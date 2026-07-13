@@ -1,0 +1,1163 @@
+{
+  "app": {
+    "prototypeLabel": "Prototaip perbankan mudah alih OCBC FutureOS"
+  },
+  "language": {
+    "title": "Bahasa",
+    "english": "English",
+    "chinese": "简体中文",
+    "malay": "Bahasa Melayu",
+    "tamil": "தமிழ்",
+    "korean": "한국어"
+  },
+  "nav": {
+    "primary": "Navigasi utama",
+    "home": "Utama",
+    "lifeGraph": "Life Graph",
+    "mirror": "Mirror",
+    "guardian": "Guardian",
+    "profile": "Profil"
+  },
+  "common": {
+    "secure": "Selamat",
+    "demoReset": "Maklumat Aplikasi",
+    "resetDemo": "Tetap semula keadaan aplikasi",
+    "backHome": "Kembali ke Utama",
+    "backLifeGraph": "Kembali ke Life Graph",
+    "openItem": "Buka {item}",
+    "protected": "Dilindungi",
+    "on": "Aktif"
+  },
+  "customer": {
+    "segment": "Eksekutif Pemasaran Pertengahan",
+    "status": "Berkahwin",
+    "lifeStage": "Akhir 20-an, berkahwin, mempertimbangkan untuk memulakan keluarga"
+  },
+  "home": {
+    "eyebrow": "Platform Perbankan AI Autonomi",
+    "title": "OCBC FutureOS",
+    "subtitle": "Daripada Mengurus Wang kepada Mengurus Hasil Hidup",
+    "futureHealthScore": "Skor Kesihatan Masa Depan",
+    "summary": "Pelan FutureOS anda berada di landasan, dengan matlamat keluarga, kecemasan dan persaraan memerlukan bimbingan aktif.",
+    "guardianStatus": "Future Self Guardian anda sedang memantau matlamat jangka panjang.",
+    "startSimulation": "Mulakan Simulasi Masa Depan",
+    "layersLabel": "Konsep teras FutureOS",
+    "modulesLabel": "Enam modul AI"
+  },
+  "goals": {
+    "wedding": "Matlamat Perkahwinan",
+    "home": "Matlamat Rumah",
+    "emergency": "Dana Kecemasan",
+    "retirement": "Matlamat Persaraan"
+  },
+  "modules": {
+    "lifeGraph": {
+      "name": "Life Graph",
+      "short": "Memahami tahap hidup pelanggan"
+    },
+    "futureMirror": {
+      "name": "Future Mirror",
+      "short": "Mensimulasikan kesan masa depan"
+    },
+    "goalNegotiator": {
+      "name": "Goal Negotiator",
+      "short": "Mengimbangi matlamat hidup"
+    },
+    "capitalOrchestrator": {
+      "name": "Capital Orchestrator",
+      "short": "Menghubungkan produk OCBC"
+    },
+    "engine": {
+      "name": "Autonomous Banking Engine",
+      "short": "Melaksanakan tindakan diluluskan"
+    },
+    "guardian": {
+      "name": "Future Self Guardian",
+      "short": "Melindungi kepentingan masa depan"
+    }
+  },
+  "layers": {
+    "mirror": {
+      "label": "Future Mirror",
+      "purpose": "Lihat akibat",
+      "detail": "Modelkan cara pilihan hari ini mengubah hasil masa depan"
+    },
+    "guardian": {
+      "label": "Future Self Guardian",
+      "purpose": "Lindungi matlamat jangka panjang",
+      "detail": "AI autonomi yang mewakili diri masa depan pelanggan"
+    }
+  },
+  "lifeGraph": {
+    "eyebrow": "Modul 1",
+    "title": "Life Graph",
+    "subtitle": "OCBC memahami tahap hidup, matlamat, transaksi dan keperluan perbankan the customer dalam satu profil.",
+    "timelineTitle": "Garis masa hidup tersambung",
+    "insight": "Life Graph menghubungkan transaksi, matlamat, peristiwa hidup dan keperluan perbankan pelanggan ke dalam satu profil kewangan hidup.",
+    "detectedNeeds": "Keperluan dikesan",
+    "openMirror": "Analisis Keputusan Masa Depan"
+  },
+  "lifeGoals": {
+    "married": "Berkahwin",
+    "marriedDetail": "Dalam 12 bulan",
+    "home": "Beli rumah pertama",
+    "homeDetail": "Dalam 3 tahun",
+    "family": "Mulakan keluarga",
+    "familyDetail": "Sebelum umur 35",
+    "invest": "Bina pelaburan",
+    "investDetail": "Portfolio jangka panjang",
+    "retire": "Bersara dengan selamat",
+    "retireDetail": "Keselamatan kewangan"
+  },
+  "timeline": {
+    "engagement": "Pertunangan",
+    "wedding": "Perkahwinan",
+    "firstHome": "Rumah Pertama",
+    "family": "Keluarga",
+    "retirement": "Persaraan"
+  },
+  "needs": {
+    "wedding": "Perancangan Bajet Perkahwinan",
+    "home": "Persediaan Bayaran Muka Rumah",
+    "emergency": "Perlindungan Dana Kecemasan",
+    "insurance": "Kesediaan Insurans",
+    "investment": "Perancangan Pelaburan Jangka Panjang"
+  },
+  "mirror": {
+    "eyebrow": "Modul 2",
+    "title": "Simulasi Future Mirror",
+    "subtitle": "Bajet perkahwinan ialah keputusan utama. Future Mirror menunjukkan kesannya kepada rumah, persaraan dan risiko.",
+    "weddingBudget": "Bajet Perkahwinan",
+    "homePurchase": "Pembelian Rumah",
+    "retirementAge": "Umur Persaraan",
+    "futureScore": "Skor Masa Depan",
+    "risk": "Tahap Risiko",
+    "chartTitle": "Perbandingan Skor Masa Depan",
+    "timelineTitle": "Garis Masa Pembelian Rumah",
+    "explainer": "Future Mirror menunjukkan bagaimana keputusan hari ini mengubah hasil hidup esok.",
+    "cta": "Teruskan ke Goal Negotiator"
+  },
+  "scenarios": {
+    "label": "Senario {id}",
+    "a": "Laluan semasa",
+    "b": "Kompromi seimbang",
+    "c": "Disyorkan"
+  },
+  "risk": {
+    "high": "Tinggi",
+    "medium": "Sederhana",
+    "low": "Rendah"
+  },
+  "negotiator": {
+    "eyebrow": "Modul 3",
+    "title": "Goal Negotiator",
+    "subtitle": "AI mengimbangi pengalaman perkahwinan dengan rumah, kecemasan, keluarga dan persaraan.",
+    "competingGoals": "Matlamat bersaing",
+    "wedding": "Perkahwinan",
+    "futureGoals": "Matlamat masa depan",
+    "tradeoff": "Jika the customer memilih perkahwinan SGD 80,000, matlamat rumah dan persaraan mereka tertangguh. Goal Negotiator mencari pelan seimbang yang melindungi matlamat paling penting.",
+    "recommendedBalance": "Imbangan disyorkan",
+    "cta": "Orkestrakan Modal Saya"
+  },
+  "competingGoals": {
+    "wedding": "Pengalaman Perkahwinan",
+    "home": "Rumah Pertama",
+    "emergency": "Dana Kecemasan",
+    "retirement": "Persaraan",
+    "family": "Keluarga Masa Depan"
+  },
+  "recommendations": {
+    "weddingBudget": "Bajet Perkahwinan",
+    "monthlySavings": "Simpanan Bulanan",
+    "homeTarget": "Sasaran Rumah",
+    "retirementTarget": "Sasaran Persaraan",
+    "emergencyFund": "Dana Kecemasan"
+  },
+  "capital": {
+    "eyebrow": "Modul 4",
+    "title": "Capital Orchestrator",
+    "subtitle": "Produk perbankan OCBC disambungkan menjadi satu strategi hidup untuk the customer.",
+    "ecosystem": "Ekosistem Produk OCBC Disambungkan",
+    "explainer": "Strategi modal ini tidak melayan produk perbankan secara berasingan. Ia menyelaras simpanan, pelaburan, insurans, gadai janji, kredit dan pembayaran mengikut matlamat hidup pelanggan.",
+    "cta": "Aktifkan Pelan Autonomi"
+  },
+  "allocations": {
+    "wedding": "Matlamat Simpanan Perkahwinan",
+    "home": "Dana Bayaran Muka Rumah",
+    "emergency": "Dana Kecemasan",
+    "investment": "Pelan Pelaburan",
+    "insurance": "Kesediaan Insurans",
+    "mortgage": "Kesediaan Gadai Janji"
+  },
+  "products": {
+    "deposits": "Deposit",
+    "depositsAction": "Simpanan berasaskan matlamat",
+    "payments": "Pembayaran",
+    "paymentsAction": "Pindahan automatik",
+    "wealth": "Kekayaan",
+    "wealthAction": "Pelarasan pelaburan",
+    "insurance": "Insurans",
+    "insuranceAction": "Kesediaan perlindungan keluarga",
+    "mortgage": "Gadai janji",
+    "mortgageAction": "Persediaan pinjaman rumah",
+    "credit": "Kredit",
+    "creditAction": "Perancangan kredit bertanggungjawab"
+  },
+  "status": {
+    "created": "Dicipta",
+    "active": "Aktif",
+    "growing": "Berkembang",
+    "locked": "Dikunci",
+    "adjusted": "Dilaras",
+    "balanced": "Seimbang",
+    "recommended": "Disyorkan",
+    "review": "Semakan",
+    "preparing": "Bersedia",
+    "track": "Jejak",
+    "completed": "Selesai",
+    "monitoring": "Memantau",
+    "scheduled": "Dijadualkan",
+    "approved": "Diluluskan"
+  },
+  "engine": {
+    "eyebrow": "Modul 5",
+    "title": "Autonomous Banking Engine",
+    "subtitle": "Pelan diluluskan dilaksanakan secara automatik dengan kawalan dan pemantauan yang jelas.",
+    "activating": "Mengaktifkan pelan...",
+    "loadingDetail": "Mencipta matlamat, pindahan, peraturan pemantauan dan jadual semakan.",
+    "activatedMessage": "Pelan Masa Depan anda telah diaktifkan.",
+    "cta": "Lihat Future Self Guardian",
+    "actions": {
+      "createWedding": "Cipta Matlamat Simpanan Perkahwinan",
+      "transfer": "Jadualkan Pindahan Bulanan: SGD 450/bulan",
+      "protectEmergency": "Lindungi Dana Kecemasan",
+      "adjustInvestment": "Laraskan Pelan Pelaburan",
+      "trackHome": "Jejak Kesediaan Pembelian Rumah",
+      "alerts": "Hantar Amaran Risiko Masa Depan",
+      "review": "Semak Pelan Setiap 3 Bulan"
+    }
+  },
+  "guardian": {
+    "eyebrow": "Modul 6",
+    "title": "Mesej Daripada Diri Masa Depan Anda",
+    "subtitle": "Future Self Guardian melindungi kepentingan jangka panjang pelanggan.",
+    "message1": "Hai the customer, saya ialah Future Self Guardian anda.",
+    "message2": "Saya telah menganalisis masa depan anda merentas perkahwinan, pemilikan rumah, perancangan keluarga dan persaraan.",
+    "message3": "Memilih perkahwinan SGD 80,000 boleh melambatkan rumah pertama anda selama 4 tahun dan menangguhkan persaraan selama 4 tahun.",
+    "message4": "Untuk melindungi masa depan yang anda mahukan, saya mengesyorkan pelan perkahwinan SGD 35,000 dengan strategi simpanan bulanan SGD 450.",
+    "message5": "Saya akan terus memantau kemajuan anda dan membantu anda kekal di landasan.",
+    "protectedScore": "Skor Masa Depan Dilindungi",
+    "activePlan": "Pelan Aktif",
+    "planValue": "Perkahwinan + Rumah + Persaraan",
+    "monitoringStatus": "Status Pemantauan",
+    "nextReview": "Semakan Seterusnya",
+    "reviewValue": "Setiap 3 bulan",
+    "cta": "Terus Lindungi Masa Depan Saya",
+    "memory": {
+      "title": "Memori Guardian",
+      "subtitle": "AI anda mengingati perjalanan kewangan anda dan terus menambah baik keputusan masa depan.",
+      "openEvent": "Buka peristiwa memori {event}",
+      "impact": "Kesan",
+      "productUsed": "Produk digunakan",
+      "metrics": {
+        "memoryEvents": "Peristiwa Memori",
+        "tomorrow": "Esok"
+      },
+      "modal": {
+        "guardianAction": "Tindakan Guardian",
+        "reason": "Sebab",
+        "dataUsed": "Data pelanggan digunakan",
+        "product": "Produk OCBC disambungkan",
+        "futureScoreImpact": "Kesan Skor Masa Depan",
+        "whyTitle": "Mengapa ini penting",
+        "whyText": "Memori ini membantu Future Self Guardian menambah baik cadangan masa depan kerana ia memahami keputusan, matlamat dan tingkah laku kewangan pelanggan sebelum ini.",
+        "close": "Tutup"
+      },
+      "events": {
+        "wedding": {
+          "title": "Cipta Matlamat Perancangan Keluarga",
+          "description": "Guardian membina pelan kesediaan keluarga jangka panjang.",
+          "impact": "Future Score +8",
+          "product": "OCBC 360 Account",
+          "action": "Mencadangkan penampan kesediaan keluarga bulanan dan mencipta pelan perlindungan.",
+          "reason": "{customer} memilih Perancangan Keluarga sebagai matlamat hidup utama.",
+          "data": "Matlamat dipilih, pendapatan bulanan, simpanan semasa, status insurans dan anggaran kos keluarga."
+        },
+        "emergency": {
+          "title": "Perlindungan Dana Kecemasan Dimulakan",
+          "description": "Guardian melindungi simpanan kecemasan daripada perbelanjaan perkahwinan berlebihan.",
+          "impact": "Risiko dikurangkan",
+          "product": "Poket simpanan berdasarkan matlamat",
+          "action": "Mengasingkan simpanan kecemasan daripada aliran tunai perancangan perkahwinan.",
+          "reason": "Perbelanjaan perkahwinan boleh mengurangkan keselamatan tunai sebelum pelan rumah pertama.",
+          "data": "Baki dana kecemasan, perbelanjaan bulanan, bajet perkahwinan dirancang dan tingkah laku simpanan."
+        },
+        "home": {
+          "title": "Kesediaan Rumah Pertama Diaktifkan",
+          "description": "Guardian menyediakan pelanggan untuk kesediaan gadai janji.",
+          "impact": "Kesediaan rumah meningkat",
+          "product": "Persediaan Pinjaman Rumah OCBC",
+          "action": "Mencipta laluan kesediaan bayaran muka dan memantau tekanan hutang.",
+          "reason": "Sasaran rumah pertama memerlukan persediaan gadai janji lebih awal.",
+          "data": "Tahun sasaran rumah, simpanan, baki pinjaman, kad tertunggak dan pendapatan bulanan."
+        },
+        "family": {
+          "title": "Perancangan Keluarga Dikesan",
+          "description": "Guardian mengenal pasti keperluan perlindungan keluarga masa depan.",
+          "impact": "Kesediaan insurans meningkat",
+          "product": "Semakan insurans Great Eastern",
+          "action": "Menandakan jurang perlindungan sebelum komitmen keluarga masa depan.",
+          "reason": "Isyarat tahap hidup menunjukkan keperluan perancangan keluarga akan datang.",
+          "data": "Tahap hidup, status insurans, matlamat keluarga, simpanan dan andaian perbelanjaan masa depan."
+        },
+        "salary": {
+          "title": "Kenaikan Gaji Dikesan",
+          "description": "Guardian meningkatkan peruntukan pelaburan selepas pertumbuhan pendapatan.",
+          "impact": "Kesediaan persaraan meningkat",
+          "product": "OCBC RoboInvest",
+          "action": "Mencadangkan peningkatan peruntukan pelaburan sambil mengekalkan simpanan kecemasan.",
+          "reason": "Pendapatan lebih tinggi memberi ruang untuk pembinaan kekayaan jangka panjang.",
+          "data": "Pendapatan bulanan, baki pelaburan, pilihan risiko dan umur sasaran persaraan."
+        }
+      }
+    },
+    "status": {
+      "autonomousLevel": "Tahap Autonomi"
+    },
+    "hub": {
+      "subtitle": "Ejen AI kewangan autonomi anda.",
+      "gridLabel": "Grid ciri Future Self Guardian",
+      "back": "Kembali ke Guardian",
+      "openSettings": "Buka tetapan penuh",
+      "cards": {
+        "recommendation": {
+          "title": "Cadangan Guardian",
+          "subtitle": "Cadangan AI peribadi hari ini."
+        },
+        "actionCentre": {
+          "title": "Pusat Tindakan",
+          "subtitle": "Lulus, ubah atau tolak tindakan AI."
+        },
+        "monitoring": {
+          "title": "Pemantauan Matlamat",
+          "subtitle": "Jejaki perlindungan setiap matlamat kewangan."
+        },
+        "financialStrategy": {
+          "title": "Strategi Kewangan",
+          "subtitle": "Simpanan, pelaburan, insurans dan pinjaman."
+        },
+        "aiReasoning": {
+          "title": "Penaakulan AI",
+          "subtitle": "Fahami sebab Guardian membuat cadangan ini."
+        },
+        "memory": {
+          "title": "Memori Guardian",
+          "subtitle": "Semak perjalanan kewangan jangka panjang anda."
+        },
+        "monthlyReview": {
+          "title": "Semakan Bulanan",
+          "subtitle": "Laporan prestasi AI bulanan."
+        },
+        "settings": {
+          "title": "Tetapan Guardian",
+          "subtitle": "Kebenaran autonomi dan pilihan Guardian."
+        }
+      }
+    },
+    "actionCentre": {
+      "preparedTitle": "Tindakan disediakan AI",
+      "preparedSubtitle": "Semak tindakan yang disediakan Future Self Guardian daripada simulasi anda."
+    },
+    "services": {
+      "title": "Perkhidmatan OCBC / Laksana",
+      "subtitle": "Tindakan yang diluluskan menghubungkan cadangan FutureOS kepada perkhidmatan perbankan OCBC yang realistik.",
+      "what": "Apa yang dilakukan",
+      "why": "Mengapa ia membantu",
+      "requiredApproval": "Kelulusan diperlukan",
+      "customerApproval": "Kelulusan pelanggan diperlukan sebelum pelaksanaan",
+      "approveCta": "Luluskan Tindakan",
+      "approvedCta": "Diluluskan",
+      "success": "{action} diluluskan. FutureOS telah mengemas kini status pelaksanaan.",
+      "actions": {
+        "open360": {
+          "title": "Buka Akaun OCBC 360",
+          "goal": "Menyokong simpanan dan dompet matlamat",
+          "what": "Menyediakan akaun gaji dan simpanan matlamat untuk aliran simpanan automatik.",
+          "why": "Ia memberi {goal} sumber dana yang jelas tanpa bercampur dengan perbelanjaan harian."
+        },
+        "creditCardApplication": {
+          "title": "Mohon Kad Kredit OCBC",
+          "goal": "Menyokong perancangan kredit bertanggungjawab",
+          "what": "Mencipta langkah kesediaan permohonan kad dengan kawalan perbelanjaan.",
+          "why": "Ia mengekalkan akses kredit sambil menjadikan risiko bayaran balik jelas."
+        },
+        "roboInvest": {
+          "title": "Mulakan OCBC RoboInvest",
+          "goal": "Menyokong pertumbuhan pelaburan",
+          "what": "Menyediakan pelan permulaan RoboInvest tiruan mengikut keutamaan risiko.",
+          "why": "Ia mengekalkan pembinaan kekayaan jangka panjang sambil melindungi keperluan tunai terdekat."
+        },
+        "insuranceReviewService": {
+          "title": "Mohon Semakan Insurans Great Eastern",
+          "goal": "Menyokong kesediaan perlindungan",
+          "what": "Menjadualkan semakan insurans tiruan untuk jurang hayat, kesihatan dan keluarga.",
+          "why": "Ia mengurangkan risiko hidup tidak diinsuranskan yang boleh mengganggu {goal}."
+        },
+        "homeLoanCheck": {
+          "title": "Semakan Kelayakan Pinjaman Rumah",
+          "goal": "Menyokong kesediaan rumah pertama",
+          "what": "Menjalankan semakan kesediaan gadai janji berdasarkan simpanan, hutang dan pendapatan.",
+          "why": "Ia menunjukkan sama ada pinjaman masa depan masih selesa sebelum komitmen meningkat."
+        },
+        "relationshipManager": {
+          "title": "Tempah Pengurus Perhubungan",
+          "goal": "Menyokong nasihat terselaras",
+          "what": "Menempah janji temu penasihat tiruan untuk semakan produk dan matlamat.",
+          "why": "Ia memberi titik semakan manusia sebelum pelaksanaan yang diluluskan pelanggan."
+        },
+        "monthlySavingsService": {
+          "title": "Jadualkan Simpanan Bulanan",
+          "goal": "Menyokong pembiayaan matlamat berulang",
+          "what": "Menjadualkan pindahan tiruan berulang ke dompet matlamat dipilih.",
+          "why": "Ia menjadikan kemajuan automatik selepas kelulusan dan mengurangkan simpanan terlepas."
+        },
+        "goalWalletTransfer": {
+          "title": "Pindahan Automatik Dompet Matlamat",
+          "goal": "Menyokong simpanan matlamat terlindung",
+          "what": "Memindahkan jumlah diluluskan ke dompet matlamat FutureOS yang dilindungi.",
+          "why": "Ia mengasingkan wang {goal} daripada perbelanjaan pilihan sambil mengekalkan kawalan pelanggan."
+        },
+        "portfolioRebalance": {
+          "title": "Imbangan Semula Portfolio Pelaburan",
+          "goal": "Menyokong kesihatan portfolio jangka panjang",
+          "what": "Menyediakan pelarasan portfolio tiruan berdasarkan risiko dan keperluan tunai.",
+          "why": "Ia mengelakkan matlamat jangka pendek melemahkan persaraan dan kesediaan pelaburan."
+        },
+        "protectionReview": {
+          "title": "Semakan Perlindungan Insurans",
+          "goal": "Menyokong perlindungan keluarga dan kecemasan",
+          "what": "Mencipta senarai semak perlindungan tiruan untuk jurang pendapatan, kesihatan dan penyakit kritikal.",
+          "why": "Ia membantu melindungi {goal} daripada risiko yang tidak cukup ditampung simpanan sahaja."
+        }
+      }
+    }
+  },
+  "profile": {
+    "eyebrow": "Pelanggan demo",
+    "title": "Profil & Kawalan",
+    "subtitle": "Bahasa, persetujuan, notifikasi dan kebenaran AI Guardian untuk demo langsung.",
+    "combinedIncome": "Pendapatan Bulanan Gabungan",
+    "currentSavings": "Simpanan Semasa",
+    "status": "Status",
+    "detectedStage": "Tahap Hidup Dikesan",
+    "consentStatus": "Persetujuan Data",
+    "consentValue": "Diluluskan untuk demo",
+    "settings": "Tetapan",
+    "notifications": "Amaran masa depan dan notifikasi kesediaan produk",
+    "permissions": "Kebenaran AI Guardian",
+    "permissionItems": {
+      "savings": "Cipta dan laras matlamat simpanan",
+      "alerts": "Hantar amaran perbelanjaan dan risiko masa depan",
+      "investment": "Cadangkan pelarasan pelaburan",
+      "insurance": "Cadangkan semakan kesediaan insurans"
+    },
+    "connectedServices": "Perkhidmatan tersambung",
+    "privacyNote": "OCBC FutureOS hanya menggunakan data pelanggan yang diluluskan. Tindakan autonomi memerlukan persetujuan dan kekal kelihatan kepada pelanggan."
+  },
+  "loading": {
+    "default": "Menyediakan FutureOS...",
+    "detail": "OCBC FutureOS sedang menghubungkan matlamat hidup, produk dan tindakan AI yang diluluskan.",
+    "lifeGraph": "Membina Life Graph...",
+    "mirror": "Mensimulasikan masa depan...",
+    "negotiator": "Merundingkan matlamat...",
+    "capital": "Mengorkestrakan modal...",
+    "engine": "Mengaktifkan pelan...",
+    "guardian": "Menyediakan mesej guardian...",
+    "simulator": "Membuka Future Mirror Simulator..."
+  },
+  "needDetails": {
+    "liveProjection": "Unjuran langsung",
+    "ocbcSupport": "Sokongan OCBC",
+    "aiRecommendations": "Cadangan AI",
+    "wedding": {
+      "title": "Perancangan Bajet Perkahwinan",
+      "subtitle": "the customer mahukan perkahwinan bermakna sambil melindungi matlamat rumah dan persaraan.",
+      "sliderLabel": "Bajet perkahwinan dirancang",
+      "currentBudget": "Bajet Awal",
+      "recommendedBudget": "Bajet Disyorkan",
+      "monthlySaving": "Pelan Simpanan Bulanan",
+      "overspendImpact": "Kesan Lebihan Belanja",
+      "delay": "Lewat 4 tahun",
+      "cta": "Kunci Pelan Perkahwinan Disyorkan",
+      "success": "Pelan bajet perkahwinan dikunci. FutureOS akan memantau perbelanjaan mengikut had diluluskan."
+    },
+    "home": {
+      "title": "Persediaan Bayaran Muka Rumah",
+      "subtitle": "FutureOS menyediakan the customer untuk rumah pertama sambil mengekalkan matlamat lain.",
+      "score": "Kesediaan rumah",
+      "targetYear": "Tahun Sasaran",
+      "currentFund": "Dana Rumah Semasa",
+      "targetDownPayment": "Bayaran Muka Sasaran",
+      "monthlyRequired": "Diperlukan Bulanan",
+      "support1": "Asingkan dana bayaran muka daripada perbelanjaan perkahwinan.",
+      "support2": "Jejak senario kemampuan HDB atau kondominium.",
+      "support3": "Sediakan kesediaan gadai janji sebelum 2030.",
+      "support4": "Cetuskankan amaran jika simpanan bulanan ketinggalan.",
+      "cta": "Cipta Jejak Kesediaan Rumah",
+      "success": "Jejak kesediaan rumah dicipta. Persediaan gadai janji dan pemantauan bayaran muka aktif."
+    },
+    "emergency": {
+      "title": "Perlindungan Dana Kecemasan",
+      "subtitle": "FutureOS mengekalkan keselamatan jangka pendek semasa matlamat hidup lain bergerak.",
+      "score": "Perlindungan kecemasan",
+      "currentFund": "Dana Semasa",
+      "recommendedFund": "Dana Disyorkan",
+      "currentCoverage": "Liputan Semasa",
+      "recommendedCoverage": "Liputan Disyorkan",
+      "months36": "3.6 bulan",
+      "months6": "6 bulan",
+      "status": "Status Risiko",
+      "statusValue": "Dilindungi daripada belanja besar",
+      "rec1": "Elakkan lebihan belanja perkahwinan daripada menyentuh tunai kecemasan.",
+      "rec2": "Tambah nilai automatik selepas gaji masuk.",
+      "rec3": "Hantar amaran jika baki jatuh bawah ambang.",
+      "cta": "Lindungi Dana Kecemasan",
+      "success": "Dana kecemasan dilindungi. FutureOS akan menghalang pengalihan berisiko daripada rizab ini."
+    },
+    "insurance": {
+      "title": "Kesediaan Insurans",
+      "subtitle": "FutureOS mengenal pasti jurang perlindungan sebelum the customer memulakan keluarga.",
+      "currentScore": "Kesediaan Semasa",
+      "recommendedScore": "Kesediaan Sasaran",
+      "life": "Perlindungan Hayat",
+      "health": "Perlindungan Kesihatan",
+      "critical": "Penyakit Kritikal",
+      "family": "Perlindungan Keluarga",
+      "notReviewed": "Belum disemak",
+      "basic": "Asas",
+      "gap": "Jurang dikesan",
+      "support1": "Semak perlindungan hayat dan kesihatan sebelum komitmen pinjaman rumah.",
+      "support2": "Anggar keperluan perlindungan keluarga masa depan.",
+      "support3": "Sambung janji temu penasihat apabila kedua-dua pelanggan meluluskan.",
+      "support4": "Pastikan cadangan berasingan daripada pelaksanaan automatik.",
+      "cta": "Jadualkan Semakan Kesediaan",
+      "success": "Semakan kesediaan insurans dijadualkan. Guardian akan memantau jurang perlindungan keluarga."
+    },
+    "investment": {
+      "title": "Perancangan Pelaburan Jangka Panjang",
+      "subtitle": "FutureOS memastikan pengkompaunan persaraan terus berjalan sambil membiayai peristiwa hidup terdekat.",
+      "currentAmount": "Pelaburan Semasa",
+      "monthlyInvestment": "Pelaburan Bulanan",
+      "riskProfile": "Profil Risiko",
+      "retirementAge": "Umur Persaraan Sasaran",
+      "gap": "Jurang Persaraan Diunjur",
+      "conservative": "Konservatif",
+      "balanced": "Seimbang",
+      "growth": "Pertumbuhan",
+      "lowerRisk": "Risiko lebih rendah, persaraan lebih lambat",
+      "higherRisk": "Risiko lebih tinggi, sasaran lebih cepat",
+      "retirementAt": "Bersara pada {age}",
+      "cta": "Guna Pelan Pelaburan Seimbang",
+      "success": "Pelan pelaburan seimbang digunakan. FutureOS akan menyemak kemajuan setiap 3 bulan."
+    }
+  },
+  "simulator": {
+    "eyebrow": "Section 8",
+    "title": "Future Mirror Simulator",
+    "subtitle": "Cipta ejen AI anda, simulasikan keputusan hidup, dan biarkan Future Self Guardian memilih cadangan terbaik.",
+    "openSimulator": "Buka Future Mirror Simulator",
+    "homeCard": {
+      "title": "Future Mirror Simulator",
+      "detail": "Type a situation, set AI independence, and compare multiple futures."
+    },
+    "trustNote": "FutureOS tidak pernah melaksanakan tindakan kewangan tanpa persetujuan pelanggan. Tindakan autonomi hanya berlaku dalam had diluluskan.",
+    "run": "Jalankan Simulasi Masa Depan",
+    "reset": "Tetap Semula Simulasi",
+    "levelLabel": "Level {level}",
+    "inputs": {
+      "situation": "Situation Explanation",
+      "situationPlaceholder": "Describe your situation, for example: I want to spend SGD 80,000 on my wedding while buying a home in 3 years.",
+      "lifeGoals": "Life Goal Selection",
+      "aiIndependence": "AI Independence Level",
+      "monthlyIncome": "Monthly Income",
+      "currentSavings": "Current Savings",
+      "plannedSpending": "Planned Spending",
+      "targetHomeYear": "Target Home Year",
+      "retirementAge": "Retirement Target Age",
+      "riskPreference": "Risk Preference",
+      "weddingBudget": "Wedding Budget",
+      "weddingDate": "Wedding Date",
+      "targetDownPayment": "Target Down Payment",
+      "propertyBudget": "Expected Property Budget",
+      "mortgageReadiness": "Mortgage Readiness",
+      "monthlyExpenses": "Monthly Expenses",
+      "currentEmergencyFund": "Current Emergency Fund",
+      "targetCoverageMonths": "Target Months of Coverage",
+      "currentInvestment": "Current Investment Amount",
+      "monthlyInvestment": "Monthly Investment Amount",
+      "targetReturnGoal": "Target Return Goal",
+      "familyPlanningYear": "Target Family Planning Year",
+      "familyMonthlyCost": "Expected Monthly Family Cost",
+      "insuranceReadiness": "Insurance Readiness",
+      "startupCapital": "Startup Capital Needed",
+      "launchDate": "Target Launch Date",
+      "customGoalName": "Goal Name",
+      "customTargetAmount": "Target Amount",
+      "customTargetDate": "Target Date",
+      "customPriority": "Priority Level",
+      "customCategory": "Goal Category",
+      "customNotes": "Notes / Situation"
+    },
+    "goals": {
+      "wedding": "Perkahwinan",
+      "home": "Rumah Pertama",
+      "emergency": "Dana Kecemasan",
+      "retirement": "Persaraan",
+      "family": "Perancangan Keluarga",
+      "investment": "Pertumbuhan Pelaburan",
+      "business": "Permulaan Perniagaan",
+      "custom": "Other / Custom Goal",
+      "customFallback": "Custom Goal"
+    },
+    "riskPreference": {
+      "conservative": "Conservative",
+      "balanced": "Balanced",
+      "growth": "Growth"
+    },
+    "levels": {
+      "1": {
+        "title": "Advice Only",
+        "detail": "AI only explains possible outcomes."
+      },
+      "2": {
+        "title": "Recommend",
+        "detail": "AI compares options and recommends the best one."
+      },
+      "3": {
+        "title": "Negotiate",
+        "detail": "AI balances competing goals and suggests trade-offs."
+      },
+      "4": {
+        "title": "Act with Approval",
+        "detail": "AI prepares an action plan but requires customer approval."
+      },
+      "5": {
+        "title": "Autonomous",
+        "detail": "AI can execute pre-approved banking actions within limits."
+      }
+    },
+    "modal": {
+      "title": "Aktifkan Mod Autonomi",
+      "message": "You are enabling high AI independence. FutureOS may execute pre-approved actions within your selected limits. You can change this anytime in Privacy & Consent.",
+      "cancel": "Batal",
+      "enable": "Aktifkan Mod Autonomi"
+    },
+    "output": {
+      "summary": "the customer are planning a major expense of {spending} while trying to buy their first home by {year}.",
+      "emergencyFund": "Emergency Fund",
+      "bestRecommendation": "Best Recommendation Selected by AI",
+      "recommendation": "Future Self Guardian mengesyorkan Balanced Future kerana ia melindungi kebahagiaan jangka pendek dan keselamatan jangka panjang.",
+      "adviceOnly": "Level 1 is advice only. FutureOS explains the possible futures without showing execution controls.",
+      "tradeoffs": "FutureOS negotiates between the selected life goals, cash safety, product readiness, and long-term security.",
+      "why": "Why did AI choose this?",
+      "explainTitle": "Guardian reasoning",
+      "suggestedActions": "Suggested Actions",
+      "autonomousWarning": "Autonomous mode is active. These actions remain limited to your approved settings and can be changed anytime.",
+      "apply": "Guna Cadangan Guardian",
+      "success": "Cadangan Future Self Guardian digunakan. FutureOS akan memantau kemajuan anda.",
+      "scenarios": {
+        "conservative": {
+          "title": "Conservative Future",
+          "detail": "Lower spending or slower timeline, stronger savings, lower risk."
+        },
+        "balanced": {
+          "title": "Balanced Future",
+          "detail": "Recommended balance between the selected goal, cash safety, and long-term health."
+        },
+        "highRisk": {
+          "title": "High-Risk Future",
+          "detail": "Higher spending or faster timeline, weaker financial safety."
+        }
+      },
+      "emergency": {
+        "strong": "Strong",
+        "protected": "Protected",
+        "weak": "Weak"
+      },
+      "tone": {
+        "1": "Advice tone: informative, no execution buttons.",
+        "2": "Recommendation tone: selects the best future without autonomous action.",
+        "3": "Negotiation tone: explains trade-offs across competing goals.",
+        "4": "Approval tone: prepares actions for customer review.",
+        "5": "Autonomous tone: prepares pre-approved actions with safety limits."
+      },
+      "explain": {
+        "protectedGoals": "Protected goals: {goals}, cash safety, and long-term financial health.",
+        "reducedRisks": "Reduced risks: overspending, delayed home purchase, and weakened retirement readiness.",
+        "products": "OCBC support: goal savings, automated transfers, insurance review, mortgage readiness where relevant, and investment planning.",
+        "tradeoffs": "Trade-off made: wedding spending is moderated so long-term security stays intact."
+      },
+      "dynamicSummary": "FutureOS is analysing {goal} across the selected goals: {goals}.",
+      "fields": {
+        "weddingBudget": "Wedding Budget",
+        "weddingDate": "Wedding Date",
+        "savingsNeeded": "Savings Needed",
+        "emergencyImpact": "Emergency Fund Impact",
+        "retirementImpact": "Retirement Impact",
+        "homeTargetYear": "Home Target Year",
+        "downPaymentProgress": "Down Payment Progress",
+        "mortgageReadiness": "Mortgage Readiness",
+        "monthlySavingNeeded": "Monthly Saving Needed",
+        "carBudget": "Car Budget",
+        "monthlyRepayment": "Monthly Repayment",
+        "cashFlowImpact": "Cash Flow Impact",
+        "startupCapital": "Startup Capital",
+        "cashRunway": "Cash Runway",
+        "loanReadiness": "Loan Readiness",
+        "goalName": "Goal Name",
+        "targetAmount": "Target Amount",
+        "targetDate": "Target Date",
+        "targetCoverage": "Target Coverage",
+        "currentEmergencyFund": "Current Emergency Fund",
+        "currentInvestment": "Current Investment",
+        "monthlyInvestment": "Monthly Investment",
+        "targetReturn": "Target Return",
+        "familyTargetYear": "Family Target Year",
+        "familyMonthlyCost": "Monthly Family Cost",
+        "insuranceReadiness": "Insurance Readiness"
+      },
+      "impact": {
+        "weak": "Weak",
+        "protected": "Protected",
+        "strong": "Strong",
+        "delayed": "Delayed",
+        "onTrack": "On track",
+        "reviewNeeded": "Review needed",
+        "tight": "Tight",
+        "manageable": "Manageable"
+      }
+    },
+    "actions": {
+      "savingsGoal": "Create savings goal",
+      "monthlyTransfer": "Schedule monthly transfer",
+      "emergencyFund": "Protect emergency fund",
+      "insuranceReview": "Review insurance needs",
+      "mortgageReadiness": "Prepare mortgage readiness",
+      "investmentPlan": "Adjust investment plan"
+    },
+    "actionButtons": {
+      "approve": "Approve",
+      "edit": "Edit",
+      "skip": "Skip"
+    },
+    "actionStatus": {
+      "pending": "Pending customer choice",
+      "approved": "Approved",
+      "editing": "Editing requested",
+      "skipped": "Skipped"
+    },
+    "autonomousLock": {
+      "title": "Autonomous Goal Lock",
+      "available": "Autonomous Goal Lock available",
+      "guardrail": "Pre-approved savings guardrail",
+      "pocket": "Protected Goal Pocket",
+      "pause": "Customer can pause or adjust anytime"
+    },
+    "reasoning": {
+      "title": "AI Agent Reasoning",
+      "situationUnderstood": "Situation understood",
+      "selectedGoals": "Selected goals",
+      "mainRisk": "Main risk",
+      "bestRecommendation": "Best recommendation",
+      "nextAction": "Next action",
+      "situation": "FutureOS understands this as a {goal} decision that must fit the customer's cash flow and long-term goals.",
+      "carRisk": "Buying too quickly may weaken cash flow and increase credit repayment pressure.",
+      "customRisk": "Acting immediately may reduce the emergency buffer or create avoidable debt.",
+      "customRecommendation": "For your {goal} goal, FutureOS recommends saving {monthly}/month toward {amount} instead of buying immediately, because it protects your emergency fund and avoids credit card debt.",
+      "nextActionCustom": "Create a guarded savings pocket for {goal} and monitor progress monthly.",
+      "weddingRisk": "A higher wedding budget can reduce cash reserves and delay other important future goals.",
+      "weddingRecommendation": "Future Self Guardian recommends the Balanced Future because it protects the wedding plan while keeping cash safety and retirement on track.",
+      "weddingAction": "Lock a wedding savings goal and use spending alerts before deposits are paid.",
+      "homeRisk": "A weak down payment path can reduce mortgage readiness and increase future borrowing stress.",
+      "homeRecommendation": "Future Self Guardian recommends the Balanced Future because it keeps the property target realistic while protecting savings.",
+      "homeAction": "Prepare a home down payment track and check mortgage readiness monthly.",
+      "emergencyRisk": "Insufficient emergency coverage leaves the customer exposed if income or expenses change.",
+      "emergencyRecommendation": "Future Self Guardian recommends the Balanced Future because it rebuilds protection without freezing every other goal.",
+      "emergencyAction": "Ring-fence emergency savings and automate top-ups after salary crediting.",
+      "retirementRisk": "Reducing investment contributions now can delay financial independence later.",
+      "retirementRecommendation": "Future Self Guardian recommends the Balanced Future because it preserves compounding while funding near-term goals.",
+      "retirementAction": "Keep a monthly investment rhythm and review the retirement gap quarterly.",
+      "investmentRisk": "Chasing return without a cash buffer can create volatility at the wrong time.",
+      "investmentRecommendation": "Future Self Guardian recommends the Balanced Future because it grows investments while keeping risk controlled.",
+      "investmentAction": "Adjust the investment plan to match the selected risk preference and review every quarter.",
+      "familyRisk": "Family planning without insurance and cash readiness can create future protection gaps.",
+      "familyRecommendation": "Future Self Guardian recommends the Balanced Future because it prepares family costs while protecting savings.",
+      "familyAction": "Review insurance readiness and build a family cost buffer.",
+      "businessRisk": "Launching too fast can drain reserves and shorten cash runway.",
+      "businessRecommendation": "Future Self Guardian recommends the Balanced Future because it funds startup capital while preserving emergency cash.",
+      "businessAction": "Create a startup capital plan and separate business risk from household reserves."
+    }
+  },
+  "settings": {
+    "eyebrow": "Settings",
+    "title": "Tetapan & Keutamaan",
+    "subtitle": "Kawal profil, bahasa, penampilan, notifikasi, kebenaran AI Guardian, privasi dan persetujuan.",
+    "openSimulator": "Buka Future Mirror Simulator",
+    "openSimulatorDetail": "Cipta simulasi tersuai daripada tetapan Profil.",
+    "language": {
+      "title": "Language",
+      "description": "Choose your preferred app language."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Personalise how FutureOS looks.",
+      "light": "Light Mode",
+      "dark": "Dark Mode",
+      "system": "System Default"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "description": "Choose which FutureOS notifications you receive.",
+      "futureRisk": "Future Risk Alerts",
+      "spending": "Spending Behaviour Alerts",
+      "goalProgress": "Goal Progress Updates",
+      "investment": "Investment Opportunities",
+      "mortgage": "Mortgage Readiness Alerts",
+      "insurance": "Insurance Review Reminders",
+      "monthlyReport": "Guardian Monthly Report",
+      "promotional": "Promotional Notifications",
+      "frequency": "Notification Frequency",
+      "history": {
+        "title": "Sejarah Notifikasi",
+        "description": "FutureOS merekod amaran secara automatik apabila risiko perbelanjaan atau matlamat berubah.",
+        "now": "Baru sahaja",
+        "today": "Hari ini",
+        "yesterday": "Semalam",
+        "sent": "Dihantar",
+        "overBudget": {
+          "title": "Perbelanjaan melebihi bajet dikesan",
+          "detail": "Karina membelanjakan {spending}, iaitu {amount} melebihi bajet bulanan selamat {budget}. Future Self Guardian mencadangkan menghentikan perbelanjaan tidak penting minggu ini."
+        },
+        "futureRisk": {
+          "title": "Pemantauan risiko masa depan aktif",
+          "detail": "Guardian sedang memantau perbelanjaan, rizab kecemasan dan kesediaan perlindungan keluarga."
+        },
+        "goalProgress": {
+          "title": "Kemas kini kemajuan matlamat",
+          "detail": "Dana Kecemasan dan Pertumbuhan Pelaburan kekal di landasan selepas semakan profil terkini."
+        },
+        "quiet": {
+          "title": "Tiada amaran sekarang",
+          "detail": "FutureOS akan menunjukkan notifikasi automatik di sini apabila risiko dikesan."
+        }
+      }
+    },
+    "frequency": {
+      "realtime": "Real-time",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "guardian": {
+      "title": "AI Guardian Preferences",
+      "description": "Control how Future Self Guardian helps you.",
+      "permissions": {
+        "autonomousSavings": "Allow Autonomous Savings",
+        "investmentSuggestions": "Allow Investment Suggestions",
+        "insuranceRecommendations": "Allow Insurance Recommendations",
+        "mortgagePlanning": "Allow Mortgage Planning",
+        "goalRebalancing": "Allow Goal Rebalancing",
+        "spendingAlerts": "Allow Spending Alerts"
+      },
+      "savingsTransfer": "Savings Transfer",
+      "investmentRebalancing": "Investment Rebalancing",
+      "reviewFrequency": "Guardian Review Frequency",
+      "personalityTitle": "Guardian Personality",
+      "savings": {
+        "manual": "Manual Approval",
+        "smart": "Smart Approval",
+        "auto": "Fully Automatic"
+      },
+      "investment": {
+        "manual": "Manual",
+        "suggested": "AI Suggested",
+        "auto": "Automatic"
+      },
+      "review": {
+        "week": "Every Week",
+        "month": "Every Month",
+        "quarter": "Every Quarter"
+      },
+      "personality": {
+        "friendly": "Friendly",
+        "professional": "Professional",
+        "minimal": "Minimal",
+        "future": "Future-focused"
+      }
+    },
+    "privacy": {
+      "title": "Privacy & Consent",
+      "description": "FutureOS only performs autonomous actions with your permission.",
+      "score": "Privacy Score",
+      "permissions": {
+        "spending": "AI may analyse spending",
+        "lifeGoals": "AI may analyse life goals",
+        "transactions": "AI may analyse transaction history",
+        "portfolio": "AI may analyse investment portfolio",
+        "simulations": "AI may generate financial simulations",
+        "executeActions": "AI may execute approved banking actions"
+      },
+      "historyTitle": "Consent History",
+      "history": {
+        "futureMirror": "Future Mirror Enabled",
+        "autonomousSavings": "Autonomous Savings"
+      },
+      "downloadReport": "Download Consent Report",
+      "managePermissions": "Manage Permissions",
+      "withdrawConsent": "Withdraw Consent",
+      "downloadedNotice": "Consent report downloaded.",
+      "manageNotice": "Permission controls are active above. Change any toggle to update consent instantly.",
+      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
+    },
+    "terms": {
+      "title": "Terms & Data Usage",
+      "description": "Understand how customer data is protected.",
+      "dataCollected": "Data Collected",
+      "purpose": "Purpose",
+      "protection": "Data Protection",
+      "customerControl": "Customer Control",
+      "data": {
+        "spending": "Spending Behaviour",
+        "savings": "Savings",
+        "investments": "Investments",
+        "products": "Banking Products",
+        "goals": "Financial Goals",
+        "preferences": "User Preferences"
+      },
+      "purposeItems": {
+        "predict": "Predict future needs",
+        "simulate": "Generate simulations",
+        "optimise": "Optimise financial planning",
+        "protect": "Protect long-term goals"
+      },
+      "protectionItems": {
+        "aes": "AES-256 Encryption",
+        "mas": "MAS Compliance",
+        "pdpa": "PDPA Compliance",
+        "cloud": "Secure Cloud Infrastructure"
+      },
+      "controlItems": {
+        "download": "Download data",
+        "delete": "Delete data",
+        "disable": "Disable AI",
+        "withdraw": "Withdraw consent"
+      },
+      "viewPolicy": "View Privacy Policy",
+      "downloadData": "Download My Data",
+      "deleteData": "Delete My Data",
+      "policyText": "FutureOS uses approved customer data only for financial simulations, planning recommendations, and consented autonomous actions. Customers remain in control at all times.",
+      "downloadedNotice": "Your local FutureOS data file has been downloaded.",
+      "deletedNotice": "Local FutureOS demo data has been reset."
+    },
+    "demo": {
+      "title": "App Information",
+      "description": "Demo controls for users and product review.",
+      "clearSimulation": "Clear Simulation",
+      "restoreMock": "Restore Mock Data",
+      "version": "Version",
+      "clearNotice": "Simulasi dikosongkan. Future Mirror sedia untuk dijalankan semula.",
+      "restoreNotice": "Data tiruan dipulihkan. FutureOS kembali kepada profil pelanggan lalai."
+    },
+    "version": {
+      "title": "Tentang FutureOS",
+      "description": "Maklumat versi dan produk untuk prototaip ini.",
+      "label": "Versi"
+    },
+    "profile": {
+      "title": "Butiran Profil",
+      "description": "Peribadikan cara FutureOS menyapa anda.",
+      "displayName": "Nama paparan",
+      "placeholder": "Masukkan nama anda",
+      "savedHint": "Disimpan automatik dan dipaparkan di Home."
+    }
+  },
+  "homeBanking": {
+    "heroLabel": "Papan utama perbankan OCBC",
+    "scan": "Imbas",
+    "notifications": "Notifikasi",
+    "logout": "Log keluar",
+    "today": "Hari ini",
+    "welcome": "Selamat kembali, {name}",
+    "quickActionsLabel": "Tindakan pantas",
+    "quickActions": {
+      "paynow": "PayNow",
+      "scanPay": "Imbas & Bayar",
+      "fx": "Tukaran Asing",
+      "customise": "Suai khas"
+    },
+    "accountsTitle": "Ringkasan Akaun",
+    "accounts": {
+      "savings": "Akaun Simpanan",
+      "creditCard": "Baki Kad Kredit",
+      "personalLoan": "Baki Pinjaman Peribadi",
+      "investments": "Pelaburan",
+      "insuranceScore": "Skor Perlindungan Insurans"
+    },
+    "availableNow": "Tersedia sekarang",
+    "selectedGoal": "Matlamat Dipilih",
+    "openFutureOS": "Buka FutureOS",
+    "infoLabel": "Terangkan {item}",
+    "info": {
+      "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
+      "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
+      "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
+      "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
+      "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
+      "family": "Perancangan Keluarga mengukur sama ada rizab tunai dan kesediaan insurans boleh menyokong keperluan isi rumah masa depan."
+    },
+    "customiseTitle": "Suai Khas Pintasan",
+    "customiseText": "Anda boleh menyusun semula atau menggantikan pintasan ini dengan tindakan perbankan pilihan.",
+    "customiseDone": "Simpan Pintasan",
+    "gotIt": "Faham",
+    "notificationsTitle": "Notifikasi",
+    "notificationsText": "FutureOS alerts aktif untuk kemajuan matlamat, risiko perbelanjaan dan persediaan rumah.",
+    "logoutTitle": "Sesi Selamat",
+    "logoutText": "Sesi selamat anda kekal dilindungi. Tiada log keluar perbankan sebenar dilakukan dalam prototaip ini.",
+    "currentScore": "Current score",
+    "howCalculated": "How this is calculated",
+    "method": {
+      "futureScore": "FutureOS normalises each module to 0-100, then combines them with higher weight on protected goals and liquidity. It is a transparent prototype model, not a live credit or investment decision.",
+      "wedding": "Progress equals protected wedding savings divided by the recommended wedding budget.",
+      "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
+      "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
+      "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
+      "family": "Perancangan Keluarga menggabungkan kekuatan dana kecemasan dan kesediaan perlindungan insurans kepada skor 0-100."
+    },
+    "proof": {
+      "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
+      "futureScoreWeights": "Weights: goal progress 35%, liquidity 25%, debt 15%, protection 10%, retirement 15%.",
+      "futureScoreResult": "Result: strong cash buffer lifts the score; retirement and insurance gaps keep it below 90.",
+      "weddingInputs": "Inputs: SGD 35,000 Guardian wedding plan, SGD 450/month transfer, and protected emergency reserve.",
+      "weddingMath": "Math: about SGD 22,400 allocated / SGD 35,000 target = 64%.",
+      "weddingResult": "Result: healthy but incomplete, so the monthly transfer stays active.",
+      "selectedInputs": "Inputs: 2030 home target, savings, emergency reserve, wedding budget, and mortgage readiness.",
+      "selectedMath": "Math: readiness is scored against down-payment progress and 2030 feasibility.",
+      "selectedResult": "Result: 72% means on track, but high wedding spending could delay the home year.",
+      "emergencyInputs": "Inputs: liquid savings, spending model, card balance, loan balance, and reserve rules.",
+      "emergencyMath": "Math: protected cash covers about 4.8 of 6 target months = 80%.",
+      "emergencyResult": "Result: FutureOS blocks optional reallocations below the protected level.",
+      "retirementInputs": "Inputs: age 62 target, SGD 85,000 savings, SGD 15,000 investments, SGD 450/month plan, 2030 home target, wedding budget, and existing debt.",
+      "retirementMath": "Math: projected retirement capital / target retirement capital = about 61%.",
+      "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
+      "familyInputs": "Input: rizab kecemasan, perbelanjaan bulanan, status insurans, matlamat keluarga dan simpanan semasa.",
+      "familyMath": "Kiraan: kesediaan kecemasan menyumbang 45% dan kesediaan perlindungan menyumbang 55%.",
+      "familyResult": "Keputusan: Karina mempunyai simpanan yang kukuh, tetapi insurans asas mengekalkan skor di bawah tahap tertinggi."
+    }
+  },
+  "mockScreens": {
+    "common": {
+      "done": "Selesai"
+    },
+    "paynow": {
+      "eyebrow": "Pembayaran OCBC",
+      "title": "PayNow",
+      "subtitle": "Skrin pindahan mock yang menunjukkan sambungan tindakan pantas OCBC kepada pelan FutureOS anda.",
+      "primary": "Sedia untuk pindah",
+      "recipient": "Penerima",
+      "mobile": "Nombor mudah alih",
+      "amount": "Jumlah",
+      "note": "Data mock sahaja. Tiada pembayaran sebenar dihantar.",
+      "goalRecipient": "Matlamat Simpanan Perkahwinan"
+    },
+    "scan": {
+      "eyebrow": "Pembayaran OCBC",
+      "title": "Imbas & Bayar",
+      "subtitle": "Skrin imbas mock untuk pembayaran QR demo.",
+      "primary": "Pengimbas sedia",
+      "merchant": "Peniaga",
+      "limit": "Had harian",
+      "status": "Status",
+      "ready": "Sedia",
+      "note": "Akses kamera dilumpuhkan untuk prototaip."
+    },
+    "fx": {
+      "eyebrow": "Kekayaan OCBC",
+      "title": "Tukaran Asing",
+      "subtitle": "Skrin FX mock dengan kadar indikatif untuk demo.",
+      "primary": "Kadar indikatif",
+      "note": "Kadar adalah nilai mock dan bukan untuk dagangan sebenar."
+    }
+  },
+  "onboarding": {
+    "securePrototype": "Prototaip OCBC FutureOS yang selamat",
+    "title": "OCBC FutureOS",
+    "subtitle": "Log masuk atau cipta profil demo untuk melihat Life Graph, Future Mirror dan Future Self Guardian berfungsi bersama.",
+    "lifeGraph": "Life Graph",
+    "futureMirror": "Future Mirror",
+    "guardian": "Future Self Guardian",
+    "login": "Log Masuk",
+    "createDemo": "Cipta Profil Demo",
+    "profileTitle": "Cipta Profil",
+    "profileSubtitle": "Tetapkan butiran pelanggan yang memacu skor, simulasi dan tindakan Guardian.",
+    "back": "Kembali",
+    "saveProfile": "Simpan Profil"
+  },
+  "spendingRisk": {
+    "title": "Butiran Risiko Perbelanjaan",
+    "subtitle": "FutureOS mengesan corak perbelanjaan yang mungkin menjejaskan matlamat masa depan Karina.",
+    "homeLabel": "Amaran FutureOS",
+    "homeTitleRisk": "1 risiko kewangan dikesan hari ini",
+    "homeTitleSafe": "Tiada risiko perbelanjaan dikesan hari ini",
+    "homeDetailRisk": "Perbelanjaan bulanan ialah {amount} melebihi bajet selamat {budget}. Ketik untuk semak.",
+    "homeDetailSafe": "Perbelanjaan masih dalam bajet bulanan selamat {budget}.",
+    "detectedLabel": "Notifikasi automatik",
+    "detectedTitleRisk": "Karina melebihi bajet selamat sebanyak {amount}",
+    "detectedTitleSafe": "Karina masih dalam bajet bulanan selamat",
+    "detectedText": "FutureOS membandingkan pendapatan, perbelanjaan semasa, komitmen matlamat dan peraturan rizab kecemasan untuk mengesan risiko lebih awal.",
+    "metrics": {
+      "monthlyIncome": "Pendapatan Bulanan",
+      "currentSpending": "Perbelanjaan Semasa",
+      "safeBudget": "Bajet Selamat",
+      "overBudget": "Melebihi Bajet",
+      "spendingRatio": "Nisbah Perbelanjaan",
+      "riskLevel": "Tahap Risiko"
+    },
+    "riskLevels": {
+      "high": "Tinggi",
+      "medium": "Sederhana",
+      "low": "Rendah"
+    },
+    "affectedTitle": "Matlamat terjejas jika perbelanjaan berterusan",
+    "goals": {
+      "emergency": {
+        "title": "Dana Kecemasan",
+        "detail": "Perbelanjaan tinggi boleh melemahkan penampan keselamatan terlindung."
+      },
+      "family": {
+        "title": "Perancangan Keluarga",
+        "detail": "Kos isi rumah masa depan memerlukan aliran tunai bulanan yang stabil."
+      },
+      "retirement": {
+        "title": "Keselamatan Persaraan",
+        "detail": "Lebihan belanja berulang mengurangkan ruang pelaburan jangka panjang."
+      }
+    },
+    "recommendation": {
+      "title": "Cadangan Guardian",
+      "detail": "Kurangkan perbelanjaan tidak penting sebanyak {amount} bulan ini dan lindungi simpanan kecemasan.",
+      "note": "FutureOS tidak akan melaksanakan tindakan kewangan tanpa kelulusan Karina."
+    },
+    "guardrail": {
+      "title": "Apa Guardian lakukan selepas kelulusan",
+      "cta": "Aktifkan Kawalan Perbelanjaan Guardian",
+      "activeCta": "Kawalan Aktif",
+      "success": "Kawalan Perbelanjaan Guardian aktif. FutureOS akan memantau perbelanjaan dan melindungi matlamat simpanan Karina.",
+      "actions": {
+        "cap": "Tetapkan kawalan lembut perbelanjaan pilihan sebanyak {budget} bulan ini.",
+        "alert": "Hantar amaran segera jika perbelanjaan melebihi had diluluskan.",
+        "protect": "Pisahkan rizab kecemasan dan dana keluarga daripada perbelanjaan harian.",
+        "review": "Semak aliran tunai setiap minggu dan kemas kini Guardian Memory."
+      }
+    }
+  }
+}

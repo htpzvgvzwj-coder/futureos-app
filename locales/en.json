@@ -1,0 +1,1607 @@
+{
+  "app": {
+    "prototypeLabel": "OCBC FutureOS mobile banking prototype"
+  },
+  "language": {
+    "title": "Language",
+    "english": "English",
+    "chinese": "简体中文",
+    "malay": "Bahasa Melayu",
+    "tamil": "தமிழ்"
+  },
+  "nav": {
+    "primary": "Primary navigation",
+    "home": "Home",
+    "lifeGraph": "Life Graph",
+    "mirror": "Mirror",
+    "guardian": "Guardian",
+    "profile": "Profile"
+  },
+  "common": {
+    "secure": "Secure",
+    "demoReset": "App Info",
+    "resetDemo": "Reset app state",
+    "backHome": "Back to Home",
+    "backLifeGraph": "Back to Life Graph",
+    "openItem": "Open {item}",
+    "protected": "Protected",
+    "on": "On"
+  },
+  "customer": {
+    "segment": "Mid-Level Marketing Executive",
+    "status": "Married",
+    "lifeStage": "Late 20s, married, considering starting a family"
+  },
+  "home": {
+    "eyebrow": "Autonomous AI Banking Platform",
+    "title": "OCBC FutureOS",
+    "subtitle": "From Managing Money to Managing Life Outcomes",
+    "futureHealthScore": "Future Health Score",
+    "summary": "Your FutureOS plan is on track, with family, emergency and retirement goals needing active guidance.",
+    "guardianStatus": "Your Future Self Guardian is monitoring your long-term goals.",
+    "startSimulation": "Start Future Simulation",
+    "futureOsSummary": "FutureOS Summary",
+    "layersLabel": "Three FutureOS intelligence systems",
+    "modulesLabel": "Three AI systems"
+  },
+  "futureSystems": {
+    "label": "FutureOS intelligence systems",
+    "lifeGraph": {
+      "title": "Life Graph",
+      "subtitle": "Understands your life, goals and OCBC product needs"
+    },
+    "futureMirror": {
+      "title": "Future Mirror",
+      "subtitle": "Simulates how today's choices affect tomorrow"
+    },
+    "guardian": {
+      "title": "Future Self Guardian",
+      "subtitle": "Protects your long-term goals with approved actions"
+    }
+  },
+  "goals": {
+    "wedding": "Wedding Goal",
+    "home": "Home Goal",
+    "emergency": "Emergency Fund",
+    "retirement": "Retirement Goal"
+  },
+  "modules": {
+    "lifeGraph": {
+      "name": "Life Graph",
+      "short": "Understands the customer's life stage"
+    },
+    "futureMirror": {
+      "name": "Future Mirror",
+      "short": "Simulates future consequences"
+    },
+    "goalNegotiator": {
+      "name": "Guardian goal balancing",
+      "short": "Balances competing life goals inside Future Self Guardian"
+    },
+    "capitalOrchestrator": {
+      "name": "Life Graph product fit",
+      "short": "Connects OCBC products inside Life Graph"
+    },
+    "engine": {
+      "name": "Approved action plan",
+      "short": "Executes approved actions inside Future Self Guardian"
+    },
+    "guardian": {
+      "name": "Future Self Guardian",
+      "short": "Protects future interests"
+    }
+  },
+  "layers": {
+    "mirror": {
+      "label": "Future Mirror",
+      "purpose": "See consequences",
+      "detail": "Model how today's choices change future outcomes"
+    },
+    "guardian": {
+      "label": "Future Self Guardian",
+      "purpose": "Protect long-term goals",
+      "detail": "Autonomous AI acting for the customer's future self"
+    }
+  },
+  "lifeGraph": {
+    "eyebrow": "System 1",
+    "title": "Life Graph",
+    "subtitle": "Your personal financial life map powered by OCBC FutureOS.",
+    "purpose": "Life Graph analyses your profile, goals, accounts, spending, debt, insurance, investments and OCBC product opportunities to create one personalised life strategy.",
+    "timelineTitle": "Connected life timeline",
+    "insight": "Life Graph connects customer transactions, goals, life events, and banking needs into one financial life profile.",
+    "lifeStage": "Life Stage",
+    "selectedGoals": "Selected Goals",
+    "detectedNeeds": "Detected needs",
+    "openMirror": "Analyse Future Decisions",
+    "strategySentence": "Life Graph does not recommend random products. It builds a financial strategy around your life goals.",
+    "futureAnalyst": {
+      "title": "Future Analyst",
+      "profileSignal": "Profile signal",
+      "goalSignal": "Goal signal",
+      "riskSignal": "Risk signal",
+      "riskValue": "Cash pressure and protection gaps are monitored before large commitments.",
+      "nextSignal": "Next signal",
+      "nextValue": "Run Future Mirror before approving any major spending plan."
+    },
+    "stages": {
+      "marriageHome": "Planning Marriage + Preparing for First Home",
+      "marriage": "Planning Marriage",
+      "home": "Preparing for First Home",
+      "emergency": "Building Emergency Fund",
+      "wealth": "Growing Wealth",
+      "family": "Starting Family",
+      "business": "Business Startup Planning",
+      "retirement": "Retirement Planning",
+      "custom": "Custom Goal Planning"
+    },
+    "timeline": {
+      "engaged": "Engaged",
+      "weddingPlanning": "Wedding Planning",
+      "familyProtection": "Family Protection",
+      "longTermWealth": "Long-term Wealth",
+      "saving": "Saving",
+      "downPayment": "Down Payment",
+      "mortgageReadiness": "Mortgage Readiness",
+      "homeOwnership": "Home Ownership",
+      "today": "Today",
+      "selectedGoal": "Selected Goal",
+      "nextMilestone": "Next Financial Milestone",
+      "longTermFuture": "Long-term Future",
+      "financialImpact": "Financial Impact",
+      "futurePlan": "Future Plan"
+    },
+    "goalDetails": {
+      "wedding": "Marriage budget, deposits, and savings discipline",
+      "home": "Down payment, mortgage readiness, and cash buffer",
+      "emergency": "Protected reserve before higher-risk moves",
+      "retirement": "Long-term compounding and retirement age target",
+      "family": "Future household costs and protection needs",
+      "investment": "Portfolio growth matched to risk preference",
+      "business": "Startup capital without draining reserves",
+      "custom": "User-created goal protected by FutureOS"
+    },
+    "health": {
+      "title": "Financial Health Analysis",
+      "savings": "Savings Strength",
+      "debt": "Debt Health",
+      "emergency": "Emergency Fund Readiness",
+      "insurance": "Insurance Protection",
+      "investment": "Investment Readiness"
+    },
+    "scoreInfo": {
+      "title": "Score explanation",
+      "future": {
+        "meaning": "What it means: overall readiness to fund selected life goals without weakening long-term stability.",
+        "method": "How it is calculated: weighted savings, debt, emergency, insurance and investment readiness.",
+        "data": "Data used: income, expenses, savings, loans, credit card balance, investments, insurance status and selected goals.",
+        "improve": "How to improve: reduce unsecured debt, protect emergency cash, automate savings and keep investment contributions steady."
+      },
+      "savings": {
+        "meaning": "What it means: strength of liquid savings against monthly expenses and planned goals.",
+        "method": "How it is calculated: savings compared with the six-month expense reserve and goal funding needs.",
+        "data": "Data used: current savings, monthly expenses, selected goals and target amounts.",
+        "improve": "How to improve: create goal pockets and schedule salary-day transfers."
+      },
+      "debt": {
+        "meaning": "What it means: how safely current loans and card balances fit the customer's income.",
+        "method": "How it is calculated: total debt pressure compared with annual income.",
+        "data": "Data used: existing loans, credit card outstanding and monthly income.",
+        "improve": "How to improve: lower card balances, avoid new debt for non-essential spending and keep repayments predictable."
+      },
+      "emergency": {
+        "meaning": "What it means: ability to handle unexpected expenses before touching long-term goal funds.",
+        "method": "How it is calculated: protected liquid cash compared with six months of expenses.",
+        "data": "Data used: current savings and monthly expenses.",
+        "improve": "How to improve: ring-fence emergency savings and stop reallocations below the protected reserve."
+      },
+      "insurance": {
+        "meaning": "What it means: whether protection is ready for family, housing and income risks.",
+        "method": "How it is calculated: prototype score based on the saved insurance status and selected family or home goals.",
+        "data": "Data used: insurance status, relationship status and selected goals.",
+        "improve": "How to improve: review life, health, critical illness and family protection needs with an adviser."
+      },
+      "investment": {
+        "meaning": "What it means: readiness to grow long-term wealth while keeping near-term cash safe.",
+        "method": "How it is calculated: investment amount compared with income and risk preference.",
+        "data": "Data used: investment amount, income, risk preference and retirement goal.",
+        "improve": "How to improve: maintain monthly investment contributions and align the portfolio with risk preference."
+      }
+    },
+    "strategy": {
+      "modalDetail": "This strategy is coordinated inside the three visible systems: Life Graph maps the need, Future Mirror simulates the impact, and Future Self Guardian protects the plan.",
+      "savings": {
+        "title": "Savings Strategy",
+        "detail": "Creates goal pockets and salary-day transfers around selected goals."
+      },
+      "investment": {
+        "title": "Investment Strategy",
+        "detail": "Keeps long-term growth active while near-term goals are funded."
+      },
+      "insurance": {
+        "title": "Insurance Strategy",
+        "detail": "Checks protection gaps before home, family or business risks grow."
+      },
+      "credit": {
+        "title": "Credit Strategy",
+        "detail": "Controls card and loan pressure so goals do not become debt-led."
+      },
+      "mortgage": {
+        "title": "Mortgage / Loan Strategy",
+        "detail": "Prepares down payment, affordability and readiness signals."
+      },
+      "emergency": {
+        "title": "Emergency Fund Strategy",
+        "detail": "Protects cash reserves before optional spending or investment changes."
+      }
+    },
+    "productFit": {
+      "title": "OCBC Product Fit",
+      "purpose": "Life Graph connects customer goals to OCBC-related product categories.",
+      "disclaimer": "Prototype recommendation only. Customers should check full product details with OCBC before applying.",
+      "whyLabel": "Why it fits",
+      "supportsLabel": "Supports",
+      "impactLabel": "Estimated future impact",
+      "viewStrategy": "View Strategy",
+      "addToPlan": "Add to Future Plan",
+      "added": "{product} added to the Future Plan.",
+      "strategyTitle": "Product strategy",
+      "categories": {
+        "savings": "Savings / Deposits",
+        "cards": "Credit Cards",
+        "loans": "Loans / Mortgage",
+        "wealth": "Wealth / Investments",
+        "insurance": "Insurance",
+        "payments": "Payments"
+      },
+      "why": {
+        "ocbc360": "Monthly salary and goal savings can be coordinated from one main account.",
+        "monthlySavings": "A recurring savings habit supports planned goals without relying on leftover cash.",
+        "homeLoan": "A first-home goal needs early mortgage readiness and down-payment planning.",
+        "roboInvest": "Long-term investment growth can continue while cash goals are protected.",
+        "greatTerm": "Home and family goals create protection needs that should be reviewed early.",
+        "payments": "Approved transfers make goal funding visible and predictable.",
+        "ocbc365": "Daily spending can be tracked responsibly while card balances stay controlled."
+      },
+      "supports": {
+        "ocbc360": "Wedding savings, emergency fund and home down payment",
+        "monthlySavings": "Custom goals, wedding goals and emergency buffer",
+        "homeLoan": "First home and mortgage readiness",
+        "roboInvest": "Investment growth and retirement security",
+        "greatTerm": "Family protection, income protection and home ownership",
+        "payments": "Monthly transfers, PayNow and GIRO savings routines",
+        "ocbc365": "Responsible spending and household cash-flow tracking"
+      },
+      "impact": {
+        "ocbc360": "Improves savings discipline and goal progress.",
+        "monthlySavings": "Turns large goals into smaller monthly steps.",
+        "homeLoan": "Improves readiness before any credit application.",
+        "roboInvest": "Keeps long-term compounding visible in the plan.",
+        "greatTerm": "Reduces protection gaps before life events become urgent.",
+        "payments": "Reduces missed transfers and keeps the Guardian plan active.",
+        "ocbc365": "Helps prevent spending drift while preserving rewards use."
+      }
+    },
+    "customGoal": {
+      "title": "Add Custom Goal",
+      "addButton": "Add Custom Goal",
+      "save": "Save Goal",
+      "defaultName": "Custom Goal",
+      "added": "{goal} added to Life Graph and Future Mirror.",
+      "fields": {
+        "name": "Goal name",
+        "amount": "Target amount",
+        "date": "Target date",
+        "priority": "Priority level",
+        "category": "Category",
+        "notes": "Notes / situation explanation"
+      }
+    }
+  },
+  "lifeGoals": {
+    "married": "Get married",
+    "marriedDetail": "Within 12 months",
+    "home": "Buy first home",
+    "homeDetail": "Within 3 years",
+    "family": "Start a family",
+    "familyDetail": "Before age 35",
+    "invest": "Build investments",
+    "investDetail": "Long-term portfolio",
+    "retire": "Retire securely",
+    "retireDetail": "Financial security"
+  },
+  "timeline": {
+    "engagement": "Engagement",
+    "wedding": "Wedding",
+    "firstHome": "First Home",
+    "family": "Family",
+    "retirement": "Retirement"
+  },
+  "needs": {
+    "wedding": "Wedding Budget Planning",
+    "home": "Home Down Payment Preparation",
+    "emergency": "Emergency Fund Protection",
+    "insurance": "Insurance Readiness",
+    "investment": "Long-term Investment Planning"
+  },
+  "mirror": {
+    "eyebrow": "System 2",
+    "title": "Future Mirror",
+    "subtitle": "See the future impact before you choose.",
+    "weddingBudget": "Wedding Budget",
+    "homePurchase": "Home Purchase",
+    "retirementAge": "Retirement Age",
+    "futureScore": "Future Score",
+    "risk": "Risk Level",
+    "chartTitle": "Future Score Comparison",
+    "timelineTitle": "Home Purchase Timeline",
+    "explainer": "Future Mirror shows how today's decision changes tomorrow's life outcomes.",
+    "cta": "Ask Future Self Guardian"
+  },
+  "scenarios": {
+    "label": "Scenario {id}",
+    "a": "Current path",
+    "b": "Balanced compromise",
+    "c": "Recommended"
+  },
+  "risk": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "negotiator": {
+    "eyebrow": "Inside Future Self Guardian",
+    "title": "Goal Balancing",
+    "subtitle": "The AI balances the wedding experience with home, emergency, family, and retirement goals.",
+    "competingGoals": "Competing goals",
+    "wedding": "Wedding",
+    "futureGoals": "Future goals",
+    "tradeoff": "If the customer chooses the SGD 80,000 wedding, home and retirement goals are delayed. Future Self Guardian finds a balanced plan that protects the most important goals.",
+    "recommendedBalance": "Recommended balance",
+    "cta": "Orchestrate My Capital"
+  },
+  "competingGoals": {
+    "wedding": "Wedding Experience",
+    "home": "First Home",
+    "emergency": "Emergency Fund",
+    "retirement": "Retirement",
+    "family": "Future Family"
+  },
+  "recommendations": {
+    "weddingBudget": "Wedding Budget",
+    "monthlySavings": "Monthly Savings",
+    "homeTarget": "Home Target",
+    "retirementTarget": "Retirement Target",
+    "emergencyFund": "Emergency Fund"
+  },
+  "capital": {
+    "eyebrow": "Inside Life Graph",
+    "title": "OCBC Product Strategy",
+    "subtitle": "OCBC banking products are connected into one life strategy for the customer.",
+    "ecosystem": "OCBC Product Ecosystem Connected",
+    "explainer": "Life Graph does not treat banking products separately. It coordinates savings, investments, insurance, mortgage, credit, and payments around the customer's life goals.",
+    "cta": "Activate Autonomous Plan"
+  },
+  "allocations": {
+    "wedding": "Wedding Savings Goal",
+    "home": "Home Down Payment Fund",
+    "emergency": "Emergency Fund",
+    "investment": "Investment Plan",
+    "insurance": "Insurance Readiness",
+    "mortgage": "Mortgage Readiness"
+  },
+  "products": {
+    "deposits": "Deposits",
+    "depositsAction": "Goal-based savings",
+    "payments": "Payments",
+    "paymentsAction": "Automated transfers",
+    "wealth": "Wealth",
+    "wealthAction": "Investment adjustment",
+    "insurance": "Insurance",
+    "insuranceAction": "Family protection readiness",
+    "mortgage": "Mortgage",
+    "mortgageAction": "Home loan preparation",
+    "credit": "Credit",
+    "creditAction": "Responsible credit planning"
+  },
+  "status": {
+    "created": "Created",
+    "active": "Active",
+    "growing": "Growing",
+    "locked": "Locked",
+    "adjusted": "Adjusted",
+    "balanced": "Balanced",
+    "recommended": "Recommended",
+    "review": "Review",
+    "preparing": "Preparing",
+    "track": "Track",
+    "completed": "Completed",
+    "monitoring": "Monitoring",
+    "scheduled": "Scheduled",
+    "approved": "Approved"
+  },
+  "engine": {
+    "eyebrow": "Inside Future Self Guardian",
+    "title": "Approved Action Plan",
+    "subtitle": "The approved plan is executed automatically, with visible controls and monitoring.",
+    "activating": "Activating plan...",
+    "loadingDetail": "Creating goals, transfers, monitoring rules, and review cadence.",
+    "activatedMessage": "Your Future Plan has been activated.",
+    "cta": "View Future Self Guardian",
+    "actions": {
+      "createWedding": "Create Wedding Savings Goal",
+      "transfer": "Schedule Monthly Transfer: SGD 450/month",
+      "protectEmergency": "Protect Emergency Fund",
+      "adjustInvestment": "Adjust Investment Plan",
+      "trackHome": "Track Home Purchase Readiness",
+      "alerts": "Send Future Risk Alerts",
+      "review": "Review Plan Every 3 Months"
+    }
+  },
+  "guardian": {
+    "eyebrow": "System 3",
+    "title": "Future Self Guardian",
+    "subtitle": "Your future self, protected by autonomous banking intelligence.",
+    "message1": "Hi, I am your Future Self Guardian.",
+    "message2": "I analysed your future across marriage, home ownership, family planning, and retirement.",
+    "message3": "Choosing an SGD 80,000 wedding may delay your first home by 4 years and postpone retirement by 4 years.",
+    "message4": "To protect the future you want, I recommend the SGD 35,000 wedding plan with a SGD 450 monthly savings strategy.",
+    "message5": "I will continue monitoring your progress and help you stay on track.",
+    "protectedScore": "Future Protected Score",
+    "activePlan": "Active Plan",
+    "planValue": "Wedding + Home + Retirement",
+    "monitoringStatus": "Monitoring Status",
+    "nextReview": "Next Review",
+    "reviewValue": "Every 3 months",
+    "cta": "Continue Protecting My Future",
+    "agentIntro": "I reviewed your future paths and selected the plan that best protects your long-term goals.",
+    "agentPromise": "I will continue monitoring {goal} and help you stay on track.",
+    "recommendationTitle": "Guardian Recommendation",
+    "whyTitle": "Why This Recommendation",
+    "customerDataUsed": "Customer data used: profile, selected goals, income, expenses, savings, debts, investments, risk preference and consented simulator inputs.",
+    "recommendedActions": "Recommended Actions",
+    "goalProtectionSignals": "Protected goal signals",
+    "protectedSignal": "Protected by Guardian",
+    "sections": {
+      "status": "Guardian Status",
+      "today": "Today's Recommendation",
+      "aiReasoning": "AI Reasoning",
+      "financialStrategy": "Financial Strategy",
+      "actionCentre": "Action Centre",
+      "monitoring": "Guardian Monitoring",
+      "monthlyReport": "Monthly Guardian Report",
+      "history": "Guardian History"
+    },
+    "status": {
+      "monitoring": "Monitoring status",
+      "activeGoals": "Active goals",
+      "futureScore": "Future Score",
+      "aiConfidence": "AI Confidence",
+      "nextReview": "Next Review",
+      "autonomousLevel": "Autonomous Level"
+    },
+    "hub": {
+      "subtitle": "Your autonomous financial AI agent.",
+      "gridLabel": "Future Self Guardian feature grid",
+      "back": "Back to Guardian",
+      "openSettings": "Open full settings",
+      "cards": {
+        "recommendation": {
+          "title": "Guardian Recommendation",
+          "subtitle": "Today's personalised AI recommendation."
+        },
+        "actionCentre": {
+          "title": "Action Centre",
+          "subtitle": "Approve, modify or reject AI actions."
+        },
+        "monitoring": {
+          "title": "Goal Monitoring",
+          "subtitle": "Track protection of every financial goal."
+        },
+        "financialStrategy": {
+          "title": "Financial Strategy",
+          "subtitle": "Savings, investments, insurance and loans."
+        },
+        "aiReasoning": {
+          "title": "AI Reasoning",
+          "subtitle": "Understand why Guardian made this recommendation."
+        },
+        "memory": {
+          "title": "Guardian Memory",
+          "subtitle": "Review your long-term financial journey."
+        },
+        "monthlyReview": {
+          "title": "Monthly Review",
+          "subtitle": "Monthly AI performance report."
+        },
+        "settings": {
+          "title": "Guardian Settings",
+          "subtitle": "Autonomy permissions and Guardian preferences."
+        }
+      }
+    },
+    "today": {
+      "dynamicRecommendation": "Proactive recommendation",
+      "reason": "Reason:",
+      "expectedImpact": "Expected future impact:",
+      "expectedImpactValue": "{goal} stays protected and the Future Score is projected at {score}/100."
+    },
+    "reasoning": {
+      "situationAnalysed": "Situation analysed",
+      "risksDetected": "Risks detected",
+      "tradeoffsConsidered": "Trade-offs considered",
+      "tradeoffsValue": "Balanced {goals} against cash safety, debt pressure, protection gaps and long-term retirement security.",
+      "selectedStrategy": "Selected strategy"
+    },
+    "strategy": {
+      "savings": "Savings",
+      "savingsDetail": "Reserve {monthly} monthly toward {goal} while keeping cash flow visible.",
+      "investment": "Investment",
+      "investmentDetail": "Keep long-term contributions active without weakening short-term liquidity.",
+      "insurance": "Insurance",
+      "insuranceDetail": "Review protection before home, family, or income risk increases.",
+      "debt": "Debt",
+      "debtDetail": "Keep credit and loan pressure controlled before new commitments.",
+      "emergency": "Emergency Fund",
+      "emergencyDetail": "Protect the emergency reserve before optional spending or product changes.",
+      "relatedProducts": "Related OCBC products"
+    },
+    "actionCentre": {
+      "approve": "Approve actions",
+      "modify": "Modify actions",
+      "reject": "Reject",
+      "goalLockDetail": "Level 5 is active, so FutureOS can reserve savings within approved limits only.",
+      "preparedTitle": "AI-prepared actions",
+      "preparedSubtitle": "Review the actions Future Self Guardian prepared from your simulation."
+    },
+    "monitoring": {
+      "goals": "Goals being monitored",
+      "risks": "Financial risks",
+      "protection": "Protection status"
+    },
+    "report": {
+      "goalProgress": "Goal progress",
+      "goalProgressValue": "{goal} remains on track under the Guardian plan.",
+      "scoreChange": "Future Score change",
+      "scoreChangeValue": "Projected score is now {score}/100 after approved safeguards.",
+      "newInsights": "New insights",
+      "aiRecommendations": "AI recommendations"
+    },
+    "history": {
+      "today": "Today",
+      "lastReview": "Last review",
+      "recommendationPrepared": "Guardian recommendation prepared",
+      "recommendationDetail": "{goal} strategy reviewed against cash flow, risk and long-term goals.",
+      "scoreUpdated": "Future Score updated",
+      "scoreDetail": "Projection refreshed to {score}/100.",
+      "actionApprovedDetail": "Customer-approved banking action added to the monitoring plan."
+    },
+    "memory": {
+      "title": "Guardian Memory",
+      "subtitle": "Your AI remembers your financial journey and continuously improves future decisions.",
+      "openEvent": "Open memory event {event}",
+      "impact": "Impact",
+      "productUsed": "Product used",
+      "metrics": {
+        "memoryEvents": "Memory Events",
+        "tomorrow": "Tomorrow"
+      },
+      "modal": {
+        "guardianAction": "Guardian action",
+        "reason": "Reason",
+        "dataUsed": "Customer data used",
+        "product": "OCBC product connected",
+        "futureScoreImpact": "Future Score impact",
+        "whyTitle": "Why this matters",
+        "whyText": "This memory helps Future Self Guardian improve future recommendations because it understands the customer's past decisions, goals and financial behaviour.",
+        "close": "Close"
+      },
+      "events": {
+        "wedding": {
+          "title": "Created Family Planning Goal",
+          "description": "Guardian built a long-term family readiness plan.",
+          "impact": "Future Score +8",
+          "product": "OCBC 360 Account",
+          "action": "Recommended a monthly family-readiness buffer and created a protection roadmap.",
+          "reason": "{customer} selected Family Planning as a major life goal.",
+          "data": "Selected goals, monthly income, current savings, insurance status and expected family costs."
+        },
+        "emergency": {
+          "title": "Started Emergency Fund Protection",
+          "description": "Guardian protected emergency savings from wedding overspending.",
+          "impact": "Risk reduced",
+          "product": "Goal-based savings pocket",
+          "action": "Separated emergency savings from wedding planning cash flow.",
+          "reason": "Wedding spending could reduce cash safety before the first-home plan.",
+          "data": "Emergency fund balance, monthly expenses, planned wedding budget and savings behaviour."
+        },
+        "home": {
+          "title": "First Home Readiness Activated",
+          "description": "Guardian prepared the customer for mortgage readiness.",
+          "impact": "Home readiness improved",
+          "product": "OCBC Home Loan preparation",
+          "action": "Created a down-payment readiness track and monitored debt pressure.",
+          "reason": "The first-home target needed early mortgage preparation.",
+          "data": "Home target year, savings, loan balance, card outstanding and monthly income."
+        },
+        "family": {
+          "title": "Family Planning Detected",
+          "description": "Guardian identified future family protection needs.",
+          "impact": "Insurance readiness improved",
+          "product": "Great Eastern insurance review",
+          "action": "Flagged protection gaps before future family commitments.",
+          "reason": "Life stage signals showed upcoming family planning needs.",
+          "data": "Life stage, insurance status, family goal, savings and future expense assumptions."
+        },
+        "salary": {
+          "title": "Salary Increase Detected",
+          "description": "Guardian increased investment allocation after income growth.",
+          "impact": "Retirement readiness improved",
+          "product": "OCBC RoboInvest",
+          "action": "Suggested increasing investment allocation while preserving emergency savings.",
+          "reason": "Higher income created room for long-term wealth building.",
+          "data": "Monthly income, investment balance, risk preference and retirement target age."
+        }
+      }
+    },
+    "protectedScoreInfo": {
+      "meaning": "What it means: how strongly the selected plan protects long-term goals after the Guardian recommendation.",
+      "method": "How it is calculated: combines Future Mirror score, approved action coverage, emergency reserve protection and goal stability.",
+      "data": "Data used: selected goals, simulator result, approved actions, savings, expenses, debt and risk preference.",
+      "improve": "How to improve: approve the recommended actions, keep emergency funds protected and review the plan monthly."
+    },
+    "services": {
+      "title": "OCBC Services / Execute",
+      "subtitle": "Approved actions connect FutureOS recommendations to realistic OCBC banking services.",
+      "what": "What it does",
+      "why": "Why it helps",
+      "requiredApproval": "Required approval",
+      "customerApproval": "Customer approval required before execution",
+      "approveCta": "Approve Action",
+      "approvedCta": "Approved",
+      "success": "{action} approved. FutureOS has updated the execution status.",
+      "actions": {
+        "open360": {
+          "title": "Open OCBC 360 Account",
+          "goal": "Supports savings and goal wallets",
+          "what": "Prepares a salary and goal-savings account for automated saving flows.",
+          "why": "It gives {goal} a clear funding source without mixing money with daily spending."
+        },
+        "creditCardApplication": {
+          "title": "Apply for OCBC Credit Card",
+          "goal": "Supports responsible credit planning",
+          "what": "Creates a mock card application readiness step with spending guardrails.",
+          "why": "It helps maintain credit access while keeping repayment risk visible."
+        },
+        "roboInvest": {
+          "title": "Start OCBC RoboInvest",
+          "goal": "Supports investment growth",
+          "what": "Sets up a mock RoboInvest starter plan aligned to the risk preference.",
+          "why": "It keeps long-term wealth building active while protecting near-term cash needs."
+        },
+        "insuranceReviewService": {
+          "title": "Apply for Great Eastern Insurance Review",
+          "goal": "Supports protection readiness",
+          "what": "Schedules a mock insurance review for life, health and family protection gaps.",
+          "why": "It reduces the chance that {goal} is disrupted by uninsured life risks."
+        },
+        "homeLoanCheck": {
+          "title": "Home Loan Eligibility Check",
+          "goal": "Supports first-home readiness",
+          "what": "Runs a mock mortgage-readiness check against savings, debt and income.",
+          "why": "It shows whether future borrowing can stay comfortable before commitments increase."
+        },
+        "relationshipManager": {
+          "title": "Book Relationship Manager",
+          "goal": "Supports coordinated advice",
+          "what": "Books a mock advisory appointment for product and goal review.",
+          "why": "It gives complex decisions a human checkpoint before customer-approved execution."
+        },
+        "monthlySavingsService": {
+          "title": "Schedule Monthly Savings",
+          "goal": "Supports recurring goal funding",
+          "what": "Schedules a recurring mock transfer into the selected goal wallet.",
+          "why": "It makes progress automatic after approval and lowers the chance of missed savings."
+        },
+        "goalWalletTransfer": {
+          "title": "Automatic Goal Wallet Transfer",
+          "goal": "Supports protected goal savings",
+          "what": "Moves approved amounts into a protected FutureOS goal wallet.",
+          "why": "It separates {goal} money from discretionary spending while keeping customer control."
+        },
+        "portfolioRebalance": {
+          "title": "Investment Portfolio Rebalancing",
+          "goal": "Supports long-term portfolio health",
+          "what": "Prepares a mock portfolio adjustment based on risk preference and liquidity needs.",
+          "why": "It prevents short-term goals from weakening retirement and investment readiness."
+        },
+        "protectionReview": {
+          "title": "Insurance Protection Review",
+          "goal": "Supports family and emergency protection",
+          "what": "Creates a mock protection checklist for income, health and critical illness gaps.",
+          "why": "It helps protect {goal} against risks that savings alone may not cover."
+        }
+      }
+    }
+  },
+  "profile": {
+    "eyebrow": "Demo customer",
+    "title": "Profile & Controls",
+    "subtitle": "Language, consent, notifications, and AI Guardian permissions for the live demo.",
+    "name": "Name",
+    "age": "Age",
+    "occupation": "Occupation",
+    "pastExperience": "Past Experience",
+    "lifeStage": "Life Stage",
+    "responsibilities": "Responsibilities",
+    "combinedIncome": "Combined Monthly Income",
+    "monthlyExpenses": "Monthly Expenses",
+    "currentSavings": "Current Savings",
+    "existingLoans": "Existing Loans",
+    "creditCardOutstanding": "Credit Card Outstanding",
+    "investments": "Investments",
+    "insuranceStatus": "Insurance Status",
+    "riskPreference": "Risk Preference",
+    "status": "Status",
+    "detectedStage": "Detected Life Stage",
+    "consentStatus": "Data Consent",
+    "consentValue": "Approved for demo",
+    "settings": "Settings",
+    "notifications": "Future alerts and product readiness notifications",
+    "permissions": "AI Guardian Permissions",
+    "permissionItems": {
+      "savings": "Create and adjust savings goals",
+      "alerts": "Send spending and future risk alerts",
+      "investment": "Recommend investment adjustments",
+      "insurance": "Recommend insurance readiness checks"
+    },
+    "connectedServices": "Connected services",
+    "privacyNote": "OCBC FutureOS uses approved customer data only. Autonomous actions require consent and remain visible to the customer."
+  },
+  "loading": {
+    "default": "Preparing FutureOS...",
+    "detail": "OCBC FutureOS is connecting life goals, products, and approved AI actions.",
+    "lifeGraph": "Building Life Graph...",
+    "mirror": "Simulating future...",
+    "negotiator": "Negotiating goals...",
+    "capital": "Orchestrating capital...",
+    "engine": "Activating plan...",
+    "guardian": "Preparing guardian message...",
+    "simulator": "Opening Future Mirror Simulator..."
+  },
+  "needDetails": {
+    "liveProjection": "Live projection",
+    "ocbcSupport": "OCBC support",
+    "aiRecommendations": "AI recommendations",
+    "wedding": {
+      "title": "Wedding Budget Planning",
+      "subtitle": "the customer want a meaningful wedding while protecting home and retirement goals.",
+      "sliderLabel": "Planned wedding budget",
+      "currentBudget": "Initial Budget",
+      "recommendedBudget": "Recommended Budget",
+      "monthlySaving": "Monthly Saving Plan",
+      "overspendImpact": "Overspend Impact",
+      "delay": "4 year delay",
+      "cta": "Lock Recommended Wedding Plan",
+      "success": "Wedding budget plan locked. FutureOS will monitor spending against the approved limit."
+    },
+    "home": {
+      "title": "Home Down Payment Preparation",
+      "subtitle": "FutureOS prepares the customer for a first home while keeping other goals stable.",
+      "score": "Home readiness",
+      "targetYear": "Target Year",
+      "currentFund": "Current Home Fund",
+      "targetDownPayment": "Target Down Payment",
+      "monthlyRequired": "Monthly Required",
+      "support1": "Ring-fence down payment funds from wedding spending.",
+      "support2": "Track HDB or condo affordability scenarios.",
+      "support3": "Prepare mortgage readiness before 2030.",
+      "support4": "Trigger alerts if monthly savings fall behind.",
+      "cta": "Create Home Readiness Track",
+      "success": "Home readiness track created. Mortgage preparation and down payment monitoring are active."
+    },
+    "emergency": {
+      "title": "Emergency Fund Protection",
+      "subtitle": "FutureOS keeps short-term safety intact while other life goals move forward.",
+      "score": "Emergency protection",
+      "currentFund": "Current Fund",
+      "recommendedFund": "Recommended Fund",
+      "currentCoverage": "Current Coverage",
+      "recommendedCoverage": "Recommended Coverage",
+      "months36": "3.6 months",
+      "months6": "6 months",
+      "status": "Risk Status",
+      "statusValue": "Protected from major spending",
+      "rec1": "Prevent wedding overspend from touching emergency cash.",
+      "rec2": "Auto-top-up after salary crediting.",
+      "rec3": "Send alerts if balance drops below threshold.",
+      "cta": "Protect Emergency Fund",
+      "success": "Emergency fund protected. FutureOS will block risky reallocations from this reserve."
+    },
+    "insurance": {
+      "title": "Insurance Readiness",
+      "subtitle": "FutureOS identifies protection gaps before the customer start a family.",
+      "currentScore": "Current Readiness",
+      "recommendedScore": "Target Readiness",
+      "life": "Life Cover",
+      "health": "Health Cover",
+      "critical": "Critical Illness",
+      "family": "Family Protection",
+      "notReviewed": "Not reviewed",
+      "basic": "Basic",
+      "gap": "Gap detected",
+      "support1": "Review life and health coverage before home loan commitment.",
+      "support2": "Estimate future family protection needs.",
+      "support3": "Connect advisory appointment when both customers approve.",
+      "support4": "Keep recommendations separate from automated execution.",
+      "cta": "Schedule Readiness Review",
+      "scheduledCta": "Review Scheduled",
+      "scheduledDetail": "Readiness review scheduled. Future Self Guardian will monitor protection gaps and remind you before the home loan commitment.",
+      "success": "Insurance readiness review scheduled. Guardian will monitor family protection gaps."
+    },
+    "investment": {
+      "title": "Long-term Investment Planning",
+      "subtitle": "FutureOS keeps retirement compounding alive while funding near-term life events.",
+      "currentAmount": "Current Investments",
+      "monthlyInvestment": "Monthly Investment",
+      "riskProfile": "Risk Profile",
+      "retirementAge": "Target Retirement Age",
+      "gap": "Projected Retirement Gap",
+      "conservative": "Conservative",
+      "balanced": "Balanced",
+      "growth": "Growth",
+      "lowerRisk": "Lower risk, slower retirement",
+      "higherRisk": "Higher risk, faster target",
+      "retirementAt": "Retirement at {age}",
+      "cta": "Apply Balanced Investment Plan",
+      "success": "Balanced investment plan applied. FutureOS will review progress every 3 months."
+    }
+  },
+  "simulator": {
+    "eyebrow": "System 2",
+    "title": "Future Mirror",
+    "subtitle": "See the future impact before you choose.",
+    "openSimulator": "Open Future Mirror",
+    "homeCard": {
+      "title": "Future Mirror Simulator",
+      "detail": "Type a situation, set AI independence, and compare multiple futures."
+    },
+    "trustNote": "FutureOS never executes financial actions without customer consent. Autonomous actions only happen within approved limits.",
+    "run": "Run Future Simulation",
+    "reset": "Reset Simulation",
+    "levelLabel": "Level {level}",
+    "sections": {
+      "futureSimulator": "Future Simulator",
+      "aiIndependence": "AI Independence",
+      "scenarioComparison": "Scenario Comparison",
+      "tradeoffAnalysis": "Trade-off Analysis",
+      "riskAnalysis": "Risk Analysis",
+      "futureScore": "Future Score"
+    },
+    "inputs": {
+      "situation": "Situation Explanation",
+      "situationPlaceholder": "Describe your situation, for example: I want to spend SGD 80,000 on my wedding while buying a home in 3 years.",
+      "lifeGoals": "Life Goal Selection",
+      "aiIndependence": "AI Independence Level",
+      "monthlyIncome": "Monthly Income",
+      "currentSavings": "Current Savings",
+      "plannedSpending": "Planned Spending",
+      "targetHomeYear": "Target Home Year",
+      "retirementAge": "Retirement Target Age",
+      "riskPreference": "Risk Preference",
+      "weddingBudget": "Wedding Budget",
+      "weddingDate": "Wedding Date",
+      "targetDownPayment": "Target Down Payment",
+      "propertyBudget": "Expected Property Budget",
+      "mortgageReadiness": "Mortgage Readiness",
+      "monthlyExpenses": "Monthly Expenses",
+      "currentEmergencyFund": "Current Emergency Fund",
+      "targetCoverageMonths": "Target Months of Coverage",
+      "currentInvestment": "Current Investment Amount",
+      "monthlyInvestment": "Monthly Investment Amount",
+      "targetReturnGoal": "Target Return Goal",
+      "familyPlanningYear": "Target Family Planning Year",
+      "familyMonthlyCost": "Expected Monthly Family Cost",
+      "insuranceReadiness": "Insurance Readiness",
+      "startupCapital": "Startup Capital Needed",
+      "launchDate": "Target Launch Date",
+      "customGoalName": "Goal Name",
+      "customTargetAmount": "Target Amount",
+      "customTargetDate": "Target Date",
+      "customPriority": "Priority Level",
+      "customCategory": "Goal Category",
+      "customNotes": "Notes / Situation"
+    },
+    "goals": {
+      "wedding": "Wedding",
+      "home": "First Home",
+      "emergency": "Emergency Fund",
+      "retirement": "Retirement",
+      "family": "Family Planning",
+      "investment": "Investment Growth",
+      "business": "Business Startup",
+      "custom": "Other / Custom Goal",
+      "customFallback": "Custom Goal"
+    },
+    "riskPreference": {
+      "conservative": "Conservative",
+      "balanced": "Balanced",
+      "growth": "Growth"
+    },
+    "levels": {
+      "1": {
+        "title": "Explain",
+        "detail": "AI only explains possible outcomes."
+      },
+      "2": {
+        "title": "Recommend",
+        "detail": "AI compares options and recommends the best one."
+      },
+      "3": {
+        "title": "Negotiate",
+        "detail": "AI balances competing goals and suggests trade-offs."
+      },
+      "4": {
+        "title": "Act with Approval",
+        "detail": "AI prepares an action plan but requires customer approval."
+      },
+      "5": {
+        "title": "Autonomous Guardrails",
+        "detail": "AI executes pre-approved actions within safe limits."
+      }
+    },
+    "modal": {
+      "title": "Enable Autonomous Goal Lock",
+      "message": "You are enabling Autonomous Goal Lock. FutureOS will automatically reserve money for this goal within your approved limit. You can pause or adjust anytime.",
+      "cancel": "Cancel",
+      "enable": "Enable Goal Lock"
+    },
+    "output": {
+      "summary": "The customer is planning a major expense of {spending} while trying to buy a first home by {year}.",
+      "emergencyFund": "Emergency Fund",
+      "bestRecommendation": "Best Recommendation Selected by AI",
+      "recommendation": "Future Self Guardian recommends the Balanced Future because it protects both short-term happiness and long-term security.",
+      "adviceOnly": "Level 1 is advice only. FutureOS explains the possible futures without showing execution controls.",
+      "tradeoffs": "FutureOS negotiates between the selected life goals, cash safety, product readiness, and long-term security.",
+      "why": "Why did AI choose this?",
+      "explainTitle": "Guardian reasoning",
+      "suggestedActions": "Suggested Actions",
+      "autonomousWarning": "Autonomous mode is active. These actions remain limited to your approved settings and can be changed anytime.",
+      "apply": "Apply Guardian Recommendation",
+      "applyApproved": "Apply {count} approved actions",
+      "success": "Future Self Guardian recommendation applied. FutureOS will monitor your progress.",
+      "scenarios": {
+        "conservative": {
+          "title": "Conservative Future",
+          "detail": "Lower spending or slower timeline, stronger savings, lower risk."
+        },
+        "balanced": {
+          "title": "Balanced Future",
+          "detail": "Recommended balance between the selected goal, cash safety, and long-term health."
+        },
+        "highRisk": {
+          "title": "High-Risk Future",
+          "detail": "Higher spending or faster timeline, weaker financial safety."
+        }
+      },
+      "emergency": {
+        "strong": "Strong",
+        "protected": "Protected",
+        "weak": "Weak"
+      },
+      "tone": {
+        "1": "Advice tone: informative, no execution buttons.",
+        "2": "Recommendation tone: selects the best future without autonomous action.",
+        "3": "Negotiation tone: explains trade-offs across competing goals.",
+        "4": "Approval tone: prepares actions for customer review.",
+        "5": "Autonomous tone: prepares pre-approved actions with safety limits."
+      },
+      "explain": {
+        "protectedGoals": "Protected goals: {goals}, cash safety, and long-term financial health.",
+        "reducedRisks": "Reduced risks: overspending, delayed home purchase, and weakened retirement readiness.",
+        "products": "OCBC support: goal savings, automated transfers, insurance review, mortgage readiness where relevant, and investment planning.",
+        "tradeoffs": "Trade-off made: wedding spending is moderated so long-term security stays intact."
+      },
+      "dynamicSummary": "FutureOS is analysing {goal} across the selected goals: {goals}.",
+      "fields": {
+        "weddingBudget": "Wedding Budget",
+        "weddingDate": "Wedding Date",
+        "savingsNeeded": "Savings Needed",
+        "emergencyImpact": "Emergency Fund Impact",
+        "retirementImpact": "Retirement Impact",
+        "homeTargetYear": "Home Target Year",
+        "downPaymentProgress": "Down Payment Progress",
+        "mortgageReadiness": "Mortgage Readiness",
+        "monthlySavingNeeded": "Monthly Saving Needed",
+        "carBudget": "Car Budget",
+        "monthlyRepayment": "Monthly Repayment",
+        "cashFlowImpact": "Cash Flow Impact",
+        "startupCapital": "Startup Capital",
+        "cashRunway": "Cash Runway",
+        "loanReadiness": "Loan Readiness",
+        "goalName": "Goal Name",
+        "targetAmount": "Target Amount",
+        "targetDate": "Target Date",
+        "targetCoverage": "Target Coverage",
+        "currentEmergencyFund": "Current Emergency Fund",
+        "currentInvestment": "Current Investment",
+        "monthlyInvestment": "Monthly Investment",
+        "targetReturn": "Target Return",
+        "familyTargetYear": "Family Target Year",
+        "familyMonthlyCost": "Monthly Family Cost",
+        "insuranceReadiness": "Insurance Readiness"
+      },
+      "impact": {
+        "weak": "Weak",
+        "protected": "Protected",
+        "strong": "Strong",
+        "delayed": "Delayed",
+        "onTrack": "On track",
+        "reviewNeeded": "Review needed",
+        "tight": "Tight",
+        "manageable": "Manageable"
+      }
+    },
+    "actions": {
+      "savingsGoal": "Create savings goal",
+      "monthlyTransfer": "Schedule monthly transfer",
+      "emergencyFund": "Protect emergency fund",
+      "insuranceReview": "Review insurance needs",
+      "mortgageReadiness": "Prepare mortgage readiness",
+      "investmentPlan": "Adjust investment plan"
+    },
+    "actionButtons": {
+      "approve": "Approve",
+      "edit": "Edit",
+      "skip": "Skip"
+    },
+    "actionStatus": {
+      "pending": "Pending customer choice",
+      "approved": "Approved",
+      "editing": "Editing requested",
+      "skipped": "Skipped"
+    },
+    "actionReceipt": {
+      "summaryTitle": "Approved action receipt",
+      "summaryText": "{count} of {total} actions have customer consent. Tap Apply Guardian Recommendation to activate only the approved actions.",
+      "appliedHint": "{count} approved actions are now active in the FutureOS monitoring plan.",
+      "approvedCount": "{count} approved",
+      "editingCount": "{count} to edit",
+      "skippedCount": "{count} skipped",
+      "approvalMode": "approval required",
+      "autonomousMode": "pre-approved autonomous mode",
+      "labels": {
+        "prepared": "Prepared",
+        "safety": "Safety limit",
+        "next": "Next after Apply"
+      },
+      "state": {
+        "pending": {
+          "title": "Ready for consent",
+          "detail": "FutureOS has prepared this action, but it will not be included until the customer approves it."
+        },
+        "approved": {
+          "title": "Consent captured",
+          "detail": "This action is approved for the Guardian plan and will be included when the recommendation is applied."
+        },
+        "editing": {
+          "title": "Edit requested",
+          "detail": "FutureOS keeps this action in review mode. It will not execute until the customer approves the edited version."
+        },
+        "skipped": {
+          "title": "Skipped",
+          "detail": "This action is excluded from the current Guardian plan."
+        }
+      }
+    },
+    "actionDetails": {
+      "savingsGoal": {
+        "prepared": "Protected savings pocket for {goal}",
+        "safety": "Goal funds stay separate from spending money.",
+        "next": "Create the pocket under {mode}."
+      },
+      "monthlyTransfer": {
+        "prepared": "{amount}/month transfer instruction",
+        "safety": "No transfer happens until the final Guardian recommendation is applied.",
+        "next": "Schedule on salary day under {mode}."
+      },
+      "emergencyFund": {
+        "prepared": "Emergency reserve guardrail of {amount}",
+        "safety": "FutureOS will not recommend moving money below this reserve.",
+        "next": "Monitor balances and warn before risk rises."
+      },
+      "insuranceReview": {
+        "prepared": "Protection-readiness review checklist",
+        "safety": "Recommendation only. No insurance purchase is made.",
+        "next": "Prepare advisory questions for customer review."
+      },
+      "mortgageReadiness": {
+        "prepared": "Mortgage readiness track for {year}",
+        "safety": "No credit application is submitted.",
+        "next": "Track down payment, debt load, and eligibility signals."
+      },
+      "investmentPlan": {
+        "prepared": "Investment adjustment draft",
+        "safety": "No trade or rebalancing happens without explicit approval.",
+        "next": "Monitor risk preference and portfolio gap."
+      }
+    },
+    "autonomousLock": {
+      "title": "Autonomous Goal Lock",
+      "available": "Autonomous Goal Lock available",
+      "guardrail": "Pre-approved savings guardrail",
+      "pocket": "Protected Goal Pocket",
+      "goal": "Goal",
+      "target": "Target amount",
+      "monthlyLocked": "Monthly locked saving",
+      "completion": "Completion date",
+      "progress": "Current progress",
+      "pause": "Pause",
+      "adjust": "Adjust",
+      "withdrawImpact": "Withdraw impact"
+    },
+    "reasoning": {
+      "title": "AI Agent Reasoning",
+      "situationUnderstood": "Situation understood",
+      "selectedGoals": "Selected goals",
+      "mainRisk": "Main risk",
+      "bestRecommendation": "Best recommendation",
+      "nextAction": "Next action",
+      "situation": "FutureOS understands this as a {goal} decision that must fit the customer's cash flow and long-term goals.",
+      "carRisk": "Buying too quickly may weaken cash flow and increase credit repayment pressure.",
+      "customRisk": "Acting immediately may reduce the emergency buffer or create avoidable debt.",
+      "customRecommendation": "For your {goal} goal, FutureOS recommends saving {monthly}/month toward {amount} instead of buying immediately, because it protects your emergency fund and avoids credit card debt.",
+      "nextActionCustom": "Create a guarded savings pocket for {goal} and monitor progress monthly.",
+      "weddingRisk": "A higher wedding budget can reduce cash reserves and delay other important future goals.",
+      "weddingRecommendation": "Future Self Guardian recommends the Balanced Future because it protects the wedding plan while keeping cash safety and retirement on track.",
+      "weddingAction": "Lock a wedding savings goal and use spending alerts before deposits are paid.",
+      "homeRisk": "A weak down payment path can reduce mortgage readiness and increase future borrowing stress.",
+      "homeRecommendation": "Future Self Guardian recommends the Balanced Future because it keeps the property target realistic while protecting savings.",
+      "homeAction": "Prepare a home down payment track and check mortgage readiness monthly.",
+      "emergencyRisk": "Insufficient emergency coverage leaves the customer exposed if income or expenses change.",
+      "emergencyRecommendation": "Future Self Guardian recommends the Balanced Future because it rebuilds protection without freezing every other goal.",
+      "emergencyAction": "Ring-fence emergency savings and automate top-ups after salary crediting.",
+      "retirementRisk": "Reducing investment contributions now can delay financial independence later.",
+      "retirementRecommendation": "Future Self Guardian recommends the Balanced Future because it preserves compounding while funding near-term goals.",
+      "retirementAction": "Keep a monthly investment rhythm and review the retirement gap quarterly.",
+      "investmentRisk": "Chasing return without a cash buffer can create volatility at the wrong time.",
+      "investmentRecommendation": "Future Self Guardian recommends the Balanced Future because it grows investments while keeping risk controlled.",
+      "investmentAction": "Adjust the investment plan to match the selected risk preference and review every quarter.",
+      "familyRisk": "Family planning without insurance and cash readiness can create future protection gaps.",
+      "familyRecommendation": "Future Self Guardian recommends the Balanced Future because it prepares family costs while protecting savings.",
+      "familyAction": "Review insurance readiness and build a family cost buffer.",
+      "businessRisk": "Launching too fast can drain reserves and shorten cash runway.",
+      "businessRecommendation": "Future Self Guardian recommends the Balanced Future because it funds startup capital while preserving emergency cash.",
+      "businessAction": "Create a startup capital plan and separate business risk from household reserves."
+    }
+  },
+  "settings": {
+    "eyebrow": "Settings",
+    "title": "Settings & Preferences",
+    "subtitle": "Control your profile, language, appearance, notifications, AI Guardian permissions, privacy, and consent.",
+    "openSimulator": "Open Future Mirror",
+    "openSimulatorDetail": "Create a custom simulation from Profile settings.",
+    "language": {
+      "title": "Language",
+      "description": "Choose your preferred app language."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Personalise how FutureOS looks.",
+      "light": "Light Mode",
+      "dark": "Dark Mode",
+      "system": "System Default"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "description": "Choose which FutureOS notifications you receive.",
+      "futureRisk": "Future Risk Alerts",
+      "spending": "Spending Behaviour Alerts",
+      "goalProgress": "Goal Progress Updates",
+      "investment": "Investment Opportunities",
+      "mortgage": "Mortgage Readiness Alerts",
+      "insurance": "Insurance Review Reminders",
+      "monthlyReport": "Guardian Monthly Report",
+      "promotional": "Promotional Notifications",
+      "frequency": "Notification Frequency",
+      "history": {
+        "title": "Notification History",
+        "description": "FutureOS automatically records alerts when spending or goal risk changes.",
+        "now": "Just now",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "sent": "Sent",
+        "overBudget": {
+          "title": "Spending over budget detected",
+          "detail": "Karina spent {spending}, which is {amount} above the safe monthly budget of {budget}. Future Self Guardian recommends pausing non-essential spending this week."
+        },
+        "futureRisk": {
+          "title": "Future risk monitoring active",
+          "detail": "Guardian is watching spending, emergency reserve and family protection readiness."
+        },
+        "goalProgress": {
+          "title": "Goal progress update",
+          "detail": "Emergency Fund and Investment Growth remain on track after the latest profile review."
+        },
+        "quiet": {
+          "title": "No alerts right now",
+          "detail": "FutureOS will show automatic notifications here when risks are detected."
+        }
+      }
+    },
+    "frequency": {
+      "realtime": "Real-time",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "guardian": {
+      "title": "AI Guardian Preferences",
+      "description": "Control how Future Self Guardian helps you.",
+      "permissions": {
+        "autonomousSavings": "Allow Autonomous Savings",
+        "investmentSuggestions": "Allow Investment Suggestions",
+        "insuranceRecommendations": "Allow Insurance Recommendations",
+        "mortgagePlanning": "Allow Mortgage Planning",
+        "goalRebalancing": "Allow Goal Rebalancing",
+        "spendingAlerts": "Allow Spending Alerts"
+      },
+      "savingsTransfer": "Savings Transfer",
+      "investmentRebalancing": "Investment Rebalancing",
+      "reviewFrequency": "Guardian Review Frequency",
+      "personalityTitle": "Guardian Personality",
+      "savings": {
+        "manual": "Manual Approval",
+        "smart": "Smart Approval",
+        "auto": "Fully Automatic"
+      },
+      "investment": {
+        "manual": "Manual",
+        "suggested": "AI Suggested",
+        "auto": "Automatic"
+      },
+      "review": {
+        "week": "Every Week",
+        "month": "Every Month",
+        "quarter": "Every Quarter"
+      },
+      "personality": {
+        "friendly": "Friendly",
+        "professional": "Professional",
+        "minimal": "Minimal",
+        "future": "Future-focused"
+      }
+    },
+    "privacy": {
+      "title": "Privacy & Consent",
+      "description": "FutureOS only performs autonomous actions with your permission.",
+      "score": "Privacy Score",
+      "permissions": {
+        "spending": "AI may analyse spending",
+        "lifeGoals": "AI may analyse life goals",
+        "transactions": "AI may analyse transaction history",
+        "portfolio": "AI may analyse investment portfolio",
+        "simulations": "AI may generate financial simulations",
+        "executeActions": "AI may execute approved banking actions"
+      },
+      "historyTitle": "Consent History",
+      "history": {
+        "futureMirror": "Future Mirror Enabled",
+        "autonomousSavings": "Autonomous Savings"
+      },
+      "downloadReport": "Download Consent Report",
+      "managePermissions": "Manage Permissions",
+      "withdrawConsent": "Withdraw Consent",
+      "downloadedNotice": "Consent report downloaded.",
+      "manageNotice": "Permission controls are active above. Change any toggle to update consent instantly.",
+      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
+    },
+    "terms": {
+      "title": "Terms & Data Usage",
+      "description": "Understand how customer data is protected.",
+      "dataCollected": "Data Collected",
+      "purpose": "Purpose",
+      "protection": "Data Protection",
+      "customerControl": "Customer Control",
+      "data": {
+        "spending": "Spending Behaviour",
+        "savings": "Savings",
+        "investments": "Investments",
+        "products": "Banking Products",
+        "goals": "Financial Goals",
+        "preferences": "User Preferences"
+      },
+      "purposeItems": {
+        "predict": "Predict future needs",
+        "simulate": "Generate simulations",
+        "optimise": "Optimise financial planning",
+        "protect": "Protect long-term goals"
+      },
+      "protectionItems": {
+        "aes": "AES-256 Encryption",
+        "mas": "MAS Compliance",
+        "pdpa": "PDPA Compliance",
+        "cloud": "Secure Cloud Infrastructure"
+      },
+      "controlItems": {
+        "download": "Download data",
+        "delete": "Delete data",
+        "disable": "Disable AI",
+        "withdraw": "Withdraw consent"
+      },
+      "viewPolicy": "View Privacy Policy",
+      "downloadData": "Download My Data",
+      "deleteData": "Delete My Data",
+      "policyText": "FutureOS uses approved customer data only for financial simulations, planning recommendations, and consented autonomous actions. Customers remain in control at all times.",
+      "downloadedNotice": "Your local FutureOS data file has been downloaded.",
+      "deletedNotice": "Local FutureOS demo data has been reset."
+    },
+    "demo": {
+      "title": "App Information",
+      "description": "Product version and local prototype controls.",
+      "clearSimulation": "Clear Simulation",
+      "restoreMock": "Restore Mock Data",
+      "version": "Version",
+      "clearNotice": "Simulation cleared. Future Mirror is ready for a fresh run.",
+      "restoreNotice": "Mock data restored. FutureOS is back to the default customer profile."
+    },
+    "version": {
+      "title": "About FutureOS",
+      "description": "Version and product information for this prototype.",
+      "label": "Version"
+    },
+    "profile": {
+      "title": "Profile Details",
+      "description": "Personalise how FutureOS addresses you.",
+      "displayName": "Display name",
+      "placeholder": "Enter your name",
+      "savedHint": "Saved automatically and shown on Home."
+    }
+  },
+  "homeBanking": {
+    "heroLabel": "OCBC home banking dashboard",
+    "scan": "Scan",
+    "notifications": "Notifications",
+    "logout": "Logout",
+    "today": "Today",
+    "welcome": "Welcome back, {name}",
+    "quickActionsLabel": "Quick actions",
+    "quickActions": {
+      "paynow": "PayNow",
+      "scanPay": "Scan & Pay",
+      "fx": "Foreign Exchange",
+      "customise": "Customise"
+    },
+    "accountsTitle": "Accounts Overview",
+    "accounts": {
+      "savings": "Savings Account",
+      "creditCard": "Credit Card Outstanding",
+      "personalLoan": "Personal Loan Remaining",
+      "investments": "Investments",
+      "insuranceScore": "Insurance Protection Score",
+      "futureGoal": "FutureOS Goal Account"
+    },
+    "availableNow": "Available now",
+    "selectedGoal": "Selected Goal",
+    "openFutureOS": "Open FutureOS",
+    "infoLabel": "Explain {item}",
+    "info": {
+      "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
+      "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
+      "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
+      "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
+      "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
+      "family": "Family Planning measures whether cash reserves and insurance readiness can support future household needs."
+    },
+    "customiseTitle": "Customise Shortcuts",
+    "customiseText": "You can reorder or replace these shortcuts with preferred banking actions.",
+    "customiseDone": "Save Shortcuts",
+    "gotIt": "Got it",
+    "notificationsTitle": "Notifications",
+    "notificationsText": "FutureOS alerts are active for goal progress, spending risk, and home readiness.",
+    "logoutTitle": "Secure Session",
+    "logoutText": "Your secure session remains protected. No real banking sign-out is performed in this prototype.",
+    "currentScore": "Current score",
+    "howCalculated": "How this is calculated",
+    "method": {
+      "futureScore": "FutureOS normalises each module to 0-100, then combines them with higher weight on protected goals and liquidity. It is a transparent prototype model, not a live credit or investment decision.",
+      "wedding": "Progress equals protected wedding savings divided by the recommended wedding budget.",
+      "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
+      "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
+      "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
+      "family": "Family Planning combines emergency-fund strength and insurance protection readiness into one 0-100 readiness score."
+    },
+    "proof": {
+      "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
+      "futureScoreWeights": "Weights: goal progress 35%, liquidity 25%, debt 15%, protection 10%, retirement 15%.",
+      "futureScoreResult": "Result: strong cash buffer lifts the score; retirement and insurance gaps keep it below 90.",
+      "weddingInputs": "Inputs: SGD 35,000 Guardian wedding plan, SGD 450/month transfer, and protected emergency reserve.",
+      "weddingMath": "Math: about SGD 22,400 allocated / SGD 35,000 target = 64%.",
+      "weddingResult": "Result: healthy but incomplete, so the monthly transfer stays active.",
+      "selectedInputs": "Inputs: 2030 home target, savings, emergency reserve, wedding budget, and mortgage readiness.",
+      "selectedMath": "Math: readiness is scored against down-payment progress and 2030 feasibility.",
+      "selectedResult": "Result: 72% means on track, but high wedding spending could delay the home year.",
+      "emergencyInputs": "Inputs: liquid savings, spending model, card balance, loan balance, and reserve rules.",
+      "emergencyMath": "Math: protected cash covers about 4.8 of 6 target months = 80%.",
+      "emergencyResult": "Result: FutureOS blocks optional reallocations below the protected level.",
+      "retirementInputs": "Inputs: age 62 target, SGD 85,000 savings, SGD 15,000 investments, SGD 450/month plan, 2030 home target, wedding budget, and existing debt.",
+      "retirementMath": "Math: projected retirement capital / target retirement capital = about 61%.",
+      "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
+      "familyInputs": "Inputs: emergency reserve, monthly expenses, insurance status, family planning goal and current savings.",
+      "familyMath": "Math: emergency readiness contributes 45% and protection readiness contributes 55%.",
+      "familyResult": "Result: Karina has strong savings, but basic insurance keeps this score from reaching the highest band."
+    }
+  },
+  "accountDetails": {
+    "eyebrow": "Account detail",
+    "subtitle": "Balance, status, recent activity and FutureOS recommendation.",
+    "balance": "Current balance",
+    "recommendationTitle": "Related FutureOS Recommendation",
+    "recentActivity": "Recent Activity",
+    "simulateImpact": "Simulate Impact",
+    "addToFuturePlan": "Add to Future Plan",
+    "addedToPlan": "{account} added to the FutureOS monitoring plan.",
+    "status": {
+      "available": "Available and monitored",
+      "paymentDue": "Payment due monitored",
+      "repaying": "Repayment active",
+      "active": "Active",
+      "reviewRecommended": "Review recommended",
+      "futureosMonitoring": "FutureOS monitoring"
+    },
+    "activity": {
+      "salary": "Salary credited",
+      "goalTransfer": "Goal transfer",
+      "emergencyProtected": "Emergency reserve",
+      "cardSpend": "Recent card spend",
+      "paymentScheduled": "Payment scheduled",
+      "spendingAlert": "Spending alert",
+      "monthlyRepayment": "Monthly repayment",
+      "nextDue": "Next due date",
+      "debtHealth": "Debt health",
+      "monthlyInvestment": "Monthly investment",
+      "riskProfile": "Risk profile",
+      "investmentReadiness": "Investment readiness",
+      "currentStatus": "Current status",
+      "protectionGap": "Protection gap",
+      "familyReadiness": "Family readiness",
+      "goalName": "Goal name",
+      "monthlyTransfer": "Monthly transfer",
+      "guardianStatus": "Guardian status"
+    },
+    "info": {
+      "savings": "This is the current mock savings balance available for salary, daily banking and protected goal funding.",
+      "creditCard": "This shows the mock outstanding card balance that FutureOS watches for spending risk and repayment pressure.",
+      "loan": "This is the remaining mock personal loan balance used to estimate debt pressure and future borrowing readiness.",
+      "investments": "This is the current mock investment value used to estimate long-term compounding and retirement readiness.",
+      "insurance": "This score estimates how prepared the customer is for life, health and family protection needs.",
+      "futureGoal": "This goal account shows money reserved or recommended for the active FutureOS life plan."
+    },
+    "calculation": {
+      "savings": "FutureOS compares available savings, monthly expenses, emergency reserve needs and active goal transfers.",
+      "creditCard": "FutureOS compares outstanding balance, recent spending, scheduled repayment and monthly cash flow.",
+      "loan": "FutureOS compares remaining debt, monthly repayment, income stability and upcoming home readiness.",
+      "investments": "FutureOS compares current investments, monthly contributions, risk preference and retirement target age.",
+      "insurance": "FutureOS combines current protection status, family planning, mortgage readiness and coverage gap indicators into a 0-100 score.",
+      "futureGoal": "FutureOS combines target amount, monthly transfer, timeline, emergency fund safety and Guardian monitoring status."
+    },
+    "recommendations": {
+      "savings": "Keep this as the main salary and goal-funding account. FutureOS recommends protecting emergency cash before increasing spending.",
+      "creditCard": "Pay down outstanding card balance before adding new discretionary commitments. Future Self Guardian will flag risky spending patterns.",
+      "loan": "Keep repayments predictable and avoid new debt until the emergency reserve and priority goals are protected.",
+      "investments": "Maintain a steady investment rhythm while keeping near-term goal money separate from market risk.",
+      "insurance": "Review life and health coverage before taking on home or family commitments.",
+      "futureGoal": "{goal} is being watched by FutureOS. Current future health score is {score}/100, so approved actions should protect cash flow."
+    }
+  },
+  "scoreInfo": {
+    "body": "{item} is a prototype FutureOS readiness indicator. It helps the customer understand whether the related life goal is on track.",
+    "method": "FutureOS combines mock profile data, selected goals, savings buffer, debt pressure, product readiness and Guardian risk rules into a transparent 0-100 estimate."
+  },
+  "mockScreens": {
+    "common": {
+      "done": "Done"
+    },
+    "paynow": {
+      "eyebrow": "OCBC payment",
+      "title": "PayNow",
+      "subtitle": "A mock transfer screen showing how OCBC quick actions can stay connected to your FutureOS plan.",
+      "primary": "Ready to transfer",
+      "recipient": "Recipient",
+      "mobile": "Mobile number",
+      "amount": "Amount",
+      "note": "This is mock data only. No payment will be sent in the prototype.",
+      "goalRecipient": "Wedding Savings Goal"
+    },
+    "scan": {
+      "eyebrow": "OCBC payment",
+      "title": "Scan & Pay",
+      "subtitle": "A mock scan screen for QR payments during the demo.",
+      "primary": "Scanner ready",
+      "merchant": "Merchant",
+      "limit": "Daily limit",
+      "status": "Status",
+      "ready": "Ready",
+      "note": "Camera access is disabled for the prototype. The scanner frame is visual only."
+    },
+    "fx": {
+      "eyebrow": "OCBC wealth",
+      "title": "Foreign Exchange",
+      "subtitle": "A mock FX screen with indicative rates for demo purposes.",
+      "primary": "Indicative rate",
+      "note": "Rates are mock values and are not used for live trading."
+    }
+  },
+  "onboarding": {
+    "securePrototype": "Secure OCBC FutureOS prototype",
+    "title": "OCBC FutureOS",
+    "subtitle": "Login or create a demo profile to see how Life Graph, Future Mirror and Future Self Guardian work together.",
+    "lifeGraph": "Life Graph",
+    "futureMirror": "Future Mirror",
+    "guardian": "Future Self Guardian",
+    "login": "Login",
+    "createDemo": "Create Demo Profile",
+    "profileTitle": "Create Profile",
+    "profileSubtitle": "Set the customer details that power FutureOS scores, simulations and Guardian actions.",
+    "back": "Back",
+    "saveProfile": "Save Profile"
+  },
+  "spendingRisk": {
+    "title": "Spending Risk Detail",
+    "subtitle": "FutureOS detected a spending pattern that may affect Karina's future goals.",
+    "homeLabel": "FutureOS Alert",
+    "homeTitleRisk": "1 financial risk detected today",
+    "homeTitleSafe": "No spending risk detected today",
+    "homeDetailRisk": "Monthly spending is {amount} above the safe budget of {budget}. Tap to review.",
+    "homeDetailSafe": "Spending is within the safe monthly budget of {budget}.",
+    "detectedLabel": "Automatic notification",
+    "detectedTitleRisk": "Karina is {amount} over safe monthly budget",
+    "detectedTitleSafe": "Karina is within safe monthly budget",
+    "detectedText": "FutureOS compares income, current spending, goal commitments and emergency reserve rules to detect risk before it affects long-term outcomes.",
+    "metrics": {
+      "monthlyIncome": "Monthly Income",
+      "currentSpending": "Current Spending",
+      "safeBudget": "Safe Budget",
+      "overBudget": "Over Budget",
+      "spendingRatio": "Spending Ratio",
+      "riskLevel": "Risk Level"
+    },
+    "riskLevels": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "affectedTitle": "Goals affected if spending continues",
+    "goals": {
+      "emergency": {
+        "title": "Emergency Fund",
+        "detail": "Higher spending can weaken the protected safety buffer."
+      },
+      "family": {
+        "title": "Family Planning",
+        "detail": "Future household costs need stable monthly cash flow."
+      },
+      "retirement": {
+        "title": "Retirement Security",
+        "detail": "Repeated overspending reduces long-term investment room."
+      }
+    },
+    "recommendation": {
+      "title": "Guardian recommendation",
+      "detail": "Reduce non-essential spending by {amount} this month and keep emergency savings protected.",
+      "note": "FutureOS will not execute any financial action unless Karina approves it."
+    },
+    "guardrail": {
+      "title": "What Guardian will do after approval",
+      "cta": "Apply Guardian Spending Guardrail",
+      "activeCta": "Guardrail Active",
+      "success": "Guardian Spending Guardrail is active. FutureOS will monitor spending and protect Karina's savings goals.",
+      "actions": {
+        "cap": "Set a soft discretionary spending guardrail of {budget} this month.",
+        "alert": "Send an instant alert if spending rises above the approved guardrail.",
+        "protect": "Keep emergency reserve and family planning funds separate from daily spending.",
+        "review": "Review cash flow weekly and update Guardian Memory with the decision."
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+.next
+node_modules
+.npm-cache
+out
+dist
+.env*.local
+
+.vercel
+# Dependencies and builds
+node_modules/
+.next/
+dist/
+build/
+out/
+.npm-cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Codex and temporary files
+.codex/
+.agents/
+.codex-dev-job.txt
+.tmp_doc_builder/
+.tmp_lifeverse_reference/
+outputs/
+work/
+%SystemDrive%/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

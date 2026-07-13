@@ -1,0 +1,1163 @@
+{
+  "app": {
+    "prototypeLabel": "OCBC FutureOS æ‰‹æœºé“¶è¡ŒåŽŸåž‹"
+  },
+  "language": {
+    "title": "è¯­è¨€",
+    "english": "English",
+    "chinese": "ç®€ä½“ä¸­æ–‡",
+    "malay": "Bahasa Melayu",
+    "tamil": "à®¤à®®à®¿à®´à¯",
+    "korean": "í•œêµ­ì–´"
+  },
+  "nav": {
+    "primary": "ä¸»å¯¼èˆª",
+    "home": "é¦–é¡µ",
+    "lifeGraph": "ç”Ÿæ´»å›¾è°±",
+    "mirror": "æœªæ¥é•œ",
+    "guardian": "å®ˆæŠ¤è€…",
+    "profile": "ä¸ªäºº"
+  },
+  "common": {
+    "secure": "å®‰å…¨",
+    "demoReset": "é‡ç½®",
+    "resetDemo": "é‡ç½®æ¼”ç¤º",
+    "backHome": "è¿”å›žé¦–é¡µ",
+    "backLifeGraph": "è¿”å›žç”Ÿæ´»å›¾è°±",
+    "openItem": "æ‰“å¼€{item}",
+    "protected": "å·²ä¿æŠ¤",
+    "on": "å¼€å¯"
+  },
+  "customer": {
+    "segment": "????????",
+    "status": "??",
+    "lifeStage": "20????????????????"
+  },
+  "home": {
+    "eyebrow": "è‡ªä¸» AI é“¶è¡Œå¹³å°",
+    "title": "OCBC FutureOS",
+    "subtitle": "ä»Žç®¡ç†é‡‘é’±ï¼Œåˆ°ç®¡ç†äººç”Ÿç»“æžœ",
+    "futureHealthScore": "æœªæ¥å¥åº·è¯„åˆ†",
+    "summary": "?? FutureOS ????????????????????????",
+    "guardianStatus": "ä½ çš„æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…æ­£åœ¨ç›‘æµ‹é•¿æœŸç›®æ ‡ã€‚",
+    "startSimulation": "å¼€å§‹æœªæ¥æ¨¡æ‹Ÿ",
+    "layersLabel": "FutureOS æ ¸å¿ƒæ¦‚å¿µ",
+    "modulesLabel": "å…­ä¸ª AI æ¨¡å—"
+  },
+  "goals": {
+    "wedding": "å©šç¤¼ç›®æ ‡",
+    "home": "ç½®ä¸šç›®æ ‡",
+    "emergency": "åº”æ€¥åŸºé‡‘",
+    "retirement": "é€€ä¼‘ç›®æ ‡"
+  },
+  "modules": {
+    "lifeGraph": {
+      "name": "Life Graph",
+      "short": "ç†è§£å®¢æˆ·çš„äººç”Ÿé˜¶æ®µ"
+    },
+    "futureMirror": {
+      "name": "Future Mirror",
+      "short": "æ¨¡æ‹Ÿæœªæ¥å½±å“"
+    },
+    "goalNegotiator": {
+      "name": "Goal Negotiator",
+      "short": "å¹³è¡¡ç›¸äº’ç«žäº‰çš„äººç”Ÿç›®æ ‡"
+    },
+    "capitalOrchestrator": {
+      "name": "Capital Orchestrator",
+      "short": "è¿žæŽ¥ OCBC äº§å“"
+    },
+    "engine": {
+      "name": "Autonomous Banking Engine",
+      "short": "æ‰§è¡Œå·²æ‰¹å‡†è¡ŒåŠ¨"
+    },
+    "guardian": {
+      "name": "Future Self Guardian",
+      "short": "ä¿æŠ¤æœªæ¥åˆ©ç›Š"
+    }
+  },
+  "layers": {
+    "mirror": {
+      "label": "Future Mirror",
+      "purpose": "çœ‹è§åŽæžœ",
+      "detail": "æ¨¡æ‹Ÿä»Šå¤©çš„é€‰æ‹©å¦‚ä½•æ”¹å˜æœªæ¥ç»“æžœ"
+    },
+    "guardian": {
+      "label": "Future Self Guardian",
+      "purpose": "ä¿æŠ¤é•¿æœŸç›®æ ‡",
+      "detail": "ä»£è¡¨å®¢æˆ·æœªæ¥è‡ªæˆ‘çš„è‡ªä¸» AI"
+    }
+  },
+  "lifeGraph": {
+    "eyebrow": "æ¨¡å— 1",
+    "title": "Life Graph",
+    "subtitle": "OCBC å°† the customer å’Œ the partner çš„äººç”Ÿé˜¶æ®µã€ç›®æ ‡ã€äº¤æ˜“ä¸Žé“¶è¡Œéœ€æ±‚æ•´åˆæˆä¸€ä¸ªç”»åƒã€‚",
+    "timelineTitle": "è¿žæŽ¥å¼äººç”Ÿæ—¶é—´çº¿",
+    "insight": "Life Graph å°†å®¢æˆ·äº¤æ˜“ã€ç›®æ ‡ã€äººç”Ÿäº‹ä»¶å’Œé“¶è¡Œéœ€æ±‚è¿žæŽ¥æˆä¸€ä¸ªé‡‘èžç”Ÿæ´»ç”»åƒã€‚",
+    "detectedNeeds": "å·²è¯†åˆ«éœ€æ±‚",
+    "openMirror": "åˆ†æžæœªæ¥å†³ç­–"
+  },
+  "lifeGoals": {
+    "married": "å®Œæˆå©šç¤¼",
+    "marriedDetail": "12 ä¸ªæœˆå†…",
+    "home": "è´­ä¹°é¦–å¥—æˆ¿",
+    "homeDetail": "3 å¹´å†…",
+    "family": "å¼€å§‹å®¶åº­è®¡åˆ’",
+    "familyDetail": "35 å²å‰",
+    "invest": "å»ºç«‹æŠ•èµ„",
+    "investDetail": "é•¿æœŸç»„åˆ",
+    "retire": "å®‰å¿ƒé€€ä¼‘",
+    "retireDetail": "è´¢åŠ¡å®‰å…¨"
+  },
+  "timeline": {
+    "engagement": "è®¢å©š",
+    "wedding": "å©šç¤¼",
+    "firstHome": "é¦–å¥—æˆ¿",
+    "family": "å®¶åº­",
+    "retirement": "é€€ä¼‘"
+  },
+  "needs": {
+    "wedding": "å©šç¤¼é¢„ç®—è§„åˆ’",
+    "home": "é¦–ä»˜æ¬¾å‡†å¤‡",
+    "emergency": "åº”æ€¥åŸºé‡‘ä¿æŠ¤",
+    "insurance": "ä¿é™©å‡†å¤‡åº¦",
+    "investment": "é•¿æœŸæŠ•èµ„è§„åˆ’"
+  },
+  "mirror": {
+    "eyebrow": "æ¨¡å— 2",
+    "title": "Future Mirror æ¨¡æ‹Ÿ",
+    "subtitle": "ä»¥å©šç¤¼é¢„ç®—ä¸ºä¸»è¦å†³ç­–ï¼Œå±•ç¤ºå®ƒå¦‚ä½•å½±å“ç½®ä¸šã€é€€ä¼‘ä¸Žé£Žé™©ã€‚",
+    "weddingBudget": "å©šç¤¼é¢„ç®—",
+    "homePurchase": "ç½®ä¸šå¹´ä»½",
+    "retirementAge": "é€€ä¼‘å¹´é¾„",
+    "futureScore": "æœªæ¥è¯„åˆ†",
+    "risk": "é£Žé™©ç­‰çº§",
+    "chartTitle": "æœªæ¥è¯„åˆ†æ¯”è¾ƒ",
+    "timelineTitle": "ç½®ä¸šæ—¶é—´çº¿",
+    "explainer": "Future Mirror æ˜¾ç¤ºä»Šå¤©çš„å†³å®šå¦‚ä½•æ”¹å˜æ˜Žå¤©çš„äººç”Ÿç»“æžœã€‚",
+    "cta": "ç»§ç»­åˆ°ç›®æ ‡åè°ƒå™¨"
+  },
+  "scenarios": {
+    "label": "æ–¹æ¡ˆ {id}",
+    "a": "å½“å‰è·¯å¾„",
+    "b": "å¹³è¡¡æŠ˜ä¸­",
+    "c": "æŽ¨è"
+  },
+  "risk": {
+    "high": "é«˜",
+    "medium": "ä¸­",
+    "low": "ä½Ž"
+  },
+  "negotiator": {
+    "eyebrow": "æ¨¡å— 3",
+    "title": "Goal Negotiator",
+    "subtitle": "AI åœ¨å©šç¤¼ä½“éªŒã€ç½®ä¸šã€åº”æ€¥ã€å®¶åº­å’Œé€€ä¼‘ç›®æ ‡ä¹‹é—´å–å¾—å¹³è¡¡ã€‚",
+    "competingGoals": "ç›¸äº’ç«žäº‰çš„ç›®æ ‡",
+    "wedding": "å©šç¤¼",
+    "futureGoals": "æœªæ¥ç›®æ ‡",
+    "tradeoff": "å¦‚æžœ the customer å’Œ the partner é€‰æ‹© SGD 80,000 çš„å©šç¤¼ï¼Œç½®ä¸šå’Œé€€ä¼‘ç›®æ ‡éƒ½ä¼šå»¶åŽã€‚Goal Negotiator ä¼šæ‰¾åˆ°èƒ½ä¿æŠ¤å…³é”®ç›®æ ‡çš„å¹³è¡¡æ–¹æ¡ˆã€‚",
+    "recommendedBalance": "æŽ¨èå¹³è¡¡",
+    "cta": "åè°ƒæˆ‘çš„èµ„é‡‘"
+  },
+  "competingGoals": {
+    "wedding": "å©šç¤¼ä½“éªŒ",
+    "home": "é¦–å¥—æˆ¿",
+    "emergency": "åº”æ€¥åŸºé‡‘",
+    "retirement": "é€€ä¼‘",
+    "family": "æœªæ¥å®¶åº­"
+  },
+  "recommendations": {
+    "weddingBudget": "å©šç¤¼é¢„ç®—",
+    "monthlySavings": "æ¯æœˆå‚¨è“„",
+    "homeTarget": "ç½®ä¸šç›®æ ‡",
+    "retirementTarget": "é€€ä¼‘ç›®æ ‡",
+    "emergencyFund": "åº”æ€¥åŸºé‡‘"
+  },
+  "capital": {
+    "eyebrow": "æ¨¡å— 4",
+    "title": "Capital Orchestrator",
+    "subtitle": "OCBC é“¶è¡Œäº§å“è¢«è¿žæŽ¥æˆ the customer å’Œ the partner çš„ä¸€å¥—äººç”Ÿç­–ç•¥ã€‚",
+    "ecosystem": "å·²è¿žæŽ¥çš„ OCBC äº§å“ç”Ÿæ€",
+    "explainer": "Capital Strategy coordinates savings, investments, insurance, mortgage, credit, and payments around customer life goals.",
+    "cta": "å¯åŠ¨è‡ªä¸»è®¡åˆ’"
+  },
+  "allocations": {
+    "wedding": "å©šç¤¼å‚¨è“„ç›®æ ‡",
+    "home": "é¦–ä»˜æ¬¾åŸºé‡‘",
+    "emergency": "åº”æ€¥åŸºé‡‘",
+    "investment": "æŠ•èµ„è®¡åˆ’",
+    "insurance": "ä¿é™©å‡†å¤‡åº¦",
+    "mortgage": "æˆ¿è´·å‡†å¤‡åº¦"
+  },
+  "products": {
+    "deposits": "å­˜æ¬¾",
+    "depositsAction": "ç›®æ ‡å¼å‚¨è“„",
+    "payments": "æ”¯ä»˜",
+    "paymentsAction": "è‡ªåŠ¨è½¬è´¦",
+    "wealth": "è´¢å¯Œ",
+    "wealthAction": "æŠ•èµ„è°ƒæ•´",
+    "insurance": "ä¿é™©",
+    "insuranceAction": "å®¶åº­ä¿éšœå‡†å¤‡",
+    "mortgage": "æˆ¿è´·",
+    "mortgageAction": "ä½æˆ¿è´·æ¬¾å‡†å¤‡",
+    "credit": "ä¿¡è´·",
+    "creditAction": "è´Ÿè´£ä»»ä¿¡è´·è§„åˆ’"
+  },
+  "status": {
+    "created": "å·²åˆ›å»º",
+    "active": "è¿›è¡Œä¸­",
+    "growing": "å¢žé•¿ä¸­",
+    "locked": "å·²é”å®š",
+    "adjusted": "å·²è°ƒæ•´",
+    "balanced": "å·²å¹³è¡¡",
+    "recommended": "æŽ¨è",
+    "review": "å¾…å¤æ ¸",
+    "preparing": "å‡†å¤‡ä¸­",
+    "track": "è·Ÿè¸ª",
+    "completed": "å·²å®Œæˆ",
+    "monitoring": "ç›‘æµ‹ä¸­",
+    "scheduled": "å·²å®‰æŽ’",
+    "approved": "å·²æ‰¹å‡†"
+  },
+  "engine": {
+    "eyebrow": "æ¨¡å— 5",
+    "title": "Autonomous Banking Engine",
+    "subtitle": "å·²æ‰¹å‡†è®¡åˆ’ä¼šè‡ªåŠ¨æ‰§è¡Œï¼Œå¹¶ä¿ç•™æ¸…æ™°æŽ§åˆ¶å’Œç›‘æµ‹ã€‚",
+    "activating": "æ­£åœ¨å¯åŠ¨è®¡åˆ’...",
+    "loadingDetail": "æ­£åœ¨åˆ›å»ºç›®æ ‡ã€è½¬è´¦ã€ç›‘æµ‹è§„åˆ™å’Œå¤æ ¸èŠ‚å¥ã€‚",
+    "activatedMessage": "ä½ çš„æœªæ¥è®¡åˆ’å·²å¯åŠ¨ã€‚",
+    "cta": "æŸ¥çœ‹æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…",
+    "actions": {
+      "createWedding": "åˆ›å»ºå©šç¤¼å‚¨è“„ç›®æ ‡",
+      "transfer": "å®‰æŽ’æ¯æœˆè½¬è´¦ï¼šSGD 450/æœˆ",
+      "protectEmergency": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
+      "adjustInvestment": "è°ƒæ•´æŠ•èµ„è®¡åˆ’",
+      "trackHome": "è·Ÿè¸ªç½®ä¸šå‡†å¤‡åº¦",
+      "alerts": "å‘é€æœªæ¥é£Žé™©æé†’",
+      "review": "æ¯ 3 ä¸ªæœˆå¤æ ¸è®¡åˆ’"
+    }
+  },
+  "guardian": {
+    "eyebrow": "æ¨¡å— 6",
+    "title": "æ¥è‡ªæœªæ¥è‡ªæˆ‘çš„è®¯æ¯",
+    "subtitle": "Future Self Guardian ä¿æŠ¤å®¢æˆ·çš„é•¿æœŸåˆ©ç›Šã€‚",
+    "message1": "the customer å’Œ the partnerï¼Œä½ ä»¬å¥½ï¼Œæˆ‘æ˜¯ä½ ä»¬çš„ Future Self Guardianã€‚",
+    "message2": "æˆ‘åˆ†æžäº†ä½ ä»¬åœ¨å©šå§»ã€ç½®ä¸šã€å®¶åº­è§„åˆ’å’Œé€€ä¼‘æ–¹é¢çš„æœªæ¥ã€‚",
+    "message3": "é€‰æ‹© SGD 80,000 çš„å©šç¤¼ï¼Œå¯èƒ½è®©é¦–å¥—æˆ¿å»¶åŽ 4 å¹´ï¼Œä¹Ÿè®©é€€ä¼‘å»¶åŽ 4 å¹´ã€‚",
+    "message4": "ä¸ºäº†ä¿æŠ¤ä½ ä»¬æƒ³è¦çš„æœªæ¥ï¼Œæˆ‘å»ºè®®é€‰æ‹© SGD 35,000 çš„å©šç¤¼æ–¹æ¡ˆï¼Œå¹¶æ‰§è¡Œ SGD 450 çš„æ¯æœˆå‚¨è“„ç­–ç•¥ã€‚",
+    "message5": "æˆ‘ä¼šç»§ç»­ç›‘æµ‹è¿›å±•ï¼Œå¸®åŠ©ä½ ä»¬ä¿æŒåœ¨æ­£ç¡®è½¨é“ä¸Šã€‚",
+    "protectedScore": "æœªæ¥ä¿æŠ¤è¯„åˆ†",
+    "activePlan": "å¯ç”¨è®¡åˆ’",
+    "planValue": "å©šç¤¼ + ç½®ä¸š + é€€ä¼‘",
+    "monitoringStatus": "ç›‘æµ‹çŠ¶æ€",
+    "nextReview": "ä¸‹æ¬¡å¤æ ¸",
+    "reviewValue": "æ¯ 3 ä¸ªæœˆ",
+    "cta": "ç»§ç»­ä¿æŠ¤æˆ‘çš„æœªæ¥",
+    "memory": {
+      "title": "?????",
+      "subtitle": "?? AI ????????????????????",
+      "openEvent": "?????? {event}",
+      "impact": "??",
+      "productUsed": "?????",
+      "metrics": {
+        "memoryEvents": "????",
+        "tomorrow": "??"
+      },
+      "modal": {
+        "guardianAction": "?????",
+        "reason": "??",
+        "dataUsed": "???????",
+        "product": "??? OCBC ??",
+        "futureScoreImpact": "??????",
+        "whyTitle": "?????",
+        "whyText": "?????? Future Self Guardian ????????????????????????????",
+        "close": "??"
+      },
+      "events": {
+        "wedding": {
+          "title": "????????",
+          "description": "Guardian ???????????",
+          "impact": "Future Score +8",
+          "product": "OCBC 360 Account",
+          "action": "??????????????????????",
+          "reason": "{customer} ??????????????",
+          "data": "??????????????????????????"
+        },
+        "emergency": {
+          "title": "????????",
+          "description": "????????????????",
+          "impact": "????",
+          "product": "??????",
+          "action": "????????????????",
+          "reason": "????????????????????",
+          "data": "???????????????????????"
+        },
+        "home": {
+          "title": "???????",
+          "description": "??????????????",
+          "impact": "???????",
+          "product": "OCBC ????",
+          "action": "?????????????????",
+          "reason": "??????????????",
+          "data": "?????????????????????????"
+        },
+        "family": {
+          "title": "???????",
+          "description": "??????????????",
+          "impact": "???????",
+          "product": "Great Eastern ????",
+          "action": "?????????????????",
+          "reason": "???????????????????",
+          "data": "?????????????????????????"
+        },
+        "salary": {
+          "title": "???????",
+          "description": "????????????????",
+          "impact": "???????",
+          "product": "OCBC RoboInvest",
+          "action": "??????????????????",
+          "reason": "????????????????",
+          "data": "?????????????????????"
+        }
+      }
+    },
+    "status": {
+      "autonomousLevel": "????"
+    },
+    "hub": {
+      "subtitle": "?????? AI ???",
+      "gridLabel": "Future Self Guardian ????",
+      "back": "?????",
+      "openSettings": "??????",
+      "cards": {
+        "recommendation": {
+          "title": "?????",
+          "subtitle": "????? AI ???"
+        },
+        "actionCentre": {
+          "title": "????",
+          "subtitle": "???????? AI ???"
+        },
+        "monitoring": {
+          "title": "????",
+          "subtitle": "??????????????"
+        },
+        "financialStrategy": {
+          "title": "????",
+          "subtitle": "????????????"
+        },
+        "aiReasoning": {
+          "title": "AI ??",
+          "subtitle": "??????????????"
+        },
+        "memory": {
+          "title": "?????",
+          "subtitle": "???????????"
+        },
+        "monthlyReview": {
+          "title": "????",
+          "subtitle": "?? AI ?????"
+        },
+        "settings": {
+          "title": "?????",
+          "subtitle": "???????????"
+        }
+      }
+    },
+    "actionCentre": {
+      "preparedTitle": "AI ??????",
+      "preparedSubtitle": "?? Future Self Guardian ??????????"
+    },
+    "services": {
+      "title": "OCBC ?? / ??",
+      "subtitle": "???????? FutureOS ????????? OCBC ?????",
+      "what": "??",
+      "why": "????",
+      "requiredApproval": "????",
+      "customerApproval": "?????????",
+      "approveCta": "????",
+      "approvedCta": "???",
+      "success": "{action} ????FutureOS ????????",
+      "actions": {
+        "open360": {
+          "title": "?? OCBC 360 ??",
+          "goal": "?????????",
+          "what": "?????????????????????",
+          "why": "? {goal} ?????????????????????"
+        },
+        "creditCardApplication": {
+          "title": "?? OCBC ???",
+          "goal": "??????????",
+          "what": "????????????????????",
+          "why": "?????????????????????"
+        },
+        "roboInvest": {
+          "title": "?? OCBC RoboInvest",
+          "goal": "??????",
+          "what": "?????????? RoboInvest ?????",
+          "why": "??????????????????????"
+        },
+        "insuranceReviewService": {
+          "title": "?? Great Eastern ????",
+          "goal": "???????",
+          "what": "????????????????????????",
+          "why": "??????????? {goal} ?????"
+        },
+        "homeLoanCheck": {
+          "title": "??????",
+          "goal": "????????",
+          "what": "??????????????????????",
+          "why": "????????????????????"
+        },
+        "relationshipManager": {
+          "title": "??????",
+          "goal": "??????",
+          "what": "???????????????",
+          "why": "????????????????????"
+        },
+        "monthlySavingsService": {
+          "title": "??????",
+          "goal": "????????",
+          "what": "????????????????",
+          "why": "???????????????????"
+        },
+        "goalWalletTransfer": {
+          "title": "????????",
+          "goal": "?????????",
+          "what": "??????????? FutureOS ?????",
+          "why": "? {goal} ???????????????????"
+        },
+        "portfolioRebalance": {
+          "title": "???????",
+          "goal": "????????",
+          "what": "?????????????????????",
+          "why": "?????????????????"
+        },
+        "protectionReview": {
+          "title": "??????",
+          "goal": "?????????",
+          "what": "??????????????????????",
+          "why": "???? {goal}???????????????"
+        }
+      }
+    }
+  },
+  "profile": {
+    "eyebrow": "æ¼”ç¤ºå®¢æˆ·",
+    "title": "ä¸ªäººèµ„æ–™ä¸ŽæŽ§åˆ¶",
+    "subtitle": "ç”¨äºŽçŽ°åœºæ¼”ç¤ºçš„è¯­è¨€ã€åŒæ„ã€é€šçŸ¥å’Œ AI å®ˆæŠ¤è€…æƒé™ã€‚",
+    "combinedIncome": "åˆè®¡æœˆæ”¶å…¥",
+    "currentSavings": "å½“å‰å‚¨è“„",
+    "status": "çŠ¶æ€",
+    "detectedStage": "è¯†åˆ«äººç”Ÿé˜¶æ®µ",
+    "consentStatus": "æ•°æ®åŒæ„",
+    "consentValue": "å·²æ‰¹å‡†ç”¨äºŽæ¼”ç¤º",
+    "settings": "è®¾ç½®",
+    "notifications": "æœªæ¥æé†’ä¸Žäº§å“å‡†å¤‡åº¦é€šçŸ¥",
+    "permissions": "AI å®ˆæŠ¤è€…æƒé™",
+    "permissionItems": {
+      "savings": "åˆ›å»ºå’Œè°ƒæ•´å‚¨è“„ç›®æ ‡",
+      "alerts": "å‘é€æ”¯å‡ºä¸Žæœªæ¥é£Žé™©æé†’",
+      "investment": "å»ºè®®æŠ•èµ„è°ƒæ•´",
+      "insurance": "å»ºè®®ä¿é™©å‡†å¤‡åº¦æ£€æŸ¥"
+    },
+    "connectedServices": "å·²è¿žæŽ¥æœåŠ¡",
+    "privacyNote": "OCBC FutureOS åªä½¿ç”¨å·²èŽ·æ‰¹å‡†çš„å®¢æˆ·æ•°æ®ã€‚è‡ªä¸»è¡ŒåŠ¨éœ€è¦å®¢æˆ·åŒæ„ï¼Œå¹¶å¯¹å®¢æˆ·ä¿æŒå¯è§ã€‚"
+  },
+  "loading": {
+    "default": "æ­£åœ¨å‡†å¤‡ FutureOS...",
+    "detail": "OCBC FutureOS æ­£åœ¨è¿žæŽ¥äººç”Ÿç›®æ ‡ã€äº§å“å’Œå·²æ‰¹å‡†çš„ AI è¡ŒåŠ¨ã€‚",
+    "lifeGraph": "æ­£åœ¨æž„å»º Life Graph...",
+    "mirror": "æ­£åœ¨æ¨¡æ‹Ÿæœªæ¥...",
+    "negotiator": "æ­£åœ¨åè°ƒç›®æ ‡...",
+    "capital": "æ­£åœ¨åè°ƒèµ„é‡‘...",
+    "engine": "æ­£åœ¨å¯åŠ¨è®¡åˆ’...",
+    "guardian": "æ­£åœ¨å‡†å¤‡å®ˆæŠ¤è€…è®¯æ¯...",
+    "simulator": "æ­£åœ¨æ‰“å¼€ Future Mirror Simulator..."
+  },
+  "needDetails": {
+    "liveProjection": "å®žæ—¶é¢„æµ‹",
+    "ocbcSupport": "OCBC æ”¯æŒ",
+    "aiRecommendations": "AI å»ºè®®",
+    "wedding": {
+      "title": "å©šç¤¼é¢„ç®—è§„åˆ’",
+      "subtitle": "the customer å’Œ the partner å¸Œæœ›æ‹¥æœ‰æœ‰æ„ä¹‰çš„å©šç¤¼ï¼ŒåŒæ—¶ä¿æŠ¤ç½®ä¸šå’Œé€€ä¼‘ç›®æ ‡ã€‚",
+      "sliderLabel": "è®¡åˆ’å©šç¤¼é¢„ç®—",
+      "currentBudget": "åˆå§‹é¢„ç®—",
+      "recommendedBudget": "æŽ¨èé¢„ç®—",
+      "monthlySaving": "æ¯æœˆå‚¨è“„è®¡åˆ’",
+      "overspendImpact": "è¶…æ”¯å½±å“",
+      "delay": "å»¶åŽ 4 å¹´",
+      "cta": "é”å®šæŽ¨èå©šç¤¼æ–¹æ¡ˆ",
+      "success": "å©šç¤¼é¢„ç®—æ–¹æ¡ˆå·²é”å®šã€‚FutureOS å°†æ ¹æ®æ‰¹å‡†ä¸Šé™ç›‘æµ‹æ”¯å‡ºã€‚"
+    },
+    "home": {
+      "title": "é¦–ä»˜æ¬¾å‡†å¤‡",
+      "subtitle": "FutureOS å¸®åŠ© the customer å’Œ the partner å‡†å¤‡é¦–å¥—æˆ¿ï¼ŒåŒæ—¶ä¿æŒå…¶ä»–ç›®æ ‡ç¨³å®šã€‚",
+      "score": "ç½®ä¸šå‡†å¤‡åº¦",
+      "targetYear": "ç›®æ ‡å¹´ä»½",
+      "currentFund": "å½“å‰ç½®ä¸šåŸºé‡‘",
+      "targetDownPayment": "ç›®æ ‡é¦–ä»˜æ¬¾",
+      "monthlyRequired": "æ¯æœˆæ‰€éœ€",
+      "support1": "å°†é¦–ä»˜æ¬¾èµ„é‡‘ä¸Žå©šç¤¼æ”¯å‡ºéš”ç¦»ã€‚",
+      "support2": "è·Ÿè¸ª HDB æˆ–å…¬å¯“å¯è´Ÿæ‹…æ€§æƒ…æ™¯ã€‚",
+      "support3": "åœ¨ 2030 å¹´å‰å‡†å¤‡æˆ¿è´·èµ„æ ¼ã€‚",
+      "support4": "è‹¥æ¯æœˆå‚¨è“„è½åŽåˆ™è§¦å‘æé†’ã€‚",
+      "cta": "åˆ›å»ºç½®ä¸šå‡†å¤‡è·Ÿè¸ª",
+      "success": "ç½®ä¸šå‡†å¤‡è·Ÿè¸ªå·²åˆ›å»ºã€‚æˆ¿è´·å‡†å¤‡å’Œé¦–ä»˜æ¬¾ç›‘æµ‹å·²å¯åŠ¨ã€‚"
+    },
+    "emergency": {
+      "title": "åº”æ€¥åŸºé‡‘ä¿æŠ¤",
+      "subtitle": "FutureOS åœ¨æŽ¨è¿›äººç”Ÿç›®æ ‡çš„åŒæ—¶å®ˆä½çŸ­æœŸå®‰å…¨åž«ã€‚",
+      "score": "åº”æ€¥ä¿æŠ¤",
+      "currentFund": "å½“å‰åŸºé‡‘",
+      "recommendedFund": "æŽ¨èåŸºé‡‘",
+      "currentCoverage": "å½“å‰è¦†ç›–",
+      "recommendedCoverage": "æŽ¨èè¦†ç›–",
+      "months36": "3.6 ä¸ªæœˆ",
+      "months6": "6 ä¸ªæœˆ",
+      "status": "é£Žé™©çŠ¶æ€",
+      "statusValue": "å…å—å¤§é¢æ”¯å‡ºå½±å“",
+      "rec1": "é˜²æ­¢å©šç¤¼è¶…æ”¯åŠ¨ç”¨åº”æ€¥çŽ°é‡‘ã€‚",
+      "rec2": "å·¥èµ„å…¥è´¦åŽè‡ªåŠ¨è¡¥è¶³ã€‚",
+      "rec3": "ä½™é¢ä½ŽäºŽé˜ˆå€¼æ—¶å‘é€æé†’ã€‚",
+      "cta": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
+      "success": "åº”æ€¥åŸºé‡‘å·²ä¿æŠ¤ã€‚FutureOS å°†é˜»æ­¢ä»Žè¯¥å‚¨å¤‡ä¸­è¿›è¡Œé«˜é£Žé™©è°ƒæ‹¨ã€‚"
+    },
+    "insurance": {
+      "title": "ä¿é™©å‡†å¤‡åº¦",
+      "subtitle": "FutureOS åœ¨ the customer å’Œ the partner å¼€å§‹å®¶åº­è®¡åˆ’å‰è¯†åˆ«ä¿éšœç¼ºå£ã€‚",
+      "currentScore": "å½“å‰å‡†å¤‡åº¦",
+      "recommendedScore": "ç›®æ ‡å‡†å¤‡åº¦",
+      "life": "äººå¯¿ä¿éšœ",
+      "health": "åŒ»ç–—ä¿éšœ",
+      "critical": "é‡å¤§ç–¾ç—…",
+      "family": "å®¶åº­ä¿éšœ",
+      "notReviewed": "æœªå¤æ ¸",
+      "basic": "åŸºç¡€",
+      "gap": "å‘çŽ°ç¼ºå£",
+      "support1": "åœ¨æˆ¿è´·æ‰¿è¯ºå‰å¤æ ¸äººå¯¿ä¸ŽåŒ»ç–—ä¿éšœã€‚",
+      "support2": "ä¼°ç®—æœªæ¥å®¶åº­ä¿éšœéœ€æ±‚ã€‚",
+      "support3": "åŒæ–¹æ‰¹å‡†åŽè¿žæŽ¥é¡¾é—®é¢„çº¦ã€‚",
+      "support4": "å»ºè®®ä¸Žè‡ªåŠ¨æ‰§è¡Œä¿æŒåˆ†ç¦»ã€‚",
+      "cta": "å®‰æŽ’å‡†å¤‡åº¦å¤æ ¸",
+      "success": "ä¿é™©å‡†å¤‡åº¦å¤æ ¸å·²å®‰æŽ’ã€‚å®ˆæŠ¤è€…å°†ç›‘æµ‹å®¶åº­ä¿éšœç¼ºå£ã€‚"
+    },
+    "investment": {
+      "title": "é•¿æœŸæŠ•èµ„è§„åˆ’",
+      "subtitle": "FutureOS åœ¨æ”¯æŒçŸ­æœŸäººç”Ÿäº‹ä»¶çš„åŒæ—¶ä¿ç•™é€€ä¼‘å¤åˆ©ã€‚",
+      "currentAmount": "å½“å‰æŠ•èµ„",
+      "monthlyInvestment": "æ¯æœˆæŠ•èµ„",
+      "riskProfile": "é£Žé™©ç”»åƒ",
+      "retirementAge": "ç›®æ ‡é€€ä¼‘å¹´é¾„",
+      "gap": "é¢„è®¡é€€ä¼‘ç¼ºå£",
+      "conservative": "ä¿å®ˆ",
+      "balanced": "å¹³è¡¡",
+      "growth": "å¢žé•¿",
+      "lowerRisk": "è¾ƒä½Žé£Žé™©ï¼Œé€€ä¼‘è¾ƒæ…¢",
+      "higherRisk": "è¾ƒé«˜é£Žé™©ï¼Œæ›´å¿«è¾¾æ ‡",
+      "retirementAt": "{age} å²é€€ä¼‘",
+      "cta": "åº”ç”¨å¹³è¡¡æŠ•èµ„è®¡åˆ’",
+      "success": "å¹³è¡¡æŠ•èµ„è®¡åˆ’å·²åº”ç”¨ã€‚FutureOS å°†æ¯ 3 ä¸ªæœˆå¤æ ¸è¿›å±•ã€‚"
+    }
+  },
+  "simulator": {
+    "eyebrow": "ç¬¬ 8 èŠ‚",
+    "title": "Future Mirror æ¨¡æ‹Ÿå™¨",
+    "subtitle": "åˆ›å»ºä½ çš„ AI ä»£ç†ï¼Œæ¨¡æ‹Ÿäººç”Ÿå†³ç­–ï¼Œå¹¶è®© Future Self Guardian é€‰æ‹©æœ€ä½³å»ºè®®ã€‚",
+    "openSimulator": "æ‰“å¼€ Future Mirror æ¨¡æ‹Ÿå™¨",
+    "homeCard": {
+      "title": "Future Mirror æ¨¡æ‹Ÿå™¨",
+      "detail": "è¾“å…¥æƒ…å†µã€è®¾å®š AI ç‹¬ç«‹ç¨‹åº¦ï¼Œå¹¶æ¯”è¾ƒå¤šä¸ªæœªæ¥ã€‚"
+    },
+    "trustNote": "FutureOS ä¸ä¼šåœ¨æœªç»å®¢æˆ·åŒæ„çš„æƒ…å†µä¸‹æ‰§è¡Œé‡‘èžæ“ä½œã€‚è‡ªä¸»æ“ä½œåªä¼šåœ¨å·²æ‰¹å‡†çš„é™åˆ¶å†…è¿›è¡Œã€‚",
+    "run": "è¿è¡Œæœªæ¥æ¨¡æ‹Ÿ",
+    "reset": "é‡ç½®æ¨¡æ‹Ÿ",
+    "levelLabel": "ç­‰çº§ {level}",
+    "inputs": {
+      "situation": "æƒ…å†µè¯´æ˜Ž",
+      "situationPlaceholder": "æè¿°ä½ çš„æƒ…å†µï¼Œä¾‹å¦‚ï¼šæˆ‘æƒ³èŠ± SGD 80,000 åŠžå©šç¤¼ï¼ŒåŒæ—¶åœ¨ 3 å¹´å†…ä¹°æˆ¿ã€‚",
+      "lifeGoals": "äººç”Ÿç›®æ ‡é€‰æ‹©",
+      "aiIndependence": "AI ç‹¬ç«‹ç¨‹åº¦",
+      "monthlyIncome": "æœˆæ”¶å…¥",
+      "currentSavings": "å½“å‰å‚¨è“„",
+      "plannedSpending": "è®¡åˆ’æ”¯å‡º",
+      "targetHomeYear": "ç›®æ ‡ç½®ä¸šå¹´ä»½",
+      "retirementAge": "é€€ä¼‘ç›®æ ‡å¹´é¾„",
+      "riskPreference": "é£Žé™©åå¥½",
+      "weddingBudget": "å©šç¤¼é¢„ç®—",
+      "weddingDate": "å©šç¤¼æ—¥æœŸ",
+      "targetDownPayment": "ç›®æ ‡é¦–ä»˜æ¬¾",
+      "propertyBudget": "é¢„è®¡æˆ¿äº§é¢„ç®—",
+      "mortgageReadiness": "æˆ¿è´·å‡†å¤‡åº¦",
+      "monthlyExpenses": "æ¯æœˆæ”¯å‡º",
+      "currentEmergencyFund": "å½“å‰åº”æ€¥åŸºé‡‘",
+      "targetCoverageMonths": "ç›®æ ‡è¦†ç›–æœˆæ•°",
+      "currentInvestment": "å½“å‰æŠ•èµ„é‡‘é¢",
+      "monthlyInvestment": "æ¯æœˆæŠ•èµ„é‡‘é¢",
+      "targetReturnGoal": "ç›®æ ‡å›žæŠ¥",
+      "familyPlanningYear": "å®¶åº­è®¡åˆ’ç›®æ ‡å¹´ä»½",
+      "familyMonthlyCost": "é¢„è®¡æ¯æœˆå®¶åº­æˆæœ¬",
+      "insuranceReadiness": "ä¿é™©å‡†å¤‡åº¦",
+      "startupCapital": "æ‰€éœ€åˆ›ä¸šèµ„é‡‘",
+      "launchDate": "ç›®æ ‡å¯åŠ¨æ—¥æœŸ",
+      "customGoalName": "ç›®æ ‡åç§°",
+      "customTargetAmount": "ç›®æ ‡é‡‘é¢",
+      "customTargetDate": "ç›®æ ‡æ—¥æœŸ",
+      "customPriority": "ä¼˜å…ˆçº§",
+      "customCategory": "ç›®æ ‡ç±»åˆ«",
+      "customNotes": "å¤‡æ³¨ / æƒ…å†µè¯´æ˜Ž"
+    },
+    "goals": {
+      "wedding": "å©šç¤¼",
+      "home": "é¦–å¥—æˆ¿",
+      "emergency": "åº”æ€¥åŸºé‡‘",
+      "retirement": "é€€ä¼‘",
+      "family": "å®¶åº­è®¡åˆ’",
+      "investment": "æŠ•èµ„å¢žé•¿",
+      "business": "åˆ›ä¸š",
+      "custom": "å…¶ä»– / è‡ªå®šä¹‰ç›®æ ‡",
+      "customFallback": "è‡ªå®šä¹‰ç›®æ ‡"
+    },
+    "riskPreference": {
+      "conservative": "ä¿å®ˆ",
+      "balanced": "å¹³è¡¡",
+      "growth": "å¢žé•¿"
+    },
+    "levels": {
+      "1": {
+        "title": "ä»…å»ºè®®",
+        "detail": "AI åªè§£é‡Šå¯èƒ½å‡ºçŽ°çš„ç»“æžœã€‚"
+      },
+      "2": {
+        "title": "æŽ¨è",
+        "detail": "AI æ¯”è¾ƒä¸åŒé€‰é¡¹å¹¶æŽ¨èæœ€ä½³æ–¹æ¡ˆã€‚"
+      },
+      "3": {
+        "title": "åå•†",
+        "detail": "AI å¹³è¡¡ç«žäº‰ç›®æ ‡å¹¶æå‡ºå–èˆã€‚"
+      },
+      "4": {
+        "title": "æ‰¹å‡†åŽè¡ŒåŠ¨",
+        "detail": "AI å‡†å¤‡è¡ŒåŠ¨è®¡åˆ’ï¼Œä½†éœ€è¦å®¢æˆ·æ‰¹å‡†ã€‚"
+      },
+      "5": {
+        "title": "è‡ªä¸»",
+        "detail": "AI å¯åœ¨é™åˆ¶å†…æ‰§è¡Œé¢„å…ˆæ‰¹å‡†çš„é“¶è¡Œæ“ä½œã€‚"
+      }
+    },
+    "modal": {
+      "title": "å¯ç”¨è‡ªä¸»æ¨¡å¼",
+      "message": "ä½ æ­£åœ¨å¯ç”¨è¾ƒé«˜çš„ AI ç‹¬ç«‹ç¨‹åº¦ã€‚FutureOS å¯åœ¨ä½ é€‰æ‹©çš„é™åˆ¶å†…æ‰§è¡Œé¢„å…ˆæ‰¹å‡†çš„æ“ä½œã€‚ä½ å¯ä»¥éšæ—¶åœ¨éšç§ä¸ŽåŒæ„ä¸­æ›´æ”¹ã€‚",
+      "cancel": "å–æ¶ˆ",
+      "enable": "å¯ç”¨è‡ªä¸»æ¨¡å¼"
+    },
+    "output": {
+      "summary": "å®¢æˆ·æ­£åœ¨è®¡åˆ’ä¸€ç¬” {spending} çš„é‡å¤§æ”¯å‡ºï¼ŒåŒæ—¶å¸Œæœ›åœ¨ {year} å¹´å‰è´­ä¹°é¦–å¥—æˆ¿ã€‚",
+      "emergencyFund": "åº”æ€¥åŸºé‡‘",
+      "bestRecommendation": "AI é€‰æ‹©çš„æœ€ä½³å»ºè®®",
+      "recommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåŒæ—¶ä¿æŠ¤çŸ­æœŸå¹¸ç¦å’Œé•¿æœŸå®‰å…¨ã€‚",
+      "adviceOnly": "ç­‰çº§ 1 ä»…æä¾›å»ºè®®ã€‚FutureOS ä¼šè§£é‡Šå¯èƒ½çš„æœªæ¥ï¼Œä½†ä¸ä¼šæ˜¾ç¤ºæ‰§è¡ŒæŽ§åˆ¶ã€‚",
+      "tradeoffs": "FutureOS ä¼šåœ¨å·²é€‰æ‹©çš„äººç”Ÿç›®æ ‡ã€çŽ°é‡‘å®‰å…¨ã€äº§å“å‡†å¤‡åº¦å’Œé•¿æœŸä¿éšœä¹‹é—´åå•†å¹³è¡¡ã€‚",
+      "why": "AI ä¸ºä»€ä¹ˆè¿™æ ·é€‰æ‹©ï¼Ÿ",
+      "explainTitle": "Guardian æŽ¨ç†",
+      "suggestedActions": "å»ºè®®è¡ŒåŠ¨",
+      "autonomousWarning": "è‡ªä¸»æ¨¡å¼å·²å¯ç”¨ã€‚è¿™äº›è¡ŒåŠ¨ä»å—ä½ æ‰¹å‡†çš„è®¾ç½®é™åˆ¶ï¼Œå¹¶å¯éšæ—¶æ›´æ”¹ã€‚",
+      "apply": "åº”ç”¨ Guardian å»ºè®®",
+      "success": "Future Self Guardian å»ºè®®å·²åº”ç”¨ã€‚FutureOS å°†æŒç»­ç›‘æµ‹ä½ çš„è¿›åº¦ã€‚",
+      "scenarios": {
+        "conservative": {
+          "title": "ä¿å®ˆæœªæ¥",
+          "detail": "è¾ƒä½Žæ”¯å‡ºæˆ–è¾ƒæ…¢æ—¶é—´è¡¨ï¼Œå‚¨è“„æ›´å¼ºï¼Œé£Žé™©æ›´ä½Žã€‚"
+        },
+        "balanced": {
+          "title": "å¹³è¡¡æœªæ¥",
+          "detail": "åœ¨æ‰€é€‰ç›®æ ‡ã€çŽ°é‡‘å®‰å…¨ä¸Žé•¿æœŸå¥åº·ä¹‹é—´å–å¾—æŽ¨èå¹³è¡¡ã€‚"
+        },
+        "highRisk": {
+          "title": "é«˜é£Žé™©æœªæ¥",
+          "detail": "è¾ƒé«˜æ”¯å‡ºæˆ–æ›´å¿«æ—¶é—´è¡¨ï¼Œè´¢åŠ¡å®‰å…¨è¾ƒå¼±ã€‚"
+        }
+      },
+      "emergency": {
+        "strong": "å¼º",
+        "protected": "å·²ä¿æŠ¤",
+        "weak": "å¼±"
+      },
+      "tone": {
+        "1": "å»ºè®®è¯­æ°”ï¼šæä¾›ä¿¡æ¯ï¼Œä¸æ˜¾ç¤ºæ‰§è¡ŒæŒ‰é’®ã€‚",
+        "2": "æŽ¨èè¯­æ°”ï¼šé€‰æ‹©æœ€ä½³æœªæ¥ï¼Œä½†ä¸è¿›è¡Œè‡ªä¸»è¡ŒåŠ¨ã€‚",
+        "3": "åå•†è¯­æ°”ï¼šè§£é‡Šå¤šä¸ªç«žäº‰ç›®æ ‡ä¹‹é—´çš„å–èˆã€‚",
+        "4": "æ‰¹å‡†è¯­æ°”ï¼šä¸ºå®¢æˆ·å®¡æ ¸å‡†å¤‡è¡ŒåŠ¨ã€‚",
+        "5": "è‡ªä¸»è¯­æ°”ï¼šåœ¨å®‰å…¨é™åˆ¶å†…å‡†å¤‡é¢„å…ˆæ‰¹å‡†çš„è¡ŒåŠ¨ã€‚"
+      },
+      "explain": {
+        "protectedGoals": "å—ä¿æŠ¤ç›®æ ‡ï¼š{goals}ã€çŽ°é‡‘å®‰å…¨ä¸Žé•¿æœŸè´¢åŠ¡å¥åº·ã€‚",
+        "reducedRisks": "é™ä½Žçš„é£Žé™©ï¼šè¶…æ”¯ã€ç›®æ ‡å»¶è¯¯å’Œé•¿æœŸå‡†å¤‡ä¸è¶³ã€‚",
+        "products": "OCBC æ”¯æŒï¼šç›®æ ‡å‚¨è“„ã€è‡ªåŠ¨è½¬è´¦ã€ä¿é™©å¤æ ¸ã€ç›¸å…³æˆ¿è´·å‡†å¤‡ï¼Œä»¥åŠæŠ•èµ„è§„åˆ’ã€‚",
+        "tradeoffs": "å–èˆï¼šæŽ§åˆ¶æ”¯å‡ºæˆ–è°ƒæ•´æ—¶é—´è¡¨ï¼Œè®©é•¿æœŸå®‰å…¨ä¿æŒç¨³å®šã€‚"
+      },
+      "dynamicSummary": "FutureOS æ­£åœ¨æ ¹æ®å·²é€‰æ‹©ç›®æ ‡åˆ†æž {goal}ï¼š{goals}ã€‚",
+      "fields": {
+        "weddingBudget": "å©šç¤¼é¢„ç®—",
+        "weddingDate": "å©šç¤¼æ—¥æœŸ",
+        "savingsNeeded": "æ‰€éœ€å‚¨è“„",
+        "emergencyImpact": "åº”æ€¥åŸºé‡‘å½±å“",
+        "retirementImpact": "é€€ä¼‘å½±å“",
+        "homeTargetYear": "ç½®ä¸šç›®æ ‡å¹´ä»½",
+        "downPaymentProgress": "é¦–ä»˜æ¬¾è¿›åº¦",
+        "mortgageReadiness": "æˆ¿è´·å‡†å¤‡åº¦",
+        "monthlySavingNeeded": "æ¯æœˆæ‰€éœ€å‚¨è“„",
+        "carBudget": "è´­è½¦é¢„ç®—",
+        "monthlyRepayment": "æ¯æœˆè¿˜æ¬¾",
+        "cashFlowImpact": "çŽ°é‡‘æµå½±å“",
+        "startupCapital": "åˆ›ä¸šèµ„é‡‘",
+        "cashRunway": "çŽ°é‡‘ç»­èˆª",
+        "loanReadiness": "è´·æ¬¾å‡†å¤‡åº¦",
+        "goalName": "ç›®æ ‡åç§°",
+        "targetAmount": "ç›®æ ‡é‡‘é¢",
+        "targetDate": "ç›®æ ‡æ—¥æœŸ",
+        "targetCoverage": "ç›®æ ‡è¦†ç›–",
+        "currentEmergencyFund": "å½“å‰åº”æ€¥åŸºé‡‘",
+        "currentInvestment": "å½“å‰æŠ•èµ„",
+        "monthlyInvestment": "æ¯æœˆæŠ•èµ„",
+        "targetReturn": "ç›®æ ‡å›žæŠ¥",
+        "familyTargetYear": "å®¶åº­ç›®æ ‡å¹´ä»½",
+        "familyMonthlyCost": "æ¯æœˆå®¶åº­æˆæœ¬",
+        "insuranceReadiness": "ä¿é™©å‡†å¤‡åº¦"
+      },
+      "impact": {
+        "weak": "è¾ƒå¼±",
+        "protected": "å·²ä¿æŠ¤",
+        "strong": "å¼º",
+        "delayed": "å»¶åŽ",
+        "onTrack": "æŒ‰è®¡åˆ’",
+        "reviewNeeded": "éœ€å¤æ ¸",
+        "tight": "åç´§",
+        "manageable": "å¯ç®¡ç†"
+      }
+    },
+    "actions": {
+      "savingsGoal": "åˆ›å»ºå‚¨è“„ç›®æ ‡",
+      "monthlyTransfer": "å®‰æŽ’æ¯æœˆè½¬è´¦",
+      "emergencyFund": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
+      "insuranceReview": "å¤æ ¸ä¿é™©éœ€æ±‚",
+      "mortgageReadiness": "å‡†å¤‡æˆ¿è´·èµ„æ ¼",
+      "investmentPlan": "è°ƒæ•´æŠ•èµ„è®¡åˆ’"
+    },
+    "actionButtons": {
+      "approve": "æ‰¹å‡†",
+      "edit": "ç¼–è¾‘",
+      "skip": "è·³è¿‡"
+    },
+    "actionStatus": {
+      "pending": "ç­‰å¾…å®¢æˆ·é€‰æ‹©",
+      "approved": "å·²æ‰¹å‡†",
+      "editing": "å·²è¯·æ±‚ç¼–è¾‘",
+      "skipped": "å·²è·³è¿‡"
+    },
+    "autonomousLock": {
+      "title": "è‡ªä¸»ç›®æ ‡é”å®š",
+      "available": "å¯å¯ç”¨è‡ªä¸»ç›®æ ‡é”å®š",
+      "guardrail": "é¢„å…ˆæ‰¹å‡†çš„å‚¨è“„ä¿æŠ¤çº¿",
+      "pocket": "å—ä¿æŠ¤ç›®æ ‡è´¦æˆ·",
+      "pause": "å®¢æˆ·å¯éšæ—¶æš‚åœæˆ–è°ƒæ•´"
+    },
+    "reasoning": {
+      "title": "AI ä»£ç†æŽ¨ç†",
+      "situationUnderstood": "å·²ç†è§£æƒ…å†µ",
+      "selectedGoals": "å·²é€‰ç›®æ ‡",
+      "mainRisk": "ä¸»è¦é£Žé™©",
+      "bestRecommendation": "æœ€ä½³å»ºè®®",
+      "nextAction": "ä¸‹ä¸€æ­¥è¡ŒåŠ¨",
+      "situation": "FutureOS å°†æ­¤ç†è§£ä¸ºä¸€ä¸ª {goal} å†³ç­–ï¼Œéœ€è¦é…åˆå®¢æˆ·çŽ°é‡‘æµä¸Žé•¿æœŸç›®æ ‡ã€‚",
+      "carRisk": "è¿‡å¿«è´­è½¦å¯èƒ½å‰Šå¼±çŽ°é‡‘æµï¼Œå¹¶å¢žåŠ ä¿¡è´·è¿˜æ¬¾åŽ‹åŠ›ã€‚",
+      "customRisk": "ç«‹å³è¡ŒåŠ¨å¯èƒ½é™ä½Žåº”æ€¥ç¼“å†²ï¼Œæˆ–äº§ç”Ÿå¯é¿å…çš„å€ºåŠ¡ã€‚",
+      "customRecommendation": "å¯¹äºŽ {goal} ç›®æ ‡ï¼ŒFutureOS å»ºè®®æ¯æœˆå‚¨è“„ {monthly} è¾¾åˆ° {amount}ï¼Œè€Œä¸æ˜¯ç«‹å³è´­ä¹°ï¼Œä»¥ä¿æŠ¤åº”æ€¥åŸºé‡‘å¹¶é¿å…ä¿¡ç”¨å¡å€ºåŠ¡ã€‚",
+      "nextActionCustom": "ä¸º {goal} å»ºç«‹å—ä¿æŠ¤å‚¨è“„å£è¢‹ï¼Œå¹¶æ¯æœˆç›‘æµ‹è¿›åº¦ã€‚",
+      "weddingRisk": "è¾ƒé«˜å©šç¤¼é¢„ç®—å¯èƒ½é™ä½ŽçŽ°é‡‘å‚¨å¤‡ï¼Œå¹¶æŽ¨è¿Ÿå…¶ä»–é‡è¦æœªæ¥ç›®æ ‡ã€‚",
+      "weddingRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒä¿æŠ¤å©šç¤¼è®¡åˆ’ï¼ŒåŒæ—¶ç»´æŒçŽ°é‡‘å®‰å…¨ä¸Žé€€ä¼‘è¿›åº¦ã€‚",
+      "weddingAction": "é”å®šå©šç¤¼å‚¨è“„ç›®æ ‡ï¼Œå¹¶åœ¨æ”¯ä»˜è®¢é‡‘å‰å¯ç”¨æ”¯å‡ºæé†’ã€‚",
+      "homeRisk": "é¦–ä»˜æ¬¾è·¯å¾„ä¸è¶³å¯èƒ½é™ä½Žæˆ¿è´·å‡†å¤‡åº¦å¹¶å¢žåŠ æœªæ¥å€Ÿæ¬¾åŽ‹åŠ›ã€‚",
+      "homeRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒè®©ç½®ä¸šç›®æ ‡æ›´çŽ°å®žï¼ŒåŒæ—¶ä¿æŠ¤å‚¨è“„ã€‚",
+      "homeAction": "å»ºç«‹é¦–ä»˜æ¬¾è¿›åº¦ï¼Œå¹¶æ¯æœˆæ£€æŸ¥æˆ¿è´·å‡†å¤‡åº¦ã€‚",
+      "emergencyRisk": "åº”æ€¥è¦†ç›–ä¸è¶³ä¼šåœ¨æ”¶å…¥æˆ–æ”¯å‡ºå˜åŒ–æ—¶å¸¦æ¥é£Žé™©ã€‚",
+      "emergencyRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒæ¢å¤ä¿éšœï¼ŒåŒæ—¶ä¸å†»ç»“å…¶ä»–ç›®æ ‡ã€‚",
+      "emergencyAction": "éš”ç¦»åº”æ€¥å‚¨è“„ï¼Œå¹¶åœ¨å·¥èµ„å…¥è´¦åŽè‡ªåŠ¨è¡¥è¶³ã€‚",
+      "retirementRisk": "çŽ°åœ¨å‡å°‘æŠ•èµ„ä¾›æ¬¾å¯èƒ½æŽ¨è¿Ÿæœªæ¥è´¢åŠ¡è‡ªç”±ã€‚",
+      "retirementRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåœ¨æ”¯æŒè¿‘æœŸç›®æ ‡çš„åŒæ—¶ä¿ç•™å¤åˆ©ã€‚",
+      "retirementAction": "ä¿æŒæ¯æœˆæŠ•èµ„èŠ‚å¥ï¼Œå¹¶æ¯å­£åº¦å¤æ ¸é€€ä¼‘ç¼ºå£ã€‚",
+      "investmentRisk": "åœ¨ç¼ºå°‘çŽ°é‡‘ç¼“å†²æ—¶è¿½æ±‚å›žæŠ¥ï¼Œå¯èƒ½åœ¨é”™è¯¯æ—¶é—´æ‰¿å—æ³¢åŠ¨ã€‚",
+      "investmentRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåœ¨æŽ§åˆ¶é£Žé™©çš„åŒæ—¶æŽ¨åŠ¨æŠ•èµ„å¢žé•¿ã€‚",
+      "investmentAction": "æŒ‰æ‰€é€‰é£Žé™©åå¥½è°ƒæ•´æŠ•èµ„è®¡åˆ’ï¼Œå¹¶æ¯å­£åº¦å¤æ ¸ã€‚",
+      "familyRisk": "æ²¡æœ‰ä¿é™©å’ŒçŽ°é‡‘å‡†å¤‡çš„å®¶åº­è®¡åˆ’ï¼Œå¯èƒ½äº§ç”Ÿæœªæ¥ä¿éšœç¼ºå£ã€‚",
+      "familyRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒå‡†å¤‡å®¶åº­æˆæœ¬ï¼ŒåŒæ—¶ä¿æŠ¤å‚¨è“„ã€‚",
+      "familyAction": "å¤æ ¸ä¿é™©å‡†å¤‡åº¦ï¼Œå¹¶å»ºç«‹å®¶åº­æˆæœ¬ç¼“å†²ã€‚",
+      "businessRisk": "è¿‡å¿«åˆ›ä¸šå¯èƒ½è€—å°½å‚¨å¤‡å¹¶ç¼©çŸ­çŽ°é‡‘ç»­èˆªã€‚",
+      "businessRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒç­¹å¤‡åˆ›ä¸šèµ„é‡‘ï¼ŒåŒæ—¶ä¿ç•™åº”æ€¥çŽ°é‡‘ã€‚",
+      "businessAction": "å»ºç«‹åˆ›ä¸šèµ„é‡‘è®¡åˆ’ï¼Œå¹¶å°†ä¸šåŠ¡é£Žé™©ä¸Žå®¶åº­å‚¨å¤‡åˆ†å¼€ã€‚"
+    }
+  },
+  "settings": {
+    "eyebrow": "è®¾ç½®",
+    "title": "è®¾ç½®ä¸Žåå¥½",
+    "subtitle": "ç®¡ç†ä¸ªäººèµ„æ–™ã€è¯­è¨€ã€å¤–è§‚ã€é€šçŸ¥ã€AI Guardian æƒé™ã€éšç§ä¸ŽåŒæ„ã€‚",
+    "openSimulator": "æ‰“å¼€ Future Mirror æ¨¡æ‹Ÿå™¨",
+    "openSimulatorDetail": "ä»Žè®¾ç½®ä¸­åˆ›å»ºè‡ªå®šä¹‰æ¨¡æ‹Ÿã€‚",
+    "language": {
+      "title": "è¯­è¨€",
+      "description": "é€‰æ‹©ä½ çš„é¦–é€‰åº”ç”¨è¯­è¨€ã€‚"
+    },
+    "appearance": {
+      "title": "å¤–è§‚",
+      "description": "ä¸ªæ€§åŒ– FutureOS çš„æ˜¾ç¤ºæ–¹å¼ã€‚",
+      "light": "æµ…è‰²æ¨¡å¼",
+      "dark": "æ·±è‰²æ¨¡å¼",
+      "system": "è·Ÿéšç³»ç»Ÿ"
+    },
+    "notifications": {
+      "title": "é€šçŸ¥è®¾ç½®",
+      "description": "é€‰æ‹©ä½ å¸Œæœ›æŽ¥æ”¶çš„ FutureOS é€šçŸ¥ã€‚",
+      "futureRisk": "æœªæ¥é£Žé™©æé†’",
+      "spending": "æ¶ˆè´¹è¡Œä¸ºæé†’",
+      "goalProgress": "ç›®æ ‡è¿›åº¦æ›´æ–°",
+      "investment": "æŠ•èµ„æœºä¼š",
+      "mortgage": "æˆ¿è´·å‡†å¤‡æé†’",
+      "insurance": "ä¿é™©å¤æ ¸æé†’",
+      "monthlyReport": "Guardian æœˆæŠ¥",
+      "promotional": "æŽ¨å¹¿é€šçŸ¥",
+      "frequency": "é€šçŸ¥é¢‘çŽ‡",
+      "history": {
+        "title": "????",
+        "description": "????????????FutureOS ????????",
+        "now": "??",
+        "today": "??",
+        "yesterday": "??",
+        "sent": "???",
+        "overBudget": {
+          "title": "?????????",
+          "detail": "Karina ???? {spending}??????? {budget} ?? {amount}?Future Self Guardian ????????????"
+        },
+        "futureRisk": {
+          "title": "?????????",
+          "detail": "Guardian ????????????????????"
+        },
+        "goalProgress": {
+          "title": "??????",
+          "detail": "?????????????????????????"
+        },
+        "quiet": {
+          "title": "??????",
+          "detail": "FutureOS ??????????????????"
+        }
+      }
+    },
+    "frequency": {
+      "realtime": "å®žæ—¶",
+      "daily": "æ¯æ—¥",
+      "weekly": "æ¯å‘¨",
+      "monthly": "æ¯æœˆ"
+    },
+    "guardian": {
+      "title": "AI Guardian åå¥½",
+      "description": "æŽ§åˆ¶ Future Self Guardian å¦‚ä½•å¸®åŠ©ä½ ã€‚",
+      "permissions": {
+        "autonomousSavings": "å…è®¸è‡ªä¸»å‚¨è“„",
+        "investmentSuggestions": "å…è®¸æŠ•èµ„å»ºè®®",
+        "insuranceRecommendations": "å…è®¸ä¿é™©å»ºè®®",
+        "mortgagePlanning": "å…è®¸æˆ¿è´·è§„åˆ’",
+        "goalRebalancing": "å…è®¸ç›®æ ‡å†å¹³è¡¡",
+        "spendingAlerts": "å…è®¸æ¶ˆè´¹æé†’"
+      },
+      "savingsTransfer": "å‚¨è“„è½¬è´¦",
+      "investmentRebalancing": "æŠ•èµ„å†å¹³è¡¡",
+      "reviewFrequency": "Guardian å¤æ ¸é¢‘çŽ‡",
+      "personalityTitle": "Guardian ä¸ªæ€§",
+      "savings": {
+        "manual": "æ‰‹åŠ¨æ‰¹å‡†",
+        "smart": "æ™ºèƒ½æ‰¹å‡†",
+        "auto": "å®Œå…¨è‡ªåŠ¨"
+      },
+      "investment": {
+        "manual": "æ‰‹åŠ¨",
+        "suggested": "AI å»ºè®®",
+        "auto": "è‡ªåŠ¨"
+      },
+      "review": {
+        "week": "æ¯å‘¨",
+        "month": "æ¯æœˆ",
+        "quarter": "æ¯å­£åº¦"
+      },
+      "personality": {
+        "friendly": "å‹å¥½",
+        "professional": "ä¸“ä¸š",
+        "minimal": "ç®€æ´",
+        "future": "æœªæ¥å¯¼å‘"
+      }
+    },
+    "privacy": {
+      "title": "éšç§ä¸ŽåŒæ„",
+      "description": "FutureOS åªä¼šåœ¨èŽ·å¾—ä½ çš„è®¸å¯åŽæ‰§è¡Œè‡ªä¸»æ“ä½œã€‚",
+      "score": "éšç§è¯„åˆ†",
+      "permissions": {
+        "spending": "AI å¯åˆ†æžæ¶ˆè´¹",
+        "lifeGoals": "AI å¯åˆ†æžäººç”Ÿç›®æ ‡",
+        "transactions": "AI å¯åˆ†æžäº¤æ˜“åŽ†å²",
+        "portfolio": "AI å¯åˆ†æžæŠ•èµ„ç»„åˆ",
+        "simulations": "AI å¯ç”Ÿæˆè´¢åŠ¡æ¨¡æ‹Ÿ",
+        "executeActions": "AI å¯æ‰§è¡Œå·²æ‰¹å‡†çš„é“¶è¡Œæ“ä½œ"
+      },
+      "historyTitle": "åŒæ„è®°å½•",
+      "history": {
+        "futureMirror": "Future Mirror å·²å¯ç”¨",
+        "autonomousSavings": "è‡ªä¸»å‚¨è“„"
+      },
+      "downloadReport": "ä¸‹è½½åŒæ„æŠ¥å‘Š",
+      "managePermissions": "ç®¡ç†æƒé™",
+      "withdrawConsent": "æ’¤å›žåŒæ„",
+      "downloadedNotice": "åŒæ„æŠ¥å‘Šå·²ä¸‹è½½ã€‚",
+      "manageNotice": "ä¸Šæ–¹æƒé™æŽ§åˆ¶å·²å¯ç”¨ã€‚æ›´æ”¹ä»»ä½•å¼€å…³å³å¯ç«‹å³æ›´æ–°åŒæ„ã€‚",
+      "withdrawnNotice": "åŒæ„å·²æ’¤å›žã€‚è‡ªä¸»é“¶è¡ŒåŠŸèƒ½å·²ç¦ç”¨ã€‚"
+    },
+    "terms": {
+      "title": "æ¡æ¬¾ä¸Žæ•°æ®ä½¿ç”¨",
+      "description": "äº†è§£å®¢æˆ·æ•°æ®å¦‚ä½•å—åˆ°ä¿æŠ¤ã€‚",
+      "dataCollected": "æ”¶é›†çš„æ•°æ®",
+      "purpose": "ç”¨é€”",
+      "protection": "æ•°æ®ä¿æŠ¤",
+      "customerControl": "å®¢æˆ·æŽ§åˆ¶",
+      "data": {
+        "spending": "æ¶ˆè´¹è¡Œä¸º",
+        "savings": "å‚¨è“„",
+        "investments": "æŠ•èµ„",
+        "products": "é“¶è¡Œäº§å“",
+        "goals": "è´¢åŠ¡ç›®æ ‡",
+        "preferences": "ç”¨æˆ·åå¥½"
+      },
+      "purposeItems": {
+        "predict": "é¢„æµ‹æœªæ¥éœ€æ±‚",
+        "simulate": "ç”Ÿæˆæ¨¡æ‹Ÿ",
+        "optimise": "ä¼˜åŒ–è´¢åŠ¡è§„åˆ’",
+        "protect": "ä¿æŠ¤é•¿æœŸç›®æ ‡"
+      },
+      "protectionItems": {
+        "aes": "AES-256 åŠ å¯†",
+        "mas": "MAS åˆè§„",
+        "pdpa": "PDPA åˆè§„",
+        "cloud": "å®‰å…¨äº‘åŸºç¡€è®¾æ–½"
+      },
+      "controlItems": {
+        "download": "ä¸‹è½½æ•°æ®",
+        "delete": "åˆ é™¤æ•°æ®",
+        "disable": "ç¦ç”¨ AI",
+        "withdraw": "æ’¤å›žåŒæ„"
+      },
+      "viewPolicy": "æŸ¥çœ‹éšç§æ”¿ç­–",
+      "downloadData": "ä¸‹è½½æˆ‘çš„æ•°æ®",
+      "deleteData": "åˆ é™¤æˆ‘çš„æ•°æ®",
+      "policyText": "FutureOS åªä¼šå°†å·²æ‰¹å‡†çš„å®¢æˆ·æ•°æ®ç”¨äºŽè´¢åŠ¡æ¨¡æ‹Ÿã€è§„åˆ’å»ºè®®å’Œç»åŒæ„çš„è‡ªä¸»æ“ä½œã€‚å®¢æˆ·å§‹ç»ˆä¿æœ‰æŽ§åˆ¶æƒã€‚",
+      "downloadedNotice": "ä½ çš„æœ¬åœ° FutureOS æ•°æ®æ–‡ä»¶å·²ä¸‹è½½ã€‚",
+      "deletedNotice": "æœ¬åœ° FutureOS æ¼”ç¤ºæ•°æ®å·²é‡ç½®ã€‚"
+    },
+    "demo": {
+      "title": "åº”ç”¨ä¿¡æ¯",
+      "description": "ç”¨äºŽç”¨æˆ·ä¸Žäº§å“å¤æ ¸çš„æ¼”ç¤ºæŽ§åˆ¶ã€‚",
+      "clearSimulation": "æ¸…é™¤æ¨¡æ‹Ÿ",
+      "restoreMock": "æ¢å¤æ¨¡æ‹Ÿæ•°æ®",
+      "version": "ç‰ˆæœ¬",
+      "clearNotice": "??????Future Mirror ??????",
+      "restoreNotice": "????????FutureOS ??????????"
+    },
+    "version": {
+      "title": "å…³äºŽ FutureOS",
+      "description": "æŸ¥çœ‹åŽŸåž‹ç‰ˆæœ¬ä¸Žäº§å“ä¿¡æ¯ã€‚",
+      "label": "ç‰ˆæœ¬"
+    },
+    "profile": {
+      "title": "ä¸ªäººèµ„æ–™",
+      "description": "è‡ªå®šä¹‰ FutureOS å¦‚ä½•ç§°å‘¼ä½ ã€‚",
+      "displayName": "æ˜¾ç¤ºåç§°",
+      "placeholder": "è¾“å…¥ä½ çš„åå­—",
+      "savedHint": "åç§°ä¼šç«‹å³æ˜¾ç¤ºåœ¨é¦–é¡µã€‚"
+    }
+  },
+  "homeBanking": {
+    "heroLabel": "OCBC æ•°å­—é“¶è¡Œ",
+    "scan": "æ‰«æ",
+    "notifications": "é€šçŸ¥",
+    "logout": "ç™»å‡º",
+    "today": "ä»Šå¤©",
+    "welcome": "æ¬¢è¿Žï¼Œ{name}",
+    "quickActionsLabel": "å¿«æ·æ“ä½œ",
+    "quickActions": {
+      "paynow": "PayNow",
+      "scanPay": "æ‰«ç ä»˜æ¬¾",
+      "fx": "å¤–æ±‡",
+      "customise": "è‡ªå®šä¹‰"
+    },
+    "accountsTitle": "è´¦æˆ·æ€»è§ˆ",
+    "accounts": {
+      "savings": "å‚¨è“„è´¦æˆ·",
+      "creditCard": "ä¿¡ç”¨å¡æœªè¿˜æ¬¾",
+      "personalLoan": "ä¸ªäººè´·æ¬¾ä½™é¢",
+      "investments": "æŠ•èµ„",
+      "insuranceScore": "ä¿é™©ä¿éšœè¯„åˆ†"
+    },
+    "availableNow": "å½“å‰å¯ç”¨",
+    "selectedGoal": "å·²é€‰ç›®æ ‡",
+    "openFutureOS": "æ‰“å¼€ FutureOS",
+    "infoLabel": "{item} è¯´æ˜Ž",
+    "info": {
+      "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
+      "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
+      "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
+      "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
+      "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
+      "family": "????????????????????????????"
+    },
+    "customiseTitle": "è‡ªå®šä¹‰å¿«æ·æ“ä½œ",
+    "customiseText": "ä½ å¯ä»¥é‡æ–°æŽ’åºæˆ–æ›¿æ¢è¿™äº›å¿«æ·æ–¹å¼ä¸ºå¸¸ç”¨é“¶è¡Œæ“ä½œã€‚",
+    "customiseDone": "ä¿å­˜å¿«æ·æ“ä½œ",
+    "gotIt": "çŸ¥é“äº†",
+    "notificationsTitle": "é€šçŸ¥",
+    "notificationsText": "FutureOS ä¼šåœ¨æœªæ¥é£Žé™©ã€ç›®æ ‡è¿›åº¦ä¸Žäº§å“å‡†å¤‡åº¦å˜åŒ–æ—¶æé†’ä½ ã€‚",
+    "logoutTitle": "å®‰å…¨ä¼šè¯",
+    "logoutText": "ç™»å‡ºæŒ‰é’®ä»…ç”¨äºŽçœŸå®žæ„Ÿã€‚æœ¬åŽŸåž‹ä¼šä¿æŒç”¨æˆ·ç™»å½•ï¼Œæ–¹ä¾¿ç»§ç»­æ¼”ç¤ºæµç¨‹ã€‚",
+    "currentScore": "å½“å‰è¯„åˆ†",
+    "howCalculated": "è®¡ç®—æ–¹å¼",
+    "method": {
+      "futureScore": "FutureOS normalises each module to 0-100, then combines them with higher weight on protected goals and liquidity. It is a transparent prototype model, not a live credit or investment decision.",
+      "wedding": "Progress equals protected wedding savings divided by the recommended wedding budget.",
+      "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
+      "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
+      "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
+      "family": "?????????????????????? 0-100 ???????"
+    },
+    "proof": {
+      "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
+      "futureScoreWeights": "Weights: goal progress 35%, liquidity 25%, debt 15%, protection 10%, retirement 15%.",
+      "futureScoreResult": "Result: strong cash buffer lifts the score; retirement and insurance gaps keep it below 90.",
+      "weddingInputs": "Inputs: SGD 35,000 Guardian wedding plan, SGD 450/month transfer, and protected emergency reserve.",
+      "weddingMath": "Math: about SGD 22,400 allocated / SGD 35,000 target = 64%.",
+      "weddingResult": "Result: healthy but incomplete, so the monthly transfer stays active.",
+      "selectedInputs": "Inputs: 2030 home target, savings, emergency reserve, wedding budget, and mortgage readiness.",
+      "selectedMath": "Math: readiness is scored against down-payment progress and 2030 feasibility.",
+      "selectedResult": "Result: 72% means on track, but high wedding spending could delay the home year.",
+      "emergencyInputs": "Inputs: liquid savings, spending model, card balance, loan balance, and reserve rules.",
+      "emergencyMath": "Math: protected cash covers about 4.8 of 6 target months = 80%.",
+      "emergencyResult": "Result: FutureOS blocks optional reallocations below the protected level.",
+      "retirementInputs": "Inputs: age 62 target, SGD 85,000 savings, SGD 15,000 investments, SGD 450/month plan, 2030 home target, wedding budget, and existing debt.",
+      "retirementMath": "Math: projected retirement capital / target retirement capital = about 61%.",
+      "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
+      "familyInputs": "??????????????????????????????",
+      "familyMath": "????????? 45%??????? 55%?",
+      "familyResult": "???Karina ???????????????????????"
+    }
+  },
+  "mockScreens": {
+    "common": {
+      "done": "å®Œæˆ"
+    },
+    "paynow": {
+      "eyebrow": "OCBC è½¬è´¦",
+      "title": "PayNow",
+      "subtitle": "ä»Ž OCBC å¿«æ·æ“ä½œè¿›å…¥çš„æ¨¡æ‹Ÿè½¬è´¦é¡µé¢ï¼Œå¹¶è¿žæŽ¥ FutureOS ç›®æ ‡ã€‚",
+      "primary": "ç¡®è®¤è½¬è´¦",
+      "recipient": "æ”¶æ¬¾äºº",
+      "mobile": "æ‰‹æœºå·ç ",
+      "amount": "é‡‘é¢",
+      "note": "è¿™æ˜¯æ¨¡æ‹Ÿæ•°æ®ã€‚ä¸ä¼šæ‰§è¡ŒçœŸå®žä»˜æ¬¾ã€‚",
+      "goalRecipient": "å©šç¤¼å‚¨è“„ç›®æ ‡"
+    },
+    "scan": {
+      "eyebrow": "OCBC ä»˜æ¬¾",
+      "title": "æ‰«ç ä»˜æ¬¾",
+      "subtitle": "ç”¨äºŽæ¼”ç¤ºçš„äºŒç»´ç ä»˜æ¬¾æ¨¡æ‹Ÿé¡µé¢ã€‚",
+      "primary": "å¼€å§‹æ¨¡æ‹Ÿæ‰«æ",
+      "merchant": "å•†æˆ·",
+      "limit": "æ¯æ—¥é™é¢",
+      "status": "çŠ¶æ€",
+      "ready": "å·²å‡†å¤‡å¥½",
+      "note": "åŽŸåž‹ä¸­ç›¸æœºåŠŸèƒ½å·²ç¦ç”¨ã€‚"
+    },
+    "fx": {
+      "eyebrow": "OCBC å¤–æ±‡",
+      "title": "å¤–æ±‡",
+      "subtitle": "ç”¨äºŽæ¼”ç¤ºçš„æ¨¡æ‹Ÿå¤–æ±‡é¡µé¢ã€‚",
+      "primary": "é”å®šæ±‡çŽ‡",
+      "note": "æ±‡çŽ‡ä¸ºæ¨¡æ‹Ÿå€¼ã€‚"
+    }
+  },
+  "onboarding": {
+    "securePrototype": "??? OCBC FutureOS ??",
+    "title": "OCBC FutureOS",
+    "subtitle": "???????????? Life Graph?Future Mirror ? Future Self Guardian ???????",
+    "lifeGraph": "Life Graph",
+    "futureMirror": "Future Mirror",
+    "guardian": "Future Self Guardian",
+    "login": "??",
+    "createDemo": "??????",
+    "profileTitle": "????",
+    "profileSubtitle": "????????? FutureOS ?????? Guardian ???",
+    "back": "??",
+    "saveProfile": "????"
+  },
+  "spendingRisk": {
+    "title": "??????",
+    "subtitle": "FutureOS ????????? Karina ??????????",
+    "homeLabel": "FutureOS ??",
+    "homeTitleRisk": "????? 1 ?????",
+    "homeTitleSafe": "???????????",
+    "homeDetailRisk": "????????? {budget} ?? {amount}??????",
+    "homeDetailSafe": "????????? {budget} ??",
+    "detectedLabel": "????",
+    "detectedTitleRisk": "Karina ??????? {amount}",
+    "detectedTitleSafe": "Karina ????????",
+    "detectedText": "FutureOS ??????????????????????????????????????",
+    "metrics": {
+      "monthlyIncome": "???",
+      "currentSpending": "????",
+      "safeBudget": "????",
+      "overBudget": "????",
+      "spendingRatio": "????",
+      "riskLevel": "????"
+    },
+    "riskLevels": {
+      "high": "?",
+      "medium": "?",
+      "low": "?"
+    },
+    "affectedTitle": "????????????",
+    "goals": {
+      "emergency": {
+        "title": "????",
+        "detail": "?????????????????"
+      },
+      "family": {
+        "title": "????",
+        "detail": "????????????????"
+      },
+      "retirement": {
+        "title": "????",
+        "detail": "??????????????"
+      }
+    },
+    "recommendation": {
+      "title": "Guardian ??",
+      "detail": "???? {amount} ?????????????????",
+      "note": "?? Karina ???FutureOS ???????????"
+    },
+    "guardrail": {
+      "title": "??? Guardian ?????",
+      "cta": "?? Guardian ????",
+      "activeCta": "?????",
+      "success": "Guardian ????????FutureOS ???????? Karina ??????",
+      "actions": {
+        "cap": "????? {budget} ??????????",
+        "alert": "??????????????????",
+        "protect": "????????????????????",
+        "review": "??????????????? Guardian Memory?"
+      }
+    }
+  }
+}
