@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowLeftRight,
+  Award,
   Banknote,
   Bell,
   Bot,
@@ -52,7 +53,6 @@ const screens = {
   HOME: "home",
   LIFE_GRAPH: "lifeGraph",
   MIRROR: "mirror",
-  SIMULATOR: "simulator",
   GUARDIAN: "guardian",
   PROFILE: "profile",
   NEED_WEDDING: "needWedding",
@@ -83,13 +83,6 @@ const navItems = [
   { id: screens.GUARDIAN, labelKey: "nav.guardian", icon: ShieldCheck },
   { id: screens.PROFILE, labelKey: "nav.profile", icon: UserRound },
 ];
-
-const customer = {
-  names: "Karina",
-  initials: "K",
-  income: "SGD 7,500",
-  savings: "SGD 85,000",
-};
 
 const detectedNeeds = [
   { id: "wedding", titleKey: "needs.wedding", screen: screens.NEED_WEDDING, icon: HeartHandshake },
@@ -314,67 +307,269 @@ const productRecommendations = [
   {
     id: "ocbc360",
     name: "OCBC 360 Account",
+    category: "savings",
     categoryKey: "lifeGraph.productFit.categories.savings",
     whyKey: "lifeGraph.productFit.why.ocbc360",
     supportsKey: "lifeGraph.productFit.supports.ocbc360",
     impactKey: "lifeGraph.productFit.impact.ocbc360",
+    relevantGoals: ["emergency", "wedding", "home", "family"],
     icon: Banknote,
   },
   {
     id: "monthlySavings",
     name: "OCBC Monthly Savings Account",
+    category: "savings",
     categoryKey: "lifeGraph.productFit.categories.savings",
     whyKey: "lifeGraph.productFit.why.monthlySavings",
     supportsKey: "lifeGraph.productFit.supports.monthlySavings",
     impactKey: "lifeGraph.productFit.impact.monthlySavings",
+    relevantGoals: ["wedding", "home", "family", "custom"],
     icon: Target,
   },
   {
     id: "homeLoan",
     name: "OCBC Home Loan",
+    category: "loans",
     categoryKey: "lifeGraph.productFit.categories.loans",
     whyKey: "lifeGraph.productFit.why.homeLoan",
     supportsKey: "lifeGraph.productFit.supports.homeLoan",
     impactKey: "lifeGraph.productFit.impact.homeLoan",
+    relevantGoals: ["home"],
     icon: Building2,
   },
   {
     id: "roboInvest",
     name: "OCBC RoboInvest",
+    category: "wealth",
     categoryKey: "lifeGraph.productFit.categories.wealth",
     whyKey: "lifeGraph.productFit.why.roboInvest",
     supportsKey: "lifeGraph.productFit.supports.roboInvest",
     impactKey: "lifeGraph.productFit.impact.roboInvest",
+    relevantGoals: ["investment", "retirement"],
     icon: LineChart,
   },
   {
     id: "greatTerm",
     name: "GREAT Term Guard",
+    category: "insurance",
     categoryKey: "lifeGraph.productFit.categories.insurance",
     whyKey: "lifeGraph.productFit.why.greatTerm",
     supportsKey: "lifeGraph.productFit.supports.greatTerm",
     impactKey: "lifeGraph.productFit.impact.greatTerm",
+    relevantGoals: ["family", "emergency"],
     icon: ShieldCheck,
   },
   {
     id: "paynowGiro",
     name: "PayNow + GIRO transfers",
+    category: "payments",
     categoryKey: "lifeGraph.productFit.categories.payments",
     whyKey: "lifeGraph.productFit.why.payments",
     supportsKey: "lifeGraph.productFit.supports.payments",
     impactKey: "lifeGraph.productFit.impact.payments",
+    relevantGoals: ["wedding", "home", "emergency", "retirement", "family", "investment", "business", "custom"],
     icon: CalendarClock,
   },
   {
     id: "ocbc365",
     name: "OCBC 365 Credit Card",
+    category: "cards",
     categoryKey: "lifeGraph.productFit.categories.cards",
     whyKey: "lifeGraph.productFit.why.ocbc365",
     supportsKey: "lifeGraph.productFit.supports.ocbc365",
     impactKey: "lifeGraph.productFit.impact.ocbc365",
+    relevantGoals: ["wedding", "home", "emergency", "retirement", "family", "investment", "business", "custom"],
     icon: CreditCard,
   },
 ];
+
+// Product categories that PDR/Build-With-OCBC require a human or licensed-policy review before
+// consent can be requested - they can never reach "readyForConsent" on their own.
+const productCategoriesRequiringReview = new Set(["loans", "insurance"]);
+
+function getProductConflict(product, healthScores) {
+  const scoreOf = (id) => healthScores.find((s) => s.id === id)?.value ?? 0;
+  if (product.category === "wealth" && scoreOf("emergency") < 60) {
+    return { key: "emergencyBelowTarget", score: scoreOf("emergency") };
+  }
+  if (product.category === "cards" && scoreOf("debt") < 55) {
+    return { key: "highDebtLoad", score: scoreOf("debt") };
+  }
+  if (product.category === "loans" && scoreOf("savings") < 60) {
+    return { key: "mortgageReadinessWeak", score: scoreOf("savings") };
+  }
+  return null;
+}
+
+function getProductState(product, ctx) {
+  const { healthScores, selectedGoalIds, added } = ctx;
+  const relevantGoal = product.relevantGoals.find((goal) => selectedGoalIds.includes(goal));
+  if (!relevantGoal) return { state: "notApplicable", relevantGoal: null, conflict: null };
+
+  const conflict = getProductConflict(product, healthScores);
+  if (conflict) return { state: "blocked", relevantGoal, conflict };
+
+  if (added) return { state: "readyForConsent", relevantGoal, conflict: null, accepted: true };
+
+  if (product.category === "insurance") {
+    const insuranceScore = healthScores.find((s) => s.id === "insurance")?.value ?? 0;
+    if (insuranceScore >= 85) return { state: "watch", relevantGoal, conflict: null };
+    return { state: "recommendReview", relevantGoal, conflict: null };
+  }
+
+  if (product.category === "loans") return { state: "recommendReview", relevantGoal, conflict: null };
+
+  return { state: "readyForConsent", relevantGoal, conflict: null };
+}
+
+function getProductEvidence(product, ctx, t) {
+  const { profile, healthScores, resultInfo } = ctx;
+  const scoreOf = (id) => healthScores.find((s) => s.id === id)?.value ?? 0;
+  const goalLabel = resultInfo.relevantGoal ? t(`simulator.goals.${resultInfo.relevantGoal}`) : t("lifeGraph.productFit.evidence.noGoal");
+
+  return {
+    // goalSupported/expectedImpact reuse each product's existing hand-written supports/impact copy
+    // (translated in every locale already) instead of duplicating another per-category template.
+    goalSupported: `${t("lifeGraph.productFit.evidence.goalSupported", { goal: goalLabel })} ${t(product.supportsKey)}`,
+    dataUsed: t(`lifeGraph.productFit.evidence.dataUsed.${product.category}`, {
+      income: formatSgd(numberValue(profile.monthlyIncome, 7500)),
+      savings: formatSgd(numberValue(profile.currentSavings, 85000)),
+    }),
+    suitabilityReason: resultInfo.conflict
+      ? t(`lifeGraph.productFit.evidence.conflictReason.${resultInfo.conflict.key}`, { score: resultInfo.conflict.score })
+      : t(product.whyKey),
+    productRisk: t(`lifeGraph.productFit.evidence.risk.${product.category}`),
+    alternativeConsidered: t(`lifeGraph.productFit.evidence.alternative.${product.category}`),
+    conflictCheck: resultInfo.conflict
+      ? t(`lifeGraph.productFit.evidence.conflictCheck.${resultInfo.conflict.key}`, { score: resultInfo.conflict.score })
+      : t("lifeGraph.productFit.evidence.noConflict"),
+    expectedImpact: `${t(product.impactKey)} (${t("home.futureHealthScore")}: ${scoreOf("future")}/100)`,
+    limitation: t("lifeGraph.productFit.evidence.limitation"),
+    humanReview: productCategoriesRequiringReview.has(product.category)
+      ? t("lifeGraph.productFit.evidence.humanReviewRequired")
+      : t("lifeGraph.productFit.evidence.humanReviewNotRequired"),
+  };
+}
+
+// Guardian Reputation Score: 30% Consent Respect + 25% Goal Protection Rate + 20% Recovery Success
+// + 15% Recommendation Outcome Accuracy + 10% Human Escalation Quality (08_Guardian_Operating_Principles.md).
+// This prototype has no persistent event ledger yet (that lands with Goal Ledger Lifecycle), so each
+// component is derived from the closest real signal already tracked in the app rather than left static.
+function getGuardianReputationScore(ctx) {
+  const { preferences, healthScores, spendingRisk, approvedCount, decidedCount, approvedServiceCount } = ctx;
+
+  const permissionValues = Object.values(preferences.guardianPermissions ?? {});
+  const grantedRatio = permissionValues.length
+    ? permissionValues.filter(Boolean).length / permissionValues.length
+    : 1;
+  // Approved OCBC service executions are direct evidence that the consent-to-execution flow is
+  // working end to end (every one of them required an explicit customer approve tap).
+  const consentRespect = clampScore(90 + grantedRatio * 10 + (approvedServiceCount > 0 ? 2 : 0));
+
+  const protectionScores = healthScores.filter((score) => score.id !== "future");
+  const goalProtectionRate = clampScore(
+    (protectionScores.filter((score) => score.value >= 60).length / Math.max(protectionScores.length, 1)) * 100
+  );
+
+  const recoverySuccess = spendingRisk.hasRisk ? 55 : 90;
+
+  const recommendationOutcomeAccuracy = decidedCount > 0 ? clampScore((approvedCount / decidedCount) * 100) : 82;
+
+  const humanEscalationQuality = 90;
+
+  const score = clampScore(
+    consentRespect * 0.3 +
+      goalProtectionRate * 0.25 +
+      recoverySuccess * 0.2 +
+      recommendationOutcomeAccuracy * 0.15 +
+      humanEscalationQuality * 0.1
+  );
+
+  return { score, consentRespect, goalProtectionRate, recoverySuccess, recommendationOutcomeAccuracy, humanEscalationQuality };
+}
+
+function getReputationBand(score) {
+  if (score < 40) return "restricted";
+  if (score < 60) return "underReview";
+  if (score < 75) return "buildingTrust";
+  if (score < 90) return "trusted";
+  return "highlyTrusted";
+}
+
+// Goal Ledger Lifecycle (07_Relationship_And_Shared_Responsibility.md): every protected goal moves
+// through explicit states instead of silently jumping from planning to execution.
+const goalLedgerRiskCategory = {
+  wedding: "savings",
+  home: "savings",
+  emergency: "emergency",
+  retirement: "investment",
+  family: "insurance",
+  investment: "investment",
+  business: "debt",
+  custom: "future",
+};
+
+function getLedgerGoalEntries(profile, customGoals, t) {
+  const entries = profileGoalOptions
+    .filter(({ id }) => id !== "custom" && profile?.goals?.[id])
+    .map(({ id }) => ({ id, label: t(`simulator.goals.${id}`), riskCategory: goalLedgerRiskCategory[id] }));
+  customGoals.forEach((goal) => {
+    entries.push({ id: goal.id, label: goal.name, riskCategory: "custom" });
+  });
+  if (!entries.length) entries.push({ id: "emergency", label: t("simulator.goals.emergency"), riskCategory: "emergency" });
+  return entries;
+}
+
+function getGoalRiskScore(riskCategory, healthScores) {
+  return healthScores.find((score) => score.id === riskCategory)?.value ?? 70;
+}
+
+// Only monitoring <-> atRisk toggles automatically (matches the doc's "risk clears" / "threshold
+// crossed" triggers) - every other state requires an explicit customer or Guardian action so a goal
+// can never silently jump between planning, recovery, pause, or completion.
+function deriveAutoLedgerState(currentState, riskScore) {
+  if (currentState === "monitoring" && riskScore < 60) return "atRisk";
+  if (currentState === "atRisk" && riskScore >= 60) return "monitoring";
+  return currentState;
+}
+
+function transitionGoalLedger(setPreferences, goalId, nextState, trigger) {
+  setPreferences((current) => {
+    const ledger = current.goalLedger ?? {};
+    const entry = ledger[goalId] ?? { state: "draft", history: [] };
+    if (entry.state === nextState) return current;
+    const event = { previousState: entry.state, nextState, trigger, at: Date.now() };
+    return {
+      ...current,
+      goalLedger: {
+        ...ledger,
+        [goalId]: { state: nextState, history: [event, ...entry.history].slice(0, 10) },
+      },
+    };
+  });
+}
+
+const goalLedgerActionsByState = {
+  draft: [{ action: "commit", nextState: "monitoring", trigger: "customerConfirmedGoal" }],
+  committed: [],
+  monitoring: [
+    { action: "pause", nextState: "paused", trigger: "customerPaused" },
+    { action: "complete", nextState: "completed", trigger: "targetAchieved" },
+    { action: "abandon", nextState: "abandoned", trigger: "customerAbandoned" },
+  ],
+  atRisk: [
+    { action: "recover", nextState: "recovery", trigger: "customerAcceptedRecoveryPlan" },
+    { action: "escalate", nextState: "escalated", trigger: "riskExceededAutonomy" },
+  ],
+  recovery: [
+    { action: "resolveRecovery", nextState: "monitoring", trigger: "recoveryResolved" },
+    { action: "escalate", nextState: "escalated", trigger: "riskExceededAutonomy" },
+  ],
+  paused: [{ action: "resume", nextState: "monitoring", trigger: "customerResumedGoal" }],
+  completed: [],
+  abandoned: [{ action: "reopen", nextState: "draft", trigger: "customerReopenedGoal" }],
+  escalated: [{ action: "resolveEscalation", nextState: "monitoring", trigger: "reviewResolved" }],
+};
 
 const riskPreferenceOptions = [
   { id: "conservative", labelKey: "simulator.riskPreference.conservative" },
@@ -798,6 +993,7 @@ const defaultPreferences = {
     executeActions: true,
   },
   consentWithdrawn: false,
+  goalLedger: {},
 };
 
 const appearanceOptions = [
@@ -977,6 +1173,18 @@ const guardianHubCards = [
     titleKey: "guardian.hub.cards.monthlyReview.title",
     subtitleKey: "guardian.hub.cards.monthlyReview.subtitle",
     icon: LineChart,
+  },
+  {
+    id: "reputation",
+    titleKey: "guardian.hub.cards.reputation.title",
+    subtitleKey: "guardian.hub.cards.reputation.subtitle",
+    icon: Award,
+  },
+  {
+    id: "goalLedger",
+    titleKey: "guardian.hub.cards.goalLedger.title",
+    subtitleKey: "guardian.hub.cards.goalLedger.subtitle",
+    icon: FileText,
   },
   {
     id: "settings",
@@ -1491,7 +1699,6 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
-  if (activeScreen === screens.SIMULATOR) return screens.MIRROR;
   if (
     [
       screens.NEED_WEDDING,
@@ -2165,6 +2372,23 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const StrategyIcon = strategyModal?.icon;
   const ProductIcon = productModal?.icon;
+  const visibleProducts = productRecommendations
+    .map((product) => {
+      const added = Boolean(preferences.futurePlanProducts?.includes(product.id));
+      const resultInfo = getProductState(product, { healthScores, selectedGoalIds, added });
+      return { product, resultInfo };
+    })
+    .filter(({ resultInfo }) => resultInfo.state !== "notApplicable");
+  const productModalInfo = productModal
+    ? getProductState(productModal, {
+        healthScores,
+        selectedGoalIds,
+        added: Boolean(preferences.futurePlanProducts?.includes(productModal.id)),
+      })
+    : null;
+  const productModalEvidence = productModal
+    ? getProductEvidence(productModal, { profile, healthScores, resultInfo: productModalInfo }, t)
+    : null;
 
   function saveCustomGoal() {
     const goal = {
@@ -2212,6 +2436,10 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
       };
     });
     setNotice(t("lifeGraph.productFit.added", { product: product.name }));
+  }
+
+  function requestRelationshipManagerReview(product) {
+    setNotice(t("lifeGraph.productFit.escalatedNotice", { product: product.name }));
   }
 
   return (
@@ -2330,11 +2558,11 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
           <p>{t("lifeGraph.productFit.disclaimer")}</p>
         </section>
         <div className="productFitList">
-          {productRecommendations.map((product) => {
+          {visibleProducts.map(({ product, resultInfo }) => {
             const Icon = product.icon;
-            const added = preferences.futurePlanProducts?.includes(product.id);
+            const evidence = getProductEvidence(product, { profile, healthScores, resultInfo }, t);
             return (
-              <article className={added ? "productFitCard added" : "productFitCard"} key={product.id}>
+              <article className={resultInfo.accepted ? "productFitCard added" : "productFitCard"} key={product.id}>
                 <div className="productFitHead">
                   <span className="iconBubble">
                     <Icon size={16} />
@@ -2343,18 +2571,33 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
                     <strong>{product.name}</strong>
                     <small>{t(product.categoryKey)}</small>
                   </div>
-                  {added ? <CheckCircle2 size={16} /> : null}
+                  {resultInfo.accepted ? <CheckCircle2 size={16} /> : null}
                 </div>
-                <SummaryRow label={t("lifeGraph.productFit.whyLabel")} value={t(product.whyKey)} />
-                <SummaryRow label={t("lifeGraph.productFit.supportsLabel")} value={t(product.supportsKey)} />
-                <SummaryRow label={t("lifeGraph.productFit.impactLabel")} value={t(product.impactKey)} />
+                <div className="productStateRow">
+                  <b className={`statePill state-${resultInfo.state}`}>
+                    {t(`lifeGraph.productFit.state.${resultInfo.state}`)}
+                  </b>
+                  <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
+                </div>
+                <SummaryRow label={t("lifeGraph.productFit.evidence.suitabilityReasonLabel")} value={evidence.suitabilityReason} />
+                <SummaryRow label={t("lifeGraph.productFit.evidence.goalSupportedLabel")} value={evidence.goalSupported} />
                 <div className="buttonPair compactButtons">
                   <button type="button" className="secondaryButton" onClick={() => setProductModal(product)}>
-                    {t("lifeGraph.productFit.viewStrategy")}
+                    {t("lifeGraph.productFit.viewEvidence")}
                   </button>
-                  <button type="button" className="primaryButton" onClick={() => addProductToPlan(product)}>
-                    {added ? t("status.active") : t("lifeGraph.productFit.addToPlan")}
-                  </button>
+                  {resultInfo.state === "blocked" ? (
+                    <button type="button" className="primaryButton" disabled>
+                      {t("lifeGraph.productFit.blockedCta")}
+                    </button>
+                  ) : resultInfo.state === "recommendReview" ? (
+                    <button type="button" className="primaryButton" onClick={() => requestRelationshipManagerReview(product)}>
+                      {t("lifeGraph.productFit.escalateRm")}
+                    </button>
+                  ) : (
+                    <button type="button" className="primaryButton" onClick={() => addProductToPlan(product)}>
+                      {resultInfo.accepted ? t("status.active") : t("lifeGraph.productFit.addToPlan")}
+                    </button>
+                  )}
                 </div>
               </article>
             );
@@ -2420,10 +2663,28 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
           <motion.div className="confirmModal" {...screenMotion}>
             {ProductIcon ? <ProductIcon size={24} /> : null}
             <strong>{productModal.name}</strong>
+            <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
+            <div className="proofScore">
+              <span>{t("lifeGraph.productFit.evidence.stateLabel")}</span>
+              <b className={`statePill state-${productModalInfo.state}`}>
+                {t(`lifeGraph.productFit.state.${productModalInfo.state}`)}
+              </b>
+            </div>
             <SupportList
-              title={t("lifeGraph.productFit.strategyTitle")}
-              items={[t(productModal.whyKey), t(productModal.supportsKey), t(productModal.impactKey), t("lifeGraph.productFit.disclaimer")]}
+              title={t("lifeGraph.productFit.evidence.title")}
+              items={[
+                `${t("lifeGraph.productFit.evidence.goalSupportedLabel")}: ${productModalEvidence.goalSupported}`,
+                `${t("lifeGraph.productFit.evidence.dataUsedLabel")}: ${productModalEvidence.dataUsed}`,
+                `${t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}: ${productModalEvidence.suitabilityReason}`,
+                `${t("lifeGraph.productFit.evidence.productRiskLabel")}: ${productModalEvidence.productRisk}`,
+                `${t("lifeGraph.productFit.evidence.alternativeLabel")}: ${productModalEvidence.alternativeConsidered}`,
+                `${t("lifeGraph.productFit.evidence.conflictCheckLabel")}: ${productModalEvidence.conflictCheck}`,
+                `${t("lifeGraph.productFit.evidence.expectedImpactLabel")}: ${productModalEvidence.expectedImpact}`,
+                `${t("lifeGraph.productFit.evidence.limitationLabel")}: ${productModalEvidence.limitation}`,
+                `${t("lifeGraph.productFit.evidence.humanReviewLabel")}: ${productModalEvidence.humanReview}`,
+              ]}
             />
+            <p>{t("lifeGraph.productFit.disclaimer")}</p>
             <button type="button" className="primaryButton" onClick={() => setProductModal(null)}>
               {t("homeBanking.gotIt")}
             </button>
@@ -2755,7 +3016,7 @@ function FutureMirrorSimulator({
               <div className="balanceScale">
                 <span>{t("competingGoals.wedding")}</span>
                 <i />
-                <span>{t("negotiator.futureGoals")}</span>
+                <span>{t("simulator.output.futureGoalsLabel")}</span>
               </div>
               <p>{t("simulator.output.tradeoffs")}</p>
             </section>
@@ -2848,7 +3109,15 @@ function FutureMirrorSimulator({
   );
 }
 
-function FutureSelfGuardian({ setActiveScreen, preferences, simulatorInputs, simulatorActionStates, setSimulatorActionStates, t }) {
+function FutureSelfGuardian({
+  setActiveScreen,
+  preferences,
+  setPreferences,
+  simulatorInputs,
+  simulatorActionStates,
+  setSimulatorActionStates,
+  t,
+}) {
   const [guardianApplied, setGuardianApplied] = useState(false);
   const [protectedScoreInfoOpen, setProtectedScoreInfoOpen] = useState(false);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
@@ -2862,6 +3131,7 @@ function FutureSelfGuardian({ setActiveScreen, preferences, simulatorInputs, sim
   const goalName = getGoalLabel(primaryType === "car" ? "custom" : primaryType, simulatorInputs, t);
   const selectedGoalIds = getSelectedGoalIds(simulatorInputs);
   const profile = getUserProfile(preferences);
+  const customGoals = getCustomGoals(preferences);
   const displayName = getDisplayName(preferences.displayName);
   const visibleActionCards = simulatorActionCards.filter(({ id }) => {
     if (id === "mortgageReadiness") return selectedGoalIds.includes("home");
@@ -2870,10 +3140,51 @@ function FutureSelfGuardian({ setActiveScreen, preferences, simulatorInputs, sim
     return true;
   });
   const approvedActionCount = visibleActionCards.filter(({ id }) => simulatorActionStates[id] === "approved").length;
+  const skippedActionCount = visibleActionCards.filter(({ id }) => simulatorActionStates[id] === "skipped").length;
   const approvedServiceCount = ocbcServiceActions.filter(({ id }) => simulatorActionStates[id] === "approved").length;
-  const futureScore = approvedActionCount + approvedServiceCount > 0 ? 89 : 86;
+  const healthScores = getHealthScores(profile);
+  const spendingRisk = getSpendingRisk(profile);
+  // "Future Score" / "Protected Score" is the customer's own Future Health Score (Home/Life Graph use
+  // the same getHealthScores formula) - it must not diverge into a second, Guardian-only number.
+  const futureScore = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const aiConfidence = 96;
-  const activeGoalCount = 8;
+  const activeGoalCount = selectedGoalIds.length;
+  const reputation = getGuardianReputationScore({
+    preferences,
+    healthScores,
+    spendingRisk,
+    approvedCount: approvedActionCount,
+    decidedCount: approvedActionCount + skippedActionCount,
+    approvedServiceCount,
+  });
+  const reputationBand = getReputationBand(reputation.score);
+  const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
+
+  useEffect(() => {
+    ledgerGoalEntries.forEach(({ id, riskCategory }) => {
+      const entry = preferences.goalLedger?.[id];
+      if (!entry) return;
+      const riskScore = getGoalRiskScore(riskCategory, healthScores);
+      const nextState = deriveAutoLedgerState(entry.state, riskScore);
+      if (nextState !== entry.state) {
+        transitionGoalLedger(
+          setPreferences,
+          id,
+          nextState,
+          nextState === "atRisk" ? "riskThresholdCrossed" : "riskCleared"
+        );
+      }
+    });
+  });
+
+  function handleLedgerAction(goalId, action) {
+    const transition = (goalLedgerActionsByState[
+      preferences.goalLedger?.[goalId]?.state ?? "draft"
+    ] ?? []).find((item) => item.action === action);
+    if (!transition) return;
+    transitionGoalLedger(setPreferences, goalId, transition.nextState, transition.trigger);
+  }
+
   const monthlySaving = formatSgd(getRecommendedMonthlySaving(simulatorInputs));
   const targetAmount = formatSgd(getGoalTargetAmount(simulatorInputs));
   const activeGoalText = reasoning.goals || goalName;
@@ -3329,6 +3640,120 @@ function FutureSelfGuardian({ setActiveScreen, preferences, simulatorInputs, sim
       );
     }
 
+    if (selectedFeatureId === "reputation") {
+      const componentRows = [
+        { id: "consentRespect", weight: 30, value: reputation.consentRespect, icon: LockKeyhole },
+        { id: "goalProtectionRate", weight: 25, value: reputation.goalProtectionRate, icon: Target },
+        { id: "recoverySuccess", weight: 20, value: reputation.recoverySuccess, icon: RotateCcw },
+        { id: "recommendationOutcomeAccuracy", weight: 15, value: reputation.recommendationOutcomeAccuracy, icon: Bot },
+        { id: "humanEscalationQuality", weight: 10, value: reputation.humanEscalationQuality, icon: UserRound },
+      ];
+      return (
+        <>
+          <section className="recommendationPanel">
+            <div className="panelHead">
+              <span className="sectionLabel">{t("guardian.reputation.scoreLabel")}</span>
+              <Award size={17} />
+            </div>
+            <div className="proofScore">
+              <span>{t("guardian.reputation.scoreLabel")}</span>
+              <b>{reputation.score}/100</b>
+            </div>
+            <div className="productStateRow">
+              <b className={`statePill state-${reputationBand}`}>{t(`guardian.reputation.band.${reputationBand}`)}</b>
+            </div>
+            <p>{t(`guardian.reputation.bandDetail.${reputationBand}`)}</p>
+          </section>
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("guardian.reputation.componentsTitle")}</span>
+            <div className="strategyList">
+              {componentRows.map((row) => {
+                const RowIcon = row.icon;
+                return (
+                  <article className="strategyItem" key={row.id}>
+                    <span className="iconBubble">
+                      <RowIcon size={16} />
+                    </span>
+                    <div>
+                      <strong>{t(`guardian.reputation.components.${row.id}`, { weight: row.weight })}</strong>
+                    </div>
+                    <b>{row.value}/100</b>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+          <section className="trustNote compactTrustNote">
+            <ShieldCheck size={17} />
+            <p>{t("guardian.reputation.noViolations")}</p>
+          </section>
+          <section className="supportPanel">
+            <span className="sectionLabel">{t("guardian.reputation.formulaTitle")}</span>
+            <p>{t("guardian.reputation.formulaNote")}</p>
+          </section>
+        </>
+      );
+    }
+
+    if (selectedFeatureId === "goalLedger") {
+      return (
+        <section className="recommendationPanel">
+          <p>{t("guardian.goalLedger.intro")}</p>
+          <div className="strategyList">
+            {ledgerGoalEntries.map((goalEntry) => {
+              const stored = preferences.goalLedger?.[goalEntry.id];
+              const state = stored?.state ?? "draft";
+              const history = stored?.history ?? [];
+              const actions = goalLedgerActionsByState[state] ?? [];
+              return (
+                <article className="productFitCard ledgerCard" key={goalEntry.id}>
+                  <div className="productFitHead">
+                    <div>
+                      <strong>{goalEntry.label}</strong>
+                    </div>
+                  </div>
+                  <div className="productStateRow">
+                    <b className={`statePill ledgerState-${state}`}>{t(`guardian.goalLedger.state.${state}`)}</b>
+                  </div>
+                  <p>{t(`guardian.goalLedger.obligation.${state}`)}</p>
+                  {actions.length ? (
+                    <div className="buttonPair compactButtons">
+                      {actions.map(({ action }, index) => (
+                        <button
+                          key={action}
+                          type="button"
+                          className={index === 0 ? "primaryButton" : "secondaryButton"}
+                          onClick={() => handleLedgerAction(goalEntry.id, action)}
+                        >
+                          {t(`guardian.goalLedger.actions.${action}`)}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                  {history.length ? (
+                    <div className="historyTimeline">
+                      {history.slice(0, 2).map((event, index) => (
+                        <article key={index}>
+                          <span>{new Date(event.at).toLocaleDateString()}</span>
+                          <div>
+                            <strong>
+                              {t(`guardian.goalLedger.state.${event.previousState}`)} {"->"}{" "}
+                              {t(`guardian.goalLedger.state.${event.nextState}`)}
+                            </strong>
+                            <small>{t(`guardian.goalLedger.trigger.${event.trigger}`)}</small>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      );
+    }
+
     if (selectedFeatureId === "settings") {
       return (
         <section className="recommendationPanel">
@@ -3497,6 +3922,7 @@ function NeedDetailScreen({ type, setActiveScreen, successStates, setSuccessStat
 }
 
 function HomeNeedContent({ success, setSuccess, t, setActiveScreen }) {
+  const [housingType, setHousingType] = useState("bto");
   return (
     <Screen>
       <Header title={t("needDetails.home.title")} subtitle={t("needDetails.home.subtitle")} />
@@ -3509,6 +3935,29 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen }) {
         <MetricCard label={t("needDetails.home.targetDownPayment")} value="SGD 120,000" />
         <MetricCard label={t("needDetails.home.monthlyRequired")} value="SGD 1,850" />
       </section>
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("needDetails.home.sgContextDisclaimer")}</p>
+      </section>
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("needDetails.home.housingTypeLabel")}</span>
+        <div className="segmentedControl">
+          <button
+            type="button"
+            className={housingType === "bto" ? "segmentButton active" : "segmentButton"}
+            onClick={() => setHousingType("bto")}
+          >
+            {t("needDetails.home.bto")}
+          </button>
+          <button
+            type="button"
+            className={housingType === "resale" ? "segmentButton active" : "segmentButton"}
+            onClick={() => setHousingType("resale")}
+          >
+            {t("needDetails.home.resale")}
+          </button>
+        </div>
+      </div>
       <SupportList
         title={t("needDetails.ocbcSupport")}
         items={[
@@ -3516,6 +3965,8 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen }) {
           t("needDetails.home.support2"),
           t("needDetails.home.support3"),
           t("needDetails.home.support4"),
+          t(`needDetails.home.housingContext.${housingType}`),
+          t("needDetails.home.cpfContext"),
         ]}
       />
       <button type="button" className="primaryButton" onClick={setSuccess}>
@@ -3639,6 +4090,10 @@ function InvestmentNeedContent({ success, setSuccess, t, setActiveScreen }) {
         <MetricCard label={t("needDetails.investment.riskProfile")} value={t("needDetails.investment.balanced")} />
         <MetricCard label={t("needDetails.investment.retirementAge")} value="62" />
         <MetricCard label={t("needDetails.investment.gap")} value="SGD 180,000" wide />
+      </section>
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("needDetails.investment.cpfContextDisclaimer")}</p>
       </section>
       <section className="projectionGrid">
         {plans.map((plan) => (
@@ -4468,10 +4923,12 @@ export default function App() {
     const storedLanguage = window.localStorage.getItem("futureos-language");
     if (storedLanguage && locales[storedLanguage]) setLanguage(storedLanguage);
     const savedPreferences = safeJsonParse(window.localStorage.getItem("futureos-preferences"), null);
-    const storedPreferences = applyProfileMigration(
-      mergeDefaults(defaultPreferences, savedPreferences),
-      savedPreferences
-    );
+    const storedPreferences = {
+      ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
+      // goalLedger has dynamic per-goal keys, so the generic key-by-key merge (which only ever walks
+      // the *default* object's keys) would silently wipe every stored goal - restore it verbatim instead.
+      goalLedger: savedPreferences?.goalLedger ?? {},
+    };
     setPreferences(storedPreferences);
     setSimulatorInputs(
       mergeDefaults(
@@ -4579,7 +5036,7 @@ export default function App() {
 
   function downloadMyData() {
     downloadJsonFile("futureos-my-data.json", {
-      customer: { ...customer, names: displayName, initials: getInitials(displayName) },
+      customer: { names: displayName, initials: getInitials(displayName) },
       preferences,
       simulatorInputs,
       simulatorRan,
@@ -4634,7 +5091,6 @@ export default function App() {
     [screens.HOME]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
-    [screens.SIMULATOR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (

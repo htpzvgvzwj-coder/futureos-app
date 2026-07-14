@@ -19,33 +19,24 @@
   },
   "common": {
     "secure": "Secure",
-    "demoReset": "App Info",
     "resetDemo": "Reset app state",
     "backHome": "Back to Home",
     "backLifeGraph": "Back to Life Graph",
-    "openItem": "Open {item}",
     "protected": "Protected",
     "on": "On"
   },
   "customer": {
     "segment": "Mid-Level Marketing Executive",
-    "status": "Married",
     "lifeStage": "Late 20s, married, considering starting a family"
   },
   "home": {
-    "eyebrow": "Autonomous AI Banking Platform",
     "title": "OCBC FutureOS",
     "subtitle": "From Managing Money to Managing Life Outcomes",
     "futureHealthScore": "Future Health Score",
-    "summary": "Your FutureOS plan is on track, with family, emergency and retirement goals needing active guidance.",
     "guardianStatus": "Your Future Self Guardian is monitoring your long-term goals.",
-    "startSimulation": "Start Future Simulation",
-    "futureOsSummary": "FutureOS Summary",
-    "layersLabel": "Three FutureOS intelligence systems",
-    "modulesLabel": "Three AI systems"
+    "futureOsSummary": "FutureOS Summary"
   },
   "futureSystems": {
-    "label": "FutureOS intelligence systems",
     "lifeGraph": {
       "title": "Life Graph",
       "subtitle": "Understands your life, goals and OCBC product needs"
@@ -61,55 +52,13 @@
   },
   "goals": {
     "wedding": "Wedding Goal",
-    "home": "Home Goal",
     "emergency": "Emergency Fund",
     "retirement": "Retirement Goal"
   },
-  "modules": {
-    "lifeGraph": {
-      "name": "Life Graph",
-      "short": "Understands the customer's life stage"
-    },
-    "futureMirror": {
-      "name": "Future Mirror",
-      "short": "Simulates future consequences"
-    },
-    "goalNegotiator": {
-      "name": "Guardian goal balancing",
-      "short": "Balances competing life goals inside Future Self Guardian"
-    },
-    "capitalOrchestrator": {
-      "name": "Life Graph product fit",
-      "short": "Connects OCBC products inside Life Graph"
-    },
-    "engine": {
-      "name": "Approved action plan",
-      "short": "Executes approved actions inside Future Self Guardian"
-    },
-    "guardian": {
-      "name": "Future Self Guardian",
-      "short": "Protects future interests"
-    }
-  },
-  "layers": {
-    "mirror": {
-      "label": "Future Mirror",
-      "purpose": "See consequences",
-      "detail": "Model how today's choices change future outcomes"
-    },
-    "guardian": {
-      "label": "Future Self Guardian",
-      "purpose": "Protect long-term goals",
-      "detail": "Autonomous AI acting for the customer's future self"
-    }
-  },
   "lifeGraph": {
-    "eyebrow": "System 1",
     "title": "Life Graph",
     "subtitle": "Your personal financial life map powered by OCBC FutureOS.",
-    "purpose": "Life Graph analyses your profile, goals, accounts, spending, debt, insurance, investments and OCBC product opportunities to create one personalised life strategy.",
     "timelineTitle": "Connected life timeline",
-    "insight": "Life Graph connects customer transactions, goals, life events, and banking needs into one financial life profile.",
     "lifeStage": "Life Stage",
     "selectedGoals": "Selected Goals",
     "detectedNeeds": "Detected needs",
@@ -150,16 +99,6 @@
       "longTermFuture": "Long-term Future",
       "financialImpact": "Financial Impact",
       "futurePlan": "Future Plan"
-    },
-    "goalDetails": {
-      "wedding": "Marriage budget, deposits, and savings discipline",
-      "home": "Down payment, mortgage readiness, and cash buffer",
-      "emergency": "Protected reserve before higher-risk moves",
-      "retirement": "Long-term compounding and retirement age target",
-      "family": "Future household costs and protection needs",
-      "investment": "Portfolio growth matched to risk preference",
-      "business": "Startup capital without draining reserves",
-      "custom": "User-created goal protected by FutureOS"
     },
     "health": {
       "title": "Financial Health Analysis",
@@ -239,13 +178,8 @@
       "title": "OCBC Product Fit",
       "purpose": "Life Graph connects customer goals to OCBC-related product categories.",
       "disclaimer": "Prototype recommendation only. Customers should check full product details with OCBC before applying.",
-      "whyLabel": "Why it fits",
-      "supportsLabel": "Supports",
-      "impactLabel": "Estimated future impact",
-      "viewStrategy": "View Strategy",
       "addToPlan": "Add to Future Plan",
       "added": "{product} added to the Future Plan.",
-      "strategyTitle": "Product strategy",
       "categories": {
         "savings": "Savings / Deposits",
         "cards": "Credit Cards",
@@ -280,6 +214,72 @@
         "greatTerm": "Reduces protection gaps before life events become urgent.",
         "payments": "Reduces missed transfers and keeps the Guardian plan active.",
         "ocbc365": "Helps prevent spending drift while preserving rewards use."
+      },
+      "viewEvidence": "View Evidence",
+      "blockedCta": "Blocked",
+      "escalateRm": "Request Relationship Manager Review",
+      "escalatedNotice": "{product} has been queued for Relationship Manager review.",
+      "prototypeTag": "Prototype reference — not verified for production",
+      "state": {
+        "notApplicable": "Not applicable",
+        "watch": "Watch",
+        "explore": "Explore",
+        "recommendReview": "Recommend review",
+        "blocked": "Blocked",
+        "readyForConsent": "Ready for consent"
+      },
+      "evidence": {
+        "title": "Suitability evidence",
+        "stateLabel": "Recommendation state",
+        "goalSupportedLabel": "Goal supported",
+        "goalSupported": "Supports the {goal} goal.",
+        "noGoal": "no currently selected goal",
+        "dataUsedLabel": "Customer data used",
+        "suitabilityReasonLabel": "Suitability reason",
+        "productRiskLabel": "Product risk",
+        "alternativeLabel": "Alternative considered",
+        "conflictCheckLabel": "Conflict check",
+        "noConflict": "No conflict with protected goals detected.",
+        "expectedImpactLabel": "Expected impact",
+        "limitationLabel": "Limitation",
+        "limitation": "This is a prototype estimate, not a verified product quote or approval.",
+        "humanReviewLabel": "Human review requirement",
+        "humanReviewRequired": "Relationship Manager or licensed review required before execution.",
+        "humanReviewNotRequired": "No human review required for this category at this autonomy level.",
+        "dataUsed": {
+          "savings": "Monthly income {income} and current savings {savings}.",
+          "payments": "Selected goals and monthly income {income}.",
+          "wealth": "Current investments, risk preference and current savings {savings}.",
+          "insurance": "Insurance status and family-related goals.",
+          "loans": "Current savings {savings}, target down payment, and HDB/BTO planning context.",
+          "cards": "Monthly income {income} and existing debt."
+        },
+        "risk": {
+          "savings": "Low risk. Funds remain liquid and deposit protection applies.",
+          "payments": "Low risk. Transfers are reversible before settlement and require approval.",
+          "wealth": "Market risk. Value can fall as well as rise; not suitable for short-notice cash needs.",
+          "insurance": "Premium cost and lock-in risk. Cancelling early may forfeit paid premiums.",
+          "loans": "Long-term debt and interest-rate risk over the loan tenure.",
+          "cards": "Debt risk if the outstanding balance is not paid in full each month."
+        },
+        "alternative": {
+          "savings": "Keeping funds in the existing account without opening a new product.",
+          "payments": "Manual transfers without automation.",
+          "wealth": "Continuing to build the emergency fund before increasing investment contributions.",
+          "insurance": "Reviewing existing coverage with a licensed advisor before adding a new policy.",
+          "loans": "Continuing to save toward a larger down payment before applying.",
+          "cards": "Using the existing debit account until existing balances are reduced."
+        },
+        "conflictReason": {
+          "emergencyBelowTarget": "Emergency fund readiness is {score}/100, below the safe threshold. Liquidity should be protected before higher-risk growth.",
+          "highDebtLoad": "Debt health is {score}/100. Adding discretionary credit is not recommended while existing debt is elevated.",
+          "mortgageReadinessWeak": "Savings strength is {score}/100. Mortgage affordability should improve before applying."
+        },
+        "conflictCheck": {
+          "emergencyBelowTarget": "Checked against the Emergency Fund goal — conflict found (score {score}/100).",
+          "highDebtLoad": "Checked against existing debt load — conflict found (score {score}/100).",
+          "mortgageReadinessWeak": "Checked against down-payment readiness — conflict found (score {score}/100)."
+        }
       }
     },
     "customGoal": {
@@ -298,25 +298,6 @@
       }
     }
   },
-  "lifeGoals": {
-    "married": "Get married",
-    "marriedDetail": "Within 12 months",
-    "home": "Buy first home",
-    "homeDetail": "Within 3 years",
-    "family": "Start a family",
-    "familyDetail": "Before age 35",
-    "invest": "Build investments",
-    "investDetail": "Long-term portfolio",
-    "retire": "Retire securely",
-    "retireDetail": "Financial security"
-  },
-  "timeline": {
-    "engagement": "Engagement",
-    "wedding": "Wedding",
-    "firstHome": "First Home",
-    "family": "Family",
-    "retirement": "Retirement"
-  },
   "needs": {
     "wedding": "Wedding Budget Planning",
     "home": "Home Down Payment Preparation",
@@ -325,40 +306,16 @@
     "investment": "Long-term Investment Planning"
   },
   "mirror": {
-    "eyebrow": "System 2",
-    "title": "Future Mirror",
-    "subtitle": "See the future impact before you choose.",
-    "weddingBudget": "Wedding Budget",
     "homePurchase": "Home Purchase",
     "retirementAge": "Retirement Age",
     "futureScore": "Future Score",
     "risk": "Risk Level",
-    "chartTitle": "Future Score Comparison",
-    "timelineTitle": "Home Purchase Timeline",
-    "explainer": "Future Mirror shows how today's decision changes tomorrow's life outcomes.",
     "cta": "Ask Future Self Guardian"
-  },
-  "scenarios": {
-    "label": "Scenario {id}",
-    "a": "Current path",
-    "b": "Balanced compromise",
-    "c": "Recommended"
   },
   "risk": {
     "high": "High",
     "medium": "Medium",
     "low": "Low"
-  },
-  "negotiator": {
-    "eyebrow": "Inside Future Self Guardian",
-    "title": "Goal Balancing",
-    "subtitle": "The AI balances the wedding experience with home, emergency, family, and retirement goals.",
-    "competingGoals": "Competing goals",
-    "wedding": "Wedding",
-    "futureGoals": "Future goals",
-    "tradeoff": "If the customer chooses the SGD 80,000 wedding, home and retirement goals are delayed. Future Self Guardian finds a balanced plan that protects the most important goals.",
-    "recommendedBalance": "Recommended balance",
-    "cta": "Orchestrate My Capital"
   },
   "competingGoals": {
     "wedding": "Wedding Experience",
@@ -373,22 +330,6 @@
     "homeTarget": "Home Target",
     "retirementTarget": "Retirement Target",
     "emergencyFund": "Emergency Fund"
-  },
-  "capital": {
-    "eyebrow": "Inside Life Graph",
-    "title": "OCBC Product Strategy",
-    "subtitle": "OCBC banking products are connected into one life strategy for the customer.",
-    "ecosystem": "OCBC Product Ecosystem Connected",
-    "explainer": "Life Graph does not treat banking products separately. It coordinates savings, investments, insurance, mortgage, credit, and payments around the customer's life goals.",
-    "cta": "Activate Autonomous Plan"
-  },
-  "allocations": {
-    "wedding": "Wedding Savings Goal",
-    "home": "Home Down Payment Fund",
-    "emergency": "Emergency Fund",
-    "investment": "Investment Plan",
-    "insurance": "Insurance Readiness",
-    "mortgage": "Mortgage Readiness"
   },
   "products": {
     "deposits": "Deposits",
@@ -405,75 +346,23 @@
     "creditAction": "Responsible credit planning"
   },
   "status": {
-    "created": "Created",
     "active": "Active",
-    "growing": "Growing",
-    "locked": "Locked",
-    "adjusted": "Adjusted",
-    "balanced": "Balanced",
     "recommended": "Recommended",
     "review": "Review",
     "preparing": "Preparing",
-    "track": "Track",
     "completed": "Completed",
     "monitoring": "Monitoring",
     "scheduled": "Scheduled",
     "approved": "Approved"
   },
-  "engine": {
-    "eyebrow": "Inside Future Self Guardian",
-    "title": "Approved Action Plan",
-    "subtitle": "The approved plan is executed automatically, with visible controls and monitoring.",
-    "activating": "Activating plan...",
-    "loadingDetail": "Creating goals, transfers, monitoring rules, and review cadence.",
-    "activatedMessage": "Your Future Plan has been activated.",
-    "cta": "View Future Self Guardian",
-    "actions": {
-      "createWedding": "Create Wedding Savings Goal",
-      "transfer": "Schedule Monthly Transfer: SGD 450/month",
-      "protectEmergency": "Protect Emergency Fund",
-      "adjustInvestment": "Adjust Investment Plan",
-      "trackHome": "Track Home Purchase Readiness",
-      "alerts": "Send Future Risk Alerts",
-      "review": "Review Plan Every 3 Months"
-    }
-  },
   "guardian": {
-    "eyebrow": "System 3",
     "title": "Future Self Guardian",
-    "subtitle": "Your future self, protected by autonomous banking intelligence.",
-    "message1": "Hi, I am your Future Self Guardian.",
-    "message2": "I analysed your future across marriage, home ownership, family planning, and retirement.",
-    "message3": "Choosing an SGD 80,000 wedding may delay your first home by 4 years and postpone retirement by 4 years.",
-    "message4": "To protect the future you want, I recommend the SGD 35,000 wedding plan with a SGD 450 monthly savings strategy.",
-    "message5": "I will continue monitoring your progress and help you stay on track.",
     "protectedScore": "Future Protected Score",
-    "activePlan": "Active Plan",
-    "planValue": "Wedding + Home + Retirement",
-    "monitoringStatus": "Monitoring Status",
-    "nextReview": "Next Review",
-    "reviewValue": "Every 3 months",
-    "cta": "Continue Protecting My Future",
-    "agentIntro": "I reviewed your future paths and selected the plan that best protects your long-term goals.",
-    "agentPromise": "I will continue monitoring {goal} and help you stay on track.",
-    "recommendationTitle": "Guardian Recommendation",
-    "whyTitle": "Why This Recommendation",
-    "customerDataUsed": "Customer data used: profile, selected goals, income, expenses, savings, debts, investments, risk preference and consented simulator inputs.",
-    "recommendedActions": "Recommended Actions",
-    "goalProtectionSignals": "Protected goal signals",
-    "protectedSignal": "Protected by Guardian",
     "sections": {
       "status": "Guardian Status",
-      "today": "Today's Recommendation",
-      "aiReasoning": "AI Reasoning",
-      "financialStrategy": "Financial Strategy",
-      "actionCentre": "Action Centre",
-      "monitoring": "Guardian Monitoring",
-      "monthlyReport": "Monthly Guardian Report",
       "history": "Guardian History"
     },
     "status": {
-      "monitoring": "Monitoring status",
       "activeGoals": "Active goals",
       "futureScore": "Future Score",
       "aiConfidence": "AI Confidence",
@@ -517,6 +406,14 @@
         "settings": {
           "title": "Guardian Settings",
           "subtitle": "Autonomy permissions and Guardian preferences."
+        },
+        "reputation": {
+          "title": "Guardian Reputation",
+          "subtitle": "How much autonomy Guardian has earned"
+        },
+        "goalLedger": {
+          "title": "Goal Ledger",
+          "subtitle": "See the lifecycle state behind every protected goal"
         }
       }
     },
@@ -722,13 +619,88 @@
           "why": "It helps protect {goal} against risks that savings alone may not cover."
         }
       }
+    },
+    "reputation": {
+      "scoreLabel": "Reputation score",
+      "band": {
+        "restricted": "Restricted",
+        "underReview": "Under Review",
+        "buildingTrust": "Building Trust",
+        "trusted": "Trusted",
+        "highlyTrusted": "Highly Trusted"
+      },
+      "bandDetail": {
+        "restricted": "No autonomy increase; review required and proactive intervention reduced.",
+        "underReview": "Explain and recommend only until issues are resolved.",
+        "buildingTrust": "Eligible for recommendation and negotiation; no execution without approval.",
+        "trusted": "Eligible for Level 4 action preparation and approval workflows.",
+        "highlyTrusted": "Eligible to offer Level 5 guardrails if you explicitly opt in."
+      },
+      "componentsTitle": "Score components",
+      "components": {
+        "consentRespect": "Consent Respect ({weight}%)",
+        "goalProtectionRate": "Goal Protection Rate ({weight}%)",
+        "recoverySuccess": "Recovery Success ({weight}%)",
+        "recommendationOutcomeAccuracy": "Recommendation Outcome Accuracy ({weight}%)",
+        "humanEscalationQuality": "Human Escalation Quality ({weight}%)"
+      },
+      "noViolations": "No consent violations recorded. A confirmed violation would immediately restrict this category until reviewed.",
+      "formulaTitle": "How this is calculated",
+      "formulaNote": "Guardian Reputation Score is a prototype scoring model for product behaviour, not a regulated financial formula. It only affects whether Guardian may request more autonomy - it never executes anything on its own."
+    },
+    "goalLedger": {
+      "intro": "Every protected goal moves through explicit states - it can never silently jump from planning to execution, or from a setback to abandonment.",
+      "state": {
+        "draft": "Draft",
+        "committed": "Committed",
+        "monitoring": "Monitoring",
+        "atRisk": "At Risk",
+        "recovery": "Recovery",
+        "paused": "Paused",
+        "completed": "Completed",
+        "abandoned": "Abandoned",
+        "escalated": "Escalated"
+      },
+      "obligation": {
+        "draft": "Ask only for missing data needed to make the goal usable.",
+        "committed": "Create baseline plan, thresholds, and review rhythm.",
+        "monitoring": "Track progress, detect drift, and report changes.",
+        "atRisk": "Alert, explain impact, show affected goals, and prepare recovery options.",
+        "recovery": "Track recovery effectiveness and revise if recovery is failing.",
+        "paused": "Stop actions, preserve history, and keep read-only planning only if allowed.",
+        "completed": "Produce completion review, outcome evidence, and next-step options.",
+        "abandoned": "Record reason without judgment and protect remaining goals.",
+        "escalated": "Freeze unsafe autonomy and explain why review is required."
+      },
+      "actions": {
+        "commit": "Commit Goal",
+        "pause": "Pause Goal",
+        "complete": "Mark Complete",
+        "abandon": "Abandon Goal",
+        "recover": "Accept Recovery Plan",
+        "escalate": "Escalate for Review",
+        "resolveRecovery": "Resume Monitoring",
+        "resume": "Resume Goal",
+        "reopen": "Reopen as Draft",
+        "resolveEscalation": "Resolve Review"
+      },
+      "trigger": {
+        "customerConfirmedGoal": "Customer confirmed the goal and committed to monitoring.",
+        "customerPaused": "Customer paused this goal.",
+        "targetAchieved": "Customer marked the goal as complete.",
+        "customerAbandoned": "Customer abandoned this goal.",
+        "customerAcceptedRecoveryPlan": "Customer accepted a recovery plan.",
+        "riskExceededAutonomy": "Risk exceeded the current autonomy level and was escalated for review.",
+        "recoveryResolved": "Recovery plan resolved the drift; monitoring resumed.",
+        "customerResumedGoal": "Customer resumed this goal.",
+        "customerReopenedGoal": "Customer reopened this goal as a new draft.",
+        "reviewResolved": "Review was resolved; monitoring resumed.",
+        "riskThresholdCrossed": "A protection score dropped below the safe threshold.",
+        "riskCleared": "The protection score recovered above the safe threshold."
+      }
     }
   },
   "profile": {
-    "eyebrow": "Demo customer",
-    "title": "Profile & Controls",
-    "subtitle": "Language, consent, notifications, and AI Guardian permissions for the live demo.",
-    "name": "Name",
     "age": "Age",
     "occupation": "Occupation",
     "pastExperience": "Past Experience",
@@ -743,31 +715,14 @@
     "insuranceStatus": "Insurance Status",
     "riskPreference": "Risk Preference",
     "status": "Status",
-    "detectedStage": "Detected Life Stage",
-    "consentStatus": "Data Consent",
-    "consentValue": "Approved for demo",
-    "settings": "Settings",
-    "notifications": "Future alerts and product readiness notifications",
-    "permissions": "AI Guardian Permissions",
-    "permissionItems": {
-      "savings": "Create and adjust savings goals",
-      "alerts": "Send spending and future risk alerts",
-      "investment": "Recommend investment adjustments",
-      "insurance": "Recommend insurance readiness checks"
-    },
-    "connectedServices": "Connected services",
-    "privacyNote": "OCBC FutureOS uses approved customer data only. Autonomous actions require consent and remain visible to the customer."
+    "detectedStage": "Detected Life Stage"
   },
   "loading": {
     "default": "Preparing FutureOS...",
     "detail": "OCBC FutureOS is connecting life goals, products, and approved AI actions.",
     "lifeGraph": "Building Life Graph...",
     "mirror": "Simulating future...",
-    "negotiator": "Negotiating goals...",
-    "capital": "Orchestrating capital...",
-    "engine": "Activating plan...",
-    "guardian": "Preparing guardian message...",
-    "simulator": "Opening Future Mirror Simulator..."
+    "guardian": "Preparing guardian message..."
   },
   "needDetails": {
     "liveProjection": "Live projection",
@@ -798,7 +753,16 @@
       "support3": "Prepare mortgage readiness before 2030.",
       "support4": "Trigger alerts if monthly savings fall behind.",
       "cta": "Create Home Readiness Track",
-      "success": "Home readiness track created. Mortgage preparation and down payment monitoring are active."
+      "success": "Home readiness track created. Mortgage preparation and down payment monitoring are active.",
+      "sgContextDisclaimer": "Singapore housing context (HDB/BTO) shown here is general planning awareness, not a verified HDB/BTO integration.",
+      "housingTypeLabel": "Housing type",
+      "bto": "BTO",
+      "resale": "Resale",
+      "housingContext": {
+        "bto": "BTO flats are usually cheaper but come with a multi-year building wait before key collection - plan your savings timeline around the expected wait, not just the down payment date.",
+        "resale": "Resale flats are available sooner but usually cost more upfront - your down payment and mortgage readiness matter earlier than with a BTO."
+      },
+      "cpfContext": "Your CPF Ordinary Account savings may also count toward a down payment or monthly instalments - check your CPF Housing Usage Statement for your actual entitlement."
     },
     "emergency": {
       "title": "Emergency Fund Protection",
@@ -854,18 +818,13 @@
       "higherRisk": "Higher risk, faster target",
       "retirementAt": "Retirement at {age}",
       "cta": "Apply Balanced Investment Plan",
-      "success": "Balanced investment plan applied. FutureOS will review progress every 3 months."
+      "success": "Balanced investment plan applied. FutureOS will review progress every 3 months.",
+      "cpfContextDisclaimer": "This plan covers private investments only. Your CPF savings and the CPF Retirement Sum framework are a separate, important part of retirement readiness - check your CPF statement for your current balance and projected payout eligibility age."
     }
   },
   "simulator": {
-    "eyebrow": "System 2",
     "title": "Future Mirror",
     "subtitle": "See the future impact before you choose.",
-    "openSimulator": "Open Future Mirror",
-    "homeCard": {
-      "title": "Future Mirror Simulator",
-      "detail": "Type a situation, set AI independence, and compare multiple futures."
-    },
     "trustNote": "FutureOS never executes financial actions without customer consent. Autonomous actions only happen within approved limits.",
     "run": "Run Future Simulation",
     "reset": "Reset Simulation",
@@ -885,7 +844,6 @@
       "aiIndependence": "AI Independence Level",
       "monthlyIncome": "Monthly Income",
       "currentSavings": "Current Savings",
-      "plannedSpending": "Planned Spending",
       "targetHomeYear": "Target Home Year",
       "retirementAge": "Retirement Target Age",
       "riskPreference": "Risk Preference",
@@ -957,16 +915,11 @@
       "enable": "Enable Goal Lock"
     },
     "output": {
-      "summary": "The customer is planning a major expense of {spending} while trying to buy a first home by {year}.",
-      "emergencyFund": "Emergency Fund",
       "bestRecommendation": "Best Recommendation Selected by AI",
-      "recommendation": "Future Self Guardian recommends the Balanced Future because it protects both short-term happiness and long-term security.",
       "adviceOnly": "Level 1 is advice only. FutureOS explains the possible futures without showing execution controls.",
       "tradeoffs": "FutureOS negotiates between the selected life goals, cash safety, product readiness, and long-term security.",
       "why": "Why did AI choose this?",
       "explainTitle": "Guardian reasoning",
-      "suggestedActions": "Suggested Actions",
-      "autonomousWarning": "Autonomous mode is active. These actions remain limited to your approved settings and can be changed anytime.",
       "apply": "Apply Guardian Recommendation",
       "applyApproved": "Apply {count} approved actions",
       "success": "Future Self Guardian recommendation applied. FutureOS will monitor your progress.",
@@ -984,11 +937,6 @@
           "detail": "Higher spending or faster timeline, weaker financial safety."
         }
       },
-      "emergency": {
-        "strong": "Strong",
-        "protected": "Protected",
-        "weak": "Weak"
-      },
       "tone": {
         "1": "Advice tone: informative, no execution buttons.",
         "2": "Recommendation tone: selects the best future without autonomous action.",
@@ -998,9 +946,7 @@
       },
       "explain": {
         "protectedGoals": "Protected goals: {goals}, cash safety, and long-term financial health.",
-        "reducedRisks": "Reduced risks: overspending, delayed home purchase, and weakened retirement readiness.",
-        "products": "OCBC support: goal savings, automated transfers, insurance review, mortgage readiness where relevant, and investment planning.",
-        "tradeoffs": "Trade-off made: wedding spending is moderated so long-term security stays intact."
+        "products": "OCBC support: goal savings, automated transfers, insurance review, mortgage readiness where relevant, and investment planning."
       },
       "dynamicSummary": "FutureOS is analysing {goal} across the selected goals: {goals}.",
       "fields": {
@@ -1040,7 +986,8 @@
         "reviewNeeded": "Review needed",
         "tight": "Tight",
         "manageable": "Manageable"
-      }
+      },
+      "futureGoalsLabel": "Future goals"
     },
     "actions": {
       "savingsGoal": "Create savings goal",
@@ -1051,9 +998,7 @@
       "investmentPlan": "Adjust investment plan"
     },
     "actionButtons": {
-      "approve": "Approve",
-      "edit": "Edit",
-      "skip": "Skip"
+      "approve": "Approve"
     },
     "actionStatus": {
       "pending": "Pending customer choice",
@@ -1062,12 +1007,6 @@
       "skipped": "Skipped"
     },
     "actionReceipt": {
-      "summaryTitle": "Approved action receipt",
-      "summaryText": "{count} of {total} actions have customer consent. Tap Apply Guardian Recommendation to activate only the approved actions.",
-      "appliedHint": "{count} approved actions are now active in the FutureOS monitoring plan.",
-      "approvedCount": "{count} approved",
-      "editingCount": "{count} to edit",
-      "skippedCount": "{count} skipped",
       "approvalMode": "approval required",
       "autonomousMode": "pre-approved autonomous mode",
       "labels": {
@@ -1128,9 +1067,6 @@
     },
     "autonomousLock": {
       "title": "Autonomous Goal Lock",
-      "available": "Autonomous Goal Lock available",
-      "guardrail": "Pre-approved savings guardrail",
-      "pocket": "Protected Goal Pocket",
       "goal": "Goal",
       "target": "Target amount",
       "monthlyLocked": "Monthly locked saving",
@@ -1141,7 +1077,6 @@
       "withdrawImpact": "Withdraw impact"
     },
     "reasoning": {
-      "title": "AI Agent Reasoning",
       "situationUnderstood": "Situation understood",
       "selectedGoals": "Selected goals",
       "mainRisk": "Main risk",
@@ -1345,11 +1280,6 @@
       "clearNotice": "Simulation cleared. Future Mirror is ready for a fresh run.",
       "restoreNotice": "Mock data restored. FutureOS is back to the default customer profile."
     },
-    "version": {
-      "title": "About FutureOS",
-      "description": "Version and product information for this prototype.",
-      "label": "Version"
-    },
     "profile": {
       "title": "Profile Details",
       "description": "Personalise how FutureOS addresses you.",
@@ -1531,20 +1461,6 @@
       "primary": "Indicative rate",
       "note": "Rates are mock values and are not used for live trading."
     }
-  },
-  "onboarding": {
-    "securePrototype": "Secure OCBC FutureOS prototype",
-    "title": "OCBC FutureOS",
-    "subtitle": "Login or create a demo profile to see how Life Graph, Future Mirror and Future Self Guardian work together.",
-    "lifeGraph": "Life Graph",
-    "futureMirror": "Future Mirror",
-    "guardian": "Future Self Guardian",
-    "login": "Login",
-    "createDemo": "Create Demo Profile",
-    "profileTitle": "Create Profile",
-    "profileSubtitle": "Set the customer details that power FutureOS scores, simulations and Guardian actions.",
-    "back": "Back",
-    "saveProfile": "Save Profile"
   },
   "spendingRisk": {
     "title": "Spending Risk Detail",

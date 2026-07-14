@@ -181,29 +181,7 @@ nextjs-portal {
   font-size: 12px;
   font-weight: 800;
   box-shadow: 0 10px 24px rgba(20, 36, 58, 0.07);
-}
-
-.demoReset {
-  position: absolute;
-  right: 18px;
-  top: 96px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 30px;
-  border: 1px solid rgba(215, 25, 32, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: var(--ocbc-red);
-  padding: 6px 9px;
-  font-size: 10px;
-  font-weight: 900;
-  box-shadow: 0 10px 22px rgba(20, 36, 58, 0.08);
-  backdrop-filter: blur(14px);
-}
-
-.screenArea {
+}.screenArea {
   position: relative;
   z-index: 2;
   height: calc(100% - 174px);
@@ -258,13 +236,7 @@ nextjs-portal {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.45;
-}
-
-.phone.screen-home .demoReset {
-  display: none;
-}
-
-.ocbcHome {
+}.ocbcHome {
   min-height: calc(100% + 42px);
   margin: -42px -18px 0;
   padding-bottom: 24px;
@@ -1026,80 +998,21 @@ nextjs-portal {
   margin-top: 0;
 }
 
-.heroScore,
-.savingsCard,
 .guardianMini,
-.formCard,
-.chartPanel,
 .timelinePanel,
 .recommendationPanel,
-.activatedHero,
 .finalMessage,
-.profileCard,
 .profileHero,
 .metricCard,
 .insightCard,
-.explainerCard,
-.priorityPanel,
 .tradeoffPanel,
-.ecosystemPanel,
-.guardianScorePanel,
-.guardianStatusPanel,
 .financialStrategyPanel,
 .loadingCard {
   border: 1px solid rgba(20, 36, 58, 0.09);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 16px 42px rgba(20, 36, 58, 0.08);
-}
-
-.heroScore {
-  min-height: 138px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 18px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.76)),
-    linear-gradient(135deg, rgba(215, 25, 32, 0.15), rgba(20, 36, 58, 0.08));
-}
-
-.heroScore strong {
-  display: inline-block;
-  color: var(--navy);
-  font-size: 54px;
-  line-height: 0.94;
-  letter-spacing: 0;
-}
-
-.heroScore .sectionLabel {
-  display: flex;
-  margin-bottom: 5px;
-}
-
-.heroScore small {
-  color: var(--muted);
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.heroNarrative {
-  max-width: 168px;
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 760;
-  line-height: 1.32;
-}
-
-.futureOsHero {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.78)),
-    linear-gradient(135deg, rgba(215, 25, 32, 0.13), rgba(32, 56, 87, 0.12));
-}
-
-.ringWrap {
+}.ringWrap {
   position: relative;
   display: grid;
   place-items: center;
@@ -1111,61 +1024,14 @@ nextjs-portal {
   color: var(--navy);
   font-size: 17px;
   font-weight: 900;
-}
-
-.goalGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.dashboardGoals {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.goalCard {
-  min-height: 114px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid rgba(20, 36, 58, 0.09);
-  border-radius: 20px;
-  background: var(--surface);
-  padding: 11px;
-  box-shadow: 0 12px 30px rgba(20, 36, 58, 0.06);
-}
-
-.goalTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.iconBubble {
+}.iconBubble {
   width: 34px;
   height: 34px;
   display: inline-grid;
   place-items: center;
   border-radius: 13px;
   background: #f2f5f9;
-}
-
-.goalCard strong {
-  color: var(--navy);
-  font-size: 18px;
-}
-
-.goalCard > span {
-  min-height: 31px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.25;
-}
-
-.track {
+}.track {
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
@@ -1176,34 +1042,7 @@ nextjs-portal {
   display: block;
   height: 100%;
   border-radius: inherit;
-}
-
-.savingsCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10px;
-  padding: 15px 18px;
-}
-
-.savingsCard strong {
-  display: block;
-  color: var(--navy);
-  font-size: 34px;
-  letter-spacing: 0;
-}
-
-.coinStack {
-  width: 50px;
-  height: 50px;
-  display: grid;
-  place-items: center;
-  border-radius: 19px;
-  color: var(--ocbc-red);
-  background: rgba(215, 25, 32, 0.1);
-}
-
-.guardianMini {
+}.guardianMini {
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1394,139 +1233,10 @@ nextjs-portal {
 
 .guardianBackButton svg {
   transform: rotate(180deg);
-}
-
-.moduleGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.layerGrid {
-  display: grid;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.layerCard {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 11px;
-  box-shadow: 0 10px 24px rgba(20, 36, 58, 0.05);
-  text-align: left;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.layerCard:hover,
-.layerCard:focus-visible {
-  border-color: rgba(215, 25, 32, 0.22);
-  box-shadow: 0 14px 30px rgba(20, 36, 58, 0.09);
-  transform: translateY(-1px);
-}
-
-.layerCard strong,
-.layerCard b,
-.layerCard small {
-  display: block;
-}
-
-.layerCard strong {
-  color: var(--navy);
-  font-size: 13px;
-}
-
-.layerCard b {
-  margin-top: 2px;
-  color: var(--ocbc-red);
-  font-size: 11px;
-}
-
-.layerCard small {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 730;
-  line-height: 1.24;
-}
-
-.cardArrow {
-  color: #98a2b3;
-  justify-self: end;
-}
-
-.moduleCard {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-  min-height: 62px;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  box-shadow: 0 10px 24px rgba(20, 36, 58, 0.05);
-  text-align: left;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.moduleCard:hover,
-.moduleCard:focus-visible {
-  border-color: rgba(215, 25, 32, 0.22);
-  box-shadow: 0 14px 30px rgba(20, 36, 58, 0.09);
-  transform: translateY(-1px);
-}
-
-.moduleCard:focus-visible,
-.backHomeButton:focus-visible {
+}.backHomeButton:focus-visible {
   outline: 3px solid rgba(215, 25, 32, 0.18);
   outline-offset: 2px;
-}
-
-.moduleCard span {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: var(--ocbc-red);
-  background: rgba(215, 25, 32, 0.08);
-}
-
-.moduleCard strong,
-.moduleCard small {
-  display: block;
-}
-
-.moduleCard strong {
-  color: var(--navy);
-  font-size: 12px;
-  line-height: 1.18;
-}
-
-.moduleCard small {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 760;
-  line-height: 1.2;
-}
-
-.simulatorEntry,
-.profileQuickAction {
+}.profileQuickAction {
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 10px;
@@ -1544,33 +1254,23 @@ nextjs-portal {
   box-shadow: 0 14px 30px rgba(20, 36, 58, 0.08);
 }
 
-.simulatorEntry strong,
-.simulatorEntry small,
 .profileQuickAction strong,
 .profileQuickAction small {
   display: block;
 }
 
-.simulatorEntry strong,
 .profileQuickAction strong {
   color: var(--navy);
   font-size: 13px;
 }
 
-.simulatorEntry small,
 .profileQuickAction small {
   margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 760;
   line-height: 1.25;
-}
-
-.simulatorButton {
-  margin-top: 10px;
-}
-
-.backHomeButton {
+}.backHomeButton {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -1626,149 +1326,12 @@ nextjs-portal {
 .secondaryButton {
   color: var(--navy);
   background: #eef3f8;
-}
-
-.eventGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.eventCard {
-  position: relative;
-  min-height: 142px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  border: 1px solid rgba(20, 36, 58, 0.09);
-  border-radius: 22px;
-  padding: 16px;
-  color: var(--navy);
-  background: white;
-  text-align: left;
-  box-shadow: 0 14px 34px rgba(20, 36, 58, 0.07);
-}
-
-.eventCard span {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 17px;
-  background: #f2f5f9;
-}
-
-.eventCard strong {
-  font-size: 16px;
-  line-height: 1.18;
-}
-
-.eventCard > svg {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  color: #98a2b3;
-}
-
-.eventCard.rose span {
-  color: var(--ocbc-red);
-  background: rgba(215, 25, 32, 0.1);
-}
-
-.eventCard.navy span {
-  color: var(--navy);
-}
-
-.eventCard.slate span {
-  color: #475467;
-}
-
-.eventCard.amber span {
-  color: #b45309;
-  background: rgba(245, 158, 11, 0.12);
-}
-
-.eventCard.green span {
-  color: var(--success);
-  background: rgba(15, 159, 132, 0.12);
-}
-
-.eventCard.blue span {
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.1);
-}
-
-.formCard {
-  padding: 16px;
-}
-
-.sliderField {
-  display: block;
-  padding: 8px 0 18px;
-}
-
-.sliderField span,
-.fieldRow,
-.summaryRow {
+}.summaryRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-}
-
-.sliderField b,
-.fieldRow span {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.sliderField strong {
-  color: var(--navy);
-  font-size: 24px;
-}
-
-.sliderField input {
-  width: 100%;
-  accent-color: var(--ocbc-red);
-  margin-top: 14px;
-}
-
-.fieldRow {
-  min-height: 58px;
-  border-top: 1px solid var(--line);
-}
-
-.fieldRow input {
-  width: 130px;
-  border: 0;
-  outline: none;
-  border-radius: 12px;
-  background: #f4f7fb;
-  color: var(--navy);
-  padding: 10px 12px;
-  text-align: right;
-  font-weight: 850;
-}
-
-.insightStrip {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 12px;
-  border-radius: 20px;
-  background: var(--navy);
-  color: white;
-  padding: 14px;
-}
-
-.insightStrip p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.36;
-}
-
-.profileHero {
+}.profileHero {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 13px;
@@ -1860,39 +1423,7 @@ nextjs-portal {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
   margin-top: 10px;
-}
-
-.lifeGoalCard {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 9px;
-  align-items: center;
-  min-height: 70px;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 19px;
-  background: white;
-  padding: 11px;
-  box-shadow: 0 10px 24px rgba(20, 36, 58, 0.05);
-}
-
-.lifeGoalCard strong,
-.lifeGoalCard small {
-  display: block;
-}
-
-.lifeGoalCard strong {
-  color: var(--navy);
-  font-size: 13px;
-}
-
-.lifeGoalCard small {
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 730;
-}
-
-.lifeTimeline {
+}.lifeTimeline {
   position: relative;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -2057,8 +1588,92 @@ nextjs-portal {
   font-weight: 800;
 }
 
+.productStateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statePill {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: white;
+  color: var(--muted);
+}
+
+.statePill.state-readyForConsent {
+  color: var(--teal);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.statePill.state-watch,
+.statePill.state-explore,
+.statePill.state-recommendReview {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.statePill.state-blocked {
+  color: var(--ocbc-red-dark);
+  background: rgba(215, 25, 32, 0.1);
+}
+
+.statePill.state-notApplicable {
+  color: var(--muted);
+  background: #eef2f7;
+}
+
+.statePill.ledgerState-draft,
+.statePill.ledgerState-paused,
+.statePill.ledgerState-abandoned {
+  color: var(--muted);
+  background: #eef2f7;
+}
+
+.statePill.ledgerState-committed,
+.statePill.ledgerState-monitoring,
+.statePill.ledgerState-completed {
+  color: var(--teal);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.statePill.ledgerState-atRisk,
+.statePill.ledgerState-recovery {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.statePill.ledgerState-escalated {
+  color: var(--ocbc-red-dark);
+  background: rgba(215, 25, 32, 0.1);
+}
+
+.ledgerCard {
+  gap: 10px;
+}
+
+.prototypeTag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  font-style: italic;
+}
+
 .compactButtons {
   margin-top: 2px;
+}
+
+.compactButtons .primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .compactButtons .primaryButton,
@@ -2068,8 +1683,7 @@ nextjs-portal {
   font-size: 11px;
 }
 
-.insightCard,
-.explainerCard {
+.insightCard {
   display: flex;
   align-items: center;
   gap: 11px;
@@ -2077,32 +1691,18 @@ nextjs-portal {
   padding: 14px;
 }
 
-.insightCard svg,
-.explainerCard svg {
+.insightCard svg {
   flex: 0 0 auto;
   color: var(--ocbc-red);
 }
 
-.insightCard p,
-.explainerCard p {
+.insightCard p {
   margin: 0;
   color: var(--navy);
   font-size: 13px;
   font-weight: 760;
   line-height: 1.35;
-}
-
-.insightCard.navy {
-  color: white;
-  background: var(--navy);
-}
-
-.insightCard.navy svg,
-.insightCard.navy p {
-  color: white;
-}
-
-.detectedNeeds {
+}.detectedNeeds {
   margin-top: 12px;
   border: 1px solid rgba(20, 36, 58, 0.09);
   border-radius: 24px;
@@ -2245,7 +1845,6 @@ nextjs-portal {
   background: #d1fadf;
 }
 
-.chartPanel,
 .timelinePanel,
 .recommendationPanel {
   margin-top: 12px;
@@ -2256,7 +1855,6 @@ nextjs-portal {
 .progressPanel,
 .supportPanel,
 .projectionCard,
-.settingsPanel,
 .successBanner {
   border: 1px solid rgba(20, 36, 58, 0.09);
   border-radius: 24px;
@@ -2679,14 +2277,7 @@ nextjs-portal {
   cursor: pointer;
   font-size: 14px;
   font-weight: 900;
-}
-
-.actionCardGrid {
-  display: grid;
-  gap: 9px;
-}
-
-.actionCard {
+}.actionCard {
   display: grid;
   gap: 10px;
   border: 1px solid rgba(20, 36, 58, 0.08);
@@ -2807,43 +2398,7 @@ nextjs-portal {
   color: var(--navy);
   font-size: 12px;
   line-height: 1.3;
-}
-
-.approvalSummaryPanel {
-  display: grid;
-  gap: 9px;
-  border: 1px solid rgba(20, 184, 166, 0.28);
-  border-radius: 18px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.8)),
-    linear-gradient(135deg, rgba(20, 184, 166, 0.14), rgba(20, 36, 58, 0.05));
-  padding: 12px;
-}
-
-.approvalSummaryPanel > div:first-child {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.approvalSummaryPanel svg {
-  color: var(--teal);
-}
-
-.approvalSummaryPanel strong {
-  color: var(--navy);
-  font-size: 14px;
-}
-
-.approvalSummaryPanel p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 760;
-  line-height: 1.35;
-}
-
-.approvalCounters {
+}.approvalCounters {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
@@ -2920,27 +2475,7 @@ nextjs-portal {
 
 .actionCard.skipped {
   opacity: 0.82;
-}
-
-.dangerNote {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 9px;
-  align-items: start;
-  border-radius: 16px;
-  background: #fff1f2;
-  color: #be123c;
-  padding: 11px;
-}
-
-.dangerNote p {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.32;
-}
-
-.modalBackdrop {
+}.modalBackdrop {
   position: absolute;
   inset: 0;
   z-index: 20;
@@ -3053,120 +2588,9 @@ nextjs-portal {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.chartIcon {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--navy);
-}
-
-.chartWrap {
-  height: 186px;
-  margin-top: 6px;
-}
-
-.timeline {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.timeline::before {
-  content: "";
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  right: 14px;
-  height: 2px;
-  background: #e1e7ef;
-}
-
-.timelineItem {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  text-align: center;
-}
-
-.timelineItem i {
-  width: 24px;
-  height: 24px;
-  border: 4px solid white;
-  border-radius: 999px;
-  box-shadow: 0 6px 14px rgba(20, 36, 58, 0.14);
-}
-
-.timelineItem span {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 750;
-}
-
-.timelineItem strong {
-  color: var(--navy);
-  font-size: 15px;
-}
-
-.priorityPanel,
-.tradeoffPanel,
-.ecosystemPanel {
+}.tradeoffPanel {
   padding: 16px;
-}
-
-.priorityRow {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 11px;
-  align-items: center;
-  min-height: 58px;
-  border-top: 1px solid var(--line);
-}
-
-.priorityRow:first-of-type {
-  margin-top: 8px;
-  border-top: 0;
-}
-
-.priorityRow strong {
-  display: block;
-  margin-bottom: 7px;
-  color: var(--navy);
-  font-size: 13px;
-}
-
-.prioritySlider {
-  width: 100%;
-  height: 7px;
-  display: block;
-  cursor: pointer;
-}
-
-.priorityRow b {
-  color: var(--navy);
-  font-size: 13px;
-}
-
-.compactPriorityRow small,
-.guardianScorePanel small,
-.panelCopy {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 760;
-  line-height: 1.35;
-}
-
-.panelCopy {
-  margin: 8px 0 0;
-  color: var(--navy);
-}
-
-.strategyList,
+}.strategyList,
 .monitoringGrid {
   display: grid;
   gap: 9px;
@@ -3633,91 +3057,7 @@ nextjs-portal {
   border-radius: 999px;
   background: linear-gradient(90deg, var(--ocbc-red), var(--success));
   transform: rotate(-8deg);
-}
-
-.allocationGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-
-.allocationCard {
-  min-height: 128px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 21px;
-  background: white;
-  padding: 12px;
-  box-shadow: 0 12px 28px rgba(20, 36, 58, 0.06);
-}
-
-.allocationCard strong,
-.allocationCard small,
-.allocationCard b {
-  display: block;
-}
-
-.allocationCard strong {
-  color: var(--navy);
-  font-size: 13px;
-  line-height: 1.2;
-}
-
-.allocationCard small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 760;
-}
-
-.allocationCard b {
-  width: max-content;
-  border-radius: 999px;
-  background: #eef3f8;
-  color: var(--navy);
-  padding: 5px 8px;
-  font-size: 10px;
-  font-weight: 900;
-}
-
-.ecosystemPanel {
-  margin-top: 12px;
-}
-
-.ecosystemList {
-  display: grid;
-  gap: 3px;
-  margin-top: 10px;
-}
-
-.ecosystemRow {
-  display: grid;
-  grid-template-columns: auto 86px 1fr;
-  gap: 9px;
-  align-items: center;
-  min-height: 48px;
-  border-top: 1px solid var(--line);
-}
-
-.ecosystemRow:first-child {
-  border-top: 0;
-}
-
-.ecosystemRow strong {
-  color: var(--navy);
-  font-size: 13px;
-}
-
-.ecosystemRow small {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 760;
-  line-height: 1.2;
-}
-
-.guardianCard {
+}.guardianCard {
   position: relative;
   overflow: hidden;
   border-radius: 28px;
@@ -3735,33 +3075,12 @@ nextjs-portal {
   color: rgba(255, 255, 255, 0.84);
 }
 
-.guardianStatusPanel,
 .financialStrategyPanel,
 .guardianMemoryPanel {
   display: grid;
   gap: 12px;
   padding: 16px;
-}
-
-.guardianStatusGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-
-.guardianStatusGrid article {
-  min-height: 82px;
-  display: grid;
-  align-content: space-between;
-  gap: 8px;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 18px;
-  background: #f7f9fc;
-  padding: 12px;
-}
-
-.guardianStatusGrid small,
-.monitoringGrid small,
+}.monitoringGrid small,
 .historyTimeline small {
   color: var(--muted);
   font-size: 11px;
@@ -3769,7 +3088,6 @@ nextjs-portal {
   line-height: 1.25;
 }
 
-.guardianStatusGrid strong,
 .monitoringGrid strong {
   color: var(--navy);
   font-size: 14px;
@@ -3869,111 +3187,7 @@ nextjs-portal {
 .buttonPair {
   display: grid;
   gap: 10px;
-}
-
-.activatedHero {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 18px;
-  text-align: center;
-}
-
-.activationRing {
-  width: 76px;
-  height: 76px;
-  display: grid;
-  place-items: center;
-  border: 2px solid rgba(215, 25, 32, 0.18);
-  border-top-color: var(--ocbc-red);
-  border-radius: 50%;
-  color: var(--ocbc-red);
-  background: rgba(215, 25, 32, 0.06);
-}
-
-.activatedHero strong {
-  color: var(--navy);
-  font-size: 20px;
-}
-
-.activatedHero span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 750;
-}
-
-.engineHero {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.84)),
-    linear-gradient(135deg, rgba(20, 36, 58, 0.08), rgba(215, 25, 32, 0.1));
-}
-
-.checklist {
-  display: grid;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.checkItem {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 18px;
-  background: white;
-  padding: 10px 13px;
-}
-
-.checkItem span {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  color: white;
-  background: var(--success);
-}
-
-.checkItem p {
-  margin: 0;
-  color: var(--navy);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.engineItem {
-  grid-template-columns: auto 1fr auto;
-}
-
-.statusBadge {
-  border-radius: 999px;
-  padding: 5px 8px;
-  font-size: 10px;
-  font-weight: 950;
-}
-
-.statusBadge.completed {
-  color: #027a48;
-  background: #d1fadf;
-}
-
-.statusBadge.active {
-  color: #175cd3;
-  background: #dbeafe;
-}
-
-.statusBadge.monitoring {
-  color: #7a2e0e;
-  background: #ffedd5;
-}
-
-.statusBadge.scheduled {
-  color: #344054;
-  background: #eef3f8;
-}
-
-.finalMessage {
+}.finalMessage {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -4008,25 +3222,7 @@ nextjs-portal {
   background:
     linear-gradient(145deg, rgba(20, 36, 58, 0.98), rgba(32, 56, 87, 0.94)),
     #14243a;
-}
-
-.guardianScorePanel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 12px;
-  padding: 15px;
-}
-
-.guardianScorePanel strong {
-  display: block;
-  margin-top: 7px;
-  color: var(--navy);
-  font-size: 26px;
-}
-
-.loadingCard {
+}.loadingCard {
   min-height: 360px;
   display: grid;
   place-items: center;
@@ -4059,92 +3255,7 @@ nextjs-portal {
   font-size: 13px;
   font-weight: 760;
   line-height: 1.35;
-}
-
-.engineLoading {
-  min-height: 438px;
-  margin-top: 12px;
-}
-
-.goalList {
-  display: grid;
-  gap: 12px;
-}
-
-.wideGoal {
-  min-height: 82px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 13px;
-  align-items: center;
-  border: 1px solid rgba(20, 36, 58, 0.09);
-  border-radius: 22px;
-  background: white;
-  padding: 14px;
-  box-shadow: 0 12px 30px rgba(20, 36, 58, 0.06);
-}
-
-.wideGoal strong {
-  display: block;
-  color: var(--navy);
-  font-size: 15px;
-}
-
-.wideGoal small {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.wideGoal .ringWrap span {
-  font-size: 11px;
-}
-
-.profileCard {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-}
-
-.avatar {
-  width: 58px;
-  height: 58px;
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
-  color: white;
-  background: var(--navy);
-  font-weight: 950;
-}
-
-.profileCard strong {
-  display: block;
-  color: var(--navy);
-  font-size: 18px;
-}
-
-.profileCard span {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.servicesPanel {
-  margin-top: 12px;
-  border: 1px solid rgba(20, 36, 58, 0.09);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 14px;
-  box-shadow: 0 16px 42px rgba(20, 36, 58, 0.08);
-}
-
-.settingsPanel {
-  display: grid;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 15px;
-}
-
-.settingsCard {
+}.settingsCard {
   display: grid;
   gap: 13px;
   margin-top: 12px;
@@ -4571,132 +3682,7 @@ nextjs-portal {
 .futureAlertCard:focus-visible {
   border-color: rgba(215, 25, 32, 0.26);
   transform: translateY(-1px);
-}
-
-.onboardingHero {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  gap: 14px;
-  min-height: 420px;
-  align-content: end;
-  border-radius: 30px;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.74)),
-    radial-gradient(circle at 2% 22%, rgba(215, 25, 32, 0.92) 0 24%, transparent 25%),
-    linear-gradient(145deg, rgba(20, 36, 58, 0.12), rgba(15, 159, 132, 0.08));
-  padding: 26px 22px;
-  box-shadow: 0 20px 52px rgba(20, 36, 58, 0.12);
-}
-
-.onboardingMark {
-  position: absolute;
-  top: 24px;
-  left: 22px;
-  color: var(--ocbc-red);
-  font-size: 30px;
-  font-weight: 950;
-  letter-spacing: 0;
-}
-
-.onboardingHero h1 {
-  max-width: 300px;
-  margin: 0;
-  color: var(--navy);
-  font-size: 38px;
-  line-height: 1.02;
-}
-
-.onboardingHero p {
-  max-width: 310px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 780;
-  line-height: 1.42;
-}
-
-.onboardingPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.onboardingPills span {
-  border: 1px solid rgba(20, 36, 58, 0.08);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: var(--navy);
-  padding: 8px 10px;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.onboardingActions {
-  display: grid;
-  gap: 10px;
-}
-
-.profileSetupCard {
-  display: grid;
-  gap: 14px;
-}
-
-.servicesPanel > div {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.servicePill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  border-radius: 14px;
-  background: #f4f7fb;
-  color: var(--navy);
-  padding: 8px 10px;
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.servicePill svg {
-  color: var(--ocbc-red);
-  flex: 0 0 auto;
-}
-
-.privacyNote {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin-top: 12px;
-  border: 1px solid rgba(20, 36, 58, 0.09);
-  border-radius: 22px;
-  background: var(--navy);
-  color: white;
-  padding: 14px;
-  box-shadow: 0 16px 42px rgba(20, 36, 58, 0.12);
-}
-
-.privacyNote svg {
-  flex: 0 0 auto;
-  color: white;
-}
-
-.privacyNote p {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 760;
-  line-height: 1.35;
-}
-
-.resetButton {
-  margin-top: 12px;
-}
-
-.bottomNav {
+}.bottomNav {
   height: 82px;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -4840,7 +3826,6 @@ nextjs-portal {
 
 .stage.theme-dark .languageSwitcher,
 .stage.theme-dark .securePill,
-.stage.theme-dark .demoReset,
 .stage.theme-dark .bottomNav,
 .stage.theme-dark .backHomeButton {
   border-color: rgba(255, 255, 255, 0.1);
@@ -4848,20 +3833,13 @@ nextjs-portal {
   color: var(--ink);
 }
 
-.stage.theme-dark .heroScore,
 .stage.theme-dark .guardianMini,
-.stage.theme-dark .chartPanel,
 .stage.theme-dark .timelinePanel,
 .stage.theme-dark .recommendationPanel,
 .stage.theme-dark .profileHero,
 .stage.theme-dark .metricCard,
 .stage.theme-dark .insightCard,
-.stage.theme-dark .explainerCard,
-.stage.theme-dark .priorityPanel,
 .stage.theme-dark .tradeoffPanel,
-.stage.theme-dark .ecosystemPanel,
-.stage.theme-dark .guardianScorePanel,
-.stage.theme-dark .guardianStatusPanel,
 .stage.theme-dark .financialStrategyPanel,
 .stage.theme-dark .guardianMemoryPanel,
 .stage.theme-dark .guardianHubStatus,
@@ -4870,7 +3848,6 @@ nextjs-portal {
 .stage.theme-dark .progressPanel,
 .stage.theme-dark .supportPanel,
 .stage.theme-dark .projectionCard,
-.stage.theme-dark .settingsPanel,
 .stage.theme-dark .successBanner,
 .stage.theme-dark .trustNote,
 .stage.theme-dark .simulatorForm,
@@ -4881,13 +3858,11 @@ nextjs-portal {
 .stage.theme-dark .dynamicFieldGroup,
 .stage.theme-dark .autonomousLockPanel,
 .stage.theme-dark .agentReasoningPanel,
-.stage.theme-dark .approvalSummaryPanel,
 .stage.theme-dark .explainPanel,
 .stage.theme-dark .settingsCard,
 .stage.theme-dark .noticeBanner,
 .stage.theme-dark .notificationHistoryPanel,
 .stage.theme-dark .detectedNeeds,
-.stage.theme-dark .servicesPanel,
 .stage.theme-dark .futureSystemCard,
 .stage.theme-dark .scorePanel,
 .stage.theme-dark .productFitPanel,
@@ -4895,20 +3870,13 @@ nextjs-portal {
 .stage.theme-dark .compactTrustNote,
 .stage.theme-dark .accountDetailHero,
 .stage.theme-dark .ocbcExecutePanel,
-.stage.theme-dark .aiPreparedActions,
-.stage.theme-dark .onboardingHero {
+.stage.theme-dark .aiPreparedActions {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(17, 29, 49, 0.9);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
 }
 
-.stage.theme-dark .goalCard,
-.stage.theme-dark .layerCard,
-.stage.theme-dark .moduleCard,
-.stage.theme-dark .lifeGoalCard,
 .stage.theme-dark .scenarioCard,
-.stage.theme-dark .allocationCard,
-.stage.theme-dark .guardianStatusGrid article,
 .stage.theme-dark .guardianHubStats article,
 .stage.theme-dark .guardianFeatureCard,
 .stage.theme-dark .strategyItem,
@@ -4920,7 +3888,6 @@ nextjs-portal {
 .stage.theme-dark .productStrip b,
 .stage.theme-dark .guardianActionSummary span,
 .stage.theme-dark .guardianGoalSignals span,
-.stage.theme-dark .wideGoal,
 .stage.theme-dark .actionCard,
 .stage.theme-dark .serviceActionCard,
 .stage.theme-dark .notificationHistoryItem,
@@ -4931,8 +3898,48 @@ nextjs-portal {
   background: #111d31;
 }
 
+.stage.theme-dark .statePill {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stage.theme-dark .statePill.state-readyForConsent {
+  background: rgba(20, 184, 166, 0.18);
+}
+
+.stage.theme-dark .statePill.state-watch,
+.stage.theme-dark .statePill.state-explore,
+.stage.theme-dark .statePill.state-recommendReview {
+  background: rgba(180, 83, 9, 0.28);
+  color: #fbbf24;
+}
+
+.stage.theme-dark .statePill.state-blocked {
+  background: rgba(215, 25, 32, 0.22);
+  color: #ff8a80;
+}
+
+.stage.theme-dark .statePill.ledgerState-committed,
+.stage.theme-dark .statePill.ledgerState-monitoring,
+.stage.theme-dark .statePill.ledgerState-completed {
+  background: rgba(20, 184, 166, 0.18);
+}
+
+.stage.theme-dark .statePill.ledgerState-atRisk,
+.stage.theme-dark .statePill.ledgerState-recovery {
+  background: rgba(180, 83, 9, 0.28);
+  color: #fbbf24;
+}
+
+.stage.theme-dark .statePill.ledgerState-escalated {
+  background: rgba(215, 25, 32, 0.22);
+  color: #ff8a80;
+}
+
+.stage.theme-dark .prototypeTag {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .stage.theme-dark .iconBubble,
-.stage.theme-dark .moduleCard span,
 .stage.theme-dark .needChip,
 .stage.theme-dark .settingsSelect,
 .stage.theme-dark .profileNameField,
@@ -4948,8 +3955,6 @@ nextjs-portal {
 .stage.theme-dark .inputField textarea,
 .stage.theme-dark .consentTable,
 .stage.theme-dark .termsList,
-.stage.theme-dark .servicePill,
-.stage.theme-dark .onboardingPills span,
 .stage.theme-dark .actionButtons button,
 .stage.theme-dark .miniButton {
   border-color: rgba(255, 255, 255, 0.1);
@@ -5006,29 +4011,19 @@ nextjs-portal {
 }
 
 .stage.theme-dark .track,
-.stage.theme-dark .timeline::before,
 .stage.theme-dark .lifeTimeline::before {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.stage.theme-dark .privacyNote,
 .stage.theme-dark .policyText,
 .stage.theme-dark .trustNote {
   background: #07101f;
-}
-
-.stage.theme-dark .dangerNote {
-  background: rgba(215, 25, 32, 0.12);
-  color: #fecdd3;
-}
-
-.stage.theme-dark .adviceOnlyPanel {
+}.stage.theme-dark .adviceOnlyPanel {
   background: rgba(245, 158, 11, 0.12);
   color: #fed7aa;
 }
 
 .stage.theme-dark .privacyScore,
-.stage.theme-dark .simulatorEntry,
 .stage.theme-dark .profileQuickAction,
 .stage.theme-dark .recommendationHero {
   background:
@@ -5063,21 +4058,12 @@ nextjs-portal {
   .goalGrid,
   .scenarioStats {
     grid-template-columns: 1fr;
-  }
-
-  .eventGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .projectionGrid,
-  .allocationGrid,
-  .moduleGrid,
-  .lifeGoals,
-  .servicesPanel > div,
-  .financialGrid,
-  .checkboxGrid,
-  .settingsActions,
-  .segmentedControl {
+  }  .projectionGrid,
+.lifeGoals,
+.financialGrid,
+.checkboxGrid,
+.settingsActions,
+.segmentedControl {
     grid-template-columns: 1fr;
   }
 
@@ -5092,13 +4078,7 @@ nextjs-portal {
 
   .languageSwitcher select {
     width: 58px;
-  }
-
-  .goalCard {
-    min-height: 112px;
-  }
-
-  .scenarioStats small {
+  }  .scenarioStats small {
     min-height: auto;
   }
 }

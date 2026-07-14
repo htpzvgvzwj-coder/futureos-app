@@ -20,101 +20,141 @@
   },
   "common": {
     "secure": "å®‰å…¨",
-    "demoReset": "é‡ç½®",
     "resetDemo": "é‡ç½®æ¼”ç¤º",
     "backHome": "è¿”å›žé¦–é¡µ",
     "backLifeGraph": "è¿”å›žç”Ÿæ´»å›¾è°±",
-    "openItem": "æ‰“å¼€{item}",
     "protected": "å·²ä¿æŠ¤",
     "on": "å¼€å¯"
   },
   "customer": {
     "segment": "????????",
-    "status": "??",
     "lifeStage": "20????????????????"
   },
   "home": {
-    "eyebrow": "è‡ªä¸» AI é“¶è¡Œå¹³å°",
     "title": "OCBC FutureOS",
     "subtitle": "ä»Žç®¡ç†é‡‘é’±ï¼Œåˆ°ç®¡ç†äººç”Ÿç»“æžœ",
     "futureHealthScore": "æœªæ¥å¥åº·è¯„åˆ†",
-    "summary": "?? FutureOS ????????????????????????",
-    "guardianStatus": "ä½ çš„æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…æ­£åœ¨ç›‘æµ‹é•¿æœŸç›®æ ‡ã€‚",
-    "startSimulation": "å¼€å§‹æœªæ¥æ¨¡æ‹Ÿ",
-    "layersLabel": "FutureOS æ ¸å¿ƒæ¦‚å¿µ",
-    "modulesLabel": "å…­ä¸ª AI æ¨¡å—"
+    "guardianStatus": "ä½ çš„æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…æ­£åœ¨ç›‘æµ‹é•¿æœŸç›®æ ‡ã€‚"
   },
   "goals": {
     "wedding": "å©šç¤¼ç›®æ ‡",
-    "home": "ç½®ä¸šç›®æ ‡",
     "emergency": "åº”æ€¥åŸºé‡‘",
     "retirement": "é€€ä¼‘ç›®æ ‡"
   },
-  "modules": {
-    "lifeGraph": {
-      "name": "Life Graph",
-      "short": "ç†è§£å®¢æˆ·çš„äººç”Ÿé˜¶æ®µ"
-    },
-    "futureMirror": {
-      "name": "Future Mirror",
-      "short": "æ¨¡æ‹Ÿæœªæ¥å½±å“"
-    },
-    "goalNegotiator": {
-      "name": "Goal Negotiator",
-      "short": "å¹³è¡¡ç›¸äº’ç«žäº‰çš„äººç”Ÿç›®æ ‡"
-    },
-    "capitalOrchestrator": {
-      "name": "Capital Orchestrator",
-      "short": "è¿žæŽ¥ OCBC äº§å“"
-    },
-    "engine": {
-      "name": "Autonomous Banking Engine",
-      "short": "æ‰§è¡Œå·²æ‰¹å‡†è¡ŒåŠ¨"
-    },
-    "guardian": {
-      "name": "Future Self Guardian",
-      "short": "ä¿æŠ¤æœªæ¥åˆ©ç›Š"
-    }
-  },
-  "layers": {
-    "mirror": {
-      "label": "Future Mirror",
-      "purpose": "çœ‹è§åŽæžœ",
-      "detail": "æ¨¡æ‹Ÿä»Šå¤©çš„é€‰æ‹©å¦‚ä½•æ”¹å˜æœªæ¥ç»“æžœ"
-    },
-    "guardian": {
-      "label": "Future Self Guardian",
-      "purpose": "ä¿æŠ¤é•¿æœŸç›®æ ‡",
-      "detail": "ä»£è¡¨å®¢æˆ·æœªæ¥è‡ªæˆ‘çš„è‡ªä¸» AI"
-    }
-  },
   "lifeGraph": {
-    "eyebrow": "æ¨¡å— 1",
     "title": "Life Graph",
     "subtitle": "OCBC å°† the customer å’Œ the partner çš„äººç”Ÿé˜¶æ®µã€ç›®æ ‡ã€äº¤æ˜“ä¸Žé“¶è¡Œéœ€æ±‚æ•´åˆæˆä¸€ä¸ªç”»åƒã€‚",
     "timelineTitle": "è¿žæŽ¥å¼äººç”Ÿæ—¶é—´çº¿",
-    "insight": "Life Graph å°†å®¢æˆ·äº¤æ˜“ã€ç›®æ ‡ã€äººç”Ÿäº‹ä»¶å’Œé“¶è¡Œéœ€æ±‚è¿žæŽ¥æˆä¸€ä¸ªé‡‘èžç”Ÿæ´»ç”»åƒã€‚",
     "detectedNeeds": "å·²è¯†åˆ«éœ€æ±‚",
-    "openMirror": "åˆ†æžæœªæ¥å†³ç­–"
-  },
-  "lifeGoals": {
-    "married": "å®Œæˆå©šç¤¼",
-    "marriedDetail": "12 ä¸ªæœˆå†…",
-    "home": "è´­ä¹°é¦–å¥—æˆ¿",
-    "homeDetail": "3 å¹´å†…",
-    "family": "å¼€å§‹å®¶åº­è®¡åˆ’",
-    "familyDetail": "35 å²å‰",
-    "invest": "å»ºç«‹æŠ•èµ„",
-    "investDetail": "é•¿æœŸç»„åˆ",
-    "retire": "å®‰å¿ƒé€€ä¼‘",
-    "retireDetail": "è´¢åŠ¡å®‰å…¨"
-  },
-  "timeline": {
-    "engagement": "è®¢å©š",
-    "wedding": "å©šç¤¼",
-    "firstHome": "é¦–å¥—æˆ¿",
-    "family": "å®¶åº­",
-    "retirement": "é€€ä¼‘"
+    "openMirror": "åˆ†æžæœªæ¥å†³ç­–",
+    "productFit": {
+      "title": "OCBC 产品适配",
+      "purpose": "Life Graph 将客户目标与 OCBC 相关产品类别相连接。",
+      "disclaimer": "仅为原型建议。客户在申请前应向 OCBC 核实完整产品详情。",
+      "addToPlan": "加入未来计划",
+      "added": "{product} 已加入未来计划。",
+      "categories": {
+        "savings": "储蓄 / 存款",
+        "cards": "信用卡",
+        "loans": "贷款 / 房贷",
+        "wealth": "财富 / 投资",
+        "insurance": "保险",
+        "payments": "支付"
+      },
+      "why": {
+        "ocbc360": "每月薪资与目标储蓄可通过一个主账户统一协调。",
+        "monthlySavings": "定期储蓄习惯有助于实现既定目标,而不必依赖结余现金。",
+        "homeLoan": "首套房目标需要及早规划房贷准备度与首付款。",
+        "roboInvest": "在保护现金目标的同时,长期投资增长可持续进行。",
+        "greatTerm": "住房与家庭目标会产生应尽早检视的保障需求。",
+        "payments": "已批准的转账让目标资金流向变得可见且可预测。",
+        "ocbc365": "在信用卡余额保持可控的同时,可负责任地追踪日常消费。"
+      },
+      "supports": {
+        "ocbc360": "婚礼储蓄、应急基金及购房首付款",
+        "monthlySavings": "自定义目标、婚礼目标及应急缓冲",
+        "homeLoan": "首套房及房贷准备度",
+        "roboInvest": "投资增长及退休保障",
+        "greatTerm": "家庭保障、收入保障及置业保障",
+        "payments": "每月转账、PayNow 及 GIRO 储蓄安排",
+        "ocbc365": "负责任消费及家庭现金流追踪"
+      },
+      "impact": {
+        "ocbc360": "提升储蓄纪律及目标进度。",
+        "monthlySavings": "把大目标拆解为更小的每月步骤。",
+        "homeLoan": "在任何信贷申请前提升准备度。",
+        "roboInvest": "让长期复利效果在计划中保持可见。",
+        "greatTerm": "在人生事件变得紧迫前减少保障缺口。",
+        "payments": "减少漏转账情况,让 Guardian 计划保持运作。",
+        "ocbc365": "在保留奖赏使用的同时,有助防止消费失控。"
+      },
+      "viewEvidence": "查看依据",
+      "blockedCta": "已阻止",
+      "escalateRm": "申请客户经理审核",
+      "escalatedNotice": "{product} 已提交客户经理审核。",
+      "prototypeTag": "原型参考 — 尚未通过生产环境验证",
+      "state": {
+        "notApplicable": "不适用",
+        "watch": "观察中",
+        "explore": "待了解",
+        "recommendReview": "建议人工审核",
+        "blocked": "已阻止",
+        "readyForConsent": "可申请同意"
+      },
+      "evidence": {
+        "title": "适用性依据",
+        "stateLabel": "建议状态",
+        "goalSupportedLabel": "支持的目标",
+        "goalSupported": "支持{goal}目标。",
+        "noGoal": "目前未选择的目标",
+        "dataUsedLabel": "使用的客户数据",
+        "suitabilityReasonLabel": "适用性理由",
+        "productRiskLabel": "产品风险",
+        "alternativeLabel": "已考虑的替代方案",
+        "conflictCheckLabel": "冲突检查",
+        "noConflict": "未发现与受保护目标的冲突。",
+        "expectedImpactLabel": "预期影响",
+        "limitationLabel": "局限性",
+        "limitation": "这是原型估算,并非已核实的产品报价或批核。",
+        "humanReviewLabel": "人工审核要求",
+        "humanReviewRequired": "执行前需要客户经理或持牌顾问审核。",
+        "humanReviewNotRequired": "在当前自主等级下,此类别无需人工审核。",
+        "dataUsed": {
+          "savings": "每月收入{income}及目前储蓄{savings}。",
+          "payments": "已选目标及每月收入{income}。",
+          "wealth": "目前投资、风险偏好及目前储蓄{savings}。",
+          "insurance": "保险现状及与家庭相关的目标。",
+          "loans": "目前储蓄{savings}、目标首付款,以及HDB/BTO规划参考。",
+          "cards": "每月收入{income}及现有债务。"
+        },
+        "risk": {
+          "savings": "低风险。资金保持流动性,并适用存款保障。",
+          "payments": "低风险。转账在结算前可撤销,且需经批准。",
+          "wealth": "市场风险。价值可升可跌,不适合短期急需的现金。",
+          "insurance": "保费成本及锁定风险。提早取消可能损失已缴保费。",
+          "loans": "贷款期内存在长期债务及利率风险。",
+          "cards": "若每月未全额清还欠款,将产生债务风险。"
+        },
+        "alternative": {
+          "savings": "资金保留在现有账户,不开立新产品。",
+          "payments": "不使用自动化,改为手动转账。",
+          "wealth": "在增加投资供款前,先充实应急基金。",
+          "insurance": "在新增保单前,先与持牌顾问检视现有保障。",
+          "loans": "在申请前,继续储蓄以扩大首付款。",
+          "cards": "在现有欠款减少前,使用现有借记账户。"
+        },
+        "conflictReason": {
+          "emergencyBelowTarget": "应急基金准备度为{score}/100,低于安全门槛。应先保护流动性,再考虑高风险增长。",
+          "highDebtLoad": "债务健康度为{score}/100。现有债务偏高时,不建议增加非必要信贷。",
+          "mortgageReadinessWeak": "储蓄实力为{score}/100。应先提升房贷负担能力,再申请贷款。"
+        },
+        "conflictCheck": {
+          "emergencyBelowTarget": "已对照应急基金目标检查 — 发现冲突(分数 {score}/100)。",
+          "highDebtLoad": "已对照现有债务水平检查 — 发现冲突(分数 {score}/100)。",
+          "mortgageReadinessWeak": "已对照首付款准备度检查 — 发现冲突(分数 {score}/100)。"
+        }
+      }
+    }
   },
   "needs": {
     "wedding": "å©šç¤¼é¢„ç®—è§„åˆ’",
@@ -124,40 +164,16 @@
     "investment": "é•¿æœŸæŠ•èµ„è§„åˆ’"
   },
   "mirror": {
-    "eyebrow": "æ¨¡å— 2",
-    "title": "Future Mirror æ¨¡æ‹Ÿ",
-    "subtitle": "ä»¥å©šç¤¼é¢„ç®—ä¸ºä¸»è¦å†³ç­–ï¼Œå±•ç¤ºå®ƒå¦‚ä½•å½±å“ç½®ä¸šã€é€€ä¼‘ä¸Žé£Žé™©ã€‚",
-    "weddingBudget": "å©šç¤¼é¢„ç®—",
     "homePurchase": "ç½®ä¸šå¹´ä»½",
     "retirementAge": "é€€ä¼‘å¹´é¾„",
     "futureScore": "æœªæ¥è¯„åˆ†",
     "risk": "é£Žé™©ç­‰çº§",
-    "chartTitle": "æœªæ¥è¯„åˆ†æ¯”è¾ƒ",
-    "timelineTitle": "ç½®ä¸šæ—¶é—´çº¿",
-    "explainer": "Future Mirror æ˜¾ç¤ºä»Šå¤©çš„å†³å®šå¦‚ä½•æ”¹å˜æ˜Žå¤©çš„äººç”Ÿç»“æžœã€‚",
     "cta": "ç»§ç»­åˆ°ç›®æ ‡åè°ƒå™¨"
-  },
-  "scenarios": {
-    "label": "æ–¹æ¡ˆ {id}",
-    "a": "å½“å‰è·¯å¾„",
-    "b": "å¹³è¡¡æŠ˜ä¸­",
-    "c": "æŽ¨è"
   },
   "risk": {
     "high": "é«˜",
     "medium": "ä¸­",
     "low": "ä½Ž"
-  },
-  "negotiator": {
-    "eyebrow": "æ¨¡å— 3",
-    "title": "Goal Negotiator",
-    "subtitle": "AI åœ¨å©šç¤¼ä½“éªŒã€ç½®ä¸šã€åº”æ€¥ã€å®¶åº­å’Œé€€ä¼‘ç›®æ ‡ä¹‹é—´å–å¾—å¹³è¡¡ã€‚",
-    "competingGoals": "ç›¸äº’ç«žäº‰çš„ç›®æ ‡",
-    "wedding": "å©šç¤¼",
-    "futureGoals": "æœªæ¥ç›®æ ‡",
-    "tradeoff": "å¦‚æžœ the customer å’Œ the partner é€‰æ‹© SGD 80,000 çš„å©šç¤¼ï¼Œç½®ä¸šå’Œé€€ä¼‘ç›®æ ‡éƒ½ä¼šå»¶åŽã€‚Goal Negotiator ä¼šæ‰¾åˆ°èƒ½ä¿æŠ¤å…³é”®ç›®æ ‡çš„å¹³è¡¡æ–¹æ¡ˆã€‚",
-    "recommendedBalance": "æŽ¨èå¹³è¡¡",
-    "cta": "åè°ƒæˆ‘çš„èµ„é‡‘"
   },
   "competingGoals": {
     "wedding": "å©šç¤¼ä½“éªŒ",
@@ -172,22 +188,6 @@
     "homeTarget": "ç½®ä¸šç›®æ ‡",
     "retirementTarget": "é€€ä¼‘ç›®æ ‡",
     "emergencyFund": "åº”æ€¥åŸºé‡‘"
-  },
-  "capital": {
-    "eyebrow": "æ¨¡å— 4",
-    "title": "Capital Orchestrator",
-    "subtitle": "OCBC é“¶è¡Œäº§å“è¢«è¿žæŽ¥æˆ the customer å’Œ the partner çš„ä¸€å¥—äººç”Ÿç­–ç•¥ã€‚",
-    "ecosystem": "å·²è¿žæŽ¥çš„ OCBC äº§å“ç”Ÿæ€",
-    "explainer": "Capital Strategy coordinates savings, investments, insurance, mortgage, credit, and payments around customer life goals.",
-    "cta": "å¯åŠ¨è‡ªä¸»è®¡åˆ’"
-  },
-  "allocations": {
-    "wedding": "å©šç¤¼å‚¨è“„ç›®æ ‡",
-    "home": "é¦–ä»˜æ¬¾åŸºé‡‘",
-    "emergency": "åº”æ€¥åŸºé‡‘",
-    "investment": "æŠ•èµ„è®¡åˆ’",
-    "insurance": "ä¿é™©å‡†å¤‡åº¦",
-    "mortgage": "æˆ¿è´·å‡†å¤‡åº¦"
   },
   "products": {
     "deposits": "å­˜æ¬¾",
@@ -204,55 +204,18 @@
     "creditAction": "è´Ÿè´£ä»»ä¿¡è´·è§„åˆ’"
   },
   "status": {
-    "created": "å·²åˆ›å»º",
     "active": "è¿›è¡Œä¸­",
-    "growing": "å¢žé•¿ä¸­",
-    "locked": "å·²é”å®š",
-    "adjusted": "å·²è°ƒæ•´",
-    "balanced": "å·²å¹³è¡¡",
     "recommended": "æŽ¨è",
     "review": "å¾…å¤æ ¸",
     "preparing": "å‡†å¤‡ä¸­",
-    "track": "è·Ÿè¸ª",
     "completed": "å·²å®Œæˆ",
     "monitoring": "ç›‘æµ‹ä¸­",
     "scheduled": "å·²å®‰æŽ’",
     "approved": "å·²æ‰¹å‡†"
   },
-  "engine": {
-    "eyebrow": "æ¨¡å— 5",
-    "title": "Autonomous Banking Engine",
-    "subtitle": "å·²æ‰¹å‡†è®¡åˆ’ä¼šè‡ªåŠ¨æ‰§è¡Œï¼Œå¹¶ä¿ç•™æ¸…æ™°æŽ§åˆ¶å’Œç›‘æµ‹ã€‚",
-    "activating": "æ­£åœ¨å¯åŠ¨è®¡åˆ’...",
-    "loadingDetail": "æ­£åœ¨åˆ›å»ºç›®æ ‡ã€è½¬è´¦ã€ç›‘æµ‹è§„åˆ™å’Œå¤æ ¸èŠ‚å¥ã€‚",
-    "activatedMessage": "ä½ çš„æœªæ¥è®¡åˆ’å·²å¯åŠ¨ã€‚",
-    "cta": "æŸ¥çœ‹æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…",
-    "actions": {
-      "createWedding": "åˆ›å»ºå©šç¤¼å‚¨è“„ç›®æ ‡",
-      "transfer": "å®‰æŽ’æ¯æœˆè½¬è´¦ï¼šSGD 450/æœˆ",
-      "protectEmergency": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
-      "adjustInvestment": "è°ƒæ•´æŠ•èµ„è®¡åˆ’",
-      "trackHome": "è·Ÿè¸ªç½®ä¸šå‡†å¤‡åº¦",
-      "alerts": "å‘é€æœªæ¥é£Žé™©æé†’",
-      "review": "æ¯ 3 ä¸ªæœˆå¤æ ¸è®¡åˆ’"
-    }
-  },
   "guardian": {
-    "eyebrow": "æ¨¡å— 6",
     "title": "æ¥è‡ªæœªæ¥è‡ªæˆ‘çš„è®¯æ¯",
-    "subtitle": "Future Self Guardian ä¿æŠ¤å®¢æˆ·çš„é•¿æœŸåˆ©ç›Šã€‚",
-    "message1": "the customer å’Œ the partnerï¼Œä½ ä»¬å¥½ï¼Œæˆ‘æ˜¯ä½ ä»¬çš„ Future Self Guardianã€‚",
-    "message2": "æˆ‘åˆ†æžäº†ä½ ä»¬åœ¨å©šå§»ã€ç½®ä¸šã€å®¶åº­è§„åˆ’å’Œé€€ä¼‘æ–¹é¢çš„æœªæ¥ã€‚",
-    "message3": "é€‰æ‹© SGD 80,000 çš„å©šç¤¼ï¼Œå¯èƒ½è®©é¦–å¥—æˆ¿å»¶åŽ 4 å¹´ï¼Œä¹Ÿè®©é€€ä¼‘å»¶åŽ 4 å¹´ã€‚",
-    "message4": "ä¸ºäº†ä¿æŠ¤ä½ ä»¬æƒ³è¦çš„æœªæ¥ï¼Œæˆ‘å»ºè®®é€‰æ‹© SGD 35,000 çš„å©šç¤¼æ–¹æ¡ˆï¼Œå¹¶æ‰§è¡Œ SGD 450 çš„æ¯æœˆå‚¨è“„ç­–ç•¥ã€‚",
-    "message5": "æˆ‘ä¼šç»§ç»­ç›‘æµ‹è¿›å±•ï¼Œå¸®åŠ©ä½ ä»¬ä¿æŒåœ¨æ­£ç¡®è½¨é“ä¸Šã€‚",
     "protectedScore": "æœªæ¥ä¿æŠ¤è¯„åˆ†",
-    "activePlan": "å¯ç”¨è®¡åˆ’",
-    "planValue": "å©šç¤¼ + ç½®ä¸š + é€€ä¼‘",
-    "monitoringStatus": "ç›‘æµ‹çŠ¶æ€",
-    "nextReview": "ä¸‹æ¬¡å¤æ ¸",
-    "reviewValue": "æ¯ 3 ä¸ªæœˆ",
-    "cta": "ç»§ç»­ä¿æŠ¤æˆ‘çš„æœªæ¥",
     "memory": {
       "title": "?????",
       "subtitle": "?? AI ????????????????????",
@@ -361,6 +324,14 @@
         "settings": {
           "title": "?????",
           "subtitle": "???????????"
+        },
+        "reputation": {
+          "title": "Guardian 信誉",
+          "subtitle": "Guardian 已赢得多少自主权"
+        },
+        "goalLedger": {
+          "title": "目标台账",
+          "subtitle": "查看每个受保护目标背后的生命周期状态"
         }
       }
     },
@@ -440,40 +411,99 @@
           "why": "???? {goal}???????????????"
         }
       }
+    },
+    "reputation": {
+      "scoreLabel": "信誉分数",
+      "band": {
+        "restricted": "受限",
+        "underReview": "审核中",
+        "buildingTrust": "建立信任中",
+        "trusted": "已获信任",
+        "highlyTrusted": "高度信任"
+      },
+      "bandDetail": {
+        "restricted": "不会增加自主权;需要审核,并减少主动介入。",
+        "underReview": "在问题解决前,仅提供说明与建议。",
+        "buildingTrust": "可提供建议与协商;执行前仍需批准。",
+        "trusted": "可进行第4级行动准备与批准流程。",
+        "highlyTrusted": "若你明确同意,可提供第5级自动守则。"
+      },
+      "componentsTitle": "评分构成",
+      "components": {
+        "consentRespect": "同意遵守度({weight}%)",
+        "goalProtectionRate": "目标保护率({weight}%)",
+        "recoverySuccess": "恢复成功率({weight}%)",
+        "recommendationOutcomeAccuracy": "建议结果准确度({weight}%)",
+        "humanEscalationQuality": "人工升级质量({weight}%)"
+      },
+      "noViolations": "未记录任何同意违规。一旦确认违规,该类别将立即受限,直至审核完成。",
+      "formulaTitle": "计算方式",
+      "formulaNote": "Guardian 信誉分数是一种产品行为的原型评分模型,并非受监管的金融公式。它只影响 Guardian 能否申请更高自主权——它绝不会自行执行任何操作。"
+    },
+    "goalLedger": {
+      "intro": "每个受保护的目标都会经历明确的状态——它绝不会从规划悄然跳到执行,也不会从挫折悄然跳到放弃。",
+      "state": {
+        "draft": "草拟中",
+        "committed": "已承诺",
+        "monitoring": "监控中",
+        "atRisk": "有风险",
+        "recovery": "恢复中",
+        "paused": "已暂停",
+        "completed": "已完成",
+        "abandoned": "已放弃",
+        "escalated": "已升级审核"
+      },
+      "obligation": {
+        "draft": "仅询问使该目标可用所需的缺失数据。",
+        "committed": "建立基准计划、门槛及审查节奏。",
+        "monitoring": "追踪进度、侦测偏移并报告变化。",
+        "atRisk": "发出提醒、解释影响、显示受影响的目标,并准备恢复方案。",
+        "recovery": "追踪恢复成效,若恢复未见效则修订方案。",
+        "paused": "停止行动、保留历史记录,若获准则仅保留只读规划。",
+        "completed": "提供完成审查、成果证据及下一步选项。",
+        "abandoned": "不带评判地记录原因,并保护其余目标。",
+        "escalated": "冻结不安全的自主权,并说明为何需要审核。"
+      },
+      "actions": {
+        "commit": "承诺此目标",
+        "pause": "暂停目标",
+        "complete": "标记为已完成",
+        "abandon": "放弃目标",
+        "recover": "接受恢复方案",
+        "escalate": "提交审核",
+        "resolveRecovery": "恢复监控",
+        "resume": "恢复目标",
+        "reopen": "重新开启为草拟",
+        "resolveEscalation": "解决审核"
+      },
+      "trigger": {
+        "customerConfirmedGoal": "客户确认目标并开始监控。",
+        "customerPaused": "客户暂停了此目标。",
+        "targetAchieved": "客户将目标标记为已完成。",
+        "customerAbandoned": "客户放弃了此目标。",
+        "customerAcceptedRecoveryPlan": "客户接受了恢复方案。",
+        "riskExceededAutonomy": "风险超出目前自主权等级,已提交审核。",
+        "recoveryResolved": "恢复方案已解决偏移问题;已恢复监控。",
+        "customerResumedGoal": "客户恢复了此目标。",
+        "customerReopenedGoal": "客户将此目标重新开启为新的草拟。",
+        "reviewResolved": "审核已解决;已恢复监控。",
+        "riskThresholdCrossed": "保护分数跌破安全门槛。",
+        "riskCleared": "保护分数已回升至安全门槛之上。"
+      }
     }
   },
   "profile": {
-    "eyebrow": "æ¼”ç¤ºå®¢æˆ·",
-    "title": "ä¸ªäººèµ„æ–™ä¸ŽæŽ§åˆ¶",
-    "subtitle": "ç”¨äºŽçŽ°åœºæ¼”ç¤ºçš„è¯­è¨€ã€åŒæ„ã€é€šçŸ¥å’Œ AI å®ˆæŠ¤è€…æƒé™ã€‚",
     "combinedIncome": "åˆè®¡æœˆæ”¶å…¥",
     "currentSavings": "å½“å‰å‚¨è“„",
     "status": "çŠ¶æ€",
-    "detectedStage": "è¯†åˆ«äººç”Ÿé˜¶æ®µ",
-    "consentStatus": "æ•°æ®åŒæ„",
-    "consentValue": "å·²æ‰¹å‡†ç”¨äºŽæ¼”ç¤º",
-    "settings": "è®¾ç½®",
-    "notifications": "æœªæ¥æé†’ä¸Žäº§å“å‡†å¤‡åº¦é€šçŸ¥",
-    "permissions": "AI å®ˆæŠ¤è€…æƒé™",
-    "permissionItems": {
-      "savings": "åˆ›å»ºå’Œè°ƒæ•´å‚¨è“„ç›®æ ‡",
-      "alerts": "å‘é€æ”¯å‡ºä¸Žæœªæ¥é£Žé™©æé†’",
-      "investment": "å»ºè®®æŠ•èµ„è°ƒæ•´",
-      "insurance": "å»ºè®®ä¿é™©å‡†å¤‡åº¦æ£€æŸ¥"
-    },
-    "connectedServices": "å·²è¿žæŽ¥æœåŠ¡",
-    "privacyNote": "OCBC FutureOS åªä½¿ç”¨å·²èŽ·æ‰¹å‡†çš„å®¢æˆ·æ•°æ®ã€‚è‡ªä¸»è¡ŒåŠ¨éœ€è¦å®¢æˆ·åŒæ„ï¼Œå¹¶å¯¹å®¢æˆ·ä¿æŒå¯è§ã€‚"
+    "detectedStage": "è¯†åˆ«äººç”Ÿé˜¶æ®µ"
   },
   "loading": {
     "default": "æ­£åœ¨å‡†å¤‡ FutureOS...",
     "detail": "OCBC FutureOS æ­£åœ¨è¿žæŽ¥äººç”Ÿç›®æ ‡ã€äº§å“å’Œå·²æ‰¹å‡†çš„ AI è¡ŒåŠ¨ã€‚",
     "lifeGraph": "æ­£åœ¨æž„å»º Life Graph...",
     "mirror": "æ­£åœ¨æ¨¡æ‹Ÿæœªæ¥...",
-    "negotiator": "æ­£åœ¨åè°ƒç›®æ ‡...",
-    "capital": "æ­£åœ¨åè°ƒèµ„é‡‘...",
-    "engine": "æ­£åœ¨å¯åŠ¨è®¡åˆ’...",
-    "guardian": "æ­£åœ¨å‡†å¤‡å®ˆæŠ¤è€…è®¯æ¯...",
-    "simulator": "æ­£åœ¨æ‰“å¼€ Future Mirror Simulator..."
+    "guardian": "æ­£åœ¨å‡†å¤‡å®ˆæŠ¤è€…è®¯æ¯..."
   },
   "needDetails": {
     "liveProjection": "å®žæ—¶é¢„æµ‹",
@@ -504,7 +534,16 @@
       "support3": "åœ¨ 2030 å¹´å‰å‡†å¤‡æˆ¿è´·èµ„æ ¼ã€‚",
       "support4": "è‹¥æ¯æœˆå‚¨è“„è½åŽåˆ™è§¦å‘æé†’ã€‚",
       "cta": "åˆ›å»ºç½®ä¸šå‡†å¤‡è·Ÿè¸ª",
-      "success": "ç½®ä¸šå‡†å¤‡è·Ÿè¸ªå·²åˆ›å»ºã€‚æˆ¿è´·å‡†å¤‡å’Œé¦–ä»˜æ¬¾ç›‘æµ‹å·²å¯åŠ¨ã€‚"
+      "success": "ç½®ä¸šå‡†å¤‡è·Ÿè¸ªå·²åˆ›å»ºã€‚æˆ¿è´·å‡†å¤‡å’Œé¦–ä»˜æ¬¾ç›‘æµ‹å·²å¯åŠ¨ã€‚",
+      "sgContextDisclaimer": "此处显示的新加坡房屋背景信息(HDB/BTO)仅为一般规划参考,并非已核实的 HDB/BTO 对接。",
+      "housingTypeLabel": "房屋类型",
+      "bto": "BTO预购组屋",
+      "resale": "转售组屋",
+      "housingContext": {
+        "bto": "BTO组屋通常价格较低,但需要数年的建造等待期才能收楼——请围绕预计的等待期而不仅是首付日期来规划储蓄时间表。",
+        "resale": "转售组屋可较快入住,但前期费用通常更高——首付款与房贷准备度需要比BTO更早到位。"
+      },
+      "cpfContext": "你的公积金(CPF)普通户头存款也可能用于支付首付款或每月房贷分期——请查阅你的CPF房屋用途声明以确认实际额度。"
     },
     "emergency": {
       "title": "åº”æ€¥åŸºé‡‘ä¿æŠ¤",
@@ -558,18 +597,13 @@
       "higherRisk": "è¾ƒé«˜é£Žé™©ï¼Œæ›´å¿«è¾¾æ ‡",
       "retirementAt": "{age} å²é€€ä¼‘",
       "cta": "åº”ç”¨å¹³è¡¡æŠ•èµ„è®¡åˆ’",
-      "success": "å¹³è¡¡æŠ•èµ„è®¡åˆ’å·²åº”ç”¨ã€‚FutureOS å°†æ¯ 3 ä¸ªæœˆå¤æ ¸è¿›å±•ã€‚"
+      "success": "å¹³è¡¡æŠ•èµ„è®¡åˆ’å·²åº”ç”¨ã€‚FutureOS å°†æ¯ 3 ä¸ªæœˆå¤æ ¸è¿›å±•ã€‚",
+      "cpfContextDisclaimer": "此计划仅涵盖私人投资部分。你的公积金储蓄及CPF退休储蓄框架是退休准备的另一项重要内容——请查阅你的CPF结单,了解目前余额及预计可领取年龄。"
     }
   },
   "simulator": {
-    "eyebrow": "ç¬¬ 8 èŠ‚",
     "title": "Future Mirror æ¨¡æ‹Ÿå™¨",
     "subtitle": "åˆ›å»ºä½ çš„ AI ä»£ç†ï¼Œæ¨¡æ‹Ÿäººç”Ÿå†³ç­–ï¼Œå¹¶è®© Future Self Guardian é€‰æ‹©æœ€ä½³å»ºè®®ã€‚",
-    "openSimulator": "æ‰“å¼€ Future Mirror æ¨¡æ‹Ÿå™¨",
-    "homeCard": {
-      "title": "Future Mirror æ¨¡æ‹Ÿå™¨",
-      "detail": "è¾“å…¥æƒ…å†µã€è®¾å®š AI ç‹¬ç«‹ç¨‹åº¦ï¼Œå¹¶æ¯”è¾ƒå¤šä¸ªæœªæ¥ã€‚"
-    },
     "trustNote": "FutureOS ä¸ä¼šåœ¨æœªç»å®¢æˆ·åŒæ„çš„æƒ…å†µä¸‹æ‰§è¡Œé‡‘èžæ“ä½œã€‚è‡ªä¸»æ“ä½œåªä¼šåœ¨å·²æ‰¹å‡†çš„é™åˆ¶å†…è¿›è¡Œã€‚",
     "run": "è¿è¡Œæœªæ¥æ¨¡æ‹Ÿ",
     "reset": "é‡ç½®æ¨¡æ‹Ÿ",
@@ -581,7 +615,6 @@
       "aiIndependence": "AI ç‹¬ç«‹ç¨‹åº¦",
       "monthlyIncome": "æœˆæ”¶å…¥",
       "currentSavings": "å½“å‰å‚¨è“„",
-      "plannedSpending": "è®¡åˆ’æ”¯å‡º",
       "targetHomeYear": "ç›®æ ‡ç½®ä¸šå¹´ä»½",
       "retirementAge": "é€€ä¼‘ç›®æ ‡å¹´é¾„",
       "riskPreference": "é£Žé™©åå¥½",
@@ -653,16 +686,11 @@
       "enable": "å¯ç”¨è‡ªä¸»æ¨¡å¼"
     },
     "output": {
-      "summary": "å®¢æˆ·æ­£åœ¨è®¡åˆ’ä¸€ç¬” {spending} çš„é‡å¤§æ”¯å‡ºï¼ŒåŒæ—¶å¸Œæœ›åœ¨ {year} å¹´å‰è´­ä¹°é¦–å¥—æˆ¿ã€‚",
-      "emergencyFund": "åº”æ€¥åŸºé‡‘",
       "bestRecommendation": "AI é€‰æ‹©çš„æœ€ä½³å»ºè®®",
-      "recommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåŒæ—¶ä¿æŠ¤çŸ­æœŸå¹¸ç¦å’Œé•¿æœŸå®‰å…¨ã€‚",
       "adviceOnly": "ç­‰çº§ 1 ä»…æä¾›å»ºè®®ã€‚FutureOS ä¼šè§£é‡Šå¯èƒ½çš„æœªæ¥ï¼Œä½†ä¸ä¼šæ˜¾ç¤ºæ‰§è¡ŒæŽ§åˆ¶ã€‚",
       "tradeoffs": "FutureOS ä¼šåœ¨å·²é€‰æ‹©çš„äººç”Ÿç›®æ ‡ã€çŽ°é‡‘å®‰å…¨ã€äº§å“å‡†å¤‡åº¦å’Œé•¿æœŸä¿éšœä¹‹é—´åå•†å¹³è¡¡ã€‚",
       "why": "AI ä¸ºä»€ä¹ˆè¿™æ ·é€‰æ‹©ï¼Ÿ",
       "explainTitle": "Guardian æŽ¨ç†",
-      "suggestedActions": "å»ºè®®è¡ŒåŠ¨",
-      "autonomousWarning": "è‡ªä¸»æ¨¡å¼å·²å¯ç”¨ã€‚è¿™äº›è¡ŒåŠ¨ä»å—ä½ æ‰¹å‡†çš„è®¾ç½®é™åˆ¶ï¼Œå¹¶å¯éšæ—¶æ›´æ”¹ã€‚",
       "apply": "åº”ç”¨ Guardian å»ºè®®",
       "success": "Future Self Guardian å»ºè®®å·²åº”ç”¨ã€‚FutureOS å°†æŒç»­ç›‘æµ‹ä½ çš„è¿›åº¦ã€‚",
       "scenarios": {
@@ -679,11 +707,6 @@
           "detail": "è¾ƒé«˜æ”¯å‡ºæˆ–æ›´å¿«æ—¶é—´è¡¨ï¼Œè´¢åŠ¡å®‰å…¨è¾ƒå¼±ã€‚"
         }
       },
-      "emergency": {
-        "strong": "å¼º",
-        "protected": "å·²ä¿æŠ¤",
-        "weak": "å¼±"
-      },
       "tone": {
         "1": "å»ºè®®è¯­æ°”ï¼šæä¾›ä¿¡æ¯ï¼Œä¸æ˜¾ç¤ºæ‰§è¡ŒæŒ‰é’®ã€‚",
         "2": "æŽ¨èè¯­æ°”ï¼šé€‰æ‹©æœ€ä½³æœªæ¥ï¼Œä½†ä¸è¿›è¡Œè‡ªä¸»è¡ŒåŠ¨ã€‚",
@@ -693,9 +716,7 @@
       },
       "explain": {
         "protectedGoals": "å—ä¿æŠ¤ç›®æ ‡ï¼š{goals}ã€çŽ°é‡‘å®‰å…¨ä¸Žé•¿æœŸè´¢åŠ¡å¥åº·ã€‚",
-        "reducedRisks": "é™ä½Žçš„é£Žé™©ï¼šè¶…æ”¯ã€ç›®æ ‡å»¶è¯¯å’Œé•¿æœŸå‡†å¤‡ä¸è¶³ã€‚",
-        "products": "OCBC æ”¯æŒï¼šç›®æ ‡å‚¨è“„ã€è‡ªåŠ¨è½¬è´¦ã€ä¿é™©å¤æ ¸ã€ç›¸å…³æˆ¿è´·å‡†å¤‡ï¼Œä»¥åŠæŠ•èµ„è§„åˆ’ã€‚",
-        "tradeoffs": "å–èˆï¼šæŽ§åˆ¶æ”¯å‡ºæˆ–è°ƒæ•´æ—¶é—´è¡¨ï¼Œè®©é•¿æœŸå®‰å…¨ä¿æŒç¨³å®šã€‚"
+        "products": "OCBC æ”¯æŒï¼šç›®æ ‡å‚¨è“„ã€è‡ªåŠ¨è½¬è´¦ã€ä¿é™©å¤æ ¸ã€ç›¸å…³æˆ¿è´·å‡†å¤‡ï¼Œä»¥åŠæŠ•èµ„è§„åˆ’ã€‚"
       },
       "dynamicSummary": "FutureOS æ­£åœ¨æ ¹æ®å·²é€‰æ‹©ç›®æ ‡åˆ†æž {goal}ï¼š{goals}ã€‚",
       "fields": {
@@ -735,7 +756,8 @@
         "reviewNeeded": "éœ€å¤æ ¸",
         "tight": "åç´§",
         "manageable": "å¯ç®¡ç†"
-      }
+      },
+      "futureGoalsLabel": "æœªæ¥ç›®æ ‡"
     },
     "actions": {
       "savingsGoal": "åˆ›å»ºå‚¨è“„ç›®æ ‡",
@@ -746,9 +768,7 @@
       "investmentPlan": "è°ƒæ•´æŠ•èµ„è®¡åˆ’"
     },
     "actionButtons": {
-      "approve": "æ‰¹å‡†",
-      "edit": "ç¼–è¾‘",
-      "skip": "è·³è¿‡"
+      "approve": "æ‰¹å‡†"
     },
     "actionStatus": {
       "pending": "ç­‰å¾…å®¢æˆ·é€‰æ‹©",
@@ -758,13 +778,9 @@
     },
     "autonomousLock": {
       "title": "è‡ªä¸»ç›®æ ‡é”å®š",
-      "available": "å¯å¯ç”¨è‡ªä¸»ç›®æ ‡é”å®š",
-      "guardrail": "é¢„å…ˆæ‰¹å‡†çš„å‚¨è“„ä¿æŠ¤çº¿",
-      "pocket": "å—ä¿æŠ¤ç›®æ ‡è´¦æˆ·",
       "pause": "å®¢æˆ·å¯éšæ—¶æš‚åœæˆ–è°ƒæ•´"
     },
     "reasoning": {
-      "title": "AI ä»£ç†æŽ¨ç†",
       "situationUnderstood": "å·²ç†è§£æƒ…å†µ",
       "selectedGoals": "å·²é€‰ç›®æ ‡",
       "mainRisk": "ä¸»è¦é£Žé™©",
@@ -968,11 +984,6 @@
       "clearNotice": "??????Future Mirror ??????",
       "restoreNotice": "????????FutureOS ??????????"
     },
-    "version": {
-      "title": "å…³äºŽ FutureOS",
-      "description": "æŸ¥çœ‹åŽŸåž‹ç‰ˆæœ¬ä¸Žäº§å“ä¿¡æ¯ã€‚",
-      "label": "ç‰ˆæœ¬"
-    },
     "profile": {
       "title": "ä¸ªäººèµ„æ–™",
       "description": "è‡ªå®šä¹‰ FutureOS å¦‚ä½•ç§°å‘¼ä½ ã€‚",
@@ -1087,20 +1098,6 @@
       "primary": "é”å®šæ±‡çŽ‡",
       "note": "æ±‡çŽ‡ä¸ºæ¨¡æ‹Ÿå€¼ã€‚"
     }
-  },
-  "onboarding": {
-    "securePrototype": "??? OCBC FutureOS ??",
-    "title": "OCBC FutureOS",
-    "subtitle": "???????????? Life Graph?Future Mirror ? Future Self Guardian ???????",
-    "lifeGraph": "Life Graph",
-    "futureMirror": "Future Mirror",
-    "guardian": "Future Self Guardian",
-    "login": "??",
-    "createDemo": "??????",
-    "profileTitle": "????",
-    "profileSubtitle": "????????? FutureOS ?????? Guardian ???",
-    "back": "??",
-    "saveProfile": "????"
   },
   "spendingRisk": {
     "title": "??????",
