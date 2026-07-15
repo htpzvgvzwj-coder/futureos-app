@@ -1656,6 +1656,12 @@ nextjs-portal {
   background: rgba(215, 25, 32, 0.1);
 }
 
+.statePill.ledgerState-planning,
+.statePill.ledgerState-awaitingApproval {
+  color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.1);
+}
+
 .ledgerCard {
   gap: 10px;
 }
@@ -3933,6 +3939,12 @@ nextjs-portal {
 .stage.theme-dark .statePill.ledgerState-escalated {
   background: rgba(215, 25, 32, 0.22);
   color: #ff8a80;
+}
+
+.stage.theme-dark .statePill.ledgerState-planning,
+.stage.theme-dark .statePill.ledgerState-awaitingApproval {
+  background: rgba(29, 78, 216, 0.28);
+  color: #93c5fd;
 }
 
 .stage.theme-dark .prototypeTag {

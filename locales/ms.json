@@ -669,7 +669,17 @@
       "scoreChange": "Perubahan Skor Masa Depan",
       "scoreChangeValue": "Skor unjuran kini {score}/100 selepas langkah perlindungan yang diluluskan.",
       "newInsights": "Pandangan baharu",
-      "aiRecommendations": "Cadangan AI"
+      "aiRecommendations": "Cadangan AI",
+      "goalsMonitored": "Matlamat Dipantau",
+      "risksDetected": "Risiko Dikesan",
+      "recommendationsDecided": "Cadangan Diputuskan",
+      "recommendationsDecidedValue": "{accepted} diluluskan, {skipped} dilangkau",
+      "recoveryPlansCreated": "Pelan Pemulihan Dicipta",
+      "strategyChanges": "Perubahan Strategi",
+      "reputationState": "Status Reputasi",
+      "mistakes": "Kesilapan atau Isu Belum Selesai",
+      "mistakesValue": "Tiada direkodkan pada tempoh ini.",
+      "nextReview": "Semakan Seterusnya"
     },
     "history": {
       "today": "Hari ini",
@@ -742,6 +752,29 @@
         "completed": "Ditutup sebaik sahaja semakan penyiapan dan pilihan langkah seterusnya dihasilkan.",
         "abandoned": "Keluar jika pelanggan membuka semula matlamat sebagai draf baharu.",
         "escalated": "Keluar apabila semakan diselesaikan dan pemantauan boleh disambung semula dengan selamat."
+      }
+    },
+    "state": {
+      "title": "Status Guardian",
+      "label": {
+        "planning": "Merancang",
+        "monitoring": "Memantau",
+        "atRisk": "Berisiko",
+        "recovery": "Pemulihan",
+        "awaitingApproval": "Menunggu Kelulusan",
+        "completed": "Selesai",
+        "escalated": "Dieskalasi",
+        "paused": "Dijeda"
+      },
+      "reason": {
+        "planning": "Guardian sedang membina strategi untuk matlamat yang belum dikomited.",
+        "monitoring": "Guardian sedang menjejaki matlamat aktif anda dan mengawasi lencongan.",
+        "atRisk": "Matlamat terlindung telah melepasi ambang risiko dan memerlukan perhatian anda.",
+        "recovery": "Pelan yang disemak semula sedang dijejaki untuk memulihkan matlamat berisiko.",
+        "awaitingApproval": "Guardian telah menyediakan tindakan yang menunggu kelulusan anda.",
+        "completed": "Semua matlamat terlindung anda telah mencapai sasaran.",
+        "escalated": "Satu matlamat memerlukan semakan manusia atau dasar sebelum Guardian boleh meneruskan.",
+        "paused": "Kebenaran telah ditarik balik, jadi Guardian telah menghentikan tingkah laku autonomi."
       }
     }
   },

@@ -496,6 +496,23 @@ function getReputationBand(score) {
   return "highlyTrusted";
 }
 
+// Guardian State (08_Guardian_Operating_Principles.md "Guardian States" table): a single, explicit,
+// customer-visible state derived only from data that already exists - goal ledger states, prepared
+// action decisions, and consent - so "Guardian is active" always comes with a reason. "Executing" is
+// omitted because actions apply synchronously in this prototype, so there is no observable moment
+// between "awaiting approval" and the ledger/action state updating.
+function getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates) {
+  if (preferences.consentWithdrawn) return "paused";
+  const ledgerStates = ledgerGoalEntries.map((entry) => preferences.goalLedger?.[entry.id]?.state ?? "draft");
+  if (ledgerStates.some((state) => state === "escalated")) return "escalated";
+  if (ledgerStates.some((state) => state === "atRisk")) return "atRisk";
+  if (ledgerStates.some((state) => state === "recovery")) return "recovery";
+  if (visibleActionCards.some(({ id }) => simulatorActionStates[id] === "pending")) return "awaitingApproval";
+  if (ledgerStates.every((state) => state === "completed")) return "completed";
+  if (ledgerStates.every((state) => state === "draft")) return "planning";
+  return "monitoring";
+}
+
 // Goal Ledger Lifecycle (07_Relationship_And_Shared_Responsibility.md): every protected goal moves
 // through explicit states instead of silently jumping from planning to execution.
 const goalLedgerRiskCategory = {
@@ -3137,6 +3154,7 @@ function FutureSelfGuardian({
 }) {
   const [guardianApplied, setGuardianApplied] = useState(false);
   const [protectedScoreInfoOpen, setProtectedScoreInfoOpen] = useState(false);
+  const [guardianStateInfoOpen, setGuardianStateInfoOpen] = useState(false);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [selectedMemoryEvent, setSelectedMemoryEvent] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
@@ -3177,6 +3195,7 @@ function FutureSelfGuardian({
   });
   const reputationBand = getReputationBand(reputation.score);
   const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
+  const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
 
   useEffect(() => {
     ledgerGoalEntries.forEach(({ id, riskCategory }) => {
@@ -3243,11 +3262,38 @@ function FutureSelfGuardian({
       icon: LockKeyhole,
     },
   ];
+  // Monthly Guardian Report requirements (08_Guardian_Operating_Principles.md): every field below is
+  // derived from data already tracked elsewhere (ledger states, decided actions, reputation) so the
+  // report stays accountable instead of becoming encouraging copy.
+  const recoveryGoalCount = ledgerGoalEntries.filter(
+    (entry) => (preferences.goalLedger?.[entry.id]?.state ?? "draft") === "recovery"
+  ).length;
+  const atRiskGoalCount = ledgerGoalEntries.filter(
+    (entry) => (preferences.goalLedger?.[entry.id]?.state ?? "draft") === "atRisk"
+  ).length;
+  const strategyChangeCount = ledgerGoalEntries.reduce(
+    (total, entry) => total + (preferences.goalLedger?.[entry.id]?.history?.length ?? 0),
+    0
+  );
   const reportItems = [
-    { labelKey: "guardian.report.goalProgress", value: t("guardian.report.goalProgressValue", { goal: goalName }) },
-    { labelKey: "guardian.report.scoreChange", value: t("guardian.report.scoreChangeValue", { score: futureScore }) },
-    { labelKey: "guardian.report.newInsights", value: reasoning.risk },
-    { labelKey: "guardian.report.aiRecommendations", value: reasoning.action },
+    { labelKey: "guardian.report.goalsMonitored", value: String(ledgerGoalEntries.length) },
+    { labelKey: "guardian.report.risksDetected", value: String(atRiskGoalCount) },
+    {
+      labelKey: "guardian.report.recommendationsDecided",
+      value: t("guardian.report.recommendationsDecidedValue", {
+        accepted: approvedActionCount + approvedServiceCount,
+        skipped: skippedActionCount,
+      }),
+    },
+    { labelKey: "guardian.report.recoveryPlansCreated", value: String(recoveryGoalCount) },
+    { labelKey: "guardian.report.strategyChanges", value: String(strategyChangeCount) },
+    { labelKey: "guardian.report.goalProgress", value: t("guardian.report.goalProgressValue", { goal: goalName }), long: true },
+    { labelKey: "guardian.report.scoreChange", value: t("guardian.report.scoreChangeValue", { score: futureScore }), long: true },
+    { labelKey: "guardian.report.reputationState", value: t(`guardian.reputation.band.${reputationBand}`) },
+    { labelKey: "guardian.report.mistakes", value: t("guardian.report.mistakesValue"), long: true },
+    { labelKey: "guardian.report.newInsights", value: reasoning.risk, long: true },
+    { labelKey: "guardian.report.aiRecommendations", value: reasoning.action, long: true },
+    { labelKey: "guardian.report.nextReview", value: t("guardian.memory.metrics.tomorrow") },
   ];
   const approvedHistoryItems = visibleActionCards
     .filter(({ id }) => simulatorActionStates[id] === "approved")
@@ -3298,6 +3344,17 @@ function FutureSelfGuardian({
     setLastApprovedServiceId(actionId);
     setSimulatorActionStates((current) => ({ ...current, [actionId]: "approved" }));
   }
+
+  const guardianStateInfoModal = guardianStateInfoOpen ? (
+    <InfoModal
+      icon={ShieldCheck}
+      title={t("guardian.state.title")}
+      tag={t(`guardian.state.label.${guardianState}`)}
+      body={t(`guardian.state.reason.${guardianState}`)}
+      onClose={() => setGuardianStateInfoOpen(false)}
+      closeLabel={t("homeBanking.gotIt")}
+    />
+  ) : null;
 
   const protectedScoreModal = protectedScoreInfoOpen ? (
     <InfoModal
@@ -3701,9 +3758,16 @@ function FutureSelfGuardian({
     if (selectedFeatureId === "monthlyReview") {
       return (
         <section className="recommendationPanel">
-          {reportItems.map((item) => (
-            <SummaryRow key={item.labelKey} label={t(item.labelKey)} value={item.value} />
-          ))}
+          {reportItems.map((item) =>
+            item.long ? (
+              <div className="proofBlock" key={item.labelKey}>
+                <strong>{t(item.labelKey)}</strong>
+                <p>{item.value}</p>
+              </div>
+            ) : (
+              <SummaryRow key={item.labelKey} label={t(item.labelKey)} value={item.value} />
+            )
+          )}
         </section>
       );
     }
@@ -3866,6 +3930,7 @@ function FutureSelfGuardian({
         {protectedScoreModal}
         {memoryDetailModal}
         {contractModal}
+        {guardianStateInfoModal}
       </Screen>
     );
   }
@@ -3879,6 +3944,17 @@ function FutureSelfGuardian({
         <div className="panelHead">
           <span className="sectionLabel">{t("guardian.sections.status")}</span>
           <ShieldCheck size={17} />
+        </div>
+        <div className="productStateRow">
+          <b className={`statePill ledgerState-${guardianState}`}>{t(`guardian.state.label.${guardianState}`)}</b>
+          <button
+            type="button"
+            className="infoButton tinyInfoButton"
+            onClick={() => setGuardianStateInfoOpen(true)}
+            aria-label={t("homeBanking.infoLabel", { item: t("guardian.state.title") })}
+          >
+            <Info size={11} />
+          </button>
         </div>
         <div className="guardianHubStats">
           <article>
@@ -3939,6 +4015,7 @@ function FutureSelfGuardian({
         ))}
       </section>
       {protectedScoreModal}
+      {guardianStateInfoModal}
     </Screen>
   );
 }

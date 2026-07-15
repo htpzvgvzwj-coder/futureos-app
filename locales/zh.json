@@ -669,7 +669,17 @@
       "scoreChange": "未来评分变化",
       "scoreChangeValue": "在已批准的保障措施后,预计评分现为 {score}/100。",
       "newInsights": "新洞察",
-      "aiRecommendations": "AI 建议"
+      "aiRecommendations": "AI 建议",
+      "goalsMonitored": "已监测目标",
+      "risksDetected": "已检测到的风险",
+      "recommendationsDecided": "已决定的建议",
+      "recommendationsDecidedValue": "已批准 {accepted} 项,已跳过 {skipped} 项",
+      "recoveryPlansCreated": "已创建的恢复计划",
+      "strategyChanges": "策略变更",
+      "reputationState": "信誉状态",
+      "mistakes": "错误或未解决的问题",
+      "mistakesValue": "本期无记录。",
+      "nextReview": "下次审查"
     },
     "history": {
       "today": "今天",
@@ -742,6 +752,29 @@
         "completed": "在完成审查及下一步选项生成后关闭。",
         "abandoned": "如客户将目标重新开启为新草稿则结束。",
         "escalated": "当审查解决,监测可安全恢复时结束。"
+      }
+    },
+    "state": {
+      "title": "Guardian 状态",
+      "label": {
+        "planning": "规划中",
+        "monitoring": "监测中",
+        "atRisk": "风险中",
+        "recovery": "恢复中",
+        "awaitingApproval": "等待批准",
+        "completed": "已完成",
+        "escalated": "已升级",
+        "paused": "已暂停"
+      },
+      "reason": {
+        "planning": "Guardian 正在为尚未确认的目标制定策略。",
+        "monitoring": "Guardian 正在追踪你的活跃目标,并留意偏差。",
+        "atRisk": "一个受保护的目标已超出风险阈值,需要你的关注。",
+        "recovery": "正在追踪一项修订计划,以恢复处于风险中的目标。",
+        "awaitingApproval": "Guardian 已准备好行动,正在等待你的批准。",
+        "completed": "你所有受保护的目标都已达成。",
+        "escalated": "某个目标需要人工或政策审查后 Guardian 才能继续。",
+        "paused": "同意已被撤回,因此 Guardian 已停止自主行为。"
       }
     }
   },

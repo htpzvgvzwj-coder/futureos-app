@@ -462,7 +462,17 @@
       "scoreChange": "Future Score change",
       "scoreChangeValue": "Projected score is now {score}/100 after approved safeguards.",
       "newInsights": "New insights",
-      "aiRecommendations": "AI recommendations"
+      "aiRecommendations": "AI recommendations",
+      "goalsMonitored": "Goals monitored",
+      "risksDetected": "Risks detected",
+      "recommendationsDecided": "Recommendations decided",
+      "recommendationsDecidedValue": "{accepted} accepted, {skipped} skipped",
+      "recoveryPlansCreated": "Recovery plans created",
+      "strategyChanges": "Strategy changes",
+      "reputationState": "Reputation state",
+      "mistakes": "Mistakes or unresolved issues",
+      "mistakesValue": "None recorded this period.",
+      "nextReview": "Next review"
     },
     "history": {
       "today": "Today",
@@ -755,6 +765,29 @@
         "completed": "Closed once the completion review and next-step options are produced.",
         "abandoned": "Exits if the customer reopens the goal as a new draft.",
         "escalated": "Exits when the review resolves and monitoring can safely resume."
+      }
+    },
+    "state": {
+      "title": "Guardian State",
+      "label": {
+        "planning": "Planning",
+        "monitoring": "Monitoring",
+        "atRisk": "At Risk",
+        "recovery": "Recovery",
+        "awaitingApproval": "Awaiting Approval",
+        "completed": "Completed",
+        "escalated": "Escalated",
+        "paused": "Paused"
+      },
+      "reason": {
+        "planning": "Guardian is building a strategy for a goal that has not been committed yet.",
+        "monitoring": "Guardian is tracking your active goals and watching for drift.",
+        "atRisk": "A protected goal has crossed a risk threshold and needs your attention.",
+        "recovery": "A revised plan is being tracked to restore an at-risk goal.",
+        "awaitingApproval": "Guardian has prepared actions that are waiting for your approval.",
+        "completed": "All of your protected goals have reached their target.",
+        "escalated": "A goal needs human or policy review before Guardian can continue.",
+        "paused": "Consent has been withdrawn, so Guardian has stopped autonomous behaviour."
       }
     }
   },
