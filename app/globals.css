@@ -1723,6 +1723,13 @@ nextjs-portal {
   margin-top: 10px;
 }
 
+.noDetectedNeeds {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .needChip {
   display: grid;
   grid-template-columns: auto 1fr auto;

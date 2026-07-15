@@ -24,7 +24,8 @@
     "backHome": "返回首页",
     "backLifeGraph": "返回生活图谱",
     "protected": "已保护",
-    "on": "开启"
+    "on": "开启",
+    "perMonth": "{amount}/月"
   },
   "customer": {
     "segment": "中层市场营销主管",
@@ -283,7 +284,8 @@
         "category": "类别",
         "notes": "备注 / 情况说明"
       }
-    }
+    },
+    "noDetectedNeeds": "根据你目前的目标及财务健康信号,未检测到需求。"
   },
   "needs": {
     "wedding": "婚礼预算规划",
@@ -303,20 +305,6 @@
     "high": "高",
     "medium": "中",
     "low": "低"
-  },
-  "competingGoals": {
-    "wedding": "婚礼体验",
-    "home": "首套房",
-    "emergency": "应急基金",
-    "retirement": "退休",
-    "family": "未来家庭"
-  },
-  "recommendations": {
-    "weddingBudget": "婚礼预算",
-    "monthlySavings": "每月储蓄",
-    "homeTarget": "置业目标",
-    "retirementTarget": "退休目标",
-    "emergencyFund": "应急基金"
   },
   "products": {
     "deposits": "存款",
@@ -643,7 +631,10 @@
       "risksDetected": "已检测风险",
       "tradeoffsConsidered": "已考虑的权衡",
       "tradeoffsValue": "在现金安全、债务压力、保障缺口及长期退休保障之间平衡了 {goals}。",
-      "selectedStrategy": "已选策略"
+      "selectedStrategy": "已选策略",
+      "recommendedSavings": "建议每月储蓄",
+      "targetForGoal": "{goal} 的目标金额",
+      "emergencyFundStatus": "应急基金状态"
     },
     "strategy": {
       "savings": "储蓄",

@@ -84,7 +84,7 @@ const navItems = [
   { id: screens.PROFILE, labelKey: "nav.profile", icon: UserRound },
 ];
 
-const detectedNeeds = [
+const detectedNeedDefinitions = [
   { id: "wedding", titleKey: "needs.wedding", screen: screens.NEED_WEDDING, icon: HeartHandshake },
   { id: "home", titleKey: "needs.home", screen: screens.NEED_HOME, icon: Building2 },
   { id: "emergency", titleKey: "needs.emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
@@ -92,21 +92,21 @@ const detectedNeeds = [
   { id: "investment", titleKey: "needs.investment", screen: screens.NEED_INVESTMENT, icon: LineChart },
 ];
 
-const competingGoals = [
-  { labelKey: "competingGoals.wedding", stateKey: "wedding", value: 78, icon: HeartHandshake, color: "#d71920" },
-  { labelKey: "competingGoals.home", stateKey: "home", value: 92, icon: Building2, color: "#203857" },
-  { labelKey: "competingGoals.emergency", stateKey: "emergency", value: 88, icon: LockKeyhole, color: "#0f9f84" },
-  { labelKey: "competingGoals.retirement", stateKey: "retirement", value: 84, icon: Landmark, color: "#667085" },
-  { labelKey: "competingGoals.family", stateKey: "family", value: 81, icon: Sparkles, color: "#b45309" },
-];
-
-const recommendedBalance = [
-  { labelKey: "recommendations.weddingBudget", value: "SGD 35,000" },
-  { labelKey: "recommendations.monthlySavings", value: "SGD 450" },
-  { labelKey: "recommendations.homeTarget", value: "2030" },
-  { labelKey: "recommendations.retirementTarget", value: "62" },
-  { labelKey: "recommendations.emergencyFund", valueKey: "common.protected" },
-];
+// Life Graph Detected Needs (05_Life_Graph.md "Detected Needs"): a need only appears when there is
+// actual evidence - a declared goal, or a health score signal (low buffer, weak protection) - instead
+// of always showing the same five cards regardless of the customer's profile.
+function getDetectedNeeds(selectedGoalIds, healthScores) {
+  const scoreById = Object.fromEntries(healthScores.map((score) => [score.id, score.value]));
+  const evidenceById = {
+    wedding: selectedGoalIds.includes("wedding"),
+    home: selectedGoalIds.includes("home"),
+    emergency: selectedGoalIds.includes("emergency") || scoreById.emergency < 60,
+    insurance: selectedGoalIds.includes("family") || scoreById.insurance < 60,
+    investment:
+      selectedGoalIds.includes("investment") || selectedGoalIds.includes("retirement") || scoreById.investment >= 70,
+  };
+  return detectedNeedDefinitions.filter(({ id }) => evidenceById[id]);
+}
 
 const productEcosystem = [
   { productKey: "products.deposits", actionKey: "products.depositsAction", icon: Banknote },
@@ -539,6 +539,34 @@ function getLedgerGoalEntries(profile, customGoals, t) {
 
 function getGoalRiskScore(riskCategory, healthScores) {
   return healthScores.find((score) => score.id === riskCategory)?.value ?? 70;
+}
+
+const goalSignalColors = {
+  wedding: "#d71920",
+  home: "#203857",
+  emergency: "#0f9f84",
+  retirement: "#667085",
+  family: "#b45309",
+  investment: "#0f9f84",
+  business: "#667085",
+  custom: "#d71920",
+};
+
+// Guardian Monitoring goal signals: only the goals the customer actually selected, scored from the
+// same health-score dimensions shown everywhere else - not a fixed list of goal names and numbers
+// that stay on screen even when the customer never selected them.
+function getMonitoredGoalSignals(selectedGoalIds, healthScores, customGoals, t) {
+  return selectedGoalIds.map((goalId) => {
+    const definition = profileGoalOptions.find((option) => option.id === goalId);
+    const riskCategory = goalLedgerRiskCategory[goalId] ?? "future";
+    return {
+      id: goalId,
+      label: getProfileGoalLabel(goalId, customGoals, t),
+      value: getGoalRiskScore(riskCategory, healthScores),
+      icon: definition?.icon ?? Target,
+      color: goalSignalColors[goalId] ?? "#667085",
+    };
+  });
 }
 
 // Only monitoring <-> atRisk toggles automatically (matches the doc's "risk clears" / "threshold
@@ -2426,6 +2454,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const timelineSteps = getLifeTimeline(profile, customGoals, t);
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
+  const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
   const StrategyIcon = strategyModal?.icon;
   const ProductIcon = productModal?.icon;
   const visibleProducts = productRecommendations
@@ -2552,21 +2581,25 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
 
       <section className="detectedNeeds">
         <span className="sectionLabel">{t("lifeGraph.detectedNeeds")}</span>
-        <div>
-          {detectedNeeds.map(({ id, titleKey, screen, icon: Icon }) => (
-            <button
-              type="button"
-              className="needChip"
-              key={id}
-              data-testid={`need-${id}`}
-              onClick={() => setActiveScreen(screen)}
-            >
-              <Icon size={15} />
-              <span>{t(titleKey)}</span>
-              <ChevronRight size={15} />
-            </button>
-          ))}
-        </div>
+        {detectedNeeds.length ? (
+          <div>
+            {detectedNeeds.map(({ id, titleKey, screen, icon: Icon }) => (
+              <button
+                type="button"
+                className="needChip"
+                key={id}
+                data-testid={`need-${id}`}
+                onClick={() => setActiveScreen(screen)}
+              >
+                <Icon size={15} />
+                <span>{t(titleKey)}</span>
+                <ChevronRight size={15} />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="noDetectedNeeds">{t("lifeGraph.noDetectedNeeds")}</p>
+        )}
       </section>
 
       <section className="timelinePanel">
@@ -2839,6 +2872,8 @@ function FutureMirrorSimulator({
   const scenarios = getDynamicSimulatorScenarios(simulatorInputs, t);
   const reasoning = getAgentReasoning(simulatorInputs, t);
   const recommendedScenario = scenarios.find((scenario) => scenario.recommended) ?? scenarios[1] ?? scenarios[0];
+  const primaryType = getPrimaryGoal(simulatorInputs);
+  const goalName = getGoalLabel(primaryType === "car" ? "custom" : primaryType, simulatorInputs, t);
 
   function updateInput(key, value) {
     setSimulatorInputs((current) => ({ ...current, [key]: value }));
@@ -2931,7 +2966,7 @@ function FutureMirrorSimulator({
               <strong>{t("simulator.autonomousLock.title")}</strong>
               <SummaryRow label={t("simulator.autonomousLock.goal")} value={getGoalLabel(getPrimaryGoal(simulatorInputs) === "car" ? "custom" : getPrimaryGoal(simulatorInputs), simulatorInputs, t)} />
               <SummaryRow label={t("simulator.autonomousLock.target")} value={formatSgd(getGoalTargetAmount(simulatorInputs))} />
-              <SummaryRow label={t("simulator.autonomousLock.monthlyLocked")} value={`${formatSgd(getRecommendedMonthlySaving(simulatorInputs))}/month`} />
+              <SummaryRow label={t("simulator.autonomousLock.monthlyLocked")} value={t("common.perMonth", { amount: formatSgd(getRecommendedMonthlySaving(simulatorInputs)) })} />
               <SummaryRow label={t("simulator.autonomousLock.completion")} value={getGoalTargetDisplay(simulatorInputs)} />
               <SummaryRow label={t("simulator.autonomousLock.progress")} value="18%" />
               <div className="approvalCounters">
@@ -3055,7 +3090,7 @@ function FutureMirrorSimulator({
             <section className="tradeoffPanel">
               <span className="sectionLabel">{t("simulator.sections.tradeoffAnalysis")}</span>
               <div className="balanceScale">
-                <span>{t("competingGoals.wedding")}</span>
+                <span>{goalName}</span>
                 <i />
                 <span>{t("simulator.output.futureGoalsLabel")}</span>
               </div>
@@ -3180,6 +3215,7 @@ function FutureSelfGuardian({
   const approvedServiceCount = ocbcServiceActions.filter(({ id }) => simulatorActionStates[id] === "approved").length;
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
+  const monitoredGoalSignals = getMonitoredGoalSignals(selectedGoalIds, healthScores, customGoals, t);
   // "Future Score" / "Protected Score" is the customer's own Future Health Score (Home/Life Graph use
   // the same getHealthScores formula) - it must not diverge into a second, Guardian-only number.
   const futureScore = healthScores.find((score) => score.id === "future")?.value ?? 86;
@@ -3229,7 +3265,7 @@ function FutureSelfGuardian({
     {
       id: "savings",
       labelKey: "guardian.strategy.savings",
-      value: `${monthlySaving}/month`,
+      value: t("common.perMonth", { amount: monthlySaving }),
       detailKey: "guardian.strategy.savingsDetail",
       icon: Banknote,
     },
@@ -3495,7 +3531,7 @@ function FutureSelfGuardian({
               </div>
               <SummaryRow label={t("simulator.autonomousLock.goal")} value={goalName} />
               <SummaryRow label={t("simulator.autonomousLock.target")} value={targetAmount} />
-              <SummaryRow label={t("simulator.autonomousLock.monthlyLocked")} value={`${monthlySaving}/month`} />
+              <SummaryRow label={t("simulator.autonomousLock.monthlyLocked")} value={t("common.perMonth", { amount: monthlySaving })} />
               <SummaryRow label={t("simulator.autonomousLock.completion")} value={getGoalTargetDisplay(simulatorInputs)} />
             </section>
           ) : null}
@@ -3639,10 +3675,10 @@ function FutureSelfGuardian({
             </article>
           </div>
           <div className="guardianGoalSignals">
-            {competingGoals.map(({ labelKey, value, icon: Icon, color }) => (
-              <span key={labelKey}>
+            {monitoredGoalSignals.map(({ id, label, value, icon: Icon, color }) => (
+              <span key={id}>
                 <Icon size={14} style={{ color }} />
-                {t(labelKey)}
+                {label}
                 <b>{value}</b>
               </span>
             ))}
@@ -3684,17 +3720,30 @@ function FutureSelfGuardian({
     if (selectedFeatureId === "aiReasoning") {
       return (
         <section className="recommendationPanel">
-          <SummaryRow label={t("guardian.reasoning.situationAnalysed")} value={reasoning.situation} />
-          <SummaryRow label={t("guardian.reasoning.risksDetected")} value={reasoning.risk} />
-          <SummaryRow label={t("guardian.reasoning.tradeoffsConsidered")} value={t("guardian.reasoning.tradeoffsValue", { goals: activeGoalText })} />
-          <SummaryRow label={t("guardian.reasoning.selectedStrategy")} value={reasoning.recommendation} />
-          {recommendedBalance.map((item) => (
-            <SummaryRow
-              key={item.labelKey}
-              label={t(item.labelKey)}
-              value={item.valueKey ? t(item.valueKey) : item.value}
-            />
-          ))}
+          <div className="proofBlock">
+            <strong>{t("guardian.reasoning.situationAnalysed")}</strong>
+            <p>{reasoning.situation}</p>
+          </div>
+          <div className="proofBlock">
+            <strong>{t("guardian.reasoning.risksDetected")}</strong>
+            <p>{reasoning.risk}</p>
+          </div>
+          <div className="proofBlock">
+            <strong>{t("guardian.reasoning.tradeoffsConsidered")}</strong>
+            <p>{t("guardian.reasoning.tradeoffsValue", { goals: activeGoalText })}</p>
+          </div>
+          <div className="proofBlock">
+            <strong>{t("guardian.reasoning.selectedStrategy")}</strong>
+            <p>{reasoning.recommendation}</p>
+          </div>
+          <SummaryRow label={t("guardian.reasoning.recommendedSavings")} value={t("common.perMonth", { amount: monthlySaving })} />
+          <SummaryRow label={t("guardian.reasoning.targetForGoal", { goal: goalName })} value={targetAmount} />
+          <SummaryRow
+            label={t("guardian.reasoning.emergencyFundStatus")}
+            value={healthScores.find((score) => score.id === "emergency")?.value >= 60
+              ? t("common.protected")
+              : t("status.review")}
+          />
         </section>
       );
     }

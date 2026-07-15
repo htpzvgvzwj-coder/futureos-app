@@ -24,7 +24,8 @@
     "backHome": "Kembali ke Utama",
     "backLifeGraph": "Kembali ke Life Graph",
     "protected": "Dilindungi",
-    "on": "Aktif"
+    "on": "Aktif",
+    "perMonth": "{amount}/bulan"
   },
   "customer": {
     "segment": "Eksekutif Pemasaran Pertengahan",
@@ -283,7 +284,8 @@
         "category": "Kategori",
         "notes": "Nota / penjelasan situasi"
       }
-    }
+    },
+    "noDetectedNeeds": "Tiada keperluan dikesan daripada matlamat dan isyarat kesihatan kewangan semasa anda."
   },
   "needs": {
     "wedding": "Perancangan Bajet Perkahwinan",
@@ -303,20 +305,6 @@
     "high": "Tinggi",
     "medium": "Sederhana",
     "low": "Rendah"
-  },
-  "competingGoals": {
-    "wedding": "Pengalaman Perkahwinan",
-    "home": "Rumah Pertama",
-    "emergency": "Dana Kecemasan",
-    "retirement": "Persaraan",
-    "family": "Keluarga Masa Depan"
-  },
-  "recommendations": {
-    "weddingBudget": "Bajet Perkahwinan",
-    "monthlySavings": "Simpanan Bulanan",
-    "homeTarget": "Sasaran Rumah",
-    "retirementTarget": "Sasaran Persaraan",
-    "emergencyFund": "Dana Kecemasan"
   },
   "products": {
     "deposits": "Deposit",
@@ -643,7 +631,10 @@
       "risksDetected": "Risiko dikesan",
       "tradeoffsConsidered": "Pertukaran dipertimbangkan",
       "tradeoffsValue": "Mengimbangi {goals} berbanding keselamatan tunai, tekanan hutang, jurang perlindungan dan keselamatan persaraan jangka panjang.",
-      "selectedStrategy": "Strategi dipilih"
+      "selectedStrategy": "Strategi dipilih",
+      "recommendedSavings": "Simpanan Bulanan Disyorkan",
+      "targetForGoal": "Sasaran untuk {goal}",
+      "emergencyFundStatus": "Status Dana Kecemasan"
     },
     "strategy": {
       "savings": "Simpanan",

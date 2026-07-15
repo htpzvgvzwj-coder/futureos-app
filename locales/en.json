@@ -23,7 +23,8 @@
     "backHome": "Back to Home",
     "backLifeGraph": "Back to Life Graph",
     "protected": "Protected",
-    "on": "On"
+    "on": "On",
+    "perMonth": "{amount}/month"
   },
   "customer": {
     "segment": "Mid-Level Marketing Executive",
@@ -62,6 +63,7 @@
     "lifeStage": "Life Stage",
     "selectedGoals": "Selected Goals",
     "detectedNeeds": "Detected needs",
+    "noDetectedNeeds": "No needs detected from your current goals and financial health signals.",
     "openMirror": "Analyse Future Decisions",
     "strategySentence": "Life Graph does not recommend random products. It builds a financial strategy around your life goals.",
     "futureAnalyst": {
@@ -317,20 +319,6 @@
     "medium": "Medium",
     "low": "Low"
   },
-  "competingGoals": {
-    "wedding": "Wedding Experience",
-    "home": "First Home",
-    "emergency": "Emergency Fund",
-    "retirement": "Retirement",
-    "family": "Future Family"
-  },
-  "recommendations": {
-    "weddingBudget": "Wedding Budget",
-    "monthlySavings": "Monthly Savings",
-    "homeTarget": "Home Target",
-    "retirementTarget": "Retirement Target",
-    "emergencyFund": "Emergency Fund"
-  },
   "products": {
     "deposits": "Deposits",
     "depositsAction": "Goal-based savings",
@@ -428,7 +416,10 @@
       "risksDetected": "Risks detected",
       "tradeoffsConsidered": "Trade-offs considered",
       "tradeoffsValue": "Balanced {goals} against cash safety, debt pressure, protection gaps and long-term retirement security.",
-      "selectedStrategy": "Selected strategy"
+      "selectedStrategy": "Selected strategy",
+      "recommendedSavings": "Recommended monthly savings",
+      "targetForGoal": "Target for {goal}",
+      "emergencyFundStatus": "Emergency fund status"
     },
     "strategy": {
       "savings": "Savings",
