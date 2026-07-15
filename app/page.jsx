@@ -890,6 +890,26 @@ function buildScenarioFields(goalType, inputs, variant, t) {
   ];
 }
 
+// Future Mirror scenario score (06_Future_Mirror.md): feasibility of each scenario's required
+// monthly saving against the customer's actual income minus expenses, so the score - not just the
+// field details - moves when the customer edits their numbers instead of only toggling by goal type.
+const scenarioMonthlyMultiplier = { conservative: 0.75, balanced: 1, highRisk: 1.4 };
+const scenarioVariantBonus = { conservative: 6, balanced: 0, highRisk: -12 };
+
+function getScenarioScore(variant, inputs) {
+  const availableMonthly = Math.max(
+    numberValue(inputs.monthlyIncome, 7500) - numberValue(inputs.monthlyExpenses, 3600),
+    100
+  );
+  const requiredMonthly = Math.max(getRecommendedMonthlySaving(inputs) * scenarioMonthlyMultiplier[variant], 50);
+  const affordabilityRatio = availableMonthly / requiredMonthly;
+  // Cap the affordability contribution below 96 before applying the variant bonus/malus, so a very
+  // generous income never collapses all three scenarios to the same ceiling - conservative, balanced,
+  // and high-risk must stay meaningfully distinct even when every plan is easily affordable.
+  const affordabilityScore = clampScore(50 + affordabilityRatio * 20, 50, 90);
+  return clampScore(affordabilityScore + scenarioVariantBonus[variant], 35, 96);
+}
+
 function getDynamicSimulatorScenarios(inputs, t) {
   const goalType = getPrimaryGoal(inputs);
   return [
@@ -897,7 +917,7 @@ function getDynamicSimulatorScenarios(inputs, t) {
       id: "conservative",
       titleKey: "simulator.output.scenarios.conservative.title",
       detailKey: "simulator.output.scenarios.conservative.detail",
-      score: goalType === "home" ? 84 : 90,
+      score: getScenarioScore("conservative", inputs),
       riskKey: "risk.low",
       riskClass: "Low",
       fields: buildScenarioFields(goalType, inputs, "conservative", t),
@@ -906,7 +926,7 @@ function getDynamicSimulatorScenarios(inputs, t) {
       id: "balanced",
       titleKey: "simulator.output.scenarios.balanced.title",
       detailKey: "simulator.output.scenarios.balanced.detail",
-      score: goalType === "home" ? 82 : 88,
+      score: getScenarioScore("balanced", inputs),
       riskKey: "risk.low",
       riskClass: "Low",
       fields: buildScenarioFields(goalType, inputs, "balanced", t),
@@ -916,7 +936,7 @@ function getDynamicSimulatorScenarios(inputs, t) {
       id: "highRisk",
       titleKey: "simulator.output.scenarios.highRisk.title",
       detailKey: "simulator.output.scenarios.highRisk.detail",
-      score: 62,
+      score: getScenarioScore("highRisk", inputs),
       riskKey: "risk.high",
       riskClass: "High",
       fields: buildScenarioFields(goalType, inputs, "highRisk", t),
