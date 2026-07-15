@@ -2921,6 +2921,8 @@ function FutureMirrorSimulator({
 }) {
   const [pendingAutonomous, setPendingAutonomous] = useState(false);
   const [scoreInfoModal, setScoreInfoModal] = useState(null);
+  const [notice, setNotice] = useState("");
+  const [withdrawImpactOpen, setWithdrawImpactOpen] = useState(false);
   const level = Number(simulatorInputs.independenceLevel);
   const selectedLevel = independenceLevels.find((item) => item.level === level) ?? independenceLevels[0];
   const customGoals = getCustomGoals(preferences);
@@ -2955,10 +2957,23 @@ function FutureMirrorSimulator({
     setSimulatorRan(true);
   }
 
+  // Autonomous Guardrails safety controls (04_AI_Agent.md "Level 5 requires... Pause control"):
+  // pause and adjust must be real, working downgrades, not inert labels next to a locked plan.
+  function pauseAutonomousLock() {
+    updateInput("independenceLevel", 4);
+    setNotice(t("simulator.autonomousLock.pausedNotice"));
+  }
+
+  function adjustAutonomousLock() {
+    updateInput("independenceLevel", 4);
+    setNotice(t("simulator.autonomousLock.adjustNotice"));
+  }
+
   return (
     <Screen>
       <Header title={t("simulator.title")} subtitle={t("simulator.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+      <NoticeBanner text={notice} />
 
       <section className="trustNote">
         <ShieldCheck size={18} />
@@ -3026,9 +3041,15 @@ function FutureMirrorSimulator({
               <SummaryRow label={t("simulator.autonomousLock.completion")} value={getGoalTargetDisplay(simulatorInputs)} />
               <SummaryRow label={t("simulator.autonomousLock.progress")} value="18%" />
               <div className="approvalCounters">
-                <span>{t("simulator.autonomousLock.pause")}</span>
-                <span>{t("simulator.autonomousLock.adjust")}</span>
-                <span>{t("simulator.autonomousLock.withdrawImpact")}</span>
+                <button type="button" className="miniButton" onClick={pauseAutonomousLock}>
+                  {t("simulator.autonomousLock.pause")}
+                </button>
+                <button type="button" className="miniButton" onClick={adjustAutonomousLock}>
+                  {t("simulator.autonomousLock.adjust")}
+                </button>
+                <button type="button" className="miniButton danger" onClick={() => setWithdrawImpactOpen(true)}>
+                  {t("simulator.autonomousLock.withdrawImpact")}
+                </button>
               </div>
             </section>
           ) : null}
@@ -3225,6 +3246,33 @@ function FutureMirrorSimulator({
               >
                 {t("simulator.modal.enable")}
                 <Check size={17} />
+              </button>
+            </div>
+          </motion.div>
+        </section>
+      ) : null}
+
+      {withdrawImpactOpen ? (
+        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("simulator.autonomousLock.withdrawImpactTitle")}>
+          <motion.div className="confirmModal" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
+            <AlertTriangle size={24} />
+            <strong>{t("simulator.autonomousLock.withdrawImpactTitle")}</strong>
+            <p>{t("simulator.autonomousLock.withdrawImpactBody")}</p>
+            <div className="buttonPair">
+              <button type="button" className="secondaryButton" onClick={() => setWithdrawImpactOpen(false)}>
+                {t("simulator.modal.cancel")}
+                <X size={17} />
+              </button>
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={() => {
+                  setWithdrawImpactOpen(false);
+                  setActiveScreen(screens.PROFILE);
+                }}
+              >
+                {t("simulator.autonomousLock.withdrawImpactCta")}
+                <ChevronRight size={17} />
               </button>
             </div>
           </motion.div>

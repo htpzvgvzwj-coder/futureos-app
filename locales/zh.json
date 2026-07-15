@@ -1084,7 +1084,12 @@
       "completion": "完成日期",
       "progress": "目前进度",
       "adjust": "调整",
-      "withdrawImpact": "提取影响"
+      "withdrawImpact": "提取影响",
+      "pausedNotice": "自主执行已暂停。Guardian 将在下次转账前征求你的批准。",
+      "adjustNotice": "自主等级已降至第 4 级,以便你修改已锁定的计划——Guardian 将在下次转账前征求批准。",
+      "withdrawImpactTitle": "如果你撤回同意",
+      "withdrawImpactBody": "撤回同意将立即停止所有自主转账。在你重新批准某个权限等级之前,Guardian 将切换为仅提供建议。你可以在个人资料 > 隐私中管理此设置。",
+      "withdrawImpactCta": "前往隐私设置"
     },
     "reasoning": {
       "situationUnderstood": "已理解情况",

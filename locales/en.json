@@ -1164,7 +1164,12 @@
       "progress": "Current progress",
       "pause": "Pause",
       "adjust": "Adjust",
-      "withdrawImpact": "Withdraw impact"
+      "withdrawImpact": "Withdraw impact",
+      "pausedNotice": "Autonomous execution paused. Guardian will ask for your approval before the next transfer.",
+      "adjustNotice": "Autonomy lowered to Level 4 so you can change the locked plan - Guardian will ask for approval on the next transfer.",
+      "withdrawImpactTitle": "If you withdraw consent",
+      "withdrawImpactBody": "Withdrawing consent stops all autonomous transfers immediately. Guardian will switch to advice-only until you re-approve a permission level. Manage this from Profile > Privacy.",
+      "withdrawImpactCta": "Go to Privacy Settings"
     },
     "reasoning": {
       "situationUnderstood": "Situation understood",

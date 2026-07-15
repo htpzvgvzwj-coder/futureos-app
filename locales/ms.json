@@ -1084,7 +1084,12 @@
       "completion": "Tarikh siap",
       "progress": "Kemajuan semasa",
       "adjust": "Laraskan",
-      "withdrawImpact": "Impak pengeluaran"
+      "withdrawImpact": "Impak pengeluaran",
+      "pausedNotice": "Pelaksanaan autonomi dijeda. Guardian akan meminta kelulusan anda sebelum pindahan seterusnya.",
+      "adjustNotice": "Autonomi diturunkan ke Tahap 4 supaya anda boleh menukar pelan yang dikunci - Guardian akan meminta kelulusan pada pindahan seterusnya.",
+      "withdrawImpactTitle": "Jika anda menarik balik kebenaran",
+      "withdrawImpactBody": "Menarik balik kebenaran menghentikan semua pindahan autonomi serta-merta. Guardian akan beralih kepada nasihat sahaja sehingga anda meluluskan semula tahap kebenaran. Urus ini daripada Profil > Privasi.",
+      "withdrawImpactCta": "Pergi ke Tetapan Privasi"
     },
     "reasoning": {
       "situationUnderstood": "Situation understood",
