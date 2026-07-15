@@ -905,7 +905,7 @@
       "retirementAt": "Retirement at {age}",
       "cta": "Apply Balanced Investment Plan",
       "success": "Balanced investment plan applied. FutureOS will review progress every 3 months.",
-      "cpfContextDisclaimer": "This plan covers private investments only. Your CPF savings and the CPF Retirement Sum framework are a separate, important part of retirement readiness - check your CPF statement for your current balance and projected payout eligibility age."
+      "cpfContextDisclaimer": "This plan covers private investments only. Your CPF savings, the CPF Retirement Sum framework, and any Supplementary Retirement Scheme (SRS) contributions are a separate, important part of retirement readiness - check your CPF and SRS statements for your current balance and projected payout eligibility age."
     }
   },
   "simulator": {

@@ -892,7 +892,7 @@
       "retirementAt": "Bersara pada {age}",
       "cta": "Guna Pelan Pelaburan Seimbang",
       "success": "Pelan pelaburan seimbang digunakan. FutureOS akan menyemak kemajuan setiap 3 bulan.",
-      "cpfContextDisclaimer": "Pelan ini hanya merangkumi pelaburan persendirian. Simpanan CPF anda dan rangka kerja CPF Retirement Sum adalah bahagian penting yang berasingan bagi kesediaan persaraan - semak penyata CPF anda untuk baki semasa dan umur kelayakan pembayaran yang dijangka."
+      "cpfContextDisclaimer": "Pelan ini hanya merangkumi pelaburan persendirian. Simpanan CPF anda, rangka kerja Jumlah Persaraan CPF, dan sebarang caruman Skim Persaraan Tambahan (SRS) adalah sebahagian penting yang berasingan daripada kesediaan persaraan - semak penyata CPF dan SRS anda untuk baki semasa dan umur kelayakan bayaran yang dijangka."
     }
   },
   "simulator": {
