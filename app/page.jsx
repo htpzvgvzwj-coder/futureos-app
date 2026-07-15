@@ -1100,6 +1100,7 @@ const defaultPreferences = {
   },
   consentWithdrawn: false,
   goalLedger: {},
+  escalationHistory: [],
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -2543,7 +2544,22 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
     setNotice(t("lifeGraph.productFit.added", { product: product.name }));
   }
 
-  function requestRelationshipManagerReview(product) {
+  // Relationship Manager escalation (04_Build_With_OCBC.md "the handoff should preserve context so
+  // the customer does not repeat the full story"): record the evidence already gathered instead of
+  // letting it vanish after the toast, so the escalation stays reviewable in the customer's own history.
+  function requestRelationshipManagerReview(product, resultInfo, evidence) {
+    setPreferences((current) => {
+      const existing = Array.isArray(current.escalationHistory) ? current.escalationHistory : [];
+      const record = {
+        id: `${product.id}-${Date.now()}`,
+        productId: product.id,
+        productName: product.name,
+        goal: resultInfo.relevantGoal ? t(`simulator.goals.${resultInfo.relevantGoal}`) : t("lifeGraph.productFit.evidence.noGoal"),
+        reason: evidence.suitabilityReason,
+        at: Date.now(),
+      };
+      return { ...current, escalationHistory: [record, ...existing].slice(0, 10) };
+    });
     setNotice(t("lifeGraph.productFit.escalatedNotice", { product: product.name }));
   }
 
@@ -2688,8 +2704,14 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
                   </b>
                   <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
                 </div>
-                <SummaryRow label={t("lifeGraph.productFit.evidence.suitabilityReasonLabel")} value={evidence.suitabilityReason} />
-                <SummaryRow label={t("lifeGraph.productFit.evidence.goalSupportedLabel")} value={evidence.goalSupported} />
+                <div className="proofBlock">
+                  <strong>{t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}</strong>
+                  <p>{evidence.suitabilityReason}</p>
+                </div>
+                <div className="proofBlock">
+                  <strong>{t("lifeGraph.productFit.evidence.goalSupportedLabel")}</strong>
+                  <p>{evidence.goalSupported}</p>
+                </div>
                 <div className="buttonPair compactButtons">
                   <button type="button" className="secondaryButton" onClick={() => setProductModal(product)}>
                     {t("lifeGraph.productFit.viewEvidence")}
@@ -2699,7 +2721,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
                       {t("lifeGraph.productFit.blockedCta")}
                     </button>
                   ) : resultInfo.state === "recommendReview" ? (
-                    <button type="button" className="primaryButton" onClick={() => requestRelationshipManagerReview(product)}>
+                    <button type="button" className="primaryButton" onClick={() => requestRelationshipManagerReview(product, resultInfo, evidence)}>
                       {t("lifeGraph.productFit.escalateRm")}
                     </button>
                   ) : (
@@ -2712,6 +2734,20 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
             );
           })}
         </div>
+        {preferences.escalationHistory?.length ? (
+          <div className="historyTimeline">
+            <span className="sectionLabel">{t("lifeGraph.productFit.escalationHistoryTitle")}</span>
+            {preferences.escalationHistory.map((record) => (
+              <article key={record.id}>
+                <span>{new Date(record.at).toLocaleDateString()}</span>
+                <div>
+                  <strong>{t("lifeGraph.productFit.escalationHistoryItem", { product: record.productName, goal: record.goal })}</strong>
+                  <small>{record.reason}</small>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <button type="button" className="secondaryButton" onClick={() => setCustomGoalOpen(true)}>

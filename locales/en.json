@@ -282,7 +282,9 @@
           "highDebtLoad": "Checked against existing debt load — conflict found (score {score}/100).",
           "mortgageReadinessWeak": "Checked against down-payment readiness — conflict found (score {score}/100)."
         }
-      }
+      },
+      "escalationHistoryTitle": "Relationship Manager reviews",
+      "escalationHistoryItem": "{product} queued for review to support {goal}"
     },
     "customGoal": {
       "title": "Add Custom Goal",

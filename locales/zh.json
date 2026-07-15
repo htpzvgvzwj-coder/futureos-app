@@ -155,7 +155,9 @@
           "highDebtLoad": "已对照现有债务水平检查 — 发现冲突(分数 {score}/100)。",
           "mortgageReadinessWeak": "已对照首付款准备度检查 — 发现冲突(分数 {score}/100)。"
         }
-      }
+      },
+      "escalationHistoryTitle": "客户经理审查记录",
+      "escalationHistoryItem": "{product} 已排队等待审查,以支持 {goal}"
     },
     "lifeStage": "生活阶段",
     "selectedGoals": "已选目标",

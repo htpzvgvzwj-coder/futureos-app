@@ -155,7 +155,9 @@
           "highDebtLoad": "Disemak berbanding beban hutang sedia ada — konflik dikesan (skor {score}/100).",
           "mortgageReadinessWeak": "Disemak berbanding kesediaan bayaran muka — konflik dikesan (skor {score}/100)."
         }
-      }
+      },
+      "escalationHistoryTitle": "Semakan Pengurus Perhubungan",
+      "escalationHistoryItem": "{product} dalam giliran semakan untuk menyokong {goal}"
     },
     "lifeStage": "Tahap Kehidupan",
     "selectedGoals": "Matlamat Dipilih",
