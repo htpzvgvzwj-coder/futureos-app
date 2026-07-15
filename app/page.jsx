@@ -994,6 +994,11 @@ const defaultPreferences = {
   },
   consentWithdrawn: false,
   goalLedger: {},
+  quickActionVisibility: {
+    paynow: true,
+    scanPay: true,
+    fx: true,
+  },
 };
 
 const appearanceOptions = [
@@ -1250,12 +1255,13 @@ function mergeDefaults(defaults, stored) {
 
 function applyProfileMigration(preferences, storedPreferences) {
   if (storedPreferences?.profileVersion === currentProfileVersion) return preferences;
-  return {
-    ...preferences,
-    profileVersion: currentProfileVersion,
-    displayName: "Karina",
-    profile: defaultProfile,
-  };
+  // First-ever load (nothing saved yet): seed the default demo profile.
+  // Otherwise a customer's own edits must survive future version bumps - only stamp the
+  // new version number, never overwrite displayName/profile that mergeDefaults already preserved.
+  if (!storedPreferences) {
+    return { ...preferences, profileVersion: currentProfileVersion, displayName: "Karina", profile: defaultProfile };
+  }
+  return { ...preferences, profileVersion: currentProfileVersion };
 }
 
 function clampScore(value, min = 0, max = 100) {
@@ -1724,7 +1730,7 @@ function Header({ eyebrow, title, subtitle }) {
   );
 }
 
-function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, displayName, preferences, t }) {
+function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, displayName, preferences, setPreferences, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [accountInfoModal, setAccountInfoModal] = useState(null);
@@ -1734,6 +1740,7 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
   const customGoals = getCustomGoals(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
+  const notificationHistory = getNotificationHistory(profile, preferences, t);
   const futureHealth = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const homeProgress = profile.goals.home ? 72 : 54;
   const weddingProgress = profile.goals.wedding ? 64 : 0;
@@ -1763,7 +1770,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
         proofKeys: ["familyInputs", "familyMath", "familyResult"],
       };
 
-  const quickActions = [
+  const quickActionVisibility = preferences.quickActionVisibility ?? defaultPreferences.quickActionVisibility;
+  const allQuickActions = [
     {
       id: "paynow",
       label: t("homeBanking.quickActions.paynow"),
@@ -1782,6 +1790,9 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
       icon: ArrowLeftRight,
       onClick: () => setActiveScreen(screens.FX),
     },
+  ];
+  const quickActions = [
+    ...allQuickActions.filter(({ id }) => quickActionVisibility[id]),
     {
       id: "customise",
       label: t("homeBanking.quickActions.customise"),
@@ -1790,6 +1801,16 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
       custom: true,
     },
   ];
+
+  function toggleQuickAction(id) {
+    setPreferences((current) => {
+      const currentVisibility = current.quickActionVisibility ?? defaultPreferences.quickActionVisibility;
+      const nextVisibility = { ...currentVisibility, [id]: !currentVisibility[id] };
+      // At least one shortcut must stay visible - customise should never be able to empty the row.
+      if (!Object.values(nextVisibility).some(Boolean)) return current;
+      return { ...current, quickActionVisibility: nextVisibility };
+    });
+  }
 
   const accountDetails = getAccountDetails(profile, customGoals, healthScores, t);
   const accounts = ["savings", "creditCard", "loan", "investments", "insurance", "futureGoal"].map((id) => ({
@@ -1859,7 +1880,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
                   setNoticeModal({
                     icon: Bell,
                     title: t("homeBanking.notificationsTitle"),
-                    body: t("homeBanking.notificationsText"),
+                    listTitle: t("settings.notifications.history.title"),
+                    listItems: notificationHistory.map(({ title, detail }) => `${title}: ${detail}`),
                   })
                 }
                 aria-label={t("homeBanking.notifications")}
@@ -2084,14 +2106,15 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
             <SlidersHorizontal size={24} />
             <strong>{t("homeBanking.customiseTitle")}</strong>
             <p>{t("homeBanking.customiseText")}</p>
-            <div className="shortcutPreview">
-              {quickActions.slice(0, 3).map(({ label, icon: Icon }) => (
-                <span key={label}>
-                  <Icon size={15} />
-                  {label}
-                </span>
-              ))}
-            </div>
+            {allQuickActions.map(({ id, label, icon: Icon }) => (
+              <ToggleRow
+                key={id}
+                icon={Icon}
+                label={label}
+                checked={quickActionVisibility[id]}
+                onChange={() => toggleQuickAction(id)}
+              />
+            ))}
             <button type="button" className="primaryButton" onClick={() => setCustomiseOpen(false)}>
               {t("homeBanking.customiseDone")}
             </button>
@@ -2100,63 +2123,45 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
       ) : null}
 
       {infoModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={infoModal.title}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{infoModal.title}</strong>
-            <p>{infoModal.body}</p>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{infoModal.value}</b>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("homeBanking.howCalculated")}</strong>
-              <p>{infoModal.method}</p>
-            </div>
-            <ul className="proofList">
-              {infoModal.proofKeys.map((key) => (
-                <li key={key}>{t(`homeBanking.proof.${key}`)}</li>
-              ))}
-            </ul>
-            <button type="button" className="primaryButton" onClick={() => setInfoModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={infoModal.title}
+          body={infoModal.body}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={infoModal.value}
+          methodLabel={t("homeBanking.howCalculated")}
+          methodText={infoModal.method}
+          listTitle={t("lifeGraph.scoreInfo.title")}
+          listItems={infoModal.proofKeys.map((key) => t(`homeBanking.proof.${key}`))}
+          onClose={() => setInfoModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
 
       {accountInfoModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={accountInfoModal.title}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{accountInfoModal.title}</strong>
-            <p>{accountInfoModal.body}</p>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{accountInfoModal.value}</b>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("homeBanking.howCalculated")}</strong>
-              <p>{accountInfoModal.method}</p>
-            </div>
-            <button type="button" className="primaryButton" onClick={() => setAccountInfoModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={accountInfoModal.title}
+          body={accountInfoModal.body}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={accountInfoModal.value}
+          methodLabel={t("homeBanking.howCalculated")}
+          methodText={accountInfoModal.method}
+          onClose={() => setAccountInfoModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
 
       {noticeModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={noticeModal.title}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <NoticeIcon size={24} />
-            <strong>{noticeModal.title}</strong>
-            <p>{noticeModal.body}</p>
-            <button type="button" className="primaryButton" onClick={() => setNoticeModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={NoticeIcon}
+          title={noticeModal.title}
+          body={noticeModal.body}
+          listTitle={noticeModal.listTitle}
+          listItems={noticeModal.listItems}
+          onClose={() => setNoticeModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
     </Screen>
   );
@@ -2334,24 +2339,17 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
       </div>
 
       {detailInfoOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={account.title}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{account.title}</strong>
-            <p>{account.infoBody}</p>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{account.value}</b>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("homeBanking.howCalculated")}</strong>
-              <p>{account.calculation}</p>
-            </div>
-            <button type="button" className="primaryButton" onClick={() => setDetailInfoOpen(false)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={account.title}
+          body={account.infoBody}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={account.value}
+          methodLabel={t("homeBanking.howCalculated")}
+          methodText={account.calculation}
+          onClose={() => setDetailInfoOpen(false)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
     </Screen>
   );
@@ -2620,28 +2618,21 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
       </button>
 
       {infoModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(infoModal.labelKey)}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{t(infoModal.labelKey)}</strong>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{infoModal.value}/100</b>
-            </div>
-            <SupportList
-              title={t("lifeGraph.scoreInfo.title")}
-              items={[
-                t(`lifeGraph.scoreInfo.${infoModal.id}.meaning`),
-                t(`lifeGraph.scoreInfo.${infoModal.id}.method`),
-                t(`lifeGraph.scoreInfo.${infoModal.id}.data`),
-                t(`lifeGraph.scoreInfo.${infoModal.id}.improve`),
-              ]}
-            />
-            <button type="button" className="primaryButton" onClick={() => setInfoModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={t(infoModal.labelKey)}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={`${infoModal.value}/100`}
+          listTitle={t("lifeGraph.scoreInfo.title")}
+          listItems={[
+            t(`lifeGraph.scoreInfo.${infoModal.id}.meaning`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.method`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.data`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.improve`),
+          ]}
+          onClose={() => setInfoModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
 
       {strategyModal ? (
@@ -2659,37 +2650,29 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
       ) : null}
 
       {productModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={productModal.name}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            {ProductIcon ? <ProductIcon size={24} /> : null}
-            <strong>{productModal.name}</strong>
-            <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
-            <div className="proofScore">
-              <span>{t("lifeGraph.productFit.evidence.stateLabel")}</span>
-              <b className={`statePill state-${productModalInfo.state}`}>
-                {t(`lifeGraph.productFit.state.${productModalInfo.state}`)}
-              </b>
-            </div>
-            <SupportList
-              title={t("lifeGraph.productFit.evidence.title")}
-              items={[
-                `${t("lifeGraph.productFit.evidence.goalSupportedLabel")}: ${productModalEvidence.goalSupported}`,
-                `${t("lifeGraph.productFit.evidence.dataUsedLabel")}: ${productModalEvidence.dataUsed}`,
-                `${t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}: ${productModalEvidence.suitabilityReason}`,
-                `${t("lifeGraph.productFit.evidence.productRiskLabel")}: ${productModalEvidence.productRisk}`,
-                `${t("lifeGraph.productFit.evidence.alternativeLabel")}: ${productModalEvidence.alternativeConsidered}`,
-                `${t("lifeGraph.productFit.evidence.conflictCheckLabel")}: ${productModalEvidence.conflictCheck}`,
-                `${t("lifeGraph.productFit.evidence.expectedImpactLabel")}: ${productModalEvidence.expectedImpact}`,
-                `${t("lifeGraph.productFit.evidence.limitationLabel")}: ${productModalEvidence.limitation}`,
-                `${t("lifeGraph.productFit.evidence.humanReviewLabel")}: ${productModalEvidence.humanReview}`,
-              ]}
-            />
-            <p>{t("lifeGraph.productFit.disclaimer")}</p>
-            <button type="button" className="primaryButton" onClick={() => setProductModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={ProductIcon}
+          title={productModal.name}
+          tag={t("lifeGraph.productFit.prototypeTag")}
+          scoreLabel={t("lifeGraph.productFit.evidence.stateLabel")}
+          scoreValue={t(`lifeGraph.productFit.state.${productModalInfo.state}`)}
+          scoreValueClassName={`statePill state-${productModalInfo.state}`}
+          listTitle={t("lifeGraph.productFit.evidence.title")}
+          listItems={[
+            `${t("lifeGraph.productFit.evidence.goalSupportedLabel")}: ${productModalEvidence.goalSupported}`,
+            `${t("lifeGraph.productFit.evidence.dataUsedLabel")}: ${productModalEvidence.dataUsed}`,
+            `${t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}: ${productModalEvidence.suitabilityReason}`,
+            `${t("lifeGraph.productFit.evidence.productRiskLabel")}: ${productModalEvidence.productRisk}`,
+            `${t("lifeGraph.productFit.evidence.alternativeLabel")}: ${productModalEvidence.alternativeConsidered}`,
+            `${t("lifeGraph.productFit.evidence.conflictCheckLabel")}: ${productModalEvidence.conflictCheck}`,
+            `${t("lifeGraph.productFit.evidence.expectedImpactLabel")}: ${productModalEvidence.expectedImpact}`,
+            `${t("lifeGraph.productFit.evidence.limitationLabel")}: ${productModalEvidence.limitation}`,
+            `${t("lifeGraph.productFit.evidence.humanReviewLabel")}: ${productModalEvidence.humanReview}`,
+          ]}
+          footerText={t("lifeGraph.productFit.disclaimer")}
+          onClose={() => setProductModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
 
       {customGoalOpen ? (
@@ -3055,28 +3038,21 @@ function FutureMirrorSimulator({
       ) : null}
 
       {scoreInfoModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={scoreInfoModal.title}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{scoreInfoModal.title}</strong>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{scoreInfoModal.value}</b>
-            </div>
-            <SupportList
-              title={t("lifeGraph.scoreInfo.title")}
-              items={[
-                t("homeBanking.method.futureScore"),
-                t("homeBanking.proof.futureScoreInputs"),
-                t("homeBanking.proof.futureScoreWeights"),
-                t("homeBanking.proof.futureScoreResult"),
-              ]}
-            />
-            <button type="button" className="primaryButton" onClick={() => setScoreInfoModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={scoreInfoModal.title}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={scoreInfoModal.value}
+          listTitle={t("lifeGraph.scoreInfo.title")}
+          listItems={[
+            t("homeBanking.method.futureScore"),
+            t("homeBanking.proof.futureScoreInputs"),
+            t("homeBanking.proof.futureScoreWeights"),
+            t("homeBanking.proof.futureScoreResult"),
+          ]}
+          onClose={() => setScoreInfoModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
 
       {pendingAutonomous ? (
@@ -3282,29 +3258,22 @@ function FutureSelfGuardian({
   }
 
   const protectedScoreModal = protectedScoreInfoOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("guardian.protectedScore")}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{t("guardian.protectedScore")}</strong>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{futureScore}/100</b>
-            </div>
-            <SupportList
-              title={t("lifeGraph.scoreInfo.title")}
-              items={[
-                t("guardian.protectedScoreInfo.meaning"),
-                t("guardian.protectedScoreInfo.method"),
-                t("guardian.protectedScoreInfo.data"),
-                t("guardian.protectedScoreInfo.improve"),
-              ]}
-            />
-            <button type="button" className="primaryButton" onClick={() => setProtectedScoreInfoOpen(false)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
-      ) : null;
+    <InfoModal
+      icon={Info}
+      title={t("guardian.protectedScore")}
+      scoreLabel={t("homeBanking.currentScore")}
+      scoreValue={`${futureScore}/100`}
+      listTitle={t("lifeGraph.scoreInfo.title")}
+      listItems={[
+        t("guardian.protectedScoreInfo.meaning"),
+        t("guardian.protectedScoreInfo.method"),
+        t("guardian.protectedScoreInfo.data"),
+        t("guardian.protectedScoreInfo.improve"),
+      ]}
+      onClose={() => setProtectedScoreInfoOpen(false)}
+      closeLabel={t("homeBanking.gotIt")}
+    />
+  ) : null;
 
   const memoryDetailModal = selectedMemoryEvent ? (
         <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(selectedMemoryEvent.titleKey)}>
@@ -3865,9 +3834,21 @@ function FutureSelfGuardian({
   );
 }
 
-function NeedDetailScreen({ type, setActiveScreen, successStates, setSuccessStates, weddingBudget, setWeddingBudget, t }) {
+function NeedDetailScreen({
+  type,
+  setActiveScreen,
+  successStates,
+  setSuccessStates,
+  weddingBudget,
+  setWeddingBudget,
+  preferences,
+  simulatorInputs,
+  t,
+}) {
   const success = Boolean(successStates[type]);
   const setSuccess = () => setSuccessStates((current) => ({ ...current, [type]: true }));
+  const profile = getUserProfile(preferences);
+  const healthScores = getHealthScores(profile);
 
   if (type === "wedding") {
     const projection = getWeddingProjection(weddingBudget);
@@ -3912,28 +3893,72 @@ function NeedDetailScreen({ type, setActiveScreen, successStates, setSuccessStat
   }
 
   const content = {
-    home: <HomeNeedContent success={success} setSuccess={setSuccess} t={t} setActiveScreen={setActiveScreen} />,
-    emergency: <EmergencyNeedContent success={success} setSuccess={setSuccess} t={t} setActiveScreen={setActiveScreen} />,
-    insurance: <InsuranceNeedContent success={success} setSuccess={setSuccess} t={t} setActiveScreen={setActiveScreen} />,
-    investment: <InvestmentNeedContent success={success} setSuccess={setSuccess} t={t} setActiveScreen={setActiveScreen} />,
+    home: (
+      <HomeNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        profile={profile}
+        healthScores={healthScores}
+      />
+    ),
+    emergency: (
+      <EmergencyNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        profile={profile}
+        healthScores={healthScores}
+      />
+    ),
+    insurance: (
+      <InsuranceNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        profile={profile}
+        healthScores={healthScores}
+      />
+    ),
+    investment: (
+      <InvestmentNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        profile={profile}
+        simulatorInputs={simulatorInputs}
+      />
+    ),
   }[type];
 
   return content;
 }
 
-function HomeNeedContent({ success, setSuccess, t, setActiveScreen }) {
+function HomeNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
   const [housingType, setHousingType] = useState("bto");
+  const readinessScore = healthScores.find((score) => score.id === "savings")?.value ?? 72;
+  const currentFund = numberValue(profile.currentSavings, 42000);
+  // Affordability heuristic: a down payment target of roughly 16 months of income, adjusted
+  // slightly later for a resale flat (higher upfront cost) than a BTO (lower, delayed cost).
+  const targetDownPayment =
+    Math.round((numberValue(profile.monthlyIncome, 7500) * 16 * (housingType === "resale" ? 1.1 : 0.9)) / 1000) * 1000;
+  const targetYear = readinessScore >= 75 ? "2028" : readinessScore >= 60 ? "2030" : "2032";
+  const monthlyRequired = Math.max(0, Math.round((targetDownPayment - currentFund) / 36 / 50) * 50);
   return (
     <Screen>
       <Header title={t("needDetails.home.title")} subtitle={t("needDetails.home.subtitle")} />
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={success} text={t("needDetails.home.success")} />
-      <ProgressPanel label={t("needDetails.home.score")} value={72} t={t} />
+      <ProgressPanel label={t("needDetails.home.score")} value={readinessScore} t={t} />
       <section className="metricGrid">
-        <MetricCard label={t("needDetails.home.targetYear")} value="2030" />
-        <MetricCard label={t("needDetails.home.currentFund")} value="SGD 42,000" />
-        <MetricCard label={t("needDetails.home.targetDownPayment")} value="SGD 120,000" />
-        <MetricCard label={t("needDetails.home.monthlyRequired")} value="SGD 1,850" />
+        <MetricCard label={t("needDetails.home.targetYear")} value={targetYear} />
+        <MetricCard label={t("needDetails.home.currentFund")} value={formatSgd(currentFund)} />
+        <MetricCard label={t("needDetails.home.targetDownPayment")} value={formatSgd(targetDownPayment)} />
+        <MetricCard label={t("needDetails.home.monthlyRequired")} value={formatSgd(monthlyRequired)} />
       </section>
       <section className="trustNote compactTrustNote">
         <Info size={17} />
@@ -3977,19 +4002,26 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen }) {
   );
 }
 
-function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen }) {
+function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
+  const readinessScore = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
+  const currentFund = numberValue(profile.currentSavings, 18000);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 3000);
+  const recommendedFund = monthlyExpenses * 6;
+  const currentCoverageMonths = monthlyExpenses > 0 ? Math.round((currentFund / monthlyExpenses) * 10) / 10 : 0;
+  const statusKey =
+    readinessScore >= 80 ? "needDetails.emergency.statusValue" : readinessScore >= 60 ? "status.monitoring" : "status.review";
   return (
     <Screen>
       <Header title={t("needDetails.emergency.title")} subtitle={t("needDetails.emergency.subtitle")} />
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={success} text={t("needDetails.emergency.success")} />
-      <ProgressPanel label={t("needDetails.emergency.score")} value={80} t={t} />
+      <ProgressPanel label={t("needDetails.emergency.score")} value={readinessScore} t={t} />
       <section className="metricGrid">
-        <MetricCard label={t("needDetails.emergency.currentFund")} value="SGD 18,000" />
-        <MetricCard label={t("needDetails.emergency.recommendedFund")} value="SGD 30,000" />
-        <MetricCard label={t("needDetails.emergency.currentCoverage")} value={t("needDetails.emergency.months36")} />
+        <MetricCard label={t("needDetails.emergency.currentFund")} value={formatSgd(currentFund)} />
+        <MetricCard label={t("needDetails.emergency.recommendedFund")} value={formatSgd(recommendedFund)} />
+        <MetricCard label={t("needDetails.emergency.currentCoverage")} value={t("needDetails.emergency.monthsValue", { months: currentCoverageMonths })} />
         <MetricCard label={t("needDetails.emergency.recommendedCoverage")} value={t("needDetails.emergency.months6")} />
-        <MetricCard label={t("needDetails.emergency.status")} value={t("needDetails.emergency.statusValue")} wide />
+        <MetricCard label={t("needDetails.emergency.status")} value={t(statusKey)} wide />
       </section>
       <SupportList
         title={t("needDetails.aiRecommendations")}
@@ -4007,9 +4039,10 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen }) {
   );
 }
 
-function InsuranceNeedContent({ success, setSuccess, t, setActiveScreen }) {
+function InsuranceNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
   const [reviewScheduled, setReviewScheduled] = useState(success);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const currentScore = healthScores.find((score) => score.id === "insurance")?.value ?? 58;
 
   function scheduleReview() {
     setReviewScheduled(true);
@@ -4023,11 +4056,11 @@ function InsuranceNeedContent({ success, setSuccess, t, setActiveScreen }) {
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={reviewScheduled} text={t("needDetails.insurance.success")} />
       <section className="metricGrid">
-        <MetricCard label={t("needDetails.insurance.currentScore")} value="58/100" t={t} />
+        <MetricCard label={t("needDetails.insurance.currentScore")} value={`${currentScore}/100`} t={t} />
         <MetricCard label={t("needDetails.insurance.recommendedScore")} value="85/100" t={t} />
-        <MetricCard label={t("needDetails.insurance.life")} value={t("needDetails.insurance.notReviewed")} />
-        <MetricCard label={t("needDetails.insurance.health")} value={t("needDetails.insurance.basic")} />
-        <MetricCard label={t("needDetails.insurance.critical")} value={t("needDetails.insurance.gap")} />
+        <MetricCard label={t("needDetails.insurance.life")} value={profile.insuranceStatus || t("needDetails.insurance.notReviewed")} />
+        <MetricCard label={t("needDetails.insurance.health")} value={profile.insuranceStatus || t("needDetails.insurance.basic")} />
+        <MetricCard label={t("needDetails.insurance.critical")} value={currentScore < 70 ? t("needDetails.insurance.gap") : t("common.protected")} />
         <MetricCard label={t("needDetails.insurance.family")} value={t("status.recommended")} />
       </section>
       <SupportList
@@ -4072,12 +4105,17 @@ function InsuranceNeedContent({ success, setSuccess, t, setActiveScreen }) {
   );
 }
 
-function InvestmentNeedContent({ success, setSuccess, t, setActiveScreen }) {
+function InvestmentNeedContent({ success, setSuccess, t, setActiveScreen, profile, simulatorInputs }) {
+  const retirementAge = numberValue(simulatorInputs?.retirementAge, 62);
   const plans = [
-    { title: t("needDetails.investment.conservative"), detail: t("needDetails.investment.lowerRisk"), age: "65" },
-    { title: t("needDetails.investment.balanced"), detail: t("status.recommended"), age: "62", recommended: true },
-    { title: t("needDetails.investment.growth"), detail: t("needDetails.investment.higherRisk"), age: "60" },
+    { title: t("needDetails.investment.conservative"), detail: t("needDetails.investment.lowerRisk"), age: String(retirementAge + 3) },
+    { title: t("needDetails.investment.balanced"), detail: t("status.recommended"), age: String(retirementAge), recommended: true },
+    { title: t("needDetails.investment.growth"), detail: t("needDetails.investment.higherRisk"), age: String(Math.max(55, retirementAge - 2)) },
   ];
+  const currentAmount = numberValue(profile.investments, 15000);
+  const monthlyInvestment = numberValue(simulatorInputs?.monthlyInvestment, 500);
+  // Illustrative milestone: roughly two years of income held in investments by mid-career.
+  const investmentGap = Math.max(0, Math.round((numberValue(profile.monthlyIncome, 7500) * 24 - currentAmount) / 1000) * 1000);
 
   return (
     <Screen>
@@ -4085,11 +4123,11 @@ function InvestmentNeedContent({ success, setSuccess, t, setActiveScreen }) {
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={success} text={t("needDetails.investment.success")} />
       <section className="metricGrid">
-        <MetricCard label={t("needDetails.investment.currentAmount")} value="SGD 15,000" />
-        <MetricCard label={t("needDetails.investment.monthlyInvestment")} value="SGD 500" />
-        <MetricCard label={t("needDetails.investment.riskProfile")} value={t("needDetails.investment.balanced")} />
-        <MetricCard label={t("needDetails.investment.retirementAge")} value="62" />
-        <MetricCard label={t("needDetails.investment.gap")} value="SGD 180,000" wide />
+        <MetricCard label={t("needDetails.investment.currentAmount")} value={formatSgd(currentAmount)} />
+        <MetricCard label={t("needDetails.investment.monthlyInvestment")} value={formatSgd(monthlyInvestment)} />
+        <MetricCard label={t("needDetails.investment.riskProfile")} value={profile.riskPreference || t("needDetails.investment.balanced")} />
+        <MetricCard label={t("needDetails.investment.retirementAge")} value={String(retirementAge)} />
+        <MetricCard label={t("needDetails.investment.gap")} value={formatSgd(investmentGap)} wide />
       </section>
       <section className="trustNote compactTrustNote">
         <Info size={17} />
@@ -4530,10 +4568,6 @@ function ProfileScreen({
             <Download size={15} />
             {t("settings.privacy.downloadReport")}
           </button>
-          <button type="button" className="miniButton" onClick={() => setNotice(t("settings.privacy.manageNotice"))}>
-            <Settings size={15} />
-            {t("settings.privacy.managePermissions")}
-          </button>
           <button type="button" className="miniButton danger" onClick={withdrawConsent}>
             <X size={15} />
             {t("settings.privacy.withdrawConsent")}
@@ -4791,25 +4825,67 @@ function ProgressPanel({ label, value, t }) {
       </div>
       <ProgressRing value={value} size={76} stroke={7} color="#0f9f84" />
       {infoOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={label}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{label}</strong>
-            <p>{t("scoreInfo.body", { item: label })}</p>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{value}%</b>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("homeBanking.howCalculated")}</strong>
-              <p>{t("scoreInfo.method")}</p>
-            </div>
-            <button type="button" className="primaryButton" onClick={() => setInfoOpen(false)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={label}
+          body={t("scoreInfo.body", { item: label })}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={`${value}%`}
+          methodLabel={t("homeBanking.howCalculated")}
+          methodText={t("scoreInfo.method")}
+          onClose={() => setInfoOpen(false)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
+    </section>
+  );
+}
+
+// Shared shape for every "tap the (i) icon" explainer across the app: icon, title, optional tag,
+// optional body paragraph, optional proof score row, optional method block, optional evidence list,
+// optional trailing note, single close button. Screens with a genuinely different shape (the
+// strategy modal, the memory-event detail modal) stay bespoke rather than being forced into this.
+function InfoModal({
+  icon: Icon,
+  title,
+  tag,
+  body,
+  scoreLabel,
+  scoreValue,
+  scoreValueClassName,
+  methodLabel,
+  methodText,
+  listTitle,
+  listItems,
+  footerText,
+  onClose,
+  closeLabel,
+}) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={title}>
+      <motion.div className="confirmModal" {...screenMotion}>
+        {Icon ? <Icon size={24} /> : null}
+        <strong>{title}</strong>
+        {tag ? <span className="prototypeTag">{tag}</span> : null}
+        {body ? <p>{body}</p> : null}
+        {scoreValue !== undefined && scoreValue !== null ? (
+          <div className="proofScore">
+            <span>{scoreLabel}</span>
+            <b className={scoreValueClassName}>{scoreValue}</b>
+          </div>
+        ) : null}
+        {methodText ? (
+          <div className="proofBlock">
+            <strong>{methodLabel}</strong>
+            <p>{methodText}</p>
+          </div>
+        ) : null}
+        {listItems ? <SupportList title={listTitle} items={listItems} /> : null}
+        {footerText ? <p>{footerText}</p> : null}
+        <button type="button" className="primaryButton" onClick={onClose}>
+          {closeLabel}
+        </button>
+      </motion.div>
     </section>
   );
 }
@@ -4861,24 +4937,17 @@ function MetricCard({ label, value, wide = false, t }) {
       </span>
       <strong>{value}</strong>
       {infoOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={label}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            <Info size={24} />
-            <strong>{label}</strong>
-            <p>{t("scoreInfo.body", { item: label })}</p>
-            <div className="proofScore">
-              <span>{t("homeBanking.currentScore")}</span>
-              <b>{value}</b>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("homeBanking.howCalculated")}</strong>
-              <p>{t("scoreInfo.method")}</p>
-            </div>
-            <button type="button" className="primaryButton" onClick={() => setInfoOpen(false)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
+        <InfoModal
+          icon={Info}
+          title={label}
+          body={t("scoreInfo.body", { item: label })}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={value}
+          methodLabel={t("homeBanking.howCalculated")}
+          methodText={t("scoreInfo.method")}
+          onClose={() => setInfoOpen(false)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
       ) : null}
     </article>
   );

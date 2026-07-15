@@ -553,7 +553,6 @@
       "recommendedFund": "Dana Disyorkan",
       "currentCoverage": "Liputan Semasa",
       "recommendedCoverage": "Liputan Disyorkan",
-      "months36": "3.6 bulan",
       "months6": "6 bulan",
       "status": "Status Risiko",
       "statusValue": "Dilindungi daripada belanja besar",
@@ -561,7 +560,8 @@
       "rec2": "Tambah nilai automatik selepas gaji masuk.",
       "rec3": "Hantar amaran jika baki jatuh bawah ambang.",
       "cta": "Lindungi Dana Kecemasan",
-      "success": "Dana kecemasan dilindungi. FutureOS akan menghalang pengalihan berisiko daripada rizab ini."
+      "success": "Dana kecemasan dilindungi. FutureOS akan menghalang pengalihan berisiko daripada rizab ini.",
+      "monthsValue": "{months} bulan"
     },
     "insurance": {
       "title": "Kesediaan Insurans",
@@ -929,10 +929,8 @@
         "autonomousSavings": "Autonomous Savings"
       },
       "downloadReport": "Download Consent Report",
-      "managePermissions": "Manage Permissions",
       "withdrawConsent": "Withdraw Consent",
       "downloadedNotice": "Consent report downloaded.",
-      "manageNotice": "Permission controls are active above. Change any toggle to update consent instantly.",
       "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
     },
     "terms": {
@@ -1027,11 +1025,10 @@
       "family": "Perancangan Keluarga mengukur sama ada rizab tunai dan kesediaan insurans boleh menyokong keperluan isi rumah masa depan."
     },
     "customiseTitle": "Suai Khas Pintasan",
-    "customiseText": "Anda boleh menyusun semula atau menggantikan pintasan ini dengan tindakan perbankan pilihan.",
+    "customiseText": "Pilih pintasan yang dipaparkan pada skrin utama anda.",
     "customiseDone": "Simpan Pintasan",
     "gotIt": "Faham",
     "notificationsTitle": "Notifikasi",
-    "notificationsText": "FutureOS alerts aktif untuk kemajuan matlamat, risiko perbelanjaan dan persediaan rumah.",
     "logoutTitle": "Sesi Selamat",
     "logoutText": "Sesi selamat anda kekal dilindungi. Tiada log keluar perbankan sebenar dilakukan dalam prototaip ini.",
     "currentScore": "Current score",

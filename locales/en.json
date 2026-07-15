@@ -772,7 +772,6 @@
       "recommendedFund": "Recommended Fund",
       "currentCoverage": "Current Coverage",
       "recommendedCoverage": "Recommended Coverage",
-      "months36": "3.6 months",
       "months6": "6 months",
       "status": "Risk Status",
       "statusValue": "Protected from major spending",
@@ -780,7 +779,8 @@
       "rec2": "Auto-top-up after salary crediting.",
       "rec3": "Send alerts if balance drops below threshold.",
       "cta": "Protect Emergency Fund",
-      "success": "Emergency fund protected. FutureOS will block risky reallocations from this reserve."
+      "success": "Emergency fund protected. FutureOS will block risky reallocations from this reserve.",
+      "monthsValue": "{months} months"
     },
     "insurance": {
       "title": "Insurance Readiness",
@@ -1225,10 +1225,8 @@
         "autonomousSavings": "Autonomous Savings"
       },
       "downloadReport": "Download Consent Report",
-      "managePermissions": "Manage Permissions",
       "withdrawConsent": "Withdraw Consent",
       "downloadedNotice": "Consent report downloaded.",
-      "manageNotice": "Permission controls are active above. Change any toggle to update consent instantly.",
       "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
     },
     "terms": {
@@ -1324,11 +1322,10 @@
       "family": "Family Planning measures whether cash reserves and insurance readiness can support future household needs."
     },
     "customiseTitle": "Customise Shortcuts",
-    "customiseText": "You can reorder or replace these shortcuts with preferred banking actions.",
+    "customiseText": "Choose which shortcuts appear on your home screen.",
     "customiseDone": "Save Shortcuts",
     "gotIt": "Got it",
     "notificationsTitle": "Notifications",
-    "notificationsText": "FutureOS alerts are active for goal progress, spending risk, and home readiness.",
     "logoutTitle": "Secure Session",
     "logoutText": "Your secure session remains protected. No real banking sign-out is performed in this prototype.",
     "currentScore": "Current score",
