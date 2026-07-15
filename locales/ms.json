@@ -685,6 +685,64 @@
       "method": "Cara pengiraan: menggabungkan skor Future Mirror, liputan tindakan diluluskan, perlindungan rizab kecemasan dan kestabilan matlamat.",
       "data": "Data digunakan: matlamat dipilih, hasil simulasi, tindakan diluluskan, simpanan, perbelanjaan, hutang dan keutamaan risiko.",
       "improve": "Cara penambahbaikan: luluskan tindakan yang disyorkan, kekalkan dana kecemasan dilindungi dan semak pelan setiap bulan."
+    },
+    "contract": {
+      "title": "Kontrak Matlamat Bersama",
+      "viewCta": "Lihat Kontrak Matlamat Bersama",
+      "close": "Tutup",
+      "goalStatementValue": "Melindungi dan memajukan kemajuan ke arah {goal}, seperti yang ditakrifkan oleh pelanggan.",
+      "fields": {
+        "goalStatement": "Pernyataan Matlamat",
+        "priorityLevel": "Tahap Keutamaan",
+        "protectedBoundaries": "Sempadan Terlindung",
+        "guardianRole": "Peranan Guardian",
+        "customerRole": "Peranan Pelanggan",
+        "autonomyLevel": "Tahap Autonomi",
+        "reviewRhythm": "Kekerapan Semakan",
+        "escalationPath": "Laluan Eskalasi",
+        "exitCondition": "Syarat Keluar"
+      },
+      "priority": {
+        "critical": "Kritikal",
+        "important": "Penting",
+        "flexible": "Fleksibel",
+        "paused": "Dijeda"
+      },
+      "boundaries": {
+        "savings": "Simpanan matlamat tidak sepatutnya dialihkan untuk perbelanjaan pilihan tanpa semakan yang jelas.",
+        "emergency": "Baki dana kecemasan tidak sepatutnya dibelanjakan untuk tujuan bukan kecemasan tanpa semakan.",
+        "investment": "Sumbangan pelaburan jangka panjang tidak sepatutnya dihentikan untuk membiayai perbelanjaan jangka pendek tanpa semakan.",
+        "insurance": "Perlindungan insurans tidak sepatutnya luput atau dikurangkan tanpa semakan kesesuaian.",
+        "debt": "Hutang baharu tidak sepatutnya ditanggung untuk matlamat ini tanpa menyemak keupayaan bayaran balik.",
+        "future": "Matlamat berorientasikan masa depan tidak sepatutnya diturunkan keutamaannya tanpa keputusan jelas pelanggan.",
+        "custom": "Sempadan matlamat tersuai ini mengikut keutamaan dan nota yang diberikan oleh pelanggan."
+      },
+      "customerRole": {
+        "draft": "Sahkan butiran matlamat dan skop kebenaran supaya Guardian boleh mula memantau.",
+        "committed": "Sahkan pelan asas, ambang, dan kekerapan semakan.",
+        "monitoring": "Semak kemajuan secara berkala dan luluskan sebarang tindakan yang disediakan.",
+        "atRisk": "Semak amaran dan pilih untuk menerima pelan pemulihan atau melaraskan matlamat.",
+        "recovery": "Jejaki pelan pemulihan dan sahkan sebaik sahaja matlamat stabil.",
+        "paused": "Sambung semula matlamat apabila bersedia dan sahkan semula kebenaran.",
+        "completed": "Putuskan matlamat langkah seterusnya jika diingini.",
+        "abandoned": "Buka semula matlamat ini pada bila-bila masa jika keutamaan berubah.",
+        "escalated": "Tunggu semakan selesai atau berikan maklumat tambahan jika diminta."
+      },
+      "escalation": {
+        "active": "Semakan Pengurus Perhubungan tersedia sekarang.",
+        "standard": "Hanya meningkat kepada semakan Pengurus Perhubungan jika risiko melebihi tahap autonomi semasa Guardian."
+      },
+      "exitCondition": {
+        "draft": "Keluar apabila pelanggan mengesahkan matlamat dan beralih kepada pemantauan, atau membuangnya.",
+        "committed": "Keluar sebaik sahaja pelan asas dan pemantauan bermula.",
+        "monitoring": "Keluar apabila matlamat dijeda, disiapkan, dibuang, atau ambang risiko dilampaui.",
+        "atRisk": "Keluar apabila pelanggan menerima pelan pemulihan, risiko reda, atau ia dieskalasi.",
+        "recovery": "Keluar apabila pelan pemulihan menyelesaikan lencongan atau matlamat dieskalasi.",
+        "paused": "Keluar apabila pelanggan menyambung semula matlamat dan mengesahkan semula kebenaran.",
+        "completed": "Ditutup sebaik sahaja semakan penyiapan dan pilihan langkah seterusnya dihasilkan.",
+        "abandoned": "Keluar jika pelanggan membuka semula matlamat sebagai draf baharu.",
+        "escalated": "Keluar apabila semakan diselesaikan dan pemantauan boleh disambung semula dengan selamat."
+      }
     }
   },
   "profile": {
@@ -1214,7 +1272,9 @@
       "downloadReport": "Download Consent Report",
       "withdrawConsent": "Withdraw Consent",
       "downloadedNotice": "Consent report downloaded.",
-      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
+      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled.",
+      "resetRelationship": "Set Semula Hubungan",
+      "relationshipResetNotice": "Hubungan telah diset semula. Matlamat kembali ke Draf, autonomi kembali ke Tahap 1, dan tetapan Guardian kembali ke lalai - profil anda dan Ingatan Guardian dikekalkan."
     },
     "terms": {
       "title": "Terms & Data Usage",

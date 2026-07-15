@@ -571,6 +571,47 @@ const goalLedgerActionsByState = {
   escalated: [{ action: "resolveEscalation", nextState: "monitoring", trigger: "reviewResolved" }],
 };
 
+// Shared Goal Contract (07_Relationship_And_Shared_Responsibility.md): makes the relationship
+// explicit per goal instead of leaving it as implied UI copy - every field is derived from data
+// that already exists on the ledger entry, autonomy level, and Guardian settings.
+const contractPriorityByState = {
+  draft: "flexible",
+  committed: "important",
+  monitoring: "important",
+  atRisk: "critical",
+  recovery: "critical",
+  paused: "paused",
+  completed: "important",
+  abandoned: "flexible",
+  escalated: "critical",
+};
+
+const contractBoundaryByCategory = {
+  savings: "savings",
+  emergency: "emergency",
+  investment: "investment",
+  insurance: "insurance",
+  debt: "debt",
+  future: "future",
+  custom: "custom",
+};
+
+function getSharedGoalContract({ goalEntry, state, preferences, level, selectedLevel, t }) {
+  const escalationActive = state === "atRisk" || state === "escalated";
+  const boundaryKey = contractBoundaryByCategory[goalEntry.riskCategory] ?? "future";
+  return {
+    goalStatement: t("guardian.contract.goalStatementValue", { goal: goalEntry.label }),
+    priorityLevel: t(`guardian.contract.priority.${contractPriorityByState[state] ?? "flexible"}`),
+    protectedBoundaries: t(`guardian.contract.boundaries.${boundaryKey}`),
+    guardianRole: t(`guardian.goalLedger.obligation.${state}`),
+    customerRole: t(`guardian.contract.customerRole.${state}`),
+    autonomyLevel: `${t("simulator.levelLabel", { level })} - ${t(selectedLevel.titleKey)}`,
+    reviewRhythm: t(`settings.guardian.review.${preferences.guardianReviewFrequency}`),
+    escalationPath: t(escalationActive ? "guardian.contract.escalation.active" : "guardian.contract.escalation.standard"),
+    exitCondition: t(`guardian.contract.exitCondition.${state}`),
+  };
+}
+
 const riskPreferenceOptions = [
   { id: "conservative", labelKey: "simulator.riskPreference.conservative" },
   { id: "balanced", labelKey: "simulator.riskPreference.balanced" },
@@ -3099,6 +3140,7 @@ function FutureSelfGuardian({
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [selectedMemoryEvent, setSelectedMemoryEvent] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
+  const [selectedContractGoalId, setSelectedContractGoalId] = useState(null);
   const [lastApprovedServiceId, setLastApprovedServiceId] = useState(null);
   const level = Number(simulatorInputs.independenceLevel);
   const selectedLevel = independenceLevels.find((item) => item.level === level) ?? independenceLevels[0];
@@ -3300,6 +3342,63 @@ function FutureSelfGuardian({
           </motion.div>
         </section>
       ) : null;
+
+  const selectedContractGoalEntry = selectedContractGoalId
+    ? ledgerGoalEntries.find((entry) => entry.id === selectedContractGoalId)
+    : null;
+  const contractModal = selectedContractGoalEntry ? (
+    (() => {
+      const contractState = preferences.goalLedger?.[selectedContractGoalEntry.id]?.state ?? "draft";
+      const contract = getSharedGoalContract({
+        goalEntry: selectedContractGoalEntry,
+        state: contractState,
+        preferences,
+        level,
+        selectedLevel,
+        t,
+      });
+      return (
+        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("guardian.contract.title")}>
+          <motion.div className="confirmModal" {...screenMotion}>
+            <FileText size={24} />
+            <strong>{t("guardian.contract.title")}</strong>
+            <span className="prototypeTag">{selectedContractGoalEntry.label}</span>
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.goalStatement")}</strong>
+              <p>{contract.goalStatement}</p>
+            </div>
+            <SummaryRow label={t("guardian.contract.fields.priorityLevel")} value={contract.priorityLevel} />
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.protectedBoundaries")}</strong>
+              <p>{contract.protectedBoundaries}</p>
+            </div>
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.guardianRole")}</strong>
+              <p>{contract.guardianRole}</p>
+            </div>
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.customerRole")}</strong>
+              <p>{contract.customerRole}</p>
+            </div>
+            <SummaryRow label={t("guardian.contract.fields.autonomyLevel")} value={contract.autonomyLevel} />
+            <SummaryRow label={t("guardian.contract.fields.reviewRhythm")} value={contract.reviewRhythm} />
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.escalationPath")}</strong>
+              <p>{contract.escalationPath}</p>
+            </div>
+            <div className="proofBlock">
+              <strong>{t("guardian.contract.fields.exitCondition")}</strong>
+              <p>{contract.exitCondition}</p>
+            </div>
+            <button type="button" className="primaryButton" onClick={() => setSelectedContractGoalId(null)}>
+              {t("guardian.contract.close")}
+              <Check size={18} />
+            </button>
+          </motion.div>
+        </section>
+      );
+    })()
+  ) : null;
 
   function renderFeatureDetail() {
     if (selectedFeatureId === "recommendation") {
@@ -3685,6 +3784,15 @@ function FutureSelfGuardian({
                     <b className={`statePill ledgerState-${state}`}>{t(`guardian.goalLedger.state.${state}`)}</b>
                   </div>
                   <p>{t(`guardian.goalLedger.obligation.${state}`)}</p>
+                  <div className="buttonPair compactButtons">
+                    <button
+                      type="button"
+                      className="secondaryButton"
+                      onClick={() => setSelectedContractGoalId(goalEntry.id)}
+                    >
+                      {t("guardian.contract.viewCta")}
+                    </button>
+                  </div>
                   {actions.length ? (
                     <div className="buttonPair compactButtons">
                       {actions.map(({ action }, index) => (
@@ -3757,6 +3865,7 @@ function FutureSelfGuardian({
         </motion.section>
         {protectedScoreModal}
         {memoryDetailModal}
+        {contractModal}
       </Screen>
     );
   }
@@ -4276,6 +4385,7 @@ function ProfileScreen({
   deleteLocalData,
   resetSimulation,
   restoreMockData,
+  resetRelationship,
   t,
 }) {
   const [notice, setNotice] = useState("");
@@ -4571,6 +4681,17 @@ function ProfileScreen({
           <button type="button" className="miniButton danger" onClick={withdrawConsent}>
             <X size={15} />
             {t("settings.privacy.withdrawConsent")}
+          </button>
+          <button
+            type="button"
+            className="miniButton danger"
+            onClick={() => {
+              resetRelationship();
+              setNotice(t("settings.privacy.relationshipResetNotice"));
+            }}
+          >
+            <RotateCcw size={15} />
+            {t("settings.privacy.resetRelationship")}
           </button>
         </div>
       </SettingsCard>
@@ -5090,6 +5211,24 @@ export default function App() {
     setSimulatorActionStates(defaultSimulatorActionStates);
   }
 
+  // Relationship Reset (07_Relationship_And_Shared_Responsibility.md): restarts preferences,
+  // permissions, and goal states without deleting the account story - profile, custom goals, and
+  // Guardian Memory (futureos-guardian-memory) are left untouched.
+  function resetRelationship() {
+    setPreferences((current) => ({
+      ...current,
+      goalLedger: {},
+      savingsTransfer: defaultPreferences.savingsTransfer,
+      investmentRebalancing: defaultPreferences.investmentRebalancing,
+      guardianReviewFrequency: defaultPreferences.guardianReviewFrequency,
+      guardianPersonality: defaultPreferences.guardianPersonality,
+      privacyPermissions: { ...defaultPreferences.privacyPermissions },
+      consentWithdrawn: false,
+    }));
+    setSimulatorInputs((current) => ({ ...current, independenceLevel: 1 }));
+    setSimulatorActionStates(defaultSimulatorActionStates);
+  }
+
   function downloadConsentReport() {
     downloadJsonFile("futureos-consent-report.json", {
       customer: displayName,
@@ -5182,6 +5321,7 @@ export default function App() {
         deleteLocalData={deleteLocalData}
         resetSimulation={resetSimulation}
         restoreMockData={restoreMockData}
+        resetRelationship={resetRelationship}
       />
     ),
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,

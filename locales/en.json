@@ -698,6 +698,64 @@
         "riskThresholdCrossed": "A protection score dropped below the safe threshold.",
         "riskCleared": "The protection score recovered above the safe threshold."
       }
+    },
+    "contract": {
+      "title": "Shared Goal Contract",
+      "viewCta": "View Shared Goal Contract",
+      "close": "Close",
+      "goalStatementValue": "Protect and grow progress toward {goal}, as defined by the customer.",
+      "fields": {
+        "goalStatement": "Goal statement",
+        "priorityLevel": "Priority level",
+        "protectedBoundaries": "Protected boundaries",
+        "guardianRole": "Guardian role",
+        "customerRole": "Customer role",
+        "autonomyLevel": "Autonomy level",
+        "reviewRhythm": "Review rhythm",
+        "escalationPath": "Escalation path",
+        "exitCondition": "Exit condition"
+      },
+      "priority": {
+        "critical": "Critical",
+        "important": "Important",
+        "flexible": "Flexible",
+        "paused": "Paused"
+      },
+      "boundaries": {
+        "savings": "Goal savings should not be redirected to discretionary spending without explicit review.",
+        "emergency": "The emergency fund balance should not be spent for non-emergency purposes without review.",
+        "investment": "Long-term investment contributions should not be paused to fund short-term spending without review.",
+        "insurance": "Insurance coverage should not lapse or be reduced without a suitability review.",
+        "debt": "New debt should not be taken on for this goal without checking repayment capacity.",
+        "future": "Future-facing goals should not be deprioritised without an explicit customer decision.",
+        "custom": "This custom goal's boundaries follow the priority and notes the customer provided."
+      },
+      "customerRole": {
+        "draft": "Confirm the goal details and consent scope so Guardian can start monitoring.",
+        "committed": "Confirm the baseline plan, thresholds, and review rhythm.",
+        "monitoring": "Review progress periodically and approve any prepared actions.",
+        "atRisk": "Review the alert and choose to accept a recovery plan or adjust the goal.",
+        "recovery": "Track the recovery plan and confirm once the goal stabilises.",
+        "paused": "Resume the goal when ready and reconfirm consent.",
+        "completed": "Decide on a next-step goal if desired.",
+        "abandoned": "Reopen the goal anytime if priorities change.",
+        "escalated": "Wait for review to complete or provide additional context if requested."
+      },
+      "escalation": {
+        "active": "Relationship Manager review is available now.",
+        "standard": "Escalates to Relationship Manager review only if risk exceeds Guardian's current autonomy level."
+      },
+      "exitCondition": {
+        "draft": "Exits when the customer confirms the goal and moves it to monitoring, or discards it.",
+        "committed": "Exits once the baseline plan and monitoring begin.",
+        "monitoring": "Exits when the goal is paused, completed, abandoned, or a risk threshold is crossed.",
+        "atRisk": "Exits when the customer accepts a recovery plan, the risk clears, or it is escalated.",
+        "recovery": "Exits when the recovery plan resolves the drift or the goal is escalated.",
+        "paused": "Exits when the customer resumes the goal and reconfirms consent.",
+        "completed": "Closed once the completion review and next-step options are produced.",
+        "abandoned": "Exits if the customer reopens the goal as a new draft.",
+        "escalated": "Exits when the review resolves and monitoring can safely resume."
+      }
     }
   },
   "profile": {
@@ -1226,8 +1284,10 @@
       },
       "downloadReport": "Download Consent Report",
       "withdrawConsent": "Withdraw Consent",
+      "resetRelationship": "Reset Relationship",
       "downloadedNotice": "Consent report downloaded.",
-      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled."
+      "withdrawnNotice": "Consent withdrawn. Autonomous Banking has been disabled.",
+      "relationshipResetNotice": "Relationship reset. Goals return to Draft, autonomy returns to Level 1, and Guardian settings return to default - your profile and Guardian Memory are kept."
     },
     "terms": {
       "title": "Terms & Data Usage",

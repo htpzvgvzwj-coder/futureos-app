@@ -685,6 +685,64 @@
       "method": "计算方式:结合 Future Mirror 评分、已批准行动覆盖率、应急储备保护及目标稳定性。",
       "data": "使用数据:已选目标、模拟结果、已批准行动、储蓄、支出、债务及风险偏好。",
       "improve": "改善方法:批准建议的行动,保持应急基金受保护,并每月审查计划。"
+    },
+    "contract": {
+      "title": "共享目标契约",
+      "viewCta": "查看共享目标契约",
+      "close": "关闭",
+      "goalStatementValue": "按照客户的定义,保护并推进 {goal} 的进度。",
+      "fields": {
+        "goalStatement": "目标声明",
+        "priorityLevel": "优先级别",
+        "protectedBoundaries": "受保护的边界",
+        "guardianRole": "Guardian 的职责",
+        "customerRole": "客户的职责",
+        "autonomyLevel": "自主等级",
+        "reviewRhythm": "审查节奏",
+        "escalationPath": "升级途径",
+        "exitCondition": "退出条件"
+      },
+      "priority": {
+        "critical": "关键",
+        "important": "重要",
+        "flexible": "灵活",
+        "paused": "已暂停"
+      },
+      "boundaries": {
+        "savings": "未经明确审查,目标储蓄不应被转用于非必要消费。",
+        "emergency": "未经审查,应急基金余额不应用于非应急用途。",
+        "investment": "未经审查,不应暂停长期投资供款以资助短期消费。",
+        "insurance": "未经适用性审查,保险保障不应失效或减少。",
+        "debt": "在核实还款能力之前,不应为此目标承担新的债务。",
+        "future": "未经客户明确决定,面向未来的目标不应被降低优先级。",
+        "custom": "此自定义目标的边界遵循客户提供的优先级及备注。"
+      },
+      "customerRole": {
+        "draft": "确认目标详情及同意范围,以便 Guardian 开始监测。",
+        "committed": "确认基础计划、阈值及审查节奏。",
+        "monitoring": "定期审查进度,并批准已准备的行动。",
+        "atRisk": "查看提醒,并选择接受恢复计划或调整目标。",
+        "recovery": "追踪恢复计划,并在目标稳定后确认。",
+        "paused": "准备好后恢复目标,并重新确认同意。",
+        "completed": "如有需要,决定下一步目标。",
+        "abandoned": "如优先级改变,可随时重新开启此目标。",
+        "escalated": "等待审查完成,或在需要时提供更多信息。"
+      },
+      "escalation": {
+        "active": "现在可以进行客户经理审查。",
+        "standard": "仅当风险超出 Guardian 目前的自主等级时,才会升级至客户经理审查。"
+      },
+      "exitCondition": {
+        "draft": "当客户确认目标并转入监测,或放弃该目标时结束。",
+        "committed": "一旦基础计划及监测开始即结束。",
+        "monitoring": "当目标被暂停、完成、放弃,或风险阈值被突破时结束。",
+        "atRisk": "当客户接受恢复计划、风险解除,或升级审查时结束。",
+        "recovery": "当恢复计划解决偏差,或该目标被升级审查时结束。",
+        "paused": "当客户恢复目标并重新确认同意时结束。",
+        "completed": "在完成审查及下一步选项生成后关闭。",
+        "abandoned": "如客户将目标重新开启为新草稿则结束。",
+        "escalated": "当审查解决,监测可安全恢复时结束。"
+      }
     }
   },
   "profile": {
@@ -1214,7 +1272,9 @@
       "downloadReport": "下载同意报告",
       "withdrawConsent": "撤回同意",
       "downloadedNotice": "同意报告已下载。",
-      "withdrawnNotice": "同意已撤回。自主银行功能已禁用。"
+      "withdrawnNotice": "同意已撤回。自主银行功能已禁用。",
+      "resetRelationship": "重置关系",
+      "relationshipResetNotice": "关系已重置。目标恢复为草稿,自主等级恢复为第 1 级,Guardian 设置恢复默认——你的个人资料及 Guardian 记忆将被保留。"
     },
     "terms": {
       "title": "条款与数据使用",
