@@ -3360,6 +3360,18 @@ function FutureSelfGuardian({
       detail: t("guardian.history.actionApprovedDetail"),
       status: t("status.active"),
     }));
+  // Guardian accountability requires history to cover every decision, not only approved ones - a
+  // skipped recommendation is customer data (07_Relationship_And_Shared_Responsibility.md "When Users
+  // Reject Recommendations"), so it must stay reviewable rather than silently disappearing.
+  const skippedHistoryItems = visibleActionCards
+    .filter(({ id }) => simulatorActionStates[id] === "skipped")
+    .map(({ id, titleKey }) => ({
+      id,
+      date: t("guardian.history.today"),
+      title: t(titleKey),
+      detail: t("guardian.history.actionSkippedDetail"),
+      status: t("status.skipped"),
+    }));
   const historyItems = [
     {
       id: "recommendation",
@@ -3376,6 +3388,7 @@ function FutureSelfGuardian({
       status: t("status.monitoring"),
     },
     ...approvedHistoryItems,
+    ...skippedHistoryItems,
   ];
 
   useEffect(() => {

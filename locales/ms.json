@@ -328,7 +328,8 @@
     "completed": "Selesai",
     "monitoring": "Memantau",
     "scheduled": "Dijadualkan",
-    "approved": "Diluluskan"
+    "approved": "Diluluskan",
+    "skipped": "Dilangkau"
   },
   "guardian": {
     "title": "Mesej Daripada Diri Masa Depan Anda",
@@ -679,7 +680,8 @@
       "recommendationDetail": "Strategi {goal} disemak berbanding aliran tunai, risiko dan matlamat jangka panjang.",
       "scoreUpdated": "Skor Masa Depan dikemas kini",
       "scoreDetail": "Unjuran disegarkan kepada {score}/100.",
-      "actionApprovedDetail": "Tindakan perbankan yang diluluskan pelanggan ditambah ke pelan pemantauan."
+      "actionApprovedDetail": "Tindakan perbankan yang diluluskan pelanggan ditambah ke pelan pemantauan.",
+      "actionSkippedDetail": "Guardian telah merekodkan keutamaan ini dan tidak akan mengulangi cadangan yang sama tanpa bukti baharu."
     },
     "protectedScoreInfo": {
       "meaning": "Maksudnya: sejauh mana pelan dipilih melindungi matlamat jangka panjang selepas cadangan Guardian.",

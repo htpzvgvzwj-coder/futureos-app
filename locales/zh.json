@@ -328,7 +328,8 @@
     "completed": "已完成",
     "monitoring": "监测中",
     "scheduled": "已安排",
-    "approved": "已批准"
+    "approved": "已批准",
+    "skipped": "已跳过"
   },
   "guardian": {
     "title": "来自未来自我的讯息",
@@ -679,7 +680,8 @@
       "recommendationDetail": "已根据现金流、风险及长期目标审查了 {goal} 策略。",
       "scoreUpdated": "未来评分已更新",
       "scoreDetail": "预测已刷新为 {score}/100。",
-      "actionApprovedDetail": "客户已批准的银行行动已加入监测计划。"
+      "actionApprovedDetail": "客户已批准的银行行动已加入监测计划。",
+      "actionSkippedDetail": "Guardian 已记录此偏好,在没有新证据前不会重复相同建议。"
     },
     "protectedScoreInfo": {
       "meaning": "含义:在 Guardian 建议后,已选计划对长期目标的保护力度。",

@@ -341,7 +341,8 @@
     "completed": "Completed",
     "monitoring": "Monitoring",
     "scheduled": "Scheduled",
-    "approved": "Approved"
+    "approved": "Approved",
+    "skipped": "Skipped"
   },
   "guardian": {
     "title": "Future Self Guardian",
@@ -472,7 +473,8 @@
       "recommendationDetail": "{goal} strategy reviewed against cash flow, risk and long-term goals.",
       "scoreUpdated": "Future Score updated",
       "scoreDetail": "Projection refreshed to {score}/100.",
-      "actionApprovedDetail": "Customer-approved banking action added to the monitoring plan."
+      "actionApprovedDetail": "Customer-approved banking action added to the monitoring plan.",
+      "actionSkippedDetail": "Guardian recorded this preference and will not repeat the same suggestion without new evidence."
     },
     "memory": {
       "title": "Guardian Memory",
