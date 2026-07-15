@@ -1,52 +1,53 @@
 {
   "app": {
-    "prototypeLabel": "OCBC FutureOS æ‰‹æœºé“¶è¡ŒåŽŸåž‹"
+    "prototypeLabel": "OCBC FutureOS 手机银行原型"
   },
   "language": {
-    "title": "è¯­è¨€",
+    "title": "语言",
     "english": "English",
-    "chinese": "ç®€ä½“ä¸­æ–‡",
+    "chinese": "简体中文",
     "malay": "Bahasa Melayu",
-    "tamil": "à®¤à®®à®¿à®´à¯",
-    "korean": "í•œêµ­ì–´"
+    "tamil": "தமிழ்",
+    "korean": "한국어"
   },
   "nav": {
-    "primary": "ä¸»å¯¼èˆª",
-    "home": "é¦–é¡µ",
-    "lifeGraph": "ç”Ÿæ´»å›¾è°±",
-    "mirror": "æœªæ¥é•œ",
-    "guardian": "å®ˆæŠ¤è€…",
-    "profile": "ä¸ªäºº"
+    "primary": "主导航",
+    "home": "首页",
+    "lifeGraph": "生活图谱",
+    "mirror": "未来镜",
+    "guardian": "守护者",
+    "profile": "个人"
   },
   "common": {
-    "secure": "å®‰å…¨",
-    "resetDemo": "é‡ç½®æ¼”ç¤º",
-    "backHome": "è¿”å›žé¦–é¡µ",
-    "backLifeGraph": "è¿”å›žç”Ÿæ´»å›¾è°±",
-    "protected": "å·²ä¿æŠ¤",
-    "on": "å¼€å¯"
+    "secure": "安全",
+    "resetDemo": "重置演示",
+    "backHome": "返回首页",
+    "backLifeGraph": "返回生活图谱",
+    "protected": "已保护",
+    "on": "开启"
   },
   "customer": {
-    "segment": "????????",
-    "lifeStage": "20????????????????"
+    "segment": "中层市场营销主管",
+    "lifeStage": "二十多岁后期,已婚,正考虑组建家庭"
   },
   "home": {
     "title": "OCBC FutureOS",
-    "subtitle": "ä»Žç®¡ç†é‡‘é’±ï¼Œåˆ°ç®¡ç†äººç”Ÿç»“æžœ",
-    "futureHealthScore": "æœªæ¥å¥åº·è¯„åˆ†",
-    "guardianStatus": "ä½ çš„æœªæ¥è‡ªæˆ‘å®ˆæŠ¤è€…æ­£åœ¨ç›‘æµ‹é•¿æœŸç›®æ ‡ã€‚"
+    "subtitle": "从管理金钱，到管理人生结果",
+    "futureHealthScore": "未来健康评分",
+    "guardianStatus": "你的未来自我守护者正在监测长期目标。",
+    "futureOsSummary": "FutureOS 摘要"
   },
   "goals": {
-    "wedding": "å©šç¤¼ç›®æ ‡",
-    "emergency": "åº”æ€¥åŸºé‡‘",
-    "retirement": "é€€ä¼‘ç›®æ ‡"
+    "wedding": "婚礼目标",
+    "emergency": "应急基金",
+    "retirement": "退休目标"
   },
   "lifeGraph": {
     "title": "Life Graph",
-    "subtitle": "OCBC å°† the customer å’Œ the partner çš„äººç”Ÿé˜¶æ®µã€ç›®æ ‡ã€äº¤æ˜“ä¸Žé“¶è¡Œéœ€æ±‚æ•´åˆæˆä¸€ä¸ªç”»åƒã€‚",
-    "timelineTitle": "è¿žæŽ¥å¼äººç”Ÿæ—¶é—´çº¿",
-    "detectedNeeds": "å·²è¯†åˆ«éœ€æ±‚",
-    "openMirror": "åˆ†æžæœªæ¥å†³ç­–",
+    "subtitle": "OCBC 将 the customer 和 the partner 的人生阶段、目标、交易与银行需求整合成一个画像。",
+    "timelineTitle": "连接式人生时间线",
+    "detectedNeeds": "已识别需求",
+    "openMirror": "分析未来决策",
     "productFit": {
       "title": "OCBC 产品适配",
       "purpose": "Life Graph 将客户目标与 OCBC 相关产品类别相连接。",
@@ -154,176 +155,308 @@
           "mortgageReadinessWeak": "已对照首付款准备度检查 — 发现冲突(分数 {score}/100)。"
         }
       }
+    },
+    "lifeStage": "生活阶段",
+    "selectedGoals": "已选目标",
+    "strategySentence": "Life Graph 不会随意推荐产品,而是围绕你的生活目标构建财务策略。",
+    "futureAnalyst": {
+      "title": "未来分析师",
+      "profileSignal": "资料信号",
+      "goalSignal": "目标信号",
+      "riskSignal": "风险信号",
+      "riskValue": "在做出重大承诺前,系统会监测现金压力及保障缺口。",
+      "nextSignal": "下一步信号",
+      "nextValue": "在批准任何重大支出计划前,先运行 Future Mirror。"
+    },
+    "stages": {
+      "marriageHome": "筹备婚礼 + 准备首套房",
+      "marriage": "筹备婚礼",
+      "home": "准备首套房",
+      "emergency": "建立应急基金",
+      "wealth": "增长财富",
+      "family": "组建家庭",
+      "business": "创业规划",
+      "retirement": "退休规划",
+      "custom": "自定义目标规划"
+    },
+    "timeline": {
+      "engaged": "已订婚",
+      "weddingPlanning": "婚礼筹备",
+      "familyProtection": "家庭保障",
+      "longTermWealth": "长期财富",
+      "saving": "储蓄中",
+      "downPayment": "首付款",
+      "mortgageReadiness": "房贷准备度",
+      "homeOwnership": "拥有住房",
+      "today": "今天",
+      "selectedGoal": "已选目标",
+      "nextMilestone": "下一个财务里程碑",
+      "longTermFuture": "长期未来",
+      "financialImpact": "财务影响",
+      "futurePlan": "未来计划"
+    },
+    "health": {
+      "title": "财务健康分析",
+      "savings": "储蓄实力",
+      "debt": "债务健康度",
+      "emergency": "应急基金准备度",
+      "insurance": "保险保障度",
+      "investment": "投资准备度"
+    },
+    "scoreInfo": {
+      "title": "分数说明",
+      "future": {
+        "meaning": "含义:在不削弱长期稳定性的前提下,资助已选生活目标的整体准备程度。",
+        "method": "计算方式:综合加权储蓄、债务、应急、保险及投资准备度。",
+        "data": "使用数据:收入、支出、储蓄、贷款、信用卡余额、投资、保险状况及已选目标。",
+        "improve": "改善方法:减少无抵押债务、保护应急现金、自动储蓄并保持稳定的投资供款。"
+      },
+      "savings": {
+        "meaning": "含义:流动储蓄相对于每月支出及既定目标的强度。",
+        "method": "计算方式:将储蓄与六个月支出储备及目标资金需求进行比较。",
+        "data": "使用数据:目前储蓄、每月支出、已选目标及目标金额。",
+        "improve": "改善方法:建立目标储蓄口袋,并安排发薪日自动转账。"
+      },
+      "debt": {
+        "meaning": "含义:目前贷款及信用卡余额相对于收入的安全程度。",
+        "method": "计算方式:总债务压力与年收入进行比较。",
+        "data": "使用数据:现有贷款、信用卡未还款额及每月收入。",
+        "improve": "改善方法:降低信用卡余额、避免为非必要支出新增债务,并保持还款稳定可预测。"
+      },
+      "emergency": {
+        "meaning": "含义:在动用长期目标资金前应对突发支出的能力。",
+        "method": "计算方式:受保护的流动现金与六个月支出进行比较。",
+        "data": "使用数据:目前储蓄及每月支出。",
+        "improve": "改善方法:圈定应急储蓄专款专用,并停止将资金调至低于受保护储备的水平。"
+      },
+      "insurance": {
+        "meaning": "含义:对家庭、住房及收入风险的保障是否到位。",
+        "method": "计算方式:基于已保存的保险状况及已选家庭或住房目标的原型评分。",
+        "data": "使用数据:保险状况、婚姻状况及已选目标。",
+        "improve": "改善方法:与顾问一起检视人寿、健康、重疾及家庭保障需求。"
+      },
+      "investment": {
+        "meaning": "含义:在保持近期现金安全的同时,增长长期财富的准备度。",
+        "method": "计算方式:投资金额与收入及风险偏好进行比较。",
+        "data": "使用数据:投资金额、收入、风险偏好及退休目标。",
+        "improve": "改善方法:保持每月投资供款,并让投资组合与风险偏好保持一致。"
+      }
+    },
+    "strategy": {
+      "modalDetail": "该策略由三大可见系统协同完成:Life Graph 描绘需求,Future Mirror 模拟影响,Future Self Guardian 保护计划。",
+      "savings": {
+        "title": "储蓄策略",
+        "detail": "围绕已选目标建立目标专属储蓄口袋及发薪日自动转账。"
+      },
+      "investment": {
+        "title": "投资策略",
+        "detail": "在资助近期目标的同时,保持长期增长持续进行。"
+      },
+      "insurance": {
+        "title": "保险策略",
+        "detail": "在住房、家庭或创业风险增加前检查保障缺口。"
+      },
+      "credit": {
+        "title": "信贷策略",
+        "detail": "控制信用卡及贷款压力,避免目标被债务主导。"
+      },
+      "mortgage": {
+        "title": "房贷 / 贷款策略",
+        "detail": "准备首付款、负担能力及准备度信号。"
+      },
+      "emergency": {
+        "title": "应急基金策略",
+        "detail": "在增加自选支出或投资变动前,保护现金储备。"
+      }
+    },
+    "customGoal": {
+      "title": "添加自定义目标",
+      "addButton": "添加自定义目标",
+      "save": "保存目标",
+      "defaultName": "自定义目标",
+      "added": "{goal} 已加入 Life Graph 与 Future Mirror。",
+      "fields": {
+        "name": "目标名称",
+        "amount": "目标金额",
+        "date": "目标日期",
+        "priority": "优先级",
+        "category": "类别",
+        "notes": "备注 / 情况说明"
+      }
     }
   },
   "needs": {
-    "wedding": "å©šç¤¼é¢„ç®—è§„åˆ’",
-    "home": "é¦–ä»˜æ¬¾å‡†å¤‡",
-    "emergency": "åº”æ€¥åŸºé‡‘ä¿æŠ¤",
-    "insurance": "ä¿é™©å‡†å¤‡åº¦",
-    "investment": "é•¿æœŸæŠ•èµ„è§„åˆ’"
+    "wedding": "婚礼预算规划",
+    "home": "首付款准备",
+    "emergency": "应急基金保护",
+    "insurance": "保险准备度",
+    "investment": "长期投资规划"
   },
   "mirror": {
-    "homePurchase": "ç½®ä¸šå¹´ä»½",
-    "retirementAge": "é€€ä¼‘å¹´é¾„",
-    "futureScore": "æœªæ¥è¯„åˆ†",
-    "risk": "é£Žé™©ç­‰çº§",
-    "cta": "ç»§ç»­åˆ°ç›®æ ‡åè°ƒå™¨"
+    "homePurchase": "置业年份",
+    "retirementAge": "退休年龄",
+    "futureScore": "未来评分",
+    "risk": "风险等级",
+    "cta": "继续到目标协调器"
   },
   "risk": {
-    "high": "é«˜",
-    "medium": "ä¸­",
-    "low": "ä½Ž"
+    "high": "高",
+    "medium": "中",
+    "low": "低"
   },
   "competingGoals": {
-    "wedding": "å©šç¤¼ä½“éªŒ",
-    "home": "é¦–å¥—æˆ¿",
-    "emergency": "åº”æ€¥åŸºé‡‘",
-    "retirement": "é€€ä¼‘",
-    "family": "æœªæ¥å®¶åº­"
+    "wedding": "婚礼体验",
+    "home": "首套房",
+    "emergency": "应急基金",
+    "retirement": "退休",
+    "family": "未来家庭"
   },
   "recommendations": {
-    "weddingBudget": "å©šç¤¼é¢„ç®—",
-    "monthlySavings": "æ¯æœˆå‚¨è“„",
-    "homeTarget": "ç½®ä¸šç›®æ ‡",
-    "retirementTarget": "é€€ä¼‘ç›®æ ‡",
-    "emergencyFund": "åº”æ€¥åŸºé‡‘"
+    "weddingBudget": "婚礼预算",
+    "monthlySavings": "每月储蓄",
+    "homeTarget": "置业目标",
+    "retirementTarget": "退休目标",
+    "emergencyFund": "应急基金"
   },
   "products": {
-    "deposits": "å­˜æ¬¾",
-    "depositsAction": "ç›®æ ‡å¼å‚¨è“„",
-    "payments": "æ”¯ä»˜",
-    "paymentsAction": "è‡ªåŠ¨è½¬è´¦",
-    "wealth": "è´¢å¯Œ",
-    "wealthAction": "æŠ•èµ„è°ƒæ•´",
-    "insurance": "ä¿é™©",
-    "insuranceAction": "å®¶åº­ä¿éšœå‡†å¤‡",
-    "mortgage": "æˆ¿è´·",
-    "mortgageAction": "ä½æˆ¿è´·æ¬¾å‡†å¤‡",
-    "credit": "ä¿¡è´·",
-    "creditAction": "è´Ÿè´£ä»»ä¿¡è´·è§„åˆ’"
+    "deposits": "存款",
+    "depositsAction": "目标式储蓄",
+    "payments": "支付",
+    "paymentsAction": "自动转账",
+    "wealth": "财富",
+    "wealthAction": "投资调整",
+    "insurance": "保险",
+    "insuranceAction": "家庭保障准备",
+    "mortgage": "房贷",
+    "mortgageAction": "住房贷款准备",
+    "credit": "信贷",
+    "creditAction": "负责任信贷规划"
   },
   "status": {
-    "active": "è¿›è¡Œä¸­",
-    "recommended": "æŽ¨è",
-    "review": "å¾…å¤æ ¸",
-    "preparing": "å‡†å¤‡ä¸­",
-    "completed": "å·²å®Œæˆ",
-    "monitoring": "ç›‘æµ‹ä¸­",
-    "scheduled": "å·²å®‰æŽ’",
-    "approved": "å·²æ‰¹å‡†"
+    "active": "进行中",
+    "recommended": "推荐",
+    "review": "待复核",
+    "preparing": "准备中",
+    "completed": "已完成",
+    "monitoring": "监测中",
+    "scheduled": "已安排",
+    "approved": "已批准"
   },
   "guardian": {
-    "title": "æ¥è‡ªæœªæ¥è‡ªæˆ‘çš„è®¯æ¯",
-    "protectedScore": "æœªæ¥ä¿æŠ¤è¯„åˆ†",
+    "title": "来自未来自我的讯息",
+    "protectedScore": "未来保护评分",
     "memory": {
-      "title": "?????",
-      "subtitle": "?? AI ????????????????????",
-      "openEvent": "?????? {event}",
-      "impact": "??",
-      "productUsed": "?????",
+      "title": "Guardian 记忆",
+      "subtitle": "你的 AI 会记住你的财务历程,并持续改进未来的决策。",
+      "openEvent": "打开记忆事件 {event}",
+      "impact": "影响",
+      "productUsed": "使用的产品",
       "metrics": {
-        "memoryEvents": "????",
-        "tomorrow": "??"
+        "memoryEvents": "记忆事件",
+        "tomorrow": "明天"
       },
       "modal": {
-        "guardianAction": "?????",
-        "reason": "??",
-        "dataUsed": "???????",
-        "product": "??? OCBC ??",
-        "futureScoreImpact": "??????",
-        "whyTitle": "?????",
-        "whyText": "?????? Future Self Guardian ????????????????????????????",
-        "close": "??"
+        "guardianAction": "Guardian 行动",
+        "reason": "原因",
+        "dataUsed": "使用的客户数据",
+        "product": "关联的 OCBC 产品",
+        "futureScoreImpact": "未来评分影响",
+        "whyTitle": "为什么这很重要",
+        "whyText": "这段记忆帮助 Future Self Guardian 改进未来建议,因为它了解客户过去的决策、目标及财务行为。",
+        "close": "关闭"
       },
       "events": {
         "wedding": {
-          "title": "????????",
-          "description": "Guardian ???????????",
+          "title": "创建了家庭规划目标",
+          "description": "Guardian 制定了长期家庭准备计划。",
           "impact": "Future Score +8",
           "product": "OCBC 360 Account",
-          "action": "??????????????????????",
-          "reason": "{customer} ??????????????",
-          "data": "??????????????????????????"
+          "action": "建议每月预留家庭准备资金,并制定了保障路线图。",
+          "reason": "{customer} 将家庭规划选定为重要的人生目标。",
+          "data": "已选目标、每月收入、目前储蓄、保险状况及预期家庭支出。"
         },
         "emergency": {
-          "title": "????????",
-          "description": "????????????????",
-          "impact": "????",
-          "product": "??????",
-          "action": "????????????????",
-          "reason": "????????????????????",
-          "data": "???????????????????????"
+          "title": "启动应急基金保障",
+          "description": "Guardian 保护了应急储蓄,避免因婚礼超支而受影响。",
+          "impact": "风险已降低",
+          "product": "目标专属储蓄口袋",
+          "action": "将应急储蓄与婚礼筹备现金流分开。",
+          "reason": "婚礼支出可能在首套房计划前降低现金安全性。",
+          "data": "应急基金余额、每月支出、计划婚礼预算及储蓄行为。"
         },
         "home": {
-          "title": "???????",
-          "description": "??????????????",
-          "impact": "???????",
-          "product": "OCBC ????",
-          "action": "?????????????????",
-          "reason": "??????????????",
-          "data": "?????????????????????????"
+          "title": "首套房准备已激活",
+          "description": "Guardian 为客户准备了房贷准备度。",
+          "impact": "住房准备度已提升",
+          "product": "OCBC 房贷准备",
+          "action": "创建了首付款准备度追踪,并监测债务压力。",
+          "reason": "首套房目标需要及早进行房贷准备。",
+          "data": "购房目标年份、储蓄、贷款余额、信用卡未还款额及每月收入。"
         },
         "family": {
-          "title": "???????",
-          "description": "??????????????",
-          "impact": "???????",
-          "product": "Great Eastern ????",
-          "action": "?????????????????",
-          "reason": "???????????????????",
-          "data": "?????????????????????????"
+          "title": "检测到家庭规划",
+          "description": "Guardian 识别出未来的家庭保障需求。",
+          "impact": "保险准备度已提升",
+          "product": "大东方保险审查",
+          "action": "在未来家庭承诺前标记了保障缺口。",
+          "reason": "生活阶段信号显示即将有家庭规划需求。",
+          "data": "生活阶段、保险状况、家庭目标、储蓄及未来支出假设。"
         },
         "salary": {
-          "title": "???????",
-          "description": "????????????????",
-          "impact": "???????",
+          "title": "检测到加薪",
+          "description": "Guardian 在收入增长后提高了投资配置。",
+          "impact": "退休准备度已提升",
           "product": "OCBC RoboInvest",
-          "action": "??????????????????",
-          "reason": "????????????????",
-          "data": "?????????????????????"
+          "action": "建议在保留应急储蓄的同时增加投资配置。",
+          "reason": "收入提高为长期财富积累创造了空间。",
+          "data": "每月收入、投资余额、风险偏好及退休目标年龄。"
         }
       }
     },
     "status": {
-      "autonomousLevel": "????"
+      "autonomousLevel": "自主等级",
+      "activeGoals": "活跃目标",
+      "futureScore": "未来评分",
+      "aiConfidence": "AI 置信度",
+      "nextReview": "下次审查"
     },
     "hub": {
-      "subtitle": "?????? AI ???",
-      "gridLabel": "Future Self Guardian ????",
-      "back": "?????",
-      "openSettings": "??????",
+      "subtitle": "你的自主财务 AI 助理。",
+      "gridLabel": "Future Self Guardian 功能网格",
+      "back": "返回 Guardian",
+      "openSettings": "打开完整设置",
       "cards": {
         "recommendation": {
-          "title": "?????",
-          "subtitle": "????? AI ???"
+          "title": "Guardian 建议",
+          "subtitle": "今日个性化 AI 建议。"
         },
         "actionCentre": {
-          "title": "????",
-          "subtitle": "???????? AI ???"
+          "title": "行动中心",
+          "subtitle": "批准、修改或拒绝 AI 行动。"
         },
         "monitoring": {
-          "title": "????",
-          "subtitle": "??????????????"
+          "title": "目标监测",
+          "subtitle": "追踪每个财务目标的保障情况。"
         },
         "financialStrategy": {
-          "title": "????",
-          "subtitle": "????????????"
+          "title": "财务策略",
+          "subtitle": "储蓄、投资、保险及贷款。"
         },
         "aiReasoning": {
-          "title": "AI ??",
-          "subtitle": "??????????????"
+          "title": "AI 推理",
+          "subtitle": "了解 Guardian 为何做出此建议。"
         },
         "memory": {
-          "title": "?????",
-          "subtitle": "???????????"
+          "title": "Guardian 记忆",
+          "subtitle": "回顾你的长期财务历程。"
         },
         "monthlyReview": {
-          "title": "????",
-          "subtitle": "?? AI ?????"
+          "title": "月度审查",
+          "subtitle": "月度 AI 表现报告。"
         },
         "settings": {
-          "title": "?????",
-          "subtitle": "???????????"
+          "title": "Guardian 设置",
+          "subtitle": "自主权限及 Guardian 偏好设置。"
         },
         "reputation": {
           "title": "Guardian 信誉",
@@ -336,79 +469,83 @@
       }
     },
     "actionCentre": {
-      "preparedTitle": "AI ??????",
-      "preparedSubtitle": "?? Future Self Guardian ??????????"
+      "preparedTitle": "AI 已准备的行动",
+      "preparedSubtitle": "查看 Future Self Guardian 根据你的模拟结果准备的行动。",
+      "approve": "批准行动",
+      "modify": "修改行动",
+      "reject": "拒绝",
+      "goalLockDetail": "第5级已启用,FutureOS 只能在已批准的额度内预留储蓄。"
     },
     "services": {
-      "title": "OCBC ?? / ??",
-      "subtitle": "???????? FutureOS ????????? OCBC ?????",
-      "what": "??",
-      "why": "????",
-      "requiredApproval": "????",
-      "customerApproval": "?????????",
-      "approveCta": "????",
-      "approvedCta": "???",
-      "success": "{action} ????FutureOS ????????",
+      "title": "OCBC 服务 / 执行",
+      "subtitle": "已批准的行动将 FutureOS 建议连接到实际的 OCBC 银行服务。",
+      "what": "作用",
+      "why": "为何有帮助",
+      "requiredApproval": "所需批准",
+      "customerApproval": "执行前需要客户批准",
+      "approveCta": "批准行动",
+      "approvedCta": "已批准",
+      "success": "{action} 已批准。FutureOS 已更新执行状态。",
       "actions": {
         "open360": {
-          "title": "?? OCBC 360 ??",
-          "goal": "?????????",
-          "what": "?????????????????????",
-          "why": "? {goal} ?????????????????????"
+          "title": "开通 OCBC 360 账户",
+          "goal": "支持储蓄及目标钱包",
+          "what": "为自动储蓄流程准备一个工资及目标储蓄账户。",
+          "why": "它为 {goal} 提供了明确的资金来源,不与日常支出混淆。"
         },
         "creditCardApplication": {
-          "title": "?? OCBC ???",
-          "goal": "??????????",
-          "what": "????????????????????",
-          "why": "?????????????????????"
+          "title": "申请 OCBC 信用卡",
+          "goal": "支持负责任的信贷规划",
+          "what": "创建带有消费防护措施的模拟信用卡申请准备步骤。",
+          "why": "它有助于维持信贷额度,同时保持还款风险可见。"
         },
         "roboInvest": {
-          "title": "?? OCBC RoboInvest",
-          "goal": "??????",
-          "what": "?????????? RoboInvest ?????",
-          "why": "??????????????????????"
+          "title": "启动 OCBC RoboInvest",
+          "goal": "支持投资增长",
+          "what": "设置与风险偏好相符的模拟 RoboInvest 入门计划。",
+          "why": "它在保护近期现金需求的同时,保持长期财富积累持续进行。"
         },
         "insuranceReviewService": {
-          "title": "?? Great Eastern ????",
-          "goal": "???????",
-          "what": "????????????????????????",
-          "why": "??????????? {goal} ?????"
+          "title": "申请大东方保险审查",
+          "goal": "支持保障准备度",
+          "what": "为人身、健康及家庭保障缺口安排模拟保险审查。",
+          "why": "它降低了 {goal} 因未投保的人身风险而受影响的可能性。"
         },
         "homeLoanCheck": {
-          "title": "??????",
-          "goal": "????????",
-          "what": "??????????????????????",
-          "why": "????????????????????"
+          "title": "房贷资格审查",
+          "goal": "支持首套房准备度",
+          "what": "根据储蓄、债务及收入进行模拟房贷准备度审查。",
+          "why": "它显示未来在承诺增加前,借贷是否仍能保持轻松。"
         },
         "relationshipManager": {
-          "title": "??????",
-          "goal": "??????",
-          "what": "???????????????",
-          "why": "????????????????????"
+          "title": "预约客户经理",
+          "goal": "支持协调建议",
+          "what": "为产品及目标审查预约模拟顾问会面。",
+          "why": "它在客户批准执行前,为复杂决策提供了人工核查点。"
         },
         "monthlySavingsService": {
-          "title": "??????",
-          "goal": "????????",
-          "what": "????????????????",
-          "why": "???????????????????"
+          "title": "安排每月储蓄",
+          "goal": "支持持续的目标资助",
+          "what": "安排定期模拟转账至已选目标钱包。",
+          "why": "批准后进度将自动进行,降低漏存的可能性。"
         },
         "goalWalletTransfer": {
-          "title": "????????",
-          "goal": "?????????",
-          "what": "??????????? FutureOS ?????",
-          "why": "? {goal} ???????????????????"
+          "title": "自动目标钱包转账",
+          "goal": "支持受保护的目标储蓄",
+          "what": "将已批准的金额转入受保护的 FutureOS 目标钱包。",
+          "why": "它将 {goal} 资金与自选支出分开,同时保留客户控制权。"
         },
         "portfolioRebalance": {
-          "title": "???????",
-          "goal": "????????",
-          "what": "?????????????????????",
-          "why": "?????????????????"
+          "title": "投资组合再平衡",
+          "goal": "支持长期投资组合健康",
+          "what": "根据风险偏好及流动性需求准备模拟投资组合调整。",
+          "why": "它防止短期目标削弱退休及投资准备度。"
         },
         "protectionReview": {
-          "title": "??????",
-          "goal": "?????????",
-          "what": "??????????????????????",
-          "why": "???? {goal}???????????????"
+          "title": "保险保障审查",
+          "goal": "支持家庭及应急保障",
+          "what": "为收入、健康及重疾缺口创建模拟保障清单。",
+          "why": "它有助于保护 {goal} 免受仅靠储蓄可能无法覆盖的风险。"
         }
       }
     },
@@ -490,51 +627,120 @@
         "riskThresholdCrossed": "保护分数跌破安全门槛。",
         "riskCleared": "保护分数已回升至安全门槛之上。"
       }
+    },
+    "sections": {
+      "status": "Guardian 状态",
+      "history": "Guardian 历史记录"
+    },
+    "today": {
+      "dynamicRecommendation": "主动建议",
+      "reason": "原因:",
+      "expectedImpact": "预期未来影响:",
+      "expectedImpactValue": "{goal} 将保持受保护状态,未来评分预计为 {score}/100。"
+    },
+    "reasoning": {
+      "situationAnalysed": "已分析情况",
+      "risksDetected": "已检测风险",
+      "tradeoffsConsidered": "已考虑的权衡",
+      "tradeoffsValue": "在现金安全、债务压力、保障缺口及长期退休保障之间平衡了 {goals}。",
+      "selectedStrategy": "已选策略"
+    },
+    "strategy": {
+      "savings": "储蓄",
+      "savingsDetail": "每月为 {goal} 预留 {monthly},同时保持现金流可见。",
+      "investment": "投资",
+      "investmentDetail": "在不削弱短期流动性的前提下,保持长期供款持续进行。",
+      "insurance": "保险",
+      "insuranceDetail": "在住房、家庭或收入风险增加前检视保障。",
+      "debt": "债务",
+      "debtDetail": "在新增承诺前保持信贷及贷款压力可控。",
+      "emergency": "应急基金",
+      "emergencyDetail": "在自选支出或产品变动前保护应急储备。",
+      "relatedProducts": "相关 OCBC 产品"
+    },
+    "monitoring": {
+      "goals": "正在监测的目标",
+      "risks": "财务风险",
+      "protection": "保障状态"
+    },
+    "report": {
+      "goalProgress": "目标进度",
+      "goalProgressValue": "在 Guardian 计划下,{goal} 仍保持正轨。",
+      "scoreChange": "未来评分变化",
+      "scoreChangeValue": "在已批准的保障措施后,预计评分现为 {score}/100。",
+      "newInsights": "新洞察",
+      "aiRecommendations": "AI 建议"
+    },
+    "history": {
+      "today": "今天",
+      "lastReview": "上次审查",
+      "recommendationPrepared": "Guardian 建议已准备就绪",
+      "recommendationDetail": "已根据现金流、风险及长期目标审查了 {goal} 策略。",
+      "scoreUpdated": "未来评分已更新",
+      "scoreDetail": "预测已刷新为 {score}/100。",
+      "actionApprovedDetail": "客户已批准的银行行动已加入监测计划。"
+    },
+    "protectedScoreInfo": {
+      "meaning": "含义:在 Guardian 建议后,已选计划对长期目标的保护力度。",
+      "method": "计算方式:结合 Future Mirror 评分、已批准行动覆盖率、应急储备保护及目标稳定性。",
+      "data": "使用数据:已选目标、模拟结果、已批准行动、储蓄、支出、债务及风险偏好。",
+      "improve": "改善方法:批准建议的行动,保持应急基金受保护,并每月审查计划。"
     }
   },
   "profile": {
-    "combinedIncome": "åˆè®¡æœˆæ”¶å…¥",
-    "currentSavings": "å½“å‰å‚¨è“„",
-    "status": "çŠ¶æ€",
-    "detectedStage": "è¯†åˆ«äººç”Ÿé˜¶æ®µ"
+    "combinedIncome": "合计月收入",
+    "currentSavings": "当前储蓄",
+    "status": "状态",
+    "detectedStage": "识别人生阶段",
+    "age": "年龄",
+    "occupation": "职业",
+    "pastExperience": "过往经历",
+    "lifeStage": "生活阶段",
+    "responsibilities": "职责",
+    "monthlyExpenses": "每月支出",
+    "existingLoans": "现有贷款",
+    "creditCardOutstanding": "信用卡未还款额",
+    "investments": "投资",
+    "insuranceStatus": "保险状况",
+    "riskPreference": "风险偏好"
   },
   "loading": {
-    "default": "æ­£åœ¨å‡†å¤‡ FutureOS...",
-    "detail": "OCBC FutureOS æ­£åœ¨è¿žæŽ¥äººç”Ÿç›®æ ‡ã€äº§å“å’Œå·²æ‰¹å‡†çš„ AI è¡ŒåŠ¨ã€‚",
-    "lifeGraph": "æ­£åœ¨æž„å»º Life Graph...",
-    "mirror": "æ­£åœ¨æ¨¡æ‹Ÿæœªæ¥...",
-    "guardian": "æ­£åœ¨å‡†å¤‡å®ˆæŠ¤è€…è®¯æ¯..."
+    "default": "正在准备 FutureOS...",
+    "detail": "OCBC FutureOS 正在连接人生目标、产品和已批准的 AI 行动。",
+    "lifeGraph": "正在构建 Life Graph...",
+    "mirror": "正在模拟未来...",
+    "guardian": "正在准备守护者讯息..."
   },
   "needDetails": {
-    "liveProjection": "å®žæ—¶é¢„æµ‹",
-    "ocbcSupport": "OCBC æ”¯æŒ",
-    "aiRecommendations": "AI å»ºè®®",
+    "liveProjection": "实时预测",
+    "ocbcSupport": "OCBC 支持",
+    "aiRecommendations": "AI 建议",
     "wedding": {
-      "title": "å©šç¤¼é¢„ç®—è§„åˆ’",
-      "subtitle": "the customer å’Œ the partner å¸Œæœ›æ‹¥æœ‰æœ‰æ„ä¹‰çš„å©šç¤¼ï¼ŒåŒæ—¶ä¿æŠ¤ç½®ä¸šå’Œé€€ä¼‘ç›®æ ‡ã€‚",
-      "sliderLabel": "è®¡åˆ’å©šç¤¼é¢„ç®—",
-      "currentBudget": "åˆå§‹é¢„ç®—",
-      "recommendedBudget": "æŽ¨èé¢„ç®—",
-      "monthlySaving": "æ¯æœˆå‚¨è“„è®¡åˆ’",
-      "overspendImpact": "è¶…æ”¯å½±å“",
-      "delay": "å»¶åŽ 4 å¹´",
-      "cta": "é”å®šæŽ¨èå©šç¤¼æ–¹æ¡ˆ",
-      "success": "å©šç¤¼é¢„ç®—æ–¹æ¡ˆå·²é”å®šã€‚FutureOS å°†æ ¹æ®æ‰¹å‡†ä¸Šé™ç›‘æµ‹æ”¯å‡ºã€‚"
+      "title": "婚礼预算规划",
+      "subtitle": "the customer 和 the partner 希望拥有有意义的婚礼，同时保护置业和退休目标。",
+      "sliderLabel": "计划婚礼预算",
+      "currentBudget": "初始预算",
+      "recommendedBudget": "推荐预算",
+      "monthlySaving": "每月储蓄计划",
+      "overspendImpact": "超支影响",
+      "delay": "延后 4 年",
+      "cta": "锁定推荐婚礼方案",
+      "success": "婚礼预算方案已锁定。FutureOS 将根据批准上限监测支出。"
     },
     "home": {
-      "title": "é¦–ä»˜æ¬¾å‡†å¤‡",
-      "subtitle": "FutureOS å¸®åŠ© the customer å’Œ the partner å‡†å¤‡é¦–å¥—æˆ¿ï¼ŒåŒæ—¶ä¿æŒå…¶ä»–ç›®æ ‡ç¨³å®šã€‚",
-      "score": "ç½®ä¸šå‡†å¤‡åº¦",
-      "targetYear": "ç›®æ ‡å¹´ä»½",
-      "currentFund": "å½“å‰ç½®ä¸šåŸºé‡‘",
-      "targetDownPayment": "ç›®æ ‡é¦–ä»˜æ¬¾",
-      "monthlyRequired": "æ¯æœˆæ‰€éœ€",
-      "support1": "å°†é¦–ä»˜æ¬¾èµ„é‡‘ä¸Žå©šç¤¼æ”¯å‡ºéš”ç¦»ã€‚",
-      "support2": "è·Ÿè¸ª HDB æˆ–å…¬å¯“å¯è´Ÿæ‹…æ€§æƒ…æ™¯ã€‚",
-      "support3": "åœ¨ 2030 å¹´å‰å‡†å¤‡æˆ¿è´·èµ„æ ¼ã€‚",
-      "support4": "è‹¥æ¯æœˆå‚¨è“„è½åŽåˆ™è§¦å‘æé†’ã€‚",
-      "cta": "åˆ›å»ºç½®ä¸šå‡†å¤‡è·Ÿè¸ª",
-      "success": "ç½®ä¸šå‡†å¤‡è·Ÿè¸ªå·²åˆ›å»ºã€‚æˆ¿è´·å‡†å¤‡å’Œé¦–ä»˜æ¬¾ç›‘æµ‹å·²å¯åŠ¨ã€‚",
+      "title": "首付款准备",
+      "subtitle": "FutureOS 帮助 the customer 和 the partner 准备首套房，同时保持其他目标稳定。",
+      "score": "置业准备度",
+      "targetYear": "目标年份",
+      "currentFund": "当前置业基金",
+      "targetDownPayment": "目标首付款",
+      "monthlyRequired": "每月所需",
+      "support1": "将首付款资金与婚礼支出隔离。",
+      "support2": "跟踪 HDB 或公寓可负担性情景。",
+      "support3": "在 2030 年前准备房贷资格。",
+      "support4": "若每月储蓄落后则触发提醒。",
+      "cta": "创建置业准备跟踪",
+      "success": "置业准备跟踪已创建。房贷准备和首付款监测已启动。",
       "sgContextDisclaimer": "此处显示的新加坡房屋背景信息(HDB/BTO)仅为一般规划参考,并非已核实的 HDB/BTO 对接。",
       "housingTypeLabel": "房屋类型",
       "bto": "BTO预购组屋",
@@ -546,500 +752,578 @@
       "cpfContext": "你的公积金(CPF)普通户头存款也可能用于支付首付款或每月房贷分期——请查阅你的CPF房屋用途声明以确认实际额度。"
     },
     "emergency": {
-      "title": "åº”æ€¥åŸºé‡‘ä¿æŠ¤",
-      "subtitle": "FutureOS åœ¨æŽ¨è¿›äººç”Ÿç›®æ ‡çš„åŒæ—¶å®ˆä½çŸ­æœŸå®‰å…¨åž«ã€‚",
-      "score": "åº”æ€¥ä¿æŠ¤",
-      "currentFund": "å½“å‰åŸºé‡‘",
-      "recommendedFund": "æŽ¨èåŸºé‡‘",
-      "currentCoverage": "å½“å‰è¦†ç›–",
-      "recommendedCoverage": "æŽ¨èè¦†ç›–",
-      "months6": "6 ä¸ªæœˆ",
-      "status": "é£Žé™©çŠ¶æ€",
-      "statusValue": "å…å—å¤§é¢æ”¯å‡ºå½±å“",
-      "rec1": "é˜²æ­¢å©šç¤¼è¶…æ”¯åŠ¨ç”¨åº”æ€¥çŽ°é‡‘ã€‚",
-      "rec2": "å·¥èµ„å…¥è´¦åŽè‡ªåŠ¨è¡¥è¶³ã€‚",
-      "rec3": "ä½™é¢ä½ŽäºŽé˜ˆå€¼æ—¶å‘é€æé†’ã€‚",
-      "cta": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
-      "success": "åº”æ€¥åŸºé‡‘å·²ä¿æŠ¤ã€‚FutureOS å°†é˜»æ­¢ä»Žè¯¥å‚¨å¤‡ä¸­è¿›è¡Œé«˜é£Žé™©è°ƒæ‹¨ã€‚",
+      "title": "应急基金保护",
+      "subtitle": "FutureOS 在推进人生目标的同时守住短期安全垫。",
+      "score": "应急保护",
+      "currentFund": "当前基金",
+      "recommendedFund": "推荐基金",
+      "currentCoverage": "当前覆盖",
+      "recommendedCoverage": "推荐覆盖",
+      "months6": "6 个月",
+      "status": "风险状态",
+      "statusValue": "免受大额支出影响",
+      "rec1": "防止婚礼超支动用应急现金。",
+      "rec2": "工资入账后自动补足。",
+      "rec3": "余额低于阈值时发送提醒。",
+      "cta": "保护应急基金",
+      "success": "应急基金已保护。FutureOS 将阻止从该储备中进行高风险调拨。",
       "monthsValue": "{months} 个月"
     },
     "insurance": {
-      "title": "ä¿é™©å‡†å¤‡åº¦",
-      "subtitle": "FutureOS åœ¨ the customer å’Œ the partner å¼€å§‹å®¶åº­è®¡åˆ’å‰è¯†åˆ«ä¿éšœç¼ºå£ã€‚",
-      "currentScore": "å½“å‰å‡†å¤‡åº¦",
-      "recommendedScore": "ç›®æ ‡å‡†å¤‡åº¦",
-      "life": "äººå¯¿ä¿éšœ",
-      "health": "åŒ»ç–—ä¿éšœ",
-      "critical": "é‡å¤§ç–¾ç—…",
-      "family": "å®¶åº­ä¿éšœ",
-      "notReviewed": "æœªå¤æ ¸",
-      "basic": "åŸºç¡€",
-      "gap": "å‘çŽ°ç¼ºå£",
-      "support1": "åœ¨æˆ¿è´·æ‰¿è¯ºå‰å¤æ ¸äººå¯¿ä¸ŽåŒ»ç–—ä¿éšœã€‚",
-      "support2": "ä¼°ç®—æœªæ¥å®¶åº­ä¿éšœéœ€æ±‚ã€‚",
-      "support3": "åŒæ–¹æ‰¹å‡†åŽè¿žæŽ¥é¡¾é—®é¢„çº¦ã€‚",
-      "support4": "å»ºè®®ä¸Žè‡ªåŠ¨æ‰§è¡Œä¿æŒåˆ†ç¦»ã€‚",
-      "cta": "å®‰æŽ’å‡†å¤‡åº¦å¤æ ¸",
-      "success": "ä¿é™©å‡†å¤‡åº¦å¤æ ¸å·²å®‰æŽ’ã€‚å®ˆæŠ¤è€…å°†ç›‘æµ‹å®¶åº­ä¿éšœç¼ºå£ã€‚"
+      "title": "保险准备度",
+      "subtitle": "FutureOS 在 the customer 和 the partner 开始家庭计划前识别保障缺口。",
+      "currentScore": "当前准备度",
+      "recommendedScore": "目标准备度",
+      "life": "人寿保障",
+      "health": "医疗保障",
+      "critical": "重大疾病",
+      "family": "家庭保障",
+      "notReviewed": "未复核",
+      "basic": "基础",
+      "gap": "发现缺口",
+      "support1": "在房贷承诺前复核人寿与医疗保障。",
+      "support2": "估算未来家庭保障需求。",
+      "support3": "双方批准后连接顾问预约。",
+      "support4": "建议与自动执行保持分离。",
+      "cta": "安排准备度复核",
+      "success": "保险准备度复核已安排。守护者将监测家庭保障缺口。",
+      "scheduledCta": "已安排审查",
+      "scheduledDetail": "准备度审查已安排。Future Self Guardian 将监测保障缺口,并在房贷承诺前提醒你。"
     },
     "investment": {
-      "title": "é•¿æœŸæŠ•èµ„è§„åˆ’",
-      "subtitle": "FutureOS åœ¨æ”¯æŒçŸ­æœŸäººç”Ÿäº‹ä»¶çš„åŒæ—¶ä¿ç•™é€€ä¼‘å¤åˆ©ã€‚",
-      "currentAmount": "å½“å‰æŠ•èµ„",
-      "monthlyInvestment": "æ¯æœˆæŠ•èµ„",
-      "riskProfile": "é£Žé™©ç”»åƒ",
-      "retirementAge": "ç›®æ ‡é€€ä¼‘å¹´é¾„",
-      "gap": "é¢„è®¡é€€ä¼‘ç¼ºå£",
-      "conservative": "ä¿å®ˆ",
-      "balanced": "å¹³è¡¡",
-      "growth": "å¢žé•¿",
-      "lowerRisk": "è¾ƒä½Žé£Žé™©ï¼Œé€€ä¼‘è¾ƒæ…¢",
-      "higherRisk": "è¾ƒé«˜é£Žé™©ï¼Œæ›´å¿«è¾¾æ ‡",
-      "retirementAt": "{age} å²é€€ä¼‘",
-      "cta": "åº”ç”¨å¹³è¡¡æŠ•èµ„è®¡åˆ’",
-      "success": "å¹³è¡¡æŠ•èµ„è®¡åˆ’å·²åº”ç”¨ã€‚FutureOS å°†æ¯ 3 ä¸ªæœˆå¤æ ¸è¿›å±•ã€‚",
+      "title": "长期投资规划",
+      "subtitle": "FutureOS 在支持短期人生事件的同时保留退休复利。",
+      "currentAmount": "当前投资",
+      "monthlyInvestment": "每月投资",
+      "riskProfile": "风险画像",
+      "retirementAge": "目标退休年龄",
+      "gap": "预计退休缺口",
+      "conservative": "保守",
+      "balanced": "平衡",
+      "growth": "增长",
+      "lowerRisk": "较低风险，退休较慢",
+      "higherRisk": "较高风险，更快达标",
+      "retirementAt": "{age} 岁退休",
+      "cta": "应用平衡投资计划",
+      "success": "平衡投资计划已应用。FutureOS 将每 3 个月复核进展。",
       "cpfContextDisclaimer": "此计划仅涵盖私人投资部分。你的公积金储蓄及CPF退休储蓄框架是退休准备的另一项重要内容——请查阅你的CPF结单,了解目前余额及预计可领取年龄。"
     }
   },
   "simulator": {
-    "title": "Future Mirror æ¨¡æ‹Ÿå™¨",
-    "subtitle": "åˆ›å»ºä½ çš„ AI ä»£ç†ï¼Œæ¨¡æ‹Ÿäººç”Ÿå†³ç­–ï¼Œå¹¶è®© Future Self Guardian é€‰æ‹©æœ€ä½³å»ºè®®ã€‚",
-    "trustNote": "FutureOS ä¸ä¼šåœ¨æœªç»å®¢æˆ·åŒæ„çš„æƒ…å†µä¸‹æ‰§è¡Œé‡‘èžæ“ä½œã€‚è‡ªä¸»æ“ä½œåªä¼šåœ¨å·²æ‰¹å‡†çš„é™åˆ¶å†…è¿›è¡Œã€‚",
-    "run": "è¿è¡Œæœªæ¥æ¨¡æ‹Ÿ",
-    "reset": "é‡ç½®æ¨¡æ‹Ÿ",
-    "levelLabel": "ç­‰çº§ {level}",
+    "title": "Future Mirror 模拟器",
+    "subtitle": "创建你的 AI 代理，模拟人生决策，并让 Future Self Guardian 选择最佳建议。",
+    "trustNote": "FutureOS 不会在未经客户同意的情况下执行金融操作。自主操作只会在已批准的限制内进行。",
+    "run": "运行未来模拟",
+    "reset": "重置模拟",
+    "levelLabel": "等级 {level}",
     "inputs": {
-      "situation": "æƒ…å†µè¯´æ˜Ž",
-      "situationPlaceholder": "æè¿°ä½ çš„æƒ…å†µï¼Œä¾‹å¦‚ï¼šæˆ‘æƒ³èŠ± SGD 80,000 åŠžå©šç¤¼ï¼ŒåŒæ—¶åœ¨ 3 å¹´å†…ä¹°æˆ¿ã€‚",
-      "lifeGoals": "äººç”Ÿç›®æ ‡é€‰æ‹©",
-      "aiIndependence": "AI ç‹¬ç«‹ç¨‹åº¦",
-      "monthlyIncome": "æœˆæ”¶å…¥",
-      "currentSavings": "å½“å‰å‚¨è“„",
-      "targetHomeYear": "ç›®æ ‡ç½®ä¸šå¹´ä»½",
-      "retirementAge": "é€€ä¼‘ç›®æ ‡å¹´é¾„",
-      "riskPreference": "é£Žé™©åå¥½",
-      "weddingBudget": "å©šç¤¼é¢„ç®—",
-      "weddingDate": "å©šç¤¼æ—¥æœŸ",
-      "targetDownPayment": "ç›®æ ‡é¦–ä»˜æ¬¾",
-      "propertyBudget": "é¢„è®¡æˆ¿äº§é¢„ç®—",
-      "mortgageReadiness": "æˆ¿è´·å‡†å¤‡åº¦",
-      "monthlyExpenses": "æ¯æœˆæ”¯å‡º",
-      "currentEmergencyFund": "å½“å‰åº”æ€¥åŸºé‡‘",
-      "targetCoverageMonths": "ç›®æ ‡è¦†ç›–æœˆæ•°",
-      "currentInvestment": "å½“å‰æŠ•èµ„é‡‘é¢",
-      "monthlyInvestment": "æ¯æœˆæŠ•èµ„é‡‘é¢",
-      "targetReturnGoal": "ç›®æ ‡å›žæŠ¥",
-      "familyPlanningYear": "å®¶åº­è®¡åˆ’ç›®æ ‡å¹´ä»½",
-      "familyMonthlyCost": "é¢„è®¡æ¯æœˆå®¶åº­æˆæœ¬",
-      "insuranceReadiness": "ä¿é™©å‡†å¤‡åº¦",
-      "startupCapital": "æ‰€éœ€åˆ›ä¸šèµ„é‡‘",
-      "launchDate": "ç›®æ ‡å¯åŠ¨æ—¥æœŸ",
-      "customGoalName": "ç›®æ ‡åç§°",
-      "customTargetAmount": "ç›®æ ‡é‡‘é¢",
-      "customTargetDate": "ç›®æ ‡æ—¥æœŸ",
-      "customPriority": "ä¼˜å…ˆçº§",
-      "customCategory": "ç›®æ ‡ç±»åˆ«",
-      "customNotes": "å¤‡æ³¨ / æƒ…å†µè¯´æ˜Ž"
+      "situation": "情况说明",
+      "situationPlaceholder": "描述你的情况，例如：我想花 SGD 80,000 办婚礼，同时在 3 年内买房。",
+      "lifeGoals": "人生目标选择",
+      "aiIndependence": "AI 独立程度",
+      "monthlyIncome": "月收入",
+      "currentSavings": "当前储蓄",
+      "targetHomeYear": "目标置业年份",
+      "retirementAge": "退休目标年龄",
+      "riskPreference": "风险偏好",
+      "weddingBudget": "婚礼预算",
+      "weddingDate": "婚礼日期",
+      "targetDownPayment": "目标首付款",
+      "propertyBudget": "预计房产预算",
+      "mortgageReadiness": "房贷准备度",
+      "monthlyExpenses": "每月支出",
+      "currentEmergencyFund": "当前应急基金",
+      "targetCoverageMonths": "目标覆盖月数",
+      "currentInvestment": "当前投资金额",
+      "monthlyInvestment": "每月投资金额",
+      "targetReturnGoal": "目标回报",
+      "familyPlanningYear": "家庭计划目标年份",
+      "familyMonthlyCost": "预计每月家庭成本",
+      "insuranceReadiness": "保险准备度",
+      "startupCapital": "所需创业资金",
+      "launchDate": "目标启动日期",
+      "customGoalName": "目标名称",
+      "customTargetAmount": "目标金额",
+      "customTargetDate": "目标日期",
+      "customPriority": "优先级",
+      "customCategory": "目标类别",
+      "customNotes": "备注 / 情况说明"
     },
     "goals": {
-      "wedding": "å©šç¤¼",
-      "home": "é¦–å¥—æˆ¿",
-      "emergency": "åº”æ€¥åŸºé‡‘",
-      "retirement": "é€€ä¼‘",
-      "family": "å®¶åº­è®¡åˆ’",
-      "investment": "æŠ•èµ„å¢žé•¿",
-      "business": "åˆ›ä¸š",
-      "custom": "å…¶ä»– / è‡ªå®šä¹‰ç›®æ ‡",
-      "customFallback": "è‡ªå®šä¹‰ç›®æ ‡"
+      "wedding": "婚礼",
+      "home": "首套房",
+      "emergency": "应急基金",
+      "retirement": "退休",
+      "family": "家庭计划",
+      "investment": "投资增长",
+      "business": "创业",
+      "custom": "其他 / 自定义目标",
+      "customFallback": "自定义目标"
     },
     "riskPreference": {
-      "conservative": "ä¿å®ˆ",
-      "balanced": "å¹³è¡¡",
-      "growth": "å¢žé•¿"
+      "conservative": "保守",
+      "balanced": "平衡",
+      "growth": "增长"
     },
     "levels": {
       "1": {
-        "title": "ä»…å»ºè®®",
-        "detail": "AI åªè§£é‡Šå¯èƒ½å‡ºçŽ°çš„ç»“æžœã€‚"
+        "title": "仅建议",
+        "detail": "AI 只解释可能出现的结果。"
       },
       "2": {
-        "title": "æŽ¨è",
-        "detail": "AI æ¯”è¾ƒä¸åŒé€‰é¡¹å¹¶æŽ¨èæœ€ä½³æ–¹æ¡ˆã€‚"
+        "title": "推荐",
+        "detail": "AI 比较不同选项并推荐最佳方案。"
       },
       "3": {
-        "title": "åå•†",
-        "detail": "AI å¹³è¡¡ç«žäº‰ç›®æ ‡å¹¶æå‡ºå–èˆã€‚"
+        "title": "协商",
+        "detail": "AI 平衡竞争目标并提出取舍。"
       },
       "4": {
-        "title": "æ‰¹å‡†åŽè¡ŒåŠ¨",
-        "detail": "AI å‡†å¤‡è¡ŒåŠ¨è®¡åˆ’ï¼Œä½†éœ€è¦å®¢æˆ·æ‰¹å‡†ã€‚"
+        "title": "批准后行动",
+        "detail": "AI 准备行动计划，但需要客户批准。"
       },
       "5": {
-        "title": "è‡ªä¸»",
-        "detail": "AI å¯åœ¨é™åˆ¶å†…æ‰§è¡Œé¢„å…ˆæ‰¹å‡†çš„é“¶è¡Œæ“ä½œã€‚"
+        "title": "自主",
+        "detail": "AI 可在限制内执行预先批准的银行操作。"
       }
     },
     "modal": {
-      "title": "å¯ç”¨è‡ªä¸»æ¨¡å¼",
-      "message": "ä½ æ­£åœ¨å¯ç”¨è¾ƒé«˜çš„ AI ç‹¬ç«‹ç¨‹åº¦ã€‚FutureOS å¯åœ¨ä½ é€‰æ‹©çš„é™åˆ¶å†…æ‰§è¡Œé¢„å…ˆæ‰¹å‡†çš„æ“ä½œã€‚ä½ å¯ä»¥éšæ—¶åœ¨éšç§ä¸ŽåŒæ„ä¸­æ›´æ”¹ã€‚",
-      "cancel": "å–æ¶ˆ",
-      "enable": "å¯ç”¨è‡ªä¸»æ¨¡å¼"
+      "title": "启用自主模式",
+      "message": "你正在启用较高的 AI 独立程度。FutureOS 可在你选择的限制内执行预先批准的操作。你可以随时在隐私与同意中更改。",
+      "cancel": "取消",
+      "enable": "启用自主模式"
     },
     "output": {
-      "bestRecommendation": "AI é€‰æ‹©çš„æœ€ä½³å»ºè®®",
-      "adviceOnly": "ç­‰çº§ 1 ä»…æä¾›å»ºè®®ã€‚FutureOS ä¼šè§£é‡Šå¯èƒ½çš„æœªæ¥ï¼Œä½†ä¸ä¼šæ˜¾ç¤ºæ‰§è¡ŒæŽ§åˆ¶ã€‚",
-      "tradeoffs": "FutureOS ä¼šåœ¨å·²é€‰æ‹©çš„äººç”Ÿç›®æ ‡ã€çŽ°é‡‘å®‰å…¨ã€äº§å“å‡†å¤‡åº¦å’Œé•¿æœŸä¿éšœä¹‹é—´åå•†å¹³è¡¡ã€‚",
-      "why": "AI ä¸ºä»€ä¹ˆè¿™æ ·é€‰æ‹©ï¼Ÿ",
-      "explainTitle": "Guardian æŽ¨ç†",
-      "apply": "åº”ç”¨ Guardian å»ºè®®",
-      "success": "Future Self Guardian å»ºè®®å·²åº”ç”¨ã€‚FutureOS å°†æŒç»­ç›‘æµ‹ä½ çš„è¿›åº¦ã€‚",
+      "bestRecommendation": "AI 选择的最佳建议",
+      "adviceOnly": "等级 1 仅提供建议。FutureOS 会解释可能的未来，但不会显示执行控制。",
+      "tradeoffs": "FutureOS 会在已选择的人生目标、现金安全、产品准备度和长期保障之间协商平衡。",
+      "why": "AI 为什么这样选择？",
+      "explainTitle": "Guardian 推理",
+      "apply": "应用 Guardian 建议",
+      "success": "Future Self Guardian 建议已应用。FutureOS 将持续监测你的进度。",
       "scenarios": {
         "conservative": {
-          "title": "ä¿å®ˆæœªæ¥",
-          "detail": "è¾ƒä½Žæ”¯å‡ºæˆ–è¾ƒæ…¢æ—¶é—´è¡¨ï¼Œå‚¨è“„æ›´å¼ºï¼Œé£Žé™©æ›´ä½Žã€‚"
+          "title": "保守未来",
+          "detail": "较低支出或较慢时间表，储蓄更强，风险更低。"
         },
         "balanced": {
-          "title": "å¹³è¡¡æœªæ¥",
-          "detail": "åœ¨æ‰€é€‰ç›®æ ‡ã€çŽ°é‡‘å®‰å…¨ä¸Žé•¿æœŸå¥åº·ä¹‹é—´å–å¾—æŽ¨èå¹³è¡¡ã€‚"
+          "title": "平衡未来",
+          "detail": "在所选目标、现金安全与长期健康之间取得推荐平衡。"
         },
         "highRisk": {
-          "title": "é«˜é£Žé™©æœªæ¥",
-          "detail": "è¾ƒé«˜æ”¯å‡ºæˆ–æ›´å¿«æ—¶é—´è¡¨ï¼Œè´¢åŠ¡å®‰å…¨è¾ƒå¼±ã€‚"
+          "title": "高风险未来",
+          "detail": "较高支出或更快时间表，财务安全较弱。"
         }
       },
       "tone": {
-        "1": "å»ºè®®è¯­æ°”ï¼šæä¾›ä¿¡æ¯ï¼Œä¸æ˜¾ç¤ºæ‰§è¡ŒæŒ‰é’®ã€‚",
-        "2": "æŽ¨èè¯­æ°”ï¼šé€‰æ‹©æœ€ä½³æœªæ¥ï¼Œä½†ä¸è¿›è¡Œè‡ªä¸»è¡ŒåŠ¨ã€‚",
-        "3": "åå•†è¯­æ°”ï¼šè§£é‡Šå¤šä¸ªç«žäº‰ç›®æ ‡ä¹‹é—´çš„å–èˆã€‚",
-        "4": "æ‰¹å‡†è¯­æ°”ï¼šä¸ºå®¢æˆ·å®¡æ ¸å‡†å¤‡è¡ŒåŠ¨ã€‚",
-        "5": "è‡ªä¸»è¯­æ°”ï¼šåœ¨å®‰å…¨é™åˆ¶å†…å‡†å¤‡é¢„å…ˆæ‰¹å‡†çš„è¡ŒåŠ¨ã€‚"
+        "1": "建议语气：提供信息，不显示执行按钮。",
+        "2": "推荐语气：选择最佳未来，但不进行自主行动。",
+        "3": "协商语气：解释多个竞争目标之间的取舍。",
+        "4": "批准语气：为客户审核准备行动。",
+        "5": "自主语气：在安全限制内准备预先批准的行动。"
       },
       "explain": {
-        "protectedGoals": "å—ä¿æŠ¤ç›®æ ‡ï¼š{goals}ã€çŽ°é‡‘å®‰å…¨ä¸Žé•¿æœŸè´¢åŠ¡å¥åº·ã€‚",
-        "products": "OCBC æ”¯æŒï¼šç›®æ ‡å‚¨è“„ã€è‡ªåŠ¨è½¬è´¦ã€ä¿é™©å¤æ ¸ã€ç›¸å…³æˆ¿è´·å‡†å¤‡ï¼Œä»¥åŠæŠ•èµ„è§„åˆ’ã€‚"
+        "protectedGoals": "受保护目标：{goals}、现金安全与长期财务健康。",
+        "products": "OCBC 支持：目标储蓄、自动转账、保险复核、相关房贷准备，以及投资规划。"
       },
-      "dynamicSummary": "FutureOS æ­£åœ¨æ ¹æ®å·²é€‰æ‹©ç›®æ ‡åˆ†æž {goal}ï¼š{goals}ã€‚",
+      "dynamicSummary": "FutureOS 正在根据已选择目标分析 {goal}：{goals}。",
       "fields": {
-        "weddingBudget": "å©šç¤¼é¢„ç®—",
-        "weddingDate": "å©šç¤¼æ—¥æœŸ",
-        "savingsNeeded": "æ‰€éœ€å‚¨è“„",
-        "emergencyImpact": "åº”æ€¥åŸºé‡‘å½±å“",
-        "retirementImpact": "é€€ä¼‘å½±å“",
-        "homeTargetYear": "ç½®ä¸šç›®æ ‡å¹´ä»½",
-        "downPaymentProgress": "é¦–ä»˜æ¬¾è¿›åº¦",
-        "mortgageReadiness": "æˆ¿è´·å‡†å¤‡åº¦",
-        "monthlySavingNeeded": "æ¯æœˆæ‰€éœ€å‚¨è“„",
-        "carBudget": "è´­è½¦é¢„ç®—",
-        "monthlyRepayment": "æ¯æœˆè¿˜æ¬¾",
-        "cashFlowImpact": "çŽ°é‡‘æµå½±å“",
-        "startupCapital": "åˆ›ä¸šèµ„é‡‘",
-        "cashRunway": "çŽ°é‡‘ç»­èˆª",
-        "loanReadiness": "è´·æ¬¾å‡†å¤‡åº¦",
-        "goalName": "ç›®æ ‡åç§°",
-        "targetAmount": "ç›®æ ‡é‡‘é¢",
-        "targetDate": "ç›®æ ‡æ—¥æœŸ",
-        "targetCoverage": "ç›®æ ‡è¦†ç›–",
-        "currentEmergencyFund": "å½“å‰åº”æ€¥åŸºé‡‘",
-        "currentInvestment": "å½“å‰æŠ•èµ„",
-        "monthlyInvestment": "æ¯æœˆæŠ•èµ„",
-        "targetReturn": "ç›®æ ‡å›žæŠ¥",
-        "familyTargetYear": "å®¶åº­ç›®æ ‡å¹´ä»½",
-        "familyMonthlyCost": "æ¯æœˆå®¶åº­æˆæœ¬",
-        "insuranceReadiness": "ä¿é™©å‡†å¤‡åº¦"
+        "weddingBudget": "婚礼预算",
+        "weddingDate": "婚礼日期",
+        "savingsNeeded": "所需储蓄",
+        "emergencyImpact": "应急基金影响",
+        "retirementImpact": "退休影响",
+        "homeTargetYear": "置业目标年份",
+        "downPaymentProgress": "首付款进度",
+        "mortgageReadiness": "房贷准备度",
+        "monthlySavingNeeded": "每月所需储蓄",
+        "carBudget": "购车预算",
+        "monthlyRepayment": "每月还款",
+        "cashFlowImpact": "现金流影响",
+        "startupCapital": "创业资金",
+        "cashRunway": "现金续航",
+        "loanReadiness": "贷款准备度",
+        "goalName": "目标名称",
+        "targetAmount": "目标金额",
+        "targetDate": "目标日期",
+        "targetCoverage": "目标覆盖",
+        "currentEmergencyFund": "当前应急基金",
+        "currentInvestment": "当前投资",
+        "monthlyInvestment": "每月投资",
+        "targetReturn": "目标回报",
+        "familyTargetYear": "家庭目标年份",
+        "familyMonthlyCost": "每月家庭成本",
+        "insuranceReadiness": "保险准备度"
       },
       "impact": {
-        "weak": "è¾ƒå¼±",
-        "protected": "å·²ä¿æŠ¤",
-        "strong": "å¼º",
-        "delayed": "å»¶åŽ",
-        "onTrack": "æŒ‰è®¡åˆ’",
-        "reviewNeeded": "éœ€å¤æ ¸",
-        "tight": "åç´§",
-        "manageable": "å¯ç®¡ç†"
+        "weak": "较弱",
+        "protected": "已保护",
+        "strong": "强",
+        "delayed": "延后",
+        "onTrack": "按计划",
+        "reviewNeeded": "需复核",
+        "tight": "偏紧",
+        "manageable": "可管理"
       },
-      "futureGoalsLabel": "æœªæ¥ç›®æ ‡"
+      "futureGoalsLabel": "未来目标",
+      "applyApproved": "应用 {count} 项已批准的行动"
     },
     "actions": {
-      "savingsGoal": "åˆ›å»ºå‚¨è“„ç›®æ ‡",
-      "monthlyTransfer": "å®‰æŽ’æ¯æœˆè½¬è´¦",
-      "emergencyFund": "ä¿æŠ¤åº”æ€¥åŸºé‡‘",
-      "insuranceReview": "å¤æ ¸ä¿é™©éœ€æ±‚",
-      "mortgageReadiness": "å‡†å¤‡æˆ¿è´·èµ„æ ¼",
-      "investmentPlan": "è°ƒæ•´æŠ•èµ„è®¡åˆ’"
+      "savingsGoal": "创建储蓄目标",
+      "monthlyTransfer": "安排每月转账",
+      "emergencyFund": "保护应急基金",
+      "insuranceReview": "复核保险需求",
+      "mortgageReadiness": "准备房贷资格",
+      "investmentPlan": "调整投资计划"
     },
     "actionButtons": {
-      "approve": "æ‰¹å‡†"
+      "approve": "批准"
     },
     "actionStatus": {
-      "pending": "ç­‰å¾…å®¢æˆ·é€‰æ‹©",
-      "approved": "å·²æ‰¹å‡†",
-      "editing": "å·²è¯·æ±‚ç¼–è¾‘",
-      "skipped": "å·²è·³è¿‡"
+      "pending": "等待客户选择",
+      "approved": "已批准",
+      "editing": "已请求编辑",
+      "skipped": "已跳过"
     },
     "autonomousLock": {
-      "title": "è‡ªä¸»ç›®æ ‡é”å®š",
-      "pause": "å®¢æˆ·å¯éšæ—¶æš‚åœæˆ–è°ƒæ•´"
+      "title": "自主目标锁定",
+      "pause": "客户可随时暂停或调整",
+      "goal": "目标",
+      "target": "目标金额",
+      "monthlyLocked": "每月锁定储蓄",
+      "completion": "完成日期",
+      "progress": "目前进度",
+      "adjust": "调整",
+      "withdrawImpact": "提取影响"
     },
     "reasoning": {
-      "situationUnderstood": "å·²ç†è§£æƒ…å†µ",
-      "selectedGoals": "å·²é€‰ç›®æ ‡",
-      "mainRisk": "ä¸»è¦é£Žé™©",
-      "bestRecommendation": "æœ€ä½³å»ºè®®",
-      "nextAction": "ä¸‹ä¸€æ­¥è¡ŒåŠ¨",
-      "situation": "FutureOS å°†æ­¤ç†è§£ä¸ºä¸€ä¸ª {goal} å†³ç­–ï¼Œéœ€è¦é…åˆå®¢æˆ·çŽ°é‡‘æµä¸Žé•¿æœŸç›®æ ‡ã€‚",
-      "carRisk": "è¿‡å¿«è´­è½¦å¯èƒ½å‰Šå¼±çŽ°é‡‘æµï¼Œå¹¶å¢žåŠ ä¿¡è´·è¿˜æ¬¾åŽ‹åŠ›ã€‚",
-      "customRisk": "ç«‹å³è¡ŒåŠ¨å¯èƒ½é™ä½Žåº”æ€¥ç¼“å†²ï¼Œæˆ–äº§ç”Ÿå¯é¿å…çš„å€ºåŠ¡ã€‚",
-      "customRecommendation": "å¯¹äºŽ {goal} ç›®æ ‡ï¼ŒFutureOS å»ºè®®æ¯æœˆå‚¨è“„ {monthly} è¾¾åˆ° {amount}ï¼Œè€Œä¸æ˜¯ç«‹å³è´­ä¹°ï¼Œä»¥ä¿æŠ¤åº”æ€¥åŸºé‡‘å¹¶é¿å…ä¿¡ç”¨å¡å€ºåŠ¡ã€‚",
-      "nextActionCustom": "ä¸º {goal} å»ºç«‹å—ä¿æŠ¤å‚¨è“„å£è¢‹ï¼Œå¹¶æ¯æœˆç›‘æµ‹è¿›åº¦ã€‚",
-      "weddingRisk": "è¾ƒé«˜å©šç¤¼é¢„ç®—å¯èƒ½é™ä½ŽçŽ°é‡‘å‚¨å¤‡ï¼Œå¹¶æŽ¨è¿Ÿå…¶ä»–é‡è¦æœªæ¥ç›®æ ‡ã€‚",
-      "weddingRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒä¿æŠ¤å©šç¤¼è®¡åˆ’ï¼ŒåŒæ—¶ç»´æŒçŽ°é‡‘å®‰å…¨ä¸Žé€€ä¼‘è¿›åº¦ã€‚",
-      "weddingAction": "é”å®šå©šç¤¼å‚¨è“„ç›®æ ‡ï¼Œå¹¶åœ¨æ”¯ä»˜è®¢é‡‘å‰å¯ç”¨æ”¯å‡ºæé†’ã€‚",
-      "homeRisk": "é¦–ä»˜æ¬¾è·¯å¾„ä¸è¶³å¯èƒ½é™ä½Žæˆ¿è´·å‡†å¤‡åº¦å¹¶å¢žåŠ æœªæ¥å€Ÿæ¬¾åŽ‹åŠ›ã€‚",
-      "homeRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒè®©ç½®ä¸šç›®æ ‡æ›´çŽ°å®žï¼ŒåŒæ—¶ä¿æŠ¤å‚¨è“„ã€‚",
-      "homeAction": "å»ºç«‹é¦–ä»˜æ¬¾è¿›åº¦ï¼Œå¹¶æ¯æœˆæ£€æŸ¥æˆ¿è´·å‡†å¤‡åº¦ã€‚",
-      "emergencyRisk": "åº”æ€¥è¦†ç›–ä¸è¶³ä¼šåœ¨æ”¶å…¥æˆ–æ”¯å‡ºå˜åŒ–æ—¶å¸¦æ¥é£Žé™©ã€‚",
-      "emergencyRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒæ¢å¤ä¿éšœï¼ŒåŒæ—¶ä¸å†»ç»“å…¶ä»–ç›®æ ‡ã€‚",
-      "emergencyAction": "éš”ç¦»åº”æ€¥å‚¨è“„ï¼Œå¹¶åœ¨å·¥èµ„å…¥è´¦åŽè‡ªåŠ¨è¡¥è¶³ã€‚",
-      "retirementRisk": "çŽ°åœ¨å‡å°‘æŠ•èµ„ä¾›æ¬¾å¯èƒ½æŽ¨è¿Ÿæœªæ¥è´¢åŠ¡è‡ªç”±ã€‚",
-      "retirementRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåœ¨æ”¯æŒè¿‘æœŸç›®æ ‡çš„åŒæ—¶ä¿ç•™å¤åˆ©ã€‚",
-      "retirementAction": "ä¿æŒæ¯æœˆæŠ•èµ„èŠ‚å¥ï¼Œå¹¶æ¯å­£åº¦å¤æ ¸é€€ä¼‘ç¼ºå£ã€‚",
-      "investmentRisk": "åœ¨ç¼ºå°‘çŽ°é‡‘ç¼“å†²æ—¶è¿½æ±‚å›žæŠ¥ï¼Œå¯èƒ½åœ¨é”™è¯¯æ—¶é—´æ‰¿å—æ³¢åŠ¨ã€‚",
-      "investmentRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒåœ¨æŽ§åˆ¶é£Žé™©çš„åŒæ—¶æŽ¨åŠ¨æŠ•èµ„å¢žé•¿ã€‚",
-      "investmentAction": "æŒ‰æ‰€é€‰é£Žé™©åå¥½è°ƒæ•´æŠ•èµ„è®¡åˆ’ï¼Œå¹¶æ¯å­£åº¦å¤æ ¸ã€‚",
-      "familyRisk": "æ²¡æœ‰ä¿é™©å’ŒçŽ°é‡‘å‡†å¤‡çš„å®¶åº­è®¡åˆ’ï¼Œå¯èƒ½äº§ç”Ÿæœªæ¥ä¿éšœç¼ºå£ã€‚",
-      "familyRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒå‡†å¤‡å®¶åº­æˆæœ¬ï¼ŒåŒæ—¶ä¿æŠ¤å‚¨è“„ã€‚",
-      "familyAction": "å¤æ ¸ä¿é™©å‡†å¤‡åº¦ï¼Œå¹¶å»ºç«‹å®¶åº­æˆæœ¬ç¼“å†²ã€‚",
-      "businessRisk": "è¿‡å¿«åˆ›ä¸šå¯èƒ½è€—å°½å‚¨å¤‡å¹¶ç¼©çŸ­çŽ°é‡‘ç»­èˆªã€‚",
-      "businessRecommendation": "Future Self Guardian æŽ¨èå¹³è¡¡æœªæ¥ï¼Œå› ä¸ºå®ƒç­¹å¤‡åˆ›ä¸šèµ„é‡‘ï¼ŒåŒæ—¶ä¿ç•™åº”æ€¥çŽ°é‡‘ã€‚",
-      "businessAction": "å»ºç«‹åˆ›ä¸šèµ„é‡‘è®¡åˆ’ï¼Œå¹¶å°†ä¸šåŠ¡é£Žé™©ä¸Žå®¶åº­å‚¨å¤‡åˆ†å¼€ã€‚"
+      "situationUnderstood": "已理解情况",
+      "selectedGoals": "已选目标",
+      "mainRisk": "主要风险",
+      "bestRecommendation": "最佳建议",
+      "nextAction": "下一步行动",
+      "situation": "FutureOS 将此理解为一个 {goal} 决策，需要配合客户现金流与长期目标。",
+      "carRisk": "过快购车可能削弱现金流，并增加信贷还款压力。",
+      "customRisk": "立即行动可能降低应急缓冲，或产生可避免的债务。",
+      "customRecommendation": "对于 {goal} 目标，FutureOS 建议每月储蓄 {monthly} 达到 {amount}，而不是立即购买，以保护应急基金并避免信用卡债务。",
+      "nextActionCustom": "为 {goal} 建立受保护储蓄口袋，并每月监测进度。",
+      "weddingRisk": "较高婚礼预算可能降低现金储备，并推迟其他重要未来目标。",
+      "weddingRecommendation": "Future Self Guardian 推荐平衡未来，因为它保护婚礼计划，同时维持现金安全与退休进度。",
+      "weddingAction": "锁定婚礼储蓄目标，并在支付订金前启用支出提醒。",
+      "homeRisk": "首付款路径不足可能降低房贷准备度并增加未来借款压力。",
+      "homeRecommendation": "Future Self Guardian 推荐平衡未来，因为它让置业目标更现实，同时保护储蓄。",
+      "homeAction": "建立首付款进度，并每月检查房贷准备度。",
+      "emergencyRisk": "应急覆盖不足会在收入或支出变化时带来风险。",
+      "emergencyRecommendation": "Future Self Guardian 推荐平衡未来，因为它恢复保障，同时不冻结其他目标。",
+      "emergencyAction": "隔离应急储蓄，并在工资入账后自动补足。",
+      "retirementRisk": "现在减少投资供款可能推迟未来财务自由。",
+      "retirementRecommendation": "Future Self Guardian 推荐平衡未来，因为它在支持近期目标的同时保留复利。",
+      "retirementAction": "保持每月投资节奏，并每季度复核退休缺口。",
+      "investmentRisk": "在缺少现金缓冲时追求回报，可能在错误时间承受波动。",
+      "investmentRecommendation": "Future Self Guardian 推荐平衡未来，因为它在控制风险的同时推动投资增长。",
+      "investmentAction": "按所选风险偏好调整投资计划，并每季度复核。",
+      "familyRisk": "没有保险和现金准备的家庭计划，可能产生未来保障缺口。",
+      "familyRecommendation": "Future Self Guardian 推荐平衡未来，因为它准备家庭成本，同时保护储蓄。",
+      "familyAction": "复核保险准备度，并建立家庭成本缓冲。",
+      "businessRisk": "过快创业可能耗尽储备并缩短现金续航。",
+      "businessRecommendation": "Future Self Guardian 推荐平衡未来，因为它筹备创业资金，同时保留应急现金。",
+      "businessAction": "建立创业资金计划，并将业务风险与家庭储备分开。"
+    },
+    "sections": {
+      "futureSimulator": "未来模拟器",
+      "aiIndependence": "AI 自主程度",
+      "scenarioComparison": "情景对比",
+      "tradeoffAnalysis": "权衡分析",
+      "riskAnalysis": "风险分析",
+      "futureScore": "未来评分"
+    },
+    "actionReceipt": {
+      "approvalMode": "需要批准",
+      "autonomousMode": "预先批准的自主模式",
+      "labels": {
+        "prepared": "已准备",
+        "safety": "安全限额",
+        "next": "应用后的下一步"
+      },
+      "state": {
+        "pending": {
+          "title": "待获得同意",
+          "detail": "FutureOS 已准备好此行动,但在客户批准前不会执行。"
+        },
+        "approved": {
+          "title": "已获同意",
+          "detail": "此行动已获批准纳入 Guardian 计划,应用建议时将会包含在内。"
+        },
+        "editing": {
+          "title": "已请求修改",
+          "detail": "FutureOS 会将此行动保持在审查模式,直到客户批准修改后的版本才会执行。"
+        },
+        "skipped": {
+          "title": "已跳过",
+          "detail": "此行动已从当前 Guardian 计划中排除。"
+        }
+      }
+    },
+    "actionDetails": {
+      "savingsGoal": {
+        "prepared": "为 {goal} 设立的受保护储蓄口袋",
+        "safety": "目标资金与日常支出资金分开存放。",
+        "next": "在{mode}下创建该储蓄口袋。"
+      },
+      "monthlyTransfer": {
+        "prepared": "每月 {amount} 的转账指令",
+        "safety": "在最终 Guardian 建议应用前不会发生任何转账。",
+        "next": "在{mode}下安排于发薪日进行。"
+      },
+      "emergencyFund": {
+        "prepared": "{amount} 的应急储备保障线",
+        "safety": "FutureOS 不会建议将资金调至低于此储备的水平。",
+        "next": "监测余额,并在风险上升前发出提醒。"
+      },
+      "insuranceReview": {
+        "prepared": "保障准备度审查清单",
+        "safety": "仅为建议,不会购买任何保险。",
+        "next": "为客户审查准备顾问问题。"
+      },
+      "mortgageReadiness": {
+        "prepared": "{year} 房贷准备度追踪",
+        "safety": "不会提交任何信贷申请。",
+        "next": "追踪首付款、债务负担及资格信号。"
+      },
+      "investmentPlan": {
+        "prepared": "投资调整草案",
+        "safety": "未经明确批准,不会进行任何交易或再平衡。",
+        "next": "监测风险偏好及投资组合缺口。"
+      }
     }
   },
   "settings": {
-    "eyebrow": "è®¾ç½®",
-    "title": "è®¾ç½®ä¸Žåå¥½",
-    "subtitle": "ç®¡ç†ä¸ªäººèµ„æ–™ã€è¯­è¨€ã€å¤–è§‚ã€é€šçŸ¥ã€AI Guardian æƒé™ã€éšç§ä¸ŽåŒæ„ã€‚",
-    "openSimulator": "æ‰“å¼€ Future Mirror æ¨¡æ‹Ÿå™¨",
-    "openSimulatorDetail": "ä»Žè®¾ç½®ä¸­åˆ›å»ºè‡ªå®šä¹‰æ¨¡æ‹Ÿã€‚",
+    "eyebrow": "设置",
+    "title": "设置与偏好",
+    "subtitle": "管理个人资料、语言、外观、通知、AI Guardian 权限、隐私与同意。",
+    "openSimulator": "打开 Future Mirror 模拟器",
+    "openSimulatorDetail": "从设置中创建自定义模拟。",
     "language": {
-      "title": "è¯­è¨€",
-      "description": "é€‰æ‹©ä½ çš„é¦–é€‰åº”ç”¨è¯­è¨€ã€‚"
+      "title": "语言",
+      "description": "选择你的首选应用语言。"
     },
     "appearance": {
-      "title": "å¤–è§‚",
-      "description": "ä¸ªæ€§åŒ– FutureOS çš„æ˜¾ç¤ºæ–¹å¼ã€‚",
-      "light": "æµ…è‰²æ¨¡å¼",
-      "dark": "æ·±è‰²æ¨¡å¼",
-      "system": "è·Ÿéšç³»ç»Ÿ"
+      "title": "外观",
+      "description": "个性化 FutureOS 的显示方式。",
+      "light": "浅色模式",
+      "dark": "深色模式",
+      "system": "跟随系统"
     },
     "notifications": {
-      "title": "é€šçŸ¥è®¾ç½®",
-      "description": "é€‰æ‹©ä½ å¸Œæœ›æŽ¥æ”¶çš„ FutureOS é€šçŸ¥ã€‚",
-      "futureRisk": "æœªæ¥é£Žé™©æé†’",
-      "spending": "æ¶ˆè´¹è¡Œä¸ºæé†’",
-      "goalProgress": "ç›®æ ‡è¿›åº¦æ›´æ–°",
-      "investment": "æŠ•èµ„æœºä¼š",
-      "mortgage": "æˆ¿è´·å‡†å¤‡æé†’",
-      "insurance": "ä¿é™©å¤æ ¸æé†’",
-      "monthlyReport": "Guardian æœˆæŠ¥",
-      "promotional": "æŽ¨å¹¿é€šçŸ¥",
-      "frequency": "é€šçŸ¥é¢‘çŽ‡",
+      "title": "通知设置",
+      "description": "选择你希望接收的 FutureOS 通知。",
+      "futureRisk": "未来风险提醒",
+      "spending": "消费行为提醒",
+      "goalProgress": "目标进度更新",
+      "investment": "投资机会",
+      "mortgage": "房贷准备提醒",
+      "insurance": "保险复核提醒",
+      "monthlyReport": "Guardian 月报",
+      "promotional": "推广通知",
+      "frequency": "通知频率",
       "history": {
-        "title": "????",
-        "description": "????????????FutureOS ????????",
-        "now": "??",
-        "today": "??",
-        "yesterday": "??",
-        "sent": "???",
+        "title": "通知历史",
+        "description": "当消费或目标风险发生变化时,FutureOS 会自动记录提醒。",
+        "now": "刚刚",
+        "today": "今天",
+        "yesterday": "昨天",
+        "sent": "已发送",
         "overBudget": {
-          "title": "?????????",
-          "detail": "Karina ???? {spending}??????? {budget} ?? {amount}?Future Self Guardian ????????????"
+          "title": "检测到超支",
+          "detail": "Karina 花费了 {spending},超出安全每月预算 {budget} 达 {amount}。Future Self Guardian 建议本周暂停非必要支出。"
         },
         "futureRisk": {
-          "title": "?????????",
-          "detail": "Guardian ????????????????????"
+          "title": "未来风险监测已启用",
+          "detail": "Guardian 正在关注消费、应急储备及家庭保障准备度。"
         },
         "goalProgress": {
-          "title": "??????",
-          "detail": "?????????????????????????"
+          "title": "目标进度更新",
+          "detail": "在最新的资料审查后,应急基金及投资增长仍保持正轨。"
         },
         "quiet": {
-          "title": "??????",
-          "detail": "FutureOS ??????????????????"
+          "title": "目前没有提醒",
+          "detail": "当检测到风险时,FutureOS 会在此处显示自动通知。"
         }
       }
     },
     "frequency": {
-      "realtime": "å®žæ—¶",
-      "daily": "æ¯æ—¥",
-      "weekly": "æ¯å‘¨",
-      "monthly": "æ¯æœˆ"
+      "realtime": "实时",
+      "daily": "每日",
+      "weekly": "每周",
+      "monthly": "每月"
     },
     "guardian": {
-      "title": "AI Guardian åå¥½",
-      "description": "æŽ§åˆ¶ Future Self Guardian å¦‚ä½•å¸®åŠ©ä½ ã€‚",
+      "title": "AI Guardian 偏好",
+      "description": "控制 Future Self Guardian 如何帮助你。",
       "permissions": {
-        "autonomousSavings": "å…è®¸è‡ªä¸»å‚¨è“„",
-        "investmentSuggestions": "å…è®¸æŠ•èµ„å»ºè®®",
-        "insuranceRecommendations": "å…è®¸ä¿é™©å»ºè®®",
-        "mortgagePlanning": "å…è®¸æˆ¿è´·è§„åˆ’",
-        "goalRebalancing": "å…è®¸ç›®æ ‡å†å¹³è¡¡",
-        "spendingAlerts": "å…è®¸æ¶ˆè´¹æé†’"
+        "autonomousSavings": "允许自主储蓄",
+        "investmentSuggestions": "允许投资建议",
+        "insuranceRecommendations": "允许保险建议",
+        "mortgagePlanning": "允许房贷规划",
+        "goalRebalancing": "允许目标再平衡",
+        "spendingAlerts": "允许消费提醒"
       },
-      "savingsTransfer": "å‚¨è“„è½¬è´¦",
-      "investmentRebalancing": "æŠ•èµ„å†å¹³è¡¡",
-      "reviewFrequency": "Guardian å¤æ ¸é¢‘çŽ‡",
-      "personalityTitle": "Guardian ä¸ªæ€§",
+      "savingsTransfer": "储蓄转账",
+      "investmentRebalancing": "投资再平衡",
+      "reviewFrequency": "Guardian 复核频率",
+      "personalityTitle": "Guardian 个性",
       "savings": {
-        "manual": "æ‰‹åŠ¨æ‰¹å‡†",
-        "smart": "æ™ºèƒ½æ‰¹å‡†",
-        "auto": "å®Œå…¨è‡ªåŠ¨"
+        "manual": "手动批准",
+        "smart": "智能批准",
+        "auto": "完全自动"
       },
       "investment": {
-        "manual": "æ‰‹åŠ¨",
-        "suggested": "AI å»ºè®®",
-        "auto": "è‡ªåŠ¨"
+        "manual": "手动",
+        "suggested": "AI 建议",
+        "auto": "自动"
       },
       "review": {
-        "week": "æ¯å‘¨",
-        "month": "æ¯æœˆ",
-        "quarter": "æ¯å­£åº¦"
+        "week": "每周",
+        "month": "每月",
+        "quarter": "每季度"
       },
       "personality": {
-        "friendly": "å‹å¥½",
-        "professional": "ä¸“ä¸š",
-        "minimal": "ç®€æ´",
-        "future": "æœªæ¥å¯¼å‘"
+        "friendly": "友好",
+        "professional": "专业",
+        "minimal": "简洁",
+        "future": "未来导向"
       }
     },
     "privacy": {
-      "title": "éšç§ä¸ŽåŒæ„",
-      "description": "FutureOS åªä¼šåœ¨èŽ·å¾—ä½ çš„è®¸å¯åŽæ‰§è¡Œè‡ªä¸»æ“ä½œã€‚",
-      "score": "éšç§è¯„åˆ†",
+      "title": "隐私与同意",
+      "description": "FutureOS 只会在获得你的许可后执行自主操作。",
+      "score": "隐私评分",
       "permissions": {
-        "spending": "AI å¯åˆ†æžæ¶ˆè´¹",
-        "lifeGoals": "AI å¯åˆ†æžäººç”Ÿç›®æ ‡",
-        "transactions": "AI å¯åˆ†æžäº¤æ˜“åŽ†å²",
-        "portfolio": "AI å¯åˆ†æžæŠ•èµ„ç»„åˆ",
-        "simulations": "AI å¯ç”Ÿæˆè´¢åŠ¡æ¨¡æ‹Ÿ",
-        "executeActions": "AI å¯æ‰§è¡Œå·²æ‰¹å‡†çš„é“¶è¡Œæ“ä½œ"
+        "spending": "AI 可分析消费",
+        "lifeGoals": "AI 可分析人生目标",
+        "transactions": "AI 可分析交易历史",
+        "portfolio": "AI 可分析投资组合",
+        "simulations": "AI 可生成财务模拟",
+        "executeActions": "AI 可执行已批准的银行操作"
       },
-      "historyTitle": "åŒæ„è®°å½•",
+      "historyTitle": "同意记录",
       "history": {
-        "futureMirror": "Future Mirror å·²å¯ç”¨",
-        "autonomousSavings": "è‡ªä¸»å‚¨è“„"
+        "futureMirror": "Future Mirror 已启用",
+        "autonomousSavings": "自主储蓄"
       },
-      "downloadReport": "ä¸‹è½½åŒæ„æŠ¥å‘Š",
-      "withdrawConsent": "æ’¤å›žåŒæ„",
-      "downloadedNotice": "åŒæ„æŠ¥å‘Šå·²ä¸‹è½½ã€‚",
-      "withdrawnNotice": "åŒæ„å·²æ’¤å›žã€‚è‡ªä¸»é“¶è¡ŒåŠŸèƒ½å·²ç¦ç”¨ã€‚"
+      "downloadReport": "下载同意报告",
+      "withdrawConsent": "撤回同意",
+      "downloadedNotice": "同意报告已下载。",
+      "withdrawnNotice": "同意已撤回。自主银行功能已禁用。"
     },
     "terms": {
-      "title": "æ¡æ¬¾ä¸Žæ•°æ®ä½¿ç”¨",
-      "description": "äº†è§£å®¢æˆ·æ•°æ®å¦‚ä½•å—åˆ°ä¿æŠ¤ã€‚",
-      "dataCollected": "æ”¶é›†çš„æ•°æ®",
-      "purpose": "ç”¨é€”",
-      "protection": "æ•°æ®ä¿æŠ¤",
-      "customerControl": "å®¢æˆ·æŽ§åˆ¶",
+      "title": "条款与数据使用",
+      "description": "了解客户数据如何受到保护。",
+      "dataCollected": "收集的数据",
+      "purpose": "用途",
+      "protection": "数据保护",
+      "customerControl": "客户控制",
       "data": {
-        "spending": "æ¶ˆè´¹è¡Œä¸º",
-        "savings": "å‚¨è“„",
-        "investments": "æŠ•èµ„",
-        "products": "é“¶è¡Œäº§å“",
-        "goals": "è´¢åŠ¡ç›®æ ‡",
-        "preferences": "ç”¨æˆ·åå¥½"
+        "spending": "消费行为",
+        "savings": "储蓄",
+        "investments": "投资",
+        "products": "银行产品",
+        "goals": "财务目标",
+        "preferences": "用户偏好"
       },
       "purposeItems": {
-        "predict": "é¢„æµ‹æœªæ¥éœ€æ±‚",
-        "simulate": "ç”Ÿæˆæ¨¡æ‹Ÿ",
-        "optimise": "ä¼˜åŒ–è´¢åŠ¡è§„åˆ’",
-        "protect": "ä¿æŠ¤é•¿æœŸç›®æ ‡"
+        "predict": "预测未来需求",
+        "simulate": "生成模拟",
+        "optimise": "优化财务规划",
+        "protect": "保护长期目标"
       },
       "protectionItems": {
-        "aes": "AES-256 åŠ å¯†",
-        "mas": "MAS åˆè§„",
-        "pdpa": "PDPA åˆè§„",
-        "cloud": "å®‰å…¨äº‘åŸºç¡€è®¾æ–½"
+        "aes": "AES-256 加密",
+        "mas": "MAS 合规",
+        "pdpa": "PDPA 合规",
+        "cloud": "安全云基础设施"
       },
       "controlItems": {
-        "download": "ä¸‹è½½æ•°æ®",
-        "delete": "åˆ é™¤æ•°æ®",
-        "disable": "ç¦ç”¨ AI",
-        "withdraw": "æ’¤å›žåŒæ„"
+        "download": "下载数据",
+        "delete": "删除数据",
+        "disable": "禁用 AI",
+        "withdraw": "撤回同意"
       },
-      "viewPolicy": "æŸ¥çœ‹éšç§æ”¿ç­–",
-      "downloadData": "ä¸‹è½½æˆ‘çš„æ•°æ®",
-      "deleteData": "åˆ é™¤æˆ‘çš„æ•°æ®",
-      "policyText": "FutureOS åªä¼šå°†å·²æ‰¹å‡†çš„å®¢æˆ·æ•°æ®ç”¨äºŽè´¢åŠ¡æ¨¡æ‹Ÿã€è§„åˆ’å»ºè®®å’Œç»åŒæ„çš„è‡ªä¸»æ“ä½œã€‚å®¢æˆ·å§‹ç»ˆä¿æœ‰æŽ§åˆ¶æƒã€‚",
-      "downloadedNotice": "ä½ çš„æœ¬åœ° FutureOS æ•°æ®æ–‡ä»¶å·²ä¸‹è½½ã€‚",
-      "deletedNotice": "æœ¬åœ° FutureOS æ¼”ç¤ºæ•°æ®å·²é‡ç½®ã€‚"
+      "viewPolicy": "查看隐私政策",
+      "downloadData": "下载我的数据",
+      "deleteData": "删除我的数据",
+      "policyText": "FutureOS 只会将已批准的客户数据用于财务模拟、规划建议和经同意的自主操作。客户始终保有控制权。",
+      "downloadedNotice": "你的本地 FutureOS 数据文件已下载。",
+      "deletedNotice": "本地 FutureOS 演示数据已重置。"
     },
     "demo": {
-      "title": "åº”ç”¨ä¿¡æ¯",
-      "description": "ç”¨äºŽç”¨æˆ·ä¸Žäº§å“å¤æ ¸çš„æ¼”ç¤ºæŽ§åˆ¶ã€‚",
-      "clearSimulation": "æ¸…é™¤æ¨¡æ‹Ÿ",
-      "restoreMock": "æ¢å¤æ¨¡æ‹Ÿæ•°æ®",
-      "version": "ç‰ˆæœ¬",
-      "clearNotice": "??????Future Mirror ??????",
-      "restoreNotice": "????????FutureOS ??????????"
+      "title": "应用信息",
+      "description": "用于用户与产品复核的演示控制。",
+      "clearSimulation": "清除模拟",
+      "restoreMock": "恢复模拟数据",
+      "version": "版本",
+      "clearNotice": "模拟已清除。Future Mirror 已准备好进行新一轮运行。",
+      "restoreNotice": "模拟数据已恢复。FutureOS 已恢复为默认客户资料。"
     },
     "profile": {
-      "title": "ä¸ªäººèµ„æ–™",
-      "description": "è‡ªå®šä¹‰ FutureOS å¦‚ä½•ç§°å‘¼ä½ ã€‚",
-      "displayName": "æ˜¾ç¤ºåç§°",
-      "placeholder": "è¾“å…¥ä½ çš„åå­—",
-      "savedHint": "åç§°ä¼šç«‹å³æ˜¾ç¤ºåœ¨é¦–é¡µã€‚"
+      "title": "个人资料",
+      "description": "自定义 FutureOS 如何称呼你。",
+      "displayName": "显示名称",
+      "placeholder": "输入你的名字",
+      "savedHint": "名称会立即显示在首页。"
     }
   },
   "homeBanking": {
-    "heroLabel": "OCBC æ•°å­—é“¶è¡Œ",
-    "scan": "æ‰«æ",
-    "notifications": "é€šçŸ¥",
-    "logout": "ç™»å‡º",
-    "today": "ä»Šå¤©",
-    "welcome": "æ¬¢è¿Žï¼Œ{name}",
-    "quickActionsLabel": "å¿«æ·æ“ä½œ",
+    "heroLabel": "OCBC 数字银行",
+    "scan": "扫描",
+    "notifications": "通知",
+    "logout": "登出",
+    "today": "今天",
+    "welcome": "欢迎，{name}",
+    "quickActionsLabel": "快捷操作",
     "quickActions": {
       "paynow": "PayNow",
-      "scanPay": "æ‰«ç ä»˜æ¬¾",
-      "fx": "å¤–æ±‡",
-      "customise": "è‡ªå®šä¹‰"
+      "scanPay": "扫码付款",
+      "fx": "外汇",
+      "customise": "自定义"
     },
-    "accountsTitle": "è´¦æˆ·æ€»è§ˆ",
+    "accountsTitle": "账户总览",
     "accounts": {
-      "savings": "å‚¨è“„è´¦æˆ·",
-      "creditCard": "ä¿¡ç”¨å¡æœªè¿˜æ¬¾",
-      "personalLoan": "ä¸ªäººè´·æ¬¾ä½™é¢",
-      "investments": "æŠ•èµ„",
-      "insuranceScore": "ä¿é™©ä¿éšœè¯„åˆ†"
+      "savings": "储蓄账户",
+      "creditCard": "信用卡未还款",
+      "personalLoan": "个人贷款余额",
+      "investments": "投资",
+      "insuranceScore": "保险保障评分",
+      "futureGoal": "FutureOS 目标账户"
     },
-    "availableNow": "å½“å‰å¯ç”¨",
-    "selectedGoal": "å·²é€‰ç›®æ ‡",
-    "openFutureOS": "æ‰“å¼€ FutureOS",
-    "infoLabel": "{item} è¯´æ˜Ž",
+    "availableNow": "当前可用",
+    "selectedGoal": "已选目标",
+    "openFutureOS": "打开 FutureOS",
+    "infoLabel": "{item} 说明",
     "info": {
       "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
       "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
       "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
       "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
       "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
-      "family": "????????????????????????????"
+      "family": "家庭规划衡量现金储备及保险准备度是否能支持未来的家庭需求。"
     },
-    "customiseTitle": "è‡ªå®šä¹‰å¿«æ·æ“ä½œ",
+    "customiseTitle": "自定义快捷操作",
     "customiseText": "选择要在主页显示的快捷方式。",
-    "customiseDone": "ä¿å­˜å¿«æ·æ“ä½œ",
-    "gotIt": "çŸ¥é“äº†",
-    "notificationsTitle": "é€šçŸ¥",
-    "logoutTitle": "å®‰å…¨ä¼šè¯",
-    "logoutText": "ç™»å‡ºæŒ‰é’®ä»…ç”¨äºŽçœŸå®žæ„Ÿã€‚æœ¬åŽŸåž‹ä¼šä¿æŒç”¨æˆ·ç™»å½•ï¼Œæ–¹ä¾¿ç»§ç»­æ¼”ç¤ºæµç¨‹ã€‚",
-    "currentScore": "å½“å‰è¯„åˆ†",
-    "howCalculated": "è®¡ç®—æ–¹å¼",
+    "customiseDone": "保存快捷操作",
+    "gotIt": "知道了",
+    "notificationsTitle": "通知",
+    "logoutTitle": "安全会话",
+    "logoutText": "登出按钮仅用于真实感。本原型会保持用户登录，方便继续演示流程。",
+    "currentScore": "当前评分",
+    "howCalculated": "计算方式",
     "method": {
       "futureScore": "FutureOS normalises each module to 0-100, then combines them with higher weight on protected goals and liquidity. It is a transparent prototype model, not a live credit or investment decision.",
       "wedding": "Progress equals protected wedding savings divided by the recommended wedding budget.",
       "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
       "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
       "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
-      "family": "?????????????????????? 0-100 ???????"
+      "family": "家庭规划将应急基金实力及保险保障准备度综合为一个 0-100 的准备度分数。"
     },
     "proof": {
       "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
@@ -1057,101 +1341,181 @@
       "retirementInputs": "Inputs: age 62 target, SGD 85,000 savings, SGD 15,000 investments, SGD 450/month plan, 2030 home target, wedding budget, and existing debt.",
       "retirementMath": "Math: projected retirement capital / target retirement capital = about 61%.",
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
-      "familyInputs": "??????????????????????????????",
-      "familyMath": "????????? 45%??????? 55%?",
-      "familyResult": "???Karina ???????????????????????"
+      "familyInputs": "输入项:应急储备、每月支出、保险状况、家庭规划目标及目前储蓄。",
+      "familyMath": "计算方式:应急准备度占 45%,保障准备度占 55%。",
+      "familyResult": "结果:Karina 的储蓄状况良好,但基础保险使该分数无法达到最高档位。"
     }
   },
   "mockScreens": {
     "common": {
-      "done": "å®Œæˆ"
+      "done": "完成"
     },
     "paynow": {
-      "eyebrow": "OCBC è½¬è´¦",
+      "eyebrow": "OCBC 转账",
       "title": "PayNow",
-      "subtitle": "ä»Ž OCBC å¿«æ·æ“ä½œè¿›å…¥çš„æ¨¡æ‹Ÿè½¬è´¦é¡µé¢ï¼Œå¹¶è¿žæŽ¥ FutureOS ç›®æ ‡ã€‚",
-      "primary": "ç¡®è®¤è½¬è´¦",
-      "recipient": "æ”¶æ¬¾äºº",
-      "mobile": "æ‰‹æœºå·ç ",
-      "amount": "é‡‘é¢",
-      "note": "è¿™æ˜¯æ¨¡æ‹Ÿæ•°æ®ã€‚ä¸ä¼šæ‰§è¡ŒçœŸå®žä»˜æ¬¾ã€‚",
-      "goalRecipient": "å©šç¤¼å‚¨è“„ç›®æ ‡"
+      "subtitle": "从 OCBC 快捷操作进入的模拟转账页面，并连接 FutureOS 目标。",
+      "primary": "确认转账",
+      "recipient": "收款人",
+      "mobile": "手机号码",
+      "amount": "金额",
+      "note": "这是模拟数据。不会执行真实付款。",
+      "goalRecipient": "婚礼储蓄目标"
     },
     "scan": {
-      "eyebrow": "OCBC ä»˜æ¬¾",
-      "title": "æ‰«ç ä»˜æ¬¾",
-      "subtitle": "ç”¨äºŽæ¼”ç¤ºçš„äºŒç»´ç ä»˜æ¬¾æ¨¡æ‹Ÿé¡µé¢ã€‚",
-      "primary": "å¼€å§‹æ¨¡æ‹Ÿæ‰«æ",
-      "merchant": "å•†æˆ·",
-      "limit": "æ¯æ—¥é™é¢",
-      "status": "çŠ¶æ€",
-      "ready": "å·²å‡†å¤‡å¥½",
-      "note": "åŽŸåž‹ä¸­ç›¸æœºåŠŸèƒ½å·²ç¦ç”¨ã€‚"
+      "eyebrow": "OCBC 付款",
+      "title": "扫码付款",
+      "subtitle": "用于演示的二维码付款模拟页面。",
+      "primary": "开始模拟扫描",
+      "merchant": "商户",
+      "limit": "每日限额",
+      "status": "状态",
+      "ready": "已准备好",
+      "note": "原型中相机功能已禁用。"
     },
     "fx": {
-      "eyebrow": "OCBC å¤–æ±‡",
-      "title": "å¤–æ±‡",
-      "subtitle": "ç”¨äºŽæ¼”ç¤ºçš„æ¨¡æ‹Ÿå¤–æ±‡é¡µé¢ã€‚",
-      "primary": "é”å®šæ±‡çŽ‡",
-      "note": "æ±‡çŽ‡ä¸ºæ¨¡æ‹Ÿå€¼ã€‚"
+      "eyebrow": "OCBC 外汇",
+      "title": "外汇",
+      "subtitle": "用于演示的模拟外汇页面。",
+      "primary": "锁定汇率",
+      "note": "汇率为模拟值。"
     }
   },
   "spendingRisk": {
-    "title": "??????",
-    "subtitle": "FutureOS ????????? Karina ??????????",
-    "homeLabel": "FutureOS ??",
-    "homeTitleRisk": "????? 1 ?????",
-    "homeTitleSafe": "???????????",
-    "homeDetailRisk": "????????? {budget} ?? {amount}??????",
-    "homeDetailSafe": "????????? {budget} ??",
-    "detectedLabel": "????",
-    "detectedTitleRisk": "Karina ??????? {amount}",
-    "detectedTitleSafe": "Karina ????????",
-    "detectedText": "FutureOS ??????????????????????????????????????",
+    "title": "消费风险详情",
+    "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",
+    "homeLabel": "FutureOS 提醒",
+    "homeTitleRisk": "今日检测到 1 项财务风险",
+    "homeTitleSafe": "今日未检测到消费风险",
+    "homeDetailRisk": "每月消费已超出安全预算 {budget} 达 {amount}。点击查看详情。",
+    "homeDetailSafe": "消费处于安全每月预算 {budget} 之内。",
+    "detectedLabel": "自动通知",
+    "detectedTitleRisk": "Karina 超出安全每月预算 {amount}",
+    "detectedTitleSafe": "Karina 处于安全每月预算之内",
+    "detectedText": "FutureOS 会比较收入、目前消费、目标承诺及应急储备规则,在影响长期结果前检测风险。",
     "metrics": {
-      "monthlyIncome": "???",
-      "currentSpending": "????",
-      "safeBudget": "????",
-      "overBudget": "????",
-      "spendingRatio": "????",
-      "riskLevel": "????"
+      "monthlyIncome": "每月收入",
+      "currentSpending": "目前消费",
+      "safeBudget": "安全预算",
+      "overBudget": "超出预算",
+      "spendingRatio": "消费比率",
+      "riskLevel": "风险等级"
     },
     "riskLevels": {
       "high": "?",
       "medium": "?",
       "low": "?"
     },
-    "affectedTitle": "????????????",
+    "affectedTitle": "若消费持续将受影响的目标",
     "goals": {
       "emergency": {
-        "title": "????",
-        "detail": "?????????????????"
+        "title": "应急基金",
+        "detail": "消费增加可能削弱受保护的安全缓冲。"
       },
       "family": {
-        "title": "????",
-        "detail": "????????????????"
+        "title": "家庭规划",
+        "detail": "未来的家庭支出需要稳定的每月现金流。"
       },
       "retirement": {
-        "title": "????",
-        "detail": "??????????????"
+        "title": "退休保障",
+        "detail": "反复超支会减少长期投资空间。"
       }
     },
     "recommendation": {
-      "title": "Guardian ??",
-      "detail": "???? {amount} ?????????????????",
-      "note": "?? Karina ???FutureOS ???????????"
+      "title": "Guardian 建议",
+      "detail": "本月减少 {amount} 的非必要支出,并保持应急储蓄受保护。",
+      "note": "除非 Karina 批准,否则 FutureOS 不会执行任何财务操作。"
     },
     "guardrail": {
-      "title": "??? Guardian ?????",
-      "cta": "?? Guardian ????",
-      "activeCta": "?????",
-      "success": "Guardian ????????FutureOS ???????? Karina ??????",
+      "title": "获批准后 Guardian 将采取的行动",
+      "cta": "应用 Guardian 消费防护",
+      "activeCta": "防护已启用",
+      "success": "Guardian 消费防护已启用。FutureOS 将监测消费并保护 Karina 的储蓄目标。",
       "actions": {
-        "cap": "????? {budget} ??????????",
-        "alert": "??????????????????",
-        "protect": "????????????????????",
-        "review": "??????????????? Guardian Memory?"
+        "cap": "本月设置 {budget} 的软性自选消费防护线。",
+        "alert": "若消费超出已批准的防护线,立即发送提醒。",
+        "protect": "将应急储备及家庭规划资金与日常消费分开。",
+        "review": "每周审查现金流,并将决策更新到 Guardian 记忆中。"
       }
     }
+  },
+  "futureSystems": {
+    "lifeGraph": {
+      "title": "Life Graph",
+      "subtitle": "了解你的生活、目标及 OCBC 产品需求"
+    },
+    "futureMirror": {
+      "title": "Future Mirror",
+      "subtitle": "模拟今天的选择如何影响明天"
+    },
+    "guardian": {
+      "title": "Future Self Guardian",
+      "subtitle": "通过已批准的行动保护你的长期目标"
+    }
+  },
+  "accountDetails": {
+    "eyebrow": "账户详情",
+    "subtitle": "余额、状态、近期活动及 FutureOS 建议。",
+    "balance": "当前余额",
+    "recommendationTitle": "相关 FutureOS 建议",
+    "recentActivity": "近期活动",
+    "simulateImpact": "模拟影响",
+    "addToFuturePlan": "加入未来计划",
+    "addedToPlan": "{account} 已加入 FutureOS 监测计划。",
+    "status": {
+      "available": "可用且受监测",
+      "paymentDue": "到期付款受监测",
+      "repaying": "正在还款",
+      "active": "进行中",
+      "reviewRecommended": "建议审查",
+      "futureosMonitoring": "FutureOS 监测中"
+    },
+    "activity": {
+      "salary": "工资已入账",
+      "goalTransfer": "目标转账",
+      "emergencyProtected": "应急储备",
+      "cardSpend": "近期刷卡消费",
+      "paymentScheduled": "已安排付款",
+      "spendingAlert": "消费提醒",
+      "monthlyRepayment": "每月还款",
+      "nextDue": "下次到期日",
+      "debtHealth": "债务健康度",
+      "monthlyInvestment": "每月投资",
+      "riskProfile": "风险偏好",
+      "investmentReadiness": "投资准备度",
+      "currentStatus": "当前状态",
+      "protectionGap": "保障缺口",
+      "familyReadiness": "家庭准备度",
+      "goalName": "目标名称",
+      "monthlyTransfer": "每月转账",
+      "guardianStatus": "Guardian 状态"
+    },
+    "info": {
+      "savings": "这是当前模拟储蓄余额,可用于工资、日常银行业务及受保护目标资助。",
+      "creditCard": "这显示了 FutureOS 监测的模拟未还款额,用于评估消费风险及还款压力。",
+      "loan": "这是用于估算债务压力及未来借贷准备度的剩余模拟个人贷款余额。",
+      "investments": "这是用于估算长期复利增长及退休准备度的当前模拟投资价值。",
+      "insurance": "该分数估算客户在人身、健康及家庭保障需求方面的准备程度。",
+      "futureGoal": "该目标账户显示为当前 FutureOS 生活计划预留或建议的资金。"
+    },
+    "calculation": {
+      "savings": "FutureOS 会比较可用储蓄、每月支出、应急储备需求及活跃的目标转账。",
+      "creditCard": "FutureOS 会比较未还款额、近期消费、已安排还款及每月现金流。",
+      "loan": "FutureOS 会比较剩余债务、每月还款、收入稳定性及即将到来的购房准备度。",
+      "investments": "FutureOS 会比较当前投资、每月供款、风险偏好及退休目标年龄。",
+      "insurance": "FutureOS 将当前保障状况、家庭规划、房贷准备度及保障缺口指标综合为 0-100 分。",
+      "futureGoal": "FutureOS 将目标金额、每月转账、时间线、应急基金安全性及 Guardian 监测状态综合考量。"
+    },
+    "recommendations": {
+      "savings": "将此作为主要工资及目标储蓄账户。FutureOS 建议在增加支出前先保护应急现金。",
+      "creditCard": "在增加新的自选支出承诺前,先偿还未还款额。Future Self Guardian 会标记有风险的消费模式。",
+      "loan": "在应急储备及优先目标获得保护前,保持还款可预测并避免新增债务。",
+      "investments": "保持稳定的投资节奏,同时将近期目标资金与市场风险分开。",
+      "insurance": "在承担住房或家庭责任前,检视人寿及健康保障。",
+      "futureGoal": "FutureOS 正在关注 {goal}。当前未来健康分数为 {score}/100,因此已批准的行动应保护现金流。"
+    }
+  },
+  "scoreInfo": {
+    "body": "{item} 是一个原型 FutureOS 准备度指标,帮助客户了解相关生活目标是否处于正轨。",
+    "method": "FutureOS 综合模拟资料、已选目标、储蓄缓冲、债务压力、产品准备度及 Guardian 风险规则,得出透明的 0-100 估算值。"
   }
 }
