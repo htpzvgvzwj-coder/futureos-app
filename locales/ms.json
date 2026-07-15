@@ -835,7 +835,9 @@
         "bto": "Flat BTO biasanya lebih murah tetapi memerlukan tempoh menunggu pembinaan selama beberapa tahun sebelum pengambilan kunci - rancang garis masa simpanan anda mengikut tempoh menunggu yang dijangka, bukan hanya tarikh bayaran muka.",
         "resale": "Flat jualan semula tersedia lebih awal tetapi biasanya kos permulaan lebih tinggi - bayaran muka dan kesediaan gadai janji anda perlu diselesaikan lebih awal berbanding BTO."
       },
-      "cpfContext": "Simpanan Akaun Biasa CPF anda juga mungkin boleh digunakan untuk bayaran muka atau ansuran bulanan - semak Penyata Penggunaan Perumahan CPF anda untuk kelayakan sebenar."
+      "cpfContext": "Simpanan Akaun Biasa CPF anda juga mungkin boleh digunakan untuk bayaran muka atau ansuran bulanan - semak Penyata Penggunaan Perumahan CPF anda untuk kelayakan sebenar.",
+      "scoreBody": "Kesediaan rumah anda ialah {score}% kerana dana semasa anda {currentFund} meliputi kemajuan ini ke arah sasaran bayaran muka {target}.",
+      "scoreMethod": "Dikira daripada kekuatan simpanan anda (pendapatan, perbelanjaan, dan simpanan semasa) diskalakan mengikut sasaran bayaran muka untuk unit {housingType}."
     },
     "emergency": {
       "title": "Perlindungan Dana Kecemasan",
@@ -853,7 +855,9 @@
       "rec3": "Hantar amaran jika baki jatuh bawah ambang.",
       "cta": "Lindungi Dana Kecemasan",
       "success": "Dana kecemasan dilindungi. FutureOS akan menghalang pengalihan berisiko daripada rizab ini.",
-      "monthsValue": "{months} bulan"
+      "monthsValue": "{months} bulan",
+      "scoreBody": "Kesediaan kecemasan anda ialah {score}% kerana dana semasa anda {fund} meliputi {months} bulan perbelanjaan.",
+      "scoreMethod": "Dikira sebagai dana semasa dibahagikan dengan perbelanjaan bulanan, dinilai berbanding sasaran 6 bulan sebanyak {recommendedFund}."
     },
     "insurance": {
       "title": "Kesediaan Insurans",

@@ -848,7 +848,9 @@
         "bto": "BTO flats are usually cheaper but come with a multi-year building wait before key collection - plan your savings timeline around the expected wait, not just the down payment date.",
         "resale": "Resale flats are available sooner but usually cost more upfront - your down payment and mortgage readiness matter earlier than with a BTO."
       },
-      "cpfContext": "Your CPF Ordinary Account savings may also count toward a down payment or monthly instalments - check your CPF Housing Usage Statement for your actual entitlement."
+      "cpfContext": "Your CPF Ordinary Account savings may also count toward a down payment or monthly instalments - check your CPF Housing Usage Statement for your actual entitlement.",
+      "scoreBody": "Your home readiness is {score}% because your current fund of {currentFund} covers this much progress toward the {target} down payment target.",
+      "scoreMethod": "Calculated from your savings strength (income, expenses, and current savings) scaled against your down payment target for a {housingType} flat."
     },
     "emergency": {
       "title": "Emergency Fund Protection",
@@ -866,7 +868,9 @@
       "rec3": "Send alerts if balance drops below threshold.",
       "cta": "Protect Emergency Fund",
       "success": "Emergency fund protected. FutureOS will block risky reallocations from this reserve.",
-      "monthsValue": "{months} months"
+      "monthsValue": "{months} months",
+      "scoreBody": "Your emergency readiness is {score}% because your current fund of {fund} covers {months} months of expenses.",
+      "scoreMethod": "Calculated as current fund divided by monthly expenses, scored against a 6-month target of {recommendedFund}."
     },
     "insurance": {
       "title": "Insurance Readiness",

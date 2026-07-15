@@ -4257,7 +4257,17 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, profile, hea
       <Header title={t("needDetails.home.title")} subtitle={t("needDetails.home.subtitle")} />
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={success} text={t("needDetails.home.success")} />
-      <ProgressPanel label={t("needDetails.home.score")} value={readinessScore} t={t} />
+      <ProgressPanel
+        label={t("needDetails.home.score")}
+        value={readinessScore}
+        t={t}
+        body={t("needDetails.home.scoreBody", {
+          score: readinessScore,
+          currentFund: formatSgd(currentFund),
+          target: formatSgd(targetDownPayment),
+        })}
+        methodText={t("needDetails.home.scoreMethod", { housingType: t(`needDetails.home.${housingType}`) })}
+      />
       <section className="metricGrid">
         <MetricCard label={t("needDetails.home.targetYear")} value={targetYear} />
         <MetricCard label={t("needDetails.home.currentFund")} value={formatSgd(currentFund)} />
@@ -4319,7 +4329,17 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, profile
       <Header title={t("needDetails.emergency.title")} subtitle={t("needDetails.emergency.subtitle")} />
       <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
       <SuccessBanner show={success} text={t("needDetails.emergency.success")} />
-      <ProgressPanel label={t("needDetails.emergency.score")} value={readinessScore} t={t} />
+      <ProgressPanel
+        label={t("needDetails.emergency.score")}
+        value={readinessScore}
+        t={t}
+        body={t("needDetails.emergency.scoreBody", {
+          score: readinessScore,
+          months: currentCoverageMonths,
+          fund: formatSgd(currentFund),
+        })}
+        methodText={t("needDetails.emergency.scoreMethod", { recommendedFund: formatSgd(recommendedFund) })}
+      />
       <section className="metricGrid">
         <MetricCard label={t("needDetails.emergency.currentFund")} value={formatSgd(currentFund)} />
         <MetricCard label={t("needDetails.emergency.recommendedFund")} value={formatSgd(recommendedFund)} />
@@ -5119,7 +5139,7 @@ function TermsList({ title, keys, path, t }) {
   );
 }
 
-function ProgressPanel({ label, value, t }) {
+function ProgressPanel({ label, value, t, body, methodText }) {
   const [infoOpen, setInfoOpen] = useState(false);
   return (
     <section className="progressPanel">
@@ -5144,11 +5164,11 @@ function ProgressPanel({ label, value, t }) {
         <InfoModal
           icon={Info}
           title={label}
-          body={t("scoreInfo.body", { item: label })}
+          body={body ?? t("scoreInfo.body", { item: label })}
           scoreLabel={t("homeBanking.currentScore")}
           scoreValue={`${value}%`}
           methodLabel={t("homeBanking.howCalculated")}
-          methodText={t("scoreInfo.method")}
+          methodText={methodText ?? t("scoreInfo.method")}
           onClose={() => setInfoOpen(false)}
           closeLabel={t("homeBanking.gotIt")}
         />

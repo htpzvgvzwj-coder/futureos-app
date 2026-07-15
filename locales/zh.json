@@ -835,7 +835,9 @@
         "bto": "BTO组屋通常价格较低,但需要数年的建造等待期才能收楼——请围绕预计的等待期而不仅是首付日期来规划储蓄时间表。",
         "resale": "转售组屋可较快入住,但前期费用通常更高——首付款与房贷准备度需要比BTO更早到位。"
       },
-      "cpfContext": "你的公积金(CPF)普通户头存款也可能用于支付首付款或每月房贷分期——请查阅你的CPF房屋用途声明以确认实际额度。"
+      "cpfContext": "你的公积金(CPF)普通户头存款也可能用于支付首付款或每月房贷分期——请查阅你的CPF房屋用途声明以确认实际额度。",
+      "scoreBody": "你的购房准备度为 {score}%,因为你目前的资金 {currentFund} 已覆盖了 {target} 首付目标的这一部分进度。",
+      "scoreMethod": "根据你的储蓄实力(收入、支出及目前储蓄)与 {housingType} 组屋的首付目标进行比较计算得出。"
     },
     "emergency": {
       "title": "应急基金保护",
@@ -853,7 +855,9 @@
       "rec3": "余额低于阈值时发送提醒。",
       "cta": "保护应急基金",
       "success": "应急基金已保护。FutureOS 将阻止从该储备中进行高风险调拨。",
-      "monthsValue": "{months} 个月"
+      "monthsValue": "{months} 个月",
+      "scoreBody": "你的应急准备度为 {score}%,因为你目前的资金 {fund} 可覆盖 {months} 个月的支出。",
+      "scoreMethod": "计算方式为目前资金除以每月支出,并与 {recommendedFund} 的 6 个月目标进行评分比较。"
     },
     "insurance": {
       "title": "保险准备度",
