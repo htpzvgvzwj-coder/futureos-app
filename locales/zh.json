@@ -776,6 +776,16 @@
         "escalated": "某个目标需要人工或政策审查后 Guardian 才能继续。",
         "paused": "同意已被撤回,因此 Guardian 已停止自主行为。"
       }
+    },
+    "confidence": {
+      "band": {
+        "high": "高",
+        "medium": "中等",
+        "low": "较低",
+        "restricted": "受限"
+      },
+      "body": "{total} 项关键资料字段中有 {confirmed} 项已由客户确认,而非沿用假设默认值,并结合 Guardian 目前的信誉计算得出。",
+      "method": "根据资料中有多少是客户确认的(而非仍为假设默认值)计算得出,并结合 Guardian 信誉评分加权。"
     }
   },
   "profile": {

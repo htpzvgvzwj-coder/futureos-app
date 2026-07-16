@@ -498,6 +498,38 @@ function getReputationBand(score) {
   return "highlyTrusted";
 }
 
+// Confidence Model (04_AI_Agent.md "AI confidence must be explicit and meaningful"): confidence
+// reflects how much of the profile is customer-confirmed (edited away from an assumed default)
+// versus still an unverified assumption, weighted against Guardian's own proven reputation - not a
+// fixed constant shown regardless of what data the recommendation is actually built on.
+const confidenceTrackedFields = [
+  "age",
+  "occupation",
+  "monthlyIncome",
+  "monthlyExpenses",
+  "currentSavings",
+  "existingLoans",
+  "creditCardOutstanding",
+  "investments",
+  "insuranceStatus",
+  "riskPreference",
+];
+
+function getAiConfidence(profile, reputationScore) {
+  const confirmedCount = confidenceTrackedFields.filter(
+    (field) => String(profile?.[field] ?? "") !== String(defaultProfile[field])
+  ).length;
+  const dataConfirmation = confirmedCount / confidenceTrackedFields.length;
+  return clampScore(58 + dataConfirmation * 26 + (reputationScore - 70) * 0.3, 40, 98);
+}
+
+function getConfidenceBand(score) {
+  if (score < 50) return "restricted";
+  if (score < 70) return "low";
+  if (score < 88) return "medium";
+  return "high";
+}
+
 // Guardian State (08_Guardian_Operating_Principles.md "Guardian States" table): a single, explicit,
 // customer-visible state derived only from data that already exists - goal ledger states, prepared
 // action decisions, and consent - so "Guardian is active" always comes with a reason. "Executing" is
@@ -3299,6 +3331,7 @@ function FutureSelfGuardian({
   const [guardianApplied, setGuardianApplied] = useState(false);
   const [protectedScoreInfoOpen, setProtectedScoreInfoOpen] = useState(false);
   const [guardianStateInfoOpen, setGuardianStateInfoOpen] = useState(false);
+  const [confidenceInfoOpen, setConfidenceInfoOpen] = useState(false);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [selectedMemoryEvent, setSelectedMemoryEvent] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
@@ -3328,7 +3361,6 @@ function FutureSelfGuardian({
   // "Future Score" / "Protected Score" is the customer's own Future Health Score (Home/Life Graph use
   // the same getHealthScores formula) - it must not diverge into a second, Guardian-only number.
   const futureScore = healthScores.find((score) => score.id === "future")?.value ?? 86;
-  const aiConfidence = 96;
   const activeGoalCount = selectedGoalIds.length;
   const reputation = getGuardianReputationScore({
     preferences,
@@ -3339,6 +3371,8 @@ function FutureSelfGuardian({
     approvedServiceCount,
   });
   const reputationBand = getReputationBand(reputation.score);
+  const aiConfidence = getAiConfidence(profile, reputation.score);
+  const confidenceBand = getConfidenceBand(aiConfidence);
   const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
   const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
 
@@ -3531,6 +3565,27 @@ function FutureSelfGuardian({
       tag={t(`guardian.state.label.${guardianState}`)}
       body={t(`guardian.state.reason.${guardianState}`)}
       onClose={() => setGuardianStateInfoOpen(false)}
+      closeLabel={t("homeBanking.gotIt")}
+    />
+  ) : null;
+
+  const confirmedFieldCount = confidenceTrackedFields.filter(
+    (field) => String(profile?.[field] ?? "") !== String(defaultProfile[field])
+  ).length;
+  const confidenceInfoModal = confidenceInfoOpen ? (
+    <InfoModal
+      icon={Info}
+      title={t("guardian.status.aiConfidence")}
+      tag={t(`guardian.confidence.band.${confidenceBand}`)}
+      body={t("guardian.confidence.body", {
+        confirmed: confirmedFieldCount,
+        total: confidenceTrackedFields.length,
+      })}
+      scoreLabel={t("homeBanking.currentScore")}
+      scoreValue={`${aiConfidence}%`}
+      methodLabel={t("homeBanking.howCalculated")}
+      methodText={t("guardian.confidence.method")}
+      onClose={() => setConfidenceInfoOpen(false)}
       closeLabel={t("homeBanking.gotIt")}
     />
   ) : null;
@@ -4142,6 +4197,7 @@ function FutureSelfGuardian({
         {memoryDetailModal}
         {contractModal}
         {guardianStateInfoModal}
+        {confidenceInfoModal}
       </Screen>
     );
   }
@@ -4191,8 +4247,18 @@ function FutureSelfGuardian({
             <strong>{futureScore}/100</strong>
           </article>
           <article>
-            <small>{t("guardian.status.aiConfidence")}</small>
-            <strong>{aiConfidence}%</strong>
+            <small className="scoreLabelWithInfo">
+              {t("guardian.status.aiConfidence")}
+              <button
+                type="button"
+                className="infoButton tinyInfoButton"
+                onClick={() => setConfidenceInfoOpen(true)}
+                aria-label={t("homeBanking.infoLabel", { item: t("guardian.status.aiConfidence") })}
+              >
+                <Info size={11} />
+              </button>
+            </small>
+            <strong>{t(`guardian.confidence.band.${confidenceBand}`)}</strong>
           </article>
           <article>
             <small>{t("guardian.status.nextReview")}</small>
@@ -4227,6 +4293,7 @@ function FutureSelfGuardian({
       </section>
       {protectedScoreModal}
       {guardianStateInfoModal}
+      {confidenceInfoModal}
     </Screen>
   );
 }

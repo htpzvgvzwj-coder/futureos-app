@@ -776,6 +776,16 @@
         "escalated": "Satu matlamat memerlukan semakan manusia atau dasar sebelum Guardian boleh meneruskan.",
         "paused": "Kebenaran telah ditarik balik, jadi Guardian telah menghentikan tingkah laku autonomi."
       }
+    },
+    "confidence": {
+      "band": {
+        "high": "Tinggi",
+        "medium": "Sederhana",
+        "low": "Rendah",
+        "restricted": "Terhad"
+      },
+      "body": "{confirmed} daripada {total} medan profil utama telah disahkan oleh pelanggan dan bukan lalai anggapan, digabungkan dengan reputasi semasa Guardian.",
+      "method": "Dikira daripada berapa banyak profil yang disahkan oleh pelanggan berbanding masih anggapan lalai, diberi wajaran berbanding Skor Reputasi Guardian."
     }
   },
   "profile": {

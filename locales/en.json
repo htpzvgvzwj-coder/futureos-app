@@ -789,6 +789,16 @@
         "escalated": "A goal needs human or policy review before Guardian can continue.",
         "paused": "Consent has been withdrawn, so Guardian has stopped autonomous behaviour."
       }
+    },
+    "confidence": {
+      "band": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "restricted": "Restricted"
+      },
+      "body": "{confirmed} of {total} key profile fields are customer-confirmed rather than assumed defaults, combined with Guardian's current reputation.",
+      "method": "Calculated from how much of the profile is customer-confirmed versus still an assumed default, weighted against Guardian Reputation Score."
     }
   },
   "profile": {
