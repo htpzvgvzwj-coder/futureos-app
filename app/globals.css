@@ -2281,6 +2281,35 @@ nextjs-portal {
   color: #9a3412;
 }
 
+.rejectionReviewPanel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 10px;
+  align-items: start;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.rejectionReviewPanel svg {
+  grid-row: 1;
+}
+
+.rejectionReviewPanel p {
+  grid-row: 1;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.rejectionReviewPanel .buttonPair {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
 .explainPanel {
   padding: 14px;
 }
@@ -4085,6 +4114,11 @@ nextjs-portal {
 .stage.theme-dark .trustNote {
   background: #07101f;
 }.stage.theme-dark .adviceOnlyPanel {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fed7aa;
+}
+
+.stage.theme-dark .rejectionReviewPanel {
   background: rgba(245, 158, 11, 0.12);
   color: #fed7aa;
 }

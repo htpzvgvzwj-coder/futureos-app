@@ -443,7 +443,12 @@
       "reject": "Reject",
       "goalLockDetail": "Level 5 is active, so FutureOS can reserve savings within approved limits only.",
       "preparedTitle": "AI-prepared actions",
-      "preparedSubtitle": "Review the actions Future Self Guardian prepared from your simulation."
+      "preparedSubtitle": "Review the actions Future Self Guardian prepared from your simulation.",
+      "rejectionReview": {
+        "message": "You have skipped this suggestion {count} times. Guardian will stop repeating it - did your priorities, budget, or comfort with this change?",
+        "adjustPriorities": "Adjust my priorities",
+        "stopSuggesting": "Stop suggesting this"
+      }
     },
     "monitoring": {
       "goals": "Goals being monitored",

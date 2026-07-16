@@ -465,7 +465,12 @@
       "approve": "Luluskan tindakan",
       "modify": "Ubah suai tindakan",
       "reject": "Tolak",
-      "goalLockDetail": "Tahap 5 aktif, jadi FutureOS hanya boleh menyimpan dalam had yang diluluskan."
+      "goalLockDetail": "Tahap 5 aktif, jadi FutureOS hanya boleh menyimpan dalam had yang diluluskan.",
+      "rejectionReview": {
+        "message": "Anda telah melangkau cadangan ini {count} kali. Guardian akan berhenti mengulanginya - adakah keutamaan, bajet, atau keselesaan anda dengan perkara ini berubah?",
+        "adjustPriorities": "Laraskan keutamaan saya",
+        "stopSuggesting": "Berhenti mencadangkan ini"
+      }
     },
     "services": {
       "title": "Perkhidmatan OCBC / Laksana",

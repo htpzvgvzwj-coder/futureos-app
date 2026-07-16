@@ -1104,6 +1104,8 @@ const defaultPreferences = {
   goalLedger: {},
   escalationHistory: [],
   notificationFeedback: {},
+  rejectionCounts: {},
+  dismissedActions: [],
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -3489,10 +3491,31 @@ function FutureSelfGuardian({
     window.localStorage.setItem("futureos-guardian-memory", JSON.stringify(memoryEvents));
   }, [memoryEvents]);
 
+  // Three-Rejection Rule (07_Relationship_And_Shared_Responsibility.md "When Users Reject
+  // Recommendations"): rejections must persist across simulation resets so a genuine third rejection
+  // is detectable, instead of resetting to zero the moment simulatorActionStates is cleared.
   function setGuardianActionState(actionId, state) {
     setGuardianApplied(false);
     setLastApprovedServiceId(null);
+    if (state === "skipped" && simulatorActionStates[actionId] !== "skipped") {
+      setPreferences((current) => ({
+        ...current,
+        rejectionCounts: {
+          ...current.rejectionCounts,
+          [actionId]: (current.rejectionCounts?.[actionId] ?? 0) + 1,
+        },
+      }));
+    }
     setSimulatorActionStates((current) => ({ ...current, [actionId]: state }));
+  }
+
+  function dismissActionPermanently(actionId) {
+    setPreferences((current) => ({
+      ...current,
+      dismissedActions: current.dismissedActions?.includes(actionId)
+        ? current.dismissedActions
+        : [...(current.dismissedActions ?? []), actionId],
+    }));
   }
 
   function approveServiceAction(actionId) {
@@ -3718,9 +3741,13 @@ function FutureSelfGuardian({
               <ClipboardCheck size={18} />
             </div>
           </section>
-          {visibleActionCards.map(({ id, titleKey, icon: Icon }) => {
+          {visibleActionCards
+            .filter(({ id }) => !preferences.dismissedActions?.includes(id))
+            .map(({ id, titleKey, icon: Icon }) => {
             const state = simulatorActionStates[id] ?? "pending";
             const detail = getSimulatorActionDetail(id, simulatorInputs, level, t);
+            const rejectionCount = preferences.rejectionCounts?.[id] ?? 0;
+            const underReview = state === "skipped" && rejectionCount >= 3;
             return (
               <article className={`actionCard ${state}`} key={id}>
                 <div className="actionCardHeader">
@@ -3752,17 +3779,32 @@ function FutureSelfGuardian({
                     </span>
                   </div>
                 </section>
-                <div className="actionButtons">
-                  <button type="button" className={state === "approved" ? "selected" : ""} onClick={() => setGuardianActionState(id, "approved")}>
-                    {t("simulator.actionButtons.approve")}
-                  </button>
-                  <button type="button" className={state === "editing" ? "selected" : ""} onClick={() => setGuardianActionState(id, "editing")}>
-                    {t("guardian.actionCentre.modify")}
-                  </button>
-                  <button type="button" className={state === "skipped" ? "selected" : ""} onClick={() => setGuardianActionState(id, "skipped")}>
-                    {t("guardian.actionCentre.reject")}
-                  </button>
-                </div>
+                {underReview ? (
+                  <section className="rejectionReviewPanel">
+                    <AlertTriangle size={16} />
+                    <p>{t("guardian.actionCentre.rejectionReview.message", { count: rejectionCount })}</p>
+                    <div className="buttonPair compactButtons">
+                      <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.PROFILE)}>
+                        {t("guardian.actionCentre.rejectionReview.adjustPriorities")}
+                      </button>
+                      <button type="button" className="primaryButton" onClick={() => dismissActionPermanently(id)}>
+                        {t("guardian.actionCentre.rejectionReview.stopSuggesting")}
+                      </button>
+                    </div>
+                  </section>
+                ) : (
+                  <div className="actionButtons">
+                    <button type="button" className={state === "approved" ? "selected" : ""} onClick={() => setGuardianActionState(id, "approved")}>
+                      {t("simulator.actionButtons.approve")}
+                    </button>
+                    <button type="button" className={state === "editing" ? "selected" : ""} onClick={() => setGuardianActionState(id, "editing")}>
+                      {t("guardian.actionCentre.modify")}
+                    </button>
+                    <button type="button" className={state === "skipped" ? "selected" : ""} onClick={() => setGuardianActionState(id, "skipped")}>
+                      {t("guardian.actionCentre.reject")}
+                    </button>
+                  </div>
+                )}
               </article>
             );
           })}
@@ -5404,12 +5446,15 @@ export default function App() {
     const savedPreferences = safeJsonParse(window.localStorage.getItem("futureos-preferences"), null);
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
-      // goalLedger, escalationHistory, and notificationFeedback all have dynamic keys (or are lists),
-      // so the generic key-by-key merge (which only ever walks the *default* object's own keys - an
-      // empty {} or [] default has none) would silently wipe every stored entry - restore them verbatim.
+      // goalLedger, escalationHistory, notificationFeedback, and rejectionCounts all have dynamic
+      // keys (or are lists), so the generic key-by-key merge (which only ever walks the *default*
+      // object's own keys - an empty {} or [] default has none) would silently wipe every stored
+      // entry - restore them verbatim.
       goalLedger: savedPreferences?.goalLedger ?? {},
       escalationHistory: savedPreferences?.escalationHistory ?? [],
       notificationFeedback: savedPreferences?.notificationFeedback ?? {},
+      rejectionCounts: savedPreferences?.rejectionCounts ?? {},
+      dismissedActions: savedPreferences?.dismissedActions ?? [],
     };
     setPreferences(storedPreferences);
     setSimulatorInputs(

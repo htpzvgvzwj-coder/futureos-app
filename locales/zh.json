@@ -465,7 +465,12 @@
       "approve": "批准行动",
       "modify": "修改行动",
       "reject": "拒绝",
-      "goalLockDetail": "第5级已启用,FutureOS 只能在已批准的额度内预留储蓄。"
+      "goalLockDetail": "第5级已启用,FutureOS 只能在已批准的额度内预留储蓄。",
+      "rejectionReview": {
+        "message": "你已经跳过这个建议 {count} 次了。Guardian 将不再重复此建议——是不是你的优先级、预算或接受度发生了变化？",
+        "adjustPriorities": "调整我的优先级",
+        "stopSuggesting": "停止建议此项"
+      }
     },
     "services": {
       "title": "OCBC 服务 / 执行",
