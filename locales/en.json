@@ -831,15 +831,16 @@
     "aiRecommendations": "AI recommendations",
     "wedding": {
       "title": "Wedding Budget Planning",
-      "subtitle": "the customer want a meaningful wedding while protecting home and retirement goals.",
+      "subtitle": "FutureOS protects home and retirement goals while the customer plans a meaningful wedding.",
       "sliderLabel": "Planned wedding budget",
       "currentBudget": "Initial Budget",
       "recommendedBudget": "Recommended Budget",
       "monthlySaving": "Monthly Saving Plan",
       "overspendImpact": "Overspend Impact",
-      "delay": "4 year delay",
       "cta": "Lock Recommended Wedding Plan",
-      "success": "Wedding budget plan locked. FutureOS will monitor spending against the approved limit."
+      "success": "Wedding budget plan locked. FutureOS will monitor spending against the approved limit.",
+      "delayYears": "{years} year delay",
+      "onTrack": "On track"
     },
     "home": {
       "title": "Home Down Payment Preparation",
@@ -889,7 +890,7 @@
     },
     "insurance": {
       "title": "Insurance Readiness",
-      "subtitle": "FutureOS identifies protection gaps before the customer start a family.",
+      "subtitle": "FutureOS identifies protection gaps before the customer starts a family.",
       "currentScore": "Current Readiness",
       "recommendedScore": "Target Readiness",
       "life": "Life Cover",

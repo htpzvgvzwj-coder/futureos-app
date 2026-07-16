@@ -45,7 +45,7 @@
   },
   "lifeGraph": {
     "title": "Life Graph",
-    "subtitle": "OCBC 将 the customer 和 the partner 的人生阶段、目标、交易与银行需求整合成一个画像。",
+    "subtitle": "由 OCBC FutureOS 驱动的个人财务生活地图。",
     "timelineTitle": "连接式人生时间线",
     "detectedNeeds": "已识别需求",
     "openMirror": "分析未来决策",
@@ -818,19 +818,20 @@
     "aiRecommendations": "AI 建议",
     "wedding": {
       "title": "婚礼预算规划",
-      "subtitle": "the customer 和 the partner 希望拥有有意义的婚礼，同时保护置业和退休目标。",
+      "subtitle": "FutureOS 在客户筹备一场有意义的婚礼时，同步守护置业与退休目标。",
       "sliderLabel": "计划婚礼预算",
       "currentBudget": "初始预算",
       "recommendedBudget": "推荐预算",
       "monthlySaving": "每月储蓄计划",
       "overspendImpact": "超支影响",
-      "delay": "延后 4 年",
       "cta": "锁定推荐婚礼方案",
-      "success": "婚礼预算方案已锁定。FutureOS 将根据批准上限监测支出。"
+      "success": "婚礼预算方案已锁定。FutureOS 将根据批准上限监测支出。",
+      "delayYears": "延迟 {years} 年",
+      "onTrack": "按计划进行"
     },
     "home": {
       "title": "首付款准备",
-      "subtitle": "FutureOS 帮助 the customer 和 the partner 准备首套房，同时保持其他目标稳定。",
+      "subtitle": "FutureOS 帮助客户准备首套房，同时保持其他目标稳定。",
       "score": "置业准备度",
       "targetYear": "目标年份",
       "currentFund": "当前置业基金",
@@ -876,7 +877,7 @@
     },
     "insurance": {
       "title": "保险准备度",
-      "subtitle": "FutureOS 在 the customer 和 the partner 开始家庭计划前识别保障缺口。",
+      "subtitle": "FutureOS 在客户开始组建家庭前，识别保障缺口。",
       "currentScore": "当前准备度",
       "recommendedScore": "目标准备度",
       "life": "人寿保障",
@@ -1414,7 +1415,7 @@
     "openFutureOS": "打开 FutureOS",
     "infoLabel": "{item} 说明",
     "info": {
-      "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
+      "futureScore": "未来健康评分是一个加权模拟评分，综合了客户的目标进度、现金缓冲、负债、保障准备度及退休预测计算得出。",
       "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
       "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
       "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",

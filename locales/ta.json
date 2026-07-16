@@ -45,7 +45,7 @@
   },
   "lifeGraph": {
     "title": "Life Graph",
-    "subtitle": "the customer மற்றும் the partner-ன் வாழ்க்கை நிலை, இலக்குகள், பரிவர்த்தனைகள், வங்கி தேவைகள் அனைத்தையும் OCBC ஒரே சுயவிவரமாக பார்க்கிறது.",
+    "subtitle": "OCBC FutureOS ஆல் இயக்கப்படும் உங்கள் தனிப்பட்ட நிதி வாழ்க்கை வரைபடம்.",
     "timelineTitle": "இணைக்கப்பட்ட வாழ்க்கை நேரவரிசை",
     "detectedNeeds": "கண்டறியப்பட்ட தேவைகள்",
     "openMirror": "எதிர்கால முடிவுகளை பகுப்பாய்வு செய்",
@@ -818,19 +818,20 @@
     "aiRecommendations": "AI பரிந்துரைகள்",
     "wedding": {
       "title": "திருமண பட்ஜெட் திட்டமிடல்",
-      "subtitle": "the customer மற்றும் the partner அர்த்தமுள்ள திருமணத்தையும் வீடு மற்றும் ஓய்வு இலக்குகளையும் பாதுகாக்க விரும்புகிறார்கள்.",
+      "subtitle": "வாடிக்கையாளர் அர்த்தமுள்ள திருமணத்தைத் திட்டமிடும்போது FutureOS வீடு மற்றும் ஓய்வூதிய இலக்குகளைப் பாதுகாக்கிறது.",
       "sliderLabel": "திட்டமிட்ட திருமண பட்ஜெட்",
       "currentBudget": "ஆரம்ப பட்ஜெட்",
       "recommendedBudget": "பரிந்துரைக்கப்பட்ட பட்ஜெட்",
       "monthlySaving": "மாதாந்திர சேமிப்பு திட்டம்",
       "overspendImpact": "அதிக செலவின் தாக்கம்",
-      "delay": "4 ஆண்டு தாமதம்",
       "cta": "பரிந்துரைத்த திருமண திட்டத்தை பூட்டு",
-      "success": "திருமண பட்ஜெட் திட்டம் பூட்டப்பட்டது. FutureOS அங்கீகரித்த வரம்புக்குள் செலவைக் கண்காணிக்கும்."
+      "success": "திருமண பட்ஜெட் திட்டம் பூட்டப்பட்டது. FutureOS அங்கீகரித்த வரம்புக்குள் செலவைக் கண்காணிக்கும்.",
+      "delayYears": "{years} ஆண்டு தாமதம்",
+      "onTrack": "சரியான பாதையில்"
     },
     "home": {
       "title": "வீட்டு முன்பணம் தயாரிப்பு",
-      "subtitle": "FutureOS the customer மற்றும் the partner-வை முதல் வீட்டிற்கு தயாராக்கி, மற்ற இலக்குகளை நிலையாக வைத்திருக்கிறது.",
+      "subtitle": "மற்ற இலக்குகளை நிலையாக வைத்திருக்கும் அதே வேளையில், FutureOS வாடிக்கையாளரை முதல் வீட்டிற்குத் தயார்படுத்துகிறது.",
       "score": "வீட்டு தயார்நிலை",
       "targetYear": "இலக்கு ஆண்டு",
       "currentFund": "தற்போதைய வீட்டு நிதி",
@@ -876,7 +877,7 @@
     },
     "insurance": {
       "title": "காப்பீட்டு தயார்நிலை",
-      "subtitle": "the customer மற்றும் the partner குடும்பம் தொடங்குவதற்கு முன் FutureOS பாதுகாப்பு இடைவெளிகளை கண்டறிகிறது.",
+      "subtitle": "வாடிக்கையாளர் குடும்பம் தொடங்குவதற்கு முன் FutureOS பாதுகாப்பு இடைவெளிகளைக் கண்டறிகிறது.",
       "currentScore": "தற்போதைய தயார்நிலை",
       "recommendedScore": "இலக்கு தயார்நிலை",
       "life": "உயிர் காப்பு",
@@ -1414,7 +1415,7 @@
     "openFutureOS": "FutureOS திற",
     "infoLabel": "{item} விளக்கம்",
     "info": {
-      "futureScore": "Future Health Score is a weighted mock score built from the customer's goal progress, cash buffer, liabilities, protection readiness, and retirement projection.",
+      "futureScore": "எதிர்கால ஆரோக்கிய மதிப்பெண் என்பது வாடிக்கையாளரின் இலக்கு முன்னேற்றம், பண இருப்பு, கடன்பாடுகள், பாதுகாப்பு தயார்நிலை மற்றும் ஓய்வூதிய கணிப்பிலிருந்து உருவாக்கப்பட்ட எடையிடப்பட்ட மாதிரி மதிப்பெண் ஆகும்.",
       "wedding": "Wedding Goal measures progress toward the Guardian-recommended SGD 35,000 wedding budget.",
       "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
       "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",

@@ -4336,10 +4336,20 @@ function NeedDetailScreen({
           />
         </section>
         <section className="metricGrid">
-          <MetricCard label={t("needDetails.wedding.currentBudget")} value="SGD 80,000" />
+          <MetricCard label={t("needDetails.wedding.currentBudget")} value={formatSgd(weddingBudget)} />
           <MetricCard label={t("needDetails.wedding.recommendedBudget")} value="SGD 35,000" />
-          <MetricCard label={t("needDetails.wedding.monthlySaving")} value="SGD 450" />
-          <MetricCard label={t("needDetails.wedding.overspendImpact")} value={t("needDetails.wedding.delay")} />
+          <MetricCard
+            label={t("needDetails.wedding.monthlySaving")}
+            value={formatSgd(Math.max(50, Math.round(weddingBudget / 24 / 50) * 50))}
+          />
+          <MetricCard
+            label={t("needDetails.wedding.overspendImpact")}
+            value={
+              projection.homeYear > 2030
+                ? t("needDetails.wedding.delayYears", { years: projection.homeYear - 2030 })
+                : t("needDetails.wedding.onTrack")
+            }
+          />
         </section>
         <section className="recommendationPanel">
           <span className="sectionLabel">{t("needDetails.liveProjection")}</span>
