@@ -3620,15 +3620,52 @@ nextjs-portal {
 .notificationHistoryItem {
   width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  align-items: center;
+  gap: 8px;
   border: 1px solid rgba(20, 36, 58, 0.08);
   border-radius: 17px;
   background: white;
   color: var(--navy);
   padding: 11px;
   text-align: left;
+}
+
+.notificationHistoryOpen {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.notificationFeedbackRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(20, 36, 58, 0.06);
+}
+
+.notificationFeedbackRow span {
+  font-size: 11px;
+  font-weight: 760;
+  color: var(--muted);
+  margin-right: auto;
+}
+
+.notificationFeedbackRow .miniButton {
+  min-width: 32px;
+  padding: 6px;
+}
+
+.notificationFeedbackRow .miniButton.active {
+  border-color: var(--ocbc-red);
+  color: var(--ocbc-red);
+  background: rgba(215, 25, 32, 0.08);
 }
 
 .notificationHistoryItem strong,
@@ -3989,6 +4026,16 @@ nextjs-portal {
 
 .stage.theme-dark .levelButton.active {
   background: var(--teal);
+}
+
+.stage.theme-dark .notificationFeedbackRow {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.stage.theme-dark .notificationFeedbackRow .miniButton.active {
+  background: rgba(215, 25, 32, 0.22);
+  color: #ff8a80;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 .stage.theme-dark .scenarioCard.recommended,

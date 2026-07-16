@@ -40,6 +40,8 @@ import {
   Sparkles,
   Sun,
   Target,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
   UserRound,
   X,
@@ -1101,6 +1103,7 @@ const defaultPreferences = {
   consentWithdrawn: false,
   goalLedger: {},
   escalationHistory: [],
+  notificationFeedback: {},
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -4826,30 +4829,53 @@ function ProfileScreen({
             <Bell size={17} />
           </div>
           <div className="notificationHistoryList">
-            {notificationHistory.map(({ id, icon: Icon, tone, title, detail, time, status }) => (
-              <button
-                type="button"
-                className={`notificationHistoryItem ${tone}`}
-                key={id}
-                onClick={() => {
-                  if (id === "over-budget") {
-                    setActiveScreen(screens.SPENDING_RISK);
-                    return;
-                  }
-                  setNotice(detail);
-                }}
-              >
-                <span className="iconBubble">
-                  <Icon size={16} />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{detail}</small>
-                  <em>{time}</em>
-                </div>
-                <b>{status}</b>
-              </button>
-            ))}
+            {notificationHistory.map(({ id, icon: Icon, tone, title, detail, time, status }) => {
+              const feedback = preferences.notificationFeedback?.[id];
+              return (
+                <article className={`notificationHistoryItem ${tone}`} key={id}>
+                  <button
+                    type="button"
+                    className="notificationHistoryOpen"
+                    onClick={() => {
+                      if (id === "over-budget") {
+                        setActiveScreen(screens.SPENDING_RISK);
+                        return;
+                      }
+                      setNotice(detail);
+                    }}
+                  >
+                    <span className="iconBubble">
+                      <Icon size={16} />
+                    </span>
+                    <div>
+                      <strong>{title}</strong>
+                      <small>{detail}</small>
+                      <em>{time}</em>
+                    </div>
+                    <b>{status}</b>
+                  </button>
+                  <div className="notificationFeedbackRow">
+                    <span>{t("settings.notifications.history.wasThisUseful")}</span>
+                    <button
+                      type="button"
+                      className={feedback === "useful" ? "miniButton active" : "miniButton"}
+                      aria-pressed={feedback === "useful"}
+                      onClick={() => updateNested("notificationFeedback", id, "useful")}
+                    >
+                      <ThumbsUp size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      className={feedback === "notUseful" ? "miniButton active" : "miniButton"}
+                      aria-pressed={feedback === "notUseful"}
+                      onClick={() => updateNested("notificationFeedback", id, "notUseful")}
+                    >
+                      <ThumbsDown size={13} />
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       </SettingsCard>
@@ -5378,9 +5404,12 @@ export default function App() {
     const savedPreferences = safeJsonParse(window.localStorage.getItem("futureos-preferences"), null);
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
-      // goalLedger has dynamic per-goal keys, so the generic key-by-key merge (which only ever walks
-      // the *default* object's keys) would silently wipe every stored goal - restore it verbatim instead.
+      // goalLedger, escalationHistory, and notificationFeedback all have dynamic keys (or are lists),
+      // so the generic key-by-key merge (which only ever walks the *default* object's own keys - an
+      // empty {} or [] default has none) would silently wipe every stored entry - restore them verbatim.
       goalLedger: savedPreferences?.goalLedger ?? {},
+      escalationHistory: savedPreferences?.escalationHistory ?? [],
+      notificationFeedback: savedPreferences?.notificationFeedback ?? {},
     };
     setPreferences(storedPreferences);
     setSimulatorInputs(

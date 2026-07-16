@@ -1243,7 +1243,8 @@
         "quiet": {
           "title": "Tiada amaran sekarang",
           "detail": "FutureOS akan menunjukkan notifikasi automatik di sini apabila risiko dikesan."
-        }
+        },
+        "wasThisUseful": "Adakah ini berguna?"
       }
     },
     "frequency": {

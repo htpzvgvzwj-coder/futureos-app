@@ -1243,7 +1243,8 @@
         "quiet": {
           "title": "目前没有提醒",
           "detail": "当检测到风险时,FutureOS 会在此处显示自动通知。"
-        }
+        },
+        "wasThisUseful": "这个提醒有用吗？"
       }
     },
     "frequency": {

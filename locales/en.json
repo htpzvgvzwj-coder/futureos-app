@@ -1256,7 +1256,8 @@
         "quiet": {
           "title": "No alerts right now",
           "detail": "FutureOS will show automatic notifications here when risks are detected."
-        }
+        },
+        "wasThisUseful": "Was this useful?"
       }
     },
     "frequency": {
