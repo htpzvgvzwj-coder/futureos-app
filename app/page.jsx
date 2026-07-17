@@ -12,30 +12,38 @@ import {
   BriefcaseBusiness,
   Building2,
   CalendarClock,
+  Camera,
   ChartNoAxesColumnIncreasing,
   Check,
   CheckCircle2,
   ChevronRight,
   CircleDollarSign,
   ClipboardCheck,
+  Coffee,
   CreditCard,
   Download,
   FileText,
   Globe2,
   HeartHandshake,
+  History,
   Home,
   Info,
   Landmark,
   LineChart,
   LockKeyhole,
   LogOut,
+  Mic,
   MonitorCog,
   Moon,
+  Music,
+  PartyPopper,
   QrCode,
   RotateCcw,
   ScanLine,
+  Send,
   Settings,
   ShieldCheck,
+  Shirt,
   SlidersHorizontal,
   Sparkles,
   Sun,
@@ -44,6 +52,8 @@ import {
   ThumbsUp,
   Trash2,
   UserRound,
+  Utensils,
+  Wine,
   X,
 } from "lucide-react";
 import en from "../locales/en.json";
@@ -87,7 +97,6 @@ const navItems = [
 ];
 
 const detectedNeedDefinitions = [
-  { id: "wedding", titleKey: "needs.wedding", screen: screens.NEED_WEDDING, icon: HeartHandshake },
   { id: "home", titleKey: "needs.home", screen: screens.NEED_HOME, icon: Building2 },
   { id: "emergency", titleKey: "needs.emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
   { id: "insurance", titleKey: "needs.insurance", screen: screens.NEED_INSURANCE, icon: ShieldCheck },
@@ -100,7 +109,6 @@ const detectedNeedDefinitions = [
 function getDetectedNeeds(selectedGoalIds, healthScores) {
   const scoreById = Object.fromEntries(healthScores.map((score) => [score.id, score.value]));
   const evidenceById = {
-    wedding: selectedGoalIds.includes("wedding"),
     home: selectedGoalIds.includes("home"),
     emergency: selectedGoalIds.includes("emergency") || scoreById.emergency < 60,
     insurance: selectedGoalIds.includes("family") || scoreById.insurance < 60,
@@ -842,11 +850,6 @@ function buildScenarioFields(goalType, inputs, variant, t) {
       [t("simulator.output.fields.weddingBudget"), formatSgd(Math.round(weddingBudget * multiplier))],
       [t("simulator.output.fields.weddingDate"), formatMonthDate(inputs.weddingDate, "12 months")],
       [t("simulator.output.fields.savingsNeeded"), formatSgd(Math.max(0, Math.round(weddingBudget * multiplier - numberValue(inputs.currentSavings, 0) * 0.25)))],
-      [t("simulator.output.fields.emergencyImpact"), emergencyImpact],
-      [
-        t("simulator.output.fields.retirementImpact"),
-        variant === "highRisk" ? t("simulator.output.impact.delayed") : t("simulator.output.impact.onTrack"),
-      ],
     ];
   }
 
@@ -1218,18 +1221,6 @@ const consentHistory = [
 ];
 
 const defaultGuardianMemoryEvents = [
-  {
-    id: "wedding-goal",
-    year: "2026",
-    titleKey: "guardian.memory.events.wedding.title",
-    descriptionKey: "guardian.memory.events.wedding.description",
-    impactKey: "guardian.memory.events.wedding.impact",
-    productKey: "guardian.memory.events.wedding.product",
-    actionKey: "guardian.memory.events.wedding.action",
-    reasonKey: "guardian.memory.events.wedding.reason",
-    dataKey: "guardian.memory.events.wedding.data",
-    statusKey: "status.completed",
-  },
   {
     id: "emergency-protection",
     year: "2026",
@@ -1737,19 +1728,6 @@ function downloadJsonFile(filename, data) {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
-}
-
-function getWeddingProjection(budget) {
-  if (budget <= 35000) {
-    return { score: 89, homeYear: 2030, retirementAge: 62, riskKey: "risk.low", color: "#0f9f84" };
-  }
-  if (budget <= 55000) {
-    return { score: 74, homeYear: 2032, retirementAge: 64, riskKey: "risk.medium", color: "#f59e0b" };
-  }
-  const score = Math.max(52, 89 - Math.round((budget - 35000) / 1400));
-  const homeYear = budget >= 80000 ? 2034 : 2033;
-  const retirementAge = budget >= 80000 ? 66 : 65;
-  return { score, homeYear, retirementAge, riskKey: "risk.high", color: "#d71920" };
 }
 
 function ProgressRing({ value, size = 92, stroke = 9, color = "#d71920" }) {
@@ -3031,18 +3009,29 @@ function FutureMirrorSimulator({
         <div className="settingsGroup">
           <span className="sectionLabel">{t("simulator.inputs.lifeGoals")}</span>
           <div className="checkboxGrid">
-            {simulatorGoalOptions.map(({ id, labelKey, icon: Icon }) => (
-              <button
-                type="button"
-                className={simulatorInputs.goals[id] ? "checkOption selected" : "checkOption"}
-                key={id}
-                onClick={() => toggleGoal(id)}
-              >
-                <Icon size={15} />
-                <span>{id === "custom" && customGoals[0] ? customGoals[0].name : t(labelKey)}</span>
-                {simulatorInputs.goals[id] ? <Check size={14} /> : null}
-              </button>
-            ))}
+            {simulatorGoalOptions.map(({ id, labelKey, icon: Icon }) =>
+              id === "wedding" ? (
+                <button type="button" className="checkOption weddingEntryOption" key={id} onClick={() => setActiveScreen(screens.NEED_WEDDING)}>
+                  <Icon size={15} />
+                  <span>{t(labelKey)}</span>
+                  <span className="weddingEntryTrailing">
+                    <b className="miniBadge">{t("weddingPlanner.newFeatureBadge")}</b>
+                    <ChevronRight size={14} />
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={simulatorInputs.goals[id] ? "checkOption selected" : "checkOption"}
+                  key={id}
+                  onClick={() => toggleGoal(id)}
+                >
+                  <Icon size={15} />
+                  <span>{id === "custom" && customGoals[0] ? customGoals[0].name : t(labelKey)}</span>
+                  {simulatorInputs.goals[id] ? <Check size={14} /> : null}
+                </button>
+              )
+            )}
           </div>
         </div>
       </section>
@@ -3326,13 +3315,13 @@ function FutureSelfGuardian({
   simulatorInputs,
   simulatorActionStates,
   setSimulatorActionStates,
+  memoryEvents,
   t,
 }) {
   const [guardianApplied, setGuardianApplied] = useState(false);
   const [protectedScoreInfoOpen, setProtectedScoreInfoOpen] = useState(false);
   const [guardianStateInfoOpen, setGuardianStateInfoOpen] = useState(false);
   const [confidenceInfoOpen, setConfidenceInfoOpen] = useState(false);
-  const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [selectedMemoryEvent, setSelectedMemoryEvent] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
   const [selectedContractGoalId, setSelectedContractGoalId] = useState(null);
@@ -3514,17 +3503,6 @@ function FutureSelfGuardian({
     ...skippedHistoryItems,
   ];
 
-  useEffect(() => {
-    const savedMemory = safeJsonParse(window.localStorage.getItem("futureos-guardian-memory"), null);
-    if (Array.isArray(savedMemory) && savedMemory.length > 0) {
-      setMemoryEvents(savedMemory);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem("futureos-guardian-memory", JSON.stringify(memoryEvents));
-  }, [memoryEvents]);
-
   // Three-Rejection Rule (07_Relationship_And_Shared_Responsibility.md "When Users Reject
   // Recommendations"): rejections must persist across simulation resets so a genuine third rejection
   // is detectable, instead of resetting to zero the moment simulatorActionStates is cleared.
@@ -3609,19 +3587,34 @@ function FutureSelfGuardian({
   ) : null;
 
   const memoryDetailModal = selectedMemoryEvent ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(selectedMemoryEvent.titleKey)}>
+        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={selectedMemoryEvent.title ?? t(selectedMemoryEvent.titleKey)}>
           <motion.div className="confirmModal memoryDetailModal" {...screenMotion}>
             <CalendarClock size={24} />
-            <strong>{t(selectedMemoryEvent.titleKey)}</strong>
+            <strong>{selectedMemoryEvent.title ?? t(selectedMemoryEvent.titleKey)}</strong>
             <div className="memoryModalMeta">
               <span>{selectedMemoryEvent.year}</span>
               <b>{t(selectedMemoryEvent.statusKey)}</b>
             </div>
-            <SummaryRow label={t("guardian.memory.modal.guardianAction")} value={t(selectedMemoryEvent.actionKey)} />
-            <SummaryRow label={t("guardian.memory.modal.reason")} value={t(selectedMemoryEvent.reasonKey, { customer: displayName })} />
-            <SummaryRow label={t("guardian.memory.modal.dataUsed")} value={t(selectedMemoryEvent.dataKey)} />
-            <SummaryRow label={t("guardian.memory.modal.product")} value={t(selectedMemoryEvent.productKey)} />
-            <SummaryRow label={t("guardian.memory.modal.futureScoreImpact")} value={t(selectedMemoryEvent.impactKey)} />
+            <SummaryRow
+              label={t("guardian.memory.modal.guardianAction")}
+              value={selectedMemoryEvent.action ?? t(selectedMemoryEvent.actionKey)}
+            />
+            <SummaryRow
+              label={t("guardian.memory.modal.reason")}
+              value={selectedMemoryEvent.reason ?? t(selectedMemoryEvent.reasonKey, { customer: displayName })}
+            />
+            <SummaryRow
+              label={t("guardian.memory.modal.dataUsed")}
+              value={selectedMemoryEvent.dataUsed ?? t(selectedMemoryEvent.dataKey)}
+            />
+            <SummaryRow
+              label={t("guardian.memory.modal.product")}
+              value={selectedMemoryEvent.product ?? t(selectedMemoryEvent.productKey)}
+            />
+            <SummaryRow
+              label={t("guardian.memory.modal.futureScoreImpact")}
+              value={selectedMemoryEvent.impact ?? t(selectedMemoryEvent.impactKey)}
+            />
             <section className="memoryWhyCard">
               <strong>{t("guardian.memory.modal.whyTitle")}</strong>
               <p>{t("guardian.memory.modal.whyText")}</p>
@@ -3983,18 +3976,18 @@ function FutureSelfGuardian({
                   className="memoryEventCard"
                   key={event.id}
                   onClick={() => setSelectedMemoryEvent(event)}
-                  aria-label={t("guardian.memory.openEvent", { event: t(event.titleKey) })}
+                  aria-label={t("guardian.memory.openEvent", { event: event.title ?? t(event.titleKey) })}
                 >
                   <span className="memoryYear">{event.year}</span>
                   <i aria-hidden="true" />
                   <div>
-                    <strong>{t(event.titleKey)}</strong>
-                    <small>{t(event.descriptionKey)}</small>
+                    <strong>{event.title ?? t(event.titleKey)}</strong>
+                    <small>{event.description ?? t(event.descriptionKey)}</small>
                     <span className="memoryImpact">
-                      {t("guardian.memory.impact")}: {t(event.impactKey)}
+                      {t("guardian.memory.impact")}: {event.impact ?? t(event.impactKey)}
                     </span>
                     <span className="memoryProduct">
-                      {t("guardian.memory.productUsed")}: {t(event.productKey)}
+                      {t("guardian.memory.productUsed")}: {event.product ?? t(event.productKey)}
                     </span>
                   </div>
                   <ChevronRight size={15} />
@@ -4303,10 +4296,11 @@ function NeedDetailScreen({
   setActiveScreen,
   successStates,
   setSuccessStates,
-  weddingBudget,
-  setWeddingBudget,
   preferences,
   simulatorInputs,
+  setSimulatorInputs,
+  setMemoryEvents,
+  language,
   t,
 }) {
   const success = Boolean(successStates[type]);
@@ -4314,59 +4308,19 @@ function NeedDetailScreen({
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
 
-  if (type === "wedding") {
-    const projection = getWeddingProjection(weddingBudget);
-    return (
-      <Screen>
-        <Header title={t("needDetails.wedding.title")} subtitle={t("needDetails.wedding.subtitle")} />
-        <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
-        <SuccessBanner show={success} text={t("needDetails.wedding.success")} />
-        <section className="needHeroCard">
-          <span className="sectionLabel">{t("needDetails.wedding.sliderLabel")}</span>
-          <strong>{formatSgd(weddingBudget)}</strong>
-          <input
-            className="wideSlider"
-            type="range"
-            min="20000"
-            max="100000"
-            step="5000"
-            value={weddingBudget}
-            onChange={(event) => setWeddingBudget(Number(event.target.value))}
-            aria-label={t("needDetails.wedding.sliderLabel")}
-          />
-        </section>
-        <section className="metricGrid">
-          <MetricCard label={t("needDetails.wedding.currentBudget")} value={formatSgd(weddingBudget)} />
-          <MetricCard label={t("needDetails.wedding.recommendedBudget")} value="SGD 35,000" />
-          <MetricCard
-            label={t("needDetails.wedding.monthlySaving")}
-            value={formatSgd(Math.max(50, Math.round(weddingBudget / 24 / 50) * 50))}
-          />
-          <MetricCard
-            label={t("needDetails.wedding.overspendImpact")}
-            value={
-              projection.homeYear > 2030
-                ? t("needDetails.wedding.delayYears", { years: projection.homeYear - 2030 })
-                : t("needDetails.wedding.onTrack")
-            }
-          />
-        </section>
-        <section className="recommendationPanel">
-          <span className="sectionLabel">{t("needDetails.liveProjection")}</span>
-          <SummaryRow label={t("mirror.futureScore")} value={`${projection.score}/100`} />
-          <SummaryRow label={t("mirror.homePurchase")} value={projection.homeYear} />
-          <SummaryRow label={t("mirror.retirementAge")} value={projection.retirementAge} />
-          <SummaryRow label={t("mirror.risk")} value={t(projection.riskKey)} />
-        </section>
-        <button type="button" className="primaryButton" onClick={setSuccess}>
-          {t("needDetails.wedding.cta")}
-          <Check size={18} />
-        </button>
-      </Screen>
-    );
-  }
-
   const content = {
+    wedding: (
+      <WeddingNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        setSimulatorInputs={setSimulatorInputs}
+        setMemoryEvents={setMemoryEvents}
+        profile={profile}
+      />
+    ),
     home: (
       <HomeNeedContent
         success={success}
@@ -4410,6 +4364,644 @@ function NeedDetailScreen({
   }[type];
 
   return content;
+}
+
+const WEDDING_ACTIVITY_CATALOG = [
+  { id: "solemnization", labelKey: "weddingPlanner.activities.solemnization", icon: HeartHandshake },
+  { id: "teaCeremony", labelKey: "weddingPlanner.activities.teaCeremony", icon: Coffee },
+  { id: "gateCrash", labelKey: "weddingPlanner.activities.gateCrash", icon: PartyPopper },
+  { id: "cocktailHour", labelKey: "weddingPlanner.activities.cocktailHour", icon: Wine },
+  { id: "speeches", labelKey: "weddingPlanner.activities.speeches", icon: Mic },
+  { id: "firstDance", labelKey: "weddingPlanner.activities.firstDance", icon: Music },
+  { id: "photobooth", labelKey: "weddingPlanner.activities.photobooth", icon: Camera },
+  { id: "liveBand", labelKey: "weddingPlanner.activities.liveBand", icon: Music },
+  { id: "afterParty", labelKey: "weddingPlanner.activities.afterParty", icon: PartyPopper },
+];
+
+function weddingCategoryIcon(category = "") {
+  const key = category.toLowerCase();
+  if (key.includes("venue") || key.includes("catering") || key.includes("dining")) return Utensils;
+  if (key.includes("photo")) return Camera;
+  if (key.includes("attire") || key.includes("dress") || key.includes("suit") || key.includes("gown")) return Shirt;
+  if (key.includes("entertain") || key.includes("music") || key.includes("band") || key.includes("dj") || key.includes("mc")) return Music;
+  if (key.includes("decor") || key.includes("floral") || key.includes("styling")) return Sparkles;
+  if (key.includes("stationery") || key.includes("invit")) return FileText;
+  if (key.includes("activit")) return PartyPopper;
+  return CircleDollarSign;
+}
+
+function WeddingLineItemRow({ item }) {
+  const Icon = weddingCategoryIcon(item.category);
+  return (
+    <div className="weddingLineItem">
+      <span className="weddingLineIcon">
+        <Icon size={15} />
+      </span>
+      <span>{item.label}</span>
+      <strong>{formatSgd(Math.round(item.subtotal))}</strong>
+    </div>
+  );
+}
+
+// Line items whose quantity equals the plan's guest_count are treated as
+// guest-scaled (e.g. per-pax catering); everything else (flat fees like
+// photography or attire) stays fixed when the guest count slider moves.
+function recomputeForGuestCount(lineItems, originalGuestCount, newGuestCount) {
+  const adjustedItems = lineItems.map((item) => {
+    const scales = originalGuestCount > 0 && item.quantity === originalGuestCount;
+    if (!scales) return item;
+    const quantity = newGuestCount;
+    const subtotal = Math.round(item.unit_rate * quantity);
+    return { ...item, quantity, subtotal };
+  });
+  const total = adjustedItems.reduce((sum, item) => sum + item.subtotal, 0);
+  return { adjustedItems, total };
+}
+
+function formatMinutesOffset(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours}h${mins ? ` ${mins}m` : ""}`;
+}
+
+function TimelineTable({ timeline, t }) {
+  if (!timeline?.length) return null;
+  return (
+    <section className="supportPanel weddingTimeline">
+      <span className="sectionLabel">{t("weddingPlanner.timelineLabel")}</span>
+      <div className="weddingTimelineTrack">
+        {timeline.map((item) => (
+          <div className="weddingTimelineItem" key={item.activity_id}>
+            <b>{formatMinutesOffset(item.start_offset_minutes)}</b>
+            <strong>{item.label}</strong>
+            {item.notes ? <small>{item.notes}</small> : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PlanEditorPanel({
+  plan,
+  guestCount,
+  onGuestCountChange,
+  activitySelections,
+  onToggleActivity,
+  customActivityText,
+  onCustomActivityChange,
+  onSubmitActivities,
+  onFinalize,
+  submitting,
+  onBack,
+  t,
+}) {
+  const { adjustedItems, total } = recomputeForGuestCount(plan.line_items, plan.guest_count, guestCount);
+
+  return (
+    <section className="recommendationPanel">
+      <div className="scenarioHead">
+        <span>{plan.name}</span>
+        <button type="button" className="secondaryButton" onClick={onBack}>
+          {t("weddingPlanner.backToComparison")}
+        </button>
+      </div>
+
+      <div className="needHeroCard">
+        <span className="sectionLabel">{t("weddingPlanner.guestCountLabel")}</span>
+        <strong>{guestCount}</strong>
+        <input
+          className="wideSlider"
+          type="range"
+          min="20"
+          max="500"
+          step="5"
+          value={guestCount}
+          onChange={(event) => onGuestCountChange(Number(event.target.value))}
+          aria-label={t("weddingPlanner.guestCountLabel")}
+        />
+      </div>
+
+      <div className="weddingLineItems">
+        {adjustedItems.map((item) => (
+          <WeddingLineItemRow item={item} key={item.label} />
+        ))}
+      </div>
+      <div className="weddingTotalCost">
+        <small>{t("weddingPlanner.updatedTotal")}</small>
+        <strong>{formatSgd(Math.round(total))}</strong>
+      </div>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("weddingPlanner.activitiesLabel")}</span>
+        <div className="checkboxGrid">
+          {WEDDING_ACTIVITY_CATALOG.map(({ id, labelKey, icon: Icon }) => (
+            <button
+              type="button"
+              key={id}
+              className={activitySelections[id] ? "checkOption selected" : "checkOption"}
+              onClick={() => onToggleActivity(id)}
+            >
+              <Icon size={15} />
+              <span>{t(labelKey)}</span>
+              {activitySelections[id] ? <Check size={14} /> : null}
+            </button>
+          ))}
+        </div>
+        <textarea
+          className="aiTextInput"
+          rows={2}
+          value={customActivityText}
+          onChange={(event) => onCustomActivityChange(event.target.value)}
+          placeholder={t("weddingPlanner.customActivityPlaceholder")}
+        />
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={onSubmitActivities}
+          disabled={submitting}
+        >
+          {submitting ? t("weddingPlanner.thinking") : t("weddingPlanner.submitActivityChanges")}
+        </button>
+      </div>
+
+      <TimelineTable timeline={plan.timeline} t={t} />
+
+      <button type="button" className="primaryButton" onClick={() => onFinalize(guestCount, total)} disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("weddingPlanner.finalizeThisPlan")}
+        <Check size={18} />
+      </button>
+    </section>
+  );
+}
+
+function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey = "weddingPlanner.send" }) {
+  const [value, setValue] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!value.trim() || submitting) return;
+    onSubmit(value.trim());
+    setValue("");
+  };
+
+  return (
+    <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("weddingPlanner.inputLabel")}</span>
+      <textarea
+        className="aiTextInput"
+        rows={3}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder={placeholder}
+        disabled={submitting}
+      />
+      <button type="submit" className="primaryButton" disabled={submitting || !value.trim()}>
+        {submitting ? t("weddingPlanner.thinking") : t(submitLabelKey)}
+        <Send size={18} />
+      </button>
+    </form>
+  );
+}
+
+function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
+  const medianCost = [...plans].map((plan) => plan.total_cost).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
+  return (
+    <section className="scenarioStack">
+      <span className="sectionLabel">{t("weddingPlanner.planComparisonLabel")}</span>
+      {plans.map((plan) => {
+        const recommended = plan.total_cost === medianCost;
+        return (
+          <article className={recommended ? "scenarioCard simulatorScenario recommended" : "scenarioCard simulatorScenario"} key={plan.id}>
+            <div className="scenarioHead">
+              <span>{plan.name}</span>
+              {recommended ? <b>{t("status.recommended")}</b> : null}
+            </div>
+            <p>{plan.summary}</p>
+            <div className="weddingTotalCost">
+              <small>{t("weddingPlanner.totalCost")}</small>
+              <strong>{formatSgd(Math.round(plan.total_cost))}</strong>
+            </div>
+            <div className="scenarioStats scenarioStatsWide">
+              <span>
+                <small>{t("weddingPlanner.guestCount")}</small>
+                <strong>{plan.guest_count}</strong>
+              </span>
+              <span>
+                <small>{t("weddingPlanner.venueTier")}</small>
+                <strong>{plan.venue_tier}</strong>
+              </span>
+            </div>
+            <div className="weddingLineItems">
+              {plan.line_items.map((item) => (
+                <WeddingLineItemRow item={item} key={`${plan.id}-${item.label}`} />
+              ))}
+            </div>
+            <button type="button" className="secondaryButton" onClick={() => onSelectPlan(plan.id)}>
+              {t("weddingPlanner.customizePlan")}
+            </button>
+          </article>
+        );
+      })}
+      {researchNotes ? (
+        <section className="insightCard">
+          <Bot size={20} />
+          <p>{researchNotes}</p>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function WeddingConfirmedBudgetCard({ budget, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("weddingPlanner.confirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>{t("weddingPlanner.totalCost")}</small>
+        <strong>{formatSgd(Math.round(budget.total_budget))}</strong>
+      </div>
+      <SummaryRow label={t("weddingPlanner.weddingDate")} value={budget.wedding_date} />
+      <SummaryRow label={t("weddingPlanner.guestCount")} value={budget.guest_count} />
+      <div className="weddingLineItems">
+        {budget.line_items.map((item) => (
+          <WeddingLineItemRow item={item} key={item.label} />
+        ))}
+      </div>
+      <p>{budget.confirmation_note}</p>
+      <TimelineTable timeline={budget.timeline} t={t} />
+    </section>
+  );
+}
+
+const SAVINGS_VEHICLE_LABEL_KEYS = {
+  savings_account: "weddingPlanner.vehicles.savingsAccount",
+  goal_based_deposit: "weddingPlanner.vehicles.goalBasedDeposit",
+  robo_invest_conservative: "weddingPlanner.vehicles.roboInvest",
+  existing_savings_drawdown: "weddingPlanner.vehicles.existingSavings",
+};
+
+const SAVINGS_VEHICLE_ICONS = {
+  savings_account: Banknote,
+  goal_based_deposit: Target,
+  robo_invest_conservative: LineChart,
+  existing_savings_drawdown: CircleDollarSign,
+};
+
+function SavingsAllocationRow({ entry, t }) {
+  const Icon = SAVINGS_VEHICLE_ICONS[entry.vehicle] ?? CircleDollarSign;
+  return (
+    <div className="weddingLineItem">
+      <span className="weddingLineIcon">
+        <Icon size={15} />
+      </span>
+      <span>{t(SAVINGS_VEHICLE_LABEL_KEYS[entry.vehicle] ?? entry.vehicle)}</span>
+      <strong>{formatSgd(Math.round(entry.monthly_amount))}</strong>
+    </div>
+  );
+}
+
+function SavingsStrategyCards({ strategies, t }) {
+  return (
+    <section className="scenarioStack">
+      <span className="sectionLabel">{t("weddingPlanner.savingsStrategyLabel")}</span>
+      {strategies.map((strategy) => (
+        <article className="scenarioCard simulatorScenario" key={strategy.id}>
+          <div className="scenarioHead">
+            <span>{strategy.name}</span>
+          </div>
+          <p>{strategy.summary}</p>
+          <div className="weddingTotalCost">
+            <small>{t("weddingPlanner.monthlyContribution")}</small>
+            <strong>{formatSgd(Math.round(strategy.monthly_contribution))}</strong>
+          </div>
+          <div className="weddingLineItems">
+            {strategy.allocation.map((entry) => (
+              <SavingsAllocationRow entry={entry} t={t} key={`${strategy.id}-${entry.vehicle}`} />
+            ))}
+          </div>
+          <SupportList
+            title={t("weddingPlanner.suitabilityLabel")}
+            items={[strategy.suitability.reason, strategy.suitability.risk, strategy.suitability.alternative_considered, strategy.suitability.limitation].filter(
+              Boolean
+            )}
+          />
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function ConfirmedSavingsPlanCard({ plan, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("weddingPlanner.savingsConfirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>{t("weddingPlanner.monthlyContribution")}</small>
+        <strong>{formatSgd(Math.round(plan.monthly_contribution))}</strong>
+      </div>
+      <SummaryRow label={t("weddingPlanner.startMonth")} value={plan.start_month} />
+      <SummaryRow label={t("weddingPlanner.targetCompleteMonth")} value={plan.target_complete_month} />
+      <div className="weddingLineItems">
+        {plan.allocation.map((entry) => (
+          <SavingsAllocationRow entry={entry} t={t} key={entry.vehicle} />
+        ))}
+      </div>
+      <p>{plan.notes}</p>
+    </section>
+  );
+}
+
+function WeddingHistoryModal({ entries, loading, onClose, t }) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("weddingPlanner.historyTitle")}>
+      <motion.div className="confirmModal weddingHistoryModal" {...screenMotion}>
+        <History size={24} />
+        <strong>{t("weddingPlanner.historyTitle")}</strong>
+        {loading ? (
+          <p>{t("loading.detail")}</p>
+        ) : entries.length ? (
+          <div className="chatHistoryLog">
+            {entries.map((entry, index) => (
+              <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"} key={index}>
+                <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>{entry.text}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>{t("weddingPlanner.historyEmpty")}</p>
+        )}
+        <button type="button" className="primaryButton" onClick={onClose}>
+          {t("homeBanking.gotIt")}
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
+function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile }) {
+  const [sessionData, setSessionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
+  const [guestCountOverride, setGuestCountOverride] = useState(null);
+  const [activitySelections, setActivitySelections] = useState({});
+  const [customActivityText, setCustomActivityText] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/wedding/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/wedding/session")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSessionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage(t("weddingPlanner.genericError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const submitToStage1 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/wedding/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("weddingPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        planOptions: data.type === "propose_plans" ? data.data : current?.planOptions,
+        confirmedBudget: data.type === "confirm_wedding_budget" ? data.data : current?.confirmedBudget,
+        stage1Status: data.type === "confirm_wedding_budget" ? "confirmed" : current?.stage1Status,
+      }));
+      if (data.type === "confirm_wedding_budget") {
+        setSuccess();
+        const budget = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          weddingBudget: String(Math.round(budget.total_budget)),
+          weddingDate: budget.wedding_date,
+        }));
+        setMemoryEvents((current) => [
+          {
+            id: `wedding-confirmed-${budget.plan_id}`,
+            year: new Date(budget.wedding_date).getFullYear().toString(),
+            title: t("weddingPlanner.memoryEventTitle"),
+            description: budget.confirmation_note,
+            impact: t("weddingPlanner.memoryEventImpact", { amount: formatSgd(Math.round(budget.total_budget)) }),
+            product: t("weddingPlanner.memoryEventProduct"),
+            action: t("weddingPlanner.memoryEventAction"),
+            reason: t("weddingPlanner.memoryEventReason"),
+            dataUsed: t("weddingPlanner.memoryEventDataUsed"),
+            statusKey: "status.completed",
+          },
+          ...current,
+        ]);
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("weddingPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (text) => submitToStage1(sessionData?.planOptions ? "refine" : "generate", text);
+
+  const selectedPlan = sessionData?.planOptions?.plans.find((plan) => plan.id === selectedPlanId) ?? null;
+
+  const handleSelectPlan = (planId) => {
+    const plan = sessionData?.planOptions?.plans.find((p) => p.id === planId);
+    if (!plan) return;
+    setSelectedPlanId(planId);
+    setGuestCountOverride(plan.guest_count);
+    setActivitySelections({});
+    setCustomActivityText("");
+  };
+
+  const handleSubmitActivities = async () => {
+    if (!selectedPlan) return;
+    const included = WEDDING_ACTIVITY_CATALOG.filter(({ id }) => activitySelections[id]).map(({ labelKey }) => t(labelKey));
+    const parts = [];
+    if (included.length) parts.push(`Please make sure the plan includes: ${included.join(", ")}.`);
+    if (customActivityText.trim()) parts.push(customActivityText.trim());
+    if (!parts.length) return;
+    const message = `For the "${selectedPlan.name}" plan: ${parts.join(" ")}`;
+    const ok = await submitToStage1("edit_activities", message);
+    if (ok) {
+      setSelectedPlanId(null);
+      setActivitySelections({});
+      setCustomActivityText("");
+    }
+  };
+
+  const handleFinalize = async (guestCount, total) => {
+    if (!selectedPlan) return;
+    const message = `I'd like to finalize the "${selectedPlan.name}" plan with ${guestCount} guests, for a total budget of approximately SGD ${Math.round(total)}. Please confirm this as the final wedding budget.`;
+    await submitToStage1("refine", message);
+  };
+
+  const submitToStage2 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/wedding/stage2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language, profile }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("weddingPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsPlanOptions: data.type === "propose_savings_plan" ? data.data : current?.savingsPlanOptions,
+        confirmedSavingsPlan: data.type === "finalize_savings_plan" ? data.data : current?.confirmedSavingsPlan,
+      }));
+      return true;
+    } catch {
+      setErrorMessage(t("weddingPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStartSavingsPlan = () =>
+    submitToStage2("generate", "Please suggest savings strategies for funding this confirmed wedding budget.");
+
+  const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
+
+  return (
+    <Screen>
+      <Header title={t("weddingPlanner.title")} subtitle={t("weddingPlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("weddingPlanner.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <WeddingHistoryModal entries={historyEntries} loading={historyLoading} onClose={() => setHistoryOpen(false)} t={t} />
+      ) : null}
+      <SuccessBanner show={success} text={t("weddingPlanner.success")} />
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : sessionData?.confirmedBudget ? (
+        <>
+          <WeddingConfirmedBudgetCard budget={sessionData.confirmedBudget} t={t} />
+          {sessionData?.confirmedSavingsPlan ? (
+            <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
+          ) : sessionData?.savingsPlanOptions ? (
+            <SavingsStrategyCards strategies={sessionData.savingsPlanOptions.strategies} t={t} />
+          ) : (
+            <section className="needHeroCard">
+              <span className="sectionLabel">{t("weddingPlanner.savingsPlanCtaLabel")}</span>
+              <p>{t("weddingPlanner.savingsPlanCtaBody")}</p>
+              <button type="button" className="primaryButton" onClick={handleStartSavingsPlan} disabled={submitting}>
+                {submitting ? t("weddingPlanner.thinking") : t("weddingPlanner.savingsPlanCtaButton")}
+                <Send size={18} />
+              </button>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!sessionData?.confirmedSavingsPlan && sessionData?.savingsPlanOptions ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSavingsSubmit}
+              submitting={submitting}
+              placeholder={t("weddingPlanner.savingsInputPlaceholder")}
+              submitLabelKey="weddingPlanner.send"
+            />
+          ) : null}
+        </>
+      ) : (
+        <>
+          {selectedPlan ? (
+            <PlanEditorPanel
+              plan={selectedPlan}
+              guestCount={guestCountOverride ?? selectedPlan.guest_count}
+              onGuestCountChange={setGuestCountOverride}
+              activitySelections={activitySelections}
+              onToggleActivity={(id) => setActivitySelections((current) => ({ ...current, [id]: !current[id] }))}
+              customActivityText={customActivityText}
+              onCustomActivityChange={setCustomActivityText}
+              onSubmitActivities={handleSubmitActivities}
+              onFinalize={handleFinalize}
+              submitting={submitting}
+              onBack={() => setSelectedPlanId(null)}
+              t={t}
+            />
+          ) : sessionData?.planOptions ? (
+            <WeddingPlanCards
+              plans={sessionData.planOptions.plans}
+              researchNotes={sessionData.planOptions.research_notes}
+              onSelectPlan={handleSelectPlan}
+              t={t}
+            />
+          ) : (
+            <section className="weddingHero">
+              <span className="weddingHeroBadge">{t("weddingPlanner.newFeatureBadge")}</span>
+              <span className="weddingHeroIcon">
+                <HeartHandshake size={26} />
+              </span>
+              <strong>{t("weddingPlanner.emptyStateLabel")}</strong>
+              <p>{t("weddingPlanner.emptyStateBody")}</p>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!selectedPlan ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+              placeholder={t("weddingPlanner.inputPlaceholder")}
+              submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "weddingPlanner.sendFirst"}
+            />
+          ) : null}
+        </>
+      )}
+    </Screen>
+  );
 }
 
 function HomeNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
@@ -5243,6 +5835,15 @@ function BackHomeButton({ setActiveScreen, t }) {
   );
 }
 
+function BackMirrorButton({ setActiveScreen, t }) {
+  return (
+    <button type="button" className="backHomeButton" onClick={() => setActiveScreen(screens.MIRROR)}>
+      <LineChart size={15} />
+      {t("common.backMirror")}
+    </button>
+  );
+}
+
 function BackLifeGraphButton({ setActiveScreen, t }) {
   return (
     <button type="button" className="backHomeButton" onClick={() => setActiveScreen(screens.LIFE_GRAPH)}>
@@ -5503,7 +6104,6 @@ export default function App() {
   const [activeScreen, setActiveScreen] = useState(screens.HOME);
   const [loadingCopyKey, setLoadingCopyKey] = useState("loading.default");
   const [language, setLanguage] = useState("en");
-  const [weddingBudget, setWeddingBudget] = useState(80000);
   const [successStates, setSuccessStates] = useState({});
   const [activeAccountId, setActiveAccountId] = useState("savings");
   const [preferences, setPreferences] = useState(defaultPreferences);
@@ -5512,6 +6112,7 @@ export default function App() {
   const [simulatorRan, setSimulatorRan] = useState(false);
   const [simulatorApplied, setSimulatorApplied] = useState(false);
   const [simulatorActionStates, setSimulatorActionStates] = useState(defaultSimulatorActionStates);
+  const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
 
   const t = useMemo(() => makeTranslator(language), [language]);
   const effectiveTheme = getEffectiveTheme(preferences.theme, systemTheme);
@@ -5548,6 +6149,10 @@ export default function App() {
         safeJsonParse(window.localStorage.getItem("futureos-simulator-actions"), null)
       )
     );
+    const savedMemory = safeJsonParse(window.localStorage.getItem("futureos-guardian-memory"), null);
+    if (Array.isArray(savedMemory) && savedMemory.length > 0) {
+      setMemoryEvents(savedMemory);
+    }
   }, []);
 
   useEffect(() => {
@@ -5601,6 +6206,10 @@ export default function App() {
     window.localStorage.setItem("futureos-simulator-actions", JSON.stringify(simulatorActionStates));
   }, [simulatorActionStates]);
 
+  useEffect(() => {
+    window.localStorage.setItem("futureos-guardian-memory", JSON.stringify(memoryEvents));
+  }, [memoryEvents]);
+
   function goWithLoading(nextScreen, copyKey) {
     setLoadingCopyKey(copyKey);
     setActiveScreen(screens.LOADING);
@@ -5616,7 +6225,6 @@ export default function App() {
 
   function restoreMockData() {
     setPreferences(defaultPreferences);
-    setWeddingBudget(80000);
     setSuccessStates({});
     setActiveAccountId("savings");
     setSimulatorInputs(getSimulatorDefaultsFromProfile(defaultProfile, []));
@@ -5680,6 +6288,7 @@ export default function App() {
 
   const shared = {
     t,
+    language,
     goWithLoading,
     setActiveScreen,
     setActiveAccountId,
@@ -5690,8 +6299,8 @@ export default function App() {
     setSimulatorInputs,
     successStates,
     setSuccessStates,
-    weddingBudget,
-    setWeddingBudget,
+    memoryEvents,
+    setMemoryEvents,
   };
 
   const mirrorSimulatorScreen = (

@@ -1,8 +1,11 @@
 name: Deploy to GitHub Pages
 
+# Disabled: app moved off static export (output: "export") to support
+# server-side API routes (Anthropic API calls, Postgres). This workflow
+# would fail on every push since there's no `out/` directory to upload
+# anymore. Kept as a manual-only escape hatch; production deploys go
+# through Vercel instead.
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:

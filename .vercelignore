@@ -10,4 +10,3 @@ outputs
 work
 .env*.local
 *.log
-*.png
