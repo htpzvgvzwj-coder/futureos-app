@@ -17,7 +17,7 @@ const client = new Client({ connectionString });
 try {
   await client.connect();
   await client.query(sql);
-  console.log("Migration applied: wedding_sessions, wedding_messages, wedding_artifacts.");
+  console.log("Migration applied.");
 } finally {
   await client.end();
 }

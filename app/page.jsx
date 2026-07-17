@@ -56,6 +56,7 @@ import {
   Wine,
   X,
 } from "lucide-react";
+import { computeHomeFinancials } from "../lib/home-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -97,7 +98,6 @@ const navItems = [
 ];
 
 const detectedNeedDefinitions = [
-  { id: "home", titleKey: "needs.home", screen: screens.NEED_HOME, icon: Building2 },
   { id: "emergency", titleKey: "needs.emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
   { id: "insurance", titleKey: "needs.insurance", screen: screens.NEED_INSURANCE, icon: ShieldCheck },
   { id: "investment", titleKey: "needs.investment", screen: screens.NEED_INVESTMENT, icon: LineChart },
@@ -109,7 +109,6 @@ const detectedNeedDefinitions = [
 function getDetectedNeeds(selectedGoalIds, healthScores) {
   const scoreById = Object.fromEntries(healthScores.map((score) => [score.id, score.value]));
   const evidenceById = {
-    home: selectedGoalIds.includes("home"),
     emergency: selectedGoalIds.includes("emergency") || scoreById.emergency < 60,
     insurance: selectedGoalIds.includes("family") || scoreById.insurance < 60,
     investment:
@@ -1827,15 +1826,10 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
-  if (
-    [
-      screens.NEED_WEDDING,
-      screens.NEED_HOME,
-      screens.NEED_EMERGENCY,
-      screens.NEED_INSURANCE,
-      screens.NEED_INVESTMENT,
-    ].includes(activeScreen)
-  ) {
+  if ([screens.NEED_WEDDING, screens.NEED_HOME].includes(activeScreen)) {
+    return screens.MIRROR;
+  }
+  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
@@ -3010,12 +3004,17 @@ function FutureMirrorSimulator({
           <span className="sectionLabel">{t("simulator.inputs.lifeGoals")}</span>
           <div className="checkboxGrid">
             {simulatorGoalOptions.map(({ id, labelKey, icon: Icon }) =>
-              id === "wedding" ? (
-                <button type="button" className="checkOption weddingEntryOption" key={id} onClick={() => setActiveScreen(screens.NEED_WEDDING)}>
+              id === "wedding" || id === "home" ? (
+                <button
+                  type="button"
+                  className="checkOption weddingEntryOption"
+                  key={id}
+                  onClick={() => setActiveScreen(id === "wedding" ? screens.NEED_WEDDING : screens.NEED_HOME)}
+                >
                   <Icon size={15} />
                   <span>{t(labelKey)}</span>
                   <span className="weddingEntryTrailing">
-                    <b className="miniBadge">{t("weddingPlanner.newFeatureBadge")}</b>
+                    <b className="miniBadge">{t(id === "wedding" ? "weddingPlanner.newFeatureBadge" : "homePlanner.newFeatureBadge")}</b>
                     <ChevronRight size={14} />
                   </span>
                 </button>
@@ -4327,8 +4326,10 @@ function NeedDetailScreen({
         setSuccess={setSuccess}
         t={t}
         setActiveScreen={setActiveScreen}
+        language={language}
+        setSimulatorInputs={setSimulatorInputs}
+        setMemoryEvents={setMemoryEvents}
         profile={profile}
-        healthScores={healthScores}
       />
     ),
     emergency: (
@@ -4424,15 +4425,23 @@ function formatMinutesOffset(minutes) {
   return `${hours}h${mins ? ` ${mins}m` : ""}`;
 }
 
-function TimelineTable({ timeline, t }) {
+function formatMonthsOffset(months) {
+  if (months <= 0) return "Now";
+  if (months < 12) return `M${months}`;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  return rem ? `Y${years}M${rem}` : `Y${years}`;
+}
+
+function TimelineTable({ timeline, t, offsetKey = "start_offset_minutes", formatOffset = formatMinutesOffset, labelKey = "weddingPlanner.timelineLabel" }) {
   if (!timeline?.length) return null;
   return (
     <section className="supportPanel weddingTimeline">
-      <span className="sectionLabel">{t("weddingPlanner.timelineLabel")}</span>
+      <span className="sectionLabel">{t(labelKey)}</span>
       <div className="weddingTimelineTrack">
         {timeline.map((item) => (
           <div className="weddingTimelineItem" key={item.activity_id}>
-            <b>{formatMinutesOffset(item.start_offset_minutes)}</b>
+            <b>{formatOffset(item[offsetKey])}</b>
             <strong>{item.label}</strong>
             {item.notes ? <small>{item.notes}</small> : null}
           </div>
@@ -4567,42 +4576,34 @@ function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey 
 function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
   const medianCost = [...plans].map((plan) => plan.total_cost).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
   return (
-    <section className="scenarioStack">
+    <section className="weddingPlanCarouselWrap">
       <span className="sectionLabel">{t("weddingPlanner.planComparisonLabel")}</span>
-      {plans.map((plan) => {
-        const recommended = plan.total_cost === medianCost;
-        return (
-          <article className={recommended ? "scenarioCard simulatorScenario recommended" : "scenarioCard simulatorScenario"} key={plan.id}>
-            <div className="scenarioHead">
-              <span>{plan.name}</span>
-              {recommended ? <b>{t("status.recommended")}</b> : null}
-            </div>
-            <p>{plan.summary}</p>
-            <div className="weddingTotalCost">
-              <small>{t("weddingPlanner.totalCost")}</small>
-              <strong>{formatSgd(Math.round(plan.total_cost))}</strong>
-            </div>
-            <div className="scenarioStats scenarioStatsWide">
-              <span>
-                <small>{t("weddingPlanner.guestCount")}</small>
-                <strong>{plan.guest_count}</strong>
-              </span>
-              <span>
-                <small>{t("weddingPlanner.venueTier")}</small>
-                <strong>{plan.venue_tier}</strong>
-              </span>
-            </div>
-            <div className="weddingLineItems">
-              {plan.line_items.map((item) => (
-                <WeddingLineItemRow item={item} key={`${plan.id}-${item.label}`} />
-              ))}
-            </div>
-            <button type="button" className="secondaryButton" onClick={() => onSelectPlan(plan.id)}>
-              {t("weddingPlanner.customizePlan")}
-            </button>
-          </article>
-        );
-      })}
+      <div className="weddingPlanCarousel">
+        {plans.map((plan, index) => {
+          const recommended = plan.total_cost === medianCost;
+          return (
+            <article className={`weddingPlanTile accent-${index % 3}${recommended ? " recommended" : ""}`} key={plan.id}>
+              {recommended ? <span className="miniBadge">{t("status.recommended")}</span> : null}
+              <h3>{plan.name}</h3>
+              <p className="weddingPlanSummary">{plan.summary}</p>
+              <div className="weddingTotalCost">
+                <small>{t("weddingPlanner.totalCost")}</small>
+                <strong>{formatSgd(Math.round(plan.total_cost))}</strong>
+              </div>
+              <div className="weddingStatChips">
+                <span className="statChip">
+                  {plan.guest_count} {t("weddingPlanner.guestCount")}
+                </span>
+                <span className="statChip">{plan.venue_tier}</span>
+              </div>
+              <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
+                {t("weddingPlanner.customizePlan")}
+              </button>
+            </article>
+          );
+        })}
+      </div>
+      {plans.length > 1 ? <p className="weddingCarouselHint">{t("weddingPlanner.swipeHint")}</p> : null}
       {researchNotes ? (
         <section className="insightCard">
           <Bot size={20} />
@@ -4628,7 +4629,10 @@ function WeddingConfirmedBudgetCard({ budget, t }) {
           <WeddingLineItemRow item={item} key={item.label} />
         ))}
       </div>
-      <p>{budget.confirmation_note}</p>
+      <section className="insightCard">
+        <Bot size={20} />
+        <p>{budget.confirmation_note}</p>
+      </section>
       <TimelineTable timeline={budget.timeline} t={t} />
     </section>
   );
@@ -4639,6 +4643,7 @@ const SAVINGS_VEHICLE_LABEL_KEYS = {
   goal_based_deposit: "weddingPlanner.vehicles.goalBasedDeposit",
   robo_invest_conservative: "weddingPlanner.vehicles.roboInvest",
   existing_savings_drawdown: "weddingPlanner.vehicles.existingSavings",
+  cpf_ordinary_account: "homePlanner.vehicles.cpfOrdinaryAccount",
 };
 
 const SAVINGS_VEHICLE_ICONS = {
@@ -4646,6 +4651,7 @@ const SAVINGS_VEHICLE_ICONS = {
   goal_based_deposit: Target,
   robo_invest_conservative: LineChart,
   existing_savings_drawdown: CircleDollarSign,
+  cpf_ordinary_account: Landmark,
 };
 
 function SavingsAllocationRow({ entry, t }) {
@@ -4707,17 +4713,20 @@ function ConfirmedSavingsPlanCard({ plan, t }) {
           <SavingsAllocationRow entry={entry} t={t} key={entry.vehicle} />
         ))}
       </div>
-      <p>{plan.notes}</p>
+      <section className="insightCard">
+        <Bot size={20} />
+        <p>{plan.notes}</p>
+      </section>
     </section>
   );
 }
 
-function WeddingHistoryModal({ entries, loading, onClose, t }) {
+function ConversationHistoryModal({ entries, loading, onClose, t, titleKey, emptyKey }) {
   return (
-    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("weddingPlanner.historyTitle")}>
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(titleKey)}>
       <motion.div className="confirmModal weddingHistoryModal" {...screenMotion}>
         <History size={24} />
-        <strong>{t("weddingPlanner.historyTitle")}</strong>
+        <strong>{t(titleKey)}</strong>
         {loading ? (
           <p>{t("loading.detail")}</p>
         ) : entries.length ? (
@@ -4729,7 +4738,7 @@ function WeddingHistoryModal({ entries, loading, onClose, t }) {
             ))}
           </div>
         ) : (
-          <p>{t("weddingPlanner.historyEmpty")}</p>
+          <p>{t(emptyKey)}</p>
         )}
         <button type="button" className="primaryButton" onClick={onClose}>
           {t("homeBanking.gotIt")}
@@ -4911,7 +4920,14 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
         </button>
       </div>
       {historyOpen ? (
-        <WeddingHistoryModal entries={historyEntries} loading={historyLoading} onClose={() => setHistoryOpen(false)} t={t} />
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="weddingPlanner.historyTitle"
+          emptyKey="weddingPlanner.historyEmpty"
+        />
       ) : null}
       <SuccessBanner show={success} text={t("weddingPlanner.success")} />
       {loading ? (
@@ -5004,76 +5020,460 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
   );
 }
 
-function HomeNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
-  const [housingType, setHousingType] = useState("bto");
-  const readinessScore = healthScores.find((score) => score.id === "savings")?.value ?? 72;
-  const currentFund = numberValue(profile.currentSavings, 42000);
-  // Affordability heuristic: a down payment target of roughly 16 months of income, adjusted
-  // slightly later for a resale flat (higher upfront cost) than a BTO (lower, delayed cost).
-  const targetDownPayment =
-    Math.round((numberValue(profile.monthlyIncome, 7500) * 16 * (housingType === "resale" ? 1.1 : 0.9)) / 1000) * 1000;
-  const targetYear = readinessScore >= 75 ? "2028" : readinessScore >= 60 ? "2030" : "2032";
-  const monthlyRequired = Math.max(0, Math.round((targetDownPayment - currentFund) / 36 / 50) * 50);
+const PROPERTY_TYPE_LABEL_KEYS = {
+  hdb_new: "homePlanner.propertyTypes.hdbNew",
+  hdb_resale: "homePlanner.propertyTypes.hdbResale",
+  ec_new: "homePlanner.propertyTypes.ecNew",
+  ec_resale: "homePlanner.propertyTypes.ecResale",
+  condo: "homePlanner.propertyTypes.condo",
+  landed: "homePlanner.propertyTypes.landed",
+};
+
+function defaultHomeFinancialContext(profile) {
+  return {
+    monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+    monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+    buyerType: "singapore_citizen",
+    existingPropertyCount: 0,
+    annualRatePercent: 3.0,
+    tenureYears: 25,
+  };
+}
+
+function targetYearFromTimeline(timeline) {
+  if (!timeline?.length) return new Date().getFullYear().toString();
+  const last = timeline[timeline.length - 1];
+  const totalMonths = (last.start_offset_months ?? 0) + (last.duration_months ?? 0);
+  const target = new Date();
+  target.setMonth(target.getMonth() + totalMonths);
+  return target.getFullYear().toString();
+}
+
+function HomeAffordabilityChip({ plan, t }) {
   return (
-    <Screen>
-      <Header title={t("needDetails.home.title")} subtitle={t("needDetails.home.subtitle")} />
-      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
-      <SuccessBanner show={success} text={t("needDetails.home.success")} />
-      <ProgressPanel
-        label={t("needDetails.home.score")}
-        value={readinessScore}
-        t={t}
-        body={t("needDetails.home.scoreBody", {
-          score: readinessScore,
-          currentFund: formatSgd(currentFund),
-          target: formatSgd(targetDownPayment),
+    <span className={plan.within_affordability ? "statChip" : "statChip warning"}>
+      {plan.within_affordability
+        ? t("homePlanner.affordabilityOk")
+        : t("homePlanner.affordabilityTight", { factor: plan.affordability_limiting_factor })}
+    </span>
+  );
+}
+
+function HomeFinancialsBreakdown({ financials, t }) {
+  return (
+    <div className="weddingLineItems">
+      <SummaryRow label={t("homePlanner.loanAmount")} value={formatSgd(Math.round(financials.loan_amount))} />
+      <SummaryRow label={t("homePlanner.downPayment")} value={formatSgd(Math.round(financials.down_payment_cash_cpf))} />
+      <SummaryRow label={t("homePlanner.minCashComponent")} value={formatSgd(Math.round(financials.min_cash_component))} />
+      <SummaryRow label={t("homePlanner.monthlyInstallment")} value={formatSgd(Math.round(financials.monthly_installment))} />
+      <SummaryRow label={t("homePlanner.stampDuty")} value={formatSgd(Math.round(financials.stamp_duty_total))} />
+    </div>
+  );
+}
+
+function HomePlanCards({ plans, researchNotes, onSelectPlan, t }) {
+  const medianPrice = [...plans].map((plan) => plan.price).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
+  return (
+    <section className="weddingPlanCarouselWrap">
+      <span className="sectionLabel">{t("homePlanner.planComparisonLabel")}</span>
+      <div className="weddingPlanCarousel">
+        {plans.map((plan, index) => {
+          const recommended = plan.price === medianPrice;
+          return (
+            <article className={`weddingPlanTile accent-${index % 3}${recommended ? " recommended" : ""}`} key={plan.id}>
+              {recommended ? <span className="miniBadge">{t("status.recommended")}</span> : null}
+              <h3>{plan.name}</h3>
+              <p className="weddingPlanSummary">{plan.summary}</p>
+              <div className="weddingTotalCost">
+                <small>{t("homePlanner.propertyPrice")}</small>
+                <strong>{formatSgd(Math.round(plan.price))}</strong>
+              </div>
+              <div className="weddingStatChips">
+                <span className="statChip">{t(PROPERTY_TYPE_LABEL_KEYS[plan.property_type] ?? plan.property_type)}</span>
+                <span className="statChip">{plan.district}</span>
+                <HomeAffordabilityChip plan={plan} t={t} />
+              </div>
+              <HomeFinancialsBreakdown financials={plan} t={t} />
+              <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
+                {t("homePlanner.customizePlan")}
+              </button>
+            </article>
+          );
         })}
-        methodText={t("needDetails.home.scoreMethod", { housingType: t(`needDetails.home.${housingType}`) })}
-      />
-      <section className="metricGrid">
-        <MetricCard label={t("needDetails.home.targetYear")} value={targetYear} />
-        <MetricCard label={t("needDetails.home.currentFund")} value={formatSgd(currentFund)} />
-        <MetricCard label={t("needDetails.home.targetDownPayment")} value={formatSgd(targetDownPayment)} />
-        <MetricCard label={t("needDetails.home.monthlyRequired")} value={formatSgd(monthlyRequired)} />
-      </section>
-      <section className="trustNote compactTrustNote">
-        <Info size={17} />
-        <p>{t("needDetails.home.sgContextDisclaimer")}</p>
-      </section>
-      <div className="settingsGroup">
-        <span className="sectionLabel">{t("needDetails.home.housingTypeLabel")}</span>
-        <div className="segmentedControl">
-          <button
-            type="button"
-            className={housingType === "bto" ? "segmentButton active" : "segmentButton"}
-            onClick={() => setHousingType("bto")}
-          >
-            {t("needDetails.home.bto")}
-          </button>
-          <button
-            type="button"
-            className={housingType === "resale" ? "segmentButton active" : "segmentButton"}
-            onClick={() => setHousingType("resale")}
-          >
-            {t("needDetails.home.resale")}
-          </button>
-        </div>
       </div>
-      <SupportList
-        title={t("needDetails.ocbcSupport")}
-        items={[
-          t("needDetails.home.support1"),
-          t("needDetails.home.support2"),
-          t("needDetails.home.support3"),
-          t("needDetails.home.support4"),
-          t(`needDetails.home.housingContext.${housingType}`),
-          t("needDetails.home.cpfContext"),
-        ]}
+      {plans.length > 1 ? <p className="weddingCarouselHint">{t("weddingPlanner.swipeHint")}</p> : null}
+      {researchNotes ? (
+        <section className="insightCard">
+          <Bot size={20} />
+          <p>{researchNotes}</p>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function HomePlanEditorPanel({ plan, profile, customText, onCustomTextChange, onSubmitCustom, onFinalize, submitting, onBack, t }) {
+  const [priceOverride, setPriceOverride] = useState(plan.estimated_price ?? plan.price);
+  const financials = useMemo(
+    () =>
+      computeHomeFinancials({
+        price: priceOverride,
+        propertyType: plan.property_type,
+        ...defaultHomeFinancialContext(profile),
+      }),
+    [priceOverride, plan.property_type, profile]
+  );
+
+  return (
+    <section className="recommendationPanel">
+      <div className="scenarioHead">
+        <span>{plan.name}</span>
+        <button type="button" className="secondaryButton" onClick={onBack}>
+          {t("weddingPlanner.backToComparison")}
+        </button>
+      </div>
+
+      <div className="needHeroCard">
+        <span className="sectionLabel">{t("homePlanner.priceAdjustLabel")}</span>
+        <strong>{formatSgd(Math.round(priceOverride))}</strong>
+        <input
+          className="wideSlider"
+          type="range"
+          min={Math.round((plan.estimated_price ?? plan.price) * 0.7)}
+          max={Math.round((plan.estimated_price ?? plan.price) * 1.3)}
+          step="5000"
+          value={priceOverride}
+          onChange={(event) => setPriceOverride(Number(event.target.value))}
+          aria-label={t("homePlanner.priceAdjustLabel")}
+        />
+      </div>
+
+      <HomeFinancialsBreakdown financials={financials} t={t} />
+      <div className="weddingStatChips">
+        <HomeAffordabilityChip plan={financials} t={t} />
+      </div>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("homePlanner.customRequestLabel")}</span>
+        <textarea
+          className="aiTextInput"
+          rows={2}
+          value={customText}
+          onChange={(event) => onCustomTextChange(event.target.value)}
+          placeholder={t("homePlanner.customRequestPlaceholder")}
+        />
+        <button type="button" className="secondaryButton" onClick={onSubmitCustom} disabled={submitting}>
+          {submitting ? t("weddingPlanner.thinking") : t("homePlanner.submitCustomChanges")}
+        </button>
+      </div>
+
+      <TimelineTable
+        timeline={plan.timeline}
+        t={t}
+        offsetKey="start_offset_months"
+        formatOffset={formatMonthsOffset}
+        labelKey="homePlanner.timelineLabel"
       />
-      <button type="button" className="primaryButton" onClick={setSuccess}>
-        {t("needDetails.home.cta")}
+
+      <button type="button" className="primaryButton" onClick={() => onFinalize(priceOverride)} disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("homePlanner.finalizeThisPlan")}
         <Check size={18} />
       </button>
+    </section>
+  );
+}
+
+function HomeConfirmedPlanCard({ plan, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("homePlanner.confirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>{t("homePlanner.propertyPrice")}</small>
+        <strong>{formatSgd(Math.round(plan.price))}</strong>
+      </div>
+      <SummaryRow label={t("homePlanner.propertyType")} value={t(PROPERTY_TYPE_LABEL_KEYS[plan.property_type] ?? plan.property_type)} />
+      <SummaryRow label={t("homePlanner.district")} value={plan.district} />
+      <SummaryRow label={t("homePlanner.unitType")} value={plan.unit_type} />
+      <HomeFinancialsBreakdown financials={plan} t={t} />
+      <div className="weddingStatChips">
+        <HomeAffordabilityChip plan={plan} t={t} />
+      </div>
+      <section className="insightCard">
+        <Bot size={20} />
+        <p>{plan.confirmation_note}</p>
+      </section>
+      <TimelineTable
+        timeline={plan.timeline}
+        t={t}
+        offsetKey="start_offset_months"
+        formatOffset={formatMonthsOffset}
+        labelKey="homePlanner.timelineLabel"
+      />
+    </section>
+  );
+}
+
+function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile }) {
+  const [sessionData, setSessionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
+  const [customText, setCustomText] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/home/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/home/session")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSessionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage(t("homePlanner.genericError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const submitToStage1 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/home/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent,
+          message,
+          language,
+          profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses },
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("homePlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        planOptions: data.type === "propose_home_plans" ? data.data : current?.planOptions,
+        confirmedPlan: data.type === "confirm_home_plan" ? data.data : current?.confirmedPlan,
+        stage1Status: data.type === "confirm_home_plan" ? "confirmed" : current?.stage1Status,
+      }));
+      if (data.type === "confirm_home_plan") {
+        setSuccess();
+        const plan = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          targetDownPayment: String(Math.round(plan.down_payment_cash_cpf)),
+          targetHomeYear: targetYearFromTimeline(plan.timeline),
+        }));
+        setMemoryEvents((current) => [
+          {
+            id: `home-confirmed-${plan.plan_id}`,
+            year: targetYearFromTimeline(plan.timeline),
+            title: t("homePlanner.memoryEventTitle"),
+            description: plan.confirmation_note,
+            impact: t("homePlanner.memoryEventImpact", { amount: formatSgd(Math.round(plan.down_payment_cash_cpf)) }),
+            product: t("homePlanner.memoryEventProduct"),
+            action: t("homePlanner.memoryEventAction"),
+            reason: t("homePlanner.memoryEventReason"),
+            dataUsed: t("homePlanner.memoryEventDataUsed"),
+            statusKey: "status.completed",
+          },
+          ...current,
+        ]);
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("homePlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (text) => submitToStage1(sessionData?.planOptions ? "refine" : "generate", text);
+
+  const selectedPlan = sessionData?.planOptions?.plans.find((plan) => plan.id === selectedPlanId) ?? null;
+
+  const handleSelectPlan = (planId) => {
+    if (!sessionData?.planOptions?.plans.find((p) => p.id === planId)) return;
+    setSelectedPlanId(planId);
+    setCustomText("");
+  };
+
+  const handleSubmitCustom = async () => {
+    if (!selectedPlan || !customText.trim()) return;
+    const message = `For the "${selectedPlan.name}" plan: ${customText.trim()}`;
+    const ok = await submitToStage1("refine", message);
+    if (ok) {
+      setSelectedPlanId(null);
+      setCustomText("");
+    }
+  };
+
+  const handleFinalize = async (priceOverride) => {
+    if (!selectedPlan) return;
+    const message = `I'd like to finalize the "${selectedPlan.name}" plan at an estimated price of approximately SGD ${Math.round(
+      priceOverride
+    )}. Please confirm this as the final home purchase plan.`;
+    await submitToStage1("refine", message);
+  };
+
+  const submitToStage2 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/home/stage2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language, profile }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("homePlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsPlanOptions: data.type === "propose_home_savings_plan" ? data.data : current?.savingsPlanOptions,
+        confirmedSavingsPlan: data.type === "finalize_home_savings_plan" ? data.data : current?.confirmedSavingsPlan,
+      }));
+      return true;
+    } catch {
+      setErrorMessage(t("homePlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStartSavingsPlan = () =>
+    submitToStage2("generate", "Please suggest savings strategies for funding this confirmed home purchase's down payment.");
+
+  const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
+
+  return (
+    <Screen>
+      <Header title={t("homePlanner.title")} subtitle={t("homePlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("homePlanner.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="homePlanner.historyTitle"
+          emptyKey="homePlanner.historyEmpty"
+        />
+      ) : null}
+      <SuccessBanner show={success} text={t("homePlanner.success")} />
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : sessionData?.confirmedPlan ? (
+        <>
+          <HomeConfirmedPlanCard plan={sessionData.confirmedPlan} t={t} />
+          {sessionData?.confirmedSavingsPlan ? (
+            <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
+          ) : sessionData?.savingsPlanOptions ? (
+            <SavingsStrategyCards strategies={sessionData.savingsPlanOptions.strategies} t={t} />
+          ) : (
+            <section className="needHeroCard">
+              <span className="sectionLabel">{t("homePlanner.savingsPlanCtaLabel")}</span>
+              <p>{t("homePlanner.savingsPlanCtaBody")}</p>
+              <button type="button" className="primaryButton" onClick={handleStartSavingsPlan} disabled={submitting}>
+                {submitting ? t("weddingPlanner.thinking") : t("homePlanner.savingsPlanCtaButton")}
+                <Send size={18} />
+              </button>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!sessionData?.confirmedSavingsPlan && sessionData?.savingsPlanOptions ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSavingsSubmit}
+              submitting={submitting}
+              placeholder={t("homePlanner.savingsInputPlaceholder")}
+              submitLabelKey="weddingPlanner.send"
+            />
+          ) : null}
+        </>
+      ) : (
+        <>
+          {selectedPlan ? (
+            <HomePlanEditorPanel
+              plan={selectedPlan}
+              profile={profile}
+              customText={customText}
+              onCustomTextChange={setCustomText}
+              onSubmitCustom={handleSubmitCustom}
+              onFinalize={handleFinalize}
+              submitting={submitting}
+              onBack={() => setSelectedPlanId(null)}
+              t={t}
+            />
+          ) : sessionData?.planOptions ? (
+            <HomePlanCards
+              plans={sessionData.planOptions.plans}
+              researchNotes={sessionData.planOptions.research_notes}
+              onSelectPlan={handleSelectPlan}
+              t={t}
+            />
+          ) : (
+            <section className="weddingHero">
+              <span className="weddingHeroBadge">{t("homePlanner.newFeatureBadge")}</span>
+              <span className="weddingHeroIcon">
+                <Building2 size={26} />
+              </span>
+              <strong>{t("homePlanner.emptyStateLabel")}</strong>
+              <p>{t("homePlanner.emptyStateBody")}</p>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!selectedPlan ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+              placeholder={t("homePlanner.inputPlaceholder")}
+              submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "homePlanner.sendFirst"}
+            />
+          ) : null}
+        </>
+      )}
     </Screen>
   );
 }

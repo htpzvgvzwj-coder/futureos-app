@@ -1916,7 +1916,8 @@ nextjs-portal {
 
 .weddingLineItems {
   display: grid;
-  gap: 2px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .weddingHero {
@@ -1974,40 +1975,40 @@ nextjs-portal {
 }
 
 .weddingLineItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 0;
-  border-top: 1px solid var(--line);
-}
-
-.weddingLineItem:first-child {
-  border-top: 0;
-  padding-top: 0;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(20, 36, 58, 0.03);
+  border: 1px solid rgba(20, 36, 58, 0.06);
 }
 
 .weddingLineIcon {
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(215, 25, 32, 0.08);
+  background: rgba(215, 25, 32, 0.1);
   color: var(--ocbc-red);
 }
 
 .weddingLineItem span {
-  flex: 1;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 11.5px;
+  line-height: 1.3;
 }
 
 .weddingLineItem strong {
   color: var(--navy);
   font-size: 15px;
-  white-space: nowrap;
+}
+
+.stage.theme-dark .weddingLineItem {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .weddingTotalCost {
@@ -2105,14 +2106,108 @@ nextjs-portal {
   background: rgba(215, 25, 32, 0.2);
 }
 
-.stage.theme-dark .weddingLineItem {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
 .stage.theme-dark .weddingTotalCost strong,
 .stage.theme-dark .weddingLineItem strong,
 .stage.theme-dark .weddingTimelineItem strong {
   color: #f4f6fb;
+}
+
+.weddingPlanCarouselWrap {
+  display: grid;
+  gap: 10px;
+}
+
+.weddingPlanCarousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 -18px;
+  padding: 4px 18px 10px;
+}
+
+.weddingPlanCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+.weddingPlanTile {
+  flex: 0 0 84%;
+  scroll-snap-align: start;
+  display: grid;
+  gap: 10px;
+  padding: 20px 18px;
+  border-radius: 24px;
+  position: relative;
+  border: 1px solid rgba(20, 36, 58, 0.09);
+  box-shadow: 0 14px 32px rgba(20, 36, 58, 0.08);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.9)),
+    linear-gradient(135deg, var(--wedding-tile-a, rgba(215, 25, 32, 0.08)), var(--wedding-tile-b, rgba(15, 159, 132, 0.05)));
+}
+
+.weddingPlanTile.accent-1 {
+  --wedding-tile-a: rgba(15, 159, 132, 0.1);
+  --wedding-tile-b: rgba(20, 36, 58, 0.05);
+}
+
+.weddingPlanTile.accent-2 {
+  --wedding-tile-a: rgba(245, 158, 11, 0.1);
+  --wedding-tile-b: rgba(215, 25, 32, 0.05);
+}
+
+.weddingPlanTile.recommended {
+  border-color: rgba(215, 25, 32, 0.35);
+}
+
+.weddingPlanTile h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--ocbc-red);
+}
+
+.weddingPlanSummary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.weddingStatChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.statChip {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  background: rgba(20, 36, 58, 0.06);
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+
+.stage.theme-dark .weddingPlanTile {
+  background:
+    linear-gradient(160deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.82)),
+    linear-gradient(135deg, var(--wedding-tile-a, rgba(215, 25, 32, 0.14)), var(--wedding-tile-b, rgba(15, 159, 132, 0.08)));
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stage.theme-dark .statChip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f6fb;
+}
+
+.weddingCarouselHint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .weddingEntryOption {
