@@ -935,6 +935,8 @@
     "confirmedLabel": "已确认的婚礼预算",
     "planAnotherLabel": "规划另一场婚礼",
     "backToConfirmedPlan": "返回已确认预算",
+    "adjustPlanLabel": "调整此方案",
+    "adjustSyntheticPlanName": "你已确认的婚礼",
     "genericError": "出了点问题,请再试一次。",
     "customizePlan": "自定义这个方案",
     "guestCountLabel": "宾客人数",
@@ -981,7 +983,18 @@
     "historyTitle": "对话记录",
     "historyEmpty": "暂时还没有对话记录。",
     "newFeatureBadge": "新功能",
-    "swipeHint": "左右滑动对比方案"
+    "swipeHint": "左右滑动对比方案",
+    "checkins": {
+      "progressLabel": "储蓄进度",
+      "loggedLabel": "已存金额",
+      "targetLabel": "计划目标",
+      "monthLabel": "月份",
+      "amountLabel": "存款金额",
+      "noteLabel": "备注（可选）",
+      "addButton": "记录这个月的存款",
+      "emptyState": "还没有存款记录。",
+      "genericError": "记录失败，请再试一次。"
+    }
   },
   "homePlanner": {
     "title": "购房规划师",
@@ -1015,6 +1028,8 @@
     "affordabilityTight": "较为吃紧——受{factor}限制",
     "planAnotherLabel": "规划另一个购房方案",
     "backToConfirmedPlan": "返回已确认方案",
+    "adjustPlanLabel": "调整此方案",
+    "adjustSyntheticPlanName": "你已确认的购房方案",
     "savingsPlanCtaLabel": "接下来规划首付储蓄方案",
     "savingsPlanCtaBody": "结合你真实的收入、支出和现有储蓄，我们会给出一份专为这笔首付定制的储蓄策略——而不是简单的金额除以月数。",
     "savingsPlanCtaButton": "获取储蓄方案",

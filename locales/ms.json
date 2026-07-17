@@ -935,6 +935,8 @@
     "confirmedLabel": "Belanjawan Perkahwinan Disahkan",
     "planAnotherLabel": "Rancang Perkahwinan Lain",
     "backToConfirmedPlan": "Kembali ke Belanjawan Disahkan",
+    "adjustPlanLabel": "Laraskan Pelan Ini",
+    "adjustSyntheticPlanName": "Perkahwinan Disahkan Anda",
     "genericError": "Sesuatu tidak kena di pihak kami. Sila cuba lagi.",
     "customizePlan": "Sesuaikan Pelan Ini",
     "guestCountLabel": "Bilangan Tetamu",
@@ -981,7 +983,18 @@
     "historyTitle": "Sejarah Perbualan",
     "historyEmpty": "Belum ada perbualan lagi.",
     "newFeatureBadge": "Baharu",
-    "swipeHint": "Leret untuk bandingkan pelan"
+    "swipeHint": "Leret untuk bandingkan pelan",
+    "checkins": {
+      "progressLabel": "Kemajuan Simpanan",
+      "loggedLabel": "Dicatat Setakat Ini",
+      "targetLabel": "Sasaran Pelan",
+      "monthLabel": "Bulan",
+      "amountLabel": "Jumlah Disimpan",
+      "noteLabel": "Nota (pilihan)",
+      "addButton": "Catat Simpanan Bulan Ini",
+      "emptyState": "Belum ada simpanan dicatat.",
+      "genericError": "Ralat mencatat simpanan. Sila cuba lagi."
+    }
   },
   "homePlanner": {
     "title": "Perancang Pembelian Rumah",
@@ -1015,6 +1028,8 @@
     "affordabilityTight": "Ketat - dihadkan oleh {factor}",
     "planAnotherLabel": "Rancang Rumah Lain",
     "backToConfirmedPlan": "Kembali ke Pelan Disahkan",
+    "adjustPlanLabel": "Laraskan Pelan Ini",
+    "adjustSyntheticPlanName": "Rumah Disahkan Anda",
     "savingsPlanCtaLabel": "Sekarang mari rancang simpanan bayaran muka",
     "savingsPlanCtaBody": "Berdasarkan pendapatan, perbelanjaan, dan simpanan semasa anda yang sebenar, kami akan menyusun strategi simpanan yang disesuaikan untuk membiayai bayaran muka ini - bukan sekadar pembahagian bulanan biasa.",
     "savingsPlanCtaButton": "Dapatkan Pelan Simpanan",

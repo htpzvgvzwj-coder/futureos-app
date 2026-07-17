@@ -948,6 +948,8 @@
     "confirmedLabel": "Confirmed Wedding Budget",
     "planAnotherLabel": "Plan a Different Wedding",
     "backToConfirmedPlan": "Back to Confirmed Budget",
+    "adjustPlanLabel": "Adjust This Plan",
+    "adjustSyntheticPlanName": "Your Confirmed Wedding",
     "genericError": "Something went wrong on our end. Please try again.",
     "customizePlan": "Customize This Plan",
     "guestCountLabel": "Guest Count",
@@ -994,7 +996,18 @@
     "historyTitle": "Conversation History",
     "historyEmpty": "No conversation yet.",
     "newFeatureBadge": "New",
-    "swipeHint": "Swipe to compare plans"
+    "swipeHint": "Swipe to compare plans",
+    "checkins": {
+      "progressLabel": "Savings Progress",
+      "loggedLabel": "Logged So Far",
+      "targetLabel": "Plan Target",
+      "monthLabel": "Month",
+      "amountLabel": "Amount Saved",
+      "noteLabel": "Note (optional)",
+      "addButton": "Log This Month's Savings",
+      "emptyState": "No savings logged yet.",
+      "genericError": "Something went wrong logging that. Please try again."
+    }
   },
   "homePlanner": {
     "title": "Home Purchase Planner",
@@ -1028,6 +1041,8 @@
     "affordabilityTight": "Tight - limited by {factor}",
     "planAnotherLabel": "Plan a Different Home",
     "backToConfirmedPlan": "Back to Confirmed Plan",
+    "adjustPlanLabel": "Adjust This Plan",
+    "adjustSyntheticPlanName": "Your Confirmed Home",
     "savingsPlanCtaLabel": "Now let's plan the down payment savings",
     "savingsPlanCtaBody": "Based on your real income, expenses, and current savings, we'll put together a savings strategy tailored to funding this down payment - not just a plain monthly split.",
     "savingsPlanCtaButton": "Get Savings Plan",

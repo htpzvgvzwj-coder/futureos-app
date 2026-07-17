@@ -208,6 +208,12 @@ const defaultSimulatorInputs = {
   targetDownPayment: "150000",
   propertyBudget: "750000",
   mortgageReadiness: "preparing",
+  weddingSavingsMonthly: "",
+  weddingSavingsStartMonth: "",
+  weddingSavingsTargetMonth: "",
+  homeSavingsMonthly: "",
+  homeSavingsStartMonth: "",
+  homeSavingsTargetMonth: "",
   monthlyExpenses: "3600",
   currentEmergencyFund: "21600",
   targetCoverageMonths: "6",
@@ -844,6 +850,15 @@ function buildScenarioFields(goalType, inputs, variant, t) {
   const emergencyImpact = variant === "highRisk" ? t("simulator.output.impact.weak") : t("simulator.output.impact.protected");
 
   if (goalType === "wedding") {
+    const confirmedMonthly = numberValue(inputs.weddingSavingsMonthly, 0);
+    if (confirmedMonthly > 0) {
+      const scaled = Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10;
+      return [
+        [t("simulator.output.fields.weddingBudget"), formatSgd(Math.round(weddingBudget))],
+        [t("simulator.output.fields.weddingDate"), formatMonthDate(inputs.weddingDate, "12 months")],
+        [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(scaled)],
+      ];
+    }
     const multiplier = variant === "conservative" ? 0.82 : variant === "balanced" ? 1 : 1.35;
     return [
       [t("simulator.output.fields.weddingBudget"), formatSgd(Math.round(weddingBudget * multiplier))],
@@ -855,6 +870,11 @@ function buildScenarioFields(goalType, inputs, variant, t) {
   if (goalType === "home") {
     const downPayment = numberValue(inputs.targetDownPayment, 150000);
     const progress = Math.min(100, Math.round((numberValue(inputs.currentSavings, 0) / downPayment) * 100));
+    const confirmedMonthly = numberValue(inputs.homeSavingsMonthly, 0);
+    const monthlySavingNeeded =
+      confirmedMonthly > 0
+        ? Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10
+        : Math.round(downPayment / 36);
     return [
       [t("simulator.output.fields.homeTargetYear"), inputs.targetHomeYear || "2030"],
       [t("simulator.output.fields.downPaymentProgress"), `${progress}%`],
@@ -862,7 +882,7 @@ function buildScenarioFields(goalType, inputs, variant, t) {
         t("simulator.output.fields.mortgageReadiness"),
         variant === "highRisk" ? t("simulator.output.impact.reviewNeeded") : inputs.mortgageReadiness || t("status.preparing"),
       ],
-      [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(Math.round(downPayment / 36))],
+      [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(monthlySavingNeeded)],
     ];
   }
 
@@ -1022,7 +1042,15 @@ function getRecommendedMonthlySaving(inputs) {
     return Math.max(50, Math.ceil(amount / Math.max(monthCountUntil(inputs.customTargetDate), 1) / 50) * 50);
   }
   if (primaryType === "business") return 1200;
-  if (primaryType === "home") return Math.round(numberValue(inputs.targetDownPayment, 150000) / 36 / 50) * 50;
+  if (primaryType === "home") {
+    const confirmed = numberValue(inputs.homeSavingsMonthly, 0);
+    if (confirmed > 0) return confirmed;
+    return Math.round(numberValue(inputs.targetDownPayment, 150000) / 36 / 50) * 50;
+  }
+  if (primaryType === "wedding") {
+    const confirmed = numberValue(inputs.weddingSavingsMonthly, 0);
+    if (confirmed > 0) return confirmed;
+  }
   return 450;
 }
 
@@ -4463,6 +4491,7 @@ function PlanEditorPanel({
   onFinalize,
   submitting,
   onBack,
+  backLabelKey = "weddingPlanner.backToComparison",
   t,
 }) {
   const { adjustedItems, total } = recomputeForGuestCount(plan.line_items, plan.guest_count, guestCount);
@@ -4472,7 +4501,7 @@ function PlanEditorPanel({
       <div className="scenarioHead">
         <span>{plan.name}</span>
         <button type="button" className="secondaryButton" onClick={onBack}>
-          {t("weddingPlanner.backToComparison")}
+          {t(backLabelKey)}
         </button>
       </div>
 
@@ -4614,6 +4643,16 @@ function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
   );
 }
 
+function adaptConfirmedBudgetToPlan(confirmedBudget, t) {
+  return {
+    id: confirmedBudget.plan_id,
+    name: t("weddingPlanner.adjustSyntheticPlanName"),
+    line_items: confirmedBudget.line_items,
+    guest_count: confirmedBudget.guest_count,
+    timeline: confirmedBudget.timeline,
+  };
+}
+
 function WeddingConfirmedBudgetCard({ budget, t }) {
   return (
     <section className="recommendationPanel">
@@ -4698,7 +4737,79 @@ function SavingsStrategyCards({ strategies, t }) {
   );
 }
 
-function ConfirmedSavingsPlanCard({ plan, t }) {
+function monthIndex(yyyyMm) {
+  const [y, m] = String(yyyyMm).split("-").map(Number);
+  return y * 12 + m;
+}
+
+function currentMonthValue() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function computeCheckinProgress(plan, checkins) {
+  const totalMonths = Math.max(1, monthIndex(plan.target_complete_month) - monthIndex(plan.start_month) + 1);
+  const targetTotal = plan.monthly_contribution * totalMonths;
+  const loggedTotal = checkins.reduce((sum, c) => sum + Number(c.amount), 0);
+  const pct = targetTotal > 0 ? Math.round((loggedTotal / targetTotal) * 100) : 0;
+  return { targetTotal, loggedTotal, pct };
+}
+
+function SavingsCheckinForm({ onAddCheckin, submitting, t }) {
+  const [checkinMonth, setCheckinMonth] = useState(currentMonthValue());
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const parsedAmount = Number(amount);
+    if (!checkinMonth || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || submitting) return;
+    const ok = await onAddCheckin({ checkinMonth, amount: parsedAmount, note: note.trim() || undefined });
+    if (ok) {
+      setAmount("");
+      setNote("");
+    }
+  };
+
+  return (
+    <form className="settingsGroup" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("weddingPlanner.checkins.addButton")}</span>
+      <input
+        type="month"
+        className="aiTextInput"
+        value={checkinMonth}
+        onChange={(event) => setCheckinMonth(event.target.value)}
+        aria-label={t("weddingPlanner.checkins.monthLabel")}
+      />
+      <input
+        type="number"
+        min="0"
+        step="10"
+        className="aiTextInput"
+        placeholder={t("weddingPlanner.checkins.amountLabel")}
+        value={amount}
+        onChange={(event) => setAmount(event.target.value)}
+        aria-label={t("weddingPlanner.checkins.amountLabel")}
+      />
+      <input
+        type="text"
+        className="aiTextInput"
+        placeholder={t("weddingPlanner.checkins.noteLabel")}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        aria-label={t("weddingPlanner.checkins.noteLabel")}
+      />
+      <button type="submit" className="secondaryButton" disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("weddingPlanner.checkins.addButton")}
+      </button>
+    </form>
+  );
+}
+
+function ConfirmedSavingsPlanCard({ plan, checkins = [], onAddCheckin, checkinSubmitting, checkinError, t }) {
+  const { targetTotal, loggedTotal, pct } = computeCheckinProgress(plan, checkins);
+  const ringColor = pct >= 75 ? "#0f9f84" : pct >= 60 ? "#f59e0b" : "#d71920";
+
   return (
     <section className="recommendationPanel">
       <span className="sectionLabel">{t("weddingPlanner.savingsConfirmedLabel")}</span>
@@ -4717,6 +4828,36 @@ function ConfirmedSavingsPlanCard({ plan, t }) {
         <Bot size={20} />
         <p>{plan.notes}</p>
       </section>
+
+      <div className="needHeroCard">
+        <span className="sectionLabel">{t("weddingPlanner.checkins.progressLabel")}</span>
+        <ProgressRing value={Math.min(pct, 100)} size={80} stroke={8} color={ringColor} />
+        <SummaryRow label={t("weddingPlanner.checkins.loggedLabel")} value={formatSgd(Math.round(loggedTotal))} />
+        <SummaryRow label={t("weddingPlanner.checkins.targetLabel")} value={formatSgd(Math.round(targetTotal))} />
+      </div>
+
+      {checkins.length ? (
+        <div className="weddingLineItems">
+          {checkins.map((checkin) => (
+            <SummaryRow
+              key={checkin.id}
+              label={checkin.note ? `${checkin.checkin_month} — ${checkin.note}` : checkin.checkin_month}
+              value={formatSgd(Math.round(Number(checkin.amount)))}
+            />
+          ))}
+        </div>
+      ) : (
+        <p>{t("weddingPlanner.checkins.emptyState")}</p>
+      )}
+
+      {checkinError ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{checkinError}</p>
+        </section>
+      ) : null}
+
+      {onAddCheckin ? <SavingsCheckinForm onAddCheckin={onAddCheckin} submitting={checkinSubmitting} t={t} /> : null}
     </section>
   );
 }
@@ -4761,6 +4902,9 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [exploringNewPlan, setExploringNewPlan] = useState(false);
+  const [adjustPlanTarget, setAdjustPlanTarget] = useState(null);
+  const [checkinSubmitting, setCheckinSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState("");
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -4813,6 +4957,7 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
       if (data.type === "confirm_wedding_budget") {
         setSuccess();
         setExploringNewPlan(false);
+        setAdjustPlanTarget(null);
         const budget = data.data;
         setSimulatorInputs((current) => ({
           ...current,
@@ -4898,6 +5043,15 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
         savingsPlanOptions: data.type === "propose_savings_plan" ? data.data : current?.savingsPlanOptions,
         confirmedSavingsPlan: data.type === "finalize_savings_plan" ? data.data : current?.confirmedSavingsPlan,
       }));
+      if (data.type === "finalize_savings_plan") {
+        const plan = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          weddingSavingsMonthly: String(Math.round(plan.monthly_contribution)),
+          weddingSavingsStartMonth: plan.start_month,
+          weddingSavingsTargetMonth: plan.target_complete_month,
+        }));
+      }
       return true;
     } catch {
       setErrorMessage(t("weddingPlanner.genericError"));
@@ -4919,6 +5073,63 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
     setActivitySelections({});
     setCustomActivityText("");
     setExploringNewPlan(true);
+  };
+
+  const handleAdjustPlan = () => {
+    if (!sessionData?.confirmedBudget) return;
+    const adapted = adaptConfirmedBudgetToPlan(sessionData.confirmedBudget, t);
+    setAdjustPlanTarget(adapted);
+    setGuestCountOverride(adapted.guest_count);
+    setActivitySelections({});
+    setCustomActivityText("");
+  };
+
+  const handleAdjustSubmitActivities = async () => {
+    if (!adjustPlanTarget) return;
+    const included = WEDDING_ACTIVITY_CATALOG.filter(({ id }) => activitySelections[id]).map(({ labelKey }) => t(labelKey));
+    const parts = [];
+    if (included.length) parts.push(`Please make sure the plan includes: ${included.join(", ")}.`);
+    if (customActivityText.trim()) parts.push(customActivityText.trim());
+    if (!parts.length) return;
+    const message = `This is an update to my already-confirmed wedding plan: ${parts.join(" ")}`;
+    const ok = await submitToStage1("refine", message);
+    if (ok) {
+      setActivitySelections({});
+      setCustomActivityText("");
+    }
+  };
+
+  const handleAdjustFinalize = async (guestCount, total) => {
+    if (!adjustPlanTarget) return;
+    const message = `I'd like to update my already-confirmed wedding plan to ${guestCount} guests, for a total budget of approximately SGD ${Math.round(total)}. This replaces the previously confirmed plan - please confirm this as the updated final wedding budget.`;
+    await submitToStage1("refine", message);
+  };
+
+  const handleAddCheckin = async ({ checkinMonth, amount, note }) => {
+    setCheckinSubmitting(true);
+    setCheckinError("");
+    try {
+      const response = await fetch("/api/wedding/savings-checkins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkinMonth, amount, note }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setCheckinError(t("weddingPlanner.checkins.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsCheckins: [...(current?.savingsCheckins ?? []), data.checkin],
+      }));
+      return true;
+    } catch {
+      setCheckinError(t("weddingPlanner.checkins.genericError"));
+      return false;
+    } finally {
+      setCheckinSubmitting(false);
+    }
   };
 
   return (
@@ -4943,14 +5154,50 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
       <SuccessBanner show={success} text={t("weddingPlanner.success")} />
       {loading ? (
         <p>{t("loading.detail")}</p>
+      ) : adjustPlanTarget ? (
+        <>
+          <PlanEditorPanel
+            plan={adjustPlanTarget}
+            guestCount={guestCountOverride ?? adjustPlanTarget.guest_count}
+            onGuestCountChange={setGuestCountOverride}
+            activitySelections={activitySelections}
+            onToggleActivity={(id) => setActivitySelections((current) => ({ ...current, [id]: !current[id] }))}
+            customActivityText={customActivityText}
+            onCustomActivityChange={setCustomActivityText}
+            onSubmitActivities={handleAdjustSubmitActivities}
+            onFinalize={handleAdjustFinalize}
+            submitting={submitting}
+            onBack={() => setAdjustPlanTarget(null)}
+            backLabelKey="weddingPlanner.backToConfirmedPlan"
+            t={t}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+        </>
       ) : sessionData?.confirmedBudget && !exploringNewPlan ? (
         <>
           <WeddingConfirmedBudgetCard budget={sessionData.confirmedBudget} t={t} />
-          <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
-            {t("weddingPlanner.planAnotherLabel")}
-          </button>
+          <div className="confirmedPlanActions">
+            <button type="button" className="secondaryButton" onClick={handleAdjustPlan}>
+              {t("weddingPlanner.adjustPlanLabel")}
+            </button>
+            <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
+              {t("weddingPlanner.planAnotherLabel")}
+            </button>
+          </div>
           {sessionData?.confirmedSavingsPlan ? (
-            <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
+            <ConfirmedSavingsPlanCard
+              plan={sessionData.confirmedSavingsPlan}
+              checkins={sessionData.savingsCheckins ?? []}
+              onAddCheckin={handleAddCheckin}
+              checkinSubmitting={checkinSubmitting}
+              checkinError={checkinError}
+              t={t}
+            />
           ) : sessionData?.savingsPlanOptions ? (
             <SavingsStrategyCards strategies={sessionData.savingsPlanOptions.strategies} t={t} />
           ) : (
@@ -5131,7 +5378,18 @@ function HomePlanCards({ plans, researchNotes, onSelectPlan, t }) {
   );
 }
 
-function HomePlanEditorPanel({ plan, profile, customText, onCustomTextChange, onSubmitCustom, onFinalize, submitting, onBack, t }) {
+function HomePlanEditorPanel({
+  plan,
+  profile,
+  customText,
+  onCustomTextChange,
+  onSubmitCustom,
+  onFinalize,
+  submitting,
+  onBack,
+  backLabelKey = "weddingPlanner.backToComparison",
+  t,
+}) {
   const [priceOverride, setPriceOverride] = useState(plan.estimated_price ?? plan.price);
   const financials = useMemo(
     () =>
@@ -5148,7 +5406,7 @@ function HomePlanEditorPanel({ plan, profile, customText, onCustomTextChange, on
       <div className="scenarioHead">
         <span>{plan.name}</span>
         <button type="button" className="secondaryButton" onClick={onBack}>
-          {t("weddingPlanner.backToComparison")}
+          {t(backLabelKey)}
         </button>
       </div>
 
@@ -5202,6 +5460,16 @@ function HomePlanEditorPanel({ plan, profile, customText, onCustomTextChange, on
   );
 }
 
+function adaptConfirmedPlanToPlan(confirmedPlan, t) {
+  return {
+    id: confirmedPlan.plan_id,
+    name: t("homePlanner.adjustSyntheticPlanName"),
+    property_type: confirmedPlan.property_type,
+    estimated_price: confirmedPlan.price,
+    timeline: confirmedPlan.timeline,
+  };
+}
+
 function HomeConfirmedPlanCard({ plan, t }) {
   return (
     <section className="recommendationPanel">
@@ -5243,6 +5511,9 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [exploringNewPlan, setExploringNewPlan] = useState(false);
+  const [adjustPlanTarget, setAdjustPlanTarget] = useState(null);
+  const [checkinSubmitting, setCheckinSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState("");
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -5300,6 +5571,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       if (data.type === "confirm_home_plan") {
         setSuccess();
         setExploringNewPlan(false);
+        setAdjustPlanTarget(null);
         const plan = data.data;
         setSimulatorInputs((current) => ({
           ...current,
@@ -5378,6 +5650,15 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
         savingsPlanOptions: data.type === "propose_home_savings_plan" ? data.data : current?.savingsPlanOptions,
         confirmedSavingsPlan: data.type === "finalize_home_savings_plan" ? data.data : current?.confirmedSavingsPlan,
       }));
+      if (data.type === "finalize_home_savings_plan") {
+        const plan = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          homeSavingsMonthly: String(Math.round(plan.monthly_contribution)),
+          homeSavingsStartMonth: plan.start_month,
+          homeSavingsTargetMonth: plan.target_complete_month,
+        }));
+      }
       return true;
     } catch {
       setErrorMessage(t("homePlanner.genericError"));
@@ -5397,6 +5678,55 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
     setSelectedPlanId(null);
     setCustomText("");
     setExploringNewPlan(true);
+  };
+
+  const handleAdjustPlan = () => {
+    if (!sessionData?.confirmedPlan) return;
+    const adapted = adaptConfirmedPlanToPlan(sessionData.confirmedPlan, t);
+    setAdjustPlanTarget(adapted);
+    setCustomText("");
+  };
+
+  const handleAdjustSubmitCustom = async () => {
+    if (!adjustPlanTarget || !customText.trim()) return;
+    const message = `This is an update to my already-confirmed home purchase plan: ${customText.trim()}`;
+    const ok = await submitToStage1("refine", message);
+    if (ok) setCustomText("");
+  };
+
+  const handleAdjustFinalize = async (priceOverride) => {
+    if (!adjustPlanTarget) return;
+    const message = `I'd like to update my already-confirmed home purchase plan to an estimated price of approximately SGD ${Math.round(
+      priceOverride
+    )}. This replaces the previously confirmed plan - please confirm this as the updated final home purchase plan.`;
+    await submitToStage1("refine", message);
+  };
+
+  const handleAddCheckin = async ({ checkinMonth, amount, note }) => {
+    setCheckinSubmitting(true);
+    setCheckinError("");
+    try {
+      const response = await fetch("/api/home/savings-checkins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkinMonth, amount, note }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setCheckinError(t("weddingPlanner.checkins.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsCheckins: [...(current?.savingsCheckins ?? []), data.checkin],
+      }));
+      return true;
+    } catch {
+      setCheckinError(t("homePlanner.checkins.genericError"));
+      return false;
+    } finally {
+      setCheckinSubmitting(false);
+    }
   };
 
   return (
@@ -5421,14 +5751,47 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       <SuccessBanner show={success} text={t("homePlanner.success")} />
       {loading ? (
         <p>{t("loading.detail")}</p>
+      ) : adjustPlanTarget ? (
+        <>
+          <HomePlanEditorPanel
+            plan={adjustPlanTarget}
+            profile={profile}
+            customText={customText}
+            onCustomTextChange={setCustomText}
+            onSubmitCustom={handleAdjustSubmitCustom}
+            onFinalize={handleAdjustFinalize}
+            submitting={submitting}
+            onBack={() => setAdjustPlanTarget(null)}
+            backLabelKey="homePlanner.backToConfirmedPlan"
+            t={t}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+        </>
       ) : sessionData?.confirmedPlan && !exploringNewPlan ? (
         <>
           <HomeConfirmedPlanCard plan={sessionData.confirmedPlan} t={t} />
-          <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
-            {t("homePlanner.planAnotherLabel")}
-          </button>
+          <div className="confirmedPlanActions">
+            <button type="button" className="secondaryButton" onClick={handleAdjustPlan}>
+              {t("homePlanner.adjustPlanLabel")}
+            </button>
+            <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
+              {t("homePlanner.planAnotherLabel")}
+            </button>
+          </div>
           {sessionData?.confirmedSavingsPlan ? (
-            <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
+            <ConfirmedSavingsPlanCard
+              plan={sessionData.confirmedSavingsPlan}
+              checkins={sessionData.savingsCheckins ?? []}
+              onAddCheckin={handleAddCheckin}
+              checkinSubmitting={checkinSubmitting}
+              checkinError={checkinError}
+              t={t}
+            />
           ) : sessionData?.savingsPlanOptions ? (
             <SavingsStrategyCards strategies={sessionData.savingsPlanOptions.strategies} t={t} />
           ) : (
@@ -6601,6 +6964,14 @@ export default function App() {
       plannedSpending: current.plannedSpending,
       weddingBudget: current.weddingBudget,
       weddingDate: current.weddingDate,
+      targetDownPayment: current.targetDownPayment,
+      targetHomeYear: current.targetHomeYear,
+      weddingSavingsMonthly: current.weddingSavingsMonthly,
+      weddingSavingsStartMonth: current.weddingSavingsStartMonth,
+      weddingSavingsTargetMonth: current.weddingSavingsTargetMonth,
+      homeSavingsMonthly: current.homeSavingsMonthly,
+      homeSavingsStartMonth: current.homeSavingsStartMonth,
+      homeSavingsTargetMonth: current.homeSavingsTargetMonth,
       customGoalName: current.customGoalName,
       customTargetAmount: current.customTargetAmount,
       customTargetDate: current.customTargetDate,

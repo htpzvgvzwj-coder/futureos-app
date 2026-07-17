@@ -37,6 +37,18 @@ create index if not exists wedding_artifacts_session_stage_type_idx
 create unique index if not exists wedding_sessions_profile_key_idx
   on wedding_sessions (profile_key);
 
+create table if not exists wedding_savings_checkins (
+  id            bigserial primary key,
+  session_id    uuid not null references wedding_sessions(id),
+  checkin_month text not null, -- "YYYY-MM"
+  amount        numeric(12,2) not null,
+  note          text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists wedding_savings_checkins_session_idx
+  on wedding_savings_checkins (session_id, checkin_month);
+
 create table if not exists home_sessions (
   id            uuid primary key default gen_random_uuid(),
   profile_key   text not null default 'karina-demo',
@@ -73,3 +85,15 @@ create index if not exists home_artifacts_session_stage_type_idx
 
 create unique index if not exists home_sessions_profile_key_idx
   on home_sessions (profile_key);
+
+create table if not exists home_savings_checkins (
+  id            bigserial primary key,
+  session_id    uuid not null references home_sessions(id),
+  checkin_month text not null, -- "YYYY-MM"
+  amount        numeric(12,2) not null,
+  note          text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists home_savings_checkins_session_idx
+  on home_savings_checkins (session_id, checkin_month);
