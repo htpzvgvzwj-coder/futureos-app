@@ -4544,7 +4544,7 @@ function PlanEditorPanel({
   );
 }
 
-function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey = "weddingPlanner.send" }) {
+function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey = "weddingPlanner.send", labelKey = "weddingPlanner.inputLabel" }) {
   const [value, setValue] = useState("");
 
   const handleSubmit = (event) => {
@@ -4556,7 +4556,7 @@ function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey 
 
   return (
     <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
-      <span className="sectionLabel">{t("weddingPlanner.inputLabel")}</span>
+      <span className="sectionLabel">{t(labelKey)}</span>
       <textarea
         className="aiTextInput"
         rows={3}
@@ -4760,6 +4760,7 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [exploringNewPlan, setExploringNewPlan] = useState(false);
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -4811,6 +4812,7 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
       }));
       if (data.type === "confirm_wedding_budget") {
         setSuccess();
+        setExploringNewPlan(false);
         const budget = data.data;
         setSimulatorInputs((current) => ({
           ...current,
@@ -4932,9 +4934,12 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
       <SuccessBanner show={success} text={t("weddingPlanner.success")} />
       {loading ? (
         <p>{t("loading.detail")}</p>
-      ) : sessionData?.confirmedBudget ? (
+      ) : sessionData?.confirmedBudget && !exploringNewPlan ? (
         <>
           <WeddingConfirmedBudgetCard budget={sessionData.confirmedBudget} t={t} />
+          <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(true)}>
+            {t("weddingPlanner.planAnotherLabel")}
+          </button>
           {sessionData?.confirmedSavingsPlan ? (
             <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
           ) : sessionData?.savingsPlanOptions ? (
@@ -4967,6 +4972,11 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
         </>
       ) : (
         <>
+          {sessionData?.confirmedBudget ? (
+            <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(false)}>
+              {t("weddingPlanner.backToConfirmedPlan")}
+            </button>
+          ) : null}
           {selectedPlan ? (
             <PlanEditorPanel
               plan={selectedPlan}
@@ -5223,6 +5233,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [exploringNewPlan, setExploringNewPlan] = useState(false);
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -5279,6 +5290,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       }));
       if (data.type === "confirm_home_plan") {
         setSuccess();
+        setExploringNewPlan(false);
         const plan = data.data;
         setSimulatorInputs((current) => ({
           ...current,
@@ -5393,9 +5405,12 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       <SuccessBanner show={success} text={t("homePlanner.success")} />
       {loading ? (
         <p>{t("loading.detail")}</p>
-      ) : sessionData?.confirmedPlan ? (
+      ) : sessionData?.confirmedPlan && !exploringNewPlan ? (
         <>
           <HomeConfirmedPlanCard plan={sessionData.confirmedPlan} t={t} />
+          <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(true)}>
+            {t("homePlanner.planAnotherLabel")}
+          </button>
           {sessionData?.confirmedSavingsPlan ? (
             <ConfirmedSavingsPlanCard plan={sessionData.confirmedSavingsPlan} t={t} />
           ) : sessionData?.savingsPlanOptions ? (
@@ -5423,11 +5438,17 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
               submitting={submitting}
               placeholder={t("homePlanner.savingsInputPlaceholder")}
               submitLabelKey="weddingPlanner.send"
+              labelKey="homePlanner.inputLabel"
             />
           ) : null}
         </>
       ) : (
         <>
+          {sessionData?.confirmedPlan ? (
+            <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(false)}>
+              {t("homePlanner.backToConfirmedPlan")}
+            </button>
+          ) : null}
           {selectedPlan ? (
             <HomePlanEditorPanel
               plan={selectedPlan}
@@ -5470,6 +5491,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
               submitting={submitting}
               placeholder={t("homePlanner.inputPlaceholder")}
               submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "homePlanner.sendFirst"}
+              labelKey="homePlanner.inputLabel"
             />
           ) : null}
         </>
