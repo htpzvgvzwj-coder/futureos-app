@@ -4912,6 +4912,15 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
 
   const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
 
+  const handleExploreNewPlan = () => {
+    setSessionData((current) => ({ ...current, planOptions: null }));
+    setSelectedPlanId(null);
+    setGuestCountOverride(null);
+    setActivitySelections({});
+    setCustomActivityText("");
+    setExploringNewPlan(true);
+  };
+
   return (
     <Screen>
       <Header title={t("weddingPlanner.title")} subtitle={t("weddingPlanner.subtitle")} />
@@ -4937,7 +4946,7 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
       ) : sessionData?.confirmedBudget && !exploringNewPlan ? (
         <>
           <WeddingConfirmedBudgetCard budget={sessionData.confirmedBudget} t={t} />
-          <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(true)}>
+          <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
             {t("weddingPlanner.planAnotherLabel")}
           </button>
           {sessionData?.confirmedSavingsPlan ? (
@@ -5383,6 +5392,13 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
 
   const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
 
+  const handleExploreNewPlan = () => {
+    setSessionData((current) => ({ ...current, planOptions: null }));
+    setSelectedPlanId(null);
+    setCustomText("");
+    setExploringNewPlan(true);
+  };
+
   return (
     <Screen>
       <Header title={t("homePlanner.title")} subtitle={t("homePlanner.subtitle")} />
@@ -5408,7 +5424,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       ) : sessionData?.confirmedPlan && !exploringNewPlan ? (
         <>
           <HomeConfirmedPlanCard plan={sessionData.confirmedPlan} t={t} />
-          <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(true)}>
+          <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
             {t("homePlanner.planAnotherLabel")}
           </button>
           {sessionData?.confirmedSavingsPlan ? (
