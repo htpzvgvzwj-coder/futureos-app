@@ -337,6 +337,11 @@
   "guardian": {
     "title": "来自未来自我的讯息",
     "protectedScore": "未来保护评分",
+    "hardshipAlert": {
+      "label": "Guardian 提醒",
+      "title": "我们注意到你的财务可能承压",
+      "detail": "看看 OCBC 现在能提供什么帮助。"
+    },
     "memory": {
       "title": "Guardian 记忆",
       "subtitle": "你的 AI 会记住你的财务历程,并持续改进未来的决策。",
@@ -867,14 +872,34 @@
       "months6": "6 个月",
       "status": "风险状态",
       "statusValue": "免受大额支出影响",
-      "rec1": "防止婚礼超支动用应急现金。",
-      "rec2": "工资入账后自动补足。",
-      "rec3": "余额低于阈值时发送提醒。",
-      "cta": "保护应急基金",
-      "success": "应急基金已保护。FutureOS 将阻止从该储备中进行高风险调拨。",
+      "success": "恢复方案已应用。我们已更新受影响的方案,并记录了具体改动。",
       "monthsValue": "{months} 个月",
       "scoreBody": "你的应急准备度为 {score}%,因为你目前的资金 {fund} 可覆盖 {months} 个月的支出。",
-      "scoreMethod": "计算方式为目前资金除以每月支出,并与 {recommendedFund} 的 6 个月目标进行评分比较。"
+      "scoreMethod": "计算方式为目前资金除以每月支出,并与 {recommendedFund} 的 6 个月目标进行评分比较。",
+      "genericError": "出了点问题,请再试一次。",
+      "historyTitle": "对话记录",
+      "historyEmpty": "暂时还没有对话记录。",
+      "hardshipCtaLabel": "遇到困难了吗?",
+      "hardshipCtaBody": "如果你的收入下降、失业了,或者遇到了意外支出,告诉我们发生了什么——我们会查看你真实的储蓄计划,给出具体能帮到你的方式,而不只是泛泛的建议。",
+      "guardianTriggeredLabel": "我们注意到你可能面临财务压力",
+      "hardshipInputLabel": "告诉我们发生了什么",
+      "hardshipInputPlaceholder": "例如:下个月起我的薪水要降30%,不确定会持续多久",
+      "hardshipSendLabel": "获取帮助",
+      "actionsLabel": "恢复方案选项",
+      "applyButton": "应用此恢复方案",
+      "appliedLabel": "我们做了这些改动",
+      "actionTypes": {
+        "pause_goal_plan": "暂停储蓄计划",
+        "reduce_goal_plan": "降低储蓄计划",
+        "drawdown_emergency_fund": "动用应急基金",
+        "invest_excess": "投资多余部分",
+        "other_ocbc_support": "OCBC 支援"
+      },
+      "domains": {
+        "wedding": "婚礼",
+        "home": "购房",
+        "retirement": "退休"
+      }
     },
     "insurance": {
       "title": "保险准备度",

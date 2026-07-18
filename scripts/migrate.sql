@@ -146,3 +146,56 @@ create table if not exists retirement_savings_checkins (
 
 create index if not exists retirement_savings_checkins_session_idx
   on retirement_savings_checkins (session_id, checkin_month);
+
+create table if not exists hardship_sessions (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null default 'karina-demo',
+  stage1_status text not null default 'in_progress', -- in_progress | assessed
+  stage2_status text not null default 'not_started', -- not_started | in_progress | proposed | applied
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create table if not exists hardship_messages (
+  id           bigserial primary key,
+  session_id   uuid not null references hardship_sessions(id),
+  stage        text not null, -- stage1 (assessment) | stage2 (recovery actions)
+  seq          integer not null,
+  role         text not null, -- user | assistant
+  content      jsonb not null,
+  created_at   timestamptz not null default now()
+);
+
+create table if not exists hardship_artifacts (
+  id            bigserial primary key,
+  session_id    uuid not null references hardship_sessions(id),
+  stage         text not null,
+  artifact_type text not null, -- hardship_assessment | proposed_recovery_actions
+  payload       jsonb not null,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists hardship_messages_session_stage_seq_idx
+  on hardship_messages (session_id, stage, seq);
+
+create index if not exists hardship_artifacts_session_stage_type_idx
+  on hardship_artifacts (session_id, stage, artifact_type, created_at desc);
+
+create unique index if not exists hardship_sessions_profile_key_idx
+  on hardship_sessions (profile_key);
+
+-- Audit trail of cross-domain writes: what the Emergency screen displays as
+-- "here's what we changed and why," independent of any one domain's own data.
+create table if not exists hardship_actions_applied (
+  id                   bigserial primary key,
+  hardship_session_id  uuid not null references hardship_sessions(id),
+  action_type          text not null, -- pause_goal_plan | drawdown_emergency_fund | invest_excess | other_ocbc_support
+  target_domain        text, -- wedding | home | retirement | null
+  amount               numeric(12,2),
+  explanation          text not null,
+  applied_at           timestamptz not null default now(),
+  status               text not null default 'applied' -- applied | failed
+);
+
+create index if not exists hardship_actions_applied_session_idx
+  on hardship_actions_applied (hardship_session_id, applied_at desc);

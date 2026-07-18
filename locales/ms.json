@@ -337,6 +337,11 @@
   "guardian": {
     "title": "Mesej Daripada Diri Masa Depan Anda",
     "protectedScore": "Skor Masa Depan Dilindungi",
+    "hardshipAlert": {
+      "label": "Amaran Guardian",
+      "title": "Kami perasan kewangan anda mungkin tertekan",
+      "detail": "Lihat apa yang OCBC boleh bantu sekarang."
+    },
     "memory": {
       "title": "Memori Guardian",
       "subtitle": "AI anda mengingati perjalanan kewangan anda dan terus menambah baik keputusan masa depan.",
@@ -867,14 +872,34 @@
       "months6": "6 bulan",
       "status": "Status Risiko",
       "statusValue": "Dilindungi daripada belanja besar",
-      "rec1": "Elakkan lebihan belanja perkahwinan daripada menyentuh tunai kecemasan.",
-      "rec2": "Tambah nilai automatik selepas gaji masuk.",
-      "rec3": "Hantar amaran jika baki jatuh bawah ambang.",
-      "cta": "Lindungi Dana Kecemasan",
-      "success": "Dana kecemasan dilindungi. FutureOS akan menghalang pengalihan berisiko daripada rizab ini.",
+      "success": "Pelan pemulihan telah digunakan. Kami telah mengemas kini pelan yang terjejas dan mencatat apa yang berubah.",
       "monthsValue": "{months} bulan",
       "scoreBody": "Kesediaan kecemasan anda ialah {score}% kerana dana semasa anda {fund} meliputi {months} bulan perbelanjaan.",
-      "scoreMethod": "Dikira sebagai dana semasa dibahagikan dengan perbelanjaan bulanan, dinilai berbanding sasaran 6 bulan sebanyak {recommendedFund}."
+      "scoreMethod": "Dikira sebagai dana semasa dibahagikan dengan perbelanjaan bulanan, dinilai berbanding sasaran 6 bulan sebanyak {recommendedFund}.",
+      "genericError": "Sesuatu tidak kena di pihak kami. Sila cuba lagi.",
+      "historyTitle": "Sejarah Perbualan",
+      "historyEmpty": "Belum ada perbualan lagi.",
+      "hardshipCtaLabel": "Sedang menghadapi kesukaran?",
+      "hardshipCtaBody": "Jika pendapatan anda menurun, anda kehilangan pekerjaan, atau berlaku perbelanjaan tidak dijangka, beritahu kami apa yang berlaku - kami akan melihat pelan simpanan sebenar anda dan mencadangkan cara konkrit untuk membantu, bukan sekadar nasihat umum.",
+      "guardianTriggeredLabel": "Kami perasan anda mungkin menghadapi tekanan kewangan",
+      "hardshipInputLabel": "Beritahu kami apa yang berlaku",
+      "hardshipInputPlaceholder": "cth: Gaji saya dipotong 30% bermula bulan depan, tidak pasti berapa lama ia akan berlangsung",
+      "hardshipSendLabel": "Dapatkan Bantuan",
+      "actionsLabel": "Pilihan Pelan Pemulihan",
+      "applyButton": "Guna Pelan Pemulihan Ini",
+      "appliedLabel": "Apa Yang Kami Ubah",
+      "actionTypes": {
+        "pause_goal_plan": "Jeda Pelan Simpanan",
+        "reduce_goal_plan": "Kurangkan Pelan Simpanan",
+        "drawdown_emergency_fund": "Gunakan Dana Kecemasan",
+        "invest_excess": "Labur Lebihan",
+        "other_ocbc_support": "Sokongan OCBC"
+      },
+      "domains": {
+        "wedding": "Perkahwinan",
+        "home": "Pembelian Rumah",
+        "retirement": "Persaraan"
+      }
     },
     "insurance": {
       "title": "Kesediaan Insurans",

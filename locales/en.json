@@ -350,6 +350,11 @@
   "guardian": {
     "title": "Future Self Guardian",
     "protectedScore": "Future Protected Score",
+    "hardshipAlert": {
+      "label": "Guardian Alert",
+      "title": "We noticed your finances may be under pressure",
+      "detail": "See what OCBC can do to help right now."
+    },
     "sections": {
       "status": "Guardian Status",
       "history": "Guardian History"
@@ -880,14 +885,34 @@
       "months6": "6 months",
       "status": "Risk Status",
       "statusValue": "Protected from major spending",
-      "rec1": "Prevent wedding overspend from touching emergency cash.",
-      "rec2": "Auto-top-up after salary crediting.",
-      "rec3": "Send alerts if balance drops below threshold.",
-      "cta": "Protect Emergency Fund",
-      "success": "Emergency fund protected. FutureOS will block risky reallocations from this reserve.",
+      "success": "Recovery plan applied. We've updated your affected plans and logged what changed.",
       "monthsValue": "{months} months",
       "scoreBody": "Your emergency readiness is {score}% because your current fund of {fund} covers {months} months of expenses.",
-      "scoreMethod": "Calculated as current fund divided by monthly expenses, scored against a 6-month target of {recommendedFund}."
+      "scoreMethod": "Calculated as current fund divided by monthly expenses, scored against a 6-month target of {recommendedFund}.",
+      "genericError": "Something went wrong on our end. Please try again.",
+      "historyTitle": "Conversation History",
+      "historyEmpty": "No conversation yet.",
+      "hardshipCtaLabel": "Going through something?",
+      "hardshipCtaBody": "If your income dropped, you lost your job, or an unexpected expense hit, tell us what happened - we'll look at your real committed savings plans and propose concrete ways we can help, not just generic advice.",
+      "guardianTriggeredLabel": "We noticed you might be under financial pressure",
+      "hardshipInputLabel": "Tell us what happened",
+      "hardshipInputPlaceholder": "e.g. My salary was cut by 30% starting next month, and I'm not sure how long it will last",
+      "hardshipSendLabel": "Get Help",
+      "actionsLabel": "Recovery Plan Options",
+      "applyButton": "Apply This Recovery Plan",
+      "appliedLabel": "What We Changed",
+      "actionTypes": {
+        "pause_goal_plan": "Pause a Savings Plan",
+        "reduce_goal_plan": "Reduce a Savings Plan",
+        "drawdown_emergency_fund": "Draw Down Emergency Fund",
+        "invest_excess": "Invest the Excess",
+        "other_ocbc_support": "OCBC Support"
+      },
+      "domains": {
+        "wedding": "Wedding",
+        "home": "Home Purchase",
+        "retirement": "Retirement"
+      }
     },
     "insurance": {
       "title": "Insurance Readiness",

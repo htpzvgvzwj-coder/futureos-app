@@ -3421,6 +3421,9 @@ function FutureSelfGuardian({
   const confidenceBand = getConfidenceBand(aiConfidence);
   const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
   const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
+  const hardshipTriggered =
+    spendingRisk.riskLevel === "high" ||
+    ledgerGoalEntries.some((entry) => (preferences.goalLedger?.[entry.id]?.state ?? "draft") === "atRisk");
 
   useEffect(() => {
     ledgerGoalEntries.forEach(({ id, riskCategory }) => {
@@ -3445,6 +3448,13 @@ function FutureSelfGuardian({
     ] ?? []).find((item) => item.action === action);
     if (!transition) return;
     transitionGoalLedger(setPreferences, goalId, transition.nextState, transition.trigger);
+    // "Recover" used to be a no-op ledger-state flip with nothing behind it
+    // - give it a real destination: the hardship recovery flow, aware this
+    // came from a specific at-risk goal.
+    if (action === "recover") {
+      setPreferences((current) => ({ ...current, hardshipEntryPoint: "guardianAtRisk" }));
+      setActiveScreen(screens.NEED_EMERGENCY);
+    }
   }
 
   const monthlySaving = formatSgd(getRecommendedMonthlySaving(simulatorInputs));
@@ -4257,6 +4267,30 @@ function FutureSelfGuardian({
       <Header title={t("guardian.title")} subtitle={t("guardian.hub.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
+      {hardshipTriggered ? (
+        <motion.button
+          type="button"
+          className="futureAlertCard risk"
+          onClick={() => {
+            setPreferences((current) => ({ ...current, hardshipEntryPoint: "guardianAtRisk" }));
+            setActiveScreen(screens.NEED_EMERGENCY);
+          }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.36, ease: "easeOut" }}
+        >
+          <span className="futureAlertIcon">
+            <AlertTriangle size={18} />
+          </span>
+          <span>
+            <small>{t("guardian.hardshipAlert.label")}</small>
+            <strong>{t("guardian.hardshipAlert.title")}</strong>
+            <em>{t("guardian.hardshipAlert.detail")}</em>
+          </span>
+          <ChevronRight size={17} />
+        </motion.button>
+      ) : null}
+
       <section className="guardianHubStatus">
         <div className="panelHead">
           <span className="sectionLabel">{t("guardian.sections.status")}</span>
@@ -4354,6 +4388,7 @@ function NeedDetailScreen({
   successStates,
   setSuccessStates,
   preferences,
+  setPreferences,
   simulatorInputs,
   setSimulatorInputs,
   setMemoryEvents,
@@ -4409,6 +4444,9 @@ function NeedDetailScreen({
         setSuccess={setSuccess}
         t={t}
         setActiveScreen={setActiveScreen}
+        language={language}
+        preferences={preferences}
+        setPreferences={setPreferences}
         profile={profile}
         healthScores={healthScores}
       />
@@ -6614,7 +6652,35 @@ function RetirementNeedContent({
   );
 }
 
-function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, profile, healthScores }) {
+const RECOVERY_ACTION_ICONS = {
+  pause_goal_plan: PiggyBank,
+  reduce_goal_plan: PiggyBank,
+  drawdown_emergency_fund: Banknote,
+  invest_excess: LineChart,
+  other_ocbc_support: ShieldCheck,
+};
+
+function RecoveryActionCard({ action, selected, onToggle, t }) {
+  const Icon = RECOVERY_ACTION_ICONS[action.action_type] ?? ShieldCheck;
+  return (
+    <button
+      type="button"
+      className={selected ? "checkOption selected" : "checkOption"}
+      onClick={() => onToggle(action.id)}
+    >
+      <Icon size={18} />
+      <span>
+        <strong>{t(`needDetails.emergency.actionTypes.${action.action_type}`)}</strong>
+        {action.target_domain ? <em> — {t(`needDetails.emergency.domains.${action.target_domain}`)}</em> : null}
+        <p>{action.rationale}</p>
+        {action.amount ? <b>{formatSgd(Math.round(action.amount))}</b> : null}
+      </span>
+      {selected ? <Check size={16} /> : null}
+    </button>
+  );
+}
+
+function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, language, preferences, setPreferences, profile, healthScores }) {
   const readinessScore = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
   const currentFund = numberValue(profile.currentSavings, 18000);
   const monthlyExpenses = numberValue(profile.monthlyExpenses, 3000);
@@ -6622,20 +6688,157 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, profile
   const currentCoverageMonths = monthlyExpenses > 0 ? Math.round((currentFund / monthlyExpenses) * 10) / 10 : 0;
   const statusKey =
     readinessScore >= 80 ? "needDetails.emergency.statusValue" : readinessScore >= 60 ? "status.monitoring" : "status.review";
+
+  const [sessionData, setSessionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedActionIds, setSelectedActionIds] = useState([]);
+  const [applyResults, setApplyResults] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const guardianTriggered = preferences?.hardshipEntryPoint === "guardianAtRisk";
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/hardship/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/hardship/session")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSessionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage(t("needDetails.emergency.genericError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    if (guardianTriggered) {
+      setPreferences((current) => ({ ...current, hardshipEntryPoint: null }));
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const submitAssessment = async (message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const assessResponse = await fetch("/api/hardship/assess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, language }),
+      });
+      const assessData = await assessResponse.json();
+      if (!assessResponse.ok) {
+        setErrorMessage(t("needDetails.emergency.genericError"));
+        return;
+      }
+      setSessionData((current) => ({ ...current, assessment: assessData.data }));
+
+      const proposeResponse = await fetch("/api/hardship/propose-actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Please propose a recovery plan based on my situation.",
+          language,
+          profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses, currentSavings: profile.currentSavings },
+        }),
+      });
+      const proposeData = await proposeResponse.json();
+      if (!proposeResponse.ok) {
+        setErrorMessage(t("needDetails.emergency.genericError"));
+        return;
+      }
+      setSessionData((current) => ({ ...current, proposedActions: proposeData.data }));
+      setSelectedActionIds(proposeData.data.actions.map((action) => action.id));
+    } catch {
+      setErrorMessage(t("needDetails.emergency.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const toggleActionSelected = (actionId) => {
+    setSelectedActionIds((current) =>
+      current.includes(actionId) ? current.filter((id) => id !== actionId) : [...current, actionId]
+    );
+  };
+
+  const applyRecoveryPlan = async () => {
+    if (!selectedActionIds.length) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/hardship/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedActionIds }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("needDetails.emergency.genericError"));
+        return;
+      }
+      setApplyResults(data.results);
+      const drawdownTotal = data.results
+        .filter((r) => r.action_type === "drawdown_emergency_fund" && r.status === "applied")
+        .reduce((sum, r) => sum + (r.result?.amount ?? 0), 0);
+      if (drawdownTotal > 0) {
+        setPreferences((current) => ({
+          ...current,
+          profile: { ...current.profile, currentSavings: String(Math.max(0, currentFund - drawdownTotal)) },
+        }));
+      }
+      setSuccess();
+    } catch {
+      setErrorMessage(t("needDetails.emergency.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const hasAssessment = Boolean(sessionData?.assessment);
+  const proposedActions = sessionData?.proposedActions?.actions ?? null;
+  const appliedActions = applyResults ? null : sessionData?.appliedActions ?? [];
+
   return (
     <Screen>
       <Header title={t("needDetails.emergency.title")} subtitle={t("needDetails.emergency.subtitle")} />
-      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
+      <div className="weddingTopRow">
+        <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("needDetails.emergency.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="needDetails.emergency.historyTitle"
+          emptyKey="needDetails.emergency.historyEmpty"
+        />
+      ) : null}
       <SuccessBanner show={success} text={t("needDetails.emergency.success")} />
       <ProgressPanel
         label={t("needDetails.emergency.score")}
         value={readinessScore}
         t={t}
-        body={t("needDetails.emergency.scoreBody", {
-          score: readinessScore,
-          months: currentCoverageMonths,
-          fund: formatSgd(currentFund),
-        })}
+        body={t("needDetails.emergency.scoreBody", { score: readinessScore, months: currentCoverageMonths, fund: formatSgd(currentFund) })}
         methodText={t("needDetails.emergency.scoreMethod", { recommendedFund: formatSgd(recommendedFund) })}
       />
       <section className="metricGrid">
@@ -6645,18 +6848,72 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, profile
         <MetricCard label={t("needDetails.emergency.recommendedCoverage")} value={t("needDetails.emergency.months6")} />
         <MetricCard label={t("needDetails.emergency.status")} value={t(statusKey)} wide />
       </section>
-      <SupportList
-        title={t("needDetails.aiRecommendations")}
-        items={[
-          t("needDetails.emergency.rec1"),
-          t("needDetails.emergency.rec2"),
-          t("needDetails.emergency.rec3"),
-        ]}
-      />
-      <button type="button" className="primaryButton" onClick={setSuccess}>
-        {t("needDetails.emergency.cta")}
-        <Check size={18} />
-      </button>
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <>
+          <section className="needHeroCard">
+            <span className="sectionLabel">
+              {guardianTriggered ? t("needDetails.emergency.guardianTriggeredLabel") : t("needDetails.emergency.hardshipCtaLabel")}
+            </span>
+            <p>{t("needDetails.emergency.hardshipCtaBody")}</p>
+          </section>
+
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+
+          {!hasAssessment ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={submitAssessment}
+              submitting={submitting}
+              placeholder={t("needDetails.emergency.hardshipInputPlaceholder")}
+              submitLabelKey="needDetails.emergency.hardshipSendLabel"
+              labelKey="needDetails.emergency.hardshipInputLabel"
+            />
+          ) : proposedActions && !applyResults && sessionData?.stage2Status !== "applied" ? (
+            <>
+              <span className="sectionLabel">{t("needDetails.emergency.actionsLabel")}</span>
+              <p>{sessionData.proposedActions.summary_note}</p>
+              <div className="checkboxGrid">
+                {proposedActions.map((action) => (
+                  <RecoveryActionCard
+                    key={action.id}
+                    action={action}
+                    selected={selectedActionIds.includes(action.id)}
+                    onToggle={toggleActionSelected}
+                    t={t}
+                  />
+                ))}
+              </div>
+              <button type="button" className="primaryButton" onClick={applyRecoveryPlan} disabled={submitting || !selectedActionIds.length}>
+                {submitting ? t("weddingPlanner.thinking") : t("needDetails.emergency.applyButton")}
+                <Check size={18} />
+              </button>
+            </>
+          ) : null}
+
+          {applyResults || (appliedActions && appliedActions.length > 0) ? (
+            <>
+              <span className="sectionLabel">{t("needDetails.emergency.appliedLabel")}</span>
+              <div className="weddingLineItems">
+                {(applyResults ?? appliedActions).map((entry) => (
+                  <SummaryRow
+                    key={entry.id}
+                    label={entry.explanation ?? entry.action_type}
+                    value={entry.amount || entry.result?.amount ? formatSgd(Math.round(entry.amount ?? entry.result?.amount)) : t(`needDetails.emergency.actionTypes.${entry.action_type}`)}
+                  />
+                ))}
+              </div>
+            </>
+          ) : null}
+        </>
+      )}
     </Screen>
   );
 }
