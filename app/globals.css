@@ -1342,6 +1342,15 @@ nextjs-portal {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+}
+.summaryRow span {
+  flex: 1;
+  min-width: 0;
+}
+.summaryRow strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
 }.profileHero {
   display: grid;
   grid-template-columns: auto 1fr;

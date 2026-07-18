@@ -904,6 +904,7 @@
       "retryButton": "Try Again",
       "actionFailedLabel": "Didn't go through",
       "actionPendingReviewLabel": "Awaiting banker review",
+      "newFeatureBadge": "New",
       "actionTypes": {
         "pause_goal_plan": "Pause a Savings Plan",
         "reduce_goal_plan": "Reduce a Savings Plan",

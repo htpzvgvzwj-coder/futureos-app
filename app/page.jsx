@@ -146,6 +146,7 @@ const DEDICATED_GOAL_SCREENS = {
   wedding: { screen: screens.NEED_WEDDING, badgeKey: "weddingPlanner.newFeatureBadge" },
   home: { screen: screens.NEED_HOME, badgeKey: "homePlanner.newFeatureBadge" },
   retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
+  emergency: { screen: screens.NEED_EMERGENCY, badgeKey: "needDetails.emergency.newFeatureBadge" },
 };
 
 const independenceLevels = [

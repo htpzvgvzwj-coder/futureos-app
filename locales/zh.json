@@ -891,6 +891,7 @@
       "retryButton": "重试",
       "actionFailedLabel": "未能完成",
       "actionPendingReviewLabel": "等待客户经理审核",
+      "newFeatureBadge": "新功能",
       "actionTypes": {
         "pause_goal_plan": "暂停储蓄计划",
         "reduce_goal_plan": "降低储蓄计划",

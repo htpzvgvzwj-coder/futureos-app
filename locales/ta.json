@@ -891,6 +891,7 @@
       "retryButton": "மீண்டும் முயற்சி",
       "actionFailedLabel": "முடியவில்லை",
       "actionPendingReviewLabel": "வங்கி அதிகாரி மதிப்பாய்வுக்காக காத்திருக்கிறது",
+      "newFeatureBadge": "புதியது",
       "actionTypes": {
         "pause_goal_plan": "சேமிப்புத் திட்டத்தை இடைநிறுத்து",
         "reduce_goal_plan": "சேமிப்புத் திட்டத்தைக் குறை",

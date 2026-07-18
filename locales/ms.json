@@ -891,6 +891,7 @@
       "retryButton": "Cuba Lagi",
       "actionFailedLabel": "Tidak berjaya",
       "actionPendingReviewLabel": "Menunggu semakan pegawai bank",
+      "newFeatureBadge": "Baharu",
       "actionTypes": {
         "pause_goal_plan": "Jeda Pelan Simpanan",
         "reduce_goal_plan": "Kurangkan Pelan Simpanan",
