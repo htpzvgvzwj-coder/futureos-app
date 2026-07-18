@@ -201,7 +201,12 @@ nextjs-portal {
 .screen small,
 .screen b,
 .screen button {
-  overflow-wrap: anywhere;
+  /* break-word (not "anywhere"): only break mid-word when a single word
+     genuinely can't fit on its own line. "anywhere" breaks between any two
+     characters whenever a flex/grid sibling squeezes this element's
+     allotted width, which is what produced one-character-per-line text in
+     summary rows whose neighboring column happened to be wide. */
+  overflow-wrap: break-word;
 }
 
 .screen::-webkit-scrollbar {
@@ -1343,13 +1348,7 @@ nextjs-portal {
   justify-content: space-between;
   gap: 14px;
 }
-.summaryRow span {
-  flex: 1;
-  min-width: 0;
-}
 .summaryRow strong {
-  flex-shrink: 0;
-  white-space: nowrap;
   text-align: right;
 }.profileHero {
   display: grid;
