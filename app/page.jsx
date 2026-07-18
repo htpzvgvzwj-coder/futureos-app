@@ -930,6 +930,18 @@ function buildScenarioFields(goalType, inputs, variant, t) {
     ];
   }
 
+  if (goalType === "retirement") {
+    const confirmedMonthly = numberValue(inputs.retirementSavingsMonthly, 0);
+    if (confirmedMonthly > 0) {
+      const scaled = Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10;
+      return [
+        [t("simulator.output.fields.monthlyInvestment"), formatSgd(scaled)],
+        [t("simulator.output.fields.targetReturn"), `${inputs.targetReturnGoal || 6}%`],
+        [t("simulator.output.fields.retirementImpact"), variant === "highRisk" ? t("simulator.output.impact.delayed") : t("simulator.output.impact.onTrack")],
+      ];
+    }
+  }
+
   if (goalType === "retirement" || goalType === "investment") {
     return [
       [t("simulator.output.fields.currentInvestment"), formatSgd(numberValue(inputs.currentInvestment, 15000))],
@@ -1063,6 +1075,10 @@ function getRecommendedMonthlySaving(inputs) {
   }
   if (primaryType === "wedding") {
     const confirmed = numberValue(inputs.weddingSavingsMonthly, 0);
+    if (confirmed > 0) return confirmed;
+  }
+  if (primaryType === "retirement") {
+    const confirmed = numberValue(inputs.retirementSavingsMonthly, 0);
     if (confirmed > 0) return confirmed;
   }
   return 450;
@@ -6190,7 +6206,19 @@ function RetirementNeedContent({
   const [adjustPlanTarget, setAdjustPlanTarget] = useState(null);
   const [checkinSubmitting, setCheckinSubmitting] = useState(false);
   const [checkinError, setCheckinError] = useState("");
-  const [retirementProfileInput, setRetirementProfileInput] = useState(null);
+  // Persisted client-side (not just React state) so the age/retirement-age/
+  // CPF-balance context entered once survives a page reload — without this,
+  // "Adjust This Plan" and later refine calls after a reload silently fall
+  // back to estimated defaults instead of what the customer actually entered.
+  const [retirementProfileInput, setRetirementProfileInputState] = useState(() =>
+    typeof window === "undefined" ? null : safeJsonParse(window.localStorage.getItem("futureos-retirement-profile"), null)
+  );
+  const setRetirementProfileInput = (value) => {
+    setRetirementProfileInputState(value);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("futureos-retirement-profile", JSON.stringify(value));
+    }
+  };
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -6226,12 +6254,20 @@ function RetirementNeedContent({
       retirementAge: numberValue(simulatorInputs?.retirementAge, 65),
       cpfBalances: null,
     };
-  const retirementContext = {
-    currentAge: effectiveRetirementProfile.currentAge,
-    retirementAge: effectiveRetirementProfile.retirementAge,
-    currentBalances: effectiveRetirementProfile.cpfBalances,
-    monthlyIncome: numberValue(profile.monthlyIncome, 7500),
-  };
+  const { currentAge: effCurrentAge, retirementAge: effRetirementAge, cpfBalances: effCpfBalances } = effectiveRetirementProfile;
+  const effMonthlyIncome = numberValue(profile.monthlyIncome, 7500);
+  // Memoized so RetirementPlanEditorPanel's own useMemo (which depends on
+  // this object) only recomputes the CPF projection loop when the
+  // underlying values actually change, not on every unrelated re-render.
+  const retirementContext = useMemo(
+    () => ({
+      currentAge: effCurrentAge,
+      retirementAge: effRetirementAge,
+      currentBalances: effCpfBalances,
+      monthlyIncome: effMonthlyIncome,
+    }),
+    [effCurrentAge, effRetirementAge, effCpfBalances, effMonthlyIncome]
+  );
 
   const submitToStage1 = async (intent, message) => {
     setSubmitting(true);
