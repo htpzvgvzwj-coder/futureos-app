@@ -2530,6 +2530,8 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
 }
 
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences, setSimulatorInputs, t }) {
+  const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
+  const [infoModal, setInfoModal] = useState(null);
   const [strategyModal, setStrategyModal] = useState(null);
   const [productModal, setProductModal] = useState(null);
   const [customGoalOpen, setCustomGoalOpen] = useState(false);
@@ -2632,8 +2634,67 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   return (
     <Screen>
       <Header title={t("lifeGraph.title")} subtitle={t("lifeGraph.subtitle")} />
-      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+      <div className="weddingTopRow">
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+        <button
+          type="button"
+          className="historyButton"
+          onClick={() => setHealthAnalysisOpen(true)}
+          aria-label={t("lifeGraph.health.title")}
+        >
+          <ChartNoAxesColumnIncreasing size={16} />
+        </button>
+      </div>
       <NoticeBanner text={notice} />
+
+      {healthAnalysisOpen ? (
+        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("lifeGraph.health.title")}>
+          <motion.div className="confirmModal" {...screenMotion}>
+            <ChartNoAxesColumnIncreasing size={24} />
+            <strong>{t("lifeGraph.health.title")}</strong>
+            <div className="scoreGrid">
+              {healthScores.map((score) => (
+                <article className="healthScoreCard" key={score.id}>
+                  <div>
+                    <strong>{t(score.labelKey)}</strong>
+                    <button
+                      type="button"
+                      className="infoButton"
+                      onClick={() => setInfoModal(score)}
+                      aria-label={t("homeBanking.infoLabel", { item: t(score.labelKey) })}
+                    >
+                      <Info size={13} />
+                    </button>
+                  </div>
+                  <ProgressRing value={score.value} size={66} stroke={7} color={score.value >= 75 ? "#0f9f84" : score.value >= 60 ? "#f59e0b" : "#d71920"} />
+                  <b>{score.value}/100</b>
+                </article>
+              ))}
+            </div>
+            <button type="button" className="primaryButton" onClick={() => setHealthAnalysisOpen(false)}>
+              {t("homeBanking.gotIt")}
+            </button>
+          </motion.div>
+        </section>
+      ) : null}
+
+      {infoModal ? (
+        <InfoModal
+          icon={Info}
+          title={t(infoModal.labelKey)}
+          scoreLabel={t("homeBanking.currentScore")}
+          scoreValue={`${infoModal.value}/100`}
+          listTitle={t("lifeGraph.scoreInfo.title")}
+          listItems={[
+            t(`lifeGraph.scoreInfo.${infoModal.id}.meaning`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.method`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.data`),
+            t(`lifeGraph.scoreInfo.${infoModal.id}.improve`),
+          ]}
+          onClose={() => setInfoModal(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
+      ) : null}
 
       <section className="agentReasoningPanel">
         <div className="panelHead">
