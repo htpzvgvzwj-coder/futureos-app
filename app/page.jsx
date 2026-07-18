@@ -2530,7 +2530,6 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
 }
 
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences, setSimulatorInputs, t }) {
-  const [infoModal, setInfoModal] = useState(null);
   const [strategyModal, setStrategyModal] = useState(null);
   const [productModal, setProductModal] = useState(null);
   const [customGoalOpen, setCustomGoalOpen] = useState(false);
@@ -2635,41 +2634,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
       <Header title={t("lifeGraph.title")} subtitle={t("lifeGraph.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
       <NoticeBanner text={notice} />
-
-      <section className="recommendationPanel">
-        <span className="sectionLabel">{t("lifeGraph.lifeStage")}</span>
-        <SummaryRow label={t("profile.detectedStage")} value={detectedStage} />
-        <SummaryRow
-          label={t("lifeGraph.selectedGoals")}
-          value={selectedGoalIds.map((goalId) => getProfileGoalLabel(goalId, customGoals, t)).join(", ")}
-        />
-      </section>
-
-      <section className="scorePanel">
-        <div className="panelHead">
-          <span className="sectionLabel">{t("lifeGraph.health.title")}</span>
-          <Info size={17} />
-        </div>
-        <div className="scoreGrid">
-          {healthScores.map((score) => (
-            <article className="healthScoreCard" key={score.id}>
-              <div>
-                <strong>{t(score.labelKey)}</strong>
-                <button
-                  type="button"
-                  className="infoButton"
-                  onClick={() => setInfoModal(score)}
-                  aria-label={t("homeBanking.infoLabel", { item: t(score.labelKey) })}
-                >
-                  <Info size={13} />
-                </button>
-              </div>
-              <ProgressRing value={score.value} size={66} stroke={7} color={score.value >= 75 ? "#0f9f84" : score.value >= 60 ? "#f59e0b" : "#d71920"} />
-              <b>{score.value}/100</b>
-            </article>
-          ))}
-        </div>
-      </section>
 
       <section className="agentReasoningPanel">
         <div className="panelHead">
@@ -2830,24 +2794,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         {t("lifeGraph.openMirror")}
         <ChevronRight size={18} />
       </button>
-
-      {infoModal ? (
-        <InfoModal
-          icon={Info}
-          title={t(infoModal.labelKey)}
-          scoreLabel={t("homeBanking.currentScore")}
-          scoreValue={`${infoModal.value}/100`}
-          listTitle={t("lifeGraph.scoreInfo.title")}
-          listItems={[
-            t(`lifeGraph.scoreInfo.${infoModal.id}.meaning`),
-            t(`lifeGraph.scoreInfo.${infoModal.id}.method`),
-            t(`lifeGraph.scoreInfo.${infoModal.id}.data`),
-            t(`lifeGraph.scoreInfo.${infoModal.id}.improve`),
-          ]}
-          onClose={() => setInfoModal(null)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
-      ) : null}
 
       {strategyModal ? (
         <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(strategyModal.titleKey)}>
