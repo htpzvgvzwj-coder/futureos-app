@@ -960,6 +960,9 @@
     "totalCost": "மொத்த செலவு",
     "guestCount": "விருந்தினர்கள்",
     "venueTier": "இட நிலை",
+    "venueType": "இட வகை",
+    "photographyTier": "புகைப்படம்",
+    "attireTier": "உடை",
     "weddingDate": "திருமண தேதி",
     "confirmedLabel": "உறுதி செய்யப்பட்ட திருமண பட்ஜெட்",
     "planAnotherLabel": "வேறு திருமணத்தைத் திட்டமிடு",
@@ -1023,6 +1026,27 @@
       "addButton": "இந்த மாத சேமிப்பைப் பதிவு செய்",
       "emptyState": "இன்னும் சேமிப்பு பதிவு செய்யப்படவில்லை.",
       "genericError": "பதிவு செய்வதில் சிக்கல். மீண்டும் முயற்சிக்கவும்."
+    },
+    "venueTiers": {
+      "budget": "மிதமான",
+      "midRange": "நடுத்தர",
+      "premium": "பிரீமியம்",
+      "luxury": "ஆடம்பர"
+    },
+    "venueTypes": {
+      "hotel": "ஹோட்டல்",
+      "restaurant": "உணவகம்",
+      "community": "சமூக மண்டபம்"
+    },
+    "photographyTiers": {
+      "basic": "அடிப்படை",
+      "midRange": "நடுத்தர",
+      "premium": "பிரீமியம்"
+    },
+    "attireTiers": {
+      "budget": "மிதமான",
+      "midRange": "நடுத்தர",
+      "premium": "பிரீமியம்"
     }
   },
   "homePlanner": {

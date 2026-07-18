@@ -58,6 +58,7 @@ import {
   X,
 } from "lucide-react";
 import { computeHomeFinancials } from "../lib/home-finance.js";
+import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
 import { computeRetirementFinancials } from "../lib/retirement-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
@@ -4519,11 +4520,19 @@ function WeddingLineItemRow({ item }) {
   );
 }
 
-// Line items whose quantity equals the plan's guest_count are treated as
-// guest-scaled (e.g. per-pax catering); everything else (flat fees like
-// photography or attire) stays fixed when the guest count slider moves.
-function recomputeForGuestCount(lineItems, originalGuestCount, newGuestCount) {
-  const adjustedItems = lineItems.map((item) => {
+// The venue line item recomputes via the real table-based formula (never
+// linear scaling — see lib/wedding-finance.js). Every other line item whose
+// quantity equals the plan's guest_count is treated as guest-scaled (e.g.
+// per-pax catering); flat fees (photography, attire, most long-tail items)
+// stay fixed when the guest count slider moves.
+function recomputeForGuestCount(lineItems, plan, originalGuestCount, newGuestCount) {
+  const venueRecomputed = recomputeVenueForGuestCount(
+    lineItems,
+    { venueTier: plan.venue_tier, venueType: plan.venue_type },
+    newGuestCount
+  );
+  const adjustedItems = venueRecomputed.map((item) => {
+    if (item.category === "venue") return item;
     const scales = originalGuestCount > 0 && item.quantity === originalGuestCount;
     if (!scales) return item;
     const quantity = newGuestCount;
@@ -4581,7 +4590,7 @@ function PlanEditorPanel({
   backLabelKey = "weddingPlanner.backToComparison",
   t,
 }) {
-  const { adjustedItems, total } = recomputeForGuestCount(plan.line_items, plan.guest_count, guestCount);
+  const { adjustedItems, total } = recomputeForGuestCount(plan.line_items, plan, plan.guest_count, guestCount);
 
   return (
     <section className="recommendationPanel">
@@ -4689,6 +4698,31 @@ function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey 
   );
 }
 
+const WEDDING_VENUE_TIER_LABEL_KEYS = {
+  budget: "weddingPlanner.venueTiers.budget",
+  mid_range: "weddingPlanner.venueTiers.midRange",
+  premium: "weddingPlanner.venueTiers.premium",
+  luxury: "weddingPlanner.venueTiers.luxury",
+};
+
+const WEDDING_VENUE_TYPE_LABEL_KEYS = {
+  hotel: "weddingPlanner.venueTypes.hotel",
+  restaurant: "weddingPlanner.venueTypes.restaurant",
+  community: "weddingPlanner.venueTypes.community",
+};
+
+const WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS = {
+  basic: "weddingPlanner.photographyTiers.basic",
+  mid_range: "weddingPlanner.photographyTiers.midRange",
+  premium: "weddingPlanner.photographyTiers.premium",
+};
+
+const WEDDING_ATTIRE_TIER_LABEL_KEYS = {
+  budget: "weddingPlanner.attireTiers.budget",
+  mid_range: "weddingPlanner.attireTiers.midRange",
+  premium: "weddingPlanner.attireTiers.premium",
+};
+
 function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
   const medianCost = [...plans].map((plan) => plan.total_cost).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
   return (
@@ -4710,7 +4744,12 @@ function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
                 <span className="statChip">
                   {plan.guest_count} {t("weddingPlanner.guestCount")}
                 </span>
-                <span className="statChip">{plan.venue_tier}</span>
+                <span className="statChip">{t(WEDDING_VENUE_TYPE_LABEL_KEYS[plan.venue_type] ?? plan.venue_type)}</span>
+                {plan.venue_type !== "community" ? (
+                  <span className="statChip">{t(WEDDING_VENUE_TIER_LABEL_KEYS[plan.venue_tier] ?? plan.venue_tier)}</span>
+                ) : null}
+                <span className="statChip">{t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[plan.photography_tier] ?? plan.photography_tier)}</span>
+                <span className="statChip">{t(WEDDING_ATTIRE_TIER_LABEL_KEYS[plan.attire_tier] ?? plan.attire_tier)}</span>
               </div>
               <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
                 {t("weddingPlanner.customizePlan")}
@@ -4737,6 +4776,10 @@ function adaptConfirmedBudgetToPlan(confirmedBudget, t) {
     line_items: confirmedBudget.line_items,
     guest_count: confirmedBudget.guest_count,
     timeline: confirmedBudget.timeline,
+    venue_tier: confirmedBudget.venue_tier,
+    venue_type: confirmedBudget.venue_type,
+    photography_tier: confirmedBudget.photography_tier,
+    attire_tier: confirmedBudget.attire_tier,
   };
 }
 
@@ -4750,6 +4793,24 @@ function WeddingConfirmedBudgetCard({ budget, t }) {
       </div>
       <SummaryRow label={t("weddingPlanner.weddingDate")} value={budget.wedding_date} />
       <SummaryRow label={t("weddingPlanner.guestCount")} value={budget.guest_count} />
+      <SummaryRow
+        label={t("weddingPlanner.venueType")}
+        value={t(WEDDING_VENUE_TYPE_LABEL_KEYS[budget.venue_type] ?? budget.venue_type)}
+      />
+      {budget.venue_type !== "community" ? (
+        <SummaryRow
+          label={t("weddingPlanner.venueTier")}
+          value={t(WEDDING_VENUE_TIER_LABEL_KEYS[budget.venue_tier] ?? budget.venue_tier)}
+        />
+      ) : null}
+      <SummaryRow
+        label={t("weddingPlanner.photographyTier")}
+        value={t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[budget.photography_tier] ?? budget.photography_tier)}
+      />
+      <SummaryRow
+        label={t("weddingPlanner.attireTier")}
+        value={t(WEDDING_ATTIRE_TIER_LABEL_KEYS[budget.attire_tier] ?? budget.attire_tier)}
+      />
       <div className="weddingLineItems">
         {budget.line_items.map((item) => (
           <WeddingLineItemRow item={item} key={item.label} />

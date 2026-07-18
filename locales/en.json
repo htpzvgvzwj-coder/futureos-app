@@ -973,6 +973,9 @@
     "totalCost": "Total Cost",
     "guestCount": "Guests",
     "venueTier": "Venue Tier",
+    "venueType": "Venue Type",
+    "photographyTier": "Photography",
+    "attireTier": "Attire",
     "weddingDate": "Wedding Date",
     "confirmedLabel": "Confirmed Wedding Budget",
     "planAnotherLabel": "Plan a Different Wedding",
@@ -1036,6 +1039,27 @@
       "addButton": "Log This Month's Savings",
       "emptyState": "No savings logged yet.",
       "genericError": "Something went wrong logging that. Please try again."
+    },
+    "venueTiers": {
+      "budget": "Budget",
+      "midRange": "Mid-range",
+      "premium": "Premium",
+      "luxury": "Luxury"
+    },
+    "venueTypes": {
+      "hotel": "Hotel",
+      "restaurant": "Restaurant",
+      "community": "Community/Void Deck"
+    },
+    "photographyTiers": {
+      "basic": "Basic",
+      "midRange": "Mid-range",
+      "premium": "Premium"
+    },
+    "attireTiers": {
+      "budget": "Budget",
+      "midRange": "Mid-range",
+      "premium": "Premium"
     }
   },
   "homePlanner": {

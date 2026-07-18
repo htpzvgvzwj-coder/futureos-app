@@ -960,6 +960,9 @@
     "totalCost": "Jumlah Kos",
     "guestCount": "Bilangan Tetamu",
     "venueTier": "Tahap Tempat",
+    "venueType": "Jenis Tempat",
+    "photographyTier": "Fotografi",
+    "attireTier": "Pakaian",
     "weddingDate": "Tarikh Perkahwinan",
     "confirmedLabel": "Belanjawan Perkahwinan Disahkan",
     "planAnotherLabel": "Rancang Perkahwinan Lain",
@@ -1023,6 +1026,27 @@
       "addButton": "Catat Simpanan Bulan Ini",
       "emptyState": "Belum ada simpanan dicatat.",
       "genericError": "Ralat mencatat simpanan. Sila cuba lagi."
+    },
+    "venueTiers": {
+      "budget": "Jimat",
+      "midRange": "Sederhana",
+      "premium": "Premium",
+      "luxury": "Mewah"
+    },
+    "venueTypes": {
+      "hotel": "Hotel",
+      "restaurant": "Restoran",
+      "community": "Komuniti/Ruang Legar"
+    },
+    "photographyTiers": {
+      "basic": "Asas",
+      "midRange": "Sederhana",
+      "premium": "Premium"
+    },
+    "attireTiers": {
+      "budget": "Jimat",
+      "midRange": "Sederhana",
+      "premium": "Premium"
     }
   },
   "homePlanner": {

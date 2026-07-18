@@ -960,6 +960,9 @@
     "totalCost": "总预算",
     "guestCount": "宾客人数",
     "venueTier": "场地档次",
+    "venueType": "场地类型",
+    "photographyTier": "摄影",
+    "attireTier": "礼服",
     "weddingDate": "婚期",
     "confirmedLabel": "已确认的婚礼预算",
     "planAnotherLabel": "规划另一场婚礼",
@@ -1023,6 +1026,27 @@
       "addButton": "记录这个月的存款",
       "emptyState": "还没有存款记录。",
       "genericError": "记录失败，请再试一次。"
+    },
+    "venueTiers": {
+      "budget": "经济型",
+      "midRange": "中档",
+      "premium": "高档",
+      "luxury": "奢华"
+    },
+    "venueTypes": {
+      "hotel": "酒店",
+      "restaurant": "餐厅",
+      "community": "社区/组屋楼下"
+    },
+    "photographyTiers": {
+      "basic": "基础",
+      "midRange": "中档",
+      "premium": "高档"
+    },
+    "attireTiers": {
+      "budget": "经济型",
+      "midRange": "中档",
+      "premium": "高档"
     }
   },
   "homePlanner": {
