@@ -888,6 +888,9 @@
       "actionsLabel": "மீட்பு திட்ட விருப்பங்கள்",
       "applyButton": "இந்த மீட்பு திட்டத்தைப் பயன்படுத்து",
       "appliedLabel": "நாங்கள் மாற்றியவை",
+      "retryButton": "மீண்டும் முயற்சி",
+      "actionFailedLabel": "முடியவில்லை",
+      "actionPendingReviewLabel": "வங்கி அதிகாரி மதிப்பாய்வுக்காக காத்திருக்கிறது",
       "actionTypes": {
         "pause_goal_plan": "சேமிப்புத் திட்டத்தை இடைநிறுத்து",
         "reduce_goal_plan": "சேமிப்புத் திட்டத்தைக் குறை",

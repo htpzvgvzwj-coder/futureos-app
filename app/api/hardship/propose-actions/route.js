@@ -47,7 +47,7 @@ export async function POST(request) {
     return Response.json({ error: "no_assessment" }, { status: 409 });
   }
 
-  const [commitments] = await Promise.all([getCustomerCommitments()]);
+  const commitments = await getCustomerCommitments();
   const { monthlyExpenses, monthlyIncome, currentFund } = getEmergencyFundSnapshot(profile);
 
   const outflow = computeCommittedMonthlyOutflow(commitments, monthlyExpenses);

@@ -901,6 +901,9 @@
       "actionsLabel": "Recovery Plan Options",
       "applyButton": "Apply This Recovery Plan",
       "appliedLabel": "What We Changed",
+      "retryButton": "Try Again",
+      "actionFailedLabel": "Didn't go through",
+      "actionPendingReviewLabel": "Awaiting banker review",
       "actionTypes": {
         "pause_goal_plan": "Pause a Savings Plan",
         "reduce_goal_plan": "Reduce a Savings Plan",

@@ -3421,9 +3421,7 @@ function FutureSelfGuardian({
   const confidenceBand = getConfidenceBand(aiConfidence);
   const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
   const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
-  const hardshipTriggered =
-    spendingRisk.riskLevel === "high" ||
-    ledgerGoalEntries.some((entry) => (preferences.goalLedger?.[entry.id]?.state ?? "draft") === "atRisk");
+  const hardshipTriggered = spendingRisk.riskLevel === "high" || guardianState === "atRisk";
 
   useEffect(() => {
     ledgerGoalEntries.forEach(({ id, riskCategory }) => {
@@ -6673,7 +6671,7 @@ function RecoveryActionCard({ action, selected, onToggle, t }) {
         <strong>{t(`needDetails.emergency.actionTypes.${action.action_type}`)}</strong>
         {action.target_domain ? <em> — {t(`needDetails.emergency.domains.${action.target_domain}`)}</em> : null}
         <p>{action.rationale}</p>
-        {action.amount ? <b>{formatSgd(Math.round(action.amount))}</b> : null}
+        {action.action_type !== "other_ocbc_support" ? <b>{formatSgd(Math.round(action.amount))}</b> : null}
       </span>
       {selected ? <Check size={16} /> : null}
     </button>
@@ -6699,7 +6697,11 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const guardianTriggered = preferences?.hardshipEntryPoint === "guardianAtRisk";
+  // Snapshot once at mount rather than reading the live preference: the
+  // marker gets cleared (below) right after mount so future generic visits
+  // don't show stale "Guardian flagged you" copy, but this visit's banner
+  // should keep showing it for as long as the customer is on this screen.
+  const [guardianTriggered] = useState(() => preferences?.hardshipEntryPoint === "guardianAtRisk");
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -6724,13 +6726,36 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    if (guardianTriggered) {
+    if (preferences?.hardshipEntryPoint === "guardianAtRisk") {
       setPreferences((current) => ({ ...current, hardshipEntryPoint: null }));
     }
     return () => {
       cancelled = true;
     };
   }, [t]);
+
+  const runProposeActions = async () => {
+    const proposeResponse = await fetch("/api/hardship/propose-actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "Please propose a recovery plan based on my situation.",
+        language,
+        profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses, currentSavings: profile.currentSavings },
+      }),
+    });
+    const proposeData = await proposeResponse.json();
+    if (!proposeResponse.ok) {
+      setErrorMessage(t("needDetails.emergency.genericError"));
+      return;
+    }
+    setSessionData((current) => ({ ...current, proposedActions: proposeData.data }));
+    // Don't pre-select actions the AI itself flagged as needing human/banker
+    // review before anything happens - the customer must opt in explicitly.
+    setSelectedActionIds(
+      proposeData.data.actions.filter((action) => !action.suitability?.human_review_required).map((action) => action.id)
+    );
+  };
 
   const submitAssessment = async (message) => {
     setSubmitting(true);
@@ -6747,23 +6772,19 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
         return;
       }
       setSessionData((current) => ({ ...current, assessment: assessData.data }));
+      await runProposeActions();
+    } catch {
+      setErrorMessage(t("needDetails.emergency.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-      const proposeResponse = await fetch("/api/hardship/propose-actions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: "Please propose a recovery plan based on my situation.",
-          language,
-          profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses, currentSavings: profile.currentSavings },
-        }),
-      });
-      const proposeData = await proposeResponse.json();
-      if (!proposeResponse.ok) {
-        setErrorMessage(t("needDetails.emergency.genericError"));
-        return;
-      }
-      setSessionData((current) => ({ ...current, proposedActions: proposeData.data }));
-      setSelectedActionIds(proposeData.data.actions.map((action) => action.id));
+  const retryProposeActions = async () => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      await runProposeActions();
     } catch {
       setErrorMessage(t("needDetails.emergency.genericError"));
     } finally {
@@ -6812,7 +6833,9 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
 
   const hasAssessment = Boolean(sessionData?.assessment);
   const proposedActions = sessionData?.proposedActions?.actions ?? null;
-  const appliedActions = applyResults ? null : sessionData?.appliedActions ?? [];
+  const appliedActions = sessionData?.appliedActions ?? [];
+  const displayedActions = applyResults ?? appliedActions;
+  const stuckAfterAssessment = hasAssessment && !proposedActions && !applyResults;
 
   return (
     <Screen>
@@ -6876,6 +6899,10 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
               submitLabelKey="needDetails.emergency.hardshipSendLabel"
               labelKey="needDetails.emergency.hardshipInputLabel"
             />
+          ) : stuckAfterAssessment ? (
+            <button type="button" className="secondaryButton" onClick={retryProposeActions} disabled={submitting}>
+              {submitting ? t("weddingPlanner.thinking") : t("needDetails.emergency.retryButton")}
+            </button>
           ) : proposedActions && !applyResults && sessionData?.stage2Status !== "applied" ? (
             <>
               <span className="sectionLabel">{t("needDetails.emergency.actionsLabel")}</span>
@@ -6898,15 +6925,27 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
             </>
           ) : null}
 
-          {applyResults || (appliedActions && appliedActions.length > 0) ? (
+          {displayedActions.length > 0 ? (
             <>
               <span className="sectionLabel">{t("needDetails.emergency.appliedLabel")}</span>
               <div className="weddingLineItems">
-                {(applyResults ?? appliedActions).map((entry) => (
+                {displayedActions.map((entry) => (
                   <SummaryRow
                     key={entry.id}
-                    label={entry.explanation ?? entry.action_type}
-                    value={entry.amount || entry.result?.amount ? formatSgd(Math.round(entry.amount ?? entry.result?.amount)) : t(`needDetails.emergency.actionTypes.${entry.action_type}`)}
+                    label={
+                      entry.status === "failed"
+                        ? `${t("needDetails.emergency.actionFailedLabel")}: ${entry.explanation}`
+                        : entry.status === "pending_review"
+                          ? `${t("needDetails.emergency.actionPendingReviewLabel")}: ${entry.explanation}`
+                          : entry.explanation
+                    }
+                    value={
+                      entry.status === "failed"
+                        ? "—"
+                        : entry.amount != null
+                          ? formatSgd(Math.round(entry.amount))
+                          : t(`needDetails.emergency.actionTypes.${entry.action_type}`)
+                    }
                   />
                 ))}
               </div>

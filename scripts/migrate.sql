@@ -194,7 +194,7 @@ create table if not exists hardship_actions_applied (
   amount               numeric(12,2),
   explanation          text not null,
   applied_at           timestamptz not null default now(),
-  status               text not null default 'applied' -- applied | failed
+  status               text not null default 'applied' -- applied | failed | pending_review
 );
 
 create index if not exists hardship_actions_applied_session_idx
