@@ -37,6 +37,7 @@ import {
   Moon,
   Music,
   PartyPopper,
+  PiggyBank,
   QrCode,
   RotateCcw,
   ScanLine,
@@ -57,6 +58,7 @@ import {
   X,
 } from "lucide-react";
 import { computeHomeFinancials } from "../lib/home-finance.js";
+import { computeRetirementFinancials } from "../lib/retirement-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -70,6 +72,7 @@ const screens = {
   PROFILE: "profile",
   NEED_WEDDING: "needWedding",
   NEED_HOME: "needHome",
+  NEED_RETIREMENT: "needRetirement",
   NEED_EMERGENCY: "needEmergency",
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
@@ -136,6 +139,14 @@ const simulatorGoalOptions = [
   { id: "business", labelKey: "simulator.goals.business", icon: BriefcaseBusiness },
   { id: "custom", labelKey: "simulator.goals.custom", icon: SlidersHorizontal },
 ];
+
+// Goal ids that navigate to a dedicated AI-driven planner screen instead of
+// toggling a simulator checkbox, from the Life Goal Selection grid.
+const DEDICATED_GOAL_SCREENS = {
+  wedding: { screen: screens.NEED_WEDDING, badgeKey: "weddingPlanner.newFeatureBadge" },
+  home: { screen: screens.NEED_HOME, badgeKey: "homePlanner.newFeatureBadge" },
+  retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
+};
 
 const independenceLevels = [
   { level: 1, titleKey: "simulator.levels.1.title", detailKey: "simulator.levels.1.detail" },
@@ -214,6 +225,9 @@ const defaultSimulatorInputs = {
   homeSavingsMonthly: "",
   homeSavingsStartMonth: "",
   homeSavingsTargetMonth: "",
+  retirementSavingsMonthly: "",
+  retirementSavingsStartMonth: "",
+  retirementSavingsTargetMonth: "",
   monthlyExpenses: "3600",
   currentEmergencyFund: "21600",
   targetCoverageMonths: "6",
@@ -1854,7 +1868,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
-  if ([screens.NEED_WEDDING, screens.NEED_HOME].includes(activeScreen)) {
+  if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT].includes(activeScreen)) {
     return screens.MIRROR;
   }
   if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.NEED_INVESTMENT].includes(activeScreen)) {
@@ -3032,17 +3046,17 @@ function FutureMirrorSimulator({
           <span className="sectionLabel">{t("simulator.inputs.lifeGoals")}</span>
           <div className="checkboxGrid">
             {simulatorGoalOptions.map(({ id, labelKey, icon: Icon }) =>
-              id === "wedding" || id === "home" ? (
+              DEDICATED_GOAL_SCREENS[id] ? (
                 <button
                   type="button"
                   className="checkOption weddingEntryOption"
                   key={id}
-                  onClick={() => setActiveScreen(id === "wedding" ? screens.NEED_WEDDING : screens.NEED_HOME)}
+                  onClick={() => setActiveScreen(DEDICATED_GOAL_SCREENS[id].screen)}
                 >
                   <Icon size={15} />
                   <span>{t(labelKey)}</span>
                   <span className="weddingEntryTrailing">
-                    <b className="miniBadge">{t(id === "wedding" ? "weddingPlanner.newFeatureBadge" : "homePlanner.newFeatureBadge")}</b>
+                    <b className="miniBadge">{t(DEDICATED_GOAL_SCREENS[id].badgeKey)}</b>
                     <ChevronRight size={14} />
                   </span>
                 </button>
@@ -4360,6 +4374,19 @@ function NeedDetailScreen({
         profile={profile}
       />
     ),
+    retirement: (
+      <RetirementNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        setSimulatorInputs={setSimulatorInputs}
+        setMemoryEvents={setMemoryEvents}
+        profile={profile}
+        simulatorInputs={simulatorInputs}
+      />
+    ),
     emergency: (
       <EmergencyNeedContent
         success={success}
@@ -4683,6 +4710,7 @@ const SAVINGS_VEHICLE_LABEL_KEYS = {
   robo_invest_conservative: "weddingPlanner.vehicles.roboInvest",
   existing_savings_drawdown: "weddingPlanner.vehicles.existingSavings",
   cpf_ordinary_account: "homePlanner.vehicles.cpfOrdinaryAccount",
+  srs_account: "retirementPlanner.vehicles.srsAccount",
 };
 
 const SAVINGS_VEHICLE_ICONS = {
@@ -4691,6 +4719,7 @@ const SAVINGS_VEHICLE_ICONS = {
   robo_invest_conservative: LineChart,
   existing_savings_drawdown: CircleDollarSign,
   cpf_ordinary_account: Landmark,
+  srs_account: PiggyBank,
 };
 
 function SavingsAllocationRow({ entry, t }) {
@@ -5500,6 +5529,264 @@ function HomeConfirmedPlanCard({ plan, t }) {
   );
 }
 
+const LIFESTYLE_CATEGORY_LABEL_KEYS = {
+  local_modest: "retirementPlanner.lifestyleCategories.localModest",
+  local_comfortable: "retirementPlanner.lifestyleCategories.localComfortable",
+  global_travel: "retirementPlanner.lifestyleCategories.globalTravel",
+  custom: "retirementPlanner.lifestyleCategories.custom",
+};
+
+function RetirementCoverageChip({ plan, t }) {
+  const pct = plan.cpf_coverage_percent ?? 0;
+  const className = pct >= 75 ? "statChip" : pct >= 40 ? "statChip warning" : "statChip warning";
+  return (
+    <span className={className}>{t("retirementPlanner.cpfCoveragePercent", { percent: pct })}</span>
+  );
+}
+
+function RetirementFinancialsBreakdown({ financials, t }) {
+  return (
+    <div className="weddingLineItems">
+      <SummaryRow label={t("retirementPlanner.raAtRetirement")} value={formatSgd(Math.round(financials.ra_at_retirement))} />
+      <SummaryRow label={t("retirementPlanner.cpfLifePayout")} value={formatSgd(Math.round(financials.cpf_life_payout))} />
+      <SummaryRow label={t("retirementPlanner.gapMonthly")} value={formatSgd(Math.round(financials.gap_monthly))} />
+    </div>
+  );
+}
+
+function RetirementPlanCards({ plans, researchNotes, onSelectPlan, t }) {
+  const medianIncome = [...plans].map((plan) => plan.target_monthly_income).sort((a, b) => a - b)[
+    Math.floor((plans.length - 1) / 2)
+  ];
+  return (
+    <section className="weddingPlanCarouselWrap">
+      <span className="sectionLabel">{t("retirementPlanner.planComparisonLabel")}</span>
+      <div className="weddingPlanCarousel">
+        {plans.map((plan, index) => {
+          const recommended = plan.target_monthly_income === medianIncome;
+          return (
+            <article className={`weddingPlanTile accent-${index % 3}${recommended ? " recommended" : ""}`} key={plan.id}>
+              {recommended ? <span className="miniBadge">{t("status.recommended")}</span> : null}
+              <h3>{plan.name}</h3>
+              <p className="weddingPlanSummary">{plan.summary}</p>
+              <div className="weddingTotalCost">
+                <small>{t("retirementPlanner.targetMonthlyIncome")}</small>
+                <strong>{formatSgd(Math.round(plan.target_monthly_income))}</strong>
+              </div>
+              <div className="weddingStatChips">
+                <span className="statChip">{t(LIFESTYLE_CATEGORY_LABEL_KEYS[plan.lifestyle_category] ?? plan.lifestyle_category)}</span>
+                <RetirementCoverageChip plan={plan} t={t} />
+              </div>
+              <RetirementFinancialsBreakdown financials={plan} t={t} />
+              <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
+                {t("retirementPlanner.customizePlan")}
+              </button>
+            </article>
+          );
+        })}
+      </div>
+      {plans.length > 1 ? <p className="weddingCarouselHint">{t("weddingPlanner.swipeHint")}</p> : null}
+      {researchNotes ? (
+        <section className="insightCard">
+          <Bot size={20} />
+          <p>{researchNotes}</p>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function RetirementPlanEditorPanel({
+  plan,
+  retirementContext,
+  customText,
+  onCustomTextChange,
+  onSubmitCustom,
+  onFinalize,
+  submitting,
+  onBack,
+  backLabelKey = "weddingPlanner.backToComparison",
+  t,
+}) {
+  const [incomeOverride, setIncomeOverride] = useState(plan.target_monthly_income);
+  const financials = useMemo(
+    () =>
+      computeRetirementFinancials({
+        targetMonthlyIncome: incomeOverride,
+        cpfLifePlan: plan.cpf_life_plan,
+        payoutAge: plan.payout_age,
+        ...retirementContext,
+      }),
+    [incomeOverride, plan.cpf_life_plan, plan.payout_age, retirementContext]
+  );
+
+  return (
+    <section className="recommendationPanel">
+      <div className="scenarioHead">
+        <span>{plan.name}</span>
+        <button type="button" className="secondaryButton" onClick={onBack}>
+          {t(backLabelKey)}
+        </button>
+      </div>
+
+      <div className="needHeroCard">
+        <span className="sectionLabel">{t("retirementPlanner.incomeAdjustLabel")}</span>
+        <strong>{formatSgd(Math.round(incomeOverride))}</strong>
+        <input
+          className="wideSlider"
+          type="range"
+          min={Math.round(plan.target_monthly_income * 0.7)}
+          max={Math.round(plan.target_monthly_income * 1.3)}
+          step="50"
+          value={incomeOverride}
+          onChange={(event) => setIncomeOverride(Number(event.target.value))}
+          aria-label={t("retirementPlanner.incomeAdjustLabel")}
+        />
+      </div>
+
+      <RetirementFinancialsBreakdown financials={financials} t={t} />
+      <div className="weddingStatChips">
+        <RetirementCoverageChip plan={financials} t={t} />
+      </div>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("retirementPlanner.customRequestLabel")}</span>
+        <textarea
+          className="aiTextInput"
+          rows={2}
+          value={customText}
+          onChange={(event) => onCustomTextChange(event.target.value)}
+          placeholder={t("retirementPlanner.customRequestPlaceholder")}
+        />
+        <button type="button" className="secondaryButton" onClick={onSubmitCustom} disabled={submitting}>
+          {submitting ? t("weddingPlanner.thinking") : t("retirementPlanner.submitCustomChanges")}
+        </button>
+      </div>
+
+      <button type="button" className="primaryButton" onClick={() => onFinalize(incomeOverride)} disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("retirementPlanner.finalizeThisPlan")}
+        <Check size={18} />
+      </button>
+    </section>
+  );
+}
+
+function adaptConfirmedRetirementPlanToPlan(confirmedPlan, t) {
+  return {
+    id: confirmedPlan.plan_id,
+    name: t("retirementPlanner.adjustSyntheticPlanName"),
+    target_monthly_income: confirmedPlan.target_monthly_income,
+    cpf_life_plan: confirmedPlan.cpf_life_plan,
+    payout_age: confirmedPlan.payout_age,
+  };
+}
+
+function RetirementConfirmedPlanCard({ plan, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("retirementPlanner.confirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>{t("retirementPlanner.targetMonthlyIncome")}</small>
+        <strong>{formatSgd(Math.round(plan.target_monthly_income))}</strong>
+      </div>
+      <SummaryRow
+        label={t("retirementPlanner.lifestyleCategoryLabel")}
+        value={t(LIFESTYLE_CATEGORY_LABEL_KEYS[plan.lifestyle_category] ?? plan.lifestyle_category)}
+      />
+      <SummaryRow label={t("retirementPlanner.cpfLifePlanLabel")} value={t(`retirementPlanner.cpfLifePlans.${plan.cpf_life_plan}`)} />
+      <SummaryRow label={t("retirementPlanner.payoutAgeLabel")} value={String(plan.payout_age)} />
+      <RetirementFinancialsBreakdown financials={plan} t={t} />
+      <div className="weddingStatChips">
+        <RetirementCoverageChip plan={plan} t={t} />
+      </div>
+      <section className="insightCard">
+        <Bot size={20} />
+        <p>{plan.confirmation_note}</p>
+      </section>
+    </section>
+  );
+}
+
+function RetirementCpfInputStep({ profile, simulatorInputs, onSubmit, t }) {
+  const [currentAge, setCurrentAge] = useState(String(numberValue(profile.age, 30)));
+  const [retirementAge, setRetirementAge] = useState(String(simulatorInputs?.retirementAge ?? "65"));
+  const [oa, setOa] = useState("");
+  const [sa, setSa] = useState("");
+  const [ma, setMa] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const hasBalances = oa.trim() || sa.trim() || ma.trim();
+    onSubmit({
+      currentAge: Number(currentAge) || 30,
+      retirementAge: Number(retirementAge) || 65,
+      cpfBalances: hasBalances
+        ? { oa: numberValue(oa, 0), sa: numberValue(sa, 0), ma: numberValue(ma, 0) }
+        : null,
+    });
+  };
+
+  return (
+    <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("retirementPlanner.cpfInputStep.title")}</span>
+      <p>{t("retirementPlanner.cpfInputStep.body")}</p>
+      <span className="sectionLabel">{t("retirementPlanner.cpfInputStep.ageLabel")}</span>
+      <input
+        type="number"
+        min="18"
+        max="80"
+        className="aiTextInput"
+        value={currentAge}
+        onChange={(event) => setCurrentAge(event.target.value)}
+        aria-label={t("retirementPlanner.cpfInputStep.ageLabel")}
+      />
+      <span className="sectionLabel">{t("retirementPlanner.cpfInputStep.retirementAgeLabel")}</span>
+      <input
+        type="number"
+        min="55"
+        max="75"
+        className="aiTextInput"
+        value={retirementAge}
+        onChange={(event) => setRetirementAge(event.target.value)}
+        aria-label={t("retirementPlanner.cpfInputStep.retirementAgeLabel")}
+      />
+      <span className="sectionLabel">{t("retirementPlanner.cpfInputStep.balancesLabel")}</span>
+      <input
+        type="number"
+        min="0"
+        className="aiTextInput"
+        placeholder={t("retirementPlanner.cpfInputStep.oaLabel")}
+        value={oa}
+        onChange={(event) => setOa(event.target.value)}
+        aria-label={t("retirementPlanner.cpfInputStep.oaLabel")}
+      />
+      <input
+        type="number"
+        min="0"
+        className="aiTextInput"
+        placeholder={t("retirementPlanner.cpfInputStep.saLabel")}
+        value={sa}
+        onChange={(event) => setSa(event.target.value)}
+        aria-label={t("retirementPlanner.cpfInputStep.saLabel")}
+      />
+      <input
+        type="number"
+        min="0"
+        className="aiTextInput"
+        placeholder={t("retirementPlanner.cpfInputStep.maLabel")}
+        value={ma}
+        onChange={(event) => setMa(event.target.value)}
+        aria-label={t("retirementPlanner.cpfInputStep.maLabel")}
+      />
+      <p className="weddingCarouselHint">{t("retirementPlanner.cpfInputStep.skipHint")}</p>
+      <button type="submit" className="primaryButton">
+        {t("retirementPlanner.cpfInputStep.continueButton")}
+        <ChevronRight size={18} />
+      </button>
+    </form>
+  );
+}
+
 function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile }) {
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -5722,7 +6009,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       }));
       return true;
     } catch {
-      setCheckinError(t("homePlanner.checkins.genericError"));
+      setCheckinError(t("weddingPlanner.checkins.genericError"));
       return false;
     } finally {
       setCheckinSubmitting(false);
@@ -5871,6 +6158,418 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
               placeholder={t("homePlanner.inputPlaceholder")}
               submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "homePlanner.sendFirst"}
               labelKey="homePlanner.inputLabel"
+            />
+          ) : null}
+        </>
+      )}
+    </Screen>
+  );
+}
+
+function RetirementNeedContent({
+  success,
+  setSuccess,
+  t,
+  setActiveScreen,
+  language,
+  setSimulatorInputs,
+  setMemoryEvents,
+  profile,
+  simulatorInputs,
+}) {
+  const [sessionData, setSessionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
+  const [customText, setCustomText] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [exploringNewPlan, setExploringNewPlan] = useState(false);
+  const [adjustPlanTarget, setAdjustPlanTarget] = useState(null);
+  const [checkinSubmitting, setCheckinSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState("");
+  const [retirementProfileInput, setRetirementProfileInput] = useState(null);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/retirement/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/retirement/session")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSessionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage(t("retirementPlanner.genericError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const effectiveRetirementProfile =
+    retirementProfileInput ?? {
+      currentAge: numberValue(profile.age, 30),
+      retirementAge: numberValue(simulatorInputs?.retirementAge, 65),
+      cpfBalances: null,
+    };
+  const retirementContext = {
+    currentAge: effectiveRetirementProfile.currentAge,
+    retirementAge: effectiveRetirementProfile.retirementAge,
+    currentBalances: effectiveRetirementProfile.cpfBalances,
+    monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+  };
+
+  const submitToStage1 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/retirement/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent,
+          message,
+          language,
+          profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses, age: profile.age },
+          retirementProfile: effectiveRetirementProfile,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("retirementPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        planOptions: data.type === "propose_retirement_plans" ? data.data : current?.planOptions,
+        confirmedPlan: data.type === "confirm_retirement_plan" ? data.data : current?.confirmedPlan,
+        stage1Status: data.type === "confirm_retirement_plan" ? "confirmed" : current?.stage1Status,
+      }));
+      if (data.type === "confirm_retirement_plan") {
+        setSuccess();
+        setExploringNewPlan(false);
+        setAdjustPlanTarget(null);
+        const plan = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          retirementAge: String(effectiveRetirementProfile.retirementAge),
+        }));
+        setMemoryEvents((current) => [
+          {
+            id: `retirement-confirmed-${plan.plan_id}`,
+            year: String(new Date().getFullYear() + (effectiveRetirementProfile.retirementAge - effectiveRetirementProfile.currentAge)),
+            title: t("retirementPlanner.memoryEventTitle"),
+            description: plan.confirmation_note,
+            impact: t("retirementPlanner.memoryEventImpact", { amount: formatSgd(Math.round(plan.target_monthly_income)) }),
+            product: t("retirementPlanner.memoryEventProduct"),
+            action: t("retirementPlanner.memoryEventAction"),
+            reason: t("retirementPlanner.memoryEventReason"),
+            dataUsed: t("retirementPlanner.memoryEventDataUsed"),
+            statusKey: "status.completed",
+          },
+          ...current,
+        ]);
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("retirementPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (text) => submitToStage1(sessionData?.planOptions ? "refine" : "generate", text);
+
+  const selectedPlan = sessionData?.planOptions?.plans.find((plan) => plan.id === selectedPlanId) ?? null;
+
+  const handleSelectPlan = (planId) => {
+    if (!sessionData?.planOptions?.plans.find((p) => p.id === planId)) return;
+    setSelectedPlanId(planId);
+    setCustomText("");
+  };
+
+  const handleSubmitCustom = async () => {
+    if (!selectedPlan || !customText.trim()) return;
+    const message = `For the "${selectedPlan.name}" plan: ${customText.trim()}`;
+    const ok = await submitToStage1("refine", message);
+    if (ok) {
+      setSelectedPlanId(null);
+      setCustomText("");
+    }
+  };
+
+  const handleFinalize = async (incomeOverride) => {
+    if (!selectedPlan) return;
+    const message = `I'd like to finalize the "${selectedPlan.name}" plan at a target monthly retirement income of approximately SGD ${Math.round(
+      incomeOverride
+    )}. Please confirm this as the final retirement plan.`;
+    await submitToStage1("refine", message);
+  };
+
+  const submitToStage2 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/retirement/stage2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language, profile }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("retirementPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsPlanOptions: data.type === "propose_retirement_savings_plan" ? data.data : current?.savingsPlanOptions,
+        confirmedSavingsPlan: data.type === "finalize_retirement_savings_plan" ? data.data : current?.confirmedSavingsPlan,
+      }));
+      if (data.type === "finalize_retirement_savings_plan") {
+        const plan = data.data;
+        setSimulatorInputs((current) => ({
+          ...current,
+          retirementSavingsMonthly: String(Math.round(plan.monthly_contribution)),
+          retirementSavingsStartMonth: plan.start_month,
+          retirementSavingsTargetMonth: plan.target_complete_month,
+        }));
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("retirementPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStartSavingsPlan = () =>
+    submitToStage2("generate", "Please suggest savings strategies for funding this confirmed retirement plan's income gap.");
+
+  const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
+
+  const handleExploreNewPlan = () => {
+    setSessionData((current) => ({ ...current, planOptions: null }));
+    setSelectedPlanId(null);
+    setCustomText("");
+    setExploringNewPlan(true);
+  };
+
+  const handleAdjustPlan = () => {
+    if (!sessionData?.confirmedPlan) return;
+    const adapted = adaptConfirmedRetirementPlanToPlan(sessionData.confirmedPlan, t);
+    setAdjustPlanTarget(adapted);
+    setCustomText("");
+  };
+
+  const handleAdjustSubmitCustom = async () => {
+    if (!adjustPlanTarget || !customText.trim()) return;
+    const message = `This is an update to my already-confirmed retirement plan: ${customText.trim()}`;
+    const ok = await submitToStage1("refine", message);
+    if (ok) setCustomText("");
+  };
+
+  const handleAdjustFinalize = async (incomeOverride) => {
+    if (!adjustPlanTarget) return;
+    const message = `I'd like to update my already-confirmed retirement plan to a target monthly income of approximately SGD ${Math.round(
+      incomeOverride
+    )}. This replaces the previously confirmed plan - please confirm this as the updated final retirement plan.`;
+    await submitToStage1("refine", message);
+  };
+
+  const handleAddCheckin = async ({ checkinMonth, amount, note }) => {
+    setCheckinSubmitting(true);
+    setCheckinError("");
+    try {
+      const response = await fetch("/api/retirement/savings-checkins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkinMonth, amount, note }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setCheckinError(t("weddingPlanner.checkins.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsCheckins: [...(current?.savingsCheckins ?? []), data.checkin],
+      }));
+      return true;
+    } catch {
+      setCheckinError(t("weddingPlanner.checkins.genericError"));
+      return false;
+    } finally {
+      setCheckinSubmitting(false);
+    }
+  };
+
+  const needsCpfInputStep = !retirementProfileInput && !sessionData?.confirmedPlan && !sessionData?.planOptions;
+
+  return (
+    <Screen>
+      <Header title={t("retirementPlanner.title")} subtitle={t("retirementPlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("retirementPlanner.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="retirementPlanner.historyTitle"
+          emptyKey="retirementPlanner.historyEmpty"
+        />
+      ) : null}
+      <SuccessBanner show={success} text={t("retirementPlanner.success")} />
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : needsCpfInputStep ? (
+        <RetirementCpfInputStep
+          profile={profile}
+          simulatorInputs={simulatorInputs}
+          onSubmit={setRetirementProfileInput}
+          t={t}
+        />
+      ) : adjustPlanTarget ? (
+        <>
+          <RetirementPlanEditorPanel
+            plan={adjustPlanTarget}
+            retirementContext={retirementContext}
+            customText={customText}
+            onCustomTextChange={setCustomText}
+            onSubmitCustom={handleAdjustSubmitCustom}
+            onFinalize={handleAdjustFinalize}
+            submitting={submitting}
+            onBack={() => setAdjustPlanTarget(null)}
+            backLabelKey="retirementPlanner.backToConfirmedPlan"
+            t={t}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+        </>
+      ) : sessionData?.confirmedPlan && !exploringNewPlan ? (
+        <>
+          <RetirementConfirmedPlanCard plan={sessionData.confirmedPlan} t={t} />
+          <div className="confirmedPlanActions">
+            <button type="button" className="secondaryButton" onClick={handleAdjustPlan}>
+              {t("retirementPlanner.adjustPlanLabel")}
+            </button>
+            <button type="button" className="secondaryButton" onClick={handleExploreNewPlan}>
+              {t("retirementPlanner.planAnotherLabel")}
+            </button>
+          </div>
+          {sessionData?.confirmedSavingsPlan ? (
+            <ConfirmedSavingsPlanCard
+              plan={sessionData.confirmedSavingsPlan}
+              checkins={sessionData.savingsCheckins ?? []}
+              onAddCheckin={handleAddCheckin}
+              checkinSubmitting={checkinSubmitting}
+              checkinError={checkinError}
+              t={t}
+            />
+          ) : sessionData?.savingsPlanOptions ? (
+            <SavingsStrategyCards strategies={sessionData.savingsPlanOptions.strategies} t={t} />
+          ) : (
+            <section className="needHeroCard">
+              <span className="sectionLabel">{t("retirementPlanner.savingsPlanCtaLabel")}</span>
+              <p>{t("retirementPlanner.savingsPlanCtaBody")}</p>
+              <button type="button" className="primaryButton" onClick={handleStartSavingsPlan} disabled={submitting}>
+                {submitting ? t("weddingPlanner.thinking") : t("retirementPlanner.savingsPlanCtaButton")}
+                <Send size={18} />
+              </button>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!sessionData?.confirmedSavingsPlan && sessionData?.savingsPlanOptions ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSavingsSubmit}
+              submitting={submitting}
+              placeholder={t("retirementPlanner.savingsInputPlaceholder")}
+              submitLabelKey="weddingPlanner.send"
+              labelKey="retirementPlanner.inputLabel"
+            />
+          ) : null}
+        </>
+      ) : (
+        <>
+          {sessionData?.confirmedPlan ? (
+            <button type="button" className="secondaryButton" onClick={() => setExploringNewPlan(false)}>
+              {t("retirementPlanner.backToConfirmedPlan")}
+            </button>
+          ) : null}
+          {selectedPlan ? (
+            <RetirementPlanEditorPanel
+              plan={selectedPlan}
+              retirementContext={retirementContext}
+              customText={customText}
+              onCustomTextChange={setCustomText}
+              onSubmitCustom={handleSubmitCustom}
+              onFinalize={handleFinalize}
+              submitting={submitting}
+              onBack={() => setSelectedPlanId(null)}
+              t={t}
+            />
+          ) : sessionData?.planOptions ? (
+            <RetirementPlanCards
+              plans={sessionData.planOptions.plans}
+              researchNotes={sessionData.planOptions.research_notes}
+              onSelectPlan={handleSelectPlan}
+              t={t}
+            />
+          ) : (
+            <section className="weddingHero">
+              <span className="weddingHeroBadge">{t("retirementPlanner.newFeatureBadge")}</span>
+              <span className="weddingHeroIcon">
+                <Landmark size={26} />
+              </span>
+              <strong>{t("retirementPlanner.emptyStateLabel")}</strong>
+              <p>{t("retirementPlanner.emptyStateBody")}</p>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          {!selectedPlan ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+              placeholder={t("retirementPlanner.inputPlaceholder")}
+              submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "retirementPlanner.sendFirst"}
+              labelKey="retirementPlanner.inputLabel"
             />
           ) : null}
         </>
@@ -6972,6 +7671,10 @@ export default function App() {
       homeSavingsMonthly: current.homeSavingsMonthly,
       homeSavingsStartMonth: current.homeSavingsStartMonth,
       homeSavingsTargetMonth: current.homeSavingsTargetMonth,
+      retirementAge: current.retirementAge,
+      retirementSavingsMonthly: current.retirementSavingsMonthly,
+      retirementSavingsStartMonth: current.retirementSavingsStartMonth,
+      retirementSavingsTargetMonth: current.retirementSavingsTargetMonth,
       customGoalName: current.customGoalName,
       customTargetAmount: current.customTargetAmount,
       customTargetDate: current.customTargetDate,
@@ -7158,6 +7861,7 @@ export default function App() {
     ),
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,
     [screens.NEED_HOME]: <NeedDetailScreen {...shared} type="home" />,
+    [screens.NEED_RETIREMENT]: <NeedDetailScreen {...shared} type="retirement" />,
     [screens.NEED_EMERGENCY]: <NeedDetailScreen {...shared} type="emergency" />,
     [screens.NEED_INSURANCE]: <NeedDetailScreen {...shared} type="insurance" />,
     [screens.NEED_INVESTMENT]: <NeedDetailScreen {...shared} type="investment" />,
