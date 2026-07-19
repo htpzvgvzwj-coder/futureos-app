@@ -306,6 +306,66 @@
       "escalationHistoryTitle": "Relationship Manager reviews",
       "escalationHistoryItem": "{product} queued for review to support {goal}"
     },
+    "crossBankData": {
+      "title": "Cross-Bank Data Integration",
+      "subtitle": "A concept preview: if FutureOS integrated SGFinDex-style cross-bank data, here is how Guardian's existing promises would go from partial to whole. Simulated data only - no real bank accounts are connected.",
+      "entrySubtitle": "What Guardian could do with cross-bank data (concept preview)",
+      "disclaimer": "Everything below uses simulated data to illustrate a future capability. FutureOS is not currently connected to any external bank account.",
+      "inputLabel": "Data Guardian would receive",
+      "processLabel": "What Guardian does with it",
+      "outputLabel": "Result shown to the customer",
+      "items": {
+        "spending": {
+          "title": "Cross-bank spending patterns",
+          "linksTo": "Lets Guardian actually honour its own rule: avoid harmful product conflicts",
+          "input": "DBS Credit Card: $1,200 in gambling-category spend this month - invisible to OCBC today",
+          "process": "Guardian checks this cross-bank spending against the savings goal declared in Life Graph",
+          "output": "Guardian moves to 'At Risk' and flags that this month's cross-bank spending may affect the house down-payment goal"
+        },
+        "insurance": {
+          "title": "Cross-institution policy coverage",
+          "linksTo": "Turns the 'event-triggered micro-insurance' idea from concept into something technically feasible",
+          "input": "AIA Critical Illness policy, $80,000 coverage - not visible in OCBC's system today",
+          "process": "Customer just confirmed a new home loan; Guardian checks total coverage across every institution against the new debt gap",
+          "output": "Calculates a real gap of $270,000 and suggests a 3-month top-up, instead of pitching a policy the customer is already covered by elsewhere"
+        },
+        "debt": {
+          "title": "Full cross-bank debt picture",
+          "linksTo": "Lets Guardian honour 'avoid over-indebtedness', and makes the Strategic Balance risk band accurate",
+          "input": "UOB credit card $1,500 owed + Citibank personal loan $15,000 - excluded from today's OCBC-side debt score",
+          "process": "Recalculates the Strategic Balance credit health score including debt at every institution",
+          "output": "Credit health score corrects from an inflated 72 to 51; risk band moves from Healthy to Tight"
+        },
+        "investment": {
+          "title": "Cross-bank investment holdings",
+          "linksTo": "Lets Guardian honour 'don't quietly hurt one goal while optimizing another'",
+          "input": "Tiger Brokers: $40,000 in tech stocks, heavily concentrated in one sector - outside OCBC's view",
+          "process": "Before recommending a tech-themed RoboInvest fund, Guardian checks the customer's existing concentration elsewhere first",
+          "output": "Withdraws the original recommendation and suggests diversification instead, avoiding a concentration risk the customer never consented to"
+        },
+        "income": {
+          "title": "IRAS-verified income",
+          "linksTo": "Turns Life Graph goals from self-reported feasibility into verified feasibility",
+          "input": "IRAS-verified annual income: $78,000 - the customer had self-entered $95,000 in Life Graph",
+          "process": "Guardian re-runs the 5-year home-purchase goal's feasibility model using the verified income",
+          "output": "Tells the customer upfront the timeline needs to shift from 5 to 7 years, instead of finding out halfway through execution"
+        },
+        "property": {
+          "title": "Official HDB data verification",
+          "linksTo": "Turns Loan Planner's ABSD and cash-requirement maths from a simulation into a verified result",
+          "input": "HDB record: the customer already co-owns a flat - not ticked in Loan Planner's self-declared status",
+          "process": "Loan Planner recalculates ABSD using the verified ownership status instead of the self-declared one",
+          "output": "ABSD corrects from 0% to 20%, catching the error before a real loan application is rejected or back-charged"
+        },
+        "trend": {
+          "title": "Longitudinal trend, not a one-time snapshot",
+          "linksTo": "Makes Drift Detection Lead Time live up to its name - ahead of a trend, not just a single event",
+          "input": "Over the past 6 months, total assets at other banks fell 8% while the OCBC-side accounts looked completely normal",
+          "process": "Guardian holds a standing subscription to cross-bank data instead of a one-off query, watching for the inflection point",
+          "output": "Enters Recovery state months earlier, instead of only reacting the day a single deposit suddenly drops"
+        }
+      }
+    },
     "customGoal": {
       "title": "Add Custom Goal",
       "addButton": "Add Custom Goal",

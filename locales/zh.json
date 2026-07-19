@@ -292,6 +292,66 @@
         "savings": "你的目标里还没有任何一个确认过储蓄计划。"
       }
     },
+    "crossBankData": {
+      "title": "跨行数据整合",
+      "subtitle": "概念展示：如果 FutureOS 接入 SGFinDex 这类跨行数据聚合，Guardian 现有的承诺会从'部分兑现'变成'完整兑现'。以下全部为模拟数据，目前并未连接任何真实银行账户。",
+      "entrySubtitle": "如果接入跨行数据，Guardian 还能多做到什么（概念展示）",
+      "disclaimer": "以下内容均使用模拟数据，用于说明一项未来能力构想。FutureOS 目前尚未连接任何外部银行账户。",
+      "inputLabel": "Guardian 会拿到的数据",
+      "processLabel": "Guardian 用它做什么",
+      "outputLabel": "客户看到的结果",
+      "items": {
+        "spending": {
+          "title": "跨行消费轨迹",
+          "linksTo": "让 Guardian 真正做到自己写下的原则：避免有害产品冲突",
+          "input": "DBS 信用卡：本月博彩类支出 $1,200 —— OCBC 目前完全看不到",
+          "process": "Guardian 将这笔跨行支出与客户在 Life Graph 声明的储蓄目标进行核对",
+          "output": "Guardian 进入'有风险'状态，提醒客户：本月跨行消费模式可能影响买房首付进度"
+        },
+        "insurance": {
+          "title": "跨机构保单覆盖",
+          "linksTo": "让之前聊的'事件触发式动态微保险'从想法变成技术上可行",
+          "input": "友邦重疾险，保额 $80,000 —— OCBC 系统目前看不到这份保单",
+          "process": "客户刚确认一笔新房贷，Guardian 核对全部机构的保障覆盖与新增负债缺口",
+          "output": "算出真实缺口为 $270,000，建议 3 个月期临时补充保障，而不是重复推销客户已有等价保障的保单"
+        },
+        "debt": {
+          "title": "跨行负债全貌",
+          "linksTo": "让 Guardian 真正做到'避免过度债务'，也让 Strategic Balance 的风险带真正准确",
+          "input": "大华信用卡欠款 $1,500 + 花旗个人贷款 $15,000 —— 目前 OCBC 侧的负债分完全没算这些",
+          "process": "重新计算 Strategic Balance 的信贷健康分，纳入客户在所有机构的负债",
+          "output": "信贷健康分从虚高的 72 修正为 51，风险带从'健康'降到'偏紧'"
+        },
+        "investment": {
+          "title": "跨行投资持仓",
+          "linksTo": "让 Guardian 真正做到'不要悄悄伤害一个目标来优化另一个目标'",
+          "input": "老虎证券持有 $40,000 科技股，高度集中在同一行业 —— OCBC 这边看不到",
+          "process": "在推荐科技主题 RoboInvest 基金前，Guardian 先核对客户在其他机构的持仓集中度",
+          "output": "撤回原本的推荐，改为建议不同行业的分散配置，避免客户在不知情的情况下被加重集中度风险"
+        },
+        "income": {
+          "title": "IRAS 核验收入",
+          "linksTo": "让 Life Graph 的目标从'自报可行'变成'核验可行'",
+          "input": "IRAS 核验年收入 $78,000 —— 客户在 Life Graph 自己填的是 $95,000",
+          "process": "Guardian 用核验后的真实收入，重新跑一遍'5年内买房'目标的可行性模型",
+          "output": "提前告知客户目标时间线需要从5年调整到7年，而不是执行到一半才发现算错"
+        },
+        "property": {
+          "title": "HDB 官方数据核验",
+          "linksTo": "让 Loan Planner 的 ABSD/现金要求计算从模拟变成真实核验结果",
+          "input": "HDB 记录：客户名下已共同拥有一套组屋 —— 客户在 Loan Planner 里没有勾选'已拥有房产'",
+          "process": "Loan Planner 用核验后的房产状态，而不是客户自报的状态，重新计算 ABSD",
+          "output": "ABSD 从 0% 修正为 20%，在客户实际申请贷款被拒或被追缴税款之前提前发现问题"
+        },
+        "trend": {
+          "title": "长期趋势，而非单次快照",
+          "linksTo": "让 Drift Detection Lead Time 这个指标真正名副其实 —— 提前于趋势，而不只是提前于单次事件",
+          "input": "过去6个月，客户在其他银行的总资产持续下降 8%，而 OCBC 侧账户看起来完全正常",
+          "process": "Guardian 持续订阅跨行数据（而非一次性查询），侦测长期拐点而非单点异常",
+          "output": "提前数月进入'恢复'状态，而不是等到某天存款骤降才被动反应"
+        }
+      }
+    },
     "customGoal": {
       "title": "添加自定义目标",
       "addButton": "添加自定义目标",

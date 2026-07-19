@@ -83,6 +83,7 @@ const screens = {
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
   STRATEGIC_BALANCE: "strategicBalance",
+  CROSS_BANK_DATA: "crossBankData",
   PAYNOW: "paynow",
   SCAN_PAY: "scanPay",
   FX: "fx",
@@ -703,6 +704,79 @@ function StrategicBalanceScreen({ preferences, t, setActiveScreen }) {
           </div>
         </>
       )}
+    </Screen>
+  );
+}
+
+// Concept preview only — no real bank account is connected. Every item here
+// is simulated data illustrating what Guardian's existing, already-documented
+// promises (avoid harmful product conflicts, avoid over-indebtedness, honest
+// drift detection lead time, etc.) would look like with real cross-bank data
+// instead of only the OCBC-visible slice.
+const crossBankDataIdeas = [
+  { id: "spending", icon: CreditCard },
+  { id: "insurance", icon: ShieldCheck },
+  { id: "debt", icon: AlertTriangle },
+  { id: "investment", icon: LineChart },
+  { id: "income", icon: FileText },
+  { id: "property", icon: Building2 },
+  { id: "trend", icon: History },
+];
+
+function CrossBankDataScreen({ t, setActiveScreen }) {
+  const [openItem, setOpenItem] = useState(null);
+
+  return (
+    <Screen>
+      <Header title={t("lifeGraph.crossBankData.title")} subtitle={t("lifeGraph.crossBankData.subtitle")} />
+      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
+
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("lifeGraph.crossBankData.disclaimer")}</p>
+      </section>
+
+      <div className="strategicCategoryList">
+        {crossBankDataIdeas.map(({ id, icon: Icon }) => {
+          const expanded = openItem === id;
+          return (
+            <div className={expanded ? "strategicAccordionItem expanded" : "strategicAccordionItem"} key={id}>
+              <button
+                type="button"
+                className="strategicCategoryRow"
+                onClick={() => setOpenItem(expanded ? null : id)}
+                aria-expanded={expanded}
+              >
+                <span className="iconBubble">
+                  <Icon size={16} />
+                </span>
+                <span>
+                  <strong>{t(`lifeGraph.crossBankData.items.${id}.title`)}</strong>
+                  <small>{t(`lifeGraph.crossBankData.items.${id}.linksTo`)}</small>
+                </span>
+                <ChevronRight size={15} className={expanded ? "chevronExpanded" : ""} />
+              </button>
+
+              {expanded ? (
+                <div className="strategicAccordionDetail">
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.crossBankData.inputLabel")}</strong>
+                    <p>{t(`lifeGraph.crossBankData.items.${id}.input`)}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.crossBankData.processLabel")}</strong>
+                    <p>{t(`lifeGraph.crossBankData.items.${id}.process`)}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.crossBankData.outputLabel")}</strong>
+                    <p>{t(`lifeGraph.crossBankData.items.${id}.output`)}</p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
     </Screen>
   );
 }
@@ -3139,6 +3213,21 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         <span>
           <strong>{t("lifeGraph.strategicBalance.title")}</strong>
           <small>{t("lifeGraph.strategicBalance.subtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
+      </button>
+
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.CROSS_BANK_DATA)}
+      >
+        <span className="iconBubble">
+          <ArrowLeftRight size={16} />
+        </span>
+        <span>
+          <strong>{t("lifeGraph.crossBankData.title")}</strong>
+          <small>{t("lifeGraph.crossBankData.entrySubtitle")}</small>
         </span>
         <ChevronRight size={15} />
       </button>
@@ -9931,6 +10020,7 @@ export default function App() {
       />
     ),
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
+    [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.PAYNOW]: <QuickActionScreen {...shared} type="paynow" />,
     [screens.SCAN_PAY]: <QuickActionScreen {...shared} type="scanPay" />,
     [screens.FX]: <QuickActionScreen {...shared} type="fx" />,
