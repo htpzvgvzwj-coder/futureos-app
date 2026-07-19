@@ -35,8 +35,8 @@ export async function POST(request) {
   const result = modifiers.length ? applyLoanModifiers(base, modifiers, params) : base;
 
   const session = await getOrCreateSession(DEFAULT_PROFILE_KEY, purpose);
-  await saveArtifact(session.id, "stage1", "confirmed_loan", result);
+  const createdAt = await saveArtifact(session.id, "stage1", "confirmed_loan", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
 
-  return Response.json({ type: "confirm_loan", data: result });
+  return Response.json({ type: "confirm_loan", data: result, confirmedAt: createdAt });
 }

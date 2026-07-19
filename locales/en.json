@@ -892,6 +892,12 @@
       "genericError": "Something went wrong on our end. Please try again.",
       "historyTitle": "Conversation History",
       "historyEmpty": "No conversation yet.",
+      "memoryEventTitle": "We Got Through a Hardship Together",
+      "memoryEventImpact": "{count} recovery action(s) applied to protect your plans.",
+      "memoryEventProduct": "Hardship Recovery (AI-assisted)",
+      "memoryEventAction": "Guardian read your real committed savings plans and proposed concrete recovery actions instead of generic advice.",
+      "memoryEventReason": "You told us what happened and approved specific actions to apply.",
+      "memoryEventDataUsed": "What you told us about your situation, plus your real confirmed goal commitments and current savings.",
       "hardshipCtaLabel": "Going through something?",
       "hardshipCtaBody": "If your income dropped, you lost your job, or an unexpected expense hit, tell us what happened - we'll look at your real committed savings plans and propose concrete ways we can help, not just generic advice.",
       "guardianTriggeredLabel": "We noticed you might be under financial pressure",
@@ -1209,7 +1215,13 @@
       "onTrack": "Other Goals: On Track",
       "tight": "Other Goals: Tight",
       "atRisk": "Other Goals: At Risk"
-    }
+    },
+    "memoryEventTitle": "Loan Strategy Confirmed",
+    "memoryEventImpact": "Loan of {amount} added to your financial plan.",
+    "memoryEventProduct": "Loan Planner (AI-assisted)",
+    "memoryEventAction": "Guardian compared Safe/Balanced/Fast repayment strategies and calculated real installment, interest, and Future Score figures for a loan scoped only to this goal.",
+    "memoryEventReason": "You confirmed a specific strategy after comparing real repayment trade-offs.",
+    "memoryEventDataUsed": "Your stated borrowing purpose and amount, plus current TDSR/MSR serviceability rules and market interest-rate benchmarks."
   },
   "investmentPlanner": {
     "title": "Investment Planner",
@@ -1330,7 +1342,13 @@
       "moneyMarketGeneric": "Near-cash, but still not principal-guaranteed and returns move with short-term rates.",
       "reitGeneric": "REITs are sensitive to interest rates and the property market cycle.",
       "thematicFundGeneric": "Thematic funds concentrate in one trend or sector - higher volatility than a broad market fund."
-    }
+    },
+    "memoryEventTitle": "Investment Confirmed",
+    "memoryEventImpact": "Investment of {amount} added to your financial plan.",
+    "memoryEventProduct": "Investment Planner (AI-assisted)",
+    "memoryEventAction": "Guardian shortlisted funds and stocks matched to your risk, goal, and available cashflow, and calculated real projected returns for the purchase mode you chose.",
+    "memoryEventReason": "You confirmed a specific instrument and purchase mode after comparing real projected outcomes.",
+    "memoryEventDataUsed": "Your risk preference, goal, current holdings, and available monthly cashflow after your other confirmed goals."
   },
   "retirementPlanner": {
     "title": "Retirement Planner",
@@ -1888,6 +1906,13 @@
       "scanPay": "Scan & Pay",
       "fx": "Foreign Exchange",
       "customise": "Customise"
+    },
+    "sharedJourney": {
+      "title": "Our Shared Journey",
+      "subtitle": "The real moments we built your plan together.",
+      "emptyBody": "Our journey together hasn't started yet - let's set your first goal and take the first step together.",
+      "emptyCta": "Set Our First Goal",
+      "viewFullJourney": "View Our Full Journey"
     },
     "accountsTitle": "Accounts Overview",
     "accounts": {

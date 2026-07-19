@@ -879,6 +879,12 @@
       "genericError": "Sesuatu tidak kena di pihak kami. Sila cuba lagi.",
       "historyTitle": "Sejarah Perbualan",
       "historyEmpty": "Belum ada perbualan lagi.",
+      "memoryEventTitle": "Kami Bersama-sama Mengharungi Kesukaran",
+      "memoryEventImpact": "{count} tindakan pemulihan telah digunakan untuk melindungi rancangan anda.",
+      "memoryEventProduct": "Pemulihan Kesukaran (dibantu AI)",
+      "memoryEventAction": "Guardian membaca rancangan simpanan sebenar yang telah anda sahkan dan mencadangkan tindakan pemulihan konkrit dan bukan nasihat generik.",
+      "memoryEventReason": "Anda memberitahu kami apa yang berlaku dan meluluskan tindakan khusus untuk digunakan.",
+      "memoryEventDataUsed": "Apa yang anda beritahu kami tentang situasi anda, ditambah komitmen matlamat sebenar yang telah disahkan dan simpanan semasa anda.",
       "hardshipCtaLabel": "Sedang menghadapi kesukaran?",
       "hardshipCtaBody": "Jika pendapatan anda menurun, anda kehilangan pekerjaan, atau berlaku perbelanjaan tidak dijangka, beritahu kami apa yang berlaku - kami akan melihat pelan simpanan sebenar anda dan mencadangkan cara konkrit untuk membantu, bukan sekadar nasihat umum.",
       "guardianTriggeredLabel": "Kami perasan anda mungkin menghadapi tekanan kewangan",
@@ -1196,7 +1202,13 @@
       "onTrack": "Matlamat Lain: Mengikut Landasan",
       "tight": "Matlamat Lain: Ketat",
       "atRisk": "Matlamat Lain: Berisiko"
-    }
+    },
+    "memoryEventTitle": "Strategi Pinjaman Disahkan",
+    "memoryEventImpact": "Pinjaman sebanyak {amount} ditambah ke rancangan kewangan anda.",
+    "memoryEventProduct": "Perancang Pinjaman (dibantu AI)",
+    "memoryEventAction": "Guardian membandingkan strategi bayaran balik Selamat/Seimbang/Pantas dan mengira angka ansuran, faedah, dan Skor Masa Depan sebenar untuk pinjaman yang tertumpu hanya pada matlamat ini.",
+    "memoryEventReason": "Anda mengesahkan strategi tertentu selepas membandingkan pertukaran bayaran balik sebenar.",
+    "memoryEventDataUsed": "Tujuan dan jumlah pinjaman yang anda nyatakan, ditambah peraturan keupayaan bayaran balik TDSR/MSR semasa dan penanda aras kadar faedah pasaran."
   },
   "investmentPlanner": {
     "title": "Perancang Pelaburan",
@@ -1317,7 +1329,13 @@
       "moneyMarketGeneric": "Hampir tunai, tetapi masih tidak dijamin modal dan pulangan bergerak mengikut kadar jangka pendek.",
       "reitGeneric": "REIT sensitif terhadap kadar faedah dan kitaran pasaran hartanah.",
       "thematicFundGeneric": "Dana bertema tertumpu pada satu trend atau sektor - turun naik lebih tinggi daripada dana pasaran luas."
-    }
+    },
+    "memoryEventTitle": "Pelaburan Disahkan",
+    "memoryEventImpact": "Pelaburan sebanyak {amount} ditambah ke rancangan kewangan anda.",
+    "memoryEventProduct": "Perancang Pelaburan (dibantu AI)",
+    "memoryEventAction": "Guardian menyenarai pendek dana dan saham yang sepadan dengan risiko, matlamat, dan aliran tunai anda, dan mengira angka pulangan unjuran sebenar untuk mod pembelian yang anda pilih.",
+    "memoryEventReason": "Anda mengesahkan instrumen dan mod pembelian tertentu selepas membandingkan hasil unjuran sebenar.",
+    "memoryEventDataUsed": "Keutamaan risiko, matlamat, pegangan semasa anda, dan aliran tunai bulanan yang tersedia selepas matlamat lain yang telah disahkan."
   },
   "retirementPlanner": {
     "title": "Perancang Persaraan",
@@ -1875,6 +1893,13 @@
       "scanPay": "Imbas & Bayar",
       "fx": "Tukaran Asing",
       "customise": "Suai khas"
+    },
+    "sharedJourney": {
+      "title": "Perjalanan Bersama Kami",
+      "subtitle": "Detik sebenar di mana kami membina rancangan anda bersama-sama.",
+      "emptyBody": "Perjalanan kami bersama belum bermula lagi - mari tetapkan matlamat pertama anda dan ambil langkah pertama bersama-sama.",
+      "emptyCta": "Tetapkan Matlamat Pertama Kami",
+      "viewFullJourney": "Lihat Perjalanan Penuh Kami"
     },
     "accountsTitle": "Ringkasan Akaun",
     "accounts": {

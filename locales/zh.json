@@ -879,6 +879,12 @@
       "genericError": "出了点问题,请再试一次。",
       "historyTitle": "对话记录",
       "historyEmpty": "暂时还没有对话记录。",
+      "memoryEventTitle": "我们一起渡过了一次难关",
+      "memoryEventImpact": "已应用 {count} 项恢复行动,保护你的各项计划。",
+      "memoryEventProduct": "困境恢复（AI辅助）",
+      "memoryEventAction": "Guardian 读取了你真实的已确认储蓄计划，提出了具体的恢复行动，而不是泛泛的建议。",
+      "memoryEventReason": "你告诉了我们发生了什么，并批准了具体要执行的行动。",
+      "memoryEventDataUsed": "你告诉我们的情况，加上你真实已确认的目标承诺和当前储蓄。",
       "hardshipCtaLabel": "遇到困难了吗?",
       "hardshipCtaBody": "如果你的收入下降、失业了,或者遇到了意外支出,告诉我们发生了什么——我们会查看你真实的储蓄计划,给出具体能帮到你的方式,而不只是泛泛的建议。",
       "guardianTriggeredLabel": "我们注意到你可能面临财务压力",
@@ -1196,7 +1202,13 @@
       "onTrack": "其他目标：进展正常",
       "tight": "其他目标：较为紧张",
       "atRisk": "其他目标：可能受影响"
-    }
+    },
+    "memoryEventTitle": "贷款策略已确认",
+    "memoryEventImpact": "金额为 {amount} 的贷款已加入你的财务计划。",
+    "memoryEventProduct": "贷款规划师（AI辅助）",
+    "memoryEventAction": "Guardian 比较了安全型/平衡型/快速型三种还款策略，并为这个单独的贷款目标算出了真实的月供、利息和未来评分数字。",
+    "memoryEventReason": "你在比较了真实的还款权衡后，确认了一个具体的策略。",
+    "memoryEventDataUsed": "你所说的借款用途和金额，加上现行的TDSR/MSR还款能力规定和市场利率水平。"
   },
   "investmentPlanner": {
     "title": "投资规划师",
@@ -1317,7 +1329,13 @@
       "moneyMarketGeneric": "接近现金，但仍不保本，回报会随短期利率变动。",
       "reitGeneric": "REITs对利率和地产周期较为敏感。",
       "thematicFundGeneric": "主题基金集中投资于单一趋势或行业——波动高于广泛市场基金。"
-    }
+    },
+    "memoryEventTitle": "投资已确认",
+    "memoryEventImpact": "金额为 {amount} 的投资已加入你的财务计划。",
+    "memoryEventProduct": "投资规划师（AI辅助）",
+    "memoryEventAction": "Guardian 根据你的风险偏好、目标和可用现金流筛选出匹配的基金和股票，并为你选择的购买方式算出了真实的预计回报数字。",
+    "memoryEventReason": "你在比较了真实的预计结果后，确认了一个具体的标的和购买方式。",
+    "memoryEventDataUsed": "你的风险偏好、投资目标、现有持仓，以及扣除其他已确认目标后的每月可用现金流。"
   },
   "retirementPlanner": {
     "title": "退休规划师",
@@ -1875,6 +1893,13 @@
       "scanPay": "扫码付款",
       "fx": "外汇",
       "customise": "自定义"
+    },
+    "sharedJourney": {
+      "title": "我们共同的旅程",
+      "subtitle": "我们一起把你的计划做出来的那些真实时刻。",
+      "emptyBody": "我们的旅程还没开始——一起定下第一个目标，迈出第一步吧。",
+      "emptyCta": "一起定下第一个目标",
+      "viewFullJourney": "查看完整旅程"
     },
     "accountsTitle": "账户总览",
     "accounts": {

@@ -79,8 +79,8 @@ export async function POST(request) {
     ...futureScore,
   };
 
-  await saveArtifact(session.id, "stage1", "confirmed_investment_pick", result);
+  const createdAt = await saveArtifact(session.id, "stage1", "confirmed_investment_pick", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
 
-  return Response.json({ type: "confirm_investment", data: result });
+  return Response.json({ type: "confirm_investment", data: result, confirmedAt: createdAt });
 }

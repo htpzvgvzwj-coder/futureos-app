@@ -80,11 +80,15 @@ export async function POST(request) {
   ]);
 
   const artifactType = toolUse.name === "propose_plans" ? "plan_options" : "confirmed_budget";
-  await saveArtifact(session.id, "stage1", artifactType, parsed.data);
+  const createdAt = await saveArtifact(session.id, "stage1", artifactType, parsed.data);
 
   if (toolUse.name === "confirm_wedding_budget") {
     await updateSessionStatus(session.id, { stage1Status: "confirmed" });
   }
 
-  return Response.json({ type: toolUse.name, data: parsed.data });
+  return Response.json({
+    type: toolUse.name,
+    data: parsed.data,
+    confirmedAt: toolUse.name === "confirm_wedding_budget" ? createdAt : undefined,
+  });
 }

@@ -1914,14 +1914,75 @@ function Header({ eyebrow, title, subtitle }) {
   );
 }
 
-function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, displayName, preferences, setPreferences, t }) {
+// Replaces the old Account Overview section. Deliberately narrative, not a
+// stat/score tile: reads only memory events with a real confirmedAt
+// (wedding/home/retirement/loan/investment confirmations, hardship
+// recovery) — the seeded demo memory events (target-year only, no
+// confirmedAt) are excluded so this only ever shows things that genuinely
+// happened, never fabricated flavor text.
+function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
+  const realEvents = memoryEvents
+    .filter((event) => event.confirmedAt)
+    .sort((a, b) => new Date(b.confirmedAt) - new Date(a.confirmedAt))
+    .slice(0, 4);
+
+  return (
+    <section className="guardianMemoryPanel recommendationPanel">
+      <div className="panelHead">
+        <div>
+          <span className="sectionLabel">{t("homeBanking.sharedJourney.title")}</span>
+          <p>{t("homeBanking.sharedJourney.subtitle")}</p>
+        </div>
+        <CalendarClock size={18} />
+      </div>
+      {realEvents.length === 0 ? (
+        <div className="needHeroCard">
+          <p>{t("homeBanking.sharedJourney.emptyBody")}</p>
+          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.MIRROR)}>
+            {t("homeBanking.sharedJourney.emptyCta")}
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="memoryTimeline">
+            {realEvents.map((event) => (
+              <button
+                type="button"
+                className="memoryEventCard"
+                key={event.id}
+                onClick={() => setActiveScreen(screens.GUARDIAN)}
+                aria-label={t("guardian.memory.openEvent", { event: event.title })}
+              >
+                <span className="memoryYear">{event.year}</span>
+                <i aria-hidden="true" />
+                <div>
+                  <strong>{event.title}</strong>
+                  <small>{event.description}</small>
+                  <span className="memoryImpact">
+                    {t("guardian.memory.impact")}: {event.impact}
+                  </span>
+                </div>
+                <ChevronRight size={15} />
+              </button>
+            ))}
+          </div>
+          <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.GUARDIAN)}>
+            {t("homeBanking.sharedJourney.viewFullJourney")}
+            <ChevronRight size={16} />
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
+function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
-  const [accountInfoModal, setAccountInfoModal] = useState(null);
   const [noticeModal, setNoticeModal] = useState(null);
   const NoticeIcon = noticeModal?.icon;
   const profile = getUserProfile(preferences);
-  const customGoals = getCustomGoals(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
   const notificationHistory = getNotificationHistory(profile, preferences, t);
@@ -1995,12 +2056,6 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
       return { ...current, quickActionVisibility: nextVisibility };
     });
   }
-
-  const accountDetails = getAccountDetails(profile, customGoals, healthScores, t);
-  const accounts = ["savings", "creditCard", "loan", "investments", "insurance", "futureGoal"].map((id) => ({
-    id,
-    ...accountDetails[id],
-  }));
 
   const futureMetrics = [
     {
@@ -2148,61 +2203,7 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
           <ChevronRight size={17} />
         </motion.button>
 
-        <section className="bankSection">
-          <h2>{t("homeBanking.accountsTitle")}</h2>
-          <div className="bankAccountList">
-            {accounts.map(({ id, title, value, icon: Icon, infoBody, calculation }) => {
-              const hasScoreInfo = value.includes("/") || value.includes("%");
-              return (
-              <motion.article
-                className="bankAccountCard"
-                key={id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.32, ease: "easeOut" }}
-              >
-                <button
-                  type="button"
-                  className="accountCardTapTarget"
-                  data-testid={`account-card-${id}`}
-                  aria-label={`${title} ${value}`}
-                  onClick={() => {
-                    setActiveAccountId(id);
-                    setActiveScreen(screens.ACCOUNT_DETAIL);
-                  }}
-                />
-                <span className="bankAccountIcon">
-                  <Icon size={18} />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{t("homeBanking.availableNow")}</small>
-                </div>
-                <b>{value}</b>
-                {hasScoreInfo ? (
-                  <button
-                    type="button"
-                    className="infoButton accountScoreInfo"
-                    aria-label={t("homeBanking.infoLabel", { item: title })}
-                    onClick={() =>
-                      setAccountInfoModal({
-                        title,
-                        value,
-                        body: infoBody,
-                        method: calculation,
-                      })
-                    }
-                  >
-                    <Info size={13} />
-                  </button>
-                ) : (
-                  <ChevronRight size={16} />
-                )}
-              </motion.article>
-              );
-            })}
-          </div>
-        </section>
+        <SharedJourneySection memoryEvents={memoryEvents} t={t} setActiveScreen={setActiveScreen} />
 
         <section className="futureOsBankCard">
           <div className="futureCardHeader">
@@ -2318,20 +2319,6 @@ function HomeDashboard({ goWithLoading, setActiveScreen, setActiveAccountId, dis
           listTitle={t("lifeGraph.scoreInfo.title")}
           listItems={infoModal.proofKeys.map((key) => t(`homeBanking.proof.${key}`))}
           onClose={() => setInfoModal(null)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
-      ) : null}
-
-      {accountInfoModal ? (
-        <InfoModal
-          icon={Info}
-          title={accountInfoModal.title}
-          body={accountInfoModal.body}
-          scoreLabel={t("homeBanking.currentScore")}
-          scoreValue={accountInfoModal.value}
-          methodLabel={t("homeBanking.howCalculated")}
-          methodText={accountInfoModal.method}
-          onClose={() => setAccountInfoModal(null)}
           closeLabel={t("homeBanking.gotIt")}
         />
       ) : null}
@@ -4466,6 +4453,7 @@ function NeedDetailScreen({
         setPreferences={setPreferences}
         profile={profile}
         healthScores={healthScores}
+        setMemoryEvents={setMemoryEvents}
       />
     ),
     insurance: (
@@ -5126,6 +5114,7 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
             reason: t("weddingPlanner.memoryEventReason"),
             dataUsed: t("weddingPlanner.memoryEventDataUsed"),
             statusKey: "status.completed",
+            confirmedAt: data.confirmedAt ?? null,
           },
           ...current,
         ]);
@@ -6016,6 +6005,7 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
             reason: t("homePlanner.memoryEventReason"),
             dataUsed: t("homePlanner.memoryEventDataUsed"),
             statusKey: "status.completed",
+            confirmedAt: data.confirmedAt ?? null,
           },
           ...current,
         ]);
@@ -6477,6 +6467,7 @@ function RetirementNeedContent({
             reason: t("retirementPlanner.memoryEventReason"),
             dataUsed: t("retirementPlanner.memoryEventDataUsed"),
             statusKey: "status.completed",
+            confirmedAt: data.confirmedAt ?? null,
           },
           ...current,
         ]);
@@ -7021,7 +7012,7 @@ function LoanSizingOptionCard({ option, selected, onSelect, t }) {
   );
 }
 
-function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, initialPurpose, onConsumeInitialPurpose }) {
+function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, initialPurpose, onConsumeInitialPurpose, setMemoryEvents }) {
   const [purpose, setPurpose] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -7187,6 +7178,23 @@ function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language,
       setConfirmedLoan(data.data);
       setEditingStrategy(false);
       setSuccess();
+      const loan = data.data;
+      setMemoryEvents((current) => [
+        {
+          id: `loan-confirmed-${purpose}-${data.confirmedAt ?? Date.now()}`,
+          year: new Date(data.confirmedAt ?? Date.now()).getFullYear().toString(),
+          title: t("loanPlanner.memoryEventTitle"),
+          description: t(`loanPlanner.purposeDescriptions.${purpose}`),
+          impact: t("loanPlanner.memoryEventImpact", { amount: formatSgd(Math.round(loan.loan_amount)) }),
+          product: t("loanPlanner.memoryEventProduct"),
+          action: t("loanPlanner.memoryEventAction"),
+          reason: t("loanPlanner.memoryEventReason"),
+          dataUsed: t("loanPlanner.memoryEventDataUsed"),
+          statusKey: "status.completed",
+          confirmedAt: data.confirmedAt ?? null,
+        },
+        ...current,
+      ]);
     } catch {
       setErrorMessage(t("loanPlanner.genericError"));
     } finally {
@@ -7695,7 +7703,7 @@ function InvestmentConfirmedCard({ pick, t }) {
   );
 }
 
-function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile }) {
+function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, setMemoryEvents }) {
   const [stage, setStage] = useState("intake");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -7869,6 +7877,23 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
       setSelectedEntryId(null);
       setSuccess();
       setStage("confirmed");
+      const pick = data.data;
+      setMemoryEvents((current) => [
+        {
+          id: `investment-confirmed-${pick.entry_id}-${data.confirmedAt ?? Date.now()}`,
+          year: new Date(data.confirmedAt ?? Date.now()).getFullYear().toString(),
+          title: t("investmentPlanner.memoryEventTitle"),
+          description: t(pick.instrument_type === "fund" ? "investmentPlanner.instrumentTypeLabels.fund" : "investmentPlanner.instrumentTypeLabels.stock") + ` – ${pick.name}`,
+          impact: t("investmentPlanner.memoryEventImpact", { amount: formatSgd(Math.round(pick.amount)) }),
+          product: t("investmentPlanner.memoryEventProduct"),
+          action: t("investmentPlanner.memoryEventAction"),
+          reason: t("investmentPlanner.memoryEventReason"),
+          dataUsed: t("investmentPlanner.memoryEventDataUsed"),
+          statusKey: "status.completed",
+          confirmedAt: data.confirmedAt ?? null,
+        },
+        ...current,
+      ]);
     } catch {
       setErrorMessage(t("investmentPlanner.genericError"));
     } finally {
@@ -8015,7 +8040,7 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
   );
 }
 
-function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, language, preferences, setPreferences, profile, healthScores }) {
+function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, language, preferences, setPreferences, profile, healthScores, setMemoryEvents }) {
   const readinessScore = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
   const currentFund = numberValue(profile.currentSavings, 18000);
   const monthlyExpenses = numberValue(profile.monthlyExpenses, 3000);
@@ -8161,6 +8186,26 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
         }));
       }
       setSuccess();
+      const appliedNow = data.results.filter((r) => r.status === "applied");
+      if (appliedNow.length > 0) {
+        const confirmedAt = new Date().toISOString();
+        setMemoryEvents((current) => [
+          {
+            id: `hardship-recovery-${confirmedAt}`,
+            year: new Date(confirmedAt).getFullYear().toString(),
+            title: t("needDetails.emergency.memoryEventTitle"),
+            description: appliedNow.map((r) => r.explanation).filter(Boolean).join(" "),
+            impact: t("needDetails.emergency.memoryEventImpact", { count: appliedNow.length }),
+            product: t("needDetails.emergency.memoryEventProduct"),
+            action: t("needDetails.emergency.memoryEventAction"),
+            reason: t("needDetails.emergency.memoryEventReason"),
+            dataUsed: t("needDetails.emergency.memoryEventDataUsed"),
+            statusKey: "status.completed",
+            confirmedAt,
+          },
+          ...current,
+        ]);
+      }
     } catch {
       setErrorMessage(t("needDetails.emergency.genericError"));
     } finally {
@@ -9499,6 +9544,7 @@ export default function App() {
         profile={getUserProfile(preferences)}
         initialPurpose={loanPlannerInitialPurpose}
         onConsumeInitialPurpose={() => setLoanPlannerInitialPurpose(null)}
+        setMemoryEvents={setMemoryEvents}
       />
     ),
     [screens.NEED_EMERGENCY]: <NeedDetailScreen {...shared} type="emergency" />,
@@ -9511,6 +9557,7 @@ export default function App() {
         setActiveScreen={setActiveScreen}
         language={language}
         profile={getUserProfile(preferences)}
+        setMemoryEvents={setMemoryEvents}
       />
     ),
     [screens.PAYNOW]: <QuickActionScreen {...shared} type="paynow" />,
