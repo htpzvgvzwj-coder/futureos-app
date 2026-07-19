@@ -62,6 +62,8 @@ import { computeHomeFinancials } from "../lib/home-finance.js";
 import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
 import { computeRetirementFinancials } from "../lib/retirement-finance.js";
 import { computeAllLoanArchetypes, applyLoanModifiers, LOAN_ARCHETYPE_KEYS, LOAN_MODIFIER_KEYS } from "../lib/loan-finance.js";
+import { projectPurchaseMode } from "../lib/investment-finance.js";
+import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES } from "../lib/investment-catalog.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -153,6 +155,7 @@ const DEDICATED_GOAL_SCREENS = {
   loan: { screen: screens.NEED_LOAN, badgeKey: "loanPlanner.newFeatureBadge" },
   retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
   emergency: { screen: screens.NEED_EMERGENCY, badgeKey: "needDetails.emergency.newFeatureBadge" },
+  investment: { screen: screens.NEED_INVESTMENT, badgeKey: "investmentPlanner.newFeatureBadge" },
 };
 
 const independenceLevels = [
@@ -1891,10 +1894,10 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
-  if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN].includes(activeScreen)) {
+  if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
   }
-  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.NEED_INVESTMENT].includes(activeScreen)) {
+  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE].includes(activeScreen)) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
@@ -4473,16 +4476,6 @@ function NeedDetailScreen({
         setActiveScreen={setActiveScreen}
         profile={profile}
         healthScores={healthScores}
-      />
-    ),
-    investment: (
-      <InvestmentNeedContent
-        success={success}
-        setSuccess={setSuccess}
-        t={t}
-        setActiveScreen={setActiveScreen}
-        profile={profile}
-        simulatorInputs={simulatorInputs}
       />
     ),
   }[type];
@@ -7340,6 +7333,688 @@ function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language,
   );
 }
 
+const RISK_LABEL_KEYS = {
+  conservative: "investmentPlanner.riskOptions.conservative.label",
+  balanced: "investmentPlanner.riskOptions.balanced.label",
+  growth: "investmentPlanner.riskOptions.growth.label",
+};
+const RISK_DESC_KEYS = {
+  conservative: "investmentPlanner.riskOptions.conservative.description",
+  balanced: "investmentPlanner.riskOptions.balanced.description",
+  growth: "investmentPlanner.riskOptions.growth.description",
+};
+const RISK_ICONS = { conservative: ShieldCheck, balanced: Target, growth: LineChart };
+
+const INVESTMENT_GOAL_CATEGORIES = ["retirement_gap", "general_wealth_building", "custom_target"];
+const GOAL_CATEGORY_LABEL_KEYS = {
+  retirement_gap: "investmentPlanner.goalCategories.retirementGap.label",
+  general_wealth_building: "investmentPlanner.goalCategories.generalWealthBuilding.label",
+  custom_target: "investmentPlanner.goalCategories.customTarget.label",
+};
+const GOAL_CATEGORY_DESC_KEYS = {
+  retirement_gap: "investmentPlanner.goalCategories.retirementGap.description",
+  general_wealth_building: "investmentPlanner.goalCategories.generalWealthBuilding.description",
+  custom_target: "investmentPlanner.goalCategories.customTarget.description",
+};
+const GOAL_CATEGORY_ICONS = { retirement_gap: Landmark, general_wealth_building: Globe2, custom_target: ClipboardCheck };
+
+const HOLDINGS_LABEL_KEYS = {
+  sg_equities: "investmentPlanner.holdingsCategories.sgEquities",
+  global_equities: "investmentPlanner.holdingsCategories.globalEquities",
+  bonds: "investmentPlanner.holdingsCategories.bonds",
+  reits: "investmentPlanner.holdingsCategories.reits",
+  cash_like: "investmentPlanner.holdingsCategories.cashLike",
+};
+const HOLDINGS_ICONS = { sg_equities: Building2, global_equities: Globe2, bonds: ShieldCheck, reits: Home, cash_like: PiggyBank };
+
+const PURCHASE_MODE_LABEL_KEYS = {
+  monthly_rsp: "investmentPlanner.purchaseModes.monthlyRsp.label",
+  lump_sum: "investmentPlanner.purchaseModes.lumpSum.label",
+  daily_micro_dca: "investmentPlanner.purchaseModes.dailyMicroDca.label",
+  value_averaging: "investmentPlanner.purchaseModes.valueAveraging.label",
+};
+const PURCHASE_MODE_DESC_KEYS = {
+  monthly_rsp: "investmentPlanner.purchaseModes.monthlyRsp.description",
+  lump_sum: "investmentPlanner.purchaseModes.lumpSum.description",
+  daily_micro_dca: "investmentPlanner.purchaseModes.dailyMicroDca.description",
+  value_averaging: "investmentPlanner.purchaseModes.valueAveraging.description",
+};
+const PURCHASE_MODE_ICONS = { monthly_rsp: CalendarClock, lump_sum: PiggyBank, daily_micro_dca: ArrowLeftRight, value_averaging: SlidersHorizontal };
+
+const INVESTMENT_EMERGENCY_FUND_IMPACT_LABEL_KEYS = {
+  protected: "investmentPlanner.emergencyFundImpact.protected",
+  healthy: "investmentPlanner.emergencyFundImpact.healthy",
+  reduced: "investmentPlanner.emergencyFundImpact.reduced",
+  weak: "investmentPlanner.emergencyFundImpact.weak",
+};
+const INVESTMENT_CASHFLOW_IMPACT_LABEL_KEYS = {
+  on_track: "investmentPlanner.cashflowImpact.onTrack",
+  tight: "investmentPlanner.cashflowImpact.tight",
+  at_risk: "investmentPlanner.cashflowImpact.atRisk",
+};
+
+// profile.riskPreference is a free capitalized string ("Balanced") separate
+// from the simulator's own lowercase riskPreference enum — reconciles that
+// inconsistency at the one place Investment Planner reads it, rather than
+// touching the shared profile shape.
+function normalizeRiskPreference(value) {
+  const lower = String(value ?? "").toLowerCase();
+  return RISK_BANDS.includes(lower) ? lower : "balanced";
+}
+
+function InvestmentIntakeForm({
+  riskPreference,
+  setRiskPreference,
+  goalCategory,
+  setGoalCategory,
+  horizonYears,
+  setHorizonYears,
+  customTargetAmount,
+  setCustomTargetAmount,
+  holdingsCategories,
+  onToggleHolding,
+  purchaseMode,
+  setPurchaseMode,
+  availableMonthlyCashflow,
+  hasRetirementGoal,
+  onSubmit,
+  submitting,
+  t,
+}) {
+  const goalCategoryOptions = hasRetirementGoal
+    ? INVESTMENT_GOAL_CATEGORIES
+    : INVESTMENT_GOAL_CATEGORIES.filter((key) => key !== "retirement_gap");
+
+  return (
+    <section className="settingsGroup">
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("investmentPlanner.availableCashflowNote", { amount: formatSgd(Math.round(availableMonthlyCashflow)) })}</p>
+      </section>
+
+      <span className="sectionLabel">{t("investmentPlanner.riskLabel")}</span>
+      <div className="checkboxGrid">
+        {RISK_BANDS.map((key) => {
+          const Icon = RISK_ICONS[key];
+          return (
+            <button
+              type="button"
+              key={key}
+              className={riskPreference === key ? "checkOption selected" : "checkOption"}
+              onClick={() => setRiskPreference(key)}
+            >
+              <Icon size={15} />
+              <span>
+                {t(RISK_LABEL_KEYS[key])}
+                <small style={{ display: "block", fontWeight: 400 }}>{t(RISK_DESC_KEYS[key])}</small>
+              </span>
+              {riskPreference === key ? <Check size={14} /> : null}
+            </button>
+          );
+        })}
+      </div>
+
+      <span className="sectionLabel">{t("investmentPlanner.goalCategoryLabel")}</span>
+      <div className="checkboxGrid">
+        {goalCategoryOptions.map((key) => {
+          const Icon = GOAL_CATEGORY_ICONS[key];
+          return (
+            <button
+              type="button"
+              key={key}
+              className={goalCategory === key ? "checkOption selected" : "checkOption"}
+              onClick={() => setGoalCategory(key)}
+            >
+              <Icon size={15} />
+              <span>
+                {t(GOAL_CATEGORY_LABEL_KEYS[key])}
+                <small style={{ display: "block", fontWeight: 400 }}>{t(GOAL_CATEGORY_DESC_KEYS[key])}</small>
+              </span>
+              {goalCategory === key ? <Check size={14} /> : null}
+            </button>
+          );
+        })}
+      </div>
+
+      <span className="sectionLabel">{t("investmentPlanner.horizonYearsLabel")}</span>
+      <input
+        type="number"
+        min="1"
+        max="50"
+        className="aiTextInput"
+        value={horizonYears}
+        onChange={(event) => setHorizonYears(event.target.value)}
+        aria-label={t("investmentPlanner.horizonYearsLabel")}
+      />
+
+      {goalCategory === "custom_target" ? (
+        <>
+          <span className="sectionLabel">{t("investmentPlanner.customTargetAmountLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={customTargetAmount}
+            onChange={(event) => setCustomTargetAmount(event.target.value)}
+            aria-label={t("investmentPlanner.customTargetAmountLabel")}
+          />
+        </>
+      ) : null}
+
+      <span className="sectionLabel">{t("investmentPlanner.holdingsLabel")}</span>
+      <div className="checkboxGrid">
+        {HOLDINGS_CATEGORIES.map((key) => {
+          const Icon = HOLDINGS_ICONS[key];
+          const active = holdingsCategories.includes(key);
+          return (
+            <button type="button" key={key} className={active ? "checkOption selected" : "checkOption"} onClick={() => onToggleHolding(key)}>
+              <Icon size={15} />
+              <span>{t(HOLDINGS_LABEL_KEYS[key])}</span>
+              {active ? <Check size={14} /> : null}
+            </button>
+          );
+        })}
+      </div>
+
+      <span className="sectionLabel">{t("investmentPlanner.purchaseModeLabel")}</span>
+      <div className="checkboxGrid">
+        {PURCHASE_MODES.map((key) => {
+          const Icon = PURCHASE_MODE_ICONS[key];
+          return (
+            <button
+              type="button"
+              key={key}
+              className={purchaseMode === key ? "checkOption selected" : "checkOption"}
+              onClick={() => setPurchaseMode(key)}
+            >
+              <Icon size={15} />
+              <span>
+                {t(PURCHASE_MODE_LABEL_KEYS[key])}
+                <small style={{ display: "block", fontWeight: 400 }}>{t(PURCHASE_MODE_DESC_KEYS[key])}</small>
+              </span>
+              {purchaseMode === key ? <Check size={14} /> : null}
+            </button>
+          );
+        })}
+      </div>
+      {purchaseMode === "value_averaging" ? (
+        <section className="trustNote compactTrustNote">
+          <Info size={17} />
+          <p>{t("investmentPlanner.valueAveragingDisclaimer")}</p>
+        </section>
+      ) : null}
+
+      <button type="button" className="primaryButton" disabled={submitting} onClick={onSubmit}>
+        {submitting ? t("investmentPlanner.thinking") : t("investmentPlanner.submitIntake")}
+        <Check size={18} />
+      </button>
+    </section>
+  );
+}
+
+function InvestmentShortlistCard({
+  item,
+  narrative,
+  purchaseMode,
+  horizonYears,
+  previewAmount,
+  selected,
+  onSelect,
+  selectionAmount,
+  setSelectionAmount,
+  selectionHorizonYears,
+  setSelectionHorizonYears,
+  onConfirm,
+  submitting,
+  accentIndex,
+  t,
+}) {
+  const InstrumentIcon = item.instrument_type === "fund" ? LineChart : CircleDollarSign;
+  const displayAmount = selected ? numberValue(selectionAmount, previewAmount) : previewAmount;
+  const displayHorizon = selected ? numberValue(selectionHorizonYears, horizonYears) : horizonYears;
+  const projection = projectPurchaseMode({
+    mode: purchaseMode,
+    entry: { expectedAnnualReturnPercent: item.expected_annual_return_percent },
+    amount: displayAmount,
+    horizonYears: displayHorizon,
+  });
+
+  return (
+    <article className={`weddingPlanTile accent-${accentIndex}${selected ? " recommended" : ""}`}>
+      <h3>
+        <InstrumentIcon size={16} /> {item.name}
+      </h3>
+      {item.ticker ? <p className="weddingPlanSummary">{item.ticker}</p> : null}
+      <div className="weddingStatChips">
+        <span className="statChip">{t(item.market === "sg" ? "investmentPlanner.marketLabels.sg" : "investmentPlanner.marketLabels.global")}</span>
+        <span className="statChip">
+          {t(item.instrument_type === "fund" ? "investmentPlanner.instrumentTypeLabels.fund" : "investmentPlanner.instrumentTypeLabels.stock")}
+        </span>
+      </div>
+      <p className="weddingPlanSummary">{t(item.description_key)}</p>
+      <SummaryRow label={t("investmentPlanner.expectedReturnLabel")} value={`${item.expected_annual_return_percent}%`} />
+      {item.expense_ratio_percent != null ? (
+        <SummaryRow label={t("investmentPlanner.expenseRatioLabel")} value={`${item.expense_ratio_percent}%`} />
+      ) : null}
+      {item.dividend_yield_percent != null ? (
+        <SummaryRow label={t("investmentPlanner.dividendYieldLabel")} value={`${item.dividend_yield_percent}%`} />
+      ) : null}
+
+      <div className="weddingTotalCost">
+        <small>{t("investmentPlanner.projectedEndValueLabel")}</small>
+        <strong>{formatSgd(Math.round(projection.projectedEndValue))}</strong>
+      </div>
+      <SummaryRow label={t("investmentPlanner.totalContributedLabel")} value={formatSgd(Math.round(projection.totalContributed))} />
+      <SummaryRow label={t("investmentPlanner.projectedGrowthLabel")} value={formatSgd(Math.round(projection.projectedGrowth))} />
+      {purchaseMode === "value_averaging" && projection.schedule ? (
+        <p className="weddingCarouselHint">
+          {t("investmentPlanner.valueAveragingScheduleHint", {
+            first: formatSgd(Math.round(projection.schedule[0]?.contribution ?? 0)),
+            last: formatSgd(Math.round(projection.schedule[projection.schedule.length - 1]?.contribution ?? 0)),
+          })}
+        </p>
+      ) : null}
+      {purchaseMode === "daily_micro_dca" && projection.monthlyEquivalentAmount != null ? (
+        <p className="weddingCarouselHint">
+          {t("investmentPlanner.dailyMonthlyEquivalentHint", { amount: formatSgd(Math.round(projection.monthlyEquivalentAmount)) })}
+        </p>
+      ) : null}
+      {!narrative && item.disclosure_key ? <p className="weddingCarouselHint">{t(item.disclosure_key)}</p> : null}
+
+      {narrative ? (
+        <>
+          <p className="weddingPlanSummary">
+            <strong>{t("investmentPlanner.whyRecommendedLabel")}</strong> {narrative.why_recommended}
+          </p>
+          <p className="weddingPlanSummary">
+            <strong>{t("investmentPlanner.purchaseModeCommentaryLabel")}</strong> {narrative.purchase_mode_commentary}
+          </p>
+          <p className="weddingPlanSummary">
+            <strong>{t("investmentPlanner.riskDisclosureLabel")}</strong> {narrative.risk_disclosure}
+          </p>
+        </>
+      ) : null}
+
+      {selected ? (
+        <>
+          <span className="sectionLabel">{t("investmentPlanner.amountLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={selectionAmount}
+            onChange={(event) => setSelectionAmount(event.target.value)}
+            aria-label={t("investmentPlanner.amountLabel")}
+          />
+          <span className="sectionLabel">{t("investmentPlanner.horizonLabel")}</span>
+          <input
+            type="number"
+            min="1"
+            max="50"
+            className="aiTextInput"
+            value={selectionHorizonYears}
+            onChange={(event) => setSelectionHorizonYears(event.target.value)}
+            aria-label={t("investmentPlanner.horizonLabel")}
+          />
+          <button type="button" className="primaryButton" disabled={submitting} onClick={onConfirm}>
+            {submitting ? t("investmentPlanner.thinking") : t("investmentPlanner.confirmPick")}
+            <Check size={18} />
+          </button>
+        </>
+      ) : (
+        <button type="button" className="secondaryButton" onClick={onSelect}>
+          {t("investmentPlanner.selectThisInstrument")}
+        </button>
+      )}
+    </article>
+  );
+}
+
+function InvestmentConfirmedCard({ pick, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("investmentPlanner.confirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>
+          {pick.name}
+          {pick.ticker ? ` (${pick.ticker})` : ""}
+        </small>
+        <strong>{formatSgd(Math.round(pick.projection.projectedEndValue))}</strong>
+      </div>
+      <SummaryRow label={t("investmentPlanner.purchaseModeLabel")} value={t(PURCHASE_MODE_LABEL_KEYS[pick.purchase_mode] ?? pick.purchase_mode)} />
+      <SummaryRow label={t("investmentPlanner.amountLabel")} value={formatSgd(Math.round(pick.amount))} />
+      <SummaryRow label={t("investmentPlanner.horizonLabel")} value={`${pick.horizon_years}y`} />
+      <SummaryRow label={t("investmentPlanner.totalContributedLabel")} value={formatSgd(Math.round(pick.projection.totalContributed))} />
+      <SummaryRow label={t("investmentPlanner.projectedGrowthLabel")} value={formatSgd(Math.round(pick.projection.projectedGrowth))} />
+      <SummaryRow label={t("investmentPlanner.futureScoreLabel")} value={pick.future_score} />
+      <div className="weddingStatChips">
+        <LoanImpactChip impact={pick.emergency_fund_impact} labelKeys={INVESTMENT_EMERGENCY_FUND_IMPACT_LABEL_KEYS} t={t} />
+        <LoanImpactChip impact={pick.cashflow_impact} labelKeys={INVESTMENT_CASHFLOW_IMPACT_LABEL_KEYS} t={t} />
+      </div>
+    </section>
+  );
+}
+
+function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile }) {
+  const [stage, setStage] = useState("intake");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [riskPreference, setRiskPreference] = useState(() => normalizeRiskPreference(profile.riskPreference));
+  const [goalCategory, setGoalCategory] = useState("general_wealth_building");
+  const [horizonYears, setHorizonYears] = useState("10");
+  const [customTargetAmount, setCustomTargetAmount] = useState("");
+  const [holdingsCategories, setHoldingsCategories] = useState([]);
+  const [purchaseMode, setPurchaseMode] = useState("monthly_rsp");
+
+  const [availableMonthlyCashflow, setAvailableMonthlyCashflow] = useState(0);
+
+  const [shortlist, setShortlist] = useState(null);
+  const [previewAmount, setPreviewAmount] = useState(0);
+  const [narrative, setNarrative] = useState(null);
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
+  const [selectionAmount, setSelectionAmount] = useState("");
+  const [selectionHorizonYears, setSelectionHorizonYears] = useState("");
+
+  const [confirmedPicks, setConfirmedPicks] = useState([]);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setErrorMessage("");
+
+    async function load() {
+      const [contextResponse, sessionResponse] = await Promise.all([fetch("/api/investment/context"), fetch("/api/investment/session")]);
+      const contextJson = await contextResponse.json();
+      const sessionJson = await sessionResponse.json();
+      if (cancelled) return;
+
+      const income = numberValue(profile.monthlyIncome, 7500);
+      const expenses = numberValue(profile.monthlyExpenses, 3500);
+      setAvailableMonthlyCashflow(Math.max(0, income - expenses - (contextJson.otherGoalsMonthlyOutflow ?? 0)));
+
+      if (sessionJson.intake) {
+        setRiskPreference(sessionJson.intake.riskPreference);
+        setGoalCategory(sessionJson.intake.goalCategory);
+        setHorizonYears(String(sessionJson.intake.horizonYears));
+        setCustomTargetAmount(sessionJson.intake.customTargetAmount != null ? String(sessionJson.intake.customTargetAmount) : "");
+        setHoldingsCategories(sessionJson.intake.holdingsCategories ?? []);
+        setPurchaseMode(sessionJson.intake.purchaseMode);
+      }
+      if (sessionJson.shortlist) {
+        setShortlist(sessionJson.shortlist.items);
+        setPreviewAmount(sessionJson.shortlist.previewAmount);
+      }
+      if (sessionJson.narrative) {
+        setNarrative(sessionJson.narrative);
+      }
+      if (sessionJson.confirmedPicks?.length) {
+        setConfirmedPicks(sessionJson.confirmedPicks);
+        setStage("confirmed");
+      } else if (sessionJson.shortlist) {
+        setStage("shortlist");
+      }
+
+      setLoading(false);
+    }
+
+    load().catch(() => {
+      if (!cancelled) {
+        setErrorMessage(t("investmentPlanner.genericError"));
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const toggleHoldingCategory = (key) => {
+    setHoldingsCategories((current) => (current.includes(key) ? current.filter((item) => item !== key) : [...current, key]));
+  };
+
+  const submitIntake = async () => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/investment/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          riskPreference,
+          goalCategory,
+          horizonYears: numberValue(horizonYears, 10),
+          customTargetAmount: goalCategory === "custom_target" ? numberValue(customTargetAmount, 0) || undefined : undefined,
+          holdingsCategories,
+          purchaseMode,
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("investmentPlanner.genericError"));
+        return;
+      }
+      setShortlist(data.shortlist);
+      setPreviewAmount(data.previewAmount);
+      setAvailableMonthlyCashflow(data.availableMonthlyCashflow);
+      setNarrative(null);
+      setSelectedEntryId(null);
+      setStage("shortlist");
+    } catch {
+      setErrorMessage(t("investmentPlanner.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const requestNarrative = async (message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/investment/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: narrative ? "refine" : "generate", message, language }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("investmentPlanner.genericError"));
+        return;
+      }
+      setNarrative(data.data);
+    } catch {
+      setErrorMessage(t("investmentPlanner.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectEntry = (item) => {
+    setSelectedEntryId(item.entry_id);
+    setSelectionAmount(String(previewAmount));
+    setSelectionHorizonYears(String(horizonYears));
+  };
+
+  const confirmPick = async () => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/investment/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryId: selectedEntryId,
+          purchaseMode,
+          amount: numberValue(selectionAmount, previewAmount),
+          horizonYears: numberValue(selectionHorizonYears, horizonYears),
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+          currentSavings: numberValue(profile.currentSavings, 20000),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("investmentPlanner.genericError"));
+        return;
+      }
+      setConfirmedPicks((current) => [...current, data.data]);
+      setSelectedEntryId(null);
+      setSuccess();
+      setStage("confirmed");
+    } catch {
+      setErrorMessage(t("investmentPlanner.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/investment/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  const addAnotherInstrument = () => {
+    setSelectedEntryId(null);
+    setStage(shortlist ? "shortlist" : "intake");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("investmentPlanner.title")} subtitle={t("investmentPlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("investmentPlanner.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="investmentPlanner.historyTitle"
+          emptyKey="investmentPlanner.historyEmpty"
+        />
+      ) : null}
+      <SuccessBanner show={success} text={t("investmentPlanner.success")} />
+      {errorMessage ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{errorMessage}</p>
+        </section>
+      ) : null}
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : stage === "confirmed" ? (
+        <>
+          {confirmedPicks.map((pick, index) => (
+            <InvestmentConfirmedCard key={`${pick.entry_id}-${index}`} pick={pick} t={t} />
+          ))}
+          <button type="button" className="secondaryButton" onClick={addAnotherInstrument}>
+            {t("investmentPlanner.addAnotherPick")}
+          </button>
+        </>
+      ) : stage === "shortlist" && shortlist ? (
+        <>
+          <section className="trustNote compactTrustNote">
+            <Info size={17} />
+            <p>{t("investmentPlanner.availableCashflowNote", { amount: formatSgd(Math.round(availableMonthlyCashflow)) })}</p>
+          </section>
+          <section className="weddingPlanCarouselWrap">
+            <span className="sectionLabel">{t("investmentPlanner.shortlistLabel")}</span>
+            <div className="weddingPlanCarousel">
+              {shortlist.map((item, index) => (
+                <InvestmentShortlistCard
+                  key={item.entry_id}
+                  item={item}
+                  narrative={narrative?.narratives?.find((entry) => entry.entry_id === item.entry_id)}
+                  purchaseMode={purchaseMode}
+                  horizonYears={numberValue(horizonYears, 10)}
+                  previewAmount={previewAmount}
+                  selected={selectedEntryId === item.entry_id}
+                  onSelect={() => selectEntry(item)}
+                  selectionAmount={selectionAmount}
+                  setSelectionAmount={setSelectionAmount}
+                  selectionHorizonYears={selectionHorizonYears}
+                  setSelectionHorizonYears={setSelectionHorizonYears}
+                  onConfirm={confirmPick}
+                  submitting={submitting}
+                  accentIndex={index % 3}
+                  t={t}
+                />
+              ))}
+            </div>
+            {narrative?.portfolio_overview ? (
+              <section className="insightCard">
+                <Bot size={20} />
+                <p>{narrative.portfolio_overview}</p>
+              </section>
+            ) : null}
+          </section>
+          {!narrative ? (
+            <button
+              type="button"
+              className="primaryButton"
+              disabled={submitting}
+              onClick={() => requestNarrative("Please explain these investment recommendations.")}
+            >
+              {submitting ? t("investmentPlanner.thinking") : t("investmentPlanner.explainRecommendations")}
+              <Bot size={18} />
+            </button>
+          ) : (
+            <AiTextInputCard
+              t={t}
+              onSubmit={requestNarrative}
+              submitting={submitting}
+              placeholder={t("investmentPlanner.refinePlaceholder")}
+              submitLabelKey="weddingPlanner.send"
+              labelKey="investmentPlanner.refineLabel"
+            />
+          )}
+          <button type="button" className="secondaryButton" onClick={() => setStage("intake")}>
+            {t("investmentPlanner.changeIntakeLabel")}
+          </button>
+        </>
+      ) : (
+        <InvestmentIntakeForm
+          riskPreference={riskPreference}
+          setRiskPreference={setRiskPreference}
+          goalCategory={goalCategory}
+          setGoalCategory={setGoalCategory}
+          horizonYears={horizonYears}
+          setHorizonYears={setHorizonYears}
+          customTargetAmount={customTargetAmount}
+          setCustomTargetAmount={setCustomTargetAmount}
+          holdingsCategories={holdingsCategories}
+          onToggleHolding={toggleHoldingCategory}
+          purchaseMode={purchaseMode}
+          setPurchaseMode={setPurchaseMode}
+          availableMonthlyCashflow={availableMonthlyCashflow}
+          hasRetirementGoal={Boolean(profile.goals?.retirement)}
+          onSubmit={submitIntake}
+          submitting={submitting}
+          t={t}
+        />
+      )}
+    </Screen>
+  );
+}
+
 function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, language, preferences, setPreferences, profile, healthScores }) {
   const readinessScore = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
   const currentFund = numberValue(profile.currentSavings, 18000);
@@ -7685,50 +8360,6 @@ function InsuranceNeedContent({ success, setSuccess, t, setActiveScreen, profile
   );
 }
 
-function InvestmentNeedContent({ success, setSuccess, t, setActiveScreen, profile, simulatorInputs }) {
-  const retirementAge = numberValue(simulatorInputs?.retirementAge, 62);
-  const plans = [
-    { title: t("needDetails.investment.conservative"), detail: t("needDetails.investment.lowerRisk"), age: String(retirementAge + 3) },
-    { title: t("needDetails.investment.balanced"), detail: t("status.recommended"), age: String(retirementAge), recommended: true },
-    { title: t("needDetails.investment.growth"), detail: t("needDetails.investment.higherRisk"), age: String(Math.max(55, retirementAge - 2)) },
-  ];
-  const currentAmount = numberValue(profile.investments, 15000);
-  const monthlyInvestment = numberValue(simulatorInputs?.monthlyInvestment, 500);
-  // Illustrative milestone: roughly two years of income held in investments by mid-career.
-  const investmentGap = Math.max(0, Math.round((numberValue(profile.monthlyIncome, 7500) * 24 - currentAmount) / 1000) * 1000);
-
-  return (
-    <Screen>
-      <Header title={t("needDetails.investment.title")} subtitle={t("needDetails.investment.subtitle")} />
-      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
-      <SuccessBanner show={success} text={t("needDetails.investment.success")} />
-      <section className="metricGrid">
-        <MetricCard label={t("needDetails.investment.currentAmount")} value={formatSgd(currentAmount)} />
-        <MetricCard label={t("needDetails.investment.monthlyInvestment")} value={formatSgd(monthlyInvestment)} />
-        <MetricCard label={t("needDetails.investment.riskProfile")} value={profile.riskPreference || t("needDetails.investment.balanced")} />
-        <MetricCard label={t("needDetails.investment.retirementAge")} value={String(retirementAge)} />
-        <MetricCard label={t("needDetails.investment.gap")} value={formatSgd(investmentGap)} wide />
-      </section>
-      <section className="trustNote compactTrustNote">
-        <Info size={17} />
-        <p>{t("needDetails.investment.cpfContextDisclaimer")}</p>
-      </section>
-      <section className="projectionGrid">
-        {plans.map((plan) => (
-          <article className={plan.recommended ? "projectionCard recommended" : "projectionCard"} key={plan.title}>
-            <strong>{plan.title}</strong>
-            <span>{plan.detail}</span>
-            <b>{t("needDetails.investment.retirementAt", { age: plan.age })}</b>
-          </article>
-        ))}
-      </section>
-      <button type="button" className="primaryButton" onClick={setSuccess}>
-        {t("needDetails.investment.cta")}
-        <Check size={18} />
-      </button>
-    </Screen>
-  );
-}
 
 function SpendingRiskDetailScreen({ setActiveScreen, preferences, successStates, setSuccessStates, t }) {
   const profile = getUserProfile(preferences);
@@ -8872,7 +9503,16 @@ export default function App() {
     ),
     [screens.NEED_EMERGENCY]: <NeedDetailScreen {...shared} type="emergency" />,
     [screens.NEED_INSURANCE]: <NeedDetailScreen {...shared} type="insurance" />,
-    [screens.NEED_INVESTMENT]: <NeedDetailScreen {...shared} type="investment" />,
+    [screens.NEED_INVESTMENT]: (
+      <InvestmentPlannerContent
+        success={Boolean(successStates.investment)}
+        setSuccess={() => setSuccessStates((current) => ({ ...current, investment: true }))}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        profile={getUserProfile(preferences)}
+      />
+    ),
     [screens.PAYNOW]: <QuickActionScreen {...shared} type="paynow" />,
     [screens.SCAN_PAY]: <QuickActionScreen {...shared} type="scanPay" />,
     [screens.FX]: <QuickActionScreen {...shared} type="fx" />,

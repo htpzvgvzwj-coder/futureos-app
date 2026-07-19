@@ -1198,6 +1198,127 @@
       "atRisk": "其他目标：可能受影响"
     }
   },
+  "investmentPlanner": {
+    "title": "投资规划师",
+    "subtitle": "真实的基金和股票推荐，并按你实际的购买方式计算数字。",
+    "genericError": "系统出了点问题，请重试。",
+    "newFeatureBadge": "新功能",
+    "historyTitle": "对话记录",
+    "historyEmpty": "暂无对话记录。",
+    "success": "投资选择已确认。",
+    "thinking": "思考中...",
+    "availableCashflowNote": "在扣除你已确认的其他目标后，你每月大约还有 {amount} 可用于投资。",
+    "riskLabel": "风险偏好",
+    "riskOptions": {
+      "conservative": { "label": "保守型", "description": "预期增长较低，波动也较低——优先保本。" },
+      "balanced": { "label": "平衡型", "description": "兼顾增长与稳定——适合大多数人。" },
+      "growth": { "label": "进取型", "description": "预期增长较高，波动也较高——适合较长的投资期限。" }
+    },
+    "goalCategoryLabel": "这笔投资是为了什么？",
+    "goalCategories": {
+      "retirementGap": { "label": "退休缺口", "description": "帮助弥补你的退休目标收入与 CPF LIFE 之间的差距。" },
+      "generalWealthBuilding": { "label": "长期财富积累", "description": "没有特定目标——随着时间建立稳定的投资习惯。" },
+      "customTarget": { "label": "自定义目标", "description": "你已经有明确的目标金额和时间。" }
+    },
+    "horizonYearsLabel": "投资年限（年）",
+    "customTargetAmountLabel": "目标金额（新元）",
+    "holdingsLabel": "你目前已持有哪些资产？",
+    "holdingsCategories": {
+      "sgEquities": "新加坡股票",
+      "globalEquities": "全球股票",
+      "bonds": "债券",
+      "reits": "房地产投资信托（REITs）",
+      "cashLike": "现金／货币市场"
+    },
+    "purchaseModeLabel": "你想怎么买？",
+    "purchaseModes": {
+      "monthlyRsp": { "label": "每月定期定额", "description": "每月固定日期投入固定金额——类似 OCBC BCIP，可以摊平成本。" },
+      "lumpSum": { "label": "一次性大额买入", "description": "一次性投入较大金额，不分批。" },
+      "dailyMicroDca": { "label": "每日小额投资", "description": "每个交易日投入固定小额——更高频率地摊平成本，需要支持碎股交易的券商。" },
+      "valueAveraging": { "label": "价值平均法", "description": "每月按目标增长曲线补足差额——投入金额一开始较高，之后逐渐减少。" }
+    },
+    "valueAveragingDisclaimer": "此预测假设回报率恒定，不考虑市场涨跌。价值平均法在现实中\"逢低多买\"的优势在这里并未体现；你看到的是一个真实不同的、前期投入较多的供款安排，而不是靠择时带来不同的最终结果。",
+    "submitIntake": "查看我的推荐",
+    "shortlistLabel": "为你推荐",
+    "marketLabels": {
+      "sg": "新加坡",
+      "global": "全球"
+    },
+    "instrumentTypeLabels": {
+      "fund": "基金",
+      "stock": "股票"
+    },
+    "expectedReturnLabel": "预期年回报率",
+    "expenseRatioLabel": "费用比率",
+    "dividendYieldLabel": "股息率",
+    "projectedEndValueLabel": "预计价值",
+    "totalContributedLabel": "累计投入",
+    "projectedGrowthLabel": "预计增长",
+    "valueAveragingScheduleHint": "供款金额从约每月 {first} 开始，到期限结束时逐渐降至约每月 {last}。",
+    "dailyMonthlyEquivalentHint": "换算成月供大约为 {amount}/月。",
+    "whyRecommendedLabel": "推荐理由：",
+    "purchaseModeCommentaryLabel": "关于这种购买方式：",
+    "riskDisclosureLabel": "需要了解的风险：",
+    "explainRecommendations": "解释这些推荐",
+    "refineLabel": "追问一下",
+    "refinePlaceholder": "例如：以我的风险偏好来说，为什么不多配一些债券？",
+    "changeIntakeLabel": "修改我的回答",
+    "amountLabel": "金额",
+    "horizonLabel": "年限（年）",
+    "selectThisInstrument": "选择此标的",
+    "confirmPick": "确认此选择",
+    "confirmedLabel": "已确认的投资",
+    "addAnotherPick": "再添加一个标的",
+    "futureScoreLabel": "未来评分",
+    "cashflowImpact": {
+      "onTrack": "现金流：进展正常",
+      "tight": "现金流：较为紧张",
+      "atRisk": "现金流：可能受影响"
+    },
+    "emergencyFundImpact": {
+      "protected": "应急基金：受到保护",
+      "healthy": "应急基金：健康",
+      "reduced": "应急基金：有所减少",
+      "weak": "应急基金：偏弱"
+    },
+    "catalog": {
+      "sgBondFund": "短久期新元债券基金——收益稳定，波动较低。",
+      "sgGovtBondEtf": "新加坡政府债券指数ETF——广泛、低成本的债券配置。",
+      "sgMoneymarketFund": "新元货币市场基金——接近现金，注重保本。",
+      "sgReitIncomeFund": "多元化新加坡REIT ETF——以收益为主的房地产配置。",
+      "sgTelcoStock": "防御性强、股息较高的新加坡电信蓝筹股。",
+      "sgStiEtf": "追踪海峡时报指数——广泛的新加坡蓝筹股配置。",
+      "sgReitStock": "规模较大的多元化新加坡商业REIT。",
+      "sgUobStock": "新加坡主要银行之一——股息收入加上稳健增长。",
+      "sgDiversifiedBalancedFund": "兼顾增长与稳定的新加坡多元化单位信托基金。",
+      "sgDbsStock": "新加坡最大的银行——增长与稳健派息记录兼备。",
+      "sgOcbcStock": "新加坡主要银行之一，增长稳健、派息稳定。",
+      "sgSmallcapGrowthFund": "新加坡中小型股单位信托基金——增长较高，波动也较高。",
+      "sgTechGrowthStock": "新加坡上市的科技制造企业——周期性强，偏向增长型。",
+      "globalBondEtf": "全球综合债券ETF——多元化、低成本的债券配置。",
+      "globalMoneymarketUsdFund": "美元货币市场基金——接近现金，注重保本。",
+      "globalDividendAristocratsEtf": "拥有长期稳定派息记录的全球企业——波动较低的股票配置。",
+      "globalHealthcareDefensiveStock": "派息历史悠久的防御性全球医疗保健蓝筹股。",
+      "globalSp500Etf": "追踪标普500指数——广泛的美股大盘配置，支持每日小额投资。",
+      "globalMsciWorldEtf": "追踪全球发达市场股票——分散度高。",
+      "globalReitEtf": "全球房地产投资信托ETF——多元化的地产收益配置。",
+      "globalMsftStock": "全球科技蓝筹股——增长与持续增长的股息兼备。",
+      "globalBalancedAllocationFund": "全球60/40股债配置基金——一只基金实现多元化。",
+      "globalAppleStock": "全球消费科技蓝筹股——支持每日小额投资。",
+      "globalAmazonStock": "全球电商与云计算领军企业——增长较高，波动也较高。",
+      "globalNasdaq100Etf": "追踪纳斯达克100家最大非金融企业——偏向增长、科技股占比高。",
+      "globalEmergingMarketsFund": "多元化新兴市场股票基金——增长较高，波动也较高。",
+      "globalEvThematicFund": "聚焦清洁能源与电动车的主题基金——增长较高，波动也较高。"
+    },
+    "disclosures": {
+      "etfGeneric": "基金／ETF的价值可能上涨也可能下跌；过往表现不代表未来回报。",
+      "stockGeneric": "单一股票存在公司特定风险——配置集中，缺乏分散。",
+      "bondFundGeneric": "债券价值与利率走势相反；尽管波动较低，也并非无风险。",
+      "moneyMarketGeneric": "接近现金，但仍不保本，回报会随短期利率变动。",
+      "reitGeneric": "REITs对利率和地产周期较为敏感。",
+      "thematicFundGeneric": "主题基金集中投资于单一趋势或行业——波动高于广泛市场基金。"
+    }
+  },
   "retirementPlanner": {
     "title": "退休规划师",
     "subtitle": "描述你想要的退休生活，我们会算出真实的 CPF LIFE 数字给你。",

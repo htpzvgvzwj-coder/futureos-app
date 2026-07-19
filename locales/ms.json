@@ -1198,6 +1198,127 @@
       "atRisk": "Matlamat Lain: Berisiko"
     }
   },
+  "investmentPlanner": {
+    "title": "Perancang Pelaburan",
+    "subtitle": "Cadangan dana dan saham sebenar, dikira mengikut cara anda sebenarnya akan membelinya.",
+    "genericError": "Ada sesuatu yang tidak kena di pihak kami. Sila cuba lagi.",
+    "newFeatureBadge": "Baharu",
+    "historyTitle": "Sejarah Perbualan",
+    "historyEmpty": "Belum ada perbualan lagi.",
+    "success": "Pilihan pelaburan disahkan.",
+    "thinking": "Sedang berfikir...",
+    "availableCashflowNote": "Selepas matlamat lain yang telah disahkan, anda mempunyai kira-kira {amount}/bulan untuk dilaburkan.",
+    "riskLabel": "Keutamaan Risiko",
+    "riskOptions": {
+      "conservative": { "label": "Konservatif", "description": "Jangkaan pertumbuhan lebih rendah, turun naik lebih rendah - keutamaan mengekalkan modal." },
+      "balanced": { "label": "Seimbang", "description": "Gabungan pertumbuhan dan kestabilan - sesuai untuk kebanyakan orang." },
+      "growth": { "label": "Pertumbuhan", "description": "Jangkaan pertumbuhan lebih tinggi, turun naik lebih tinggi - untuk tempoh masa lebih panjang." }
+    },
+    "goalCategoryLabel": "Untuk apa pelaburan ini?",
+    "goalCategories": {
+      "retirementGap": { "label": "Jurang Persaraan", "description": "Bantu tutup jurang antara pendapatan sasaran persaraan anda dengan CPF LIFE." },
+      "generalWealthBuilding": { "label": "Pembinaan Kekayaan Umum", "description": "Tiada matlamat khusus - membina tabiat melabur yang berterusan dari semasa ke semasa." },
+      "customTarget": { "label": "Sasaran Tersuai", "description": "Anda mempunyai jumlah dan tempoh masa yang khusus dalam fikiran." }
+    },
+    "horizonYearsLabel": "Tempoh Pelaburan (tahun)",
+    "customTargetAmountLabel": "Jumlah Sasaran (SGD)",
+    "holdingsLabel": "Apa yang anda sudah miliki?",
+    "holdingsCategories": {
+      "sgEquities": "Ekuiti Singapura",
+      "globalEquities": "Ekuiti Global",
+      "bonds": "Bon",
+      "reits": "REIT",
+      "cashLike": "Tunai / Pasaran Wang"
+    },
+    "purchaseModeLabel": "Bagaimana anda mahu membeli?",
+    "purchaseModes": {
+      "monthlyRsp": { "label": "RSP Bulanan", "description": "Jumlah tetap pada tarikh tetap setiap bulan - seperti OCBC BCIP, meratakan kos anda." },
+      "lumpSum": { "label": "Sekali Bayar", "description": "Melabur jumlah yang lebih besar sekali gus, bukan disebarkan mengikut masa." },
+      "dailyMicroDca": { "label": "Pelaburan Mikro Harian", "description": "Jumlah kecil tetap setiap hari perdagangan - purata kos frekuensi lebih tinggi, memerlukan broker saham pecahan." },
+      "valueAveraging": { "label": "Purata Nilai", "description": "Tambah ke arah laluan pertumbuhan sasaran setiap bulan - sumbangan bermula lebih tinggi dan berkurangan dari semasa ke semasa." }
+    },
+    "valueAveragingDisclaimer": "Unjuran ini menganggap pulangan jangkaan yang tetap tanpa turun naik pasaran. Kelebihan sebenar purata nilai - membeli lebih banyak apabila harga jatuh - tidak ditangkap di sini; apa yang anda akan lihat ialah jadual sumbangan yang benar-benar berbeza dan lebih tinggi pada peringkat awal, bukan hasil akhir yang berbeza kerana pemasaan pasaran.",
+    "submitIntake": "Tunjukkan Cadangan Saya",
+    "shortlistLabel": "Disyorkan Untuk Anda",
+    "marketLabels": {
+      "sg": "Singapura",
+      "global": "Global"
+    },
+    "instrumentTypeLabels": {
+      "fund": "Dana",
+      "stock": "Saham"
+    },
+    "expectedReturnLabel": "Jangkaan Pulangan Tahunan",
+    "expenseRatioLabel": "Nisbah Perbelanjaan",
+    "dividendYieldLabel": "Hasil Dividen",
+    "projectedEndValueLabel": "Nilai Unjuran",
+    "totalContributedLabel": "Jumlah Disumbangkan",
+    "projectedGrowthLabel": "Pertumbuhan Unjuran",
+    "valueAveragingScheduleHint": "Sumbangan bermula sekitar {first}/bulan dan berkurangan kepada kira-kira {last}/bulan menjelang akhir tempoh.",
+    "dailyMonthlyEquivalentHint": "Kira-kira {amount}/bulan pada asas setara bulanan.",
+    "whyRecommendedLabel": "Kenapa ini sesuai:",
+    "purchaseModeCommentaryLabel": "Tentang cara pembelian ini:",
+    "riskDisclosureLabel": "Risiko yang perlu diketahui:",
+    "explainRecommendations": "Terangkan Cadangan Ini",
+    "refineLabel": "Tanya soalan lanjut",
+    "refinePlaceholder": "cth. Kenapa tidak lebih banyak bon memandangkan keutamaan risiko saya?",
+    "changeIntakeLabel": "Tukar Jawapan Saya",
+    "amountLabel": "Jumlah",
+    "horizonLabel": "Tempoh (tahun)",
+    "selectThisInstrument": "Pilih Instrumen Ini",
+    "confirmPick": "Sahkan Pilihan Ini",
+    "confirmedLabel": "Pelaburan Disahkan",
+    "addAnotherPick": "Tambah Instrumen Lain",
+    "futureScoreLabel": "Skor Masa Depan",
+    "cashflowImpact": {
+      "onTrack": "Aliran Tunai: Mengikut Landasan",
+      "tight": "Aliran Tunai: Ketat",
+      "atRisk": "Aliran Tunai: Berisiko"
+    },
+    "emergencyFundImpact": {
+      "protected": "Dana Kecemasan: Dilindungi",
+      "healthy": "Dana Kecemasan: Sihat",
+      "reduced": "Dana Kecemasan: Berkurangan",
+      "weak": "Dana Kecemasan: Lemah"
+    },
+    "catalog": {
+      "sgBondFund": "Dana bon SGD tempoh pendek - pendapatan stabil, turun naik rendah.",
+      "sgGovtBondEtf": "ETF indeks bon kerajaan Singapura - pendedahan bon yang luas dan kos rendah.",
+      "sgMoneymarketFund": "Dana pasaran wang SGD - hampir tunai, mengutamakan pemeliharaan modal.",
+      "sgReitIncomeFund": "ETF REIT Singapura yang pelbagai - pendedahan hartanah tertumpu pendapatan.",
+      "sgTelcoStock": "Saham telco Singapura berdividen tinggi yang defensif.",
+      "sgStiEtf": "Menjejaki Straits Times Index - pendedahan blue chip Singapura yang luas.",
+      "sgReitStock": "REIT komersial Singapura yang besar dan pelbagai.",
+      "sgUobStock": "Sebuah bank utama Singapura - pendapatan dividen ditambah pertumbuhan sederhana.",
+      "sgDiversifiedBalancedFund": "Unit amanah Singapura pelbagai yang mengimbangi pertumbuhan dan kestabilan.",
+      "sgDbsStock": "Bank terbesar Singapura - pertumbuhan ditambah rekod dividen yang kukuh.",
+      "sgOcbcStock": "Bank utama Singapura dengan pertumbuhan dan dividen yang stabil.",
+      "sgSmallcapGrowthFund": "Unit amanah syarikat kecil/sederhana Singapura - pertumbuhan lebih tinggi, turun naik lebih tinggi.",
+      "sgTechGrowthStock": "Pengeluar teknologi tersenarai Singapura - berkitaran, berorientasikan pertumbuhan.",
+      "globalBondEtf": "ETF bon agregat global - pendedahan bon yang pelbagai dan kos rendah.",
+      "globalMoneymarketUsdFund": "Dana pasaran wang USD - hampir tunai, mengutamakan pemeliharaan modal.",
+      "globalDividendAristocratsEtf": "Syarikat global dengan rekod pertumbuhan dividen yang panjang - ekuiti turun naik lebih rendah.",
+      "globalHealthcareDefensiveStock": "Saham blue chip penjagaan kesihatan global yang defensif dengan sejarah dividen yang panjang.",
+      "globalSp500Etf": "Menjejaki S&P 500 - pendedahan syarikat besar AS yang luas, menyokong pelaburan mikro harian.",
+      "globalMsciWorldEtf": "Menjejaki ekuiti pasaran maju global - kepelbagaian yang luas.",
+      "globalReitEtf": "ETF amanah pelaburan hartanah global - pendapatan hartanah yang pelbagai.",
+      "globalMsftStock": "Saham blue chip teknologi global - pertumbuhan ditambah dividen yang semakin berkembang.",
+      "globalBalancedAllocationFund": "Dana peruntukan saham-bon global 60/40 - kepelbagaian dalam satu tiket.",
+      "globalAppleStock": "Saham blue chip teknologi pengguna global - menyokong pelaburan mikro harian.",
+      "globalAmazonStock": "Peneraju e-dagang dan pengkomputeran awan global - pertumbuhan lebih tinggi, turun naik lebih tinggi.",
+      "globalNasdaq100Etf": "Menjejaki 100 syarikat bukan kewangan terbesar Nasdaq - condong pertumbuhan, berat teknologi.",
+      "globalEmergingMarketsFund": "Dana ekuiti pasaran sedang membangun yang pelbagai - pertumbuhan lebih tinggi, turun naik lebih tinggi.",
+      "globalEvThematicFund": "Dana bertema tertumpu pada tenaga bersih dan kenderaan elektrik - pertumbuhan lebih tinggi, turun naik lebih tinggi."
+    },
+    "disclosures": {
+      "etfGeneric": "Nilai dana/ETF boleh jatuh atau naik; prestasi lampau tidak menjamin pulangan masa depan.",
+      "stockGeneric": "Saham tunggal membawa risiko khusus syarikat - pendedahan tertumpu, tiada kepelbagaian.",
+      "bondFundGeneric": "Nilai bon bergerak bertentangan dengan kadar faedah; bukan bebas risiko walaupun turun naik lebih rendah.",
+      "moneyMarketGeneric": "Hampir tunai, tetapi masih tidak dijamin modal dan pulangan bergerak mengikut kadar jangka pendek.",
+      "reitGeneric": "REIT sensitif terhadap kadar faedah dan kitaran pasaran hartanah.",
+      "thematicFundGeneric": "Dana bertema tertumpu pada satu trend atau sektor - turun naik lebih tinggi daripada dana pasaran luas."
+    }
+  },
   "retirementPlanner": {
     "title": "Perancang Persaraan",
     "subtitle": "Terangkan persaraan yang anda mahu dan lihat angka CPF LIFE sebenar dikira untuk anda.",

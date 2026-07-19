@@ -1211,6 +1211,127 @@
       "atRisk": "Other Goals: At Risk"
     }
   },
+  "investmentPlanner": {
+    "title": "Investment Planner",
+    "subtitle": "Real fund and stock recommendations, priced for how you'd actually buy them.",
+    "genericError": "Something went wrong on our end. Please try again.",
+    "newFeatureBadge": "New",
+    "historyTitle": "Conversation History",
+    "historyEmpty": "No conversation yet.",
+    "success": "Investment pick confirmed.",
+    "thinking": "Thinking...",
+    "availableCashflowNote": "After your other confirmed goals, you have about {amount}/month available to invest.",
+    "riskLabel": "Risk Preference",
+    "riskOptions": {
+      "conservative": { "label": "Conservative", "description": "Lower expected growth, lower volatility - capital preservation first." },
+      "balanced": { "label": "Balanced", "description": "A mix of growth and stability - suits most people." },
+      "growth": { "label": "Growth", "description": "Higher expected growth, higher volatility - for longer time horizons." }
+    },
+    "goalCategoryLabel": "What's this investment for?",
+    "goalCategories": {
+      "retirementGap": { "label": "Retirement Gap", "description": "Help close the gap between your target retirement income and CPF LIFE." },
+      "generalWealthBuilding": { "label": "General Wealth Building", "description": "No specific goal - build a durable investing habit over time." },
+      "customTarget": { "label": "Custom Target", "description": "You have a specific amount and timeframe in mind." }
+    },
+    "horizonYearsLabel": "Investment Horizon (years)",
+    "customTargetAmountLabel": "Target Amount (SGD)",
+    "holdingsLabel": "What do you already hold?",
+    "holdingsCategories": {
+      "sgEquities": "Singapore Equities",
+      "globalEquities": "Global Equities",
+      "bonds": "Bonds",
+      "reits": "REITs",
+      "cashLike": "Cash / Money Market"
+    },
+    "purchaseModeLabel": "How do you want to buy?",
+    "purchaseModes": {
+      "monthlyRsp": { "label": "Monthly RSP", "description": "A fixed amount on a fixed date each month - like OCBC BCIP, averages out your cost." },
+      "lumpSum": { "label": "Lump Sum", "description": "Invest a larger amount all at once, not spread over time." },
+      "dailyMicroDca": { "label": "Daily Micro-Investing", "description": "A small fixed amount every trading day - higher-frequency cost averaging, needs a fractional-share broker." },
+      "valueAveraging": { "label": "Value Averaging", "description": "Top up toward a target growth path each month - contributions start higher and taper over time." }
+    },
+    "valueAveragingDisclaimer": "This projection assumes a constant expected return with no market ups and downs. Value averaging's real-world edge - buying more when prices dip - isn't captured here; what you'll see is a genuinely different, front-loaded contribution schedule, not a different end result from market timing.",
+    "submitIntake": "Show My Recommendations",
+    "shortlistLabel": "Recommended For You",
+    "marketLabels": {
+      "sg": "Singapore",
+      "global": "Global"
+    },
+    "instrumentTypeLabels": {
+      "fund": "Fund",
+      "stock": "Stock"
+    },
+    "expectedReturnLabel": "Expected Annual Return",
+    "expenseRatioLabel": "Expense Ratio",
+    "dividendYieldLabel": "Dividend Yield",
+    "projectedEndValueLabel": "Projected Value",
+    "totalContributedLabel": "Total Contributed",
+    "projectedGrowthLabel": "Projected Growth",
+    "valueAveragingScheduleHint": "Contributions start around {first}/month and taper to about {last}/month by the end of the horizon.",
+    "dailyMonthlyEquivalentHint": "About {amount}/month on a monthly-equivalent basis.",
+    "whyRecommendedLabel": "Why this fits:",
+    "purchaseModeCommentaryLabel": "About buying this way:",
+    "riskDisclosureLabel": "Risk to know:",
+    "explainRecommendations": "Explain These Recommendations",
+    "refineLabel": "Ask a follow-up",
+    "refinePlaceholder": "e.g. Why not more bonds given my risk preference?",
+    "changeIntakeLabel": "Change My Answers",
+    "amountLabel": "Amount",
+    "horizonLabel": "Horizon (years)",
+    "selectThisInstrument": "Select This Instrument",
+    "confirmPick": "Confirm This Pick",
+    "confirmedLabel": "Confirmed Investment",
+    "addAnotherPick": "Add Another Instrument",
+    "futureScoreLabel": "Future Score",
+    "cashflowImpact": {
+      "onTrack": "Cashflow: On Track",
+      "tight": "Cashflow: Tight",
+      "atRisk": "Cashflow: At Risk"
+    },
+    "emergencyFundImpact": {
+      "protected": "Emergency Fund: Protected",
+      "healthy": "Emergency Fund: Healthy",
+      "reduced": "Emergency Fund: Reduced",
+      "weak": "Emergency Fund: Weak"
+    },
+    "catalog": {
+      "sgBondFund": "A short-duration SGD bond fund - steady income, low volatility.",
+      "sgGovtBondEtf": "Singapore government bond index ETF - broad, low-cost bond exposure.",
+      "sgMoneymarketFund": "SGD money market fund - near-cash, capital preservation.",
+      "sgReitIncomeFund": "Diversified Singapore REIT ETF - income-focused property exposure.",
+      "sgTelcoStock": "A defensive, high-dividend Singapore telco blue chip.",
+      "sgStiEtf": "Tracks the Straits Times Index - broad Singapore blue-chip exposure.",
+      "sgReitStock": "A large diversified Singapore commercial REIT.",
+      "sgUobStock": "A major Singapore bank - dividend income plus moderate growth.",
+      "sgDiversifiedBalancedFund": "A diversified Singapore unit trust balancing growth and stability.",
+      "sgDbsStock": "Singapore's largest bank - growth plus a strong dividend track record.",
+      "sgOcbcStock": "A leading Singapore bank with steady growth and dividends.",
+      "sgSmallcapGrowthFund": "A Singapore small/mid-cap unit trust - higher growth, higher volatility.",
+      "sgTechGrowthStock": "A Singapore-listed technology manufacturer - cyclical, growth-oriented.",
+      "globalBondEtf": "Global aggregate bond ETF - diversified, low-cost bond exposure.",
+      "globalMoneymarketUsdFund": "USD money market fund - near-cash, capital preservation.",
+      "globalDividendAristocratsEtf": "Global companies with long dividend-growth track records - lower-volatility equities.",
+      "globalHealthcareDefensiveStock": "A defensive global healthcare blue chip with a long dividend history.",
+      "globalSp500Etf": "Tracks the S&P 500 - broad US large-cap exposure, supports daily micro-investing.",
+      "globalMsciWorldEtf": "Tracks global developed-market equities - broad diversification.",
+      "globalReitEtf": "Global real estate investment trust ETF - diversified property income.",
+      "globalMsftStock": "A global technology blue chip - growth plus a growing dividend.",
+      "globalBalancedAllocationFund": "A global 60/40 stock-bond allocation fund - one-ticket diversification.",
+      "globalAppleStock": "A global consumer technology blue chip - supports daily micro-investing.",
+      "globalAmazonStock": "A global e-commerce and cloud computing leader - higher growth, higher volatility.",
+      "globalNasdaq100Etf": "Tracks 100 of the largest non-financial Nasdaq companies - growth-tilted, tech-heavy.",
+      "globalEmergingMarketsFund": "Diversified emerging-markets equity fund - higher growth, higher volatility.",
+      "globalEvThematicFund": "A thematic fund focused on clean energy and electric vehicles - higher growth, higher volatility."
+    },
+    "disclosures": {
+      "etfGeneric": "Fund/ETF value can fall as well as rise; past performance doesn't guarantee future returns.",
+      "stockGeneric": "A single stock carries company-specific risk - concentrated exposure, no diversification.",
+      "bondFundGeneric": "Bond values move inversely with interest rates; not risk-free despite lower volatility.",
+      "moneyMarketGeneric": "Near-cash, but still not principal-guaranteed and returns move with short-term rates.",
+      "reitGeneric": "REITs are sensitive to interest rates and the property market cycle.",
+      "thematicFundGeneric": "Thematic funds concentrate in one trend or sector - higher volatility than a broad market fund."
+    }
+  },
   "retirementPlanner": {
     "title": "Retirement Planner",
     "subtitle": "Describe the retirement you want and see real CPF LIFE numbers calculated for you.",

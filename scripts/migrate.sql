@@ -239,3 +239,41 @@ create table if not exists loan_artifacts (
 
 create index if not exists loan_artifacts_session_stage_type_idx
   on loan_artifacts (session_id, stage, artifact_type, created_at desc);
+
+create table if not exists investment_sessions (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null default 'karina-demo',
+  stage1_status text not null default 'in_progress', -- in_progress | confirmed
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create unique index if not exists investment_sessions_profile_key_idx
+  on investment_sessions (profile_key);
+
+create table if not exists investment_messages (
+  id           bigserial primary key,
+  session_id   uuid not null references investment_sessions(id),
+  stage        text not null, -- stage1 only (narrative conversation) — the purchase-mode/amount
+                               -- pick itself is a structured confirm, no stage2, same "no save-up-
+                               -- first phase" reasoning as loan_messages
+  seq          integer not null,
+  role         text not null, -- user | assistant
+  content      jsonb not null,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists investment_messages_session_stage_seq_idx
+  on investment_messages (session_id, stage, seq);
+
+create table if not exists investment_artifacts (
+  id            bigserial primary key,
+  session_id    uuid not null references investment_sessions(id),
+  stage         text not null,
+  artifact_type text not null, -- intake | shortlist | narrative | confirmed_investment_pick
+  payload       jsonb not null,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists investment_artifacts_session_stage_type_idx
+  on investment_artifacts (session_id, stage, artifact_type, created_at desc);
