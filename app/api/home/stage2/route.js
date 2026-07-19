@@ -19,6 +19,7 @@ import {
   saveArtifact,
   updateSessionStatus,
 } from "../../../../lib/home-store.js";
+import { DEFAULT_PROFILE_KEY as LOAN_DEFAULT_PROFILE_KEY, getLatestArtifact as getLatestLoanArtifact, getOrCreateSession as getOrCreateLoanSession } from "../../../../lib/loan-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -45,6 +46,22 @@ export async function POST(request) {
     return Response.json({ error: "no_confirmed_plan" }, { status: 409 });
   }
 
+  // The actual financing numbers (down payment/loan amount) are now decided
+  // in the Loan Planner, not by Home Purchase Planner's own baseline
+  // LTV-max computation — the savings plan must target what the customer
+  // actually chose there, not a default nobody picked.
+  const loanSession = await getOrCreateLoanSession(LOAN_DEFAULT_PROFILE_KEY, "home");
+  const confirmedLoan = await getLatestLoanArtifact(loanSession.id, "stage1", "confirmed_loan");
+  if (!confirmedLoan) {
+    return Response.json({ error: "no_confirmed_loan" }, { status: 409 });
+  }
+  const financedPlan = {
+    ...confirmedPlan,
+    down_payment_cash_cpf: confirmedLoan.down_payment_cash_cpf,
+    min_cash_component: confirmedLoan.min_cash_component,
+    loan_amount: confirmedLoan.loan_amount,
+  };
+
   const history = await getMessageHistory(session.id, "stage2");
   const userContent = buildFollowUpUserContent(history, message);
   const messages = [...history, { role: "user", content: userContent }];
@@ -57,7 +74,7 @@ export async function POST(request) {
       max_tokens: 8000,
       thinking: { type: "adaptive" },
       output_config: { effort: "medium" },
-      system: buildHomeStage2SystemPrompt(language, profile, confirmedPlan),
+      system: buildHomeStage2SystemPrompt(language, profile, financedPlan),
       tools: [PROPOSE_HOME_SAVINGS_PLAN_TOOL, FINALIZE_HOME_SAVINGS_PLAN_TOOL],
       tool_choice: { type: "any" },
       messages,

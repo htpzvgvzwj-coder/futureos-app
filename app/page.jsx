@@ -24,6 +24,7 @@ import {
   Download,
   FileText,
   Globe2,
+  HandCoins,
   HeartHandshake,
   History,
   Home,
@@ -60,6 +61,7 @@ import {
 import { computeHomeFinancials } from "../lib/home-finance.js";
 import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
 import { computeRetirementFinancials } from "../lib/retirement-finance.js";
+import { computeAllLoanArchetypes, applyLoanModifiers, LOAN_ARCHETYPE_KEYS, LOAN_MODIFIER_KEYS } from "../lib/loan-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -74,6 +76,7 @@ const screens = {
   NEED_WEDDING: "needWedding",
   NEED_HOME: "needHome",
   NEED_RETIREMENT: "needRetirement",
+  NEED_LOAN: "needLoan",
   NEED_EMERGENCY: "needEmergency",
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
@@ -133,6 +136,7 @@ const productEcosystem = [
 const simulatorGoalOptions = [
   { id: "wedding", labelKey: "simulator.goals.wedding", icon: HeartHandshake },
   { id: "home", labelKey: "simulator.goals.home", icon: Building2 },
+  { id: "loan", labelKey: "simulator.goals.loan", icon: HandCoins },
   { id: "emergency", labelKey: "simulator.goals.emergency", icon: LockKeyhole },
   { id: "retirement", labelKey: "simulator.goals.retirement", icon: Landmark },
   { id: "family", labelKey: "simulator.goals.family", icon: Sparkles },
@@ -146,6 +150,7 @@ const simulatorGoalOptions = [
 const DEDICATED_GOAL_SCREENS = {
   wedding: { screen: screens.NEED_WEDDING, badgeKey: "weddingPlanner.newFeatureBadge" },
   home: { screen: screens.NEED_HOME, badgeKey: "homePlanner.newFeatureBadge" },
+  loan: { screen: screens.NEED_LOAN, badgeKey: "loanPlanner.newFeatureBadge" },
   retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
   emergency: { screen: screens.NEED_EMERGENCY, badgeKey: "needDetails.emergency.newFeatureBadge" },
 };
@@ -1886,7 +1891,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
-  if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT].includes(activeScreen)) {
+  if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN].includes(activeScreen)) {
     return screens.MIRROR;
   }
   if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.NEED_INVESTMENT].includes(activeScreen)) {
@@ -4401,6 +4406,7 @@ function NeedDetailScreen({
   setMemoryEvents,
   language,
   t,
+  setLoanPlannerInitialPurpose,
 }) {
   const success = Boolean(successStates[type]);
   const setSuccess = () => setSuccessStates((current) => ({ ...current, [type]: true }));
@@ -4430,6 +4436,7 @@ function NeedDetailScreen({
         setSimulatorInputs={setSimulatorInputs}
         setMemoryEvents={setMemoryEvents}
         profile={profile}
+        setLoanPlannerInitialPurpose={setLoanPlannerInitialPurpose}
       />
     ),
     retirement: (
@@ -5908,8 +5915,10 @@ function RetirementCpfInputStep({ profile, simulatorInputs, onSubmit, t }) {
   );
 }
 
-function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile }) {
+function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile, setLoanPlannerInitialPurpose }) {
   const [sessionData, setSessionData] = useState(null);
+  const [confirmedLoan, setConfirmedLoan] = useState(null);
+  const [loanChecked, setLoanChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -5950,6 +5959,22 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
       cancelled = true;
     };
   }, [t]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/loan/session?purpose=home")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setConfirmedLoan(data.confirmedLoan ?? null);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoanChecked(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const submitToStage1 = async (intent, message) => {
     setSubmitting(true);
@@ -6191,7 +6216,45 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
               {t("homePlanner.planAnotherLabel")}
             </button>
           </div>
-          {sessionData?.confirmedSavingsPlan ? (
+          {loanChecked && confirmedLoan ? (
+            <section className="needHeroCard">
+              <span className="sectionLabel">{t("homePlanner.financingLabel")}</span>
+              <div className="weddingStatChips">
+                <span className="statChip">
+                  {t(LOAN_ARCHETYPE_LABEL_KEYS[confirmedLoan.archetype] ?? confirmedLoan.archetype)}
+                </span>
+                <span className="statChip">{formatSgd(Math.round(confirmedLoan.monthly_installment))}/mo</span>
+                <span className="statChip">{confirmedLoan.tenure_years}y</span>
+              </div>
+              <button
+                type="button"
+                className="secondaryButton"
+                onClick={() => {
+                  setLoanPlannerInitialPurpose("home");
+                  setActiveScreen(screens.NEED_LOAN);
+                }}
+              >
+                {t("homePlanner.changeFinancingLabel")}
+              </button>
+            </section>
+          ) : loanChecked ? (
+            <section className="needHeroCard">
+              <span className="sectionLabel">{t("homePlanner.chooseFinancingLabel")}</span>
+              <p>{t("homePlanner.chooseFinancingBody")}</p>
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={() => {
+                  setLoanPlannerInitialPurpose("home");
+                  setActiveScreen(screens.NEED_LOAN);
+                }}
+              >
+                {t("homePlanner.chooseFinancingButton")}
+                <Send size={18} />
+              </button>
+            </section>
+          ) : null}
+          {!confirmedLoan ? null : sessionData?.confirmedSavingsPlan ? (
             <ConfirmedSavingsPlanCard
               plan={sessionData.confirmedSavingsPlan}
               checkins={sessionData.savingsCheckins ?? []}
@@ -6744,6 +6807,536 @@ function RecoveryActionCard({ action, selected, onToggle, t }) {
       </span>
       {selected ? <Check size={16} /> : null}
     </button>
+  );
+}
+
+const LOAN_PURPOSE_LABEL_KEYS = {
+  home: "loanPlanner.purposes.home",
+  renovation: "loanPlanner.purposes.renovation",
+  personal: "loanPlanner.purposes.personal",
+};
+const LOAN_PURPOSE_DESC_KEYS = {
+  home: "loanPlanner.purposeDescriptions.home",
+  renovation: "loanPlanner.purposeDescriptions.renovation",
+  personal: "loanPlanner.purposeDescriptions.personal",
+};
+const LOAN_PURPOSE_ICONS = { home: Building2, renovation: Sparkles, personal: CircleDollarSign };
+
+const LOAN_ARCHETYPE_LABEL_KEYS = {
+  safe: "loanPlanner.archetypes.safe",
+  balanced: "loanPlanner.archetypes.balanced",
+  fast: "loanPlanner.archetypes.fast",
+};
+const LOAN_ARCHETYPE_DESC_KEYS = {
+  safe: "loanPlanner.archetypeDescriptions.safe",
+  balanced: "loanPlanner.archetypeDescriptions.balanced",
+  fast: "loanPlanner.archetypeDescriptions.fast",
+};
+const LOAN_ARCHETYPE_ICONS = { safe: ShieldCheck, balanced: Target, fast: LineChart };
+
+const LOAN_MODIFIER_LABEL_KEYS = {
+  flexible: "loanPlanner.modifiers.flexible",
+  growth: "loanPlanner.modifiers.growth",
+  protection: "loanPlanner.modifiers.protection",
+};
+const LOAN_MODIFIER_DESC_KEYS = {
+  flexible: "loanPlanner.modifierDescriptions.flexible",
+  growth: "loanPlanner.modifierDescriptions.growth",
+  protection: "loanPlanner.modifierDescriptions.protection",
+};
+const LOAN_MODIFIER_ICONS = { flexible: SlidersHorizontal, growth: LineChart, protection: ShieldCheck };
+
+const EMERGENCY_FUND_IMPACT_LABEL_KEYS = {
+  protected: "loanPlanner.emergencyFundImpact.protected",
+  healthy: "loanPlanner.emergencyFundImpact.healthy",
+  reduced: "loanPlanner.emergencyFundImpact.reduced",
+  weak: "loanPlanner.emergencyFundImpact.weak",
+};
+const OTHER_GOALS_IMPACT_LABEL_KEYS = {
+  on_track: "loanPlanner.otherGoalsImpact.onTrack",
+  tight: "loanPlanner.otherGoalsImpact.tight",
+  at_risk: "loanPlanner.otherGoalsImpact.atRisk",
+};
+
+function LoanImpactChip({ impact, labelKeys, t }) {
+  const className = impact === "at_risk" || impact === "weak" ? "statChip warning" : "statChip";
+  return <span className={className}>{t(labelKeys[impact] ?? impact)}</span>;
+}
+
+function LoanArchetypeCard({ archetypeKey, result, selected, recommended, onSelect, t }) {
+  const Icon = LOAN_ARCHETYPE_ICONS[archetypeKey] ?? Target;
+  return (
+    <article className={`weddingPlanTile accent-${archetypeKey === "safe" ? 0 : archetypeKey === "balanced" ? 1 : 2}${selected ? " recommended" : ""}`}>
+      {recommended ? <span className="miniBadge">{t("status.recommended")}</span> : null}
+      <h3>
+        <Icon size={16} /> {t(LOAN_ARCHETYPE_LABEL_KEYS[archetypeKey])}
+      </h3>
+      <p className="weddingPlanSummary">{t(LOAN_ARCHETYPE_DESC_KEYS[archetypeKey])}</p>
+      <div className="weddingTotalCost">
+        <small>{t("loanPlanner.monthlyInstallment")}</small>
+        <strong>{formatSgd(Math.round(result.monthly_installment))}</strong>
+      </div>
+      <SummaryRow label={t("loanPlanner.loanAmount")} value={formatSgd(Math.round(result.loan_amount))} />
+      <SummaryRow label={t("loanPlanner.tenure")} value={`${result.tenure_years}y`} />
+      <SummaryRow label={t("loanPlanner.totalInterest")} value={formatSgd(Math.round(result.total_interest))} />
+      <SummaryRow label={t("loanPlanner.futureScore")} value={result.future_score} />
+      <div className="weddingStatChips">
+        <LoanImpactChip impact={result.emergency_fund_impact} labelKeys={EMERGENCY_FUND_IMPACT_LABEL_KEYS} t={t} />
+        <LoanImpactChip impact={result.other_goals_impact} labelKeys={OTHER_GOALS_IMPACT_LABEL_KEYS} t={t} />
+        {result.ltv_capped ? <span className="statChip">{t("loanPlanner.ltvCapped")}</span> : null}
+        {result.exceeds_serviceability ? <span className="statChip warning">{t("loanPlanner.exceedsServiceability")}</span> : null}
+      </div>
+      <button type="button" className={selected ? "primaryButton" : "secondaryButton"} onClick={() => onSelect(archetypeKey)}>
+        {selected ? t("loanPlanner.selected") : t("loanPlanner.selectStrategy")}
+        {selected ? <Check size={16} /> : null}
+      </button>
+    </article>
+  );
+}
+
+function LoanModifierToggle({ modifierKey, active, onToggle, t }) {
+  const Icon = LOAN_MODIFIER_ICONS[modifierKey] ?? SlidersHorizontal;
+  return (
+    <button type="button" className={active ? "checkOption selected" : "checkOption"} onClick={() => onToggle(modifierKey)}>
+      <Icon size={15} />
+      <span>
+        {t(LOAN_MODIFIER_LABEL_KEYS[modifierKey])}
+        <small style={{ display: "block", fontWeight: 400 }}>{t(LOAN_MODIFIER_DESC_KEYS[modifierKey])}</small>
+      </span>
+      {active ? <Check size={14} /> : null}
+    </button>
+  );
+}
+
+function LoanStrategySelector({ archetypes, selectedArchetype, onSelectArchetype, selectedModifiers, onToggleModifier, t }) {
+  const selectedResult = archetypes[selectedArchetype];
+  return (
+    <section className="weddingPlanCarouselWrap">
+      <span className="sectionLabel">{t("loanPlanner.strategyLabel")}</span>
+      <div className="weddingPlanCarousel">
+        {LOAN_ARCHETYPE_KEYS.map((key) => (
+          <LoanArchetypeCard
+            key={key}
+            archetypeKey={key}
+            result={archetypes[key]}
+            selected={selectedArchetype === key}
+            recommended={key === "balanced"}
+            onSelect={onSelectArchetype}
+            t={t}
+          />
+        ))}
+      </div>
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("loanPlanner.modifiersLabel")}</span>
+        <div className="checkboxGrid">
+          {LOAN_MODIFIER_KEYS.map((key) => (
+            <LoanModifierToggle key={key} modifierKey={key} active={selectedModifiers.includes(key)} onToggle={onToggleModifier} t={t} />
+          ))}
+        </div>
+        {selectedResult?.insurance_premium_monthly ? (
+          <p className="weddingCarouselHint">{t("loanPlanner.protectionNote", { amount: formatSgd(selectedResult.insurance_premium_monthly) })}</p>
+        ) : null}
+        {selectedResult?.invested_lump_sum ? (
+          <p className="weddingCarouselHint">
+            {t("loanPlanner.growthNote", {
+              amount: formatSgd(selectedResult.invested_lump_sum),
+              projected: formatSgd(selectedResult.projected_investment_value),
+            })}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function LoanConfirmedCard({ loan, onChangeStrategy, onChangeAmount, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("loanPlanner.confirmedLabel")}</span>
+      <div className="weddingTotalCost">
+        <small>{t("loanPlanner.monthlyInstallment")}</small>
+        <strong>{formatSgd(Math.round(loan.monthly_installment))}</strong>
+      </div>
+      <SummaryRow label={t("loanPlanner.purposeLabel")} value={t(LOAN_PURPOSE_LABEL_KEYS[loan.purpose] ?? loan.purpose)} />
+      <SummaryRow label={t("loanPlanner.strategyLabel")} value={t(LOAN_ARCHETYPE_LABEL_KEYS[loan.archetype] ?? loan.archetype)} />
+      <SummaryRow label={t("loanPlanner.loanAmount")} value={formatSgd(Math.round(loan.loan_amount))} />
+      <SummaryRow label={t("loanPlanner.tenure")} value={`${loan.tenure_years}y`} />
+      <SummaryRow label={t("loanPlanner.totalInterest")} value={formatSgd(Math.round(loan.total_interest))} />
+      <SummaryRow label={t("loanPlanner.futureScore")} value={loan.future_score} />
+      <div className="weddingStatChips">
+        <LoanImpactChip impact={loan.emergency_fund_impact} labelKeys={EMERGENCY_FUND_IMPACT_LABEL_KEYS} t={t} />
+        <LoanImpactChip impact={loan.other_goals_impact} labelKeys={OTHER_GOALS_IMPACT_LABEL_KEYS} t={t} />
+        {loan.modifiers_applied.map((key) => (
+          <span className="statChip" key={key}>
+            {t(LOAN_MODIFIER_LABEL_KEYS[key] ?? key)}
+          </span>
+        ))}
+      </div>
+      <div className="confirmedPlanActions">
+        <button type="button" className="secondaryButton" onClick={onChangeStrategy}>
+          {t("loanPlanner.changeStrategyLabel")}
+        </button>
+        {loan.purpose !== "home" ? (
+          <button type="button" className="secondaryButton" onClick={onChangeAmount}>
+            {t("loanPlanner.changeAmountLabel")}
+          </button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function LoanPurposeSelector({ onSelect, t }) {
+  return (
+    <section className="settingsGroup">
+      <span className="sectionLabel">{t("loanPlanner.purposeSelectLabel")}</span>
+      <div className="checkboxGrid">
+        {["home", "renovation", "personal"].map((purposeKey) => {
+          const Icon = LOAN_PURPOSE_ICONS[purposeKey];
+          return (
+            <button type="button" className="checkOption weddingEntryOption" key={purposeKey} onClick={() => onSelect(purposeKey)}>
+              <Icon size={15} />
+              <span>
+                {t(LOAN_PURPOSE_LABEL_KEYS[purposeKey])}
+                <small style={{ display: "block", fontWeight: 400 }}>{t(LOAN_PURPOSE_DESC_KEYS[purposeKey])}</small>
+              </span>
+              <span className="weddingEntryTrailing">
+                <ChevronRight size={14} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function LoanSizingOptionCard({ option, selected, onSelect, t }) {
+  return (
+    <article className={`weddingPlanTile accent-0${selected ? " recommended" : ""}`}>
+      <h3>{option.label}</h3>
+      <div className="weddingTotalCost">
+        <small>{t("loanPlanner.estimatedAmount")}</small>
+        <strong>{formatSgd(Math.round(option.loan_amount_estimate))}</strong>
+      </div>
+      <p className="weddingPlanSummary">{option.estimate_basis}</p>
+      {option.considerations ? <p className="weddingPlanSummary">{option.considerations}</p> : null}
+      <button type="button" className={selected ? "primaryButton" : "secondaryButton"} onClick={() => onSelect(option)}>
+        {selected ? t("loanPlanner.selected") : t("loanPlanner.selectThisAmount")}
+      </button>
+    </article>
+  );
+}
+
+function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, initialPurpose, onConsumeInitialPurpose }) {
+  const [purpose, setPurpose] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [sizingError, setSizingError] = useState(null);
+  const [sizingOptions, setSizingOptions] = useState(null);
+  const [researchNotes, setResearchNotes] = useState("");
+  const [confirmedLoan, setConfirmedLoan] = useState(null);
+  const [principalBasis, setPrincipalBasis] = useState(null);
+  const [propertyType, setPropertyType] = useState(null);
+  const [otherGoalsMonthlyOutflow, setOtherGoalsMonthlyOutflow] = useState(0);
+  const [selectedArchetype, setSelectedArchetype] = useState("balanced");
+  const [selectedModifiers, setSelectedModifiers] = useState([]);
+  const [editingStrategy, setEditingStrategy] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialPurpose) {
+      setPurpose(initialPurpose);
+      onConsumeInitialPurpose();
+    }
+  }, [initialPurpose, onConsumeInitialPurpose]);
+
+  const resetToPurposeSelection = () => {
+    setPurpose(null);
+    setSizingError(null);
+    setSizingOptions(null);
+    setConfirmedLoan(null);
+    setPrincipalBasis(null);
+    setPropertyType(null);
+    setEditingStrategy(false);
+  };
+
+  useEffect(() => {
+    if (!purpose) return;
+    let cancelled = false;
+    setLoading(true);
+    setErrorMessage("");
+    setSizingError(null);
+
+    async function load() {
+      const sessionResponse = await fetch(`/api/loan/session?purpose=${purpose}`);
+      const sessionJson = await sessionResponse.json();
+      if (cancelled) return;
+
+      if (sessionJson.confirmedLoan) {
+        setConfirmedLoan(sessionJson.confirmedLoan);
+        setPrincipalBasis(sessionJson.confirmedLoan.principal_basis);
+        setPropertyType(sessionJson.confirmedLoan.property_type);
+        setSelectedArchetype(sessionJson.confirmedLoan.archetype);
+        setSelectedModifiers(sessionJson.confirmedLoan.modifiers_applied ?? []);
+        setLoading(false);
+        return;
+      }
+
+      setSizingOptions(sessionJson.sizingOptions);
+
+      if (purpose === "home") {
+        const contextResponse = await fetch("/api/loan/sizing-context?purpose=home");
+        if (cancelled) return;
+        if (!contextResponse.ok) {
+          setSizingError("no_confirmed_home_plan");
+          setLoading(false);
+          return;
+        }
+        const contextJson = await contextResponse.json();
+        setPrincipalBasis(contextJson.price);
+        setPropertyType(contextJson.propertyType);
+        setOtherGoalsMonthlyOutflow(contextJson.otherGoalsMonthlyOutflow);
+      }
+
+      setLoading(false);
+    }
+
+    load().catch(() => {
+      if (!cancelled) {
+        setErrorMessage(t("loanPlanner.genericError"));
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [purpose, t]);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch(`/api/loan/history?purpose=${purpose}`)
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  const submitSizing = async (message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/loan/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: sizingOptions ? "refine" : "generate", message, language, purpose }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("loanPlanner.genericError"));
+        return;
+      }
+      setSizingOptions(data.data);
+      setResearchNotes(data.data.research_notes ?? "");
+    } catch {
+      setErrorMessage(t("loanPlanner.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectSizingOption = async (option) => {
+    setPrincipalBasis(option.loan_amount_estimate);
+    setLoading(true);
+    try {
+      const contextResponse = await fetch(`/api/loan/sizing-context?purpose=${purpose}`);
+      const contextJson = await contextResponse.json();
+      setOtherGoalsMonthlyOutflow(contextJson.otherGoalsMonthlyOutflow ?? 0);
+    } catch {
+      setOtherGoalsMonthlyOutflow(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleModifier = (key) => {
+    setSelectedModifiers((current) => (current.includes(key) ? current.filter((m) => m !== key) : [...current, key]));
+  };
+
+  const confirmStrategy = async () => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/loan/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          purpose,
+          principalBasis,
+          propertyType,
+          archetype: selectedArchetype,
+          modifiers: selectedModifiers,
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+          currentSavings: numberValue(profile.currentSavings, 20000),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("loanPlanner.genericError"));
+        return;
+      }
+      setConfirmedLoan(data.data);
+      setEditingStrategy(false);
+      setSuccess();
+    } catch {
+      setErrorMessage(t("loanPlanner.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const archetypes =
+    principalBasis != null
+      ? computeAllLoanArchetypes(purpose, {
+          principalBasis,
+          propertyType,
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+          currentSavings: numberValue(profile.currentSavings, 20000),
+          otherGoalsMonthlyOutflow,
+        })
+      : null;
+  const archetypesWithModifiers = archetypes
+    ? Object.fromEntries(
+        LOAN_ARCHETYPE_KEYS.map((key) => [
+          key,
+          selectedModifiers.length
+            ? applyLoanModifiers(archetypes[key], key === selectedArchetype ? selectedModifiers : [], {
+                monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+                monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+                currentSavings: numberValue(profile.currentSavings, 20000),
+                otherGoalsMonthlyOutflow,
+              })
+            : archetypes[key],
+        ])
+      )
+    : null;
+
+  return (
+    <Screen>
+      <Header title={t("loanPlanner.title")} subtitle={t("loanPlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        {purpose ? (
+          <button type="button" className="historyButton" onClick={openHistory} aria-label={t("loanPlanner.historyTitle")}>
+            <History size={16} />
+          </button>
+        ) : null}
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="loanPlanner.historyTitle"
+          emptyKey="loanPlanner.historyEmpty"
+        />
+      ) : null}
+      <SuccessBanner show={success} text={t("loanPlanner.success")} />
+      {errorMessage ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{errorMessage}</p>
+        </section>
+      ) : null}
+
+      {!purpose ? (
+        <LoanPurposeSelector onSelect={setPurpose} t={t} />
+      ) : loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : sizingError === "no_confirmed_home_plan" ? (
+        <section className="needHeroCard">
+          <span className="sectionLabel">{t("loanPlanner.needHomePlanLabel")}</span>
+          <p>{t("loanPlanner.needHomePlanBody")}</p>
+          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.NEED_HOME)}>
+            {t("loanPlanner.goToHomePlanner")}
+          </button>
+          <button type="button" className="secondaryButton" onClick={resetToPurposeSelection}>
+            {t("loanPlanner.backToPurposes")}
+          </button>
+        </section>
+      ) : confirmedLoan && !editingStrategy ? (
+        <LoanConfirmedCard
+          loan={confirmedLoan}
+          onChangeStrategy={() => setEditingStrategy(true)}
+          onChangeAmount={() => {
+            setConfirmedLoan(null);
+            setPrincipalBasis(null);
+            setSizingOptions(null);
+          }}
+          t={t}
+        />
+      ) : principalBasis != null ? (
+        <>
+          <LoanStrategySelector
+            archetypes={archetypesWithModifiers}
+            selectedArchetype={selectedArchetype}
+            onSelectArchetype={setSelectedArchetype}
+            selectedModifiers={selectedModifiers}
+            onToggleModifier={toggleModifier}
+            t={t}
+          />
+          <button type="button" className="primaryButton" onClick={confirmStrategy} disabled={submitting}>
+            {submitting ? t("loanPlanner.thinking") : t("loanPlanner.confirmStrategy")}
+            <Check size={18} />
+          </button>
+          <button type="button" className="secondaryButton" onClick={() => setEditingStrategy(false)}>
+            {t("loanPlanner.cancelEdit")}
+          </button>
+        </>
+      ) : sizingOptions ? (
+        <>
+          <section className="weddingPlanCarouselWrap">
+            <span className="sectionLabel">{t("loanPlanner.sizingLabel")}</span>
+            <div className="weddingPlanCarousel">
+              {sizingOptions.sizing_options.map((option) => (
+                <LoanSizingOptionCard key={option.id} option={option} selected={false} onSelect={selectSizingOption} t={t} />
+              ))}
+            </div>
+            {researchNotes || sizingOptions.research_notes ? (
+              <section className="insightCard">
+                <Bot size={20} />
+                <p>{researchNotes || sizingOptions.research_notes}</p>
+              </section>
+            ) : null}
+          </section>
+          <AiTextInputCard
+            t={t}
+            onSubmit={submitSizing}
+            submitting={submitting}
+            placeholder={t("loanPlanner.sizingRefinePlaceholder")}
+            submitLabelKey="weddingPlanner.send"
+            labelKey="loanPlanner.sizingRefineLabel"
+          />
+        </>
+      ) : (
+        <AiTextInputCard
+          t={t}
+          onSubmit={submitSizing}
+          submitting={submitting}
+          placeholder={t(`loanPlanner.sizingPlaceholders.${purpose}`)}
+          submitLabelKey="weddingPlanner.sendFirst"
+          labelKey="loanPlanner.sizingInputLabel"
+        />
+      )}
+    </Screen>
   );
 }
 
@@ -8014,6 +8607,7 @@ export default function App() {
   const [simulatorApplied, setSimulatorApplied] = useState(false);
   const [simulatorActionStates, setSimulatorActionStates] = useState(defaultSimulatorActionStates);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
+  const [loanPlannerInitialPurpose, setLoanPlannerInitialPurpose] = useState(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
   const effectiveTheme = getEffectiveTheme(preferences.theme, systemTheme);
@@ -8214,6 +8808,7 @@ export default function App() {
     setSuccessStates,
     memoryEvents,
     setMemoryEvents,
+    setLoanPlannerInitialPurpose,
   };
 
   const mirrorSimulatorScreen = (
@@ -8263,6 +8858,18 @@ export default function App() {
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,
     [screens.NEED_HOME]: <NeedDetailScreen {...shared} type="home" />,
     [screens.NEED_RETIREMENT]: <NeedDetailScreen {...shared} type="retirement" />,
+    [screens.NEED_LOAN]: (
+      <LoanPlannerContent
+        success={Boolean(successStates.loan)}
+        setSuccess={() => setSuccessStates((current) => ({ ...current, loan: true }))}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        profile={getUserProfile(preferences)}
+        initialPurpose={loanPlannerInitialPurpose}
+        onConsumeInitialPurpose={() => setLoanPlannerInitialPurpose(null)}
+      />
+    ),
     [screens.NEED_EMERGENCY]: <NeedDetailScreen {...shared} type="emergency" />,
     [screens.NEED_INSURANCE]: <NeedDetailScreen {...shared} type="insurance" />,
     [screens.NEED_INVESTMENT]: <NeedDetailScreen {...shared} type="investment" />,

@@ -1083,6 +1083,11 @@
     "backToConfirmedPlan": "返回已确认方案",
     "adjustPlanLabel": "调整此方案",
     "adjustSyntheticPlanName": "你已确认的购房方案",
+    "financingLabel": "融资方式",
+    "chooseFinancingLabel": "选择这套房子的融资方式",
+    "chooseFinancingBody": "选一个贷款策略——稳健、平衡或快速——这样我们才知道你真实的首付和每月供款，再来规划储蓄方案。",
+    "chooseFinancingButton": "选择如何为这个家融资",
+    "changeFinancingLabel": "更改融资策略",
     "savingsPlanCtaLabel": "接下来规划首付储蓄方案",
     "savingsPlanCtaBody": "结合你真实的收入、支出和现有储蓄，我们会给出一份专为这笔首付定制的储蓄策略——而不是简单的金额除以月数。",
     "savingsPlanCtaButton": "获取储蓄方案",
@@ -1106,6 +1111,91 @@
     },
     "vehicles": {
       "cpfOrdinaryAccount": "CPF普通账户"
+    }
+  },
+  "loanPlanner": {
+    "title": "贷款规划师",
+    "subtitle": "为你要借的钱比较真正的贷款策略——而不只是利率不同。",
+    "genericError": "出了点问题,请再试一次。",
+    "newFeatureBadge": "新功能",
+    "historyTitle": "对话记录",
+    "historyEmpty": "暂时还没有对话记录。",
+    "success": "贷款策略已确认。",
+    "thinking": "思考中...",
+    "purposeSelectLabel": "这笔贷款是用来做什么的？",
+    "purposes": {
+      "home": "购房贷款",
+      "renovation": "装修贷款",
+      "personal": "个人贷款 / 债务整合"
+    },
+    "purposeDescriptions": {
+      "home": "为你已经在购房规划师里定好的房子融资。",
+      "renovation": "借款用于装修——厨房、卫浴、整屋翻新。",
+      "personal": "针对特定需求的个人贷款，或整合其他债务。"
+    },
+    "needHomePlanLabel": "请先完成购房规划",
+    "needHomePlanBody": "在为房贷定档之前，需要先有一个已确认的购房方案——房价会直接从那个方案里读取。",
+    "goToHomePlanner": "前往购房规划师",
+    "backToPurposes": "选择其他贷款用途",
+    "sizingLabel": "贷款额度选项",
+    "sizingInputLabel": "说说你的贷款需求",
+    "sizingRefineLabel": "调整贷款额度",
+    "sizingRefinePlaceholder": "例如：我觉得需要再多一点，能重新估一下吗？",
+    "sizingPlaceholders": {
+      "renovation": "例如：一套四房转售组屋的整屋装修，包括厨房和卫浴",
+      "personal": "例如：我需要大约 15,000 新元来整合一些信用卡债务"
+    },
+    "estimatedAmount": "预估金额",
+    "selectThisAmount": "选择这个金额",
+    "selected": "已选择",
+    "strategyLabel": "贷款策略",
+    "modifiersLabel": "附加选项",
+    "monthlyInstallment": "每月供款",
+    "loanAmount": "贷款金额",
+    "tenure": "还款年限",
+    "totalInterest": "总利息",
+    "futureScore": "未来评分",
+    "ltvCapped": "已按监管上限封顶",
+    "exceedsServiceability": "已下调以符合可负担范围",
+    "selectStrategy": "选择此策略",
+    "confirmStrategy": "确认此贷款策略",
+    "cancelEdit": "取消",
+    "confirmedLabel": "已确认的贷款",
+    "purposeLabel": "用途",
+    "changeStrategyLabel": "更改融资策略",
+    "changeAmountLabel": "更改金额",
+    "protectionNote": "每月增加约 {amount} 的保险费估算。",
+    "growthNote": "将 {amount} 转投保守型投资，示意性预计到还款期结束时增值至约 {projected}——不作保证。",
+    "archetypes": {
+      "safe": "稳健型",
+      "balanced": "平衡型",
+      "fast": "快速型"
+    },
+    "archetypeDescriptions": {
+      "safe": "月供压力最低，还款年限最长——不想影响其他目标时最适合。",
+      "balanced": "可负担性与还款速度的最佳平衡——大多数人推荐选择。",
+      "fast": "借得多、还得快——月供压力更高，可能影响其他目标。"
+    },
+    "modifiers": {
+      "flexible": "灵活",
+      "growth": "增值",
+      "protection": "保障"
+    },
+    "modifierDescriptions": {
+      "flexible": "无锁定期，随时可提前还款（利率+0.15%）",
+      "growth": "把部分闲置资金拿去投资，而不是多还贷款",
+      "protection": "为这笔贷款加保保险"
+    },
+    "emergencyFundImpact": {
+      "protected": "应急基金：受到保护",
+      "healthy": "应急基金：健康",
+      "reduced": "应急基金：有所减少",
+      "weak": "应急基金：偏弱"
+    },
+    "otherGoalsImpact": {
+      "onTrack": "其他目标：进展正常",
+      "tight": "其他目标：较为紧张",
+      "atRisk": "其他目标：可能受影响"
     }
   },
   "retirementPlanner": {
@@ -1221,6 +1311,7 @@
     "goals": {
       "wedding": "婚礼",
       "home": "首套房",
+      "loan": "贷款规划",
       "emergency": "应急基金",
       "retirement": "退休",
       "family": "家庭计划",

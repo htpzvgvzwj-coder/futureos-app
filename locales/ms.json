@@ -1083,6 +1083,11 @@
     "backToConfirmedPlan": "Kembali ke Pelan Disahkan",
     "adjustPlanLabel": "Laraskan Pelan Ini",
     "adjustSyntheticPlanName": "Rumah Disahkan Anda",
+    "financingLabel": "Pembiayaan",
+    "chooseFinancingLabel": "Pilih cara membiayai rumah ini",
+    "chooseFinancingBody": "Pilih strategi pinjaman - Selamat, Seimbang, atau Pantas - supaya kami tahu bayaran muka dan ansuran bulanan sebenar anda sebelum merancang simpanan.",
+    "chooseFinancingButton": "Pilih Cara Membiayai Rumah Ini",
+    "changeFinancingLabel": "Tukar Strategi Pembiayaan",
     "savingsPlanCtaLabel": "Sekarang mari rancang simpanan bayaran muka",
     "savingsPlanCtaBody": "Berdasarkan pendapatan, perbelanjaan, dan simpanan semasa anda yang sebenar, kami akan menyusun strategi simpanan yang disesuaikan untuk membiayai bayaran muka ini - bukan sekadar pembahagian bulanan biasa.",
     "savingsPlanCtaButton": "Dapatkan Pelan Simpanan",
@@ -1106,6 +1111,91 @@
     },
     "vehicles": {
       "cpfOrdinaryAccount": "Akaun Biasa CPF"
+    }
+  },
+  "loanPlanner": {
+    "title": "Perancang Pinjaman",
+    "subtitle": "Bandingkan strategi pinjaman sebenar untuk apa yang anda pinjam - bukan sekadar kadar faedah berbeza.",
+    "genericError": "Sesuatu tidak kena di pihak kami. Sila cuba lagi.",
+    "newFeatureBadge": "Baharu",
+    "historyTitle": "Sejarah Perbualan",
+    "historyEmpty": "Belum ada perbualan lagi.",
+    "success": "Strategi pinjaman disahkan.",
+    "thinking": "Berfikir...",
+    "purposeSelectLabel": "Untuk apa pinjaman ini?",
+    "purposes": {
+      "home": "Pembelian Rumah",
+      "renovation": "Pengubahsuaian",
+      "personal": "Peribadi / Penggabungan Hutang"
+    },
+    "purposeDescriptions": {
+      "home": "Biayai rumah yang telah anda rancang dalam Perancang Pembelian Rumah.",
+      "renovation": "Pinjam untuk mengubahsuai - dapur, bilik air, rumah penuh.",
+      "personal": "Pinjaman peribadi untuk keperluan tertentu atau menggabungkan hutang lain."
+    },
+    "needHomePlanLabel": "Lengkapkan Perancang Pembelian Rumah dahulu",
+    "needHomePlanBody": "Anda perlukan pelan pembelian rumah yang disahkan sebelum kami dapat menganggarkan pinjaman rumah - harga diambil terus daripada pelan itu.",
+    "goToHomePlanner": "Pergi ke Perancang Pembelian Rumah",
+    "backToPurposes": "Pilih Tujuan Lain",
+    "sizingLabel": "Pilihan Jumlah Pinjaman",
+    "sizingInputLabel": "Ceritakan keperluan pinjaman anda",
+    "sizingRefineLabel": "Laraskan jumlah pinjaman",
+    "sizingRefinePlaceholder": "cth: Saya rasa perlukan lebih sedikit, boleh anggarkan semula?",
+    "sizingPlaceholders": {
+      "renovation": "cth: Mengubahsuai flat jualan semula 4 bilik, ubah suai penuh termasuk dapur dan bilik air",
+      "personal": "cth: Saya perlukan kira-kira SGD 15,000 untuk menggabungkan sedikit hutang kad kredit"
+    },
+    "estimatedAmount": "Jumlah Anggaran",
+    "selectThisAmount": "Pilih Jumlah Ini",
+    "selected": "Dipilih",
+    "strategyLabel": "Strategi Pinjaman",
+    "modifiersLabel": "Pengubahsuai",
+    "monthlyInstallment": "Ansuran Bulanan",
+    "loanAmount": "Jumlah Pinjaman",
+    "tenure": "Tempoh",
+    "totalInterest": "Jumlah Faedah",
+    "futureScore": "Skor Masa Depan",
+    "ltvCapped": "Dihadkan pada maksimum kawal selia",
+    "exceedsServiceability": "Dikurangkan untuk sesuai dengan kemampuan",
+    "selectStrategy": "Pilih Strategi Ini",
+    "confirmStrategy": "Sahkan Strategi Pinjaman Ini",
+    "cancelEdit": "Batal",
+    "confirmedLabel": "Pinjaman Disahkan",
+    "purposeLabel": "Tujuan",
+    "changeStrategyLabel": "Tukar Strategi Pembiayaan",
+    "changeAmountLabel": "Tukar Jumlah",
+    "protectionNote": "Menambah anggaran premium insurans sebanyak {amount}/bulan.",
+    "growthNote": "Mengalihkan {amount} ke pelaburan konservatif, dianggarkan secara ilustrasi berkembang kepada kira-kira {projected} menjelang akhir tempoh - tidak dijamin.",
+    "archetypes": {
+      "safe": "Selamat",
+      "balanced": "Seimbang",
+      "fast": "Pantas"
+    },
+    "archetypeDescriptions": {
+      "safe": "Tekanan bulanan paling rendah, tempoh paling panjang - terbaik jika tidak mahu menjejaskan matlamat lain.",
+      "balanced": "Keseimbangan terbaik antara kemampuan dan kelajuan - disyorkan untuk kebanyakan orang.",
+      "fast": "Pinjam lebih, bayar lebih cepat - tekanan bulanan lebih tinggi, mungkin menjejaskan matlamat lain."
+    },
+    "modifiers": {
+      "flexible": "Fleksibel",
+      "growth": "Pertumbuhan",
+      "protection": "Perlindungan"
+    },
+    "modifierDescriptions": {
+      "flexible": "Tiada tempoh kunci, bayar lebih awal bila-bila masa (+0.15% kadar)",
+      "growth": "Melabur sebahagian daripada baki anda dan bukan membayar lebih banyak pinjaman",
+      "protection": "Tambah perlindungan insurans untuk pinjaman ini"
+    },
+    "emergencyFundImpact": {
+      "protected": "Dana Kecemasan: Dilindungi",
+      "healthy": "Dana Kecemasan: Sihat",
+      "reduced": "Dana Kecemasan: Berkurangan",
+      "weak": "Dana Kecemasan: Lemah"
+    },
+    "otherGoalsImpact": {
+      "onTrack": "Matlamat Lain: Mengikut Landasan",
+      "tight": "Matlamat Lain: Ketat",
+      "atRisk": "Matlamat Lain: Berisiko"
     }
   },
   "retirementPlanner": {
@@ -1221,6 +1311,7 @@
     "goals": {
       "wedding": "Perkahwinan",
       "home": "Rumah Pertama",
+      "loan": "Perancang Pinjaman",
       "emergency": "Dana Kecemasan",
       "retirement": "Persaraan",
       "family": "Perancangan Keluarga",

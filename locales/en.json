@@ -1096,6 +1096,11 @@
     "backToConfirmedPlan": "Back to Confirmed Plan",
     "adjustPlanLabel": "Adjust This Plan",
     "adjustSyntheticPlanName": "Your Confirmed Home",
+    "financingLabel": "Financing",
+    "chooseFinancingLabel": "Choose how to finance this home",
+    "chooseFinancingBody": "Pick a loan strategy - Safe, Balanced, or Fast - so we know your real down payment and monthly installment before planning the savings.",
+    "chooseFinancingButton": "Choose How to Finance This Home",
+    "changeFinancingLabel": "Change Financing Strategy",
     "savingsPlanCtaLabel": "Now let's plan the down payment savings",
     "savingsPlanCtaBody": "Based on your real income, expenses, and current savings, we'll put together a savings strategy tailored to funding this down payment - not just a plain monthly split.",
     "savingsPlanCtaButton": "Get Savings Plan",
@@ -1119,6 +1124,91 @@
     },
     "vehicles": {
       "cpfOrdinaryAccount": "CPF Ordinary Account"
+    }
+  },
+  "loanPlanner": {
+    "title": "Loan Planner",
+    "subtitle": "Compare real loan strategies for what you're borrowing for - not just interest rates.",
+    "genericError": "Something went wrong on our end. Please try again.",
+    "newFeatureBadge": "New",
+    "historyTitle": "Conversation History",
+    "historyEmpty": "No conversation yet.",
+    "success": "Loan strategy confirmed.",
+    "thinking": "Thinking...",
+    "purposeSelectLabel": "What's this loan for?",
+    "purposes": {
+      "home": "Home Purchase",
+      "renovation": "Renovation",
+      "personal": "Personal / Debt Consolidation"
+    },
+    "purposeDescriptions": {
+      "home": "Finance a home you've already planned in Home Purchase Planner.",
+      "renovation": "Borrow to renovate - kitchen, bathroom, full flat refresh.",
+      "personal": "A personal loan for a specific need or to consolidate other debt."
+    },
+    "needHomePlanLabel": "Complete Home Purchase Planner first",
+    "needHomePlanBody": "You'll need a confirmed home purchase plan before we can size a home loan - the price comes straight from that plan.",
+    "goToHomePlanner": "Go to Home Purchase Planner",
+    "backToPurposes": "Choose a Different Purpose",
+    "sizingLabel": "Loan Amount Options",
+    "sizingInputLabel": "Tell us about your loan need",
+    "sizingRefineLabel": "Refine your loan amount",
+    "sizingRefinePlaceholder": "e.g. Actually I think I need a bit more, can you re-estimate?",
+    "sizingPlaceholders": {
+      "renovation": "e.g. Renovating a 4-room resale flat, full reno including kitchen and bathrooms",
+      "personal": "e.g. I need about SGD 15,000 to consolidate some credit card debt"
+    },
+    "estimatedAmount": "Estimated Amount",
+    "selectThisAmount": "Select This Amount",
+    "selected": "Selected",
+    "strategyLabel": "Loan Strategy",
+    "modifiersLabel": "Modifiers",
+    "monthlyInstallment": "Monthly Installment",
+    "loanAmount": "Loan Amount",
+    "tenure": "Tenure",
+    "totalInterest": "Total Interest",
+    "futureScore": "Future Score",
+    "ltvCapped": "Capped at regulatory maximum",
+    "exceedsServiceability": "Reduced to fit affordability",
+    "selectStrategy": "Select This Strategy",
+    "confirmStrategy": "Confirm This Loan Strategy",
+    "cancelEdit": "Cancel",
+    "confirmedLabel": "Confirmed Loan",
+    "purposeLabel": "Purpose",
+    "changeStrategyLabel": "Change Financing Strategy",
+    "changeAmountLabel": "Change Amount",
+    "protectionNote": "Adds an estimated insurance premium of {amount}/month.",
+    "growthNote": "Redirects {amount} into a conservative investment, illustratively projected to grow to about {projected} by the end of the tenure - not guaranteed.",
+    "archetypes": {
+      "safe": "Safe",
+      "balanced": "Balanced",
+      "fast": "Fast"
+    },
+    "archetypeDescriptions": {
+      "safe": "Lowest monthly stress, longest tenure - best if you don't want to affect your other goals.",
+      "balanced": "The best balance of affordability and speed - recommended for most people.",
+      "fast": "Borrow more, pay off faster - higher monthly stress, may affect other goals."
+    },
+    "modifiers": {
+      "flexible": "Flexible",
+      "growth": "Growth",
+      "protection": "Protection"
+    },
+    "modifierDescriptions": {
+      "flexible": "No lock-in, prepay anytime (+0.15% rate)",
+      "growth": "Invest part of your buffer instead of paying down more",
+      "protection": "Add insurance coverage for this loan"
+    },
+    "emergencyFundImpact": {
+      "protected": "Emergency Fund: Protected",
+      "healthy": "Emergency Fund: Healthy",
+      "reduced": "Emergency Fund: Reduced",
+      "weak": "Emergency Fund: Weak"
+    },
+    "otherGoalsImpact": {
+      "onTrack": "Other Goals: On Track",
+      "tight": "Other Goals: Tight",
+      "atRisk": "Other Goals: At Risk"
     }
   },
   "retirementPlanner": {
@@ -1242,6 +1332,7 @@
     "goals": {
       "wedding": "Wedding",
       "home": "First Home",
+      "loan": "Loan Planner",
       "emergency": "Emergency Fund",
       "retirement": "Retirement",
       "family": "Family Planning",

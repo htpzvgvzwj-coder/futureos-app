@@ -199,3 +199,43 @@ create table if not exists hardship_actions_applied (
 
 create index if not exists hardship_actions_applied_session_idx
   on hardship_actions_applied (hardship_session_id, applied_at desc);
+
+create table if not exists loan_sessions (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null default 'karina-demo',
+  purpose       text not null, -- home | renovation | personal (| education | car, future)
+  stage1_status text not null default 'in_progress', -- in_progress | confirmed
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+-- One active loan session per (customer, purpose) — a customer can have a
+-- confirmed renovation loan AND a confirmed home loan at once, unlike other
+-- domains' single profile_key-only session.
+create unique index if not exists loan_sessions_profile_key_purpose_idx
+  on loan_sessions (profile_key, purpose);
+
+create table if not exists loan_messages (
+  id           bigserial primary key,
+  session_id   uuid not null references loan_sessions(id),
+  stage        text not null, -- stage1 (sizing conversation) — no stage2, a loan has no "save up first" phase
+  seq          integer not null,
+  role         text not null, -- user | assistant
+  content      jsonb not null,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists loan_messages_session_stage_seq_idx
+  on loan_messages (session_id, stage, seq);
+
+create table if not exists loan_artifacts (
+  id            bigserial primary key,
+  session_id    uuid not null references loan_sessions(id),
+  stage         text not null,
+  artifact_type text not null, -- sizing_options | confirmed_loan
+  payload       jsonb not null,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists loan_artifacts_session_stage_type_idx
+  on loan_artifacts (session_id, stage, artifact_type, created_at desc);
