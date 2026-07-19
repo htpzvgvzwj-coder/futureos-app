@@ -1664,9 +1664,102 @@ nextjs-portal {
   line-height: 1.3;
 }
 
-.strategicDetailModal {
-  max-height: 82vh;
-  overflow-y: auto;
+.strategicBalanceEntry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 78px;
+  border: 1px solid rgba(20, 36, 58, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--navy);
+  padding: 14px 15px;
+  text-align: left;
+  box-shadow: 0 12px 30px rgba(20, 36, 58, 0.06);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.strategicBalanceEntry:hover,
+.strategicBalanceEntry:focus-visible {
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow: 0 16px 34px rgba(20, 36, 58, 0.1);
+  transform: translateY(-1px);
+}
+
+.strategicBalanceEntry strong {
+  display: block;
+  color: var(--navy);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.strategicBalanceEntry small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.3;
+}
+
+.strategicAccordionItem {
+  border: 1px solid rgba(20, 36, 58, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.strategicAccordionItem .strategicCategoryRow {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.strategicAccordionItem.expanded .strategicCategoryRow {
+  border-bottom: 1px solid rgba(20, 36, 58, 0.08);
+}
+
+.chevronExpanded {
+  transform: rotate(90deg);
+  transition: transform 180ms ease;
+}
+
+.strategicAccordionDetail {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.strategicAccordionDetail .primaryButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.scoreExplainer {
+  border-radius: 14px;
+  background: #f7f9fc;
+  border: 1px solid rgba(20, 36, 58, 0.07);
+  padding: 12px 14px;
+}
+
+.scoreExplainer strong {
+  display: block;
+  font-size: 18px;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.scoreExplainer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
 }
 
 .rebalanceSlider {
@@ -4558,6 +4651,7 @@ nextjs-portal {
 .stage.theme-dark .productFitPanel,
 .stage.theme-dark .strategyCard,
 .stage.theme-dark .strategicBalanceCard,
+.stage.theme-dark .strategicBalanceEntry,
 .stage.theme-dark .compactTrustNote,
 .stage.theme-dark .accountDetailHero,
 .stage.theme-dark .ocbcExecutePanel,
@@ -4585,8 +4679,10 @@ nextjs-portal {
 .stage.theme-dark .healthScoreCard,
 .stage.theme-dark .productFitCard,
 .stage.theme-dark .strategicCategoryRow,
+.stage.theme-dark .strategicAccordionItem,
 .stage.theme-dark .utilizationHero,
 .stage.theme-dark .rebalanceSlider,
+.stage.theme-dark .scoreExplainer,
 .stage.theme-dark .confirmModal {
   border-color: rgba(255, 255, 255, 0.1);
   background: #111d31;
