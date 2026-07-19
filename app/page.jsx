@@ -84,6 +84,7 @@ const screens = {
   NEED_INVESTMENT: "needInvestment",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
+  PRODUCT_FIT: "productFit",
   PAYNOW: "paynow",
   SCAN_PAY: "scanPay",
   FX: "fx",
@@ -781,6 +782,9 @@ function CrossBankDataScreen({ t, setActiveScreen }) {
   );
 }
 
+// Rate/fee figures are real, publicly published OCBC numbers (checked July 2026) - not
+// placeholders. honestNoteKey is only set where there's a real, sourced comparison to make;
+// it is never invented to hit a quota of "honest" cards.
 const productRecommendations = [
   {
     id: "ocbc360",
@@ -790,6 +794,7 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.ocbc360",
     supportsKey: "lifeGraph.productFit.supports.ocbc360",
     impactKey: "lifeGraph.productFit.impact.ocbc360",
+    rateKey: "lifeGraph.productFit.rates.ocbc360",
     relevantGoals: ["emergency", "wedding", "home", "family"],
     icon: Banknote,
   },
@@ -801,6 +806,8 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.monthlySavings",
     supportsKey: "lifeGraph.productFit.supports.monthlySavings",
     impactKey: "lifeGraph.productFit.impact.monthlySavings",
+    rateKey: "lifeGraph.productFit.rates.monthlySavings",
+    honestNoteKey: "lifeGraph.productFit.honestNote.monthlySavings",
     relevantGoals: ["wedding", "home", "family", "custom"],
     icon: Target,
   },
@@ -812,6 +819,7 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.homeLoan",
     supportsKey: "lifeGraph.productFit.supports.homeLoan",
     impactKey: "lifeGraph.productFit.impact.homeLoan",
+    rateKey: "lifeGraph.productFit.rates.homeLoan",
     relevantGoals: ["home"],
     icon: Building2,
   },
@@ -823,6 +831,8 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.roboInvest",
     supportsKey: "lifeGraph.productFit.supports.roboInvest",
     impactKey: "lifeGraph.productFit.impact.roboInvest",
+    rateKey: "lifeGraph.productFit.rates.roboInvest",
+    honestNoteKey: "lifeGraph.productFit.honestNote.roboInvest",
     relevantGoals: ["investment", "retirement"],
     icon: LineChart,
   },
@@ -834,6 +844,7 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.greatTerm",
     supportsKey: "lifeGraph.productFit.supports.greatTerm",
     impactKey: "lifeGraph.productFit.impact.greatTerm",
+    rateKey: "lifeGraph.productFit.rates.greatTerm",
     relevantGoals: ["family", "emergency"],
     icon: ShieldCheck,
   },
@@ -845,6 +856,7 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.payments",
     supportsKey: "lifeGraph.productFit.supports.payments",
     impactKey: "lifeGraph.productFit.impact.payments",
+    rateKey: "lifeGraph.productFit.rates.paynowGiro",
     relevantGoals: ["wedding", "home", "emergency", "retirement", "family", "investment", "business", "custom"],
     icon: CalendarClock,
   },
@@ -856,6 +868,7 @@ const productRecommendations = [
     whyKey: "lifeGraph.productFit.why.ocbc365",
     supportsKey: "lifeGraph.productFit.supports.ocbc365",
     impactKey: "lifeGraph.productFit.impact.ocbc365",
+    rateKey: "lifeGraph.productFit.rates.ocbc365",
     relevantGoals: ["wedding", "home", "emergency", "retirement", "family", "investment", "business", "custom"],
     icon: CreditCard,
   },
@@ -927,6 +940,200 @@ function getProductEvidence(product, ctx, t) {
       ? t("lifeGraph.productFit.evidence.humanReviewRequired")
       : t("lifeGraph.productFit.evidence.humanReviewNotRequired"),
   };
+}
+
+// Reached from Life Graph's compact icon entry - a full screen instead of a cramped inline panel,
+// so there's room to show the full evidence chain inline (expand-in-place) instead of hiding it
+// behind a "View Evidence" modal that most people never open.
+function ProductFitScreen({ preferences, setPreferences, t, setActiveScreen }) {
+  const [openProductId, setOpenProductId] = useState(null);
+  const [notice, setNotice] = useState("");
+  const profile = getUserProfile(preferences);
+  const customGoals = getCustomGoals(preferences);
+  const healthScores = getHealthScores(profile);
+  const selectedGoalIds = getProfileGoalIds(profile, customGoals);
+  const visibleProducts = productRecommendations
+    .map((product) => {
+      const added = Boolean(preferences.futurePlanProducts?.includes(product.id));
+      const resultInfo = getProductState(product, { healthScores, selectedGoalIds, added });
+      return { product, resultInfo };
+    })
+    .filter(({ resultInfo }) => resultInfo.state !== "notApplicable");
+
+  function addProductToPlan(product) {
+    setPreferences((current) => {
+      const existing = Array.isArray(current.futurePlanProducts) ? current.futurePlanProducts : [];
+      return {
+        ...current,
+        futurePlanProducts: existing.includes(product.id) ? existing : [...existing, product.id],
+      };
+    });
+    setNotice(t("lifeGraph.productFit.added", { product: product.name }));
+  }
+
+  // Relationship Manager escalation (04_Build_With_OCBC.md "the handoff should preserve context so
+  // the customer does not repeat the full story"): record the evidence already gathered instead of
+  // letting it vanish after the toast, so the escalation stays reviewable in the customer's own history.
+  function requestRelationshipManagerReview(product, resultInfo, evidence) {
+    setPreferences((current) => {
+      const existing = Array.isArray(current.escalationHistory) ? current.escalationHistory : [];
+      const record = {
+        id: `${product.id}-${Date.now()}`,
+        productId: product.id,
+        productName: product.name,
+        goal: resultInfo.relevantGoal ? t(`simulator.goals.${resultInfo.relevantGoal}`) : t("lifeGraph.productFit.evidence.noGoal"),
+        reason: evidence.suitabilityReason,
+        at: Date.now(),
+      };
+      return { ...current, escalationHistory: [record, ...existing].slice(0, 10) };
+    });
+    setNotice(t("lifeGraph.productFit.escalatedNotice", { product: product.name }));
+  }
+
+  return (
+    <Screen>
+      <Header title={t("lifeGraph.productFit.title")} subtitle={t("lifeGraph.productFit.purpose")} />
+      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
+      <NoticeBanner text={notice} />
+
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("lifeGraph.productFit.disclaimer")}</p>
+      </section>
+
+      <div className="productFitList">
+        {visibleProducts.map(({ product, resultInfo }) => {
+          const Icon = product.icon;
+          const evidence = getProductEvidence(product, { profile, healthScores, resultInfo }, t);
+          const expanded = openProductId === product.id;
+          return (
+            <article className={resultInfo.accepted ? "productFitCard added" : "productFitCard"} key={product.id}>
+              <button
+                type="button"
+                className="productFitHead"
+                onClick={() => setOpenProductId(expanded ? null : product.id)}
+                aria-expanded={expanded}
+              >
+                <span className="iconBubble">
+                  <Icon size={16} />
+                </span>
+                <div>
+                  <strong>{product.name}</strong>
+                  <small>{t(product.categoryKey)}</small>
+                </div>
+                {resultInfo.accepted ? <CheckCircle2 size={16} /> : null}
+                <ChevronRight size={15} className={expanded ? "chevronExpanded" : ""} />
+              </button>
+
+              <div className="productStateRow">
+                <b className={`statePill state-${resultInfo.state}`}>
+                  {t(`lifeGraph.productFit.state.${resultInfo.state}`)}
+                </b>
+                <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
+              </div>
+
+              <div className="proofBlock">
+                <strong>{t("lifeGraph.productFit.rateLabel")}</strong>
+                <p>{t(product.rateKey)}</p>
+              </div>
+
+              {product.honestNoteKey ? (
+                <section className="adviceOnlyPanel">
+                  <AlertTriangle size={18} />
+                  <p>{t(product.honestNoteKey)}</p>
+                </section>
+              ) : null}
+
+              {expanded ? (
+                <>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.goalSupportedLabel")}</strong>
+                    <p>{evidence.goalSupported}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.dataUsedLabel")}</strong>
+                    <p>{evidence.dataUsed}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}</strong>
+                    <p>{evidence.suitabilityReason}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.productRiskLabel")}</strong>
+                    <p>{evidence.productRisk}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.alternativeLabel")}</strong>
+                    <p>{evidence.alternativeConsidered}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.conflictCheckLabel")}</strong>
+                    <p>{evidence.conflictCheck}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.expectedImpactLabel")}</strong>
+                    <p>{evidence.expectedImpact}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.limitationLabel")}</strong>
+                    <p>{evidence.limitation}</p>
+                  </div>
+                  <div className="proofBlock">
+                    <strong>{t("lifeGraph.productFit.evidence.humanReviewLabel")}</strong>
+                    <p>{evidence.humanReview}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="proofBlock">
+                  <strong>{t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}</strong>
+                  <p>{evidence.suitabilityReason}</p>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="secondaryButton"
+                onClick={() => setOpenProductId(expanded ? null : product.id)}
+              >
+                {expanded ? t("lifeGraph.productFit.hideEvidence") : t("lifeGraph.productFit.viewEvidence")}
+              </button>
+
+              <div className="buttonPair compactButtons">
+                {resultInfo.state === "blocked" ? (
+                  <button type="button" className="primaryButton" disabled>
+                    {t("lifeGraph.productFit.blockedCta")}
+                  </button>
+                ) : resultInfo.state === "recommendReview" ? (
+                  <button type="button" className="primaryButton" onClick={() => requestRelationshipManagerReview(product, resultInfo, evidence)}>
+                    {t("lifeGraph.productFit.escalateRm")}
+                  </button>
+                ) : (
+                  <button type="button" className="primaryButton" onClick={() => addProductToPlan(product)}>
+                    {resultInfo.accepted ? t("status.active") : t("lifeGraph.productFit.addToPlan")}
+                  </button>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      {preferences.escalationHistory?.length ? (
+        <div className="historyTimeline">
+          <span className="sectionLabel">{t("lifeGraph.productFit.escalationHistoryTitle")}</span>
+          {preferences.escalationHistory.map((record) => (
+            <article key={record.id}>
+              <span>{new Date(record.at).toLocaleDateString()}</span>
+              <div>
+                <strong>{t("lifeGraph.productFit.escalationHistoryItem", { product: record.productName, goal: record.goal })}</strong>
+                <small>{record.reason}</small>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : null}
+    </Screen>
+  );
 }
 
 // Guardian Reputation Score: 30% Consent Respect + 25% Goal Protection Rate + 20% Recovery Success
@@ -2994,7 +3201,6 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences, setSimulatorInputs, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
-  const [productModal, setProductModal] = useState(null);
   const [customGoalOpen, setCustomGoalOpen] = useState(false);
   const [customGoalDraft, setCustomGoalDraft] = useState(defaultCustomGoalDraft);
   const [notice, setNotice] = useState("");
@@ -3005,24 +3211,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
-  const ProductIcon = productModal?.icon;
-  const visibleProducts = productRecommendations
-    .map((product) => {
-      const added = Boolean(preferences.futurePlanProducts?.includes(product.id));
-      const resultInfo = getProductState(product, { healthScores, selectedGoalIds, added });
-      return { product, resultInfo };
-    })
-    .filter(({ resultInfo }) => resultInfo.state !== "notApplicable");
-  const productModalInfo = productModal
-    ? getProductState(productModal, {
-        healthScores,
-        selectedGoalIds,
-        added: Boolean(preferences.futurePlanProducts?.includes(productModal.id)),
-      })
-    : null;
-  const productModalEvidence = productModal
-    ? getProductEvidence(productModal, { profile, healthScores, resultInfo: productModalInfo }, t)
-    : null;
 
   function saveCustomGoal() {
     const goal = {
@@ -3059,36 +3247,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
     setNotice(t("lifeGraph.customGoal.added", { goal: goal.name }));
     setCustomGoalDraft(defaultCustomGoalDraft);
     setCustomGoalOpen(false);
-  }
-
-  function addProductToPlan(product) {
-    setPreferences((current) => {
-      const existing = Array.isArray(current.futurePlanProducts) ? current.futurePlanProducts : [];
-      return {
-        ...current,
-        futurePlanProducts: existing.includes(product.id) ? existing : [...existing, product.id],
-      };
-    });
-    setNotice(t("lifeGraph.productFit.added", { product: product.name }));
-  }
-
-  // Relationship Manager escalation (04_Build_With_OCBC.md "the handoff should preserve context so
-  // the customer does not repeat the full story"): record the evidence already gathered instead of
-  // letting it vanish after the toast, so the escalation stays reviewable in the customer's own history.
-  function requestRelationshipManagerReview(product, resultInfo, evidence) {
-    setPreferences((current) => {
-      const existing = Array.isArray(current.escalationHistory) ? current.escalationHistory : [];
-      const record = {
-        id: `${product.id}-${Date.now()}`,
-        productId: product.id,
-        productName: product.name,
-        goal: resultInfo.relevantGoal ? t(`simulator.goals.${resultInfo.relevantGoal}`) : t("lifeGraph.productFit.evidence.noGoal"),
-        reason: evidence.suitabilityReason,
-        at: Date.now(),
-      };
-      return { ...current, escalationHistory: [record, ...existing].slice(0, 10) };
-    });
-    setNotice(t("lifeGraph.productFit.escalatedNotice", { product: product.name }));
   }
 
   return (
@@ -3232,85 +3390,20 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         <ChevronRight size={15} />
       </button>
 
-      <section className="productFitPanel">
-        <div className="panelHead">
-          <div>
-            <span className="sectionLabel">{t("lifeGraph.productFit.title")}</span>
-            <p>{t("lifeGraph.productFit.purpose")}</p>
-          </div>
-          <Landmark size={18} />
-        </div>
-        <section className="trustNote compactTrustNote">
-          <Info size={17} />
-          <p>{t("lifeGraph.productFit.disclaimer")}</p>
-        </section>
-        <div className="productFitList">
-          {visibleProducts.map(({ product, resultInfo }) => {
-            const Icon = product.icon;
-            const evidence = getProductEvidence(product, { profile, healthScores, resultInfo }, t);
-            return (
-              <article className={resultInfo.accepted ? "productFitCard added" : "productFitCard"} key={product.id}>
-                <div className="productFitHead">
-                  <span className="iconBubble">
-                    <Icon size={16} />
-                  </span>
-                  <div>
-                    <strong>{product.name}</strong>
-                    <small>{t(product.categoryKey)}</small>
-                  </div>
-                  {resultInfo.accepted ? <CheckCircle2 size={16} /> : null}
-                </div>
-                <div className="productStateRow">
-                  <b className={`statePill state-${resultInfo.state}`}>
-                    {t(`lifeGraph.productFit.state.${resultInfo.state}`)}
-                  </b>
-                  <span className="prototypeTag">{t("lifeGraph.productFit.prototypeTag")}</span>
-                </div>
-                <div className="proofBlock">
-                  <strong>{t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}</strong>
-                  <p>{evidence.suitabilityReason}</p>
-                </div>
-                <div className="proofBlock">
-                  <strong>{t("lifeGraph.productFit.evidence.goalSupportedLabel")}</strong>
-                  <p>{evidence.goalSupported}</p>
-                </div>
-                <div className="buttonPair compactButtons">
-                  <button type="button" className="secondaryButton" onClick={() => setProductModal(product)}>
-                    {t("lifeGraph.productFit.viewEvidence")}
-                  </button>
-                  {resultInfo.state === "blocked" ? (
-                    <button type="button" className="primaryButton" disabled>
-                      {t("lifeGraph.productFit.blockedCta")}
-                    </button>
-                  ) : resultInfo.state === "recommendReview" ? (
-                    <button type="button" className="primaryButton" onClick={() => requestRelationshipManagerReview(product, resultInfo, evidence)}>
-                      {t("lifeGraph.productFit.escalateRm")}
-                    </button>
-                  ) : (
-                    <button type="button" className="primaryButton" onClick={() => addProductToPlan(product)}>
-                      {resultInfo.accepted ? t("status.active") : t("lifeGraph.productFit.addToPlan")}
-                    </button>
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-        {preferences.escalationHistory?.length ? (
-          <div className="historyTimeline">
-            <span className="sectionLabel">{t("lifeGraph.productFit.escalationHistoryTitle")}</span>
-            {preferences.escalationHistory.map((record) => (
-              <article key={record.id}>
-                <span>{new Date(record.at).toLocaleDateString()}</span>
-                <div>
-                  <strong>{t("lifeGraph.productFit.escalationHistoryItem", { product: record.productName, goal: record.goal })}</strong>
-                  <small>{record.reason}</small>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : null}
-      </section>
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.PRODUCT_FIT)}
+      >
+        <span className="iconBubble">
+          <Landmark size={16} />
+        </span>
+        <span>
+          <strong>{t("lifeGraph.productFit.title")}</strong>
+          <small>{t("lifeGraph.productFit.entrySubtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
+      </button>
 
       <button type="button" className="secondaryButton" onClick={() => setCustomGoalOpen(true)}>
         <Target size={18} />
@@ -3325,32 +3418,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         {t("lifeGraph.openMirror")}
         <ChevronRight size={18} />
       </button>
-
-      {productModal ? (
-        <InfoModal
-          icon={ProductIcon}
-          title={productModal.name}
-          tag={t("lifeGraph.productFit.prototypeTag")}
-          scoreLabel={t("lifeGraph.productFit.evidence.stateLabel")}
-          scoreValue={t(`lifeGraph.productFit.state.${productModalInfo.state}`)}
-          scoreValueClassName={`statePill state-${productModalInfo.state}`}
-          listTitle={t("lifeGraph.productFit.evidence.title")}
-          listItems={[
-            `${t("lifeGraph.productFit.evidence.goalSupportedLabel")}: ${productModalEvidence.goalSupported}`,
-            `${t("lifeGraph.productFit.evidence.dataUsedLabel")}: ${productModalEvidence.dataUsed}`,
-            `${t("lifeGraph.productFit.evidence.suitabilityReasonLabel")}: ${productModalEvidence.suitabilityReason}`,
-            `${t("lifeGraph.productFit.evidence.productRiskLabel")}: ${productModalEvidence.productRisk}`,
-            `${t("lifeGraph.productFit.evidence.alternativeLabel")}: ${productModalEvidence.alternativeConsidered}`,
-            `${t("lifeGraph.productFit.evidence.conflictCheckLabel")}: ${productModalEvidence.conflictCheck}`,
-            `${t("lifeGraph.productFit.evidence.expectedImpactLabel")}: ${productModalEvidence.expectedImpact}`,
-            `${t("lifeGraph.productFit.evidence.limitationLabel")}: ${productModalEvidence.limitation}`,
-            `${t("lifeGraph.productFit.evidence.humanReviewLabel")}: ${productModalEvidence.humanReview}`,
-          ]}
-          footerText={t("lifeGraph.productFit.disclaimer")}
-          onClose={() => setProductModal(null)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
-      ) : null}
 
       {customGoalOpen ? (
         <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("lifeGraph.customGoal.title")}>
@@ -9832,6 +9899,7 @@ export default function App() {
     ),
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} />,
+    [screens.PRODUCT_FIT]: <ProductFitScreen preferences={preferences} setPreferences={setPreferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.PAYNOW]: <QuickActionScreen {...shared} type="paynow" />,
     [screens.SCAN_PAY]: <QuickActionScreen {...shared} type="scanPay" />,
     [screens.FX]: <QuickActionScreen {...shared} type="fx" />,

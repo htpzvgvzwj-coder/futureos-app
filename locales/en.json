@@ -199,9 +199,25 @@
     "productFit": {
       "title": "OCBC Product Fit",
       "purpose": "Life Graph connects customer goals to OCBC-related product categories.",
+      "entrySubtitle": "Real rates, and a full evidence trail for every recommendation",
       "disclaimer": "Prototype recommendation only. Customers should check full product details with OCBC before applying.",
       "addToPlan": "Add to Future Plan",
       "added": "{product} added to the Future Plan.",
+      "rateLabel": "Current rate / fee",
+      "hideEvidence": "Hide evidence",
+      "rates": {
+        "ocbc360": "Up to 4.45% p.a. on the first $100,000 - but only if you meet salary crediting, save, and spend conditions. Without any of those, the base rate is just 0.05% p.a. (published rates as of July 2026).",
+        "monthlySavings": "Base rate 0.05% p.a., rising to a maximum of just 0.1% p.a. if you make no withdrawals and deposit at least $50 that month.",
+        "homeLoan": "Fixed-rate packages: 1.4%-1.8% p.a. (2/3/5-year lock). Floating (3-month SORA + 0.3%-0.5% spread): roughly 1.36%-1.48% p.a. as of February 2026.",
+        "roboInvest": "0.88% p.a. management fee, charged monthly on total invested value - on top of any underlying ETF fees.",
+        "greatTerm": "Pure protection term life - no savings or cash-value component. Premium depends on age, sum assured, and smoker status; get a personalised quote before comparing.",
+        "paynowGiro": "No fee for domestic PayNow or GIRO transfers.",
+        "ocbc365": "Up to $160/month cashback if you spend at least $1,600 (5% dining, 6% fuel, 3% groceries/transport/travel/telco/electricity). Only up to $80/month if you spend $800-$1,599. Capped at $1,920/year."
+      },
+      "honestNote": {
+        "monthlySavings": "Guardian note: if you don't need the strict no-withdrawal rule, the OCBC 360 Account can pay up to 4.45% p.a. on the same money when its conditions are met - many times more than this account's 0.1% p.a. ceiling.",
+        "roboInvest": "Guardian note: OCBC RoboInvest's 0.88% p.a. management fee is roughly double what comparable robo-advisors in Singapore charge for similar diversified portfolios - e.g. Endowus charges 0.40% p.a. for CPF/SRS portfolios. Worth checking if the extra service is worth the difference before requesting an advisor."
+      },
       "categories": {
         "savings": "Savings / Deposits",
         "cards": "Credit Cards",
