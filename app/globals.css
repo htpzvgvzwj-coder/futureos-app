@@ -1547,6 +1547,155 @@ nextjs-portal {
   gap: 10px;
 }
 
+.strategicBalanceCard {
+  border: 1px solid rgba(20, 36, 58, 0.09);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 16px;
+  box-shadow: 0 16px 42px rgba(20, 36, 58, 0.08);
+}
+
+.strategicBalanceCard .panelHead {
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.strategicBalanceCard .panelHead p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 740;
+  line-height: 1.35;
+}
+
+.utilizationHero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 18px;
+  padding: 14px;
+  margin: 12px 0 14px;
+  background: #f7f9fc;
+  border: 1px solid rgba(20, 36, 58, 0.07);
+}
+
+.utilizationRing {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2f7;
+  border: 3px solid var(--teal);
+}
+
+.utilizationHero.band-tight .utilizationRing {
+  border-color: #d97706;
+}
+
+.utilizationHero.band-at_risk .utilizationRing {
+  border-color: var(--ocbc-red);
+}
+
+.utilizationRing strong {
+  font-size: 15px;
+  color: var(--navy);
+}
+
+.utilizationLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.utilizationTrend {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.strategicCategoryList {
+  display: grid;
+  gap: 8px;
+}
+
+.strategicCategoryRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid rgba(20, 36, 58, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  padding: 11px 13px;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.strategicCategoryRow:hover,
+.strategicCategoryRow:focus-visible {
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow: 0 12px 26px rgba(20, 36, 58, 0.08);
+  transform: translateY(-1px);
+}
+
+.strategicCategoryRow strong {
+  display: block;
+  color: var(--navy);
+  font-size: 13.5px;
+  line-height: 1.2;
+}
+
+.strategicCategoryRow small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 720;
+  line-height: 1.3;
+}
+
+.strategicDetailModal {
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.rebalanceSlider {
+  border: 1px solid rgba(20, 36, 58, 0.08);
+  border-radius: 16px;
+  background: #f7f9fc;
+  padding: 14px;
+  margin-top: 6px;
+}
+
+.rebalanceSlider input[type="range"] {
+  width: 100%;
+  margin: 10px 0 6px;
+  accent-color: var(--ocbc-red);
+}
+
+.rebalanceSlider p {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.rebalanceResult {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(20, 36, 58, 0.08);
+}
+
 .productFitPanel .panelHead {
   align-items: start;
 }
@@ -1646,6 +1795,26 @@ nextjs-portal {
 }
 
 .statePill.state-notApplicable {
+  color: var(--muted);
+  background: #eef2f7;
+}
+
+.statePill.state-healthy {
+  color: var(--teal);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.statePill.state-tight {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.statePill.state-at_risk {
+  color: var(--ocbc-red-dark);
+  background: rgba(215, 25, 32, 0.1);
+}
+
+.statePill.state-notPlanned {
   color: var(--muted);
   background: #eef2f7;
 }
@@ -4388,6 +4557,7 @@ nextjs-portal {
 .stage.theme-dark .scorePanel,
 .stage.theme-dark .productFitPanel,
 .stage.theme-dark .strategyCard,
+.stage.theme-dark .strategicBalanceCard,
 .stage.theme-dark .compactTrustNote,
 .stage.theme-dark .accountDetailHero,
 .stage.theme-dark .ocbcExecutePanel,
@@ -4414,9 +4584,16 @@ nextjs-portal {
 .stage.theme-dark .notificationHistoryItem,
 .stage.theme-dark .healthScoreCard,
 .stage.theme-dark .productFitCard,
+.stage.theme-dark .strategicCategoryRow,
+.stage.theme-dark .utilizationHero,
+.stage.theme-dark .rebalanceSlider,
 .stage.theme-dark .confirmModal {
   border-color: rgba(255, 255, 255, 0.1);
   background: #111d31;
+}
+
+.stage.theme-dark .utilizationRing {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .stage.theme-dark .statePill {
@@ -4435,6 +4612,20 @@ nextjs-portal {
 }
 
 .stage.theme-dark .statePill.state-blocked {
+  background: rgba(215, 25, 32, 0.22);
+  color: #ff8a80;
+}
+
+.stage.theme-dark .statePill.state-healthy {
+  background: rgba(20, 184, 166, 0.18);
+}
+
+.stage.theme-dark .statePill.state-tight {
+  background: rgba(180, 83, 9, 0.28);
+  color: #fbbf24;
+}
+
+.stage.theme-dark .statePill.state-at_risk {
   background: rgba(215, 25, 32, 0.22);
   color: #ff8a80;
 }

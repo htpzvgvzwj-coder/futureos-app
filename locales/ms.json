@@ -162,7 +162,6 @@
     },
     "lifeStage": "Tahap Kehidupan",
     "selectedGoals": "Matlamat Dipilih",
-    "strategySentence": "Life Graph tidak mengesyorkan produk secara rawak. Ia membina strategi kewangan di sekitar matlamat hidup anda.",
     "futureAnalyst": {
       "title": "Penganalisis Masa Depan",
       "profileSignal": "Isyarat profil",
@@ -246,31 +245,48 @@
         "improve": "Cara penambahbaikan: kekalkan caruman pelaburan bulanan dan selaraskan portfolio dengan keutamaan risiko."
       }
     },
-    "strategy": {
-      "modalDetail": "Strategi ini diselaraskan dalam tiga sistem yang kelihatan: Life Graph memetakan keperluan, Future Mirror mensimulasikan impak, dan Future Self Guardian melindungi pelan.",
-      "savings": {
-        "title": "Strategi Simpanan",
-        "detail": "Membina kantung matlamat dan pemindahan hari gaji di sekitar matlamat dipilih."
+    "strategicBalance": {
+      "title": "Imbangan Strategik",
+      "subtitle": "Adakah gambaran kewangan anda sihat, apa langkah seterusnya, dan apa maksud kadar anda sebenarnya.",
+      "notPlanned": "Belum dirancang",
+      "trend": "{change} mata sepanjang pengesahan terkini anda",
+      "noTrendYet": "Sejarah pengesahan belum cukup untuk menunjukkan trend",
+      "tryAdjusting": "Cuba laraskan komitmen pelaburan anda",
+      "newUtilization": "Penggunaan aliran tunai baharu",
+      "nextStep": "Rancang ini",
+      "savingsLiteracy": "Wang ini bergerak secara automatik ke arah matlamat anda sebelum ia boleh dibelanjakan di tempat lain - itulah yang membezakan pelan simpanan daripada sekadar berhasrat untuk menyimpan.",
+      "insuranceLiteracy": "Tanpa perlindungan, kecemasan perubatan atau kehilangan pendapatan akan ditanggung sepenuhnya oleh simpanan anda sendiri - belum ada jaringan keselamatan yang berkongsi risiko itu dengan anda.",
+      "creditLiteracy": "Faedah pusingan kad kredit di Singapura biasanya 24-28% setahun - lebih tinggi daripada hampir semua pinjaman. Melangsaikan ini biasanya lebih berbaloi daripada menyimpan lebih.",
+      "emergencyLiteracy": "Garis panduan umum ialah 6 bulan perbelanjaan dilindungi. Inilah yang benar-benar melindungi anda jika pendapatan anda tiba-tiba terhenti.",
+      "hardshipEvidenceLine": "Kami sudah menggunakan mekanisme pemulihan kesukaran bersama anda {count} kali - ia benar, dan ia ada.",
+      "loanRateLine": "Faedah {rate}% sepanjang {tenure} tahun, {installment}/bulan",
+      "investmentGrowthLine": "Anda telah memasukkan {contributed}, dijangka berkembang kepada {end}",
+      "categories": {
+        "loan": "Pinjaman",
+        "investment": "Pelaburan",
+        "savings": "Simpanan",
+        "insurance": "Insurans",
+        "credit": "Kredit",
+        "emergency": "Dana Kecemasan"
       },
-      "investment": {
-        "title": "Strategi Pelaburan",
-        "detail": "Mengekalkan pertumbuhan jangka panjang aktif sambil matlamat jangka pendek dibiayai."
+      "healthLabel": {
+        "healthy": "Sihat",
+        "tight": "Ketat",
+        "at_risk": "Berisiko",
+        "notPlanned": "Belum Dirancang"
       },
-      "insurance": {
-        "title": "Strategi Insurans",
-        "detail": "Menyemak jurang perlindungan sebelum risiko rumah, keluarga atau perniagaan meningkat."
+      "headline": {
+        "loan": "{amount}/bulan merentasi pinjaman yang telah disahkan",
+        "investment": "{amount}/bulan komited kepada pilihan yang telah disahkan",
+        "savings": "Menyimpan untuk {count} matlamat, {amount}/bulan",
+        "insurance": "Status perlindungan: {status}",
+        "credit": "{amount} dalam pinjaman sedia ada dan hutang kad",
+        "emergency": "{months} bulan perbelanjaan dilindungi"
       },
-      "credit": {
-        "title": "Strategi Kredit",
-        "detail": "Mengawal tekanan kad dan pinjaman supaya matlamat tidak diterajui hutang."
-      },
-      "mortgage": {
-        "title": "Strategi Gadai Janji / Pinjaman",
-        "detail": "Menyediakan bayaran muka, kemampuan dan isyarat kesediaan."
-      },
-      "emergency": {
-        "title": "Strategi Dana Kecemasan",
-        "detail": "Melindungi rizab tunai sebelum perbelanjaan pilihan atau perubahan pelaburan."
+      "notPlannedDetail": {
+        "loan": "Anda belum mengesahkan strategi pinjaman - tiada apa untuk ditunjukkan di sini sehingga anda berbuat demikian.",
+        "investment": "Anda belum mengesahkan pilihan pelaburan - tiada apa untuk ditunjukkan di sini sehingga anda berbuat demikian.",
+        "savings": "Tiada matlamat anda yang mempunyai pelan simpanan yang disahkan lagi."
       }
     },
     "customGoal": {

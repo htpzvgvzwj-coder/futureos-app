@@ -66,7 +66,6 @@
     "detectedNeeds": "Detected needs",
     "noDetectedNeeds": "No needs detected from your current goals and financial health signals.",
     "openMirror": "Analyse Future Decisions",
-    "strategySentence": "Life Graph does not recommend random products. It builds a financial strategy around your life goals.",
     "futureAnalyst": {
       "title": "Future Analyst",
       "profileSignal": "Profile signal",
@@ -150,31 +149,48 @@
         "improve": "How to improve: maintain monthly investment contributions and align the portfolio with risk preference."
       }
     },
-    "strategy": {
-      "modalDetail": "This strategy is coordinated inside the three visible systems: Life Graph maps the need, Future Mirror simulates the impact, and Future Self Guardian protects the plan.",
-      "savings": {
-        "title": "Savings Strategy",
-        "detail": "Creates goal pockets and salary-day transfers around selected goals."
+    "strategicBalance": {
+      "title": "Strategic Balance",
+      "subtitle": "Is your financial picture healthy, what's next, and what your rates actually mean.",
+      "notPlanned": "Not planned yet",
+      "trend": "{change} pts over your last few confirmations",
+      "noTrendYet": "Not enough confirmed history yet for a trend",
+      "tryAdjusting": "Try adjusting your investment commitment",
+      "newUtilization": "New cashflow usage",
+      "nextStep": "Go plan this",
+      "savingsLiteracy": "This money moves automatically toward your goals before it can be spent elsewhere - that's what makes a savings plan different from just intending to save.",
+      "insuranceLiteracy": "Without coverage, a medical emergency or income loss falls entirely on your own savings to absorb - there's no safety net splitting that risk with you yet.",
+      "creditLiteracy": "Credit card revolving interest in Singapore typically runs 24-28% a year - higher than almost any loan. Clearing this is usually worth more than saving extra.",
+      "emergencyLiteracy": "The general guideline is 6 months of expenses covered. This is what's actually protecting you if your income stops suddenly.",
+      "hardshipEvidenceLine": "We've already used the hardship recovery mechanism with you {count} time(s) - it's real, and it's there.",
+      "loanRateLine": "{rate}% interest over {tenure} years, {installment}/month",
+      "investmentGrowthLine": "You've put in {contributed}, projected to grow to {end}",
+      "categories": {
+        "loan": "Loan",
+        "investment": "Investment",
+        "savings": "Savings",
+        "insurance": "Insurance",
+        "credit": "Credit",
+        "emergency": "Emergency Fund"
       },
-      "investment": {
-        "title": "Investment Strategy",
-        "detail": "Keeps long-term growth active while near-term goals are funded."
+      "healthLabel": {
+        "healthy": "Healthy",
+        "tight": "Tight",
+        "at_risk": "At Risk",
+        "notPlanned": "Not Planned"
       },
-      "insurance": {
-        "title": "Insurance Strategy",
-        "detail": "Checks protection gaps before home, family or business risks grow."
+      "headline": {
+        "loan": "{amount}/month across your confirmed loans",
+        "investment": "{amount}/month committed to your confirmed picks",
+        "savings": "Saving toward {count} goal(s), {amount}/month",
+        "insurance": "Coverage status: {status}",
+        "credit": "{amount} in existing loans and card debt",
+        "emergency": "{months} months of expenses covered"
       },
-      "credit": {
-        "title": "Credit Strategy",
-        "detail": "Controls card and loan pressure so goals do not become debt-led."
-      },
-      "mortgage": {
-        "title": "Mortgage / Loan Strategy",
-        "detail": "Prepares down payment, affordability and readiness signals."
-      },
-      "emergency": {
-        "title": "Emergency Fund Strategy",
-        "detail": "Protects cash reserves before optional spending or investment changes."
+      "notPlannedDetail": {
+        "loan": "You haven't confirmed a loan strategy yet - there's nothing to show you here until you do.",
+        "investment": "You haven't confirmed an investment pick yet - there's nothing to show you here until you do.",
+        "savings": "None of your goals have a confirmed savings plan yet."
       }
     },
     "productFit": {

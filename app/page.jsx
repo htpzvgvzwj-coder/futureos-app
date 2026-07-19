@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -333,14 +333,339 @@ const futureSystems = [
   },
 ];
 
-const strategyCards = [
-  { id: "savings", titleKey: "lifeGraph.strategy.savings.title", detailKey: "lifeGraph.strategy.savings.detail", icon: Banknote },
-  { id: "investment", titleKey: "lifeGraph.strategy.investment.title", detailKey: "lifeGraph.strategy.investment.detail", icon: LineChart },
-  { id: "insurance", titleKey: "lifeGraph.strategy.insurance.title", detailKey: "lifeGraph.strategy.insurance.detail", icon: ShieldCheck },
-  { id: "credit", titleKey: "lifeGraph.strategy.credit.title", detailKey: "lifeGraph.strategy.credit.detail", icon: CreditCard },
-  { id: "mortgage", titleKey: "lifeGraph.strategy.mortgage.title", detailKey: "lifeGraph.strategy.mortgage.detail", icon: Building2 },
-  { id: "emergency", titleKey: "lifeGraph.strategy.emergency.title", detailKey: "lifeGraph.strategy.emergency.detail", icon: LockKeyhole },
-];
+// Strategic Balance (张力全景) replaces the old static strategyGrid — every
+// category here reads real confirmed-plan data from
+// /api/strategic-balance/snapshot instead of a canned sentence.
+const STRATEGIC_CATEGORY_IDS = ["loan", "investment", "savings", "insurance", "credit", "emergency"];
+const STRATEGIC_CATEGORY_ICONS = { loan: Building2, investment: LineChart, savings: Banknote, insurance: ShieldCheck, credit: CreditCard, emergency: LockKeyhole };
+const STRATEGIC_CATEGORY_SCREENS = {
+  loan: screens.NEED_LOAN,
+  investment: screens.NEED_INVESTMENT,
+  savings: screens.MIRROR,
+  insurance: screens.NEED_INSURANCE,
+  credit: screens.SPENDING_RISK,
+  emergency: screens.NEED_EMERGENCY,
+};
+
+// Same 3-band convention as loan/investment's on_track/tight/at_risk, just
+// keyed off a 0-100 score instead of a residual-income comparison.
+function scoreBand(score) {
+  if (score >= 70) return "healthy";
+  if (score >= 40) return "tight";
+  return "at_risk";
+}
+
+function buildStrategicCategories(snapshot, healthScores, profile, t) {
+  const debtHealth = healthScores.find((score) => score.id === "debt")?.value ?? 50;
+  const insuranceHealth = healthScores.find((score) => score.id === "insurance")?.value ?? 50;
+  const emergencyHealth = healthScores.find((score) => score.id === "emergency")?.value ?? 50;
+
+  const loanAvgScore = snapshot.loans.length
+    ? Math.round(snapshot.loans.reduce((sum, loan) => sum + loan.futureScore, 0) / snapshot.loans.length)
+    : null;
+  const investmentAvgScore = snapshot.investments.length
+    ? Math.round(snapshot.investments.reduce((sum, pick) => sum + pick.futureScore, 0) / snapshot.investments.length)
+    : null;
+  const monthsCovered =
+    Math.round((numberValue(profile.currentSavings, 18000) / Math.max(numberValue(profile.monthlyExpenses, 3000), 1)) * 10) / 10;
+
+  return {
+    loan: {
+      id: "loan",
+      band: loanAvgScore == null ? "notPlanned" : scoreBand(loanAvgScore),
+      headline:
+        loanAvgScore == null
+          ? t("lifeGraph.strategicBalance.notPlanned")
+          : t("lifeGraph.strategicBalance.headline.loan", { amount: formatSgd(snapshot.loansMonthlyTotal) }),
+    },
+    investment: {
+      id: "investment",
+      band: investmentAvgScore == null ? "notPlanned" : scoreBand(investmentAvgScore),
+      headline:
+        investmentAvgScore == null
+          ? t("lifeGraph.strategicBalance.notPlanned")
+          : t("lifeGraph.strategicBalance.headline.investment", { amount: formatSgd(snapshot.investmentsMonthlyTotal) }),
+    },
+    savings: {
+      id: "savings",
+      band: snapshot.savings.length ? "healthy" : "notPlanned",
+      headline: snapshot.savings.length
+        ? t("lifeGraph.strategicBalance.headline.savings", { count: snapshot.savings.length, amount: formatSgd(snapshot.savingsMonthlyTotal) })
+        : t("lifeGraph.strategicBalance.notPlanned"),
+    },
+    insurance: {
+      id: "insurance",
+      band: scoreBand(insuranceHealth),
+      headline: t("lifeGraph.strategicBalance.headline.insurance", {
+        status: profile.insuranceStatus || t("needDetails.insurance.notReviewed"),
+      }),
+    },
+    credit: {
+      id: "credit",
+      band: scoreBand(debtHealth),
+      headline: t("lifeGraph.strategicBalance.headline.credit", {
+        amount: formatSgd(numberValue(profile.existingLoans, 18000) + numberValue(profile.creditCardOutstanding, 2400)),
+      }),
+    },
+    emergency: {
+      id: "emergency",
+      band: scoreBand(emergencyHealth),
+      headline: t("lifeGraph.strategicBalance.headline.emergency", { months: monthsCovered }),
+    },
+  };
+}
+
+function StrategicBalanceCategoryRow({ category, t, onOpen }) {
+  const Icon = STRATEGIC_CATEGORY_ICONS[category.id];
+  return (
+    <button type="button" className="strategicCategoryRow" onClick={onOpen}>
+      <span className="iconBubble">
+        <Icon size={16} />
+      </span>
+      <span>
+        <strong>{t(`lifeGraph.strategicBalance.categories.${category.id}`)}</strong>
+        <small>{category.headline}</small>
+      </span>
+      <b className={`statePill state-${category.band}`}>{t(`lifeGraph.strategicBalance.healthLabel.${category.band}`)}</b>
+      <ChevronRight size={15} />
+    </button>
+  );
+}
+
+function StrategicBalanceDetailModal({ categoryId, band, snapshot, investmentSlider, rebalance, rebalancing, onSlide, onClose, onGoToPlanner, t }) {
+  const Icon = STRATEGIC_CATEGORY_ICONS[categoryId];
+  const sliderMax = Math.max(2000, snapshot.investmentsMonthlyTotal * 2);
+  const sliderValue = investmentSlider ?? snapshot.investmentsMonthlyTotal;
+
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(`lifeGraph.strategicBalance.categories.${categoryId}`)}>
+      <motion.div className="confirmModal strategicDetailModal" {...screenMotion}>
+        <Icon size={24} />
+        <strong>{t(`lifeGraph.strategicBalance.categories.${categoryId}`)}</strong>
+        <b className={`statePill state-${band}`}>{t(`lifeGraph.strategicBalance.healthLabel.${band}`)}</b>
+
+        {categoryId === "loan" ? (
+          snapshot.loans.length ? (
+            snapshot.loans.map((loan) => (
+              <div className="proofBlock" key={loan.purpose}>
+                <strong>{t(`loanPlanner.purposes.${loan.purpose}`)}</strong>
+                <p>
+                  {t("lifeGraph.strategicBalance.loanRateLine", {
+                    rate: loan.annualRatePercent,
+                    tenure: loan.tenureYears,
+                    installment: formatSgd(loan.monthlyInstallment),
+                  })}
+                </p>
+                <p>{t(`loanPlanner.archetypeDescriptions.${loan.archetype}`)}</p>
+              </div>
+            ))
+          ) : (
+            <p>{t("lifeGraph.strategicBalance.notPlannedDetail.loan")}</p>
+          )
+        ) : null}
+
+        {categoryId === "investment" ? (
+          snapshot.investments.length ? (
+            <>
+              {snapshot.investments.map((pick, index) => (
+                <div className="proofBlock" key={`${pick.name}-${index}`}>
+                  <strong>{pick.name}</strong>
+                  <p>
+                    {t("lifeGraph.strategicBalance.investmentGrowthLine", {
+                      contributed: formatSgd(Math.round(pick.totalContributed ?? 0)),
+                      end: formatSgd(Math.round(pick.projectedEndValue ?? 0)),
+                    })}
+                  </p>
+                </div>
+              ))}
+              <div className="rebalanceSlider">
+                <span className="sectionLabel">{t("lifeGraph.strategicBalance.tryAdjusting")}</span>
+                <input
+                  type="range"
+                  min="0"
+                  max={sliderMax}
+                  step="50"
+                  value={sliderValue}
+                  onChange={(event) => onSlide(Number(event.target.value))}
+                  aria-label={t("lifeGraph.strategicBalance.tryAdjusting")}
+                />
+                <p className="numeric">{t("common.perMonth", { amount: formatSgd(sliderValue) })}</p>
+                {rebalancing ? <p>{t("loading.detail")}</p> : null}
+                {rebalance ? (
+                  <div className="rebalanceResult">
+                    <SummaryRow label={t("lifeGraph.strategicBalance.newUtilization")} value={`${rebalance.utilization.utilizationPercent}%`} />
+                    {rebalance.loans.map((loan) => (
+                      <SummaryRow
+                        key={loan.purpose}
+                        label={`${t(`loanPlanner.purposes.${loan.purpose}`)} ${t("loanPlanner.futureScore")}`}
+                        value={`${loan.previousFutureScore} → ${loan.newFutureScore}`}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <p>{t("lifeGraph.strategicBalance.notPlannedDetail.investment")}</p>
+          )
+        ) : null}
+
+        {categoryId === "savings" ? (
+          snapshot.savings.length ? (
+            <>
+              {snapshot.savings.map((plan) => (
+                <SummaryRow key={plan.domain} label={t(`simulator.goals.${plan.domain}`)} value={formatSgd(plan.monthlyContribution)} />
+              ))}
+              <p>{t("lifeGraph.strategicBalance.savingsLiteracy")}</p>
+            </>
+          ) : (
+            <p>{t("lifeGraph.strategicBalance.notPlannedDetail.savings")}</p>
+          )
+        ) : null}
+
+        {categoryId === "insurance" ? <p>{t("lifeGraph.strategicBalance.insuranceLiteracy")}</p> : null}
+        {categoryId === "credit" ? <p>{t("lifeGraph.strategicBalance.creditLiteracy")}</p> : null}
+        {categoryId === "emergency" ? (
+          <>
+            <p>{t("lifeGraph.strategicBalance.emergencyLiteracy")}</p>
+            {snapshot.hardshipEvidence.length ? (
+              <p>{t("lifeGraph.strategicBalance.hardshipEvidenceLine", { count: snapshot.hardshipEvidence.length })}</p>
+            ) : null}
+          </>
+        ) : null}
+
+        <div className="buttonPair compactButtons">
+          <button type="button" className="secondaryButton" onClick={onClose}>
+            {t("homeBanking.gotIt")}
+          </button>
+          <button type="button" className="primaryButton" onClick={onGoToPlanner}>
+            {t("lifeGraph.strategicBalance.nextStep")}
+          </button>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+function StrategicBalanceCard({ profile, healthScores, t, setActiveScreen }) {
+  const [snapshot, setSnapshot] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openCategory, setOpenCategory] = useState(null);
+  const [investmentSlider, setInvestmentSlider] = useState(null);
+  const [rebalance, setRebalance] = useState(null);
+  const [rebalancing, setRebalancing] = useState(false);
+  const rebalanceTimeout = useRef(null);
+
+  const monthlyIncome = numberValue(profile.monthlyIncome, 7500);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 3500);
+  const currentSavings = numberValue(profile.currentSavings, 20000);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/strategic-balance/snapshot?monthlyIncome=${monthlyIncome}&monthlyExpenses=${monthlyExpenses}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSnapshot(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const requestRebalance = (newAmount) => {
+    setInvestmentSlider(newAmount);
+    if (rebalanceTimeout.current) clearTimeout(rebalanceTimeout.current);
+    rebalanceTimeout.current = setTimeout(() => {
+      setRebalancing(true);
+      fetch("/api/strategic-balance/rebalance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newInvestmentMonthly: newAmount, monthlyIncome, monthlyExpenses, currentSavings }),
+      })
+        .then((response) => response.json())
+        .then((data) => setRebalance(data))
+        .catch(() => {})
+        .finally(() => setRebalancing(false));
+    }, 350);
+  };
+
+  const closeModal = () => {
+    setOpenCategory(null);
+    setRebalance(null);
+    setInvestmentSlider(null);
+  };
+
+  if (loading || !snapshot) {
+    return (
+      <section className="strategicBalanceCard">
+        <span className="sectionLabel">{t("lifeGraph.strategicBalance.title")}</span>
+        <p>{t("loading.detail")}</p>
+      </section>
+    );
+  }
+
+  const categories = buildStrategicCategories(snapshot, healthScores, profile, t);
+
+  return (
+    <>
+      <section className="strategicBalanceCard">
+        <div className="panelHead">
+          <div>
+            <span className="sectionLabel">{t("lifeGraph.strategicBalance.title")}</span>
+            <p>{t("lifeGraph.strategicBalance.subtitle")}</p>
+          </div>
+          <CalendarClock size={18} />
+        </div>
+
+        <div className={`utilizationHero band-${snapshot.utilization.healthLabel}`}>
+          <div className="utilizationRing">
+            <strong className="numeric">{snapshot.utilization.utilizationPercent}%</strong>
+          </div>
+          <div>
+            <span className="utilizationLabel">{t(`lifeGraph.strategicBalance.healthLabel.${snapshot.utilization.healthLabel}`)}</span>
+            {snapshot.timeline ? (
+              <small className="utilizationTrend">
+                {t("lifeGraph.strategicBalance.trend", { change: Math.abs(snapshot.timeline.changePercentPoints) })}{" "}
+                {snapshot.timeline.direction === "up" ? "↑" : snapshot.timeline.direction === "down" ? "↓" : "→"}
+              </small>
+            ) : (
+              <small className="utilizationTrend">{t("lifeGraph.strategicBalance.noTrendYet")}</small>
+            )}
+          </div>
+        </div>
+
+        <div className="strategicCategoryList">
+          {STRATEGIC_CATEGORY_IDS.map((id) => (
+            <StrategicBalanceCategoryRow key={id} category={categories[id]} t={t} onOpen={() => setOpenCategory(id)} />
+          ))}
+        </div>
+      </section>
+
+      {openCategory ? (
+        <StrategicBalanceDetailModal
+          categoryId={openCategory}
+          band={categories[openCategory].band}
+          snapshot={snapshot}
+          investmentSlider={investmentSlider}
+          rebalance={rebalance}
+          rebalancing={rebalancing}
+          onSlide={requestRebalance}
+          onClose={closeModal}
+          onGoToPlanner={() => {
+            closeModal();
+            setActiveScreen(STRATEGIC_CATEGORY_SCREENS[openCategory]);
+          }}
+          t={t}
+        />
+      ) : null}
+    </>
+  );
+}
 
 const productRecommendations = [
   {
@@ -2555,7 +2880,6 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences, setSimulatorInputs, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
-  const [strategyModal, setStrategyModal] = useState(null);
   const [productModal, setProductModal] = useState(null);
   const [customGoalOpen, setCustomGoalOpen] = useState(false);
   const [customGoalDraft, setCustomGoalDraft] = useState(defaultCustomGoalDraft);
@@ -2567,7 +2891,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
-  const StrategyIcon = strategyModal?.icon;
   const ProductIcon = productModal?.icon;
   const visibleProducts = productRecommendations
     .map((product) => {
@@ -2765,25 +3088,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         </div>
       </section>
 
-      <section className="insightCard">
-        <Sparkles size={20} />
-        <p>{t("lifeGraph.strategySentence")}</p>
-      </section>
-
-      <section className="strategyGrid">
-        {strategyCards.map(({ id, titleKey, detailKey, icon: Icon }) => (
-          <button type="button" className="strategyCard" key={id} onClick={() => setStrategyModal({ titleKey, detailKey, icon: Icon })}>
-            <span className="iconBubble">
-              <Icon size={16} />
-            </span>
-            <span>
-              <strong>{t(titleKey)}</strong>
-              <small>{t(detailKey)}</small>
-            </span>
-            <ChevronRight size={15} />
-          </button>
-        ))}
-      </section>
+      <StrategicBalanceCard profile={profile} healthScores={healthScores} t={t} setActiveScreen={setActiveScreen} />
 
       <section className="productFitPanel">
         <div className="panelHead">
@@ -2878,20 +3183,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         {t("lifeGraph.openMirror")}
         <ChevronRight size={18} />
       </button>
-
-      {strategyModal ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t(strategyModal.titleKey)}>
-          <motion.div className="confirmModal" {...screenMotion}>
-            {StrategyIcon ? <StrategyIcon size={24} /> : null}
-            <strong>{t(strategyModal.titleKey)}</strong>
-            <p>{t(strategyModal.detailKey)}</p>
-            <p>{t("lifeGraph.strategy.modalDetail")}</p>
-            <button type="button" className="primaryButton" onClick={() => setStrategyModal(null)}>
-              {t("homeBanking.gotIt")}
-            </button>
-          </motion.div>
-        </section>
-      ) : null}
 
       {productModal ? (
         <InfoModal

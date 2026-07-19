@@ -162,7 +162,6 @@
     },
     "lifeStage": "生活阶段",
     "selectedGoals": "已选目标",
-    "strategySentence": "Life Graph 不会随意推荐产品,而是围绕你的生活目标构建财务策略。",
     "futureAnalyst": {
       "title": "未来分析师",
       "profileSignal": "资料信号",
@@ -246,31 +245,48 @@
         "improve": "改善方法:保持每月投资供款,并让投资组合与风险偏好保持一致。"
       }
     },
-    "strategy": {
-      "modalDetail": "该策略由三大可见系统协同完成:Life Graph 描绘需求,Future Mirror 模拟影响,Future Self Guardian 保护计划。",
-      "savings": {
-        "title": "储蓄策略",
-        "detail": "围绕已选目标建立目标专属储蓄口袋及发薪日自动转账。"
+    "strategicBalance": {
+      "title": "张力全景",
+      "subtitle": "你的财务状况健不健康、下一步该干嘛、以及这些利率条款到底意味着什么。",
+      "notPlanned": "还没规划",
+      "trend": "最近几次确认里变化了 {change} 个百分点",
+      "noTrendYet": "确认记录还不够多，暂时看不出趋势",
+      "tryAdjusting": "试着调整你的投资承诺",
+      "newUtilization": "调整后的现金流占用",
+      "nextStep": "去规划这个",
+      "savingsLiteracy": "这笔钱会在被花掉之前自动划向你的目标——这就是'储蓄计划'和'打算存钱'的真正区别。",
+      "insuranceLiteracy": "没有保障覆盖的话，一旦发生医疗意外或收入中断，全部风险都要由你自己的储蓄一个人扛——目前还没有安全网跟你分担这份风险。",
+      "creditLiteracy": "新加坡信用卡循环利率一般在24%-28%/年，比几乎所有贷款都高。优先还清这部分，通常比多存一点钱更划算。",
+      "emergencyLiteracy": "一般建议是覆盖6个月的支出。这笔钱是万一收入突然中断时，真正在保护你的东西。",
+      "hardshipEvidenceLine": "我们已经通过困境恢复机制和你一起渡过了 {count} 次——这是真实发生过的，不是摆设。",
+      "loanRateLine": "利率 {rate}%，{tenure} 年期，月供 {installment}",
+      "investmentGrowthLine": "你已经投入了 {contributed}，预计会增长到 {end}",
+      "categories": {
+        "loan": "贷款",
+        "investment": "投资",
+        "savings": "储蓄",
+        "insurance": "保险",
+        "credit": "信贷",
+        "emergency": "应急金"
       },
-      "investment": {
-        "title": "投资策略",
-        "detail": "在资助近期目标的同时,保持长期增长持续进行。"
+      "healthLabel": {
+        "healthy": "健康",
+        "tight": "偏紧",
+        "at_risk": "有风险",
+        "notPlanned": "还没规划"
       },
-      "insurance": {
-        "title": "保险策略",
-        "detail": "在住房、家庭或创业风险增加前检查保障缺口。"
+      "headline": {
+        "loan": "你已确认的贷款每月共 {amount}",
+        "investment": "你已确认的投资每月承诺 {amount}",
+        "savings": "正在为 {count} 个目标储蓄，每月 {amount}",
+        "insurance": "保障状态：{status}",
+        "credit": "现有贷款和信用卡欠款共 {amount}",
+        "emergency": "应急金能覆盖 {months} 个月支出"
       },
-      "credit": {
-        "title": "信贷策略",
-        "detail": "控制信用卡及贷款压力,避免目标被债务主导。"
-      },
-      "mortgage": {
-        "title": "房贷 / 贷款策略",
-        "detail": "准备首付款、负担能力及准备度信号。"
-      },
-      "emergency": {
-        "title": "应急基金策略",
-        "detail": "在增加自选支出或投资变动前,保护现金储备。"
+      "notPlannedDetail": {
+        "loan": "你还没确认过贷款策略——在你确认之前，这里没有内容可以展示。",
+        "investment": "你还没确认过投资标的——在你确认之前，这里没有内容可以展示。",
+        "savings": "你的目标里还没有任何一个确认过储蓄计划。"
       }
     },
     "customGoal": {
