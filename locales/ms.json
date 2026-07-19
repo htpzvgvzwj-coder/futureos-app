@@ -1897,8 +1897,8 @@
     "sharedJourney": {
       "title": "Perjalanan Bersama Kami",
       "subtitle": "Detik sebenar di mana kami membina rancangan anda bersama-sama.",
-      "emptyBody": "Perjalanan kami bersama belum bermula lagi - mari tetapkan matlamat pertama anda dan ambil langkah pertama bersama-sama.",
-      "emptyCta": "Tetapkan Matlamat Pertama Kami",
+      "anchorTitle": "Di Sinilah Kami Bermula",
+      "anchorDescription": "Dari sini, setiap rancangan, pelarasan, dan pemulihan yang kami lalui bersama akan dipaparkan di ruang ini.",
       "viewFullJourney": "Lihat Perjalanan Penuh Kami"
     },
     "accountsTitle": "Ringkasan Akaun",

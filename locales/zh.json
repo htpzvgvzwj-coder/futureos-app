@@ -1897,8 +1897,8 @@
     "sharedJourney": {
       "title": "我们共同的旅程",
       "subtitle": "我们一起把你的计划做出来的那些真实时刻。",
-      "emptyBody": "我们的旅程还没开始——一起定下第一个目标，迈出第一步吧。",
-      "emptyCta": "一起定下第一个目标",
+      "anchorTitle": "我们的旅程从这里开始",
+      "anchorDescription": "从现在起，我们一起做的每一个计划、每一次调整、每一次共渡难关，都会出现在这里。",
       "viewFullJourney": "查看完整旅程"
     },
     "accountsTitle": "账户总览",

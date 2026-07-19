@@ -1910,8 +1910,8 @@
     "sharedJourney": {
       "title": "Our Shared Journey",
       "subtitle": "The real moments we built your plan together.",
-      "emptyBody": "Our journey together hasn't started yet - let's set your first goal and take the first step together.",
-      "emptyCta": "Set Our First Goal",
+      "anchorTitle": "This Is Where We Began",
+      "anchorDescription": "From here, every plan, adjustment, and recovery we work through together will show up in this space.",
       "viewFullJourney": "View Our Full Journey"
     },
     "accountsTitle": "Accounts Overview",

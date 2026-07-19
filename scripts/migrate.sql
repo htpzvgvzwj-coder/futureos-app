@@ -277,3 +277,17 @@ create table if not exists investment_artifacts (
 
 create index if not exists investment_artifacts_session_stage_type_idx
   on investment_artifacts (session_id, stage, artifact_type, created_at desc);
+
+-- One row per customer, created the first time anything reads it (see
+-- lib/relationship-store.js's getOrCreateJourneyStart) - a real, permanent,
+-- backend-recorded anchor for "when did our relationship begin," so the
+-- Shared Journey section on Home always has a genuine first entry instead
+-- of a confusing empty state on a customer's very first visit.
+create table if not exists relationship_milestones (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,
+  started_at   timestamptz not null default now()
+);
+
+create unique index if not exists relationship_milestones_profile_key_idx
+  on relationship_milestones (profile_key);

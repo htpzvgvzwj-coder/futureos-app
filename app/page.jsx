@@ -1921,10 +1921,42 @@ function Header({ eyebrow, title, subtitle }) {
 // confirmedAt) are excluded so this only ever shows things that genuinely
 // happened, never fabricated flavor text.
 function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
+  const [journeyStartedAt, setJourneyStartedAt] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/relationship/journey-start")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setJourneyStartedAt(data.startedAt);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const realEvents = memoryEvents
     .filter((event) => event.confirmedAt)
     .sort((a, b) => new Date(b.confirmedAt) - new Date(a.confirmedAt))
-    .slice(0, 4);
+    .slice(0, 3);
+
+  // A real, backend-recorded anchor for "when did our relationship begin" —
+  // always the oldest entry, so it appears last in this newest-first list.
+  // Shown alone (still fetched, not fabricated client-side) when there are
+  // no other real events yet, so the section always explains itself instead
+  // of reading as broken/empty on a customer's first visit.
+  const anchorEvent = journeyStartedAt
+    ? {
+        id: "journey-started",
+        year: new Date(journeyStartedAt).getFullYear().toString(),
+        title: t("homeBanking.sharedJourney.anchorTitle"),
+        description: t("homeBanking.sharedJourney.anchorDescription"),
+        impact: null,
+      }
+    : null;
+
+  const timelineEvents = [...realEvents, ...(anchorEvent ? [anchorEvent] : [])];
 
   return (
     <section className="guardianMemoryPanel recommendationPanel">
@@ -1935,18 +1967,10 @@ function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
         </div>
         <CalendarClock size={18} />
       </div>
-      {realEvents.length === 0 ? (
-        <div className="needHeroCard">
-          <p>{t("homeBanking.sharedJourney.emptyBody")}</p>
-          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.MIRROR)}>
-            {t("homeBanking.sharedJourney.emptyCta")}
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      ) : (
+      {timelineEvents.length === 0 ? null : (
         <>
           <div className="memoryTimeline">
-            {realEvents.map((event) => (
+            {timelineEvents.map((event) => (
               <button
                 type="button"
                 className="memoryEventCard"
@@ -1959,9 +1983,11 @@ function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
                 <div>
                   <strong>{event.title}</strong>
                   <small>{event.description}</small>
-                  <span className="memoryImpact">
-                    {t("guardian.memory.impact")}: {event.impact}
-                  </span>
+                  {event.impact ? (
+                    <span className="memoryImpact">
+                      {t("guardian.memory.impact")}: {event.impact}
+                    </span>
+                  ) : null}
                 </div>
                 <ChevronRight size={15} />
               </button>
