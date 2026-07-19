@@ -548,7 +548,11 @@ function StrategicBalanceAccordionItem({
             snapshot.savings.length ? (
               <>
                 {snapshot.savings.map((plan) => (
-                  <SummaryRow key={plan.domain} label={t(`simulator.goals.${plan.domain}`)} value={formatSgd(plan.monthlyContribution)} />
+                  <SummaryRow
+                    key={plan.label ?? plan.domain}
+                    label={plan.label ?? t(`simulator.goals.${plan.domain}`)}
+                    value={formatSgd(plan.monthlyContribution)}
+                  />
                 ))}
                 <p>{t("lifeGraph.scoreInfo.savings.data")}</p>
                 <p>{t("lifeGraph.strategicBalance.savingsLiteracy")}</p>
@@ -604,6 +608,7 @@ function StrategicBalanceAccordionItem({
 function StrategicBalanceScreen({ preferences, t, setActiveScreen }) {
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
+  const customGoal = getCustomGoals(preferences)[0];
 
   const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -620,7 +625,16 @@ function StrategicBalanceScreen({ preferences, t, setActiveScreen }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/strategic-balance/snapshot?monthlyIncome=${monthlyIncome}&monthlyExpenses=${monthlyExpenses}`)
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    // Custom Goal has no server-side session/store like wedding/home/retirement - its confirmed
+    // monthly contribution is computed client-side and passed through so Strategic Balance's
+    // savings total doesn't silently exclude it.
+    if (customGoal?.monthlyContribution) {
+      params.set("customGoalMonthly", String(customGoal.monthlyContribution));
+      params.set("customGoalName", customGoal.name);
+      params.set("customGoalConfirmedAt", customGoal.confirmedAt ?? "");
+    }
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
       .then((response) => response.json())
       .then((data) => {
         if (!cancelled) setSnapshot(data);
@@ -1446,6 +1460,14 @@ function monthCountUntil(targetDate) {
   return Math.max(1, months);
 }
 
+// Same amount/months-remaining division used by getRecommendedMonthlySaving's custom-goal branch,
+// pulled out so the Custom Goal modal can show the identical number live, before a simulator run.
+function computeCustomGoalMonthlyPlan(amount, targetDate) {
+  const monthsRemaining = monthCountUntil(targetDate);
+  const monthlyContribution = Math.max(50, Math.ceil(numberValue(amount, 6000) / monthsRemaining / 50) * 50);
+  return { monthsRemaining, monthlyContribution };
+}
+
 function formatMonthCount(months) {
   if (months < 12) return `${months} months`;
   const years = Math.floor(months / 12);
@@ -1699,8 +1721,16 @@ function getAgentReasoning(inputs, t) {
   const monthly = formatSgd(Math.ceil(numberValue(inputs.customTargetAmount, 6000) / Math.max(monthCountUntil(inputs.customTargetDate), 1) / 50) * 50);
 
   if (primaryType === "custom" || primaryType === "car") {
+    const category = inputs.customCategory?.trim() || "Lifestyle";
+    const notes = inputs.customNotes?.trim();
+    // Category and notes used to be captured on the form and then never read again by anything -
+    // the customer's own context vanished the moment they hit Run. Feeding them into the situation
+    // line is what actually proves they were read, instead of just stored and discarded.
+    const situation = notes
+      ? t("simulator.reasoning.situationCustomWithNotes", { goal: primaryGoal, category, notes })
+      : t("simulator.reasoning.situationCustom", { goal: primaryGoal, category });
     return {
-      situation: t("simulator.reasoning.situation", { goal: primaryGoal }),
+      situation,
       goals: selected,
       risk: t(primaryType === "car" ? "simulator.reasoning.carRisk" : "simulator.reasoning.customRisk"),
       recommendation: t("simulator.reasoning.customRecommendation", { goal: primaryGoal, amount: customAmount, monthly }),
@@ -3213,14 +3243,20 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
 
   function saveCustomGoal() {
+    const amount = customGoalDraft.amount || "6000";
+    const date = customGoalDraft.date || "2027-01";
+    const { monthsRemaining, monthlyContribution } = computeCustomGoalMonthlyPlan(amount, date);
     const goal = {
       id: `custom-${Date.now()}`,
       name: customGoalDraft.name.trim() || t("lifeGraph.customGoal.defaultName"),
-      amount: customGoalDraft.amount || "6000",
-      date: customGoalDraft.date || "2027-01",
+      amount,
+      date,
       priority: customGoalDraft.priority || "High",
       category: customGoalDraft.category || "Lifestyle",
       notes: customGoalDraft.notes || "",
+      monthlyContribution,
+      monthsRemaining,
+      confirmedAt: new Date().toISOString(),
     };
 
     setPreferences((current) => {
@@ -3244,7 +3280,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
       customCategory: goal.category,
       customNotes: goal.notes,
     }));
-    setNotice(t("lifeGraph.customGoal.added", { goal: goal.name }));
+    setNotice(t("lifeGraph.customGoal.added", { goal: goal.name, amount: formatSgd(monthlyContribution) }));
     setCustomGoalDraft(defaultCustomGoalDraft);
     setCustomGoalOpen(false);
   }
@@ -3449,6 +3485,15 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
                   onChange={(event) => setCustomGoalDraft((current) => ({ ...current, notes: event.target.value }))}
                 />
               </label>
+            </div>
+            <div className="proofBlock">
+              <strong>{t("lifeGraph.customGoal.planPreviewLabel")}</strong>
+              <p>
+                {t("lifeGraph.customGoal.planPreview", {
+                  amount: formatSgd(computeCustomGoalMonthlyPlan(customGoalDraft.amount, customGoalDraft.date).monthlyContribution),
+                  months: computeCustomGoalMonthlyPlan(customGoalDraft.amount, customGoalDraft.date).monthsRemaining,
+                })}
+              </p>
             </div>
             <div className="buttonPair">
               <button type="button" className="secondaryButton" onClick={() => setCustomGoalOpen(false)}>

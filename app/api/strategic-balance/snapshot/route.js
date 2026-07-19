@@ -17,8 +17,26 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const monthlyIncome = Number(searchParams.get("monthlyIncome")) || 0;
   const monthlyExpenses = Number(searchParams.get("monthlyExpenses")) || 0;
+  const customGoalMonthly = Number(searchParams.get("customGoalMonthly")) || 0;
+  const customGoalName = searchParams.get("customGoalName");
+  const customGoalConfirmedAt = searchParams.get("customGoalConfirmedAt");
 
   const snapshot = await getStrategicBalanceSnapshot();
+
+  // Custom Goal has no backend store like wedding/home/retirement (lib/strategic-balance-context.js
+  // SAVINGS_STORES) - it's a client-persisted preference, so its confirmed monthly contribution
+  // arrives as a query param instead of a session read, and gets merged in here.
+  if (customGoalMonthly > 0) {
+    snapshot.savings = [
+      ...snapshot.savings,
+      {
+        domain: "custom",
+        label: customGoalName || null,
+        monthlyContribution: customGoalMonthly,
+        confirmedAt: customGoalConfirmedAt || null,
+      },
+    ];
+  }
 
   const loansTotal = snapshot.loans.reduce((sum, loan) => sum + loan.monthlyInstallment, 0);
   const investmentsTotal = snapshot.investments.reduce((sum, pick) => sum + investmentMonthlyEquivalent(pick), 0);
