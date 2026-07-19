@@ -82,6 +82,7 @@ const screens = {
   NEED_EMERGENCY: "needEmergency",
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
+  NEED_CUSTOM_GOAL: "needCustomGoal",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
@@ -159,6 +160,7 @@ const DEDICATED_GOAL_SCREENS = {
   retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
   emergency: { screen: screens.NEED_EMERGENCY, badgeKey: "needDetails.emergency.newFeatureBadge" },
   investment: { screen: screens.NEED_INVESTMENT, badgeKey: "investmentPlanner.newFeatureBadge" },
+  custom: { screen: screens.NEED_CUSTOM_GOAL, badgeKey: "customGoalPlanner.newFeatureBadge" },
 };
 
 const independenceLevels = [
@@ -799,6 +801,128 @@ function CrossBankDataScreen({ t, setActiveScreen }) {
 // Rate/fee figures are real, publicly published OCBC numbers (checked July 2026) - not
 // placeholders. honestNoteKey is only set where there's a real, sourced comparison to make;
 // it is never invented to hit a quota of "honest" cards.
+// Reached from Mirror's Life Goal Selection grid as a proper "New"-badged entry, same as every
+// sibling goal (Wedding/Home/Loan/Retirement/Emergency/Investment) - Custom Goal previously had no
+// entry point of its own and lived as a bare toggle checkbox with no dedicated screen behind it.
+function CustomGoalPlannerScreen({ setPreferences, setSimulatorInputs, t, setActiveScreen }) {
+  const [draft, setDraft] = useState(defaultCustomGoalDraft);
+  const [savedGoal, setSavedGoal] = useState(null);
+  const plan = computeCustomGoalMonthlyPlan(draft.amount, draft.date);
+
+  function saveGoal() {
+    const amount = draft.amount || "6000";
+    const date = draft.date || "2027-01";
+    const { monthsRemaining, monthlyContribution } = computeCustomGoalMonthlyPlan(amount, date);
+    const goal = {
+      id: `custom-${Date.now()}`,
+      name: draft.name.trim() || t("lifeGraph.customGoal.defaultName"),
+      amount,
+      date,
+      priority: draft.priority || "High",
+      category: draft.category || "Lifestyle",
+      notes: draft.notes || "",
+      monthlyContribution,
+      monthsRemaining,
+      confirmedAt: new Date().toISOString(),
+    };
+
+    setPreferences((current) => {
+      const currentProfile = getUserProfile(current);
+      return {
+        ...current,
+        customGoals: [goal, ...getCustomGoals(current)],
+        profile: {
+          ...currentProfile,
+          goals: { ...currentProfile.goals, custom: true },
+        },
+      };
+    });
+    setSimulatorInputs((current) => ({
+      ...current,
+      goals: { ...current.goals, custom: true },
+      customGoalName: goal.name,
+      customTargetAmount: goal.amount,
+      customTargetDate: goal.date,
+      customPriority: goal.priority,
+      customCategory: goal.category,
+      customNotes: goal.notes,
+    }));
+    setSavedGoal(goal);
+  }
+
+  if (savedGoal) {
+    return (
+      <Screen>
+        <Header title={t("customGoalPlanner.title")} subtitle={t("customGoalPlanner.subtitle")} />
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+        <section className="insightCard">
+          <CheckCircle2 size={20} />
+          <p>{t("lifeGraph.customGoal.added", { goal: savedGoal.name, amount: formatSgd(savedGoal.monthlyContribution) })}</p>
+        </section>
+        <div className="buttonPair">
+          <button
+            type="button"
+            className="secondaryButton"
+            onClick={() => {
+              setSavedGoal(null);
+              setDraft(defaultCustomGoalDraft);
+            }}
+          >
+            {t("customGoalPlanner.addAnother")}
+          </button>
+          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.MIRROR)}>
+            {t("customGoalPlanner.goToMirror")}
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen>
+      <Header title={t("customGoalPlanner.title")} subtitle={t("customGoalPlanner.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <div className="financialGrid">
+        {[
+          ["name", "lifeGraph.customGoal.fields.name", "text"],
+          ["amount", "lifeGraph.customGoal.fields.amount", "number"],
+          ["date", "lifeGraph.customGoal.fields.date", "month"],
+          ["priority", "lifeGraph.customGoal.fields.priority", "text"],
+          ["category", "lifeGraph.customGoal.fields.category", "text"],
+        ].map(([field, labelKey, type]) => (
+          <label className="inputField" key={field}>
+            <span>{t(labelKey)}</span>
+            <input
+              value={draft[field]}
+              type={type}
+              inputMode={type === "number" ? "decimal" : undefined}
+              onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+            />
+          </label>
+        ))}
+        <label className="inputField fullWidthField">
+          <span>{t("lifeGraph.customGoal.fields.notes")}</span>
+          <textarea
+            value={draft.notes}
+            onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))}
+          />
+        </label>
+      </div>
+
+      <div className="proofBlock">
+        <strong>{t("lifeGraph.customGoal.planPreviewLabel")}</strong>
+        <p>{t("lifeGraph.customGoal.planPreview", { amount: formatSgd(plan.monthlyContribution), months: plan.monthsRemaining })}</p>
+      </div>
+
+      <button type="button" className="primaryButton" onClick={saveGoal}>
+        {t("lifeGraph.customGoal.save")}
+      </button>
+    </Screen>
+  );
+}
+
 const productRecommendations = [
   {
     id: "ocbc360",
@@ -3228,12 +3352,9 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
   );
 }
 
-function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences, setSimulatorInputs, t }) {
+function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
-  const [customGoalOpen, setCustomGoalOpen] = useState(false);
-  const [customGoalDraft, setCustomGoalDraft] = useState(defaultCustomGoalDraft);
-  const [notice, setNotice] = useState("");
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
   const detectedStage = getDetectedLifeStage(profile, customGoals, t);
@@ -3241,49 +3362,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
-
-  function saveCustomGoal() {
-    const amount = customGoalDraft.amount || "6000";
-    const date = customGoalDraft.date || "2027-01";
-    const { monthsRemaining, monthlyContribution } = computeCustomGoalMonthlyPlan(amount, date);
-    const goal = {
-      id: `custom-${Date.now()}`,
-      name: customGoalDraft.name.trim() || t("lifeGraph.customGoal.defaultName"),
-      amount,
-      date,
-      priority: customGoalDraft.priority || "High",
-      category: customGoalDraft.category || "Lifestyle",
-      notes: customGoalDraft.notes || "",
-      monthlyContribution,
-      monthsRemaining,
-      confirmedAt: new Date().toISOString(),
-    };
-
-    setPreferences((current) => {
-      const currentProfile = getUserProfile(current);
-      return {
-        ...current,
-        customGoals: [goal, ...getCustomGoals(current)],
-        profile: {
-          ...currentProfile,
-          goals: { ...currentProfile.goals, custom: true },
-        },
-      };
-    });
-    setSimulatorInputs((current) => ({
-      ...current,
-      goals: { ...current.goals, custom: true },
-      customGoalName: goal.name,
-      customTargetAmount: goal.amount,
-      customTargetDate: goal.date,
-      customPriority: goal.priority,
-      customCategory: goal.category,
-      customNotes: goal.notes,
-    }));
-    setNotice(t("lifeGraph.customGoal.added", { goal: goal.name, amount: formatSgd(monthlyContribution) }));
-    setCustomGoalDraft(defaultCustomGoalDraft);
-    setCustomGoalOpen(false);
-  }
 
   return (
     <Screen>
@@ -3299,7 +3377,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
           <ChartNoAxesColumnIncreasing size={16} />
         </button>
       </div>
-      <NoticeBanner text={notice} />
 
       {healthAnalysisOpen ? (
         <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("lifeGraph.health.title")}>
@@ -3441,9 +3518,19 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         <ChevronRight size={15} />
       </button>
 
-      <button type="button" className="secondaryButton" onClick={() => setCustomGoalOpen(true)}>
-        <Target size={18} />
-        {t("lifeGraph.customGoal.addButton")}
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.NEED_CUSTOM_GOAL)}
+      >
+        <span className="iconBubble">
+          <Target size={16} />
+        </span>
+        <span>
+          <strong>{t("lifeGraph.customGoal.addButton")}</strong>
+          <small>{t("customGoalPlanner.entrySubtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
       </button>
 
       <button
@@ -3454,58 +3541,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, setPreferences
         {t("lifeGraph.openMirror")}
         <ChevronRight size={18} />
       </button>
-
-      {customGoalOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("lifeGraph.customGoal.title")}>
-          <motion.div className="confirmModal customGoalModal" {...screenMotion}>
-            <Target size={24} />
-            <strong>{t("lifeGraph.customGoal.title")}</strong>
-            <div className="financialGrid">
-              {[
-                ["name", "lifeGraph.customGoal.fields.name", "text"],
-                ["amount", "lifeGraph.customGoal.fields.amount", "number"],
-                ["date", "lifeGraph.customGoal.fields.date", "month"],
-                ["priority", "lifeGraph.customGoal.fields.priority", "text"],
-                ["category", "lifeGraph.customGoal.fields.category", "text"],
-              ].map(([field, labelKey, type]) => (
-                <label className="inputField" key={field}>
-                  <span>{t(labelKey)}</span>
-                  <input
-                    value={customGoalDraft[field]}
-                    type={type}
-                    inputMode={type === "number" ? "decimal" : undefined}
-                    onChange={(event) => setCustomGoalDraft((current) => ({ ...current, [field]: event.target.value }))}
-                  />
-                </label>
-              ))}
-              <label className="inputField fullWidthField">
-                <span>{t("lifeGraph.customGoal.fields.notes")}</span>
-                <textarea
-                  value={customGoalDraft.notes}
-                  onChange={(event) => setCustomGoalDraft((current) => ({ ...current, notes: event.target.value }))}
-                />
-              </label>
-            </div>
-            <div className="proofBlock">
-              <strong>{t("lifeGraph.customGoal.planPreviewLabel")}</strong>
-              <p>
-                {t("lifeGraph.customGoal.planPreview", {
-                  amount: formatSgd(computeCustomGoalMonthlyPlan(customGoalDraft.amount, customGoalDraft.date).monthlyContribution),
-                  months: computeCustomGoalMonthlyPlan(customGoalDraft.amount, customGoalDraft.date).monthsRemaining,
-                })}
-              </p>
-            </div>
-            <div className="buttonPair">
-              <button type="button" className="secondaryButton" onClick={() => setCustomGoalOpen(false)}>
-                {t("simulator.modal.cancel")}
-              </button>
-              <button type="button" className="primaryButton" onClick={saveCustomGoal}>
-                {t("lifeGraph.customGoal.save")}
-              </button>
-            </div>
-          </motion.div>
-        </section>
-      ) : null}
     </Screen>
   );
 }
@@ -3553,7 +3588,6 @@ function DynamicSimulatorField({ fieldId, value, onChange, t }) {
 
 function FutureMirrorSimulator({
   setActiveScreen,
-  preferences,
   simulatorInputs,
   setSimulatorInputs,
   simulatorRan,
@@ -3562,7 +3596,6 @@ function FutureMirrorSimulator({
   t,
 }) {
   const level = Number(simulatorInputs.independenceLevel);
-  const customGoals = getCustomGoals(preferences);
   const fieldGroups = getSimulatorFieldGroups(simulatorInputs, t);
   const scenarios = getDynamicSimulatorScenarios(simulatorInputs, t);
   const reasoning = getAgentReasoning(simulatorInputs, t);
@@ -3633,7 +3666,7 @@ function FutureMirrorSimulator({
                   onClick={() => toggleGoal(id)}
                 >
                   <Icon size={15} />
-                  <span>{id === "custom" && customGoals[0] ? customGoals[0].name : t(labelKey)}</span>
+                  <span>{t(labelKey)}</span>
                   {simulatorInputs.goals[id] ? <Check size={14} /> : null}
                 </button>
               )
@@ -9887,6 +9920,7 @@ export default function App() {
   const currentScreen = {
     [screens.HOME]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
+    [screens.NEED_CUSTOM_GOAL]: <CustomGoalPlannerScreen {...shared} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,

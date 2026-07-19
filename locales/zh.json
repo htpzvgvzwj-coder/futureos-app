@@ -1307,6 +1307,14 @@
     "memoryEventReason": "你在比较了真实的还款权衡后，确认了一个具体的策略。",
     "memoryEventDataUsed": "你所说的借款用途和金额，加上现行的TDSR/MSR还款能力规定和市场利率水平。"
   },
+  "customGoalPlanner": {
+    "title": "自定义目标规划师",
+    "subtitle": "任何还没有专属分类的目标——背后有一份真实的储蓄计划。",
+    "entrySubtitle": "取个名字、填金额和日期——立刻算出真实的每月储蓄计划",
+    "newFeatureBadge": "新功能",
+    "addAnother": "再添加一个目标",
+    "goToMirror": "在 Future Mirror 里查看"
+  },
   "investmentPlanner": {
     "title": "投资规划师",
     "subtitle": "真实的基金和股票推荐，并按你实际的购买方式计算数字。",

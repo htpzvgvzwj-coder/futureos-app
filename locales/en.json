@@ -1320,6 +1320,14 @@
     "memoryEventReason": "You confirmed a specific strategy after comparing real repayment trade-offs.",
     "memoryEventDataUsed": "Your stated borrowing purpose and amount, plus current TDSR/MSR serviceability rules and market interest-rate benchmarks."
   },
+  "customGoalPlanner": {
+    "title": "Custom Goal Planner",
+    "subtitle": "Any goal that doesn't fit a category yet - with a real savings plan behind it.",
+    "entrySubtitle": "Give it a name, an amount, a date - get a real monthly savings plan",
+    "newFeatureBadge": "New",
+    "addAnother": "Add another goal",
+    "goToMirror": "See it in Future Mirror"
+  },
   "investmentPlanner": {
     "title": "Investment Planner",
     "subtitle": "Real fund and stock recommendations, priced for how you'd actually buy them.",
