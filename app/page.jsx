@@ -3449,12 +3449,7 @@ function FutureMirrorSimulator({
   resetSimulation,
   t,
 }) {
-  const [pendingAutonomous, setPendingAutonomous] = useState(false);
-  const [scoreInfoModal, setScoreInfoModal] = useState(null);
-  const [notice, setNotice] = useState("");
-  const [withdrawImpactOpen, setWithdrawImpactOpen] = useState(false);
   const level = Number(simulatorInputs.independenceLevel);
-  const selectedLevel = independenceLevels.find((item) => item.level === level) ?? independenceLevels[0];
   const customGoals = getCustomGoals(preferences);
   const fieldGroups = getSimulatorFieldGroups(simulatorInputs, t);
   const scenarios = getDynamicSimulatorScenarios(simulatorInputs, t);
@@ -3475,35 +3470,14 @@ function FutureMirrorSimulator({
     });
   }
 
-  function requestLevel(nextLevel) {
-    if (nextLevel === 5 && level !== 5) {
-      setPendingAutonomous(true);
-      return;
-    }
-    updateInput("independenceLevel", nextLevel);
-  }
-
   function runSimulation() {
     setSimulatorRan(true);
-  }
-
-  // Autonomous Guardrails safety controls (04_AI_Agent.md "Level 5 requires... Pause control"):
-  // pause and adjust must be real, working downgrades, not inert labels next to a locked plan.
-  function pauseAutonomousLock() {
-    updateInput("independenceLevel", 4);
-    setNotice(t("simulator.autonomousLock.pausedNotice"));
-  }
-
-  function adjustAutonomousLock() {
-    updateInput("independenceLevel", 4);
-    setNotice(t("simulator.autonomousLock.adjustNotice"));
   }
 
   return (
     <Screen>
       <Header title={t("simulator.title")} subtitle={t("simulator.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
-      <NoticeBanner text={notice} />
 
       <section className="trustNote">
         <ShieldCheck size={18} />
@@ -3557,50 +3531,6 @@ function FutureMirrorSimulator({
       </section>
 
       <section className="simulatorForm">
-        <div className="settingsGroup">
-          <span className="sectionLabel">{t("simulator.sections.aiIndependence")}</span>
-          <div className="levelSegment">
-            {independenceLevels.map((item) => (
-              <button
-                type="button"
-                key={item.level}
-                className={level === item.level ? "levelButton active" : "levelButton"}
-                onClick={() => requestLevel(item.level)}
-                aria-label={t(item.titleKey)}
-              >
-                {item.level}
-              </button>
-            ))}
-          </div>
-          <article className="levelExplainer">
-            <strong>
-              {t("simulator.levelLabel", { level })} - {t(selectedLevel.titleKey)}
-            </strong>
-            <span>{t(selectedLevel.detailKey)}</span>
-          </article>
-          {level === 5 ? (
-            <section className="autonomousLockPanel">
-              <strong>{t("simulator.autonomousLock.title")}</strong>
-              <SummaryRow label={t("simulator.autonomousLock.goal")} value={getGoalLabel(getPrimaryGoal(simulatorInputs) === "car" ? "custom" : getPrimaryGoal(simulatorInputs), simulatorInputs, t)} />
-              <SummaryRow label={t("simulator.autonomousLock.target")} value={formatSgd(getGoalTargetAmount(simulatorInputs))} />
-              <SummaryRow label={t("simulator.autonomousLock.monthlyLocked")} value={t("common.perMonth", { amount: formatSgd(getRecommendedMonthlySaving(simulatorInputs)) })} />
-              <SummaryRow label={t("simulator.autonomousLock.completion")} value={getGoalTargetDisplay(simulatorInputs)} />
-              <SummaryRow label={t("simulator.autonomousLock.progress")} value="18%" />
-              <div className="approvalCounters">
-                <button type="button" className="miniButton" onClick={pauseAutonomousLock}>
-                  {t("simulator.autonomousLock.pause")}
-                </button>
-                <button type="button" className="miniButton" onClick={adjustAutonomousLock}>
-                  {t("simulator.autonomousLock.adjust")}
-                </button>
-                <button type="button" className="miniButton danger" onClick={() => setWithdrawImpactOpen(true)}>
-                  {t("simulator.autonomousLock.withdrawImpact")}
-                </button>
-              </div>
-            </section>
-          ) : null}
-        </div>
-
         <div className="dynamicFieldGroups">
           {fieldGroups.map((group, index) => (
             <details className="dynamicFieldGroup" key={group.id} open={index === 0 || fieldGroups.length < 3}>
@@ -3637,53 +3567,6 @@ function FutureMirrorSimulator({
           <section className="insightCard">
             <Bot size={20} />
             <p>{simulatorInputs.situation.trim() || getSimulatorSummary(simulatorInputs, t)}</p>
-          </section>
-
-          <section className="scenarioStack">
-            <span className="sectionLabel">{t("simulator.sections.scenarioComparison")}</span>
-            {scenarios.map((scenario) => (
-              <article
-                className={scenario.recommended ? "scenarioCard simulatorScenario recommended" : "scenarioCard simulatorScenario"}
-                key={scenario.id}
-              >
-                <div className="scenarioHead">
-                  <span>{t(scenario.titleKey)}</span>
-                  {scenario.recommended ? <b>{t("status.recommended")}</b> : null}
-                </div>
-                <p>{t(scenario.detailKey)}</p>
-                <div className="scenarioStats scenarioStatsWide">
-                  {scenario.fields.map(([label, value]) => (
-                    <span key={`${scenario.id}-${label}`}>
-                      <small>{label}</small>
-                      <strong>{value}</strong>
-                    </span>
-                  ))}
-                  <span>
-                    <small className="scoreLabelWithInfo">
-                      {t("mirror.futureScore")}
-                      <button
-                        type="button"
-                        className="infoButton tinyInfoButton"
-                        onClick={() =>
-                          setScoreInfoModal({
-                            title: `${t(scenario.titleKey)} ${t("mirror.futureScore")}`,
-                            value: `${scenario.score}/100`,
-                          })
-                        }
-                        aria-label={t("homeBanking.infoLabel", { item: t("mirror.futureScore") })}
-                      >
-                        <Info size={11} />
-                      </button>
-                    </small>
-                    <strong>{scenario.score}</strong>
-                  </span>
-                  <span>
-                    <small>{t("mirror.risk")}</small>
-                    <strong className={`risk risk${scenario.riskClass}`}>{t(scenario.riskKey)}</strong>
-                  </span>
-                </div>
-              </article>
-            ))}
           </section>
 
           <section className="recommendationPanel">
@@ -3751,78 +3634,6 @@ function FutureMirrorSimulator({
             <ShieldCheck size={18} />
           </button>
         </motion.section>
-      ) : null}
-
-      {scoreInfoModal ? (
-        <InfoModal
-          icon={Info}
-          title={scoreInfoModal.title}
-          scoreLabel={t("homeBanking.currentScore")}
-          scoreValue={scoreInfoModal.value}
-          listTitle={t("lifeGraph.scoreInfo.title")}
-          listItems={[
-            t("homeBanking.method.futureScore"),
-            t("homeBanking.proof.futureScoreInputs"),
-            t("homeBanking.proof.futureScoreWeights"),
-            t("homeBanking.proof.futureScoreResult"),
-          ]}
-          onClose={() => setScoreInfoModal(null)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
-      ) : null}
-
-      {pendingAutonomous ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("simulator.modal.title")}>
-          <motion.div className="confirmModal" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
-            <AlertTriangle size={24} />
-            <strong>{t("simulator.modal.title")}</strong>
-            <p>{t("simulator.modal.message")}</p>
-            <div className="buttonPair">
-              <button type="button" className="secondaryButton" onClick={() => setPendingAutonomous(false)}>
-                {t("simulator.modal.cancel")}
-                <X size={17} />
-              </button>
-              <button
-                type="button"
-                className="primaryButton"
-                onClick={() => {
-                  updateInput("independenceLevel", 5);
-                  setPendingAutonomous(false);
-                }}
-              >
-                {t("simulator.modal.enable")}
-                <Check size={17} />
-              </button>
-            </div>
-          </motion.div>
-        </section>
-      ) : null}
-
-      {withdrawImpactOpen ? (
-        <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("simulator.autonomousLock.withdrawImpactTitle")}>
-          <motion.div className="confirmModal" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
-            <AlertTriangle size={24} />
-            <strong>{t("simulator.autonomousLock.withdrawImpactTitle")}</strong>
-            <p>{t("simulator.autonomousLock.withdrawImpactBody")}</p>
-            <div className="buttonPair">
-              <button type="button" className="secondaryButton" onClick={() => setWithdrawImpactOpen(false)}>
-                {t("simulator.modal.cancel")}
-                <X size={17} />
-              </button>
-              <button
-                type="button"
-                className="primaryButton"
-                onClick={() => {
-                  setWithdrawImpactOpen(false);
-                  setActiveScreen(screens.PROFILE);
-                }}
-              >
-                {t("simulator.autonomousLock.withdrawImpactCta")}
-                <ChevronRight size={17} />
-              </button>
-            </div>
-          </motion.div>
-        </section>
       ) : null}
     </Screen>
   );
