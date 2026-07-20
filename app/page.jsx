@@ -5284,12 +5284,18 @@ function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
                 <span className="statChip">
                   {plan.guest_count} {t("weddingPlanner.guestCount")}
                 </span>
-                <span className="statChip">{t(WEDDING_VENUE_TYPE_LABEL_KEYS[plan.venue_type] ?? plan.venue_type)}</span>
-                {plan.venue_type !== "community" ? (
-                  <span className="statChip">{t(WEDDING_VENUE_TIER_LABEL_KEYS[plan.venue_tier] ?? plan.venue_tier)}</span>
+                {plan.venue_type ? (
+                  <span className="statChip">{t(WEDDING_VENUE_TYPE_LABEL_KEYS[plan.venue_type] ?? "common.notAvailable")}</span>
                 ) : null}
-                <span className="statChip">{t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[plan.photography_tier] ?? plan.photography_tier)}</span>
-                <span className="statChip">{t(WEDDING_ATTIRE_TIER_LABEL_KEYS[plan.attire_tier] ?? plan.attire_tier)}</span>
+                {plan.venue_type && plan.venue_type !== "community" && plan.venue_tier ? (
+                  <span className="statChip">{t(WEDDING_VENUE_TIER_LABEL_KEYS[plan.venue_tier] ?? "common.notAvailable")}</span>
+                ) : null}
+                {plan.photography_tier ? (
+                  <span className="statChip">{t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[plan.photography_tier] ?? "common.notAvailable")}</span>
+                ) : null}
+                {plan.attire_tier ? (
+                  <span className="statChip">{t(WEDDING_ATTIRE_TIER_LABEL_KEYS[plan.attire_tier] ?? "common.notAvailable")}</span>
+                ) : null}
               </div>
               <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
                 {t("weddingPlanner.customizePlan")}
@@ -5333,24 +5339,30 @@ function WeddingConfirmedBudgetCard({ budget, t }) {
       </div>
       <SummaryRow label={t("weddingPlanner.weddingDate")} value={budget.wedding_date} />
       <SummaryRow label={t("weddingPlanner.guestCount")} value={budget.guest_count} />
-      <SummaryRow
-        label={t("weddingPlanner.venueType")}
-        value={t(WEDDING_VENUE_TYPE_LABEL_KEYS[budget.venue_type] ?? budget.venue_type)}
-      />
-      {budget.venue_type !== "community" ? (
+      {budget.venue_type ? (
         <SummaryRow
-          label={t("weddingPlanner.venueTier")}
-          value={t(WEDDING_VENUE_TIER_LABEL_KEYS[budget.venue_tier] ?? budget.venue_tier)}
+          label={t("weddingPlanner.venueType")}
+          value={t(WEDDING_VENUE_TYPE_LABEL_KEYS[budget.venue_type] ?? "common.notAvailable")}
         />
       ) : null}
-      <SummaryRow
-        label={t("weddingPlanner.photographyTier")}
-        value={t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[budget.photography_tier] ?? budget.photography_tier)}
-      />
-      <SummaryRow
-        label={t("weddingPlanner.attireTier")}
-        value={t(WEDDING_ATTIRE_TIER_LABEL_KEYS[budget.attire_tier] ?? budget.attire_tier)}
-      />
+      {budget.venue_type && budget.venue_type !== "community" && budget.venue_tier ? (
+        <SummaryRow
+          label={t("weddingPlanner.venueTier")}
+          value={t(WEDDING_VENUE_TIER_LABEL_KEYS[budget.venue_tier] ?? "common.notAvailable")}
+        />
+      ) : null}
+      {budget.photography_tier ? (
+        <SummaryRow
+          label={t("weddingPlanner.photographyTier")}
+          value={t(WEDDING_PHOTOGRAPHY_TIER_LABEL_KEYS[budget.photography_tier] ?? "common.notAvailable")}
+        />
+      ) : null}
+      {budget.attire_tier ? (
+        <SummaryRow
+          label={t("weddingPlanner.attireTier")}
+          value={t(WEDDING_ATTIRE_TIER_LABEL_KEYS[budget.attire_tier] ?? "common.notAvailable")}
+        />
+      ) : null}
       <div className="weddingLineItems">
         {budget.line_items.map((item) => (
           <WeddingLineItemRow item={item} key={item.label} />

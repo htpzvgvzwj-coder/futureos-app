@@ -25,7 +25,8 @@
     "backMirror": "Back to Future Mirror",
     "protected": "Protected",
     "on": "On",
-    "perMonth": "{amount}/month"
+    "perMonth": "{amount}/month",
+    "notAvailable": "Not available"
   },
   "customer": {
     "segment": "Mid-Level Marketing Executive",

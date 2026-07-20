@@ -26,7 +26,8 @@
     "backMirror": "返回 Future Mirror",
     "protected": "已保护",
     "on": "开启",
-    "perMonth": "{amount}/月"
+    "perMonth": "{amount}/月",
+    "notAvailable": "暂无数据"
   },
   "customer": {
     "segment": "中层市场营销主管",

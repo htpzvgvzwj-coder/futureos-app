@@ -10,6 +10,7 @@ import {
 import { buildStage2SystemPrompt } from "../../../../lib/wedding-prompts.js";
 import { FINALIZE_SAVINGS_PLAN_TOOL, PROPOSE_SAVINGS_PLAN_TOOL } from "../../../../lib/wedding-tools.js";
 import { finalizeSavingsPlanSchema, proposeSavingsPlanSchema } from "../../../../lib/wedding-validation.js";
+import { buildMockSavingsFinalization, buildMockSavingsPlanOptions, looksLikeConfirmation } from "../../../../lib/wedding-mock.js";
 import {
   appendMessages,
   DEFAULT_PROFILE_KEY,
@@ -24,6 +25,17 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const VALID_INTENTS = new Set(["generate", "refine"]);
+
+async function buildMockToolUse(message, sessionId, confirmedBudget, profile) {
+  const previousStrategyOptions = await getLatestArtifact(sessionId, "stage2", "savings_plan_options");
+  if (looksLikeConfirmation(message) && previousStrategyOptions) {
+    return {
+      name: "finalize_savings_plan",
+      input: buildMockSavingsFinalization(message, previousStrategyOptions, confirmedBudget),
+    };
+  }
+  return { name: "propose_savings_plan", input: buildMockSavingsPlanOptions(confirmedBudget, profile) };
+}
 
 export async function POST(request) {
   const body = await request.json();
@@ -50,9 +62,11 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 8000,
       thinking: { type: "adaptive" },
@@ -62,18 +76,19 @@ export async function POST(request) {
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["propose_savings_plan", "finalize_savings_plan"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("wedding/stage2 Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["propose_savings_plan", "finalize_savings_plan"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("wedding/stage2 Anthropic call failed, falling back to mock response", error);
+    toolUse = await buildMockToolUse(message, session.id, confirmedBudget, profile);
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const schema = toolUse.name === "propose_savings_plan" ? proposeSavingsPlanSchema : finalizeSavingsPlanSchema;
@@ -85,7 +100,7 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage2", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
 
   const artifactType = toolUse.name === "propose_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
@@ -97,5 +112,5 @@ export async function POST(request) {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }
 
-  return Response.json({ type: toolUse.name, data: parsed.data });
+  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
 }
