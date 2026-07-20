@@ -380,3 +380,18 @@ create table if not exists micro_insurance_offers (
 
 create index if not exists micro_insurance_offers_profile_key_idx
   on micro_insurance_offers (profile_key, created_at desc);
+
+-- Portable, verifiable financial-health credential (the "turn proof of financial health into a
+-- portable credential" idea): a fixed, server-stored snapshot + hash issued at a point in time, so
+-- anyone the customer shares the credential ID with can re-fetch the ORIGINAL issued snapshot from
+-- OCBC and compare it against whatever the customer showed them - see lib/credential-store.js.
+create table if not exists credentials (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null default 'karina-demo',
+  snapshot      jsonb not null,
+  content_hash  text not null,
+  issued_at     timestamptz not null default now()
+);
+
+create index if not exists credentials_profile_key_idx
+  on credentials (profile_key, issued_at desc);

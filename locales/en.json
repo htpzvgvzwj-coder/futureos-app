@@ -1420,6 +1420,15 @@
         "unlocks": "OCBC RoboInvest at 0.45% p.a. (close to market rate); -0.35pp off any loan's real interest rate; loans and insurance skip the mandatory human review step."
       }
     },
+    "credential": {
+      "title": "Portable Financial Health Credential",
+      "body": "Turn the track record you've built here into something you can take outside OCBC - a landlord, a new employer, or a bank in another country can verify it independently, not just trust a screenshot.",
+      "issueButton": "Issue my credential",
+      "issuedLabel": "Issued",
+      "hashLabel": "Content hash (should match what you were shown)",
+      "verifyLabel": "Verification link (anyone with this can re-fetch the original from OCBC)",
+      "downloadButton": "Download credential"
+    },
     "timelineTitle": "Real check-in history",
     "timelineLine": "Checked in {amount} against a {target} target",
     "noCheckinsYet": "No savings check-ins logged yet - once you confirm a plan in Wedding, Home, or Retirement and log a check-in, it will show up here."

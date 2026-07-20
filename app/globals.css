@@ -3316,6 +3316,11 @@ nextjs-portal {
   line-height: 1.32;
 }
 
+.credentialHash {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+
 .proofList {
   display: grid;
   gap: 7px;

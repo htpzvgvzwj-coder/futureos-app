@@ -3913,6 +3913,8 @@ const followThroughComponentIcons = {
 function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
   const [followThrough, setFollowThrough] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [credential, setCredential] = useState(null);
+  const [issuingCredential, setIssuingCredential] = useState(false);
 
   const { reputation, reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
 
@@ -3960,6 +3962,37 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
     : [];
 
   const benefitTiers = [0, 1, 2, 3];
+
+  const handleIssueCredential = async () => {
+    if (!followThrough) return;
+    setIssuingCredential(true);
+    try {
+      const response = await fetch("/api/credential/issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          followThroughScore: followThrough.score,
+          followThroughBand,
+          reputationScore: reputation.score,
+          reputationBand,
+          relationshipTier: benefits.tier,
+        }),
+      });
+      if (response.ok) setCredential(await response.json());
+    } catch {
+      // Non-critical - the issue button stays available to retry.
+    } finally {
+      setIssuingCredential(false);
+    }
+  };
+
+  const downloadCredential = () => {
+    if (!credential) return;
+    downloadJsonFile(`futureos-credential-${credential.id}.json`, credential);
+  };
+
+  const credentialVerifyUrl =
+    credential && typeof window !== "undefined" ? `${window.location.origin}/api/credential/${credential.id}` : "";
 
   return (
     <Screen>
@@ -4060,6 +4093,33 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
                 </div>
               </div>
             ))}
+          </section>
+
+          <section className="recommendationPanel">
+            <span className="sectionLabel">{t("relationshipLedger.credential.title")}</span>
+            <p>{t("relationshipLedger.credential.body")}</p>
+            {credential ? (
+              <>
+                <SummaryRow label={t("relationshipLedger.credential.issuedLabel")} value={new Date(credential.issuedAt).toLocaleString()} />
+                <div className="proofBlock">
+                  <strong>{t("relationshipLedger.credential.hashLabel")}</strong>
+                  <p className="credentialHash">{credential.contentHash}</p>
+                </div>
+                <div className="proofBlock">
+                  <strong>{t("relationshipLedger.credential.verifyLabel")}</strong>
+                  <p className="credentialHash">{credentialVerifyUrl}</p>
+                </div>
+                <button type="button" className="secondaryButton" onClick={downloadCredential}>
+                  {t("relationshipLedger.credential.downloadButton")}
+                  <Download size={16} />
+                </button>
+              </>
+            ) : (
+              <button type="button" className="primaryButton" disabled={issuingCredential} onClick={handleIssueCredential}>
+                {issuingCredential ? t("loading.detail") : t("relationshipLedger.credential.issueButton")}
+                <Award size={18} />
+              </button>
+            )}
           </section>
 
           <section className="historyTimeline">

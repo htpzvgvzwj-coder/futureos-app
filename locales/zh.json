@@ -1403,6 +1403,15 @@
         "unlocks": "OCBC RoboInvest 降到 0.45% p.a.（接近市场价）；任何贷款的真实利率减免 0.35 个百分点；贷款和保险跳过强制人工审核环节。"
       }
     },
+    "credential": {
+      "title": "可携带的财务健康凭证",
+      "body": "把你在这里积累的真实记录，变成一份能带出 OCBC 之外使用的东西——房东、新雇主，或者另一个国家的银行都可以独立验证它，而不只是相信一张截图。",
+      "issueButton": "签发我的凭证",
+      "issuedLabel": "签发时间",
+      "hashLabel": "内容哈希值（应该和你展示给别人的一致）",
+      "verifyLabel": "验证链接（任何拿到这个的人都能从 OCBC 重新取回原始版本）",
+      "downloadButton": "下载凭证"
+    },
     "timelineTitle": "真实打卡记录",
     "timelineLine": "打卡存入 {amount}，目标是 {target}",
     "noCheckinsYet": "还没有储蓄打卡记录——在 Wedding、Home 或 Retirement 确认一个计划并打卡后，记录会出现在这里。"
