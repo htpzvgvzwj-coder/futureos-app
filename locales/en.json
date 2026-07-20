@@ -395,23 +395,6 @@
           "output": "Enters Recovery state months earlier, instead of only reacting the day a single deposit suddenly drops"
         }
       }
-    },
-    "customGoal": {
-      "title": "Add Custom Goal",
-      "addButton": "Add Custom Goal",
-      "save": "Save Goal",
-      "defaultName": "Custom Goal",
-      "added": "{goal} added - {amount}/month needed, and now counted in Strategic Balance.",
-      "planPreviewLabel": "Savings plan (live)",
-      "planPreview": "To hit this in {months} month(s), you'd need to save {amount}/month.",
-      "fields": {
-        "name": "Goal name",
-        "amount": "Target amount",
-        "date": "Target date",
-        "priority": "Priority level",
-        "category": "Category",
-        "notes": "Notes / situation explanation"
-      }
     }
   },
   "needs": {
@@ -1335,14 +1318,6 @@
     "memoryEventReason": "You confirmed a specific strategy after comparing real repayment trade-offs.",
     "memoryEventDataUsed": "Your stated borrowing purpose and amount, plus current TDSR/MSR serviceability rules and market interest-rate benchmarks."
   },
-  "customGoalPlanner": {
-    "title": "Custom Goal Planner",
-    "subtitle": "Any goal that doesn't fit a category yet - with a real savings plan behind it.",
-    "entrySubtitle": "Give it a name, an amount, a date - get a real monthly savings plan",
-    "newFeatureBadge": "New",
-    "addAnother": "Add another goal",
-    "goToMirror": "See it in Future Mirror"
-  },
   "relationshipLedger": {
     "title": "Relationship Ledger",
     "subtitle": "Two separate scores: what you've kept, and what Guardian has kept. Real benefits require both to hold up.",
@@ -1420,6 +1395,51 @@
     "timelineTitle": "Real check-in history",
     "timelineLine": "Checked in {amount} against a {target} target",
     "noCheckinsYet": "No savings check-ins logged yet - once you confirm a plan in Wedding, Home, or Retirement and log a check-in, it will show up here."
+  },
+  "otherPlanner": {
+    "title": "Other",
+    "subtitle": "Any goal that doesn't fit an existing category - a trip, a big purchase, an event, anything.",
+    "genericError": "Something went wrong on our end. Please try again.",
+    "newFeatureBadge": "New",
+    "historyTitle": "Conversation History",
+    "historyEmpty": "No conversation yet.",
+    "success": "Goal plan confirmed.",
+    "thinking": "Thinking...",
+    "inputLabel": "Describe what you're planning for",
+    "inputPlaceholder": "e.g. I want to backpack around Europe for 3 weeks next year, visiting 5-6 countries, staying in hostels.",
+    "send": "Get plan options",
+    "refine": "Send",
+    "choosePlan": "Choose this plan",
+    "choosePlanMessage": "I'd like to go with the \"{plan}\" plan. Please confirm this as the final plan.",
+    "totalCost": "Total cost",
+    "targetDate": "Target date",
+    "confirmedTitle": "Confirmed plan",
+    "goalName": "Goal",
+    "startSavingsPlan": "Plan how to save for this",
+    "startSavingsMessage": "Please suggest savings strategies for funding this confirmed goal.",
+    "savingsInputLabel": "Want to adjust the savings approach?",
+    "savingsInputPlaceholder": "e.g. I can save more upfront but less later, or I'd rather keep it simple with just a savings account.",
+    "monthlyContribution": "Monthly contribution",
+    "suitabilityReason": "Why this fits",
+    "chooseStrategy": "Choose this strategy",
+    "chooseStrategyMessage": "I'd like to go with the \"{strategy}\" strategy. Please confirm this as the final savings plan.",
+    "confirmedSavingsTitle": "Confirmed savings plan",
+    "startMonth": "Starts",
+    "targetCompleteMonth": "Target completion",
+    "checkins": {
+      "title": "Log a savings check-in",
+      "month": "Month",
+      "amount": "Amount saved",
+      "submit": "Log check-in",
+      "genericError": "Couldn't save that check-in. Please try again.",
+      "historyTitle": "Check-in history"
+    },
+    "memoryEventTitle": "Confirmed a plan for {goal}",
+    "memoryEventImpact": "Budgeted {amount} for this goal",
+    "memoryEventProduct": "Other Goal Planner",
+    "memoryEventAction": "Confirmed the goal plan and moved to savings planning",
+    "memoryEventReason": "Customer described the goal in their own words; FutureOS grounded the estimate in real market research",
+    "memoryEventDataUsed": "Customer's own description, web-search-grounded cost estimates"
   },
   "investmentPlanner": {
     "title": "Investment Planner",
@@ -1675,7 +1695,7 @@
       "family": "Family Planning",
       "investment": "Investment Growth",
       "business": "Business Startup",
-      "custom": "Other / Custom Goal",
+      "custom": "Other",
       "customFallback": "Custom Goal"
     },
     "riskPreference": {

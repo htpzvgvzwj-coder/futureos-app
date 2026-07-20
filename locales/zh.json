@@ -378,23 +378,6 @@
         }
       }
     },
-    "customGoal": {
-      "title": "添加自定义目标",
-      "addButton": "添加自定义目标",
-      "save": "保存目标",
-      "defaultName": "自定义目标",
-      "added": "{goal} 已加入——每月需存 {amount}，现在也会算进 Strategic Balance。",
-      "planPreviewLabel": "储蓄计划（实时计算）",
-      "planPreview": "要在 {months} 个月内达成，每月需要存 {amount}。",
-      "fields": {
-        "name": "目标名称",
-        "amount": "目标金额",
-        "date": "目标日期",
-        "priority": "优先级",
-        "category": "类别",
-        "notes": "备注 / 情况说明"
-      }
-    },
     "noDetectedNeeds": "根据你目前的目标及财务健康信号,未检测到需求。"
   },
   "needs": {
@@ -1318,14 +1301,6 @@
     "memoryEventReason": "你在比较了真实的还款权衡后，确认了一个具体的策略。",
     "memoryEventDataUsed": "你所说的借款用途和金额，加上现行的TDSR/MSR还款能力规定和市场利率水平。"
   },
-  "customGoalPlanner": {
-    "title": "自定义目标规划师",
-    "subtitle": "任何还没有专属分类的目标——背后有一份真实的储蓄计划。",
-    "entrySubtitle": "取个名字、填金额和日期——立刻算出真实的每月储蓄计划",
-    "newFeatureBadge": "新功能",
-    "addAnother": "再添加一个目标",
-    "goToMirror": "在 Future Mirror 里查看"
-  },
   "relationshipLedger": {
     "title": "关系账本",
     "subtitle": "两个分开的分数：你守住了什么，Guardian 守住了什么。真正的权益需要两边都达标才解锁。",
@@ -1403,6 +1378,51 @@
     "timelineTitle": "真实打卡记录",
     "timelineLine": "打卡存入 {amount}，目标是 {target}",
     "noCheckinsYet": "还没有储蓄打卡记录——在 Wedding、Home 或 Retirement 确认一个计划并打卡后，记录会出现在这里。"
+  },
+  "otherPlanner": {
+    "title": "其他",
+    "subtitle": "任何还没有专属分类的目标——旅行、大额购物、活动，什么都可以。",
+    "genericError": "系统出了点问题，请重试。",
+    "newFeatureBadge": "新功能",
+    "historyTitle": "对话记录",
+    "historyEmpty": "还没有对话记录。",
+    "success": "目标计划已确认。",
+    "thinking": "思考中...",
+    "inputLabel": "描述一下你在规划什么",
+    "inputPlaceholder": "例如：我想明年去欧洲背包旅行3周，玩5-6个国家，住青年旅舍。",
+    "send": "获取方案",
+    "refine": "发送",
+    "choosePlan": "选择这个方案",
+    "choosePlanMessage": "我想选「{plan}」这个方案，请把它确认为最终方案。",
+    "totalCost": "总花费",
+    "targetDate": "目标日期",
+    "confirmedTitle": "已确认的方案",
+    "goalName": "目标",
+    "startSavingsPlan": "规划怎么存钱",
+    "startSavingsMessage": "请为这个已确认的目标建议储蓄策略。",
+    "savingsInputLabel": "想调整储蓄方式吗？",
+    "savingsInputPlaceholder": "例如：我可以前期多存一点、后期少存一点，或者我想简单一点，只用储蓄账户就好。",
+    "monthlyContribution": "每月存入",
+    "suitabilityReason": "为什么适合",
+    "chooseStrategy": "选择这个策略",
+    "chooseStrategyMessage": "我想选「{strategy}」这个策略，请把它确认为最终储蓄计划。",
+    "confirmedSavingsTitle": "已确认的储蓄计划",
+    "startMonth": "开始时间",
+    "targetCompleteMonth": "目标完成时间",
+    "checkins": {
+      "title": "记录储蓄打卡",
+      "month": "月份",
+      "amount": "存入金额",
+      "submit": "提交打卡",
+      "genericError": "打卡保存失败，请重试。",
+      "historyTitle": "打卡记录"
+    },
+    "memoryEventTitle": "为「{goal}」确认了计划",
+    "memoryEventImpact": "为这个目标编列了 {amount} 的预算",
+    "memoryEventProduct": "其他目标规划师",
+    "memoryEventAction": "确认了目标计划，进入储蓄规划环节",
+    "memoryEventReason": "客户用自己的话描述了目标，FutureOS 基于真实市场调研给出了成本估算",
+    "memoryEventDataUsed": "客户自己的描述，以及基于网络搜索的成本估算"
   },
   "investmentPlanner": {
     "title": "投资规划师",
@@ -1650,7 +1670,7 @@
       "family": "家庭计划",
       "investment": "投资增长",
       "business": "创业",
-      "custom": "其他 / 自定义目标",
+      "custom": "其他",
       "customFallback": "自定义目标"
     },
     "riskPreference": {

@@ -82,7 +82,7 @@ const screens = {
   NEED_EMERGENCY: "needEmergency",
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
-  NEED_CUSTOM_GOAL: "needCustomGoal",
+  NEED_OTHER: "needOther",
   RELATIONSHIP_LEDGER: "relationshipLedger",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -161,7 +161,7 @@ const DEDICATED_GOAL_SCREENS = {
   retirement: { screen: screens.NEED_RETIREMENT, badgeKey: "retirementPlanner.newFeatureBadge" },
   emergency: { screen: screens.NEED_EMERGENCY, badgeKey: "needDetails.emergency.newFeatureBadge" },
   investment: { screen: screens.NEED_INVESTMENT, badgeKey: "investmentPlanner.newFeatureBadge" },
-  custom: { screen: screens.NEED_CUSTOM_GOAL, badgeKey: "customGoalPlanner.newFeatureBadge" },
+  custom: { screen: screens.NEED_OTHER, badgeKey: "otherPlanner.newFeatureBadge" },
 };
 
 const independenceLevels = [
@@ -809,128 +809,6 @@ function CrossBankDataScreen({ t, setActiveScreen }) {
 // Rate/fee figures are real, publicly published OCBC numbers (checked July 2026) - not
 // placeholders. honestNoteKey is only set where there's a real, sourced comparison to make;
 // it is never invented to hit a quota of "honest" cards.
-// Reached from Mirror's Life Goal Selection grid as a proper "New"-badged entry, same as every
-// sibling goal (Wedding/Home/Loan/Retirement/Emergency/Investment) - Custom Goal previously had no
-// entry point of its own and lived as a bare toggle checkbox with no dedicated screen behind it.
-function CustomGoalPlannerScreen({ setPreferences, setSimulatorInputs, t, setActiveScreen }) {
-  const [draft, setDraft] = useState(defaultCustomGoalDraft);
-  const [savedGoal, setSavedGoal] = useState(null);
-  const plan = computeCustomGoalMonthlyPlan(draft.amount, draft.date);
-
-  function saveGoal() {
-    const amount = draft.amount || "6000";
-    const date = draft.date || "2027-01";
-    const { monthsRemaining, monthlyContribution } = computeCustomGoalMonthlyPlan(amount, date);
-    const goal = {
-      id: `custom-${Date.now()}`,
-      name: draft.name.trim() || t("lifeGraph.customGoal.defaultName"),
-      amount,
-      date,
-      priority: draft.priority || "High",
-      category: draft.category || "Lifestyle",
-      notes: draft.notes || "",
-      monthlyContribution,
-      monthsRemaining,
-      confirmedAt: new Date().toISOString(),
-    };
-
-    setPreferences((current) => {
-      const currentProfile = getUserProfile(current);
-      return {
-        ...current,
-        customGoals: [goal, ...getCustomGoals(current)],
-        profile: {
-          ...currentProfile,
-          goals: { ...currentProfile.goals, custom: true },
-        },
-      };
-    });
-    setSimulatorInputs((current) => ({
-      ...current,
-      goals: { ...current.goals, custom: true },
-      customGoalName: goal.name,
-      customTargetAmount: goal.amount,
-      customTargetDate: goal.date,
-      customPriority: goal.priority,
-      customCategory: goal.category,
-      customNotes: goal.notes,
-    }));
-    setSavedGoal(goal);
-  }
-
-  if (savedGoal) {
-    return (
-      <Screen>
-        <Header title={t("customGoalPlanner.title")} subtitle={t("customGoalPlanner.subtitle")} />
-        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
-        <section className="insightCard">
-          <CheckCircle2 size={20} />
-          <p>{t("lifeGraph.customGoal.added", { goal: savedGoal.name, amount: formatSgd(savedGoal.monthlyContribution) })}</p>
-        </section>
-        <div className="buttonPair">
-          <button
-            type="button"
-            className="secondaryButton"
-            onClick={() => {
-              setSavedGoal(null);
-              setDraft(defaultCustomGoalDraft);
-            }}
-          >
-            {t("customGoalPlanner.addAnother")}
-          </button>
-          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.MIRROR)}>
-            {t("customGoalPlanner.goToMirror")}
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      </Screen>
-    );
-  }
-
-  return (
-    <Screen>
-      <Header title={t("customGoalPlanner.title")} subtitle={t("customGoalPlanner.subtitle")} />
-      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
-
-      <div className="financialGrid">
-        {[
-          ["name", "lifeGraph.customGoal.fields.name", "text"],
-          ["amount", "lifeGraph.customGoal.fields.amount", "number"],
-          ["date", "lifeGraph.customGoal.fields.date", "month"],
-          ["priority", "lifeGraph.customGoal.fields.priority", "text"],
-          ["category", "lifeGraph.customGoal.fields.category", "text"],
-        ].map(([field, labelKey, type]) => (
-          <label className="inputField" key={field}>
-            <span>{t(labelKey)}</span>
-            <input
-              value={draft[field]}
-              type={type}
-              inputMode={type === "number" ? "decimal" : undefined}
-              onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
-            />
-          </label>
-        ))}
-        <label className="inputField fullWidthField">
-          <span>{t("lifeGraph.customGoal.fields.notes")}</span>
-          <textarea
-            value={draft.notes}
-            onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))}
-          />
-        </label>
-      </div>
-
-      <div className="proofBlock">
-        <strong>{t("lifeGraph.customGoal.planPreviewLabel")}</strong>
-        <p>{t("lifeGraph.customGoal.planPreview", { amount: formatSgd(plan.monthlyContribution), months: plan.monthsRemaining })}</p>
-      </div>
-
-      <button type="button" className="primaryButton" onClick={saveGoal}>
-        {t("lifeGraph.customGoal.save")}
-      </button>
-    </Screen>
-  );
-}
-
 const productRecommendations = [
   {
     id: "ocbc360",
@@ -3620,21 +3498,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
 
       <button
         type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.NEED_CUSTOM_GOAL)}
-      >
-        <span className="iconBubble">
-          <Target size={16} />
-        </span>
-        <span>
-          <strong>{t("lifeGraph.customGoal.addButton")}</strong>
-          <small>{t("customGoalPlanner.entrySubtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
         className="primaryButton"
         onClick={() => goWithLoading(screens.MIRROR, "loading.mirror")}
       >
@@ -5142,6 +5005,19 @@ function NeedDetailScreen({
         healthScores={healthScores}
       />
     ),
+    other: (
+      <OtherNeedContent
+        success={success}
+        setSuccess={setSuccess}
+        t={t}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        setPreferences={setPreferences}
+        setSimulatorInputs={setSimulatorInputs}
+        setMemoryEvents={setMemoryEvents}
+        profile={profile}
+      />
+    ),
   }[type];
 
   return content;
@@ -6570,6 +6446,390 @@ function RetirementCpfInputStep({ profile, simulatorInputs, onSubmit, t }) {
         <ChevronRight size={18} />
       </button>
     </form>
+  );
+}
+
+// "Other" is the catch-all planner for any goal that doesn't fit an existing category (a trip, a
+// big purchase, an event, anything) - same two-stage AI-conversation architecture as Wedding
+// (lib/other-*.js, app/api/other/*), just without Wedding's deterministic venue/photography/attire
+// categories, since there's no fixed domain here. Confirming a plan/savings strategy writes into
+// preferences.customGoals and simulatorInputs.custom* the same shape the old standalone Custom Goal
+// modal used, so Strategic Balance, the Follow-Through Score, and Mirror's own reasoning all keep
+// working against this richer planner without any changes on their end.
+function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, setPreferences, setSimulatorInputs, setMemoryEvents, profile }) {
+  const [sessionData, setSessionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [checkinDraft, setCheckinDraft] = useState({ checkinMonth: "", amount: "", note: "" });
+  const [checkinSubmitting, setCheckinSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState("");
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/other/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/other/session")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSessionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage(t("otherPlanner.genericError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  function syncCustomGoal(confirmedPlan, monthlyContribution) {
+    const dateMonth = confirmedPlan.target_date?.slice(0, 7) || defaultCustomGoalDraft.date;
+    const plan = computeCustomGoalMonthlyPlan(String(confirmedPlan.total_budget), dateMonth);
+    const goal = {
+      id: `other-${confirmedPlan.plan_id}`,
+      name: confirmedPlan.goal_name,
+      amount: String(Math.round(confirmedPlan.total_budget)),
+      date: dateMonth,
+      priority: "High",
+      category: "Other",
+      notes: confirmedPlan.confirmation_note ?? "",
+      monthlyContribution: monthlyContribution ?? plan.monthlyContribution,
+      monthsRemaining: plan.monthsRemaining,
+      confirmedAt: new Date().toISOString(),
+    };
+    setPreferences((current) => {
+      const currentProfile = getUserProfile(current);
+      const existing = getCustomGoals(current).filter((g) => g.id !== goal.id);
+      return {
+        ...current,
+        customGoals: [goal, ...existing],
+        profile: { ...currentProfile, goals: { ...currentProfile.goals, custom: true } },
+      };
+    });
+    setSimulatorInputs((current) => ({
+      ...current,
+      goals: { ...current.goals, custom: true },
+      customGoalName: goal.name,
+      customTargetAmount: goal.amount,
+      customTargetDate: goal.date,
+      customPriority: goal.priority,
+      customCategory: goal.category,
+      customNotes: goal.notes,
+    }));
+  }
+
+  const submitToStage1 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/other/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("otherPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        planOptions: data.type === "propose_plans" ? data.data : current?.planOptions,
+        confirmedPlan: data.type === "confirm_goal_plan" ? data.data : current?.confirmedPlan,
+        stage1Status: data.type === "confirm_goal_plan" ? "confirmed" : current?.stage1Status,
+      }));
+      if (data.type === "confirm_goal_plan") {
+        setSuccess();
+        const plan = data.data;
+        syncCustomGoal(plan, null);
+        setMemoryEvents((current) => [
+          {
+            id: `other-confirmed-${plan.plan_id}`,
+            year: new Date(plan.target_date).getFullYear().toString(),
+            title: t("otherPlanner.memoryEventTitle", { goal: plan.goal_name }),
+            description: plan.confirmation_note,
+            impact: t("otherPlanner.memoryEventImpact", { amount: formatSgd(Math.round(plan.total_budget)) }),
+            product: t("otherPlanner.memoryEventProduct"),
+            action: t("otherPlanner.memoryEventAction"),
+            reason: t("otherPlanner.memoryEventReason"),
+            dataUsed: t("otherPlanner.memoryEventDataUsed"),
+            statusKey: "status.completed",
+            confirmedAt: data.confirmedAt ?? null,
+          },
+          ...current,
+        ]);
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("otherPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (text) => submitToStage1(sessionData?.planOptions ? "refine" : "generate", text);
+
+  const handleChoosePlan = (plan) => submitToStage1("refine", t("otherPlanner.choosePlanMessage", { plan: plan.name }));
+
+  const submitToStage2 = async (intent, message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/other/stage2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, message, language, profile }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("otherPlanner.genericError"));
+        return false;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsPlanOptions: data.type === "propose_savings_plan" ? data.data : current?.savingsPlanOptions,
+        confirmedSavingsPlan: data.type === "finalize_savings_plan" ? data.data : current?.confirmedSavingsPlan,
+      }));
+      if (data.type === "finalize_savings_plan" && sessionData?.confirmedPlan) {
+        const plan = data.data;
+        syncCustomGoal(sessionData.confirmedPlan, plan.monthly_contribution);
+      }
+      return true;
+    } catch {
+      setErrorMessage(t("otherPlanner.genericError"));
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStartSavingsPlan = () => submitToStage2("generate", t("otherPlanner.startSavingsMessage"));
+  const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
+  const handleChooseStrategy = (strategy) => submitToStage2("refine", t("otherPlanner.chooseStrategyMessage", { strategy: strategy.name }));
+
+  const handleAddCheckin = async (event) => {
+    event.preventDefault();
+    if (!checkinDraft.checkinMonth || !checkinDraft.amount) return;
+    setCheckinSubmitting(true);
+    setCheckinError("");
+    try {
+      const response = await fetch("/api/other/savings-checkins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(checkinDraft),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setCheckinError(t("otherPlanner.checkins.genericError"));
+        return;
+      }
+      setSessionData((current) => ({
+        ...current,
+        savingsCheckins: [...(current?.savingsCheckins ?? []), data.checkin],
+      }));
+      setCheckinDraft({ checkinMonth: "", amount: "", note: "" });
+    } catch {
+      setCheckinError(t("otherPlanner.checkins.genericError"));
+    } finally {
+      setCheckinSubmitting(false);
+    }
+  };
+
+  return (
+    <Screen>
+      <Header title={t("otherPlanner.title")} subtitle={t("otherPlanner.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("otherPlanner.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <ConversationHistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          onClose={() => setHistoryOpen(false)}
+          t={t}
+          titleKey="otherPlanner.historyTitle"
+          emptyKey="otherPlanner.historyEmpty"
+        />
+      ) : null}
+      <SuccessBanner show={success} text={t("otherPlanner.success")} />
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <>
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+
+          {!sessionData?.confirmedPlan ? (
+            <>
+              <AiTextInputCard
+                t={t}
+                onSubmit={handleSubmit}
+                submitting={submitting}
+                placeholder={t("otherPlanner.inputPlaceholder")}
+                submitLabelKey={sessionData?.planOptions ? "otherPlanner.refine" : "otherPlanner.send"}
+                labelKey="otherPlanner.inputLabel"
+              />
+
+              {sessionData?.planOptions ? (
+                <>
+                  {sessionData.planOptions.research_notes ? (
+                    <section className="trustNote compactTrustNote">
+                      <Info size={17} />
+                      <p>{sessionData.planOptions.research_notes}</p>
+                    </section>
+                  ) : null}
+                  {sessionData.planOptions.plans.map((plan, index) => (
+                    <article className={index === 0 ? "weddingPlanTile accent-1" : "weddingPlanTile accent-2"} key={plan.id}>
+                      <h3>{plan.name}</h3>
+                      <p>{plan.summary}</p>
+                      <div className="weddingLineItems">
+                        {plan.line_items.map((item) => (
+                          <WeddingLineItemRow item={{ category: item.category, label: `${item.label} (${item.quantity} ${item.unit})`, subtotal: item.subtotal }} key={item.label} />
+                        ))}
+                      </div>
+                      <SummaryRow label={t("otherPlanner.totalCost")} value={formatSgd(Math.round(plan.total_cost))} />
+                      <SummaryRow label={t("otherPlanner.targetDate")} value={plan.target_date} />
+                      <button type="button" className="primaryButton" onClick={() => handleChoosePlan(plan)} disabled={submitting}>
+                        {t("otherPlanner.choosePlan")}
+                        <ChevronRight size={18} />
+                      </button>
+                    </article>
+                  ))}
+                </>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <section className="recommendationPanel">
+                <span className="sectionLabel">{t("otherPlanner.confirmedTitle")}</span>
+                <SummaryRow label={t("otherPlanner.goalName")} value={sessionData.confirmedPlan.goal_name} />
+                <SummaryRow label={t("otherPlanner.totalCost")} value={formatSgd(Math.round(sessionData.confirmedPlan.total_budget))} />
+                <SummaryRow label={t("otherPlanner.targetDate")} value={sessionData.confirmedPlan.target_date} />
+                <div className="weddingLineItems">
+                  {sessionData.confirmedPlan.line_items.map((item) => (
+                    <WeddingLineItemRow item={{ category: item.category, label: `${item.label} (${item.quantity} ${item.unit})`, subtotal: item.subtotal }} key={item.label} />
+                  ))}
+                </div>
+              </section>
+
+              {!sessionData.confirmedSavingsPlan ? (
+                !sessionData.savingsPlanOptions ? (
+                  <button type="button" className="primaryButton" onClick={handleStartSavingsPlan} disabled={submitting}>
+                    {t("otherPlanner.startSavingsPlan")}
+                    <Sparkles size={18} />
+                  </button>
+                ) : (
+                  <>
+                    <AiTextInputCard
+                      t={t}
+                      onSubmit={handleSavingsSubmit}
+                      submitting={submitting}
+                      placeholder={t("otherPlanner.savingsInputPlaceholder")}
+                      submitLabelKey="otherPlanner.refine"
+                      labelKey="otherPlanner.savingsInputLabel"
+                    />
+                    {sessionData.savingsPlanOptions.strategies.map((strategy) => (
+                      <article className="weddingPlanTile accent-1" key={strategy.id}>
+                        <h3>{strategy.name}</h3>
+                        <p>{strategy.summary}</p>
+                        <SummaryRow label={t("otherPlanner.monthlyContribution")} value={t("common.perMonth", { amount: formatSgd(strategy.monthly_contribution) })} />
+                        {strategy.allocation.map((entry) => (
+                          <SummaryRow key={entry.vehicle} label={entry.product_ref || entry.vehicle} value={t("common.perMonth", { amount: formatSgd(entry.monthly_amount) })} />
+                        ))}
+                        <div className="proofBlock">
+                          <strong>{t("otherPlanner.suitabilityReason")}</strong>
+                          <p>{strategy.suitability.reason}</p>
+                        </div>
+                        <button type="button" className="primaryButton" onClick={() => handleChooseStrategy(strategy)} disabled={submitting}>
+                          {t("otherPlanner.chooseStrategy")}
+                          <ChevronRight size={18} />
+                        </button>
+                      </article>
+                    ))}
+                  </>
+                )
+              ) : (
+                <>
+                  <section className="recommendationPanel">
+                    <span className="sectionLabel">{t("otherPlanner.confirmedSavingsTitle")}</span>
+                    <SummaryRow
+                      label={t("otherPlanner.monthlyContribution")}
+                      value={t("common.perMonth", { amount: formatSgd(sessionData.confirmedSavingsPlan.monthly_contribution) })}
+                    />
+                    <SummaryRow label={t("otherPlanner.startMonth")} value={sessionData.confirmedSavingsPlan.start_month} />
+                    <SummaryRow label={t("otherPlanner.targetCompleteMonth")} value={sessionData.confirmedSavingsPlan.target_complete_month} />
+                  </section>
+
+                  <form className="needHeroCard" onSubmit={handleAddCheckin}>
+                    <span className="sectionLabel">{t("otherPlanner.checkins.title")}</span>
+                    {checkinError ? <p className="errorText">{checkinError}</p> : null}
+                    <div className="financialGrid">
+                      <label className="inputField">
+                        <span>{t("otherPlanner.checkins.month")}</span>
+                        <input
+                          type="month"
+                          value={checkinDraft.checkinMonth}
+                          onChange={(event) => setCheckinDraft((current) => ({ ...current, checkinMonth: event.target.value }))}
+                        />
+                      </label>
+                      <label className="inputField">
+                        <span>{t("otherPlanner.checkins.amount")}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={checkinDraft.amount}
+                          onChange={(event) => setCheckinDraft((current) => ({ ...current, amount: event.target.value }))}
+                        />
+                      </label>
+                    </div>
+                    <button type="submit" className="primaryButton" disabled={checkinSubmitting}>
+                      {t("otherPlanner.checkins.submit")}
+                      <Check size={17} />
+                    </button>
+                  </form>
+                  {sessionData.savingsCheckins?.length ? (
+                    <div className="historyTimeline">
+                      <span className="sectionLabel">{t("otherPlanner.checkins.historyTitle")}</span>
+                      {sessionData.savingsCheckins.map((checkin) => (
+                        <article key={checkin.id}>
+                          <span>{checkin.checkin_month}</span>
+                          <div>
+                            <strong>{formatSgd(Number(checkin.amount))}</strong>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </Screen>
   );
 }
 
@@ -10181,7 +10441,6 @@ export default function App() {
   const currentScreen = {
     [screens.HOME]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
-    [screens.NEED_CUSTOM_GOAL]: <CustomGoalPlannerScreen {...shared} />,
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
@@ -10212,6 +10471,7 @@ export default function App() {
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,
     [screens.NEED_HOME]: <NeedDetailScreen {...shared} type="home" />,
     [screens.NEED_RETIREMENT]: <NeedDetailScreen {...shared} type="retirement" />,
+    [screens.NEED_OTHER]: <NeedDetailScreen {...shared} type="other" />,
     [screens.NEED_LOAN]: (
       <LoanPlannerContent
         success={Boolean(successStates.loan)}
