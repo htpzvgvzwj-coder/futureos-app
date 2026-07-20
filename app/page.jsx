@@ -63,8 +63,9 @@ import { computeHomeFinancials } from "../lib/home-finance.js";
 import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
 import { computeRetirementFinancials } from "../lib/retirement-finance.js";
 import { computeAllLoanArchetypes, applyLoanModifiers, LOAN_ARCHETYPE_KEYS, LOAN_MODIFIER_KEYS } from "../lib/loan-finance.js";
-import { projectPurchaseMode } from "../lib/investment-finance.js";
-import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES } from "../lib/investment-catalog.js";
+import { projectPurchaseMode, scoreInvestmentCandidate } from "../lib/investment-finance.js";
+import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } from "../lib/investment-catalog.js";
+import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -750,7 +751,125 @@ const crossBankDataIdeas = [
   { id: "trend", icon: History },
 ];
 
-function CrossBankDataScreen({ t, setActiveScreen }) {
+// The "debt" and "investment" cross-bank ideas are the two where this app already has the real
+// scoring engine (lib/strategic-balance-finance.js's computeUtilization, lib/investment-finance.js's
+// scoreInvestmentCandidate) - so instead of only a hand-written before/after example, these two let
+// the customer drive a live "what if" against those real functions, grounded in their actual
+// confirmed commitments. The other five items stay illustrative copy, same disclaimer either way:
+// no real external bank account is connected.
+const DEBT_SLIDER_MAX = 3000;
+// A real catalog entry (not a synthetic stub) - scoreInvestmentCandidate reads several fields
+// (minInitialInvestmentByMode, suggestedMinHorizonYears) a partial object wouldn't have.
+const CONCENTRATION_DEMO_ENTRY = INVESTMENT_CATALOG.find((entry) => entry.id === "global_sp500_etf");
+
+function DebtLiveSimulator({ profile, t }) {
+  const [snapshot, setSnapshot] = useState(null);
+  const [hypotheticalMonthly, setHypotheticalMonthly] = useState(600);
+  const monthlyIncome = numberValue(profile.monthlyIncome, 7500);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 3500);
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSnapshot(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!snapshot) return <p>{t("loading.detail")}</p>;
+
+  const before = snapshot.utilization;
+  const after = computeUtilization({
+    monthlyIncome,
+    monthlyExpenses,
+    committedMonthlyTotal: snapshot.committedMonthlyTotal + hypotheticalMonthly,
+  });
+  const bandChanged = after.healthLabel !== before.healthLabel;
+
+  return (
+    <div className="strategicAccordionDetail liveSimBlock">
+      <strong className="liveSimTitle">
+        <Zap size={14} /> {t("lifeGraph.crossBankData.liveSimLabel")}
+      </strong>
+      <label className="sectionLabel">
+        {t("lifeGraph.crossBankData.hypotheticalDebtLabel", { amount: formatSgd(hypotheticalMonthly) })}
+      </label>
+      <input
+        type="range"
+        min="0"
+        max={DEBT_SLIDER_MAX}
+        step="50"
+        value={hypotheticalMonthly}
+        onChange={(event) => setHypotheticalMonthly(Number(event.target.value))}
+        aria-label={t("lifeGraph.crossBankData.hypotheticalDebtLabel", { amount: formatSgd(hypotheticalMonthly) })}
+      />
+      <div className="weddingStatChips">
+        <span className="statChip">
+          {t("lifeGraph.crossBankData.beforeLabel")}: {before.utilizationPercent}% — {t(`lifeGraph.strategicBalance.healthLabel.${before.healthLabel}`)}
+        </span>
+        <span className={bandChanged ? "statChip warning" : "statChip"}>
+          {t("lifeGraph.crossBankData.afterLabel")}: {after.utilizationPercent}% — {t(`lifeGraph.strategicBalance.healthLabel.${after.healthLabel}`)}
+        </span>
+      </div>
+      {bandChanged ? <p className="weddingCarouselHint">{t("lifeGraph.crossBankData.debtBandChangedNote")}</p> : null}
+    </div>
+  );
+}
+
+function InvestmentConcentrationLiveSimulator({ t }) {
+  const [concentrationOn, setConcentrationOn] = useState(false);
+
+  const baseScore = scoreInvestmentCandidate(CONCENTRATION_DEMO_ENTRY, {
+    riskBand: "balanced",
+    holdingsCategories: [],
+    availableMonthlyCashflow: 5000,
+    horizonYears: 10,
+    purchaseMode: "monthly_rsp",
+  });
+  const concentratedScore = scoreInvestmentCandidate(CONCENTRATION_DEMO_ENTRY, {
+    riskBand: "balanced",
+    holdingsCategories: ["global_equities"],
+    availableMonthlyCashflow: 5000,
+    horizonYears: 10,
+    purchaseMode: "monthly_rsp",
+  });
+  const shown = concentrationOn ? concentratedScore : baseScore;
+  const scoreDropped = concentrationOn && concentratedScore.suitability_score < baseScore.suitability_score;
+
+  return (
+    <div className="strategicAccordionDetail liveSimBlock">
+      <strong className="liveSimTitle">
+        <Zap size={14} /> {t("lifeGraph.crossBankData.liveSimLabel")}
+      </strong>
+      <p className="weddingPlanSummary">{t("lifeGraph.crossBankData.concentrationDemoProduct")}</p>
+      <button
+        type="button"
+        className={concentrationOn ? "checkOption selected" : "checkOption"}
+        onClick={() => setConcentrationOn((current) => !current)}
+      >
+        <span>{t("lifeGraph.crossBankData.concentrationToggleLabel")}</span>
+        {concentrationOn ? <Check size={14} /> : null}
+      </button>
+      <div className="weddingStatChips">
+        <span className="statChip">
+          {t("lifeGraph.crossBankData.diversificationScoreLabel")}: {shown.diversification_score}/100
+        </span>
+        <span className={scoreDropped ? "statChip warning" : "statChip"}>
+          {t("lifeGraph.crossBankData.suitabilityScoreLabel")}: {shown.suitability_score}/100
+        </span>
+      </div>
+      {scoreDropped ? <p className="weddingCarouselHint">{t("lifeGraph.crossBankData.concentrationWithdrawnNote")}</p> : null}
+    </div>
+  );
+}
+
+function CrossBankDataScreen({ t, setActiveScreen, profile }) {
   const [openItem, setOpenItem] = useState(null);
 
   return (
@@ -800,6 +919,8 @@ function CrossBankDataScreen({ t, setActiveScreen }) {
                   </div>
                 </div>
               ) : null}
+              {expanded && id === "debt" ? <DebtLiveSimulator profile={profile} t={t} /> : null}
+              {expanded && id === "investment" ? <InvestmentConcentrationLiveSimulator t={t} /> : null}
             </div>
           );
         })}
@@ -1563,7 +1684,11 @@ const simulatorFieldMeta = {
 const simulatorFieldGroups = {
   wedding: ["weddingBudget", "weddingDate", "monthlyIncome", "currentSavings", "retirementAge", "riskPreference"],
   home: ["targetHomeYear", "targetDownPayment", "propertyBudget", "mortgageReadiness", "monthlyIncome", "currentSavings"],
-  emergency: ["monthlyExpenses", "currentEmergencyFund", "targetCoverageMonths"],
+  // Empty on purpose: Emergency Fund has its own dedicated real-data planner
+  // (EmergencyNeedContent) - this duplicate simplified input group in the Future Simulator was
+  // redundant. monthlyExpenses/currentEmergencyFund/targetCoverageMonths stay defined above since
+  // other goals' scenario math (buildScenarioFields) still reads them from state.
+  emergency: [],
   retirement: ["retirementAge", "currentInvestment", "monthlyInvestment", "riskPreference"],
   family: ["familyPlanningYear", "familyMonthlyCost", "insuranceReadiness"],
   investment: ["currentInvestment", "monthlyInvestment", "riskPreference", "targetReturnGoal"],
@@ -10834,7 +10959,7 @@ export default function App() {
       />
     ),
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
-    [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} />,
+    [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} profile={getUserProfile(preferences)} />,
     [screens.PRODUCT_FIT]: (
       <ProductFitScreen
         preferences={preferences}

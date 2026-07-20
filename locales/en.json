@@ -345,6 +345,16 @@
       "inputLabel": "Data Guardian would receive",
       "processLabel": "What Guardian does with it",
       "outputLabel": "Result shown to the customer",
+      "liveSimLabel": "Try it live - real math, hypothetical input",
+      "hypotheticalDebtLabel": "Hypothetical monthly payment on debt held at another bank: {amount}",
+      "beforeLabel": "Today",
+      "afterLabel": "With this added",
+      "debtBandChangedNote": "This is Strategic Balance's real risk band calculation - with this hypothetical external debt included, your band would actually move.",
+      "concentrationDemoProduct": "Example: OCBC is about to recommend the Lion-OCBC Securities S&P 500 ETF (global equities, balanced risk).",
+      "concentrationToggleLabel": "I already hold a large global equities position at another broker",
+      "diversificationScoreLabel": "Diversification score",
+      "suitabilityScoreLabel": "Suitability score",
+      "concentrationWithdrawnNote": "This is the real scoring formula from the Investment Planner - with a real cross-bank concentration signal, Guardian would withdraw or de-prioritise this recommendation instead of pitching it blind.",
       "items": {
         "spending": {
           "title": "Cross-bank spending patterns",

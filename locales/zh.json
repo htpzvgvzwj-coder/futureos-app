@@ -327,6 +327,16 @@
       "inputLabel": "Guardian 会拿到的数据",
       "processLabel": "Guardian 用它做什么",
       "outputLabel": "客户看到的结果",
+      "liveSimLabel": "现场试算——真实公式，假设输入",
+      "hypotheticalDebtLabel": "假设你在别的银行每月要还：{amount}",
+      "beforeLabel": "现在",
+      "afterLabel": "加上这笔之后",
+      "debtBandChangedNote": "这是 Strategic Balance 真实的风险带计算——把这笔假设的外部负债算进去之后，你的风险带真的会变动。",
+      "concentrationDemoProduct": "示例：OCBC 正准备推荐 Lion-OCBC Securities S&P 500 ETF（全球股票，平衡型风险）。",
+      "concentrationToggleLabel": "我在别的券商已经重仓了全球股票",
+      "diversificationScoreLabel": "分散度评分",
+      "suitabilityScoreLabel": "适配度评分",
+      "concentrationWithdrawnNote": "这是投资规划器里真实的评分公式——如果有真实的跨行持仓信号，Guardian 会撤回或降低这个推荐的优先级，而不是盲目地继续推销。",
       "items": {
         "spending": {
           "title": "跨行消费轨迹",
