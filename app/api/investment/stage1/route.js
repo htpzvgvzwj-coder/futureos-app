@@ -11,6 +11,7 @@ import { buildInvestmentNarrativeSystemPrompt } from "../../../../lib/investment
 import { PROPOSE_INVESTMENT_NARRATIVE_TOOL, WEB_SEARCH_TOOL } from "../../../../lib/investment-tools.js";
 import { proposeInvestmentNarrativeSchema } from "../../../../lib/investment-validation.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/investment-context.js";
+import { buildMockNarrative } from "../../../../lib/investment-mock.js";
 import {
   appendMessages,
   DEFAULT_PROFILE_KEY,
@@ -52,9 +53,11 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 5000,
       thinking: { type: "adaptive" },
@@ -72,18 +75,24 @@ export async function POST(request) {
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["propose_investment_narrative"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("investment/stage1 Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["propose_investment_narrative"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("investment/stage1 Anthropic call failed, falling back to mock response", error);
+    const input = buildMockNarrative(shortlistArtifact.items, {
+      purchaseMode: intake.purchaseMode,
+      riskBand: intake.riskPreference,
+      goalCategory: intake.goalCategory,
+    });
+    toolUse = { name: "propose_investment_narrative", input };
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const parsed = proposeInvestmentNarrativeSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
@@ -104,10 +113,10 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage1", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
 
   await saveArtifact(session.id, "stage1", "narrative", parsed.data);
 
-  return Response.json({ type: toolUse.name, data: parsed.data });
+  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
 }

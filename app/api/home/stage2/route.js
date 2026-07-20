@@ -10,6 +10,7 @@ import {
 import { buildHomeStage2SystemPrompt } from "../../../../lib/home-prompts.js";
 import { FINALIZE_HOME_SAVINGS_PLAN_TOOL, PROPOSE_HOME_SAVINGS_PLAN_TOOL } from "../../../../lib/home-tools.js";
 import { finalizeHomeSavingsPlanSchema, proposeHomeSavingsPlanSchema } from "../../../../lib/home-validation.js";
+import { buildMockSavingsFinalization, buildMockSavingsPlanOptions, looksLikeConfirmation } from "../../../../lib/home-mock.js";
 import {
   appendMessages,
   DEFAULT_PROFILE_KEY,
@@ -25,6 +26,17 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const VALID_INTENTS = new Set(["generate", "refine"]);
+
+async function buildMockToolUse(message, sessionId, financedPlan, profile) {
+  const previousStrategyOptions = await getLatestArtifact(sessionId, "stage2", "savings_plan_options");
+  if (looksLikeConfirmation(message) && previousStrategyOptions) {
+    return {
+      name: "finalize_home_savings_plan",
+      input: buildMockSavingsFinalization(message, previousStrategyOptions, financedPlan),
+    };
+  }
+  return { name: "propose_home_savings_plan", input: buildMockSavingsPlanOptions(financedPlan, profile) };
+}
 
 export async function POST(request) {
   const body = await request.json();
@@ -46,10 +58,6 @@ export async function POST(request) {
     return Response.json({ error: "no_confirmed_plan" }, { status: 409 });
   }
 
-  // The actual financing numbers (down payment/loan amount) are now decided
-  // in the Loan Planner, not by Home Purchase Planner's own baseline
-  // LTV-max computation — the savings plan must target what the customer
-  // actually chose there, not a default nobody picked.
   const loanSession = await getOrCreateLoanSession(LOAN_DEFAULT_PROFILE_KEY, "home");
   const confirmedLoan = await getLatestLoanArtifact(loanSession.id, "stage1", "confirmed_loan");
   if (!confirmedLoan) {
@@ -67,9 +75,11 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 8000,
       thinking: { type: "adaptive" },
@@ -79,18 +89,19 @@ export async function POST(request) {
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["propose_home_savings_plan", "finalize_home_savings_plan"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("home/stage2 Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["propose_home_savings_plan", "finalize_home_savings_plan"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("home/stage2 Anthropic call failed, falling back to mock response", error);
+    toolUse = await buildMockToolUse(message, session.id, financedPlan, profile);
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const schema = toolUse.name === "propose_home_savings_plan" ? proposeHomeSavingsPlanSchema : finalizeHomeSavingsPlanSchema;
@@ -102,7 +113,7 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage2", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
 
   const artifactType = toolUse.name === "propose_home_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
@@ -114,5 +125,5 @@ export async function POST(request) {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }
 
-  return Response.json({ type: toolUse.name, data: parsed.data });
+  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
 }

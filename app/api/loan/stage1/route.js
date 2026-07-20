@@ -10,6 +10,7 @@ import {
 import { buildLoanStage1SystemPrompt } from "../../../../lib/loan-prompts.js";
 import { PROPOSE_LOAN_SIZING_TOOL, WEB_SEARCH_TOOL } from "../../../../lib/loan-tools.js";
 import { proposeLoanSizingSchema } from "../../../../lib/loan-validation.js";
+import { buildMockSizingOptions } from "../../../../lib/loan-mock.js";
 import { appendMessages, DEFAULT_PROFILE_KEY, getMessageHistory, getOrCreateSession, saveArtifact } from "../../../../lib/loan-store.js";
 
 export const runtime = "nodejs";
@@ -40,9 +41,11 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 5000,
       thinking: { type: "adaptive" },
@@ -52,18 +55,20 @@ export async function POST(request) {
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["propose_loan_sizing"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("loan/stage1 Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["propose_loan_sizing"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("loan/stage1 Anthropic call failed, falling back to mock response", error);
+    const input = buildMockSizingOptions(purpose);
+    toolUse = { name: "propose_loan_sizing", input };
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const parsed = proposeLoanSizingSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
@@ -74,10 +79,10 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage1", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
 
   await saveArtifact(session.id, "stage1", "sizing_options", parsed.data);
 
-  return Response.json({ type: toolUse.name, data: parsed.data });
+  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
 }
