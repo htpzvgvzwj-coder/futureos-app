@@ -6467,6 +6467,8 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
   const [checkinDraft, setCheckinDraft] = useState({ checkinMonth: "", amount: "", note: "" });
   const [checkinSubmitting, setCheckinSubmitting] = useState(false);
   const [checkinError, setCheckinError] = useState("");
+  const [exploringPlan, setExploringPlan] = useState(false);
+  const [exploringSavings, setExploringSavings] = useState(false);
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -6554,6 +6556,7 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
       }));
       if (data.type === "confirm_goal_plan") {
         setSuccess();
+        setExploringPlan(false);
         const plan = data.data;
         syncCustomGoal(plan, null);
         setMemoryEvents((current) => [
@@ -6582,7 +6585,8 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
     }
   };
 
-  const handleSubmit = (text) => submitToStage1(sessionData?.planOptions ? "refine" : "generate", text);
+  const handleSubmit = (text) =>
+    submitToStage1(sessionData?.planOptions || sessionData?.confirmedPlan ? "refine" : "generate", text);
 
   const handleChoosePlan = (plan) => submitToStage1("refine", t("otherPlanner.choosePlanMessage", { plan: plan.name }));
 
@@ -6606,6 +6610,7 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
         confirmedSavingsPlan: data.type === "finalize_savings_plan" ? data.data : current?.confirmedSavingsPlan,
       }));
       if (data.type === "finalize_savings_plan" && sessionData?.confirmedPlan) {
+        setExploringSavings(false);
         const plan = data.data;
         syncCustomGoal(sessionData.confirmedPlan, plan.monthly_contribution);
       }
@@ -6619,8 +6624,18 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
   };
 
   const handleStartSavingsPlan = () => submitToStage2("generate", t("otherPlanner.startSavingsMessage"));
-  const handleSavingsSubmit = (text) => submitToStage2(sessionData?.savingsPlanOptions ? "refine" : "generate", text);
+  const handleSavingsSubmit = (text) =>
+    submitToStage2(sessionData?.savingsPlanOptions || sessionData?.confirmedSavingsPlan ? "refine" : "generate", text);
   const handleChooseStrategy = (strategy) => submitToStage2("refine", t("otherPlanner.chooseStrategyMessage", { strategy: strategy.name }));
+
+  const handleExplorePlan = () => {
+    setSessionData((current) => ({ ...current, planOptions: null }));
+    setExploringPlan(true);
+  };
+  const handleExploreSavings = () => {
+    setSessionData((current) => ({ ...current, savingsPlanOptions: null }));
+    setExploringSavings(true);
+  };
 
   const handleAddCheckin = async (event) => {
     event.preventDefault();
@@ -6682,8 +6697,15 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
             </section>
           ) : null}
 
-          {!sessionData?.confirmedPlan ? (
+          {!sessionData?.confirmedPlan || exploringPlan ? (
             <>
+              {sessionData?.confirmedPlan ? (
+                <section className="trustNote compactTrustNote">
+                  <Info size={17} />
+                  <p>{t("otherPlanner.exploringNote")}</p>
+                </section>
+              ) : null}
+
               <AiTextInputCard
                 t={t}
                 onSubmit={handleSubmit}
@@ -6720,6 +6742,12 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                   ))}
                 </>
               ) : null}
+
+              {sessionData?.confirmedPlan && exploringPlan ? (
+                <button type="button" className="secondaryButton" onClick={() => setExploringPlan(false)} disabled={submitting}>
+                  {t("otherPlanner.cancelExplore")}
+                </button>
+              ) : null}
             </>
           ) : (
             <>
@@ -6735,14 +6763,24 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                 </div>
               </section>
 
-              {!sessionData.confirmedSavingsPlan ? (
-                !sessionData.savingsPlanOptions ? (
+              <button type="button" className="secondaryButton" onClick={handleExplorePlan}>
+                {t("otherPlanner.changePlan")}
+              </button>
+
+              {!sessionData.confirmedSavingsPlan || exploringSavings ? (
+                !sessionData.savingsPlanOptions && !exploringSavings ? (
                   <button type="button" className="primaryButton" onClick={handleStartSavingsPlan} disabled={submitting}>
                     {t("otherPlanner.startSavingsPlan")}
                     <Sparkles size={18} />
                   </button>
                 ) : (
                   <>
+                    {sessionData.confirmedSavingsPlan && exploringSavings ? (
+                      <section className="trustNote compactTrustNote">
+                        <Info size={17} />
+                        <p>{t("otherPlanner.exploringNote")}</p>
+                      </section>
+                    ) : null}
                     <AiTextInputCard
                       t={t}
                       onSubmit={handleSavingsSubmit}
@@ -6751,7 +6789,7 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                       submitLabelKey="otherPlanner.refine"
                       labelKey="otherPlanner.savingsInputLabel"
                     />
-                    {sessionData.savingsPlanOptions.strategies.map((strategy) => (
+                    {sessionData.savingsPlanOptions?.strategies.map((strategy) => (
                       <article className="weddingPlanTile accent-1" key={strategy.id}>
                         <h3>{strategy.name}</h3>
                         <p>{strategy.summary}</p>
@@ -6769,6 +6807,11 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                         </button>
                       </article>
                     ))}
+                    {sessionData.confirmedSavingsPlan && exploringSavings ? (
+                      <button type="button" className="secondaryButton" onClick={() => setExploringSavings(false)} disabled={submitting}>
+                        {t("otherPlanner.cancelExplore")}
+                      </button>
+                    ) : null}
                   </>
                 )
               ) : (
@@ -6782,6 +6825,10 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                     <SummaryRow label={t("otherPlanner.startMonth")} value={sessionData.confirmedSavingsPlan.start_month} />
                     <SummaryRow label={t("otherPlanner.targetCompleteMonth")} value={sessionData.confirmedSavingsPlan.target_complete_month} />
                   </section>
+
+                  <button type="button" className="secondaryButton" onClick={handleExploreSavings}>
+                    {t("otherPlanner.changeSavingsPlan")}
+                  </button>
 
                   <form className="needHeroCard" onSubmit={handleAddCheckin}>
                     <span className="sectionLabel">{t("otherPlanner.checkins.title")}</span>
