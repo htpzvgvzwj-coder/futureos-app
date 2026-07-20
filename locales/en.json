@@ -1573,6 +1573,17 @@
     "confirmedLabel": "Confirmed Investment",
     "addAnotherPick": "Add Another Instrument",
     "futureScoreLabel": "Future Score",
+    "accuracyGuarantee": {
+      "showLabel": "Explore Guardian's Accuracy Guarantee",
+      "hideLabel": "Hide Accuracy Guarantee",
+      "explainer": "Concept preview: if this pick's real value falls more than {threshold}% below what was projected at this point, OCBC credits {credit}% of the dollar shortfall back to you - a real consequence instead of only a disclaimer. This prototype has no live market feed, so try it with a hypothetical value below.",
+      "elapsedLabel": "Months since confirming: {months}",
+      "actualValueLabel": "Hypothetical actual value today (SGD)",
+      "expectedLabel": "Expected at this point",
+      "shortfallLabel": "Shortfall vs. expected",
+      "triggeredNote": "This would trigger a {amount} fee credit under the policy above.",
+      "notTriggeredNote": "Within the normal range - no credit would trigger at this shortfall level."
+    },
     "cashflowImpact": {
       "onTrack": "Cashflow: On Track",
       "tight": "Cashflow: Tight",

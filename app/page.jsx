@@ -66,6 +66,7 @@ import { computeAllLoanArchetypes, applyLoanModifiers, LOAN_ARCHETYPE_KEYS, LOAN
 import { projectPurchaseMode, scoreInvestmentCandidate } from "../lib/investment-finance.js";
 import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } from "../lib/investment-catalog.js";
 import { computeUtilization } from "../lib/strategic-balance-finance.js";
+import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -9091,7 +9092,73 @@ function InvestmentConfirmedCard({ pick, t }) {
         <LoanImpactChip impact={pick.emergency_fund_impact} labelKeys={INVESTMENT_EMERGENCY_FUND_IMPACT_LABEL_KEYS} t={t} />
         <LoanImpactChip impact={pick.cashflow_impact} labelKeys={INVESTMENT_CASHFLOW_IMPACT_LABEL_KEYS} t={t} />
       </div>
+      <AccuracyGuaranteeExplorer pick={pick} t={t} />
     </section>
+  );
+}
+
+// "Recommendation accuracy accountability" concept preview (see lib/accuracy-guarantee-finance.js's
+// header comment for why this is explorable-but-hypothetical rather than backed by a real elapsed-
+// time market feed). The formula and every number it computes are real; only "actual value" is a
+// hypothetical the customer types in to see how the policy would apply.
+function AccuracyGuaranteeExplorer({ pick, t }) {
+  const [open, setOpen] = useState(false);
+  const horizonMonths = pick.horizon_years * 12;
+  const [elapsedMonths, setElapsedMonths] = useState(Math.min(12, horizonMonths));
+  const [actualValue, setActualValue] = useState(String(pick.projection.totalContributed));
+
+  const expectedValueAtElapsed = computeExpectedValueAtElapsed({
+    projectedEndValue: pick.projection.projectedEndValue,
+    elapsedMonths,
+    horizonMonths,
+  });
+  const result = computeAccuracyGuarantee({ expectedValueAtElapsed, actualValue: numberValue(actualValue, expectedValueAtElapsed) });
+
+  return (
+    <div className="strategicAccordionItem">
+      <button type="button" className="secondaryButton" onClick={() => setOpen((current) => !current)}>
+        {open ? t("investmentPlanner.accuracyGuarantee.hideLabel") : t("investmentPlanner.accuracyGuarantee.showLabel")}
+      </button>
+      {open ? (
+        <div className="strategicAccordionDetail">
+          <p>{t("investmentPlanner.accuracyGuarantee.explainer", { threshold: UNDERPERFORMANCE_THRESHOLD_PERCENT, credit: FEE_CREDIT_PERCENT_OF_SHORTFALL })}</p>
+          <span className="sectionLabel">{t("investmentPlanner.accuracyGuarantee.elapsedLabel", { months: elapsedMonths })}</span>
+          <input
+            type="range"
+            min="1"
+            max={horizonMonths}
+            step="1"
+            value={elapsedMonths}
+            onChange={(event) => setElapsedMonths(Number(event.target.value))}
+            aria-label={t("investmentPlanner.accuracyGuarantee.elapsedLabel", { months: elapsedMonths })}
+          />
+          <span className="sectionLabel">{t("investmentPlanner.accuracyGuarantee.actualValueLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={actualValue}
+            onChange={(event) => setActualValue(event.target.value)}
+            aria-label={t("investmentPlanner.accuracyGuarantee.actualValueLabel")}
+          />
+          <div className="weddingStatChips">
+            <span className="statChip">
+              {t("investmentPlanner.accuracyGuarantee.expectedLabel")}: {formatSgd(expectedValueAtElapsed)}
+            </span>
+            <span className={result.triggered ? "statChip warning" : "statChip"}>
+              {t("investmentPlanner.accuracyGuarantee.shortfallLabel")}: {result.shortfallPercent}%
+            </span>
+          </div>
+          {result.triggered ? (
+            <p className="weddingCarouselHint">
+              {t("investmentPlanner.accuracyGuarantee.triggeredNote", { amount: formatSgd(result.creditAmount) })}
+            </p>
+          ) : (
+            <p className="weddingCarouselHint">{t("investmentPlanner.accuracyGuarantee.notTriggeredNote")}</p>
+          )}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

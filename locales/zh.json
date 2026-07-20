@@ -1556,6 +1556,17 @@
     "confirmedLabel": "已确认的投资",
     "addAnotherPick": "再添加一个标的",
     "futureScoreLabel": "未来评分",
+    "accuracyGuarantee": {
+      "showLabel": "查看 Guardian 的准确度保障",
+      "hideLabel": "收起准确度保障",
+      "explainer": "概念预览：如果这笔投资的真实价值比当前时点应有的预期值低超过 {threshold}%，OCBC 会把这笔差额的 {credit}% 以费用抵免的形式还给你——这是真实的后果，不只是一句免责声明。这个原型没有接实时行情，所以下面可以用一个假设数值试算。",
+      "elapsedLabel": "确认后已过去：{months} 个月",
+      "actualValueLabel": "假设今天的实际价值（新元）",
+      "expectedLabel": "当前时点应有预期值",
+      "shortfallLabel": "相对预期的差额比例",
+      "triggeredNote": "按上面的政策，这会触发 {amount} 的费用抵免。",
+      "notTriggeredNote": "在正常范围内——这个差额水平不会触发抵免。"
+    },
     "cashflowImpact": {
       "onTrack": "现金流：进展正常",
       "tight": "现金流：较为紧张",
