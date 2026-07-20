@@ -360,3 +360,23 @@ create table if not exists decision_checks (
 
 create index if not exists decision_checks_profile_key_idx
   on decision_checks (profile_key, created_at desc);
+
+-- Event-triggered dynamic micro-insurance (the "insurance" item in Cross-Bank Data Integration's
+-- concept preview, made real): triggered when a new loan is confirmed and the customer's declared
+-- coverage no longer covers total liabilities. A precisely-sized, precisely-timed top-up offer, not
+-- a full new annual policy - see lib/micro-insurance-finance.js.
+create table if not exists micro_insurance_offers (
+  id                uuid primary key default gen_random_uuid(),
+  profile_key       text not null default 'karina-demo',
+  trigger_purpose   text not null, -- home | renovation | personal
+  gap_amount        numeric(12,2) not null,
+  duration_months   integer not null,
+  monthly_premium   numeric(10,2) not null,
+  total_premium     numeric(10,2) not null,
+  status            text not null default 'offered', -- offered | accepted | dismissed
+  expires_at        timestamptz not null,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists micro_insurance_offers_profile_key_idx
+  on micro_insurance_offers (profile_key, created_at desc);

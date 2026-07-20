@@ -285,6 +285,7 @@ const defaultProfile = {
   creditCardOutstanding: "2400",
   investments: "15000",
   insuranceStatus: "Basic",
+  insuranceCoverageAmount: "150000",
   riskPreference: "Balanced",
   goals: {
     wedding: false,
@@ -8230,6 +8231,52 @@ function LoanConfirmedCard({ loan, onChangeStrategy, onChangeAmount, t }) {
   );
 }
 
+// Event-triggered dynamic micro-insurance (see lib/micro-insurance-finance.js): this loan
+// confirmation was the trigger event. No AI involved - the offer is pure arithmetic, computed and
+// persisted server-side before the customer ever sees it, so this card only ever displays and
+// records a response, never invents a number.
+function MicroInsuranceOfferCard({ offer, onRespond, submitting, t }) {
+  if (!offer) return null;
+
+  if (offer.status === "accepted") {
+    return (
+      <section className="trustNote compactTrustNote">
+        <ShieldCheck size={17} />
+        <p>
+          {t("loanPlanner.microInsurance.acceptedNote", {
+            amount: formatSgd(Math.round(offer.gapAmount)),
+            date: new Date(offer.expiresAt).toLocaleDateString(),
+          })}
+        </p>
+      </section>
+    );
+  }
+
+  if (offer.status !== "offered") return null;
+
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("loanPlanner.microInsurance.title")}</span>
+      <p>{t("loanPlanner.microInsurance.body", { amount: formatSgd(Math.round(offer.gapAmount)) })}</p>
+      <div className="weddingTotalCost">
+        <small>{t("loanPlanner.microInsurance.monthlyPremiumLabel")}</small>
+        <strong>{formatSgd(offer.monthlyPremium)}</strong>
+      </div>
+      <SummaryRow label={t("loanPlanner.microInsurance.durationLabel")} value={t("loanPlanner.microInsurance.durationValue", { months: offer.durationMonths })} />
+      <SummaryRow label={t("loanPlanner.microInsurance.totalPremiumLabel")} value={formatSgd(offer.totalPremium)} />
+      <div className="buttonPair compactButtons">
+        <button type="button" className="primaryButton" disabled={submitting} onClick={() => onRespond("accept")}>
+          {t("loanPlanner.microInsurance.acceptButton")}
+          <Check size={16} />
+        </button>
+        <button type="button" className="secondaryButton" disabled={submitting} onClick={() => onRespond("dismiss")}>
+          {t("loanPlanner.microInsurance.dismissButton")}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function LoanPurposeSelector({ onSelect, t }) {
   return (
     <section className="settingsGroup">
@@ -8325,6 +8372,8 @@ function LoanPlannerContent({
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [microInsuranceOffer, setMicroInsuranceOffer] = useState(null);
+  const [microInsuranceSubmitting, setMicroInsuranceSubmitting] = useState(false);
 
   useEffect(() => {
     if (initialPurpose) {
@@ -8332,6 +8381,42 @@ function LoanPlannerContent({
       onConsumeInitialPurpose();
     }
   }, [initialPurpose, onConsumeInitialPurpose]);
+
+  // Catches an offer triggered by a PAST loan confirmation that was never addressed - the trigger
+  // only fires inside /api/loan/confirm's response, so a customer who navigates away before
+  // responding would otherwise never see it again.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/micro-insurance/latest")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled && data.offer) setMicroInsuranceOffer(data.offer);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const respondToMicroInsuranceOffer = async (action) => {
+    if (!microInsuranceOffer) return;
+    setMicroInsuranceSubmitting(true);
+    try {
+      const response = await fetch("/api/micro-insurance/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ offerId: microInsuranceOffer.id, action }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMicroInsuranceOffer(data.offer);
+      }
+    } catch {
+      // Non-critical - the offer stays visible and can be retried.
+    } finally {
+      setMicroInsuranceSubmitting(false);
+    }
+  };
 
   const resetToPurposeSelection = () => {
     setPurpose(null);
@@ -8464,6 +8549,7 @@ function LoanPlannerContent({
           monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
           currentSavings: numberValue(profile.currentSavings, 20000),
           relationshipTier,
+          insuranceCoverageAmount: numberValue(profile.insuranceCoverageAmount, 150000),
         }),
       });
       const data = await response.json();
@@ -8472,6 +8558,7 @@ function LoanPlannerContent({
         return;
       }
       setConfirmedLoan(data.data);
+      setMicroInsuranceOffer(data.microInsuranceOffer ?? null);
       setEditingStrategy(false);
       setSuccess();
       const loan = data.data;
@@ -8571,16 +8658,24 @@ function LoanPlannerContent({
           </button>
         </section>
       ) : confirmedLoan && !editingStrategy ? (
-        <LoanConfirmedCard
-          loan={confirmedLoan}
-          onChangeStrategy={() => setEditingStrategy(true)}
-          onChangeAmount={() => {
-            setConfirmedLoan(null);
-            setPrincipalBasis(null);
-            setSizingOptions(null);
-          }}
-          t={t}
-        />
+        <>
+          <LoanConfirmedCard
+            loan={confirmedLoan}
+            onChangeStrategy={() => setEditingStrategy(true)}
+            onChangeAmount={() => {
+              setConfirmedLoan(null);
+              setPrincipalBasis(null);
+              setSizingOptions(null);
+            }}
+            t={t}
+          />
+          <MicroInsuranceOfferCard
+            offer={microInsuranceOffer}
+            onRespond={respondToMicroInsuranceOffer}
+            submitting={microInsuranceSubmitting}
+            t={t}
+          />
+        </>
       ) : principalBasis != null ? (
         <>
           <LoanStrategySelector
@@ -10124,6 +10219,7 @@ function ProfileScreen({
             ["creditCardOutstanding", "profile.creditCardOutstanding", "number"],
             ["investments", "profile.investments", "number"],
             ["insuranceStatus", "profile.insuranceStatus", "text"],
+            ["insuranceCoverageAmount", "profile.insuranceCoverageAmount", "number"],
             ["riskPreference", "profile.riskPreference", "text"],
           ].map(([field, labelKey, type]) => (
             <label className="inputField" key={field}>

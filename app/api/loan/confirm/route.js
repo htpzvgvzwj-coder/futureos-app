@@ -1,9 +1,13 @@
 import { computeLoanArchetype, applyLoanModifiers } from "../../../../lib/loan-finance.js";
 import { confirmLoanSchema } from "../../../../lib/loan-validation.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/loan-context.js";
+import { getTotalConfirmedLoanLiabilities } from "../../../../lib/micro-insurance-context.js";
+import { computeCoverageGap, computeMicroTopUp } from "../../../../lib/micro-insurance-finance.js";
+import { saveOffer, DEFAULT_PROFILE_KEY as MICRO_INSURANCE_PROFILE_KEY } from "../../../../lib/micro-insurance-store.js";
 import { DEFAULT_PROFILE_KEY, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/loan-store.js";
 
 export const runtime = "nodejs";
+const MICRO_TOPUP_DURATION_MONTHS = 6;
 
 // No AI call here — archetype/modifier selection is a structured UI pick
 // with nothing for an LLM to interpret, so this validates and computes
@@ -17,8 +21,19 @@ export async function POST(request) {
   if (!parsed.success) {
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });
   }
-  const { purpose, principalBasis, propertyType, archetype, modifiers, monthlyIncome, monthlyExpenses, currentSavings, existingMonthlyDebt, relationshipTier } =
-    parsed.data;
+  const {
+    purpose,
+    principalBasis,
+    propertyType,
+    archetype,
+    modifiers,
+    monthlyIncome,
+    monthlyExpenses,
+    currentSavings,
+    existingMonthlyDebt,
+    relationshipTier,
+    insuranceCoverageAmount,
+  } = parsed.data;
 
   const otherGoals = await getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null);
 
@@ -40,5 +55,18 @@ export async function POST(request) {
   const createdAt = await saveArtifact(session.id, "stage1", "confirmed_loan", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
 
-  return Response.json({ type: "confirm_loan", data: result, confirmedAt: createdAt });
+  // Event-triggered micro-insurance: this new loan is the trigger event. Re-reads total liabilities
+  // AFTER the save above, so it already reflects this loan - if the customer's declared coverage no
+  // longer covers total liabilities, Guardian offers a precisely-sized, precisely-timed top-up
+  // instead of a full new annual policy. Pure arithmetic - lib/micro-insurance-finance.js, no AI.
+  const totalLiabilities = await getTotalConfirmedLoanLiabilities();
+  const { gapAmount, hasGap } = computeCoverageGap({ existingCoverageAmount: insuranceCoverageAmount, totalLiabilities });
+  let microInsuranceOffer = null;
+  if (hasGap) {
+    const topUp = computeMicroTopUp({ gapAmount, durationMonths: MICRO_TOPUP_DURATION_MONTHS });
+    const saved = await saveOffer(MICRO_INSURANCE_PROFILE_KEY, { triggerPurpose: purpose, ...topUp });
+    microInsuranceOffer = { ...topUp, ...saved, triggerPurpose: purpose, status: "offered" };
+  }
+
+  return Response.json({ type: "confirm_loan", data: result, confirmedAt: createdAt, microInsuranceOffer });
 }

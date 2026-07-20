@@ -925,6 +925,7 @@
     "creditCardOutstanding": "Credit Card Outstanding",
     "investments": "Investments",
     "insuranceStatus": "Insurance Status",
+    "insuranceCoverageAmount": "Declared Insurance Coverage (SGD)",
     "riskPreference": "Risk Preference",
     "status": "Status",
     "detectedStage": "Detected Life Stage"
@@ -1296,6 +1297,17 @@
     "protectionNote": "Adds an estimated insurance premium of {amount}/month.",
     "growthNote": "Redirects {amount} into a conservative investment, illustratively projected to grow to about {projected} by the end of the tenure - not guaranteed.",
     "relationshipDiscountNote": "Your Relationship Ledger tier has taken {percent}pp off this rate - this is a real reduction in your monthly installment, not just a badge.",
+    "microInsurance": {
+      "title": "Guardian detected a protection gap",
+      "body": "This new loan pushed your total liabilities above your declared insurance coverage by {amount}. Instead of a full new annual policy, here's a temporary top-up sized to exactly this gap.",
+      "monthlyPremiumLabel": "Monthly premium",
+      "durationLabel": "Coverage window",
+      "durationValue": "{months} months",
+      "totalPremiumLabel": "Total cost for the window",
+      "acceptButton": "Accept top-up",
+      "dismissButton": "Not now",
+      "acceptedNote": "Guardian's temporary {amount} top-up is active until {date} - a precisely-sized bridge, not a new annual policy."
+    },
     "archetypes": {
       "safe": "Safe",
       "balanced": "Balanced",

@@ -910,6 +910,7 @@
     "creditCardOutstanding": "信用卡未还款额",
     "investments": "投资",
     "insuranceStatus": "保险状况",
+    "insuranceCoverageAmount": "已申报保额（新元）",
     "riskPreference": "风险偏好"
   },
   "loading": {
@@ -1279,6 +1280,17 @@
     "protectionNote": "每月增加约 {amount} 的保险费估算。",
     "growthNote": "将 {amount} 转投保守型投资，示意性预计到还款期结束时增值至约 {projected}——不作保证。",
     "relationshipDiscountNote": "你的关系账本等级为这笔利率减免了 {percent} 个百分点——这是月供的真实减少，不只是一个徽章。",
+    "microInsurance": {
+      "title": "Guardian 发现了一个保障缺口",
+      "body": "这笔新贷款让你的总负债超出已申报保额 {amount}。与其推销一份全新的年度保单，这里有一份刚好覆盖这个缺口的临时加保方案。",
+      "monthlyPremiumLabel": "每月保费",
+      "durationLabel": "覆盖期",
+      "durationValue": "{months} 个月",
+      "totalPremiumLabel": "覆盖期总保费",
+      "acceptButton": "接受加保",
+      "dismissButton": "暂不需要",
+      "acceptedNote": "Guardian 为你临时加保的 {amount} 保障，将持续到 {date}——这是精确匹配缺口的过渡方案，不是一份新的年度保单。"
+    },
     "archetypes": {
       "safe": "稳健型",
       "balanced": "平衡型",
