@@ -67,6 +67,7 @@ import { projectPurchaseMode, scoreInvestmentCandidate } from "../lib/investment
 import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } from "../lib/investment-catalog.js";
 import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
+import { computePeerBenchmark } from "../lib/peer-benchmark.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -91,6 +92,7 @@ const screens = {
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
+  PEER_BENCHMARK: "peerBenchmark",
   PAYNOW: "paynow",
   SCAN_PAY: "scanPay",
   FX: "fx",
@@ -1117,6 +1119,71 @@ function getRoboInvestBenefitCopy(benefits, t) {
 // Reached from Life Graph's compact icon entry - a full screen instead of a cramped inline panel,
 // so there's room to show the full evidence chain inline (expand-in-place) instead of hiding it
 // behind a "View Evidence" modal that most people never open.
+const PEER_BENCHMARK_METRIC_IDS = ["emergency", "savingsRate", "debtToIncome", "investmentToIncome"];
+const PEER_BENCHMARK_FORMATTERS = {
+  emergency: (value) => `${value}mo`,
+  savingsRate: (value) => `${value}%`,
+  debtToIncome: (value) => `${value}%`,
+  investmentToIncome: (value) => `${value}x`,
+};
+
+// Anonymous peer comparison concept preview - see lib/peer-benchmark.js's header comment for why
+// the "peer" figures are an illustrative model, not a real aggregate customer query.
+function PeerBenchmarkScreen({ preferences, t, setActiveScreen }) {
+  const profile = getUserProfile(preferences);
+  const age = numberValue(profile.age, 28);
+  const monthlyIncome = getProfileAmount(profile, "monthlyIncome", 11500);
+  const monthlyExpenses = getProfileAmount(profile, "monthlyExpenses", 4500);
+  const currentSavings = getProfileAmount(profile, "currentSavings", 85000);
+  const loans = getProfileAmount(profile, "existingLoans", 18000);
+  const card = getProfileAmount(profile, "creditCardOutstanding", 2400);
+  const investments = getProfileAmount(profile, "investments", 15000);
+  const benchmark = computePeerBenchmark({ age, monthlyIncome, monthlyExpenses, currentSavings, debtLoad: loans + card, investments });
+
+  return (
+    <Screen>
+      <Header title={t("lifeGraph.peerBenchmark.title")} subtitle={t("lifeGraph.peerBenchmark.subtitle")} />
+      <BackLifeGraphButton setActiveScreen={setActiveScreen} t={t} />
+
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("lifeGraph.peerBenchmark.disclaimer")}</p>
+      </section>
+
+      <section className="trustNote compactTrustNote">
+        <UserRound size={17} />
+        <p>
+          {t("lifeGraph.peerBenchmark.cohortNote", {
+            age: t(`lifeGraph.peerBenchmark.ageBuckets.${benchmark.ageBucket}`),
+            income: t(`lifeGraph.peerBenchmark.incomeBuckets.${benchmark.incomeBucket}`),
+          })}
+        </p>
+      </section>
+
+      <div className="strategicCategoryList">
+        {PEER_BENCHMARK_METRIC_IDS.map((id) => {
+          const data = benchmark[id];
+          const format = PEER_BENCHMARK_FORMATTERS[id];
+          return (
+            <article className="proofBlock" key={id}>
+              <strong>{t(`lifeGraph.peerBenchmark.metrics.${id}.label`)}</strong>
+              <div className="weddingStatChips">
+                <span className="statChip">
+                  {t("lifeGraph.peerBenchmark.youLabel")}: {format(data.actual)}
+                </span>
+                <span className="statChip">
+                  {t("lifeGraph.peerBenchmark.peersLabel")}: {format(data.typical)}
+                </span>
+              </div>
+              <p>{t(data.aheadOfPeers ? `lifeGraph.peerBenchmark.metrics.${id}.ahead` : `lifeGraph.peerBenchmark.metrics.${id}.behind`)}</p>
+            </article>
+          );
+        })}
+      </div>
+    </Screen>
+  );
+}
+
 function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
   const [openProductId, setOpenProductId] = useState(null);
   const [notice, setNotice] = useState("");
@@ -3645,6 +3712,21 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         <span>
           <strong>{t("lifeGraph.productFit.title")}</strong>
           <small>{t("lifeGraph.productFit.entrySubtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
+      </button>
+
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.PEER_BENCHMARK)}
+      >
+        <span className="iconBubble">
+          <UserRound size={16} />
+        </span>
+        <span>
+          <strong>{t("lifeGraph.peerBenchmark.title")}</strong>
+          <small>{t("lifeGraph.peerBenchmark.entrySubtitle")}</small>
         </span>
         <ChevronRight size={15} />
       </button>
@@ -11295,6 +11377,7 @@ export default function App() {
     ),
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} profile={getUserProfile(preferences)} />,
+    [screens.PEER_BENCHMARK]: <PeerBenchmarkScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.PRODUCT_FIT]: (
       <ProductFitScreen
         preferences={preferences}

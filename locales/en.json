@@ -406,6 +406,49 @@
           "output": "Enters Recovery state months earlier, instead of only reacting the day a single deposit suddenly drops"
         }
       }
+    },
+    "peerBenchmark": {
+      "title": "Anonymous Peer Comparison",
+      "subtitle": "Concept preview: how you'd compare against people in a similar age/income situation, if FutureOS could query real aggregate OCBC customer data. Illustrative figures only - not a real dataset query.",
+      "entrySubtitle": "See how you compare to people in your situation (concept preview)",
+      "disclaimer": "The 'peers' figures below are an illustrative model, not a real aggregate query against OCBC's customer base - this prototype has no such database to query. A real version of this needs genuine aggregate customer behavior data, which is a real data moat, not something a calculator alone can produce.",
+      "cohortNote": "Compared against an illustrative cohort: {age}, {income} monthly income.",
+      "youLabel": "You",
+      "peersLabel": "Typical for your cohort",
+      "ageBuckets": {
+        "under30": "Under 30",
+        "thirties": "30s",
+        "forties": "40s",
+        "fiftyPlus": "50+"
+      },
+      "incomeBuckets": {
+        "under5k": "Under SGD 5,000",
+        "from5kTo10k": "SGD 5,000-10,000",
+        "from10kTo15k": "SGD 10,000-15,000",
+        "from15kUp": "SGD 15,000+"
+      },
+      "metrics": {
+        "emergency": {
+          "label": "Emergency fund coverage",
+          "ahead": "You're ahead of your cohort's typical buffer.",
+          "behind": "Your cohort typically holds more months of coverage than this."
+        },
+        "savingsRate": {
+          "label": "Monthly savings rate",
+          "ahead": "You're saving a higher share of income than your cohort typically does.",
+          "behind": "Your cohort typically saves a higher share of income than this."
+        },
+        "debtToIncome": {
+          "label": "Debt-to-income ratio",
+          "ahead": "Your debt load is lighter than your cohort's typical level.",
+          "behind": "Your cohort typically carries a lighter debt load than this."
+        },
+        "investmentToIncome": {
+          "label": "Investments vs. annual income",
+          "ahead": "You've invested more relative to income than your cohort typically has.",
+          "behind": "Your cohort typically has more invested relative to income than this."
+        }
+      }
     }
   },
   "needs": {
