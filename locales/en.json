@@ -55,6 +55,10 @@
     "relationshipLedger": {
       "title": "Relationship Ledger",
       "subtitle": "Two scores, not one - what you've kept and what Guardian has kept"
+    },
+    "lifeJourney": {
+      "title": "Life Journey View",
+      "subtitle": "The same real planners, organized by what's happening in your life"
     }
   },
   "goals": {
@@ -1388,6 +1392,43 @@
     "memoryEventAction": "Guardian compared Safe/Balanced/Fast repayment strategies and calculated real installment, interest, and Future Score figures for a loan scoped only to this goal.",
     "memoryEventReason": "You confirmed a specific strategy after comparing real repayment trade-offs.",
     "memoryEventDataUsed": "Your stated borrowing purpose and amount, plus current TDSR/MSR serviceability rules and market interest-rate benchmarks."
+  },
+  "lifeJourney": {
+    "title": "Life Journey View",
+    "subtitle": "An alternate way to navigate - the same real planners you already have, grouped by what's actually happening in your life instead of by bank product category.",
+    "disclaimer": "This doesn't replace anything - every planner below is the exact same real, fully working feature you'd reach from Mirror's Life Goal Selection grid, just regrouped.",
+    "moments": {
+      "gettingMarried": {
+        "title": "Getting Married",
+        "subtitle": "Plan the wedding budget and savings",
+        "body": "Everything for planning a wedding budget and building the savings plan to fund it."
+      },
+      "buyingHome": {
+        "title": "Buying Your First Home",
+        "subtitle": "Property plan plus the financing for it",
+        "body": "Both halves of a home purchase - the property plan itself, and the mortgage financing that funds it."
+      },
+      "growingFamily": {
+        "title": "Growing Your Family",
+        "subtitle": "Protection readiness and a safety buffer",
+        "body": "Insurance readiness and your emergency fund buffer - the two things that matter most when your household is growing."
+      },
+      "buildingWealth": {
+        "title": "Building Wealth, Retiring Well",
+        "subtitle": "Retirement planning and investing",
+        "body": "Long-horizon planning - real CPF LIFE projections for retirement, and priced fund/stock recommendations for general investing."
+      },
+      "careerMove": {
+        "title": "Career Move or Business Start",
+        "subtitle": "Financing for a transition",
+        "body": "Renovation, personal, or business-purpose financing sized to what you're taking on."
+      },
+      "somethingElse": {
+        "title": "Something Else Entirely",
+        "subtitle": "Any goal that doesn't fit the categories above",
+        "body": "A trip, a big purchase, an event, anything - describe it and get a real, AI-assisted finance plan."
+      }
+    }
   },
   "relationshipLedger": {
     "title": "Relationship Ledger",

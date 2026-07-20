@@ -1372,6 +1372,43 @@
     "memoryEventReason": "你在比较了真实的还款权衡后，确认了一个具体的策略。",
     "memoryEventDataUsed": "你所说的借款用途和金额，加上现行的TDSR/MSR还款能力规定和市场利率水平。"
   },
+  "lifeJourney": {
+    "title": "人生阶段视图",
+    "subtitle": "另一种浏览方式——还是你已经有的那些真实规划器，只是按人生实际发生的阶段重新分组，而不是按银行产品分类。",
+    "disclaimer": "这不是替代任何东西——下面每一个规划器都是你从 Mirror 的人生目标选择区能拿到的、完全一样的真实功能，只是重新分组了而已。",
+    "moments": {
+      "gettingMarried": {
+        "title": "准备结婚",
+        "subtitle": "婚礼预算和储蓄计划",
+        "body": "规划婚礼预算，以及为它建立储蓄计划所需的一切。"
+      },
+      "buyingHome": {
+        "title": "购置第一套房子",
+        "subtitle": "购房计划加上对应的融资",
+        "body": "购房的两个环节——房产计划本身，以及为它提供资金的房贷融资。"
+      },
+      "growingFamily": {
+        "title": "组建/扩大家庭",
+        "subtitle": "保障准备度和安全缓冲",
+        "body": "保险保障准备度，以及你的应急基金缓冲——家庭在扩大时最重要的两件事。"
+      },
+      "buildingWealth": {
+        "title": "积累财富，安心退休",
+        "subtitle": "退休规划和投资",
+        "body": "长期规划——退休用的真实 CPF LIFE 预测，以及为普通投资定价好的基金/股票推荐。"
+      },
+      "careerMove": {
+        "title": "转职或创业",
+        "subtitle": "过渡期需要的融资",
+        "body": "按你正在承担的事情来定制的装修贷、个人贷或经营性贷款。"
+      },
+      "somethingElse": {
+        "title": "其他任何事",
+        "subtitle": "不属于以上任何分类的目标",
+        "body": "一次旅行、一笔大额消费、一场活动，什么都可以——描述一下，就能拿到一份真实的、AI辅助的财务计划。"
+      }
+    }
+  },
   "relationshipLedger": {
     "title": "关系账本",
     "subtitle": "两个分开的分数：你守住了什么，Guardian 守住了什么。真正的权益需要两边都达标才解锁。",
@@ -2413,6 +2450,10 @@
     "relationshipLedger": {
       "title": "关系账本",
       "subtitle": "两个分开的分数——你守住了什么、Guardian 守住了什么。真正的权益需要两边都达标。"
+    },
+    "lifeJourney": {
+      "title": "人生阶段视图",
+      "subtitle": "同一批真实规划器，按人生阶段重新分组"
     }
   },
   "accountDetails": {

@@ -93,6 +93,7 @@ const screens = {
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
+  LIFE_JOURNEY: "lifeJourney",
   PAYNOW: "paynow",
   SCAN_PAY: "scanPay",
   FX: "fx",
@@ -350,6 +351,60 @@ const futureSystems = [
     subtitleKey: "futureSystems.relationshipLedger.subtitle",
     icon: Award,
     screen: screens.RELATIONSHIP_LEDGER,
+  },
+  {
+    id: "lifeJourney",
+    titleKey: "futureSystems.lifeJourney.title",
+    subtitleKey: "futureSystems.lifeJourney.subtitle",
+    icon: Sparkles,
+    screen: screens.LIFE_JOURNEY,
+  },
+];
+
+// Life-transition view (人生转折点视图): the SAME dedicated planners already built, just grouped
+// by what's actually happening in the customer's life instead of by bank product category - an
+// additional way to navigate, not a replacement for the existing product-first Life Goal Selection
+// grid on Mirror. Each moment can bundle more than one underlying planner (e.g. buying a home also
+// needs financing).
+const LIFE_MOMENTS = [
+  {
+    id: "gettingMarried",
+    icon: HeartHandshake,
+    plannerScreens: [{ screen: screens.NEED_WEDDING, labelKey: "weddingPlanner.title" }],
+  },
+  {
+    id: "buyingHome",
+    icon: Building2,
+    plannerScreens: [
+      { screen: screens.NEED_HOME, labelKey: "homePlanner.title" },
+      { screen: screens.NEED_LOAN, labelKey: "loanPlanner.title" },
+    ],
+  },
+  {
+    id: "growingFamily",
+    icon: Sparkles,
+    plannerScreens: [
+      { screen: screens.NEED_INSURANCE, labelKey: "needDetails.insurance.title" },
+      { screen: screens.NEED_EMERGENCY, labelKey: "needDetails.emergency.title" },
+    ],
+  },
+  {
+    id: "buildingWealth",
+    icon: LineChart,
+    plannerScreens: [
+      { screen: screens.NEED_RETIREMENT, labelKey: "retirementPlanner.title" },
+      { screen: screens.NEED_INVESTMENT, labelKey: "investmentPlanner.title" },
+    ],
+  },
+  {
+    id: "careerMove",
+    icon: BriefcaseBusiness,
+    plannerScreens: [{ screen: screens.NEED_LOAN, labelKey: "loanPlanner.title" }],
+  },
+  {
+    id: "somethingElse",
+    icon: SlidersHorizontal,
+    plannerScreens: [{ screen: screens.NEED_OTHER, labelKey: "otherPlanner.title" }],
   },
 ];
 
@@ -1177,6 +1232,62 @@ function PeerBenchmarkScreen({ preferences, t, setActiveScreen }) {
               </div>
               <p>{t(data.aheadOfPeers ? `lifeGraph.peerBenchmark.metrics.${id}.ahead` : `lifeGraph.peerBenchmark.metrics.${id}.behind`)}</p>
             </article>
+          );
+        })}
+      </div>
+    </Screen>
+  );
+}
+
+// Life-transition view - the same dedicated planners, organized around what's happening in the
+// customer's life instead of by bank product category. An additional way to navigate, reachable
+// from Home; does not replace Mirror's existing product-first Life Goal Selection grid.
+function LifeJourneyScreen({ setActiveScreen, t }) {
+  const [openItem, setOpenItem] = useState(null);
+
+  return (
+    <Screen>
+      <Header title={t("lifeJourney.title")} subtitle={t("lifeJourney.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("lifeJourney.disclaimer")}</p>
+      </section>
+
+      <div className="strategicCategoryList">
+        {LIFE_MOMENTS.map(({ id, icon: Icon, plannerScreens }) => {
+          const expanded = openItem === id;
+          return (
+            <div className={expanded ? "strategicAccordionItem expanded" : "strategicAccordionItem"} key={id}>
+              <button
+                type="button"
+                className="strategicCategoryRow"
+                onClick={() => setOpenItem(expanded ? null : id)}
+                aria-expanded={expanded}
+              >
+                <span className="iconBubble">
+                  <Icon size={16} />
+                </span>
+                <span>
+                  <strong>{t(`lifeJourney.moments.${id}.title`)}</strong>
+                  <small>{t(`lifeJourney.moments.${id}.subtitle`)}</small>
+                </span>
+                <ChevronRight size={15} className={expanded ? "chevronExpanded" : ""} />
+              </button>
+
+              {expanded ? (
+                <div className="strategicAccordionDetail">
+                  <p>{t(`lifeJourney.moments.${id}.body`)}</p>
+                  {plannerScreens.map((planner) => (
+                    <button type="button" className="secondaryButton" key={planner.screen} onClick={() => setActiveScreen(planner.screen)}>
+                      {t(planner.labelKey)}
+                      <ChevronRight size={14} />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </div>
@@ -11378,6 +11489,7 @@ export default function App() {
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} profile={getUserProfile(preferences)} />,
     [screens.PEER_BENCHMARK]: <PeerBenchmarkScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
+    [screens.LIFE_JOURNEY]: <LifeJourneyScreen setActiveScreen={setActiveScreen} t={t} />,
     [screens.PRODUCT_FIT]: (
       <ProductFitScreen
         preferences={preferences}
