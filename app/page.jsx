@@ -2439,29 +2439,6 @@ function getDetectedLifeStage(profile, customGoals, t) {
   return t("lifeGraph.stages.emergency");
 }
 
-function getLifeTimeline(profile, customGoals, t) {
-  const goals = getProfileGoalIds(profile, customGoals);
-  if (goals.includes("wedding")) {
-    return ["engaged", "weddingPlanning", "familyProtection", "longTermWealth"].map((key) =>
-      t(`lifeGraph.timeline.${key}`)
-    );
-  }
-  if (goals.includes("home")) {
-    return ["saving", "downPayment", "mortgageReadiness", "homeOwnership"].map((key) =>
-      t(`lifeGraph.timeline.${key}`)
-    );
-  }
-  if (goals.includes("custom")) {
-    return [
-      t("lifeGraph.timeline.today"),
-      getProfileGoalLabel("custom", customGoals, t),
-      t("lifeGraph.timeline.financialImpact"),
-      t("lifeGraph.timeline.futurePlan"),
-    ];
-  }
-  return ["today", "selectedGoal", "nextMilestone", "longTermFuture"].map((key) => t(`lifeGraph.timeline.${key}`));
-}
-
 function getHealthScores(profile) {
   const income = getProfileAmount(profile, "monthlyIncome", 11500);
   const expenses = getProfileAmount(profile, "monthlyExpenses", 4500);
@@ -2964,32 +2941,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const notificationHistory = getNotificationHistory(profile, preferences, t);
   const futureHealth = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const homeProgress = profile.goals.home ? 72 : 54;
-  const weddingProgress = profile.goals.wedding ? 64 : 0;
   const emergencyProgress = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
-  const insuranceProgress = healthScores.find((score) => score.id === "insurance")?.value ?? 58;
-  const familyProgress = profile.goals.family
-    ? clampScore(emergencyProgress * 0.45 + insuranceProgress * 0.55)
-    : 0;
   const retirementProgress = profile.goals.retirement ? 61 : 48;
-  const lifeGoalMetric = profile.goals.wedding
-    ? {
-        id: "wedding",
-        label: t("goals.wedding"),
-        value: `${weddingProgress}%`,
-        progress: weddingProgress,
-        info: t("homeBanking.info.wedding"),
-        methodKey: "homeBanking.method.wedding",
-        proofKeys: ["weddingInputs", "weddingMath", "weddingResult"],
-      }
-    : {
-        id: "family",
-        label: t("simulator.goals.family"),
-        value: `${familyProgress}%`,
-        progress: familyProgress,
-        info: t("homeBanking.info.family"),
-        methodKey: "homeBanking.method.family",
-        proofKeys: ["familyInputs", "familyMath", "familyResult"],
-      };
 
   const quickActionVisibility = preferences.quickActionVisibility ?? defaultPreferences.quickActionVisibility;
   const allQuickActions = [
@@ -3043,7 +2996,6 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
       methodKey: "homeBanking.method.futureScore",
       proofKeys: ["futureScoreInputs", "futureScoreWeights", "futureScoreResult"],
     },
-    lifeGoalMetric,
     {
       id: "selected",
       label: t("homeBanking.selectedGoal"),
@@ -3519,7 +3471,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
   const detectedStage = getDetectedLifeStage(profile, customGoals, t);
-  const timelineSteps = getLifeTimeline(profile, customGoals, t);
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
@@ -3588,7 +3539,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         />
       ) : null}
 
-      <section className="agentReasoningPanel">
+      <section className="agentReasoningPanel futureAnalystPanel">
         <div className="panelHead">
           <span className="sectionLabel">{t("lifeGraph.futureAnalyst.title")}</span>
           <Bot size={17} />
@@ -3620,18 +3571,6 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         ) : (
           <p className="noDetectedNeeds">{t("lifeGraph.noDetectedNeeds")}</p>
         )}
-      </section>
-
-      <section className="timelinePanel">
-        <span className="sectionLabel">{t("lifeGraph.timelineTitle")}</span>
-        <div className="lifeTimeline">
-          {timelineSteps.map((step, index) => (
-            <div className="lifeNode" key={step}>
-              <i>{index + 1}</i>
-              <span>{step}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       <button
@@ -3785,11 +3724,6 @@ function FutureMirrorSimulator({
       <Header title={t("simulator.title")} subtitle={t("simulator.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
-      <section className="trustNote">
-        <ShieldCheck size={18} />
-        <p>{t("simulator.trustNote")}</p>
-      </section>
-
       <section className="simulatorForm">
         <span className="sectionLabel">{t("simulator.sections.futureSimulator")}</span>
         <label className="textareaField">
@@ -3915,6 +3849,7 @@ function FutureMirrorSimulator({
             <SupportList
               title={t("simulator.output.explainTitle")}
               items={[
+                reasoning.situation,
                 t("simulator.output.explain.protectedGoals", { goals: reasoning.goals }),
                 reasoning.risk,
                 t("simulator.output.explain.products"),
@@ -3922,18 +3857,6 @@ function FutureMirrorSimulator({
               ]}
             />
           </details>
-
-          <section className="agentReasoningPanel">
-            <div className="panelHead">
-              <span className="sectionLabel">{t("simulator.sections.riskAnalysis")}</span>
-              <Bot size={17} />
-            </div>
-            <SummaryRow label={t("simulator.reasoning.situationUnderstood")} value={reasoning.situation} />
-            <SummaryRow label={t("simulator.reasoning.selectedGoals")} value={reasoning.goals} />
-            <SummaryRow label={t("simulator.reasoning.mainRisk")} value={reasoning.risk} />
-            <SummaryRow label={t("simulator.reasoning.bestRecommendation")} value={reasoning.recommendation} />
-            <SummaryRow label={t("simulator.reasoning.nextAction")} value={reasoning.action} />
-          </section>
 
           <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.GUARDIAN)}>
             {t("mirror.cta")}

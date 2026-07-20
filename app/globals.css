@@ -2934,6 +2934,20 @@ nextjs-portal {
   color: var(--teal);
 }
 
+.futureAnalystPanel .summaryRow {
+  min-height: 0;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.futureAnalystPanel .summaryRow span {
+  font-size: 11px;
+}
+
+.futureAnalystPanel .summaryRow strong {
+  font-size: 12px;
+}
+
 .inputField span {
   color: var(--muted);
   font-size: 11px;
