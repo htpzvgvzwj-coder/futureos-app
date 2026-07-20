@@ -50,6 +50,10 @@
     "guardian": {
       "title": "Future Self Guardian",
       "subtitle": "Protects your long-term goals with approved actions"
+    },
+    "relationshipLedger": {
+      "title": "Relationship Ledger",
+      "subtitle": "Two scores, not one - what you've kept and what Guardian has kept"
     }
   },
   "goals": {
@@ -212,11 +216,20 @@
         "roboInvest": "0.88% p.a. management fee, charged monthly on total invested value - on top of any underlying ETF fees.",
         "greatTerm": "Pure protection term life - no savings or cash-value component. Premium depends on age, sum assured, and smoker status; get a personalised quote before comparing.",
         "paynowGiro": "No fee for domestic PayNow or GIRO transfers.",
-        "ocbc365": "Up to $160/month cashback if you spend at least $1,600 (5% dining, 6% fuel, 3% groceries/transport/travel/telco/electricity). Only up to $80/month if you spend $800-$1,599. Capped at $1,920/year."
+        "ocbc365": "Up to $160/month cashback if you spend at least $1,600 (5% dining, 6% fuel, 3% groceries/transport/travel/telco/electricity). Only up to $80/month if you spend $800-$1,599. Capped at $1,920/year.",
+        "roboInvestTier1": "{rate}% p.a. management fee - reduced from the standard 0.88% p.a. because of your Relationship Ledger tier.",
+        "roboInvestTier2": "{rate}% p.a. management fee - reduced further from the standard 0.88% p.a. because of your Relationship Ledger tier.",
+        "roboInvestTier3": "{rate}% p.a. management fee - the lowest tier available, close to market rate, unlocked at Anchor."
       },
       "honestNote": {
         "monthlySavings": "Guardian note: if you don't need the strict no-withdrawal rule, the OCBC 360 Account can pay up to 4.45% p.a. on the same money when its conditions are met - many times more than this account's 0.1% p.a. ceiling.",
-        "roboInvest": "Guardian note: OCBC RoboInvest's 0.88% p.a. management fee is roughly double what comparable robo-advisors in Singapore charge for similar diversified portfolios - e.g. Endowus charges 0.40% p.a. for CPF/SRS portfolios. Worth checking if the extra service is worth the difference before requesting an advisor."
+        "roboInvest": "Guardian note: OCBC RoboInvest's 0.88% p.a. management fee is roughly double what comparable robo-advisors in Singapore charge for similar diversified portfolios - e.g. Endowus charges 0.40% p.a. for CPF/SRS portfolios. Worth checking if the extra service is worth the difference before requesting an advisor.",
+        "roboInvestTier1": "Guardian note: your relationship has brought this down from the standard 0.88%, but it's still above Endowus's 0.40% p.a. for a similar portfolio - the gap is narrowing, not closed yet.",
+        "roboInvestTier2": "Guardian note: getting closer to Endowus's 0.40% p.a. - reaching Anchor tier would close the gap further.",
+        "roboInvestTier3": "Guardian note: this is now close to Endowus's 0.40% p.a. for a similar portfolio - the lowest this fee goes through the relationship program."
+      },
+      "relationshipNote": {
+        "ocbc360": "Guardian note: because of your Relationship Ledger tier, the 'spend $500' bonus condition on this account is treated as already met."
       },
       "categories": {
         "savings": "Savings / Deposits",
@@ -284,6 +297,7 @@
         "humanReviewLabel": "Human review requirement",
         "humanReviewRequired": "Relationship Manager or licensed review required before execution.",
         "humanReviewNotRequired": "No human review required for this category at this autonomy level.",
+        "humanReviewSkipped": "Normally requires Relationship Manager or licensed review - skipped because your Relationship Ledger reached Anchor tier on both scores.",
         "dataUsed": {
           "savings": "Monthly income {income} and current savings {savings}.",
           "payments": "Selected goals and monthly income {income}.",
@@ -926,7 +940,8 @@
     "detail": "OCBC FutureOS is connecting life goals, products, and approved AI actions.",
     "lifeGraph": "Building Life Graph...",
     "mirror": "Simulating future...",
-    "guardian": "Preparing guardian message..."
+    "guardian": "Preparing guardian message...",
+    "relationshipLedger": "Reading the relationship ledger..."
   },
   "needDetails": {
     "liveProjection": "Live projection",
@@ -1327,6 +1342,84 @@
     "newFeatureBadge": "New",
     "addAnother": "Add another goal",
     "goToMirror": "See it in Future Mirror"
+  },
+  "relationshipLedger": {
+    "title": "Relationship Ledger",
+    "subtitle": "Two separate scores: what you've kept, and what Guardian has kept. Real benefits require both to hold up.",
+    "scoreLabel": "Score",
+    "notYet": "Not yet",
+    "followThrough": {
+      "title": "Follow-Through Score",
+      "band": {
+        "newRelationship": "New Relationship",
+        "building": "Building",
+        "reliable": "Reliable",
+        "steadfast": "Steadfast",
+        "anchor": "Anchor"
+      },
+      "bandDetail": {
+        "newRelationship": "No confirmed savings plan yet - confirm a goal in Wedding, Home, or Retirement to start building history.",
+        "building": "Early history - keep checking in on your confirmed goals to build a real track record.",
+        "reliable": "A solid, real track record of checking in and saving close to what you confirmed.",
+        "steadfast": "A strong, sustained record - consistent check-ins, amounts close to target, multiple goals.",
+        "anchor": "The deepest tier - long, consistent history across your confirmed goals."
+      },
+      "componentsTitle": "How this is calculated (four real dimensions)",
+      "components": {
+        "checkInConsistency": "Check-In Consistency ({weight}%)",
+        "amountFidelity": "Amount Fidelity ({weight}%)",
+        "recoveryHonesty": "Recovery Honesty ({weight}%)",
+        "multiGoalDepth": "Multi-Goal Commitment Depth ({weight}%)"
+      },
+      "detail": {
+        "checkInConsistency": "You've checked in {monthsWithCheckin} of {monthsSincePlan} months since confirming a plan.",
+        "amountFidelity": "Across {checkinCount} check-in(s), your actual amount averaged {value}% of what you confirmed.",
+        "recoveryHonesty": {
+          "neverNeeded": "You've never hit a risk signal - nothing to recover from, so this starts at full marks.",
+          "usedRecovery": "You hit a risk signal and used hardship recovery instead of going quiet - that's what this rewards.",
+          "wentQuiet": "You hit a risk signal but haven't used hardship recovery yet - this is what's holding the dimension back."
+        },
+        "multiGoalDepth": "You have {confirmedGoalCount} goal(s) actually confirmed and tracked (capped at 3 for this score)."
+      }
+    },
+    "nextStep": {
+      "checkInConsistency": "Log this month's check-in on any confirmed goal - that's the fastest way to move this score.",
+      "amountFidelity": "Your check-ins are running below your confirmed monthly target - even a partial top-up next month helps.",
+      "recoveryHonesty": "Use the hardship recovery flow on the goal that's at risk - honest recovery scores the same as never needing it.",
+      "multiGoalDepth": "Confirm a savings plan on another goal - breadth of commitment is part of this score too."
+    },
+    "reputation": {
+      "title": "Guardian Reputation Score",
+      "note": "This is Guardian's own track record - whether its recommendations and actions have actually held up. Full breakdown is on the Guardian screen.",
+      "viewGuardian": "View full Guardian breakdown"
+    },
+    "benefitsTitle": "Relationship Benefits (both scores required)",
+    "benefits": {
+      "currentTierLabel": "Current tier",
+      "tier0": {
+        "title": "Standard",
+        "requirement": "No relationship tier reached yet",
+        "unlocks": "Standard published rates - e.g. OCBC RoboInvest at 0.88% p.a."
+      },
+      "tier1": {
+        "title": "Tier 1",
+        "requirement": "Follow-Through: Reliable+ AND Guardian Reputation: Trusted+",
+        "unlocks": "OCBC RoboInvest management fee reduced to 0.65% p.a."
+      },
+      "tier2": {
+        "title": "Tier 2",
+        "requirement": "Follow-Through: Steadfast+ AND Guardian Reputation: Trusted+",
+        "unlocks": "OCBC RoboInvest reduced further to 0.50% p.a.; the OCBC 360 'spend $500' bonus condition is treated as met."
+      },
+      "tier3": {
+        "title": "Tier 3 - Anchor",
+        "requirement": "Follow-Through: Anchor AND Guardian Reputation: Highly Trusted",
+        "unlocks": "OCBC RoboInvest at 0.45% p.a. (close to market rate); loans and insurance skip the mandatory human review step."
+      }
+    },
+    "timelineTitle": "Real check-in history",
+    "timelineLine": "Checked in {amount} against a {target} target",
+    "noCheckinsYet": "No savings check-ins logged yet - once you confirm a plan in Wedding, Home, or Retirement and log a check-in, it will show up here."
   },
   "investmentPlanner": {
     "title": "Investment Planner",
@@ -2007,6 +2100,7 @@
     "logout": "Logout",
     "today": "Today",
     "welcome": "Welcome back, {name}",
+    "followThroughLabel": "Follow-Through Score",
     "quickActionsLabel": "Quick actions",
     "quickActions": {
       "paynow": "PayNow",
@@ -2040,7 +2134,8 @@
       "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
       "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
       "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
-      "family": "Family Planning measures whether cash reserves and insurance readiness can support future household needs."
+      "family": "Family Planning measures whether cash reserves and insurance readiness can support future household needs.",
+      "followThrough": "Follow-Through Score measures whether you've kept the savings commitments you confirmed - real check-ins against real targets, not income or repayment history."
     },
     "customiseTitle": "Customise Shortcuts",
     "customiseText": "Choose which shortcuts appear on your home screen.",
@@ -2057,7 +2152,8 @@
       "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
       "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
       "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
-      "family": "Family Planning combines emergency-fund strength and insurance protection readiness into one 0-100 readiness score."
+      "family": "Family Planning combines emergency-fund strength and insurance protection readiness into one 0-100 readiness score.",
+      "followThrough": "Combines check-in consistency (40%), amount fidelity (35%), recovery honesty (15%), and multi-goal depth (10%) - see the Relationship Ledger for the full breakdown."
     },
     "proof": {
       "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
@@ -2077,7 +2173,10 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "Inputs: emergency reserve, monthly expenses, insurance status, family planning goal and current savings.",
       "familyMath": "Math: emergency readiness contributes 45% and protection readiness contributes 55%.",
-      "familyResult": "Result: Karina has strong savings, but basic insurance keeps this score from reaching the highest band."
+      "familyResult": "Result: Karina has strong savings, but basic insurance keeps this score from reaching the highest band.",
+      "followThroughInputs": "Inputs: real savings check-ins across every confirmed goal, plus hardship recovery evidence.",
+      "followThroughMath": "Math: each dimension is weighted and combined; a dimension with no data yet is excluded rather than scored as zero.",
+      "followThroughResult": "Result: open the Relationship Ledger to see exactly which dimension is holding the score back."
     }
   },
   "accountDetails": {

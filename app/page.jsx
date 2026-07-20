@@ -83,6 +83,7 @@ const screens = {
   NEED_INSURANCE: "needInsurance",
   NEED_INVESTMENT: "needInvestment",
   NEED_CUSTOM_GOAL: "needCustomGoal",
+  RELATIONSHIP_LEDGER: "relationshipLedger",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
@@ -335,6 +336,13 @@ const futureSystems = [
     subtitleKey: "futureSystems.guardian.subtitle",
     icon: ShieldCheck,
     screen: screens.GUARDIAN,
+  },
+  {
+    id: "relationshipLedger",
+    titleKey: "futureSystems.relationshipLedger.title",
+    subtitleKey: "futureSystems.relationshipLedger.subtitle",
+    icon: Award,
+    screen: screens.RELATIONSHIP_LEDGER,
   },
 ];
 
@@ -1031,7 +1039,7 @@ function getProductConflict(product, healthScores) {
 }
 
 function getProductState(product, ctx) {
-  const { healthScores, selectedGoalIds, added } = ctx;
+  const { healthScores, selectedGoalIds, added, benefits } = ctx;
   const relevantGoal = product.relevantGoals.find((goal) => selectedGoalIds.includes(goal));
   if (!relevantGoal) return { state: "notApplicable", relevantGoal: null, conflict: null };
 
@@ -1039,6 +1047,12 @@ function getProductState(product, ctx) {
   if (conflict) return { state: "blocked", relevantGoal, conflict };
 
   if (added) return { state: "readyForConsent", relevantGoal, conflict: null, accepted: true };
+
+  // Anchor tier (both Follow-Through and Guardian Reputation at their top band) skips the
+  // mandatory human review on loans/insurance - a real, dual-gated relationship benefit, not a
+  // generic "trusted customer" flag.
+  const reviewSkipped = Boolean(benefits?.skipReviewCategories) && productCategoriesRequiringReview.has(product.category);
+  if (reviewSkipped) return { state: "readyForConsent", relevantGoal, conflict: null, reviewSkipped: true };
 
   if (product.category === "insurance") {
     const insuranceScore = healthScores.find((s) => s.id === "insurance")?.value ?? 0;
@@ -1074,26 +1088,67 @@ function getProductEvidence(product, ctx, t) {
       : t("lifeGraph.productFit.evidence.noConflict"),
     expectedImpact: `${t(product.impactKey)} (${t("home.futureHealthScore")}: ${scoreOf("future")}/100)`,
     limitation: t("lifeGraph.productFit.evidence.limitation"),
-    humanReview: productCategoriesRequiringReview.has(product.category)
-      ? t("lifeGraph.productFit.evidence.humanReviewRequired")
-      : t("lifeGraph.productFit.evidence.humanReviewNotRequired"),
+    humanReview: resultInfo.reviewSkipped
+      ? t("lifeGraph.productFit.evidence.humanReviewSkipped")
+      : productCategoriesRequiringReview.has(product.category)
+        ? t("lifeGraph.productFit.evidence.humanReviewRequired")
+        : t("lifeGraph.productFit.evidence.humanReviewNotRequired"),
+  };
+}
+
+// RoboInvest is the one product with a real, sourced dynamic rate: its fee actually moves with the
+// dual-gated relationship tier (see getRelationshipBenefits). At tier 0 this returns the original
+// static copy (0.88%, "roughly double Endowus"); at tier 1-3 it returns the discounted rate and an
+// honest note that the gap to market is narrowing, not closed, until Anchor tier.
+function getRoboInvestBenefitCopy(benefits, t) {
+  if (!benefits || benefits.tier === 0) {
+    return { rate: t("lifeGraph.productFit.rates.roboInvest"), honestNote: t("lifeGraph.productFit.honestNote.roboInvest") };
+  }
+  const rateDisplay = benefits.roboInvestFeePercent.toFixed(2);
+  return {
+    rate: t(`lifeGraph.productFit.rates.roboInvestTier${benefits.tier}`, { rate: rateDisplay }),
+    honestNote: t(`lifeGraph.productFit.honestNote.roboInvestTier${benefits.tier}`),
   };
 }
 
 // Reached from Life Graph's compact icon entry - a full screen instead of a cramped inline panel,
 // so there's room to show the full evidence chain inline (expand-in-place) instead of hiding it
 // behind a "View Evidence" modal that most people never open.
-function ProductFitScreen({ preferences, setPreferences, t, setActiveScreen }) {
+function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
   const [openProductId, setOpenProductId] = useState(null);
   const [notice, setNotice] = useState("");
+  const [followThrough, setFollowThrough] = useState(null);
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
+
+  // Same dual-score computation as RelationshipLedgerScreen / FutureSelfGuardian - Product Fit
+  // benefits (RoboInvest fee tier, RM-review skip) are gated on the identical two ledgers shown
+  // there, not a third parallel calculation.
+  const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = getFollowThroughQueryParams(preferences);
+    fetch(`/api/follow-through/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const followThroughBand = followThrough?.band ?? "newRelationship";
+  const benefits = getRelationshipBenefits(followThroughBand, reputationBand);
+
   const visibleProducts = productRecommendations
     .map((product) => {
       const added = Boolean(preferences.futurePlanProducts?.includes(product.id));
-      const resultInfo = getProductState(product, { healthScores, selectedGoalIds, added });
+      const resultInfo = getProductState(product, { healthScores, selectedGoalIds, added, benefits });
       return { product, resultInfo };
     })
     .filter(({ resultInfo }) => resultInfo.state !== "notApplicable");
@@ -1172,13 +1227,25 @@ function ProductFitScreen({ preferences, setPreferences, t, setActiveScreen }) {
 
               <div className="proofBlock">
                 <strong>{t("lifeGraph.productFit.rateLabel")}</strong>
-                <p>{t(product.rateKey)}</p>
+                <p>{product.id === "roboInvest" ? getRoboInvestBenefitCopy(benefits, t).rate : t(product.rateKey)}</p>
               </div>
 
-              {product.honestNoteKey ? (
+              {product.id === "roboInvest" ? (
+                <section className="adviceOnlyPanel">
+                  <AlertTriangle size={18} />
+                  <p>{getRoboInvestBenefitCopy(benefits, t).honestNote}</p>
+                </section>
+              ) : product.honestNoteKey ? (
                 <section className="adviceOnlyPanel">
                   <AlertTriangle size={18} />
                   <p>{t(product.honestNoteKey)}</p>
+                </section>
+              ) : null}
+
+              {product.id === "ocbc360" && benefits.relaxedThreshold ? (
+                <section className="trustNote compactTrustNote">
+                  <Award size={17} />
+                  <p>{t("lifeGraph.productFit.relationshipNote.ocbc360")}</p>
                 </section>
               ) : null}
 
@@ -1317,6 +1384,71 @@ function getReputationBand(score) {
   if (score < 75) return "buildingTrust";
   if (score < 90) return "trusted";
   return "highlyTrusted";
+}
+
+// Dual-gated relationship benefits: Follow-Through Score (did the CUSTOMER keep their word) and
+// Guardian Reputation Score (did the AI's own recommendations hold up) are deliberately two
+// separate ledgers, not one blended number - a customer's discount should never be dragged down
+// by an unrelated AI misjudgment, and Guardian's own track record should never be papered over by
+// a customer who happens to save consistently. Every real benefit requires BOTH sides to qualify;
+// if either side drops, the benefit drops with it - the relationship has to stay healthy on both
+// sides, not just accumulate forever.
+const FOLLOW_THROUGH_BAND_RANK = { newRelationship: 0, building: 1, reliable: 2, steadfast: 3, anchor: 4 };
+const REPUTATION_BAND_RANK = { restricted: 0, underReview: 1, buildingTrust: 2, trusted: 3, highlyTrusted: 4 };
+
+// Guardian Reputation Score needs the same handful of client-only inputs (visible action cards,
+// approved/skipped counts, approved OCBC service count) everywhere it's read - factored out once
+// FutureSelfGuardian, ProductFitScreen, RelationshipLedgerScreen, and Home's stat row all needed
+// the identical computation rather than re-deriving it four separate times.
+function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates) {
+  const profile = getUserProfile(preferences);
+  const healthScores = getHealthScores(profile);
+  const spendingRisk = getSpendingRisk(profile);
+  const selectedGoalIds = getSelectedGoalIds(simulatorInputs);
+  const visibleActionCards = simulatorActionCards.filter(({ id }) => {
+    if (id === "mortgageReadiness") return selectedGoalIds.includes("home");
+    if (id === "insuranceReview") return selectedGoalIds.includes("family") || selectedGoalIds.includes("home");
+    if (id === "investmentPlan") return selectedGoalIds.includes("investment") || selectedGoalIds.includes("retirement");
+    return true;
+  });
+  const approvedActionCount = visibleActionCards.filter(({ id }) => simulatorActionStates[id] === "approved").length;
+  const skippedActionCount = visibleActionCards.filter(({ id }) => simulatorActionStates[id] === "skipped").length;
+  const approvedServiceCount = ocbcServiceActions.filter(({ id }) => simulatorActionStates[id] === "approved").length;
+  const reputation = getGuardianReputationScore({
+    preferences,
+    healthScores,
+    spendingRisk,
+    approvedCount: approvedActionCount,
+    decidedCount: approvedActionCount + skippedActionCount,
+    approvedServiceCount,
+  });
+  return { reputation, reputationBand: getReputationBand(reputation.score) };
+}
+
+// Follow-Through Score's query params are client-only signals (everAtRisk from goal ledger state,
+// custom goal count) the server can't derive on its own - factored out for the same reason as
+// computeGuardianReputation above.
+function getFollowThroughQueryParams(preferences) {
+  const customGoals = getCustomGoals(preferences);
+  const ledgerStates = Object.values(preferences.goalLedger ?? {}).map((entry) => entry.state);
+  const everAtRisk = ledgerStates.some((state) => ["atRisk", "recovery", "escalated"].includes(state));
+  return new URLSearchParams({ everAtRisk: String(everAtRisk), customGoalCount: String(customGoals.length) });
+}
+
+function getRelationshipBenefits(followThroughBand, reputationBand) {
+  const ftRank = FOLLOW_THROUGH_BAND_RANK[followThroughBand] ?? 0;
+  const repRank = REPUTATION_BAND_RANK[reputationBand] ?? 0;
+
+  if (ftRank >= 4 && repRank >= 4) {
+    return { tier: 3, roboInvestFeePercent: 0.45, skipReviewCategories: true, relaxedThreshold: true };
+  }
+  if (ftRank >= 3 && repRank >= 3) {
+    return { tier: 2, roboInvestFeePercent: 0.5, skipReviewCategories: false, relaxedThreshold: true };
+  }
+  if (ftRank >= 2 && repRank >= 3) {
+    return { tier: 1, roboInvestFeePercent: 0.65, skipReviewCategories: false, relaxedThreshold: false };
+  }
+  return { tier: 0, roboInvestFeePercent: 0.88, skipReviewCategories: false, relaxedThreshold: false };
 }
 
 // Confidence Model (04_AI_Agent.md "AI confidence must be explicit and meaningful"): confidence
@@ -2807,10 +2939,28 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [noticeModal, setNoticeModal] = useState(null);
+  const [followThrough, setFollowThrough] = useState(null);
   const NoticeIcon = noticeModal?.icon;
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = getFollowThroughQueryParams(preferences);
+    fetch(`/api/follow-through/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const followThroughBand = followThrough?.band ?? "newRelationship";
+  const followThroughScore = followThrough?.score ?? 0;
   const notificationHistory = getNotificationHistory(profile, preferences, t);
   const futureHealth = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const homeProgress = profile.goals.home ? 72 : 54;
@@ -2920,6 +3070,17 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
       info: t("homeBanking.info.retirement"),
       methodKey: "homeBanking.method.retirement",
       proofKeys: ["retirementInputs", "retirementMath", "retirementResult"],
+    },
+    {
+      id: "followThrough",
+      label: t("homeBanking.followThroughLabel"),
+      value: followThrough
+        ? `${t(`relationshipLedger.followThrough.band.${followThroughBand}`)} · ${followThroughScore}/100`
+        : t("loading.detail"),
+      progress: followThroughScore,
+      info: t("homeBanking.info.followThrough"),
+      methodKey: "homeBanking.method.followThrough",
+      proofKeys: ["followThroughInputs", "followThroughMath", "followThroughResult"],
     },
   ];
 
@@ -3784,6 +3945,191 @@ function FutureMirrorSimulator({
   );
 }
 
+const followThroughComponentOrder = ["checkInConsistency", "amountFidelity", "recoveryHonesty", "multiGoalDepth"];
+const followThroughComponentIcons = {
+  checkInConsistency: CalendarClock,
+  amountFidelity: Target,
+  recoveryHonesty: ShieldCheck,
+  multiGoalDepth: Award,
+};
+
+// Reached from Home's entry card and stat row. Shows two deliberately separate ledgers side by
+// side - Follow-Through Score (did the customer keep their own word) and Guardian Reputation Score
+// (did the AI's recommendations hold up) - then the benefit ladder that requires BOTH to qualify.
+function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
+  const [followThrough, setFollowThrough] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const { reputation, reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    const params = getFollowThroughQueryParams(preferences);
+    fetch(`/api/follow-through/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const followThroughBand = followThrough?.band ?? "newRelationship";
+  const benefits = getRelationshipBenefits(followThroughBand, reputationBand);
+
+  const knownComponents = followThrough
+    ? followThroughComponentOrder
+        .map((key) => ({ key, ...followThrough.components[key] }))
+        .filter((c) => c.value != null)
+    : [];
+  const weakestComponent = knownComponents.length
+    ? knownComponents.reduce((weakest, c) => (c.value < weakest.value ? c : weakest))
+    : null;
+
+  const timeline = followThrough
+    ? followThrough.domains
+        .flatMap((domain) =>
+          domain.checkins.map((checkin) => ({
+            domain: domain.domain,
+            month: checkin.month,
+            amount: checkin.amount,
+            target: domain.monthlyContribution,
+          }))
+        )
+        .sort((a, b) => (a.month < b.month ? 1 : -1))
+    : [];
+
+  const benefitTiers = [0, 1, 2, 3];
+
+  return (
+    <Screen>
+      <Header title={t("relationshipLedger.title")} subtitle={t("relationshipLedger.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      {loading || !followThrough ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <>
+          <section className="recommendationPanel">
+            <div className="panelHead">
+              <span className="sectionLabel">{t("relationshipLedger.followThrough.title")}</span>
+              <Target size={17} />
+            </div>
+            <div className="proofScore">
+              <span>{t("relationshipLedger.scoreLabel")}</span>
+              <b>{followThrough.score}/100</b>
+            </div>
+            <div className="productStateRow">
+              <b className={`statePill state-${followThroughBand}`}>{t(`relationshipLedger.followThrough.band.${followThroughBand}`)}</b>
+            </div>
+            <p>{t(`relationshipLedger.followThrough.bandDetail.${followThroughBand}`)}</p>
+          </section>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("relationshipLedger.followThrough.componentsTitle")}</span>
+            <div className="strategyList">
+              {followThroughComponentOrder.map((key) => {
+                const component = followThrough.components[key];
+                const RowIcon = followThroughComponentIcons[key];
+                return (
+                  <article className="strategyItem" key={key}>
+                    <span className="iconBubble">
+                      <RowIcon size={16} />
+                    </span>
+                    <div>
+                      <strong>{t(`relationshipLedger.followThrough.components.${key}`, { weight: Math.round(component.weight * 100) })}</strong>
+                      <small>
+                        {t(
+                          key === "recoveryHonesty"
+                            ? `relationshipLedger.followThrough.detail.recoveryHonesty.${component.reason}`
+                            : `relationshipLedger.followThrough.detail.${key}`,
+                          component
+                        )}
+                      </small>
+                    </div>
+                    <b>{component.value == null ? t("relationshipLedger.notYet") : `${component.value}/100`}</b>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
+          {weakestComponent ? (
+            <section className="trustNote compactTrustNote">
+              <Info size={17} />
+              <p>{t(`relationshipLedger.nextStep.${weakestComponent.key}`)}</p>
+            </section>
+          ) : null}
+
+          <section className="recommendationPanel">
+            <div className="panelHead">
+              <span className="sectionLabel">{t("relationshipLedger.reputation.title")}</span>
+              <Bot size={17} />
+            </div>
+            <div className="proofScore">
+              <span>{t("guardian.reputation.scoreLabel")}</span>
+              <b>{reputation.score}/100</b>
+            </div>
+            <div className="productStateRow">
+              <b className={`statePill state-${reputationBand}`}>{t(`guardian.reputation.band.${reputationBand}`)}</b>
+            </div>
+            <p>{t("relationshipLedger.reputation.note")}</p>
+            <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.GUARDIAN)}>
+              {t("relationshipLedger.reputation.viewGuardian")}
+            </button>
+          </section>
+
+          <section className="strategicCategoryList">
+            <span className="sectionLabel">{t("relationshipLedger.benefitsTitle")}</span>
+            {benefitTiers.map((tier) => (
+              <div className={tier === benefits.tier ? "strategicAccordionItem expanded" : "strategicAccordionItem"} key={tier}>
+                <div className="strategicCategoryRow">
+                  <span className="iconBubble">
+                    <Award size={16} />
+                  </span>
+                  <span>
+                    <strong>{t(`relationshipLedger.benefits.tier${tier}.title`)}</strong>
+                    <small>{t(`relationshipLedger.benefits.tier${tier}.requirement`)}</small>
+                  </span>
+                  {tier === benefits.tier ? (
+                    <b className="statePill state-trusted">{t("relationshipLedger.benefits.currentTierLabel")}</b>
+                  ) : null}
+                </div>
+                <div className="strategicAccordionDetail">
+                  <p>{t(`relationshipLedger.benefits.tier${tier}.unlocks`)}</p>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="historyTimeline">
+            <span className="sectionLabel">{t("relationshipLedger.timelineTitle")}</span>
+            {timeline.length ? (
+              timeline.map((entry, index) => (
+                <article key={`${entry.domain}-${entry.month}-${index}`}>
+                  <span>{entry.month}</span>
+                  <div>
+                    <strong>{t(`simulator.goals.${entry.domain}`)}</strong>
+                    <small>{t("relationshipLedger.timelineLine", { amount: formatSgd(entry.amount), target: formatSgd(entry.target) })}</small>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <p>{t("relationshipLedger.noCheckinsYet")}</p>
+            )}
+          </section>
+        </>
+      )}
+    </Screen>
+  );
+}
+
 function FutureSelfGuardian({
   setActiveScreen,
   preferences,
@@ -3827,15 +4173,7 @@ function FutureSelfGuardian({
   // the same getHealthScores formula) - it must not diverge into a second, Guardian-only number.
   const futureScore = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const activeGoalCount = selectedGoalIds.length;
-  const reputation = getGuardianReputationScore({
-    preferences,
-    healthScores,
-    spendingRisk,
-    approvedCount: approvedActionCount,
-    decidedCount: approvedActionCount + skippedActionCount,
-    approvedServiceCount,
-  });
-  const reputationBand = getReputationBand(reputation.score);
+  const { reputation, reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
   const aiConfidence = getAiConfidence(profile, reputation.score);
   const confidenceBand = getConfidenceBand(aiConfidence);
   const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
@@ -9921,6 +10259,7 @@ export default function App() {
     [screens.HOME]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
     [screens.NEED_CUSTOM_GOAL]: <CustomGoalPlannerScreen {...shared} />,
+    [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
@@ -9978,7 +10317,16 @@ export default function App() {
     ),
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} />,
-    [screens.PRODUCT_FIT]: <ProductFitScreen preferences={preferences} setPreferences={setPreferences} t={t} setActiveScreen={setActiveScreen} />,
+    [screens.PRODUCT_FIT]: (
+      <ProductFitScreen
+        preferences={preferences}
+        setPreferences={setPreferences}
+        simulatorInputs={simulatorInputs}
+        simulatorActionStates={simulatorActionStates}
+        t={t}
+        setActiveScreen={setActiveScreen}
+      />
+    ),
     [screens.PAYNOW]: <QuickActionScreen {...shared} type="paynow" />,
     [screens.SCAN_PAY]: <QuickActionScreen {...shared} type="scanPay" />,
     [screens.FX]: <QuickActionScreen {...shared} type="fx" />,

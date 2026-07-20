@@ -66,11 +66,20 @@
         "roboInvest": "管理费 0.88% p.a.，按投资总额每月计收——这还不包括底层 ETF 本身的费用。",
         "greatTerm": "纯保障型定期寿险，不含储蓄或现金价值成分。保费取决于年龄、保额和是否吸烟，比较前建议先取得个人化报价。",
         "paynowGiro": "本地 PayNow 或 GIRO 转账不收取任何费用。",
-        "ocbc365": "消费满 $1,600 时最高可得 $160/月现金回赠（餐饮 5%、油费 6%、超市/交通/旅游/电信/电费 3%）。消费 $800-$1,599 时上限只有 $80/月。年度总上限 $1,920。"
+        "ocbc365": "消费满 $1,600 时最高可得 $160/月现金回赠（餐饮 5%、油费 6%、超市/交通/旅游/电信/电费 3%）。消费 $800-$1,599 时上限只有 $80/月。年度总上限 $1,920。",
+        "roboInvestTier1": "管理费 {rate}% p.a.——因为你在关系账本里的档位，从标准的 0.88% 降下来的。",
+        "roboInvestTier2": "管理费 {rate}% p.a.——因为你的关系档位，比标准的 0.88% 再降低了一些。",
+        "roboInvestTier3": "管理费 {rate}% p.a.——目前能拿到的最低档，接近市场价，只有到「定锚」档才解锁。"
       },
       "honestNote": {
         "monthlySavings": "Guardian 提示：如果你不需要严格的「不能提款」规则，同样这笔钱放进 OCBC 360 Account，满足条件时最高能拿到 4.45% p.a.——比这个账户 0.1% p.a. 的上限高出许多倍。",
-        "roboInvest": "Guardian 提示：OCBC RoboInvest 0.88% p.a. 的管理费，大约是新加坡同类型分散投资机器人顾问收费的两倍——例如 Endowus 的 CPF/SRS 组合收费为 0.40% p.a.。建议先确认这份额外服务是否值得这个差价，再决定要不要请求顾问对接。"
+        "roboInvest": "Guardian 提示：OCBC RoboInvest 0.88% p.a. 的管理费，大约是新加坡同类型分散投资机器人顾问收费的两倍——例如 Endowus 的 CPF/SRS 组合收费为 0.40% p.a.。建议先确认这份额外服务是否值得这个差价，再决定要不要请求顾问对接。",
+        "roboInvestTier1": "Guardian 提示：靠着你的关系档位，费率已经从标准的 0.88% 降下来了，但还是比 Endowus 同类组合的 0.40% p.a. 高——差距在缩小，还没完全追平。",
+        "roboInvestTier2": "Guardian 提示：已经很接近 Endowus 的 0.40% p.a. 了——升到「定锚」档能把差距再缩小。",
+        "roboInvestTier3": "Guardian 提示：现在已经接近 Endowus 同类组合的 0.40% p.a.——这是关系权益能降到的最低费率了。"
+      },
+      "relationshipNote": {
+        "ocbc360": "Guardian 提示：因为你在关系账本里的档位，这个账户「消费满 $500」的奖励条件已经视为达成。"
       },
       "categories": {
         "savings": "储蓄 / 存款",
@@ -138,6 +147,7 @@
         "humanReviewLabel": "人工审核要求",
         "humanReviewRequired": "执行前需要客户经理或持牌顾问审核。",
         "humanReviewNotRequired": "在当前自主等级下,此类别无需人工审核。",
+        "humanReviewSkipped": "本来需要客户经理或持牌顾问审核——因为你的关系账本两个分数都到了「定锚」档，跳过了这一步。",
         "dataUsed": {
           "savings": "每月收入{income}及目前储蓄{savings}。",
           "payments": "已选目标及每月收入{income}。",
@@ -913,7 +923,8 @@
     "detail": "OCBC FutureOS 正在连接人生目标、产品和已批准的 AI 行动。",
     "lifeGraph": "正在构建 Life Graph...",
     "mirror": "正在模拟未来...",
-    "guardian": "正在准备守护者讯息..."
+    "guardian": "正在准备守护者讯息...",
+    "relationshipLedger": "正在读取关系账本..."
   },
   "needDetails": {
     "liveProjection": "实时预测",
@@ -1314,6 +1325,84 @@
     "newFeatureBadge": "新功能",
     "addAnother": "再添加一个目标",
     "goToMirror": "在 Future Mirror 里查看"
+  },
+  "relationshipLedger": {
+    "title": "关系账本",
+    "subtitle": "两个分开的分数：你守住了什么，Guardian 守住了什么。真正的权益需要两边都达标才解锁。",
+    "scoreLabel": "分数",
+    "notYet": "暂无数据",
+    "followThrough": {
+      "title": "履约分",
+      "band": {
+        "newRelationship": "新关系",
+        "building": "建立中",
+        "reliable": "可靠",
+        "steadfast": "坚定",
+        "anchor": "定锚"
+      },
+      "bandDetail": {
+        "newRelationship": "还没有确认过储蓄计划——去 Wedding、Home 或 Retirement 确认一个目标，开始积累记录。",
+        "building": "刚开始积累记录——持续给已确认的目标打卡，才能攒出真实的履约记录。",
+        "reliable": "已经有一份扎实、真实的记录——按时打卡，存的钱接近承诺金额。",
+        "steadfast": "记录持续且强劲——打卡稳定、金额接近目标、涉及多个目标。",
+        "anchor": "最深的一档——在你已确认的目标上，有长期且持续一致的记录。"
+      },
+      "componentsTitle": "怎么算出来的（四个真实维度）",
+      "components": {
+        "checkInConsistency": "打卡一致性（{weight}%）",
+        "amountFidelity": "金额符合度（{weight}%）",
+        "recoveryHonesty": "困境诚实度（{weight}%）",
+        "multiGoalDepth": "多目标承诺深度（{weight}%）"
+      },
+      "detail": {
+        "checkInConsistency": "自从确认计划以来，你在 {monthsSincePlan} 个月里打卡了 {monthsWithCheckin} 个月。",
+        "amountFidelity": "在 {checkinCount} 次打卡里，你实际存的金额平均达到承诺金额的 {value}%。",
+        "recoveryHonesty": {
+          "neverNeeded": "你从没触发过风险信号——没什么需要恢复的，这项直接给满分。",
+          "usedRecovery": "你触发过风险信号，并且用了困境恢复功能处理，而不是放着不管——这正是这一项在奖励的行为。",
+          "wentQuiet": "你触发过风险信号，但还没用困境恢复功能处理——这是这一项被拖分的原因。"
+        },
+        "multiGoalDepth": "你真实确认并在追踪的目标有 {confirmedGoalCount} 个（这项分数最多算到 3 个）。"
+      }
+    },
+    "nextStep": {
+      "checkInConsistency": "去任意一个已确认的目标打卡本月记录——这是提升这项分数最快的办法。",
+      "amountFidelity": "你最近打卡的金额低于承诺的每月目标——下个月哪怕只补一部分也有帮助。",
+      "recoveryHonesty": "对正处于风险状态的目标使用困境恢复功能——诚实处理跟从没出过问题拿的是一样的分数。",
+      "multiGoalDepth": "去确认另一个目标的储蓄计划——承诺的广度也是这项分数的一部分。"
+    },
+    "reputation": {
+      "title": "Guardian 声誉分",
+      "note": "这是 Guardian 自己的记录——它的建议和行动有没有真的靠得住。完整拆解在 Guardian 页面里。",
+      "viewGuardian": "查看 Guardian 完整拆解"
+    },
+    "benefitsTitle": "关系权益（两个分数都要达标）",
+    "benefits": {
+      "currentTierLabel": "当前档位",
+      "tier0": {
+        "title": "标准档",
+        "requirement": "还没达到任何关系档位",
+        "unlocks": "标准公开利率——例如 OCBC RoboInvest 收 0.88% p.a."
+      },
+      "tier1": {
+        "title": "第一档",
+        "requirement": "履约分：可靠+ 且 Guardian 声誉分：Trusted+",
+        "unlocks": "OCBC RoboInvest 管理费降到 0.65% p.a."
+      },
+      "tier2": {
+        "title": "第二档",
+        "requirement": "履约分：坚定+ 且 Guardian 声誉分：Trusted+",
+        "unlocks": "OCBC RoboInvest 再降到 0.50% p.a.；OCBC 360 的「消费满$500」奖励条件视为已满足。"
+      },
+      "tier3": {
+        "title": "第三档 —— 定锚",
+        "requirement": "履约分：定锚 且 Guardian 声誉分：Highly Trusted",
+        "unlocks": "OCBC RoboInvest 降到 0.45% p.a.（接近市场价）；贷款和保险跳过强制人工审核环节。"
+      }
+    },
+    "timelineTitle": "真实打卡记录",
+    "timelineLine": "打卡存入 {amount}，目标是 {target}",
+    "noCheckinsYet": "还没有储蓄打卡记录——在 Wedding、Home 或 Retirement 确认一个计划并打卡后，记录会出现在这里。"
   },
   "investmentPlanner": {
     "title": "投资规划师",
@@ -1994,6 +2083,7 @@
     "logout": "登出",
     "today": "今天",
     "welcome": "欢迎，{name}",
+    "followThroughLabel": "履约分",
     "quickActionsLabel": "快捷操作",
     "quickActions": {
       "paynow": "PayNow",
@@ -2027,7 +2117,8 @@
       "selected": "Selected Goal is the active first-home readiness goal currently being protected by Future Self Guardian.",
       "emergency": "Emergency Fund measures how much of the target safety reserve remains protected after planned spending and debt obligations.",
       "retirement": "Retirement Goal measures projected retirement capital at age 62 against the target capital needed for a secure retirement.",
-      "family": "家庭规划衡量现金储备及保险准备度是否能支持未来的家庭需求。"
+      "family": "家庭规划衡量现金储备及保险准备度是否能支持未来的家庭需求。",
+      "followThrough": "履约分衡量的是你有没有守住自己确认过的储蓄承诺——真实的打卡记录对比真实目标，不是收入或还款记录。"
     },
     "customiseTitle": "自定义快捷操作",
     "customiseText": "选择要在主页显示的快捷方式。",
@@ -2044,7 +2135,8 @@
       "selected": "Home readiness combines down-payment progress, target year feasibility, emergency reserve protection, and mortgage-readiness signals.",
       "emergency": "Emergency readiness equals protected liquid reserve divided by the six-month safety-reserve target.",
       "retirement": "Projected capital at age 62 is divided by the target retirement capital. Spending and debt pressure lower the score.",
-      "family": "家庭规划将应急基金实力及保险保障准备度综合为一个 0-100 的准备度分数。"
+      "family": "家庭规划将应急基金实力及保险保障准备度综合为一个 0-100 的准备度分数。",
+      "followThrough": "综合打卡一致性（40%）、金额符合度（35%）、困境诚实度（15%）、多目标深度（10%）——完整拆解在关系账本页面。"
     },
     "proof": {
       "futureScoreInputs": "Inputs: savings, investments, card balance, loan balance, goals, emergency reserve, insurance score, and retirement target age 62.",
@@ -2064,7 +2156,10 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "输入项:应急储备、每月支出、保险状况、家庭规划目标及目前储蓄。",
       "familyMath": "计算方式:应急准备度占 45%,保障准备度占 55%。",
-      "familyResult": "结果:Karina 的储蓄状况良好,但基础保险使该分数无法达到最高档位。"
+      "familyResult": "结果:Karina 的储蓄状况良好,但基础保险使该分数无法达到最高档位。",
+      "followThroughInputs": "输入项：每个已确认目标背后真实的储蓄打卡记录，以及困境恢复的证据。",
+      "followThroughMath": "计算方式：每个维度加权后合并；还没有数据的维度会被排除，而不是算作零分。",
+      "followThroughResult": "结果：打开关系账本页面，能看到具体是哪个维度在拖分。"
     }
   },
   "mockScreens": {
@@ -2171,6 +2266,10 @@
     "guardian": {
       "title": "Future Self Guardian",
       "subtitle": "通过已批准的行动保护你的长期目标"
+    },
+    "relationshipLedger": {
+      "title": "关系账本",
+      "subtitle": "两个分开的分数——你守住了什么、Guardian 守住了什么。真正的权益需要两边都达标。"
     }
   },
   "accountDetails": {
