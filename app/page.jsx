@@ -1452,6 +1452,30 @@ function getRelationshipBenefits(followThroughBand, reputationBand) {
   return { tier: 0, roboInvestFeePercent: 0.88, skipReviewCategories: false, relaxedThreshold: false };
 }
 
+// Shared across every screen that needs to gate a real benefit (Loan Planner's rate discount,
+// Guardian Auto Top-Up here) on the dual-gated relationship tier - factored into one hook once a
+// fourth savings-plan screen needed the identical fetch-effect + computeGuardianReputation +
+// getRelationshipBenefits sequence, rather than copy-pasting it a fourth time.
+function useRelationshipTier(preferences, simulatorInputs, simulatorActionStates) {
+  const [followThrough, setFollowThrough] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    const params = getFollowThroughQueryParams(preferences);
+    fetch(`/api/follow-through/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
+  const followThroughBand = followThrough?.band ?? "newRelationship";
+  return getRelationshipBenefits(followThroughBand, reputationBand).tier;
+}
+
 // Confidence Model (04_AI_Agent.md "AI confidence must be explicit and meaningful"): confidence
 // reflects how much of the profile is customer-confirmed (edited away from an assumed default)
 // versus still an unverified assumption, weighted against Guardian's own proven reputation - not a
@@ -5074,6 +5098,7 @@ function NeedDetailScreen({
   setPreferences,
   simulatorInputs,
   setSimulatorInputs,
+  simulatorActionStates,
   setMemoryEvents,
   language,
   t,
@@ -5095,6 +5120,9 @@ function NeedDetailScreen({
         setSimulatorInputs={setSimulatorInputs}
         setMemoryEvents={setMemoryEvents}
         profile={profile}
+        preferences={preferences}
+        simulatorInputs={simulatorInputs}
+        simulatorActionStates={simulatorActionStates}
       />
     ),
     home: (
@@ -5108,6 +5136,9 @@ function NeedDetailScreen({
         setMemoryEvents={setMemoryEvents}
         profile={profile}
         setLoanPlannerInitialPurpose={setLoanPlannerInitialPurpose}
+        preferences={preferences}
+        simulatorInputs={simulatorInputs}
+        simulatorActionStates={simulatorActionStates}
       />
     ),
     retirement: (
@@ -5121,6 +5152,8 @@ function NeedDetailScreen({
         setMemoryEvents={setMemoryEvents}
         profile={profile}
         simulatorInputs={simulatorInputs}
+        preferences={preferences}
+        simulatorActionStates={simulatorActionStates}
       />
     ),
     emergency: (
@@ -5158,6 +5191,9 @@ function NeedDetailScreen({
         setSimulatorInputs={setSimulatorInputs}
         setMemoryEvents={setMemoryEvents}
         profile={profile}
+        preferences={preferences}
+        simulatorInputs={simulatorInputs}
+        simulatorActionStates={simulatorActionStates}
       />
     ),
   }[type];
@@ -5650,9 +5686,34 @@ function SavingsCheckinForm({ onAddCheckin, submitting, t }) {
   );
 }
 
-function ConfirmedSavingsPlanCard({ plan, checkins = [], onAddCheckin, checkinSubmitting, checkinError, t }) {
+function ConfirmedSavingsPlanCard({
+  plan,
+  checkins = [],
+  onAddCheckin,
+  checkinSubmitting,
+  checkinError,
+  relationshipTier = 0,
+  autonomousSavingsEnabled = false,
+  t,
+}) {
   const { targetTotal, loggedTotal, pct } = computeCheckinProgress(plan, checkins);
   const ringColor = pct >= 75 ? "#0f9f84" : pct >= 60 ? "#f59e0b" : "#d71920";
+
+  // Tier 2+ (Steadfast+/Trusted+) is where the dual-gated relationship score starts unlocking real
+  // autonomy, not just a rate discount (see RELATIONSHIP_RATE_DISCOUNT_PERCENT in
+  // lib/loan-finance.js for the other half of this). Requires the customer's own standing
+  // guardianPermissions.autonomousSavings grant on top of the tier - trust unlocks the ABILITY, the
+  // customer's own permission still has to be on.
+  const hasCheckinThisMonth = checkins.some((checkin) => checkin.checkin_month === currentMonthValue());
+  const autoTopUpAvailable = Boolean(onAddCheckin) && relationshipTier >= 2 && autonomousSavingsEnabled && !hasCheckinThisMonth;
+
+  const handleAutoTopUp = () => {
+    onAddCheckin({
+      checkinMonth: currentMonthValue(),
+      amount: plan.monthly_contribution,
+      note: t("weddingPlanner.checkins.guardianAutoAppliedNote"),
+    });
+  };
 
   return (
     <section className="recommendationPanel">
@@ -5701,6 +5762,17 @@ function ConfirmedSavingsPlanCard({ plan, checkins = [], onAddCheckin, checkinSu
         </section>
       ) : null}
 
+      {autoTopUpAvailable ? (
+        <div className="needHeroCard">
+          <span className="sectionLabel">{t("weddingPlanner.checkins.guardianAutoTopUpLabel")}</span>
+          <p>{t("weddingPlanner.checkins.guardianAutoTopUpBody", { amount: formatSgd(Math.round(plan.monthly_contribution)) })}</p>
+          <button type="button" className="primaryButton" disabled={checkinSubmitting} onClick={handleAutoTopUp}>
+            {checkinSubmitting ? t("weddingPlanner.thinking") : t("weddingPlanner.checkins.guardianAutoTopUpButton")}
+            <Zap size={18} />
+          </button>
+        </div>
+      ) : null}
+
       {onAddCheckin ? <SavingsCheckinForm onAddCheckin={onAddCheckin} submitting={checkinSubmitting} t={t} /> : null}
     </section>
   );
@@ -5733,7 +5805,21 @@ function ConversationHistoryModal({ entries, loading, onClose, t, titleKey, empt
   );
 }
 
-function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile }) {
+function WeddingNeedContent({
+  success,
+  setSuccess,
+  t,
+  setActiveScreen,
+  language,
+  setSimulatorInputs,
+  setMemoryEvents,
+  profile,
+  preferences,
+  simulatorInputs,
+  simulatorActionStates,
+}) {
+  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -6041,6 +6127,8 @@ function WeddingNeedContent({ success, setSuccess, t, setActiveScreen, language,
               onAddCheckin={handleAddCheckin}
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
+              relationshipTier={relationshipTier}
+              autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
           ) : sessionData?.savingsPlanOptions ? (
@@ -7034,7 +7122,22 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
   );
 }
 
-function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, setSimulatorInputs, setMemoryEvents, profile, setLoanPlannerInitialPurpose }) {
+function HomeNeedContent({
+  success,
+  setSuccess,
+  t,
+  setActiveScreen,
+  language,
+  setSimulatorInputs,
+  setMemoryEvents,
+  profile,
+  setLoanPlannerInitialPurpose,
+  preferences,
+  simulatorInputs,
+  simulatorActionStates,
+}) {
+  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [confirmedLoan, setConfirmedLoan] = useState(null);
   const [loanChecked, setLoanChecked] = useState(false);
@@ -7381,6 +7484,8 @@ function HomeNeedContent({ success, setSuccess, t, setActiveScreen, language, se
               onAddCheckin={handleAddCheckin}
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
+              relationshipTier={relationshipTier}
+              autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
           ) : sessionData?.savingsPlanOptions ? (
@@ -7480,7 +7585,11 @@ function RetirementNeedContent({
   setMemoryEvents,
   profile,
   simulatorInputs,
+  preferences,
+  simulatorActionStates,
 }) {
+  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -7814,6 +7923,8 @@ function RetirementNeedContent({
               onAddCheckin={handleAddCheckin}
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
+              relationshipTier={relationshipTier}
+              autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
           ) : sessionData?.savingsPlanOptions ? (
@@ -10870,6 +10981,7 @@ export default function App() {
     setPreferences,
     simulatorInputs,
     setSimulatorInputs,
+    simulatorActionStates,
     successStates,
     setSuccessStates,
     memoryEvents,

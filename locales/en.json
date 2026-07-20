@@ -1150,7 +1150,11 @@
       "noteLabel": "Note (optional)",
       "addButton": "Log This Month's Savings",
       "emptyState": "No savings logged yet.",
-      "genericError": "Something went wrong logging that. Please try again."
+      "genericError": "Something went wrong logging that. Please try again.",
+      "guardianAutoTopUpLabel": "Guardian Auto Top-Up",
+      "guardianAutoTopUpBody": "Your Relationship Ledger tier and your Autonomous Savings permission both allow Guardian to log this month's {amount} contribution for you - one tap instead of typing it in yourself.",
+      "guardianAutoTopUpButton": "Let Guardian log it",
+      "guardianAutoAppliedNote": "Guardian auto-applied (Relationship Ledger tier + your standing permission)"
     },
     "venueTiers": {
       "budget": "Budget",

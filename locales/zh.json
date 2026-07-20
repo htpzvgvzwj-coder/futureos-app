@@ -1133,7 +1133,11 @@
       "noteLabel": "备注（可选）",
       "addButton": "记录这个月的存款",
       "emptyState": "还没有存款记录。",
-      "genericError": "记录失败，请再试一次。"
+      "genericError": "记录失败，请再试一次。",
+      "guardianAutoTopUpLabel": "Guardian 自动存入",
+      "guardianAutoTopUpBody": "你的关系账本等级和你开启的\"自主储蓄\"权限，两者都允许 Guardian 替你记录这个月 {amount} 的存款——一键搞定，不用自己手动输入。",
+      "guardianAutoTopUpButton": "让 Guardian 帮我记",
+      "guardianAutoAppliedNote": "Guardian 自动执行（关系账本等级 + 你的授权）"
     },
     "venueTiers": {
       "budget": "经济型",
