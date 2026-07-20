@@ -340,3 +340,23 @@ create table if not exists relationship_milestones (
 
 create unique index if not exists relationship_milestones_profile_key_idx
   on relationship_milestones (profile_key);
+
+-- Mirror's point-of-decision "Quick Verdict" tool (see lib/decision-finance.js). No sessions or
+-- messages table, unlike every AI-conversation domain above — each check is a single deterministic
+-- verdict plus a short AI narration, not a multi-turn conversation, so one row per check is enough.
+create table if not exists decision_checks (
+  id                uuid primary key default gen_random_uuid(),
+  profile_key       text not null default 'karina-demo',
+  description       text not null,
+  amount            numeric(12,2) not null,
+  recurring_monthly numeric(12,2) not null default 0,
+  verdict           text not null, -- go_ahead | proceed_with_caution | reconsider
+  numbers           jsonb not null,
+  narrative         text not null,
+  key_consideration text not null,
+  mocked            boolean not null default false,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists decision_checks_profile_key_idx
+  on decision_checks (profile_key, created_at desc);

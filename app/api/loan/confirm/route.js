@@ -17,7 +17,8 @@ export async function POST(request) {
   if (!parsed.success) {
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });
   }
-  const { purpose, principalBasis, propertyType, archetype, modifiers, monthlyIncome, monthlyExpenses, currentSavings, existingMonthlyDebt } = parsed.data;
+  const { purpose, principalBasis, propertyType, archetype, modifiers, monthlyIncome, monthlyExpenses, currentSavings, existingMonthlyDebt, relationshipTier } =
+    parsed.data;
 
   const otherGoals = await getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null);
 
@@ -29,6 +30,7 @@ export async function POST(request) {
     existingMonthlyDebt,
     currentSavings,
     otherGoalsMonthlyOutflow: otherGoals.total,
+    relationshipTier,
   };
 
   const base = computeLoanArchetype(purpose, archetype, params);

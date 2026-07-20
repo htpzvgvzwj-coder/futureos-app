@@ -1281,6 +1281,7 @@
     "changeAmountLabel": "Change Amount",
     "protectionNote": "Adds an estimated insurance premium of {amount}/month.",
     "growthNote": "Redirects {amount} into a conservative investment, illustratively projected to grow to about {projected} by the end of the tenure - not guaranteed.",
+    "relationshipDiscountNote": "Your Relationship Ledger tier has taken {percent}pp off this rate - this is a real reduction in your monthly installment, not just a badge.",
     "archetypes": {
       "safe": "Safe",
       "balanced": "Balanced",
@@ -1380,17 +1381,17 @@
       "tier1": {
         "title": "Tier 1",
         "requirement": "Follow-Through: Reliable+ AND Guardian Reputation: Trusted+",
-        "unlocks": "OCBC RoboInvest management fee reduced to 0.65% p.a."
+        "unlocks": "OCBC RoboInvest management fee reduced to 0.65% p.a.; -0.10pp off any loan's real interest rate."
       },
       "tier2": {
         "title": "Tier 2",
         "requirement": "Follow-Through: Steadfast+ AND Guardian Reputation: Trusted+",
-        "unlocks": "OCBC RoboInvest reduced further to 0.50% p.a.; the OCBC 360 'spend $500' bonus condition is treated as met."
+        "unlocks": "OCBC RoboInvest reduced further to 0.50% p.a.; -0.20pp off any loan's real interest rate; the OCBC 360 'spend $500' bonus condition is treated as met."
       },
       "tier3": {
         "title": "Tier 3 - Anchor",
         "requirement": "Follow-Through: Anchor AND Guardian Reputation: Highly Trusted",
-        "unlocks": "OCBC RoboInvest at 0.45% p.a. (close to market rate); loans and insurance skip the mandatory human review step."
+        "unlocks": "OCBC RoboInvest at 0.45% p.a. (close to market rate); -0.35pp off any loan's real interest rate; loans and insurance skip the mandatory human review step."
       }
     },
     "timelineTitle": "Real check-in history",
@@ -1445,6 +1446,34 @@
     "memoryEventAction": "Confirmed the goal plan and moved to savings planning",
     "memoryEventReason": "Customer described the goal in their own words; FutureOS grounded the estimate in real market research",
     "memoryEventDataUsed": "Customer's own description, web-search-grounded cost estimates"
+  },
+  "decisionVerdict": {
+    "entryTitle": "Quick Verdict",
+    "entryBody": "Get an instant, real-numbers answer on a purchase decision - right when you're standing there deciding, not after you get home.",
+    "title": "Quick Verdict",
+    "subtitle": "An instant answer grounded in your real cashflow - built for the moment you're deciding, not for reviewing later.",
+    "instructions": "Describe what you're considering and the price you've been quoted. The verdict is computed instantly from your real income, expenses, savings, and every other confirmed commitment - the AI only explains it in plain language.",
+    "descriptionLabel": "What are you considering?",
+    "descriptionPlaceholder": "e.g. A $3,000 kitchen renovation quote from a contractor",
+    "amountLabel": "One-time cost (SGD)",
+    "recurringLabel": "Additional recurring monthly cost, if any (SGD)",
+    "submit": "Get instant verdict",
+    "thinking": "Computing...",
+    "genericError": "Something went wrong on our end. Please try again.",
+    "checkAnother": "Check another decision",
+    "residualLabel": "Monthly buffer left after this and everything else you've confirmed",
+    "emergencyFundLabel": "Emergency fund coverage",
+    "emergencyFundValue": "{before} months -> {after} months after this purchase",
+    "otherGoalsLabel": "Already committed monthly across your other confirmed goals",
+    "keyConsiderationLabel": "Worth double-checking",
+    "mockedNote": "This explanation was generated locally (no live AI call was available) - the verdict and every number above are still computed from your real numbers either way.",
+    "historyTitle": "Past checks",
+    "historyEmpty": "No checks yet - your first Quick Verdict will show up here.",
+    "verdictLabels": {
+      "go_ahead": "Go ahead",
+      "proceed_with_caution": "Proceed with caution",
+      "reconsider": "Reconsider"
+    }
   },
   "investmentPlanner": {
     "title": "Investment Planner",

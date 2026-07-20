@@ -57,6 +57,7 @@ import {
   Utensils,
   Wine,
   X,
+  Zap,
 } from "lucide-react";
 import { computeHomeFinancials } from "../lib/home-finance.js";
 import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
@@ -84,6 +85,7 @@ const screens = {
   NEED_INVESTMENT: "needInvestment",
   NEED_OTHER: "needOther",
   RELATIONSHIP_LEDGER: "relationshipLedger",
+  DECISION_VERDICT: "decisionVerdict",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
@@ -3632,6 +3634,21 @@ function FutureMirrorSimulator({
           </div>
         </div>
       </section>
+
+      <button
+        type="button"
+        className="checkOption weddingEntryOption"
+        onClick={() => setActiveScreen(screens.DECISION_VERDICT)}
+      >
+        <Zap size={15} />
+        <span>
+          {t("decisionVerdict.entryTitle")}
+          <small style={{ display: "block", fontWeight: 400 }}>{t("decisionVerdict.entryBody")}</small>
+        </span>
+        <span className="weddingEntryTrailing">
+          <ChevronRight size={14} />
+        </span>
+      </button>
 
       <section className="simulatorForm">
         <div className="dynamicFieldGroups">
@@ -7905,6 +7922,12 @@ function LoanStrategySelector({ archetypes, selectedArchetype, onSelectArchetype
           />
         ))}
       </div>
+      {selectedResult?.relationship_discount_percent > 0 ? (
+        <section className="trustNote compactTrustNote">
+          <Award size={17} />
+          <p>{t("loanPlanner.relationshipDiscountNote", { percent: selectedResult.relationship_discount_percent.toFixed(2) })}</p>
+        </section>
+      ) : null}
       <div className="settingsGroup">
         <span className="sectionLabel">{t("loanPlanner.modifiersLabel")}</span>
         <div className="checkboxGrid">
@@ -7951,6 +7974,12 @@ function LoanConfirmedCard({ loan, onChangeStrategy, onChangeAmount, t }) {
           </span>
         ))}
       </div>
+      {loan.relationship_discount_percent > 0 ? (
+        <section className="trustNote compactTrustNote">
+          <Award size={17} />
+          <p>{t("loanPlanner.relationshipDiscountNote", { percent: loan.relationship_discount_percent.toFixed(2) })}</p>
+        </section>
+      ) : null}
       <div className="confirmedPlanActions">
         <button type="button" className="secondaryButton" onClick={onChangeStrategy}>
           {t("loanPlanner.changeStrategyLabel")}
@@ -8007,8 +8036,43 @@ function LoanSizingOptionCard({ option, selected, onSelect, t }) {
   );
 }
 
-function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, initialPurpose, onConsumeInitialPurpose, setMemoryEvents }) {
+function LoanPlannerContent({
+  success,
+  setSuccess,
+  t,
+  setActiveScreen,
+  language,
+  profile,
+  initialPurpose,
+  onConsumeInitialPurpose,
+  setMemoryEvents,
+  preferences,
+  simulatorInputs,
+  simulatorActionStates,
+}) {
   const [purpose, setPurpose] = useState(null);
+  const [followThrough, setFollowThrough] = useState(null);
+
+  // Same dual-score computation as ProductFitScreen/RelationshipLedgerScreen - the discount this
+  // tier unlocks isn't just advertised copy here, it's threaded into the real rate used to compute
+  // the customer's actual monthly installment (see lib/loan-finance.js's RELATIONSHIP_RATE_DISCOUNT_PERCENT).
+  useEffect(() => {
+    let cancelled = false;
+    const params = getFollowThroughQueryParams(preferences);
+    fetch(`/api/follow-through/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
+  const followThroughBand = followThrough?.band ?? "newRelationship";
+  const relationshipBenefits = getRelationshipBenefits(followThroughBand, reputationBand);
+  const relationshipTier = relationshipBenefits.tier;
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -8163,6 +8227,7 @@ function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language,
           monthlyIncome: numberValue(profile.monthlyIncome, 7500),
           monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
           currentSavings: numberValue(profile.currentSavings, 20000),
+          relationshipTier,
         }),
       });
       const data = await response.json();
@@ -8206,6 +8271,7 @@ function LoanPlannerContent({ success, setSuccess, t, setActiveScreen, language,
           monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
           currentSavings: numberValue(profile.currentSavings, 20000),
           otherGoalsMonthlyOutflow,
+          relationshipTier,
         })
       : null;
   const archetypesWithModifiers = archetypes
@@ -9030,6 +9096,210 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
           submitting={submitting}
           t={t}
         />
+      )}
+    </Screen>
+  );
+}
+
+// Mirror's point-of-decision "Quick Verdict" tool: unlike every other planner in this app, this is
+// a single-question, single-answer interaction meant to be used standing in a shop or at a vendor
+// meeting, not a multi-turn plan-then-confirm conversation. The verdict category and every number
+// come from lib/decision-finance.js's deterministic cashflow math BEFORE any AI call, so this
+// answers instantly even on the mock fallback path - see app/api/decision/check/route.js.
+const DECISION_VERDICT_ICONS = { go_ahead: ThumbsUp, proceed_with_caution: AlertTriangle, reconsider: ThumbsDown };
+const DECISION_VERDICT_PANEL_CLASS = { go_ahead: "insightCard", proceed_with_caution: "adviceOnlyPanel", reconsider: "adviceOnlyPanel" };
+
+function DecisionHistoryModal({ entries, loading, onClose, t }) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("decisionVerdict.historyTitle")}>
+      <motion.div className="confirmModal weddingHistoryModal" {...screenMotion}>
+        <History size={24} />
+        <strong>{t("decisionVerdict.historyTitle")}</strong>
+        {loading ? (
+          <p>{t("loading.detail")}</p>
+        ) : entries.length ? (
+          <div className="historyTimeline">
+            {entries.map((entry) => {
+              const Icon = DECISION_VERDICT_ICONS[entry.verdict] ?? AlertTriangle;
+              return (
+                <article key={entry.id}>
+                  <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
+                  <div>
+                    <strong>
+                      <Icon size={14} /> {t(`decisionVerdict.verdictLabels.${entry.verdict}`)} — {entry.description}
+                    </strong>
+                    <small>{entry.narrative}</small>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <p>{t("decisionVerdict.historyEmpty")}</p>
+        )}
+        <button type="button" className="primaryButton" onClick={onClose}>
+          {t("homeBanking.gotIt")}
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
+function DecisionVerdictResultCard({ result, t, onCheckAnother }) {
+  const { verdict, narrative, keyConsideration, mocked } = result;
+  const Icon = DECISION_VERDICT_ICONS[verdict.verdict] ?? AlertTriangle;
+  const panelClass = DECISION_VERDICT_PANEL_CLASS[verdict.verdict] ?? "insightCard";
+
+  return (
+    <>
+      <section className={panelClass}>
+        <Icon size={20} />
+        <p>
+          <strong>{t(`decisionVerdict.verdictLabels.${verdict.verdict}`)}</strong> — {narrative}
+        </p>
+      </section>
+      <div className="proofBlock">
+        <strong>{t("decisionVerdict.residualLabel")}</strong>
+        <p>{formatSgd(verdict.residual_monthly_after)}/mo</p>
+      </div>
+      <div className="proofBlock">
+        <strong>{t("decisionVerdict.emergencyFundLabel")}</strong>
+        <p>{t("decisionVerdict.emergencyFundValue", { before: verdict.emergency_fund_months_before, after: verdict.emergency_fund_months_after })}</p>
+      </div>
+      <div className="proofBlock">
+        <strong>{t("decisionVerdict.otherGoalsLabel")}</strong>
+        <p>{formatSgd(verdict.other_goals_monthly_outflow)}/mo</p>
+      </div>
+      <div className="proofBlock">
+        <strong>{t("decisionVerdict.keyConsiderationLabel")}</strong>
+        <p>{keyConsideration}</p>
+      </div>
+      {mocked ? <p className="weddingCarouselHint">{t("decisionVerdict.mockedNote")}</p> : null}
+      <button type="button" className="primaryButton" onClick={onCheckAnother}>
+        {t("decisionVerdict.checkAnother")}
+        <Zap size={18} />
+      </button>
+    </>
+  );
+}
+
+function DecisionVerdictScreen({ t, setActiveScreen, language, profile }) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [recurringMonthly, setRecurringMonthly] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/decision/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  const submitCheck = async () => {
+    if (!description.trim() || !amount) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/decision/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: description.trim(),
+          amount: numberValue(amount, 0),
+          recurringMonthly: numberValue(recurringMonthly, 0),
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+          currentSavings: numberValue(profile.currentSavings, 20000),
+          language,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("decisionVerdict.genericError"));
+        return;
+      }
+      setResult(data);
+    } catch {
+      setErrorMessage(t("decisionVerdict.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const checkAnother = () => {
+    setResult(null);
+    setDescription("");
+    setAmount("");
+    setRecurringMonthly("");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("decisionVerdict.title")} subtitle={t("decisionVerdict.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("decisionVerdict.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <DecisionHistoryModal entries={historyEntries} loading={historyLoading} onClose={() => setHistoryOpen(false)} t={t} />
+      ) : null}
+
+      {result ? (
+        <DecisionVerdictResultCard result={result} t={t} onCheckAnother={checkAnother} />
+      ) : (
+        <section className="settingsGroup">
+          <section className="trustNote compactTrustNote">
+            <Zap size={17} />
+            <p>{t("decisionVerdict.instructions")}</p>
+          </section>
+          <label className="textareaField">
+            <span className="sectionLabel">{t("decisionVerdict.descriptionLabel")}</span>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder={t("decisionVerdict.descriptionPlaceholder")}
+            />
+          </label>
+          <span className="sectionLabel">{t("decisionVerdict.amountLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            aria-label={t("decisionVerdict.amountLabel")}
+          />
+          <span className="sectionLabel">{t("decisionVerdict.recurringLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={recurringMonthly}
+            onChange={(event) => setRecurringMonthly(event.target.value)}
+            aria-label={t("decisionVerdict.recurringLabel")}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          <button type="button" className="primaryButton" disabled={submitting || !description.trim() || !amount} onClick={submitCheck}>
+            {submitting ? t("decisionVerdict.thinking") : t("decisionVerdict.submit")}
+            <Zap size={18} />
+          </button>
+        </section>
       )}
     </Screen>
   );
@@ -10501,6 +10771,9 @@ export default function App() {
     [screens.HOME]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
+    [screens.DECISION_VERDICT]: (
+      <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
+    ),
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
@@ -10542,6 +10815,9 @@ export default function App() {
         initialPurpose={loanPlannerInitialPurpose}
         onConsumeInitialPurpose={() => setLoanPlannerInitialPurpose(null)}
         setMemoryEvents={setMemoryEvents}
+        preferences={preferences}
+        simulatorInputs={simulatorInputs}
+        simulatorActionStates={simulatorActionStates}
       />
     ),
     [screens.NEED_EMERGENCY]: <NeedDetailScreen {...shared} type="emergency" />,

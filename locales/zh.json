@@ -1264,6 +1264,7 @@
     "changeAmountLabel": "更改金额",
     "protectionNote": "每月增加约 {amount} 的保险费估算。",
     "growthNote": "将 {amount} 转投保守型投资，示意性预计到还款期结束时增值至约 {projected}——不作保证。",
+    "relationshipDiscountNote": "你的关系账本等级为这笔利率减免了 {percent} 个百分点——这是月供的真实减少，不只是一个徽章。",
     "archetypes": {
       "safe": "稳健型",
       "balanced": "平衡型",
@@ -1363,17 +1364,17 @@
       "tier1": {
         "title": "第一档",
         "requirement": "履约分：可靠+ 且 Guardian 声誉分：Trusted+",
-        "unlocks": "OCBC RoboInvest 管理费降到 0.65% p.a."
+        "unlocks": "OCBC RoboInvest 管理费降到 0.65% p.a.；任何贷款的真实利率减免 0.10 个百分点。"
       },
       "tier2": {
         "title": "第二档",
         "requirement": "履约分：坚定+ 且 Guardian 声誉分：Trusted+",
-        "unlocks": "OCBC RoboInvest 再降到 0.50% p.a.；OCBC 360 的「消费满$500」奖励条件视为已满足。"
+        "unlocks": "OCBC RoboInvest 再降到 0.50% p.a.；任何贷款的真实利率减免 0.20 个百分点；OCBC 360 的「消费满$500」奖励条件视为已满足。"
       },
       "tier3": {
         "title": "第三档 —— 定锚",
         "requirement": "履约分：定锚 且 Guardian 声誉分：Highly Trusted",
-        "unlocks": "OCBC RoboInvest 降到 0.45% p.a.（接近市场价）；贷款和保险跳过强制人工审核环节。"
+        "unlocks": "OCBC RoboInvest 降到 0.45% p.a.（接近市场价）；任何贷款的真实利率减免 0.35 个百分点；贷款和保险跳过强制人工审核环节。"
       }
     },
     "timelineTitle": "真实打卡记录",
@@ -1428,6 +1429,34 @@
     "memoryEventAction": "确认了目标计划，进入储蓄规划环节",
     "memoryEventReason": "客户用自己的话描述了目标，FutureOS 基于真实市场调研给出了成本估算",
     "memoryEventDataUsed": "客户自己的描述，以及基于网络搜索的成本估算"
+  },
+  "decisionVerdict": {
+    "entryTitle": "即时判断",
+    "entryBody": "在你正站在现场做决定的那一刻，就能拿到基于真实数字的即时答案——而不是回家以后才知道。",
+    "title": "即时判断",
+    "subtitle": "基于你真实现金流给出的即时答案——为你正在做决定的那一刻而设计，不是事后复盘用的。",
+    "instructions": "描述你正在考虑的东西和报价。答案会立即根据你的真实收入、支出、储蓄以及所有已确认的其他承诺计算出来——AI 只负责用大白话把它讲清楚。",
+    "descriptionLabel": "你在考虑什么？",
+    "descriptionPlaceholder": "例如：承包商给的一份 3000 新元的厨房装修报价",
+    "amountLabel": "一次性费用（新元）",
+    "recurringLabel": "额外的每月固定费用（如有，新元）",
+    "submit": "获取即时判断",
+    "thinking": "计算中……",
+    "genericError": "出了点问题，请再试一次。",
+    "checkAnother": "再查一个决定",
+    "residualLabel": "扣掉这笔和你已确认的其他一切之后，每月还剩的余量",
+    "emergencyFundLabel": "应急基金覆盖月数",
+    "emergencyFundValue": "{before} 个月 -> 购买后 {after} 个月",
+    "otherGoalsLabel": "你其他已确认目标每月已占用的金额",
+    "keyConsiderationLabel": "值得再确认一下",
+    "mockedNote": "这份说明是本地生成的（当时没有可用的实时 AI 调用）——但上面的判断结论和每一个数字，依然是基于你的真实数据计算出来的。",
+    "historyTitle": "历史查询",
+    "historyEmpty": "还没有查询记录——你的第一次即时判断会显示在这里。",
+    "verdictLabels": {
+      "go_ahead": "可以进行",
+      "proceed_with_caution": "谨慎进行",
+      "reconsider": "建议重新考虑"
+    }
   },
   "investmentPlanner": {
     "title": "投资规划师",
