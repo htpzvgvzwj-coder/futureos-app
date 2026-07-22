@@ -56,6 +56,7 @@ import {
   Trash2,
   UserRound,
   Utensils,
+  Volume2,
   Wine,
   X,
   Zap,
@@ -1571,7 +1572,7 @@ function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simula
 // This prototype has no persistent event ledger yet (that lands with Goal Ledger Lifecycle), so each
 // component is derived from the closest real signal already tracked in the app rather than left static.
 function getGuardianReputationScore(ctx) {
-  const { preferences, healthScores, spendingRisk, approvedCount, decidedCount, approvedServiceCount } = ctx;
+  const { preferences, healthScores, spendingRisk, approvedCount, decidedCount, approvedServiceCount, predictiveAccuracy = null } = ctx;
 
   const permissionValues = Object.values(preferences.guardianPermissions ?? {});
   const grantedRatio = permissionValues.length
@@ -1592,15 +1593,30 @@ function getGuardianReputationScore(ctx) {
 
   const humanEscalationQuality = 90;
 
-  const score = clampScore(
-    consentRespect * 0.3 +
-      goalProtectionRate * 0.25 +
-      recoverySuccess * 0.2 +
-      recommendationOutcomeAccuracy * 0.15 +
-      humanEscalationQuality * 0.1
-  );
+  // Whether Future Mirror's Bull/Bear/Judge debates actually called it right - only
+  // present once at least one debate has a real resolved outcome (lib/mirror-outcome-resolver.js);
+  // excluded from the weighted average (not defaulted to a guess) until then, same
+  // "insufficient data is excluded, not scored as 0" pattern as Follow-Through Score.
+  const components = [
+    { value: consentRespect, weight: 0.3 },
+    { value: goalProtectionRate, weight: 0.25 },
+    { value: recoverySuccess, weight: 0.2 },
+    { value: recommendationOutcomeAccuracy, weight: 0.15 },
+    { value: humanEscalationQuality, weight: 0.1 },
+    { value: predictiveAccuracy, weight: 0.15 },
+  ].filter((component) => component.value != null);
+  const totalWeight = components.reduce((sum, component) => sum + component.weight, 0);
+  const score = clampScore(components.reduce((sum, component) => sum + component.value * component.weight, 0) / totalWeight);
 
-  return { score, consentRespect, goalProtectionRate, recoverySuccess, recommendationOutcomeAccuracy, humanEscalationQuality };
+  return {
+    score,
+    consentRespect,
+    goalProtectionRate,
+    recoverySuccess,
+    recommendationOutcomeAccuracy,
+    humanEscalationQuality,
+    predictiveAccuracy,
+  };
 }
 
 function getReputationBand(score) {
@@ -1625,7 +1641,7 @@ const REPUTATION_BAND_RANK = { restricted: 0, underReview: 1, buildingTrust: 2, 
 // approved/skipped counts, approved OCBC service count) everywhere it's read - factored out once
 // FutureSelfGuardian, ProductFitScreen, RelationshipLedgerScreen, and Home's stat row all needed
 // the identical computation rather than re-deriving it four separate times.
-function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates) {
+function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates, predictiveAccuracy = null) {
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
@@ -1646,6 +1662,7 @@ function computeGuardianReputation(preferences, simulatorInputs, simulatorAction
     approvedCount: approvedActionCount,
     decidedCount: approvedActionCount + skippedActionCount,
     approvedServiceCount,
+    predictiveAccuracy,
   });
   return { reputation, reputationBand: getReputationBand(reputation.score) };
 }
@@ -3896,8 +3913,14 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
   const [loading, setLoading] = useState(true);
   const [credential, setCredential] = useState(null);
   const [issuingCredential, setIssuingCredential] = useState(false);
+  const [debateOutcomes, setDebateOutcomes] = useState(null);
 
-  const { reputation, reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
+  const { reputation, reputationBand } = computeGuardianReputation(
+    preferences,
+    simulatorInputs,
+    simulatorActionStates,
+    debateOutcomes?.predictiveAccuracy ?? null
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -3912,6 +3935,16 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    // Checks any of Future Mirror's confirmed debates for a resolvable real-world
+    // outcome every time this screen loads (no cron infra in this app - same
+    // recompute-on-read pattern as follow-through/strategic-balance), then folds
+    // the result into Guardian Reputation Score above.
+    fetch("/api/mirror/outcomes")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setDebateOutcomes(data);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -9651,7 +9684,7 @@ function DecisionHistoryModal({ entries, loading, onClose, t }) {
   );
 }
 
-function DecisionVerdictResultCard({ result, t, onCheckAnother }) {
+function DecisionVerdictResultCard({ result, t, onCheckAnother, onSpeak, speaking }) {
   const { verdict, narrative, keyConsideration, mocked } = result;
   const Icon = DECISION_VERDICT_ICONS[verdict.verdict] ?? AlertTriangle;
   const panelClass = DECISION_VERDICT_PANEL_CLASS[verdict.verdict] ?? "insightCard";
@@ -9664,6 +9697,17 @@ function DecisionVerdictResultCard({ result, t, onCheckAnother }) {
           <strong>{t(`decisionVerdict.verdictLabels.${verdict.verdict}`)}</strong> — {narrative}
         </p>
       </section>
+      {onSpeak ? (
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={() => onSpeak(`${t(`decisionVerdict.verdictLabels.${verdict.verdict}`)}. ${narrative} ${keyConsideration}`)}
+          disabled={speaking}
+        >
+          <Volume2 size={18} />
+          {speaking ? t("decisionVerdict.voice.speaking") : t("decisionVerdict.voice.listen")}
+        </button>
+      ) : null}
       <div className="proofBlock">
         <strong>{t("decisionVerdict.residualLabel")}</strong>
         <p>{formatSgd(verdict.residual_monthly_after)}/mo</p>
@@ -9699,6 +9743,92 @@ function DecisionVerdictScreen({ t, setActiveScreen, language, profile }) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  // Point-of-decision voice mode (Pipecat-inspired): captures a real recording
+  // in the browser (no API key needed for this part), sends it to the server
+  // for transcription, and pre-fills - never auto-submits - the same
+  // description/amount fields the typed form uses, so a misheard number is
+  // always something the customer sees and can correct before the verdict runs.
+  const startRecording = async () => {
+    setErrorMessage("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        transcribeRecording(new Blob(audioChunksRef.current, { type: "audio/webm" }));
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setErrorMessage(t("decisionVerdict.voice.micError"));
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  };
+
+  const transcribeRecording = async (blob) => {
+    setTranscribing(true);
+    try {
+      const audioBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const response = await fetch("/api/decision/voice/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audioBase64, mimeType: "audio/webm" }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "voice_not_configured" ? t("decisionVerdict.voice.notConfigured") : t("decisionVerdict.voice.transcribeError"));
+        return;
+      }
+      setDescription(data.transcript);
+      if (data.detectedAmount != null) setAmount(String(data.detectedAmount));
+    } catch {
+      setErrorMessage(t("decisionVerdict.voice.transcribeError"));
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const speakNarrative = async (text) => {
+    setSpeaking(true);
+    try {
+      const response = await fetch("/api/decision/voice/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!response.ok) {
+        setErrorMessage(t("decisionVerdict.voice.notConfigured"));
+        return;
+      }
+      const audioBlob = await response.blob();
+      const audio = new Audio(URL.createObjectURL(audioBlob));
+      await audio.play();
+    } catch {
+      setErrorMessage(t("decisionVerdict.voice.notConfigured"));
+    } finally {
+      setSpeaking(false);
+    }
+  };
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -9762,13 +9892,24 @@ function DecisionVerdictScreen({ t, setActiveScreen, language, profile }) {
       ) : null}
 
       {result ? (
-        <DecisionVerdictResultCard result={result} t={t} onCheckAnother={checkAnother} />
+        <DecisionVerdictResultCard result={result} t={t} onCheckAnother={checkAnother} onSpeak={speakNarrative} speaking={speaking} />
       ) : (
         <section className="settingsGroup">
           <section className="trustNote compactTrustNote">
             <Zap size={17} />
             <p>{t("decisionVerdict.instructions")}</p>
           </section>
+
+          <button
+            type="button"
+            className={recording ? "primaryButton" : "secondaryButton"}
+            onClick={recording ? stopRecording : startRecording}
+            disabled={transcribing}
+          >
+            <Mic size={18} />
+            {transcribing ? t("decisionVerdict.voice.transcribing") : recording ? t("decisionVerdict.voice.stop") : t("decisionVerdict.voice.speakInstead")}
+          </button>
+
           <label className="textareaField">
             <span className="sectionLabel">{t("decisionVerdict.descriptionLabel")}</span>
             <textarea
@@ -11088,6 +11229,7 @@ export default function App() {
   const [simulatorActionStates, setSimulatorActionStates] = useState(defaultSimulatorActionStates);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [loanPlannerInitialPurpose, setLoanPlannerInitialPurpose] = useState(null);
+  const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
   const effectiveTheme = getEffectiveTheme(preferences.theme, systemTheme);
@@ -11120,9 +11262,27 @@ export default function App() {
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
+    let cancelled = false;
+
+    (async () => {
     const storedLanguage = window.localStorage.getItem(storageKey("futureos-language"));
     if (storedLanguage && locales[storedLanguage]) setLanguage(storedLanguage);
-    const savedPreferences = safeJsonParse(window.localStorage.getItem(storageKey("futureos-preferences")), null);
+    const localPreferences = safeJsonParse(window.localStorage.getItem(storageKey("futureos-preferences")), null);
+    // The server copy is the cross-device source of truth once one exists (a second
+    // device/login should see real data, not its own empty localStorage cache) -
+    // local-only data is what seeds the very first server write, via the
+    // persistence effect further below.
+    let savedPreferences = localPreferences;
+    try {
+      const response = await fetch("/api/preferences");
+      if (response.ok) {
+        const { data } = await response.json();
+        if (data) savedPreferences = data;
+      }
+    } catch {
+      // Offline/unreachable - fall back to whatever this device has cached.
+    }
+    if (cancelled) return;
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
       // goalLedger, escalationHistory, notificationFeedback, and rejectionCounts all have dynamic
@@ -11159,6 +11319,11 @@ export default function App() {
     if (Array.isArray(savedMemory) && savedMemory.length > 0) {
       setMemoryEvents(savedMemory);
     }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [authStatus, authUser]);
 
   useEffect(() => {
@@ -11208,6 +11373,18 @@ export default function App() {
     document.documentElement.dataset.theme = effectiveTheme;
     if (authStatus !== "authenticated") return;
     window.localStorage.setItem(storageKey("futureos-preferences"), JSON.stringify(preferences));
+
+    // Debounced server sync so a login on a different device sees real data
+    // instead of that device's own empty cache - localStorage write above stays
+    // instant, this just mirrors it without a network round-trip per keystroke.
+    if (preferencesSyncTimer.current) clearTimeout(preferencesSyncTimer.current);
+    preferencesSyncTimer.current = setTimeout(() => {
+      fetch("/api/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(preferences),
+      }).catch(() => {});
+    }, 1000);
   }, [preferences, effectiveTheme, authStatus]);
 
   useEffect(() => {

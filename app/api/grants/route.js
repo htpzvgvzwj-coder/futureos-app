@@ -30,10 +30,6 @@ export async function POST(request) {
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });
   }
 
-  if (parsed.data.accessLevel === "view_and_act") {
-    return Response.json({ error: "not_yet_supported" }, { status: 400 });
-  }
-
   const granteeResult = await query(`select id from users where email = $1`, [parsed.data.granteeEmail.toLowerCase()]);
   const granteeUserId = granteeResult.rows[0]?.id;
   if (!granteeUserId) {

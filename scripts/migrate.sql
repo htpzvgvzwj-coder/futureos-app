@@ -47,6 +47,37 @@ create table if not exists access_grants (
 create index if not exists access_grants_grantor_idx on access_grants (grantor_user_id, status);
 create index if not exists access_grants_grantee_idx on access_grants (grantee_user_id, status);
 
+-- Joint write-permission (access_level = 'view_and_act'): the grantee never acts
+-- alone. Proposing an action creates a pending row here; it only actually executes
+-- once the OTHER party (target_user_id, whose data it affects) separately confirms
+-- via app/api/joint-actions/[id]/confirm. Deliberately not "the initiator's action
+-- takes effect immediately, target just gets notified" - real dual consent.
+create table if not exists joint_actions (
+  id                 uuid primary key default gen_random_uuid(),
+  grant_id           uuid not null references access_grants(id),
+  initiator_user_id  uuid not null references users(id),
+  target_user_id     uuid not null references users(id),
+  domain             text not null, -- wedding | home | retirement
+  action_type        text not null, -- pause_goal_plan | reduce_goal_plan (only these dispatch today)
+  payload            jsonb not null,
+  status             text not null default 'pending', -- pending | confirmed | declined
+  created_at         timestamptz not null default now(),
+  confirmed_at       timestamptz
+);
+
+create index if not exists joint_actions_target_idx on joint_actions (target_user_id, status);
+create index if not exists joint_actions_initiator_idx on joint_actions (initiator_user_id, status);
+
+-- Server-side mirror of the client's `preferences` blob, so logging into the same
+-- account on a second device sees real data instead of that device's empty
+-- localStorage cache. localStorage stays as the fast local cache (written first,
+-- synced here in the background) - this table is the source of truth across devices.
+create table if not exists user_preferences (
+  user_id     uuid primary key references users(id),
+  data        jsonb not null,
+  updated_at  timestamptz not null default now()
+);
+
 create table if not exists wedding_sessions (
   id            uuid primary key default gen_random_uuid(),
   profile_key   text not null default 'karina-demo',
@@ -328,6 +359,15 @@ create table if not exists mirror_debates (
 
 create index if not exists mirror_debates_profile_idx
   on mirror_debates (profile_key, created_at desc);
+
+-- Closes the debate's accountability loop: did the bear case's flagged risk actually
+-- happen? Checked against real hardship evidence (the only real "did something bad
+-- happen" signal this app has), not invented. resolved_outcome stays null until
+-- there's either real evidence the risk materialized or enough real activity to
+-- conclude it didn't - never guessed.
+alter table mirror_debates add column if not exists confirmed_at timestamptz;
+alter table mirror_debates add column if not exists resolved_outcome text; -- risk_materialized | risk_did_not_materialize | insufficient_signal
+alter table mirror_debates add column if not exists resolved_at timestamptz;
 
 create table if not exists loan_sessions (
   id            uuid primary key default gen_random_uuid(),

@@ -1615,6 +1615,16 @@
       "go_ahead": "Go ahead",
       "proceed_with_caution": "Proceed with caution",
       "reconsider": "Reconsider"
+    },
+    "voice": {
+      "speakInstead": "Speak instead",
+      "stop": "Stop recording",
+      "transcribing": "Transcribing...",
+      "listen": "Listen to the verdict",
+      "speaking": "Speaking...",
+      "micError": "Couldn't access the microphone - check your browser permissions.",
+      "notConfigured": "Voice isn't set up on this deployment yet.",
+      "transcribeError": "Couldn't transcribe that - please try again or type instead."
     }
   },
   "investmentPlanner": {
