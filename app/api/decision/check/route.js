@@ -4,8 +4,9 @@ import { NARRATE_VERDICT_TOOL } from "../../../../lib/decision-tools.js";
 import { decisionCheckRequestSchema, narrateVerdictSchema } from "../../../../lib/decision-validation.js";
 import { computeDecisionVerdict } from "../../../../lib/decision-finance.js";
 import { buildMockNarration } from "../../../../lib/decision-mock.js";
-import { DEFAULT_PROFILE_KEY, saveCheck } from "../../../../lib/decision-store.js";
+import { saveCheck } from "../../../../lib/decision-store.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/investment-context.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -15,6 +16,9 @@ export const maxDuration = 30;
 // answer instantly (with a mock narration) even with zero API credits, exactly the point of a
 // point-of-decision tool a customer might use standing in a shop.
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = decisionCheckRequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -22,7 +26,7 @@ export async function POST(request) {
   }
   const { description, amount, recurringMonthly, monthlyIncome, monthlyExpenses, currentSavings, language } = parsed.data;
 
-  const otherGoals = await getOtherGoalsMonthlyCommitment();
+  const otherGoals = await getOtherGoalsMonthlyCommitment(userId);
 
   const verdict = computeDecisionVerdict({
     amount,
@@ -66,7 +70,7 @@ export async function POST(request) {
     mocked = true;
   }
 
-  const saved = await saveCheck(DEFAULT_PROFILE_KEY, {
+  const saved = await saveCheck(userId, {
     description,
     verdict,
     narrative: narration.narrative,

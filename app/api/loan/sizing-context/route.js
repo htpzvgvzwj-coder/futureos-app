@@ -1,4 +1,5 @@
 import { getConfirmedHomePrice, getOtherGoalsMonthlyCommitment } from "../../../../lib/loan-context.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,9 @@ const VALID_PURPOSES = new Set(["home", "renovation", "personal"]);
 // purpose. The confirm endpoint independently re-fetches this server-side —
 // a stale or failed client fetch here can never corrupt what gets persisted.
 export async function GET(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const { searchParams } = new URL(request.url);
   const purpose = searchParams.get("purpose");
 
@@ -18,8 +22,8 @@ export async function GET(request) {
   }
 
   const [otherGoals, homePrice] = await Promise.all([
-    getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null),
-    purpose === "home" ? getConfirmedHomePrice() : Promise.resolve(null),
+    getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null, userId),
+    purpose === "home" ? getConfirmedHomePrice(userId) : Promise.resolve(null),
   ]);
 
   if (purpose === "home" && !homePrice) {

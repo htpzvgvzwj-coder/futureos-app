@@ -13,14 +13,14 @@ import { finalizeHomeSavingsPlanSchema, proposeHomeSavingsPlanSchema } from "../
 import { buildMockSavingsFinalization, buildMockSavingsPlanOptions, looksLikeConfirmation } from "../../../../lib/home-mock.js";
 import {
   appendMessages,
-  DEFAULT_PROFILE_KEY,
   getLatestArtifact,
   getMessageHistory,
   getOrCreateSession,
   saveArtifact,
   updateSessionStatus,
 } from "../../../../lib/home-store.js";
-import { DEFAULT_PROFILE_KEY as LOAN_DEFAULT_PROFILE_KEY, getLatestArtifact as getLatestLoanArtifact, getOrCreateSession as getOrCreateLoanSession } from "../../../../lib/loan-store.js";
+import { getLatestArtifact as getLatestLoanArtifact, getOrCreateSession as getOrCreateLoanSession } from "../../../../lib/loan-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,6 +39,9 @@ async function buildMockToolUse(message, sessionId, financedPlan, profile) {
 }
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const { intent, message, language, profile } = body;
 
@@ -52,13 +55,13 @@ export async function POST(request) {
     return Response.json({ error: "missing_profile" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   const confirmedPlan = await getLatestArtifact(session.id, "stage1", "confirmed_plan");
   if (!confirmedPlan) {
     return Response.json({ error: "no_confirmed_plan" }, { status: 409 });
   }
 
-  const loanSession = await getOrCreateLoanSession(LOAN_DEFAULT_PROFILE_KEY, "home");
+  const loanSession = await getOrCreateLoanSession(userId, "home");
   const confirmedLoan = await getLatestLoanArtifact(loanSession.id, "stage1", "confirmed_loan");
   if (!confirmedLoan) {
     return Response.json({ error: "no_confirmed_loan" }, { status: 409 });

@@ -2822,6 +2822,48 @@ nextjs-portal {
   color: var(--teal);
 }
 
+.decisionCard {
+  grid-template-columns: auto 1fr;
+  cursor: default;
+}
+
+.decisionCard.decision-approve {
+  border-color: rgba(20, 184, 166, 0.38);
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.decisionCard.decision-edit {
+  border-color: rgba(37, 99, 235, 0.32);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.decisionCard.decision-reject {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.decisionButtonRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.miniToggle {
+  border: 1px solid rgba(20, 36, 58, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px;
+}
+
+.miniToggle.selected {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
 .levelSegment {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -2934,18 +2976,29 @@ nextjs-portal {
   color: var(--teal);
 }
 
+.futureAnalystPanel {
+  gap: 5px;
+  padding: 9px;
+  border-radius: 14px;
+}
+
+.futureAnalystPanel .panelHead svg {
+  width: 14px;
+  height: 14px;
+}
+
 .futureAnalystPanel .summaryRow {
   min-height: 0;
   gap: 6px;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .futureAnalystPanel .summaryRow span {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .futureAnalystPanel .summaryRow strong {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .inputField span {
@@ -2991,6 +3044,24 @@ nextjs-portal {
   font-size: 12px;
   font-weight: 760;
   line-height: 1.3;
+}
+
+.debateBullCase svg {
+  color: var(--success, #0f9f84);
+}
+
+.debateBearCase svg {
+  color: var(--ocbc-red);
+}
+
+.debateBearCase {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.8)),
+    linear-gradient(135deg, rgba(215, 25, 32, 0.1), rgba(215, 25, 32, 0.04));
+}
+
+.debateJudge svg {
+  color: var(--navy);
 }
 
 .adviceOnlyPanel {
@@ -3564,6 +3635,45 @@ nextjs-portal {
 
 .guardianGoalSignals b {
   color: var(--ocbc-red);
+}
+
+.checkinConsistencyPanel {
+  display: grid;
+  gap: 10px;
+}
+
+.consistencyGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.consistencyCell {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid rgba(20, 36, 58, 0.1);
+  border-radius: 12px;
+  background: #f4f7fb;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* Gaps stay this same neutral grey - never a warning colour - so a lapsed
+   month reads as "no data yet" rather than a mistake to feel bad about. */
+.consistencyCell.active {
+  border-color: rgba(20, 184, 166, 0.4);
+  background: rgba(20, 184, 166, 0.14);
+  color: var(--teal);
+}
+
+.consistencyNote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.35;
 }
 
 .historyTimeline {

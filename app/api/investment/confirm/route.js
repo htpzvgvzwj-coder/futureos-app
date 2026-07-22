@@ -7,7 +7,8 @@ import {
   scoreInvestmentCandidate,
   computeInvestmentFutureScore,
 } from "../../../../lib/investment-finance.js";
-import { DEFAULT_PROFILE_KEY, getLatestArtifact, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/investment-store.js";
+import { getLatestArtifact, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/investment-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -20,6 +21,9 @@ export const runtime = "nodejs";
 // sent beyond the categorical pick + profile inputs, exactly like every
 // other confirm endpoint in this app.
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = confirmInvestmentSchema.safeParse(body);
   if (!parsed.success) {
@@ -35,13 +39,13 @@ export async function POST(request) {
     return Response.json({ error: "unsupported_purchase_mode" }, { status: 422 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   const intake = await getLatestArtifact(session.id, "stage1", "intake");
   if (!intake) {
     return Response.json({ error: "no_intake" }, { status: 400 });
   }
 
-  const otherGoals = await getOtherGoalsMonthlyCommitment();
+  const otherGoals = await getOtherGoalsMonthlyCommitment(userId);
   const availableMonthlyCashflow = Math.max(0, monthlyIncome - monthlyExpenses - otherGoals.total);
 
   const candidateScore = scoreInvestmentCandidate(entry, {

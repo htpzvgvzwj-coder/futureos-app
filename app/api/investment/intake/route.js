@@ -2,7 +2,8 @@ import { investmentIntakeSchema } from "../../../../lib/investment-validation.js
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/investment-context.js";
 import { shortlistInvestments, projectPurchaseMode } from "../../../../lib/investment-finance.js";
 import { INVESTMENT_CATALOG } from "../../../../lib/investment-catalog.js";
-import { DEFAULT_PROFILE_KEY, getOrCreateSession, saveArtifact } from "../../../../lib/investment-store.js";
+import { getOrCreateSession, saveArtifact } from "../../../../lib/investment-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,9 @@ function computeDefaultPreviewAmount(purchaseMode, availableMonthlyCashflow) {
 // trusting a client-sent figure, same discipline as every confirm endpoint
 // in this app.
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = investmentIntakeSchema.safeParse(body);
   if (!parsed.success) {
@@ -35,7 +39,7 @@ export async function POST(request) {
   const { riskPreference, goalCategory, horizonYears, customTargetAmount, holdingsCategories, purchaseMode, monthlyIncome, monthlyExpenses } =
     parsed.data;
 
-  const otherGoals = await getOtherGoalsMonthlyCommitment();
+  const otherGoals = await getOtherGoalsMonthlyCommitment(userId);
   const availableMonthlyCashflow = Math.max(0, monthlyIncome - monthlyExpenses - otherGoals.total);
 
   const shortlist = shortlistInvestments({
@@ -55,7 +59,7 @@ export async function POST(request) {
 
   const intake = { riskPreference, goalCategory, horizonYears, customTargetAmount: customTargetAmount ?? null, holdingsCategories, purchaseMode };
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   await saveArtifact(session.id, "stage1", "intake", intake);
   await saveArtifact(session.id, "stage1", "shortlist", { items: shortlistWithPreview, previewAmount });
 

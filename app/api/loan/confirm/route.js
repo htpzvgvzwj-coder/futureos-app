@@ -3,8 +3,9 @@ import { confirmLoanSchema } from "../../../../lib/loan-validation.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/loan-context.js";
 import { getTotalConfirmedLoanLiabilities } from "../../../../lib/micro-insurance-context.js";
 import { computeCoverageGap, computeMicroTopUp } from "../../../../lib/micro-insurance-finance.js";
-import { saveOffer, DEFAULT_PROFILE_KEY as MICRO_INSURANCE_PROFILE_KEY } from "../../../../lib/micro-insurance-store.js";
-import { DEFAULT_PROFILE_KEY, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/loan-store.js";
+import { saveOffer } from "../../../../lib/micro-insurance-store.js";
+import { getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/loan-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 const MICRO_TOPUP_DURATION_MONTHS = 6;
@@ -16,6 +17,9 @@ const MICRO_TOPUP_DURATION_MONTHS = 6;
 // the categorical choices (purpose/archetype/modifiers) and the profile
 // inputs, exactly like every other deterministic calculator in this app.
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = confirmLoanSchema.safeParse(body);
   if (!parsed.success) {
@@ -35,7 +39,7 @@ export async function POST(request) {
     insuranceCoverageAmount,
   } = parsed.data;
 
-  const otherGoals = await getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null);
+  const otherGoals = await getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null, userId);
 
   const params = {
     principalBasis,
@@ -51,7 +55,7 @@ export async function POST(request) {
   const base = computeLoanArchetype(purpose, archetype, params);
   const result = modifiers.length ? applyLoanModifiers(base, modifiers, params) : base;
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY, purpose);
+  const session = await getOrCreateSession(userId, purpose);
   const createdAt = await saveArtifact(session.id, "stage1", "confirmed_loan", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
 
@@ -59,12 +63,12 @@ export async function POST(request) {
   // AFTER the save above, so it already reflects this loan - if the customer's declared coverage no
   // longer covers total liabilities, Guardian offers a precisely-sized, precisely-timed top-up
   // instead of a full new annual policy. Pure arithmetic - lib/micro-insurance-finance.js, no AI.
-  const totalLiabilities = await getTotalConfirmedLoanLiabilities();
+  const totalLiabilities = await getTotalConfirmedLoanLiabilities(userId);
   const { gapAmount, hasGap } = computeCoverageGap({ existingCoverageAmount: insuranceCoverageAmount, totalLiabilities });
   let microInsuranceOffer = null;
   if (hasGap) {
     const topUp = computeMicroTopUp({ gapAmount, durationMonths: MICRO_TOPUP_DURATION_MONTHS });
-    const saved = await saveOffer(MICRO_INSURANCE_PROFILE_KEY, { triggerPurpose: purpose, ...topUp });
+    const saved = await saveOffer(userId, { triggerPurpose: purpose, ...topUp });
     microInsuranceOffer = { ...topUp, ...saved, triggerPurpose: purpose, status: "offered" };
   }
 

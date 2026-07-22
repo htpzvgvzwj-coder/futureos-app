@@ -13,13 +13,13 @@ import { confirmWeddingBudgetSchema, proposePlansSchema } from "../../../../lib/
 import { buildMockPlanOptions, buildMockWeddingConfirmation, looksLikeConfirmation } from "../../../../lib/wedding-mock.js";
 import {
   appendMessages,
-  DEFAULT_PROFILE_KEY,
   getLatestArtifact,
   getMessageHistory,
   getOrCreateSession,
   saveArtifact,
   updateSessionStatus,
 } from "../../../../lib/wedding-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -40,6 +40,9 @@ async function buildMockToolUse(message, sessionId) {
 }
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const { intent, message, language } = body;
 
@@ -50,7 +53,7 @@ export async function POST(request) {
     return Response.json({ error: "missing_message" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   const history = await getMessageHistory(session.id, "stage1");
   const userContent = buildFollowUpUserContent(history, message);
   const messages = [...history, { role: "user", content: userContent }];

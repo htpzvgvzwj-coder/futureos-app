@@ -4,9 +4,9 @@
 
 | Document status | Phase 2 Bible draft |
 | --- | --- |
-| Version | 2.1.0-draft |
+| Version | 2.1.1-draft |
 | Owner | FutureOS product, AI, design, banking, and engineering teams |
-| Last updated | 2026-07-13 |
+| Last updated | 2026-07-21 |
 
 ## Purpose
 Record documentation changes so FutureOS has a clear operating history.
@@ -20,6 +20,15 @@ Applies to Phase 2 Bible updates, principle changes, PDR additions, roadmap chan
 | Major | Philosophy, architecture, or governance change. | Adding a fourth top-level system. |
 | Minor | New principle, workstream, framework, or PDR set. | Adding Guardian Reputation framework. |
 | Patch | Clarification, correction, link fix, or wording improvement. | Clarifying SGD default wording. |
+
+## Version 2.1.1-draft (patch)
+Date: 2026-07-21
+
+Added PDR-013 (Draft, not yet Accepted) to Product Decision Records: what a genuine second Life Graph data provider (real SGFinDex/open-banking integration, beyond the existing manual-entry-only source) would require - technically, legally, and architecturally. Documents real gaps in the provider interface shipped this same day (`app/page.jsx`'s `LIFE_GRAPH_PROVIDERS` registry has no async support, provenance tagging, staleness handling, or consent/revocation model yet). No code changes - this is a design record only, pending a named product owner and compliance review.
+
+Affected documents:
+- Product Decision Records (new PDR-013).
+- Change Log.
 
 ## Version 2.1.0-draft
 Date: 2026-07-13

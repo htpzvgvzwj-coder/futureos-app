@@ -1,4 +1,5 @@
-import { DEFAULT_PROFILE_KEY, getAllArtifacts, getMessageHistory, getOrCreateSession } from "../../../../lib/investment-store.js";
+import { getAllArtifacts, getMessageHistory, getOrCreateSession } from "../../../../lib/investment-store.js";
+import { resolveEffectiveProfileKey } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -37,8 +38,11 @@ function formatStage(stage, messages) {
     .filter((entry) => entry.text);
 }
 
-export async function GET() {
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+export async function GET(request) {
+  const resolved = await resolveEffectiveProfileKey(request, "investment");
+  if (resolved.error) return Response.json({ error: resolved.error }, { status: resolved.status });
+
+  const session = await getOrCreateSession(resolved.profileKey);
   const [stage1, confirmedPicks] = await Promise.all([
     getMessageHistory(session.id, "stage1"),
     getAllArtifacts(session.id, "stage1", "confirmed_investment_pick"),

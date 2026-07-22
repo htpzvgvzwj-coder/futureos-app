@@ -1,5 +1,52 @@
 create extension if not exists pgcrypto;
 
+-- Real multi-user auth (PDR-013 follow-up: FutureOS was single-user, "karina-demo"
+-- hardcoded everywhere, until this table set + scripts/seed-demo-user.mjs migrated
+-- existing demo data to a real account). Every domain table's profile_key column
+-- stays plain text and now holds a real users.id (uuid) string - zero schema change
+-- needed on any of them.
+create table if not exists users (
+  id            uuid primary key default gen_random_uuid(),
+  email         text not null unique,
+  password_hash text not null,
+  display_name  text not null,
+  created_at    timestamptz not null default now()
+);
+
+create table if not exists user_sessions (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references users(id),
+  token_hash   text not null unique, -- sha256 of the opaque cookie token; raw token never persisted
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null,
+  revoked_at   timestamptz
+);
+
+create index if not exists user_sessions_user_id_idx on user_sessions (user_id);
+
+-- Real user-to-user consent/sharing (six-list idea #3: adult child monitoring a
+-- parent's account, or a couple sharing visibility on joint goals). Two-sided by
+-- design (pending -> grantee accepts/declines), not silent access. grant_type and
+-- access_level are deliberately wider than what's enforced today: 'external_provider'
+-- and 'view_and_act' are reserved for later (see PDR-013 and app code comments) so
+-- adding them doesn't require another migration, but nothing reads them as true yet.
+create table if not exists access_grants (
+  id                uuid primary key default gen_random_uuid(),
+  grantor_user_id   uuid not null references users(id),
+  grantee_user_id   uuid references users(id),
+  grant_type        text not null default 'user', -- 'user' (built) | 'external_provider' (reserved, unbuilt)
+  scope             text not null, -- 'all' | 'wedding' | 'home' | 'retirement' | ... (domain-scoped)
+  access_level      text not null, -- 'view' | 'view_and_act' (only 'view' is ever enforced)
+  status            text not null default 'pending', -- 'pending' | 'active' | 'revoked' | 'declined'
+  granted_at        timestamptz not null default now(),
+  responded_at      timestamptz,
+  revoked_at        timestamptz,
+  expires_at        timestamptz
+);
+
+create index if not exists access_grants_grantor_idx on access_grants (grantor_user_id, status);
+create index if not exists access_grants_grantee_idx on access_grants (grantee_user_id, status);
+
 create table if not exists wedding_sessions (
   id            uuid primary key default gen_random_uuid(),
   profile_key   text not null default 'karina-demo',
@@ -243,11 +290,44 @@ create table if not exists hardship_actions_applied (
   amount               numeric(12,2),
   explanation          text not null,
   applied_at           timestamptz not null default now(),
-  status               text not null default 'applied' -- applied | failed | pending_review
+  status               text not null default 'applied' -- applied | failed | pending_review | rejected
 );
 
 create index if not exists hardship_actions_applied_session_idx
   on hardship_actions_applied (hardship_session_id, applied_at desc);
+
+-- Four-state approval record (approve | edit | reject), not just applied/not-applied.
+-- proposed_amount is Guardian's original suggestion; amount is what actually got applied
+-- (equal for "approve", customer-modified for "edit", null for "reject"). This is the raw
+-- material for a future Follow-Through Score "judgment/calibration" dimension: did the
+-- customer's edits hold up, and does Guardian re-propose things it already knows were rejected.
+alter table hardship_actions_applied add column if not exists decision_type text not null default 'approve'; -- approve | edit | reject
+alter table hardship_actions_applied add column if not exists decision_reason text;
+alter table hardship_actions_applied add column if not exists proposed_amount numeric(12,2);
+
+-- Future Mirror's Bull/Bear/Judge debate (replaces the old single-voice scenario
+-- engine). Every run is persisted, not just confirmed ones - bear_risk_tag is the
+-- raw material for a future job that checks whether the flagged risk actually
+-- happened and feeds that back into Guardian Reputation Score.
+create table if not exists mirror_debates (
+  id                  uuid primary key default gen_random_uuid(),
+  profile_key         text not null default 'karina-demo',
+  goal_type           text not null,
+  situation           text,
+  future_score        integer not null,
+  risk_level          text not null, -- low | medium | high
+  bull_case           text not null,
+  bear_case           text not null,
+  bear_risk_tag       text not null, -- income_disruption | rate_increase | expense_shock | timeline_slip | market_downturn | other
+  judge_synthesis     text not null,
+  recommended_action  text not null, -- proceed | proceed_with_adjustment | wait | reconsider
+  confidence          text not null, -- low | medium | high
+  confirmed           boolean not null default false,
+  created_at          timestamptz not null default now()
+);
+
+create index if not exists mirror_debates_profile_idx
+  on mirror_debates (profile_key, created_at desc);
 
 create table if not exists loan_sessions (
   id            uuid primary key default gen_random_uuid(),

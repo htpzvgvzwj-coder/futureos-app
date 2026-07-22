@@ -1,4 +1,5 @@
-import { DEFAULT_PROFILE_KEY, getMessageHistory, getOrCreateSession } from "../../../../lib/hardship-store.js";
+import { getMessageHistory, getOrCreateSession } from "../../../../lib/hardship-store.js";
+import { resolveEffectiveProfileKey } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -38,8 +39,11 @@ function formatStage(stage, messages) {
     .filter((entry) => entry.text);
 }
 
-export async function GET() {
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+export async function GET(request) {
+  const resolved = await resolveEffectiveProfileKey(request, "hardship");
+  if (resolved.error) return Response.json({ error: resolved.error }, { status: resolved.status });
+
+  const session = await getOrCreateSession(resolved.profileKey);
   const [stage1, stage2] = await Promise.all([
     getMessageHistory(session.id, "stage1"),
     getMessageHistory(session.id, "stage2"),

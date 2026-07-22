@@ -19,18 +19,21 @@ import {
 } from "../../../../lib/hardship-finance.js";
 import {
   appendMessages,
-  DEFAULT_PROFILE_KEY,
   getLatestArtifact,
   getMessageHistory,
   getOrCreateSession,
   saveArtifact,
   updateSessionStatus,
 } from "../../../../lib/hardship-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const { message, language, profile } = body;
 
@@ -41,13 +44,13 @@ export async function POST(request) {
     return Response.json({ error: "missing_profile" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   const assessment = await getLatestArtifact(session.id, "stage1", "hardship_assessment");
   if (!assessment) {
     return Response.json({ error: "no_assessment" }, { status: 409 });
   }
 
-  const commitments = await getCustomerCommitments();
+  const commitments = await getCustomerCommitments(userId);
   const { monthlyExpenses, monthlyIncome, currentFund } = getEmergencyFundSnapshot(profile);
 
   const outflow = computeCommittedMonthlyOutflow(commitments, monthlyExpenses);

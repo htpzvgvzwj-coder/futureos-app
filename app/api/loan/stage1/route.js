@@ -11,7 +11,8 @@ import { buildLoanStage1SystemPrompt } from "../../../../lib/loan-prompts.js";
 import { PROPOSE_LOAN_SIZING_TOOL, WEB_SEARCH_TOOL } from "../../../../lib/loan-tools.js";
 import { proposeLoanSizingSchema } from "../../../../lib/loan-validation.js";
 import { buildMockSizingOptions } from "../../../../lib/loan-mock.js";
-import { appendMessages, DEFAULT_PROFILE_KEY, getMessageHistory, getOrCreateSession, saveArtifact } from "../../../../lib/loan-store.js";
+import { appendMessages, getMessageHistory, getOrCreateSession, saveArtifact } from "../../../../lib/loan-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -22,6 +23,9 @@ const VALID_INTENTS = new Set(["generate", "refine"]);
 const SIZING_PURPOSES = new Set(["renovation", "personal"]);
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const { intent, message, language, purpose } = body;
 
@@ -35,7 +39,7 @@ export async function POST(request) {
     return Response.json({ error: "missing_message" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY, purpose);
+  const session = await getOrCreateSession(userId, purpose);
   const history = await getMessageHistory(session.id, "stage1");
   const userContent = buildFollowUpUserContent(history, message);
   const messages = [...history, { role: "user", content: userContent }];

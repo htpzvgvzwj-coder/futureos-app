@@ -13,13 +13,13 @@ import { finalizeSavingsPlanSchema, proposeSavingsPlanSchema } from "../../../..
 import { buildMockSavingsFinalization, buildMockSavingsPlanOptions, looksLikeConfirmation } from "../../../../lib/other-mock.js";
 import {
   appendMessages,
-  DEFAULT_PROFILE_KEY,
   getLatestArtifact,
   getMessageHistory,
   getOrCreateSession,
   saveArtifact,
   updateSessionStatus,
 } from "../../../../lib/other-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,6 +39,9 @@ async function buildMockToolUse(message, sessionId, confirmedPlan, profile) {
 }
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const { intent, message, language, profile } = body;
 
@@ -52,7 +55,7 @@ export async function POST(request) {
     return Response.json({ error: "missing_profile" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY);
+  const session = await getOrCreateSession(userId);
   const confirmedPlan = await getLatestArtifact(session.id, "stage1", "confirmed_goal_plan");
   if (!confirmedPlan) {
     return Response.json({ error: "no_confirmed_plan" }, { status: 409 });

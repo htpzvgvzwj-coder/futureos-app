@@ -1,5 +1,6 @@
 import { getStrategicBalanceSnapshot } from "../../../../lib/strategic-balance-context.js";
 import { computeUtilization, computeUtilizationTimeline } from "../../../../lib/strategic-balance-finance.js";
+import { resolveEffectiveProfileKey } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,9 @@ function investmentMonthlyEquivalent(pick) {
 }
 
 export async function GET(request) {
+  const resolved = await resolveEffectiveProfileKey(request, "all");
+  if (resolved.error) return Response.json({ error: resolved.error }, { status: resolved.status });
+
   const { searchParams } = new URL(request.url);
   const monthlyIncome = Number(searchParams.get("monthlyIncome")) || 0;
   const monthlyExpenses = Number(searchParams.get("monthlyExpenses")) || 0;
@@ -21,7 +25,7 @@ export async function GET(request) {
   const customGoalName = searchParams.get("customGoalName");
   const customGoalConfirmedAt = searchParams.get("customGoalConfirmedAt");
 
-  const snapshot = await getStrategicBalanceSnapshot();
+  const snapshot = await getStrategicBalanceSnapshot(resolved.profileKey);
 
   // Custom Goal has no backend store like wedding/home/retirement (lib/strategic-balance-context.js
   // SAVINGS_STORES) - it's a client-persisted preference, so its confirmed monthly contribution

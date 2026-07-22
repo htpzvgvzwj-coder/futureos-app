@@ -1,4 +1,5 @@
-import { DEFAULT_PROFILE_KEY, getLatestArtifact, getMessageHistory, getOrCreateSession } from "../../../../lib/loan-store.js";
+import { getLatestArtifact, getMessageHistory, getOrCreateSession } from "../../../../lib/loan-store.js";
+import { resolveEffectiveProfileKey } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -40,13 +41,16 @@ function formatStage(stage, messages) {
 }
 
 export async function GET(request) {
+  const resolved = await resolveEffectiveProfileKey(request, "loan");
+  if (resolved.error) return Response.json({ error: resolved.error }, { status: resolved.status });
+
   const { searchParams } = new URL(request.url);
   const purpose = searchParams.get("purpose");
   if (!VALID_PURPOSES.has(purpose)) {
     return Response.json({ error: "invalid_purpose" }, { status: 400 });
   }
 
-  const session = await getOrCreateSession(DEFAULT_PROFILE_KEY, purpose);
+  const session = await getOrCreateSession(resolved.profileKey, purpose);
   const [stage1, confirmedLoan] = await Promise.all([
     getMessageHistory(session.id, "stage1"),
     getLatestArtifact(session.id, "stage1", "confirmed_loan"),

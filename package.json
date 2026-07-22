@@ -10,10 +10,12 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint app --max-warnings=0",
-    "db:migrate": "node --env-file=.env scripts/migrate.mjs"
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
+    "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",
+    "bcryptjs": "^3.0.3",
     "framer-motion": "12.41.0",
     "lucide-react": "1.21.0",
     "next": "16.2.9",

@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { DEFAULT_PROFILE_KEY, issueCredential } from "../../../../lib/credential-store.js";
+import { issueCredential } from "../../../../lib/credential-store.js";
 import { getStrategicBalanceSnapshot } from "../../../../lib/strategic-balance-context.js";
 import { getOrCreateJourneyStart } from "../../../../lib/relationship-store.js";
+import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,9 @@ const issueRequestSchema = z.object({
 });
 
 export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = issueRequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -26,12 +30,12 @@ export async function POST(request) {
   }
 
   const [balanceSnapshot, relationshipStartedAt] = await Promise.all([
-    getStrategicBalanceSnapshot(),
-    getOrCreateJourneyStart(DEFAULT_PROFILE_KEY),
+    getStrategicBalanceSnapshot(userId),
+    getOrCreateJourneyStart(userId),
   ]);
   const confirmedGoalsCount = balanceSnapshot.loans.length + balanceSnapshot.investments.length + balanceSnapshot.savings.length;
 
   const snapshot = { ...parsed.data, confirmedGoalsCount, relationshipStartedAt };
-  const issued = await issueCredential(DEFAULT_PROFILE_KEY, snapshot);
+  const issued = await issueCredential(userId, snapshot);
   return Response.json(issued);
 }

@@ -411,6 +411,15 @@
         }
       }
     },
+    "dataProviders": {
+      "title": "Data sources",
+      "manualEntry": "Manually Entered Profile",
+      "active": "Active",
+      "activeDetail": "What you've entered yourself in FutureOS - the only source Life Graph reads from today.",
+      "otherBanks": "Other Banks",
+      "otherBanksDetail": "Not connected - see the concept previews below for what this would unlock.",
+      "notConnected": "Not connected"
+    },
     "peerBenchmark": {
       "title": "Anonymous Peer Comparison",
       "subtitle": "Concept preview: how you'd compare against people in a similar age/income situation, if FutureOS could query real aggregate OCBC customer data. Illustrative figures only - not a real dataset query.",
@@ -1064,6 +1073,7 @@
       "retryButton": "Try Again",
       "actionFailedLabel": "Didn't go through",
       "actionPendingReviewLabel": "Awaiting banker review",
+      "actionRejectedLabel": "Declined",
       "newFeatureBadge": "New",
       "actionTypes": {
         "pause_goal_plan": "Pause a Savings Plan",
@@ -1076,6 +1086,14 @@
         "wedding": "Wedding",
         "home": "Home Purchase",
         "retirement": "Retirement"
+      },
+      "decision": {
+        "approve": "Approve",
+        "edit": "Edit amount",
+        "reject": "Decline",
+        "editAmountLabel": "Amount to apply instead",
+        "rejectReasonLabel": "Why not this one? (optional)",
+        "rejectReasonPlaceholder": "e.g. I'd rather keep this plan running as-is"
       }
     },
     "insurance": {
@@ -1515,7 +1533,12 @@
     },
     "timelineTitle": "Real check-in history",
     "timelineLine": "Checked in {amount} against a {target} target",
-    "noCheckinsYet": "No savings check-ins logged yet - once you confirm a plan in Wedding, Home, or Retirement and log a check-in, it will show up here."
+    "noCheckinsYet": "No savings check-ins logged yet - once you confirm a plan in Wedding, Home, or Retirement and log a check-in, it will show up here.",
+    "consistency": {
+      "title": "Check-in activity, last 6 months",
+      "streak": "{count} months active in a row.",
+      "encouragement": "Every check-in you log adds to your Follow-Through Score - there's no penalty for a gap, only credit for showing up."
+    }
   },
   "otherPlanner": {
     "title": "Other",
@@ -1896,6 +1919,25 @@
       "enable": "Enable Goal Lock"
     },
     "output": {
+      "debateThinking": "Running the debate...",
+      "debateError": "Future Self Guardian couldn't complete the debate. Please try again.",
+      "confidence": "Confidence",
+      "confidenceLevel": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "bullCase": "Bull case: why this could work",
+      "bearCase": "Bear case: what could break this",
+      "judgeSynthesis": "Judge's synthesis",
+      "recommendedAction": {
+        "proceed": "Recommendation: proceed as planned.",
+        "proceed_with_adjustment": "Recommendation: proceed, with an adjustment.",
+        "wait": "Recommendation: wait before committing.",
+        "reconsider": "Recommendation: reconsider this plan."
+      },
+      "confirmPlan": "Confirm This Plan",
+      "confirmed": "Plan Confirmed",
       "bestRecommendation": "Best Recommendation Selected by AI",
       "adviceOnly": "Level 1 is advice only. FutureOS explains the possible futures without showing execution controls.",
       "tradeoffs": "FutureOS negotiates between the selected life goals, cash safety, product readiness, and long-term security.",
@@ -2268,6 +2310,12 @@
       "version": "Version",
       "clearNotice": "Simulation cleared. Future Mirror is ready for a fresh run.",
       "restoreNotice": "Mock data restored. FutureOS is back to the default customer profile."
+    },
+    "account": {
+      "title": "Account",
+      "description": "You're signed in to this FutureOS account.",
+      "sharedAccess": "Shared access",
+      "logOut": "Log out"
     },
     "profile": {
       "title": "Profile Details",

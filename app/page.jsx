@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -72,6 +73,21 @@ import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
 import zh from "../locales/zh.json";
+
+// Namespaces every localStorage key by the real logged-in user, so two
+// different accounts on one browser never read/write each other's cached
+// data. Module-level rather than threaded through props: this is a
+// single-page app where exactly one user is ever authenticated per page
+// load, set once by App()'s auth-resolution effect before anything reads a
+// namespaced key - not meant to support two concurrent identities in one
+// loaded page.
+let currentSessionUserId = null;
+function setCurrentSessionUserId(userId) {
+  currentSessionUserId = userId;
+}
+function storageKey(base) {
+  return currentSessionUserId ? `${base}:${currentSessionUserId}` : base;
+}
 
 const screens = {
   HOME: "home",
@@ -939,6 +955,34 @@ function CrossBankDataScreen({ t, setActiveScreen, profile }) {
       <section className="trustNote compactTrustNote">
         <Info size={17} />
         <p>{t("lifeGraph.crossBankData.disclaimer")}</p>
+      </section>
+
+      <section className="financialStrategyPanel">
+        <span className="sectionLabel">{t("lifeGraph.dataProviders.title")}</span>
+        <div className="strategyList">
+          {LIFE_GRAPH_PROVIDERS.map((provider) => (
+            <article className="strategyItem" key={provider.id}>
+              <span className="iconBubble">
+                <CheckCircle2 size={16} />
+              </span>
+              <div>
+                <strong>{t(provider.labelKey)}</strong>
+                <small>{t("lifeGraph.dataProviders.activeDetail")}</small>
+              </div>
+              <b className="statePill state-trusted">{t("lifeGraph.dataProviders.active")}</b>
+            </article>
+          ))}
+          <article className="strategyItem">
+            <span className="iconBubble">
+              <Landmark size={16} />
+            </span>
+            <div>
+              <strong>{t("lifeGraph.dataProviders.otherBanks")}</strong>
+              <small>{t("lifeGraph.dataProviders.otherBanksDetail")}</small>
+            </div>
+            <b className="statePill">{t("lifeGraph.dataProviders.notConnected")}</b>
+          </article>
+        </div>
       </section>
 
       <div className="strategicCategoryList">
@@ -1849,68 +1893,6 @@ function getSharedGoalContract({ goalEntry, state, preferences, level, selectedL
   };
 }
 
-const riskPreferenceOptions = [
-  { id: "conservative", labelKey: "simulator.riskPreference.conservative" },
-  { id: "balanced", labelKey: "simulator.riskPreference.balanced" },
-  { id: "growth", labelKey: "simulator.riskPreference.growth" },
-];
-
-const simulatorFieldMeta = {
-  weddingBudget: { labelKey: "simulator.inputs.weddingBudget", type: "number" },
-  weddingDate: { labelKey: "simulator.inputs.weddingDate", type: "month" },
-  monthlyIncome: { labelKey: "simulator.inputs.monthlyIncome", type: "number" },
-  currentSavings: { labelKey: "simulator.inputs.currentSavings", type: "number" },
-  retirementAge: { labelKey: "simulator.inputs.retirementAge", type: "number" },
-  riskPreference: { labelKey: "simulator.inputs.riskPreference", type: "select" },
-  targetHomeYear: { labelKey: "simulator.inputs.targetHomeYear", type: "number" },
-  targetDownPayment: { labelKey: "simulator.inputs.targetDownPayment", type: "number" },
-  propertyBudget: { labelKey: "simulator.inputs.propertyBudget", type: "number" },
-  mortgageReadiness: { labelKey: "simulator.inputs.mortgageReadiness", type: "text" },
-  monthlyExpenses: { labelKey: "simulator.inputs.monthlyExpenses", type: "number" },
-  currentEmergencyFund: { labelKey: "simulator.inputs.currentEmergencyFund", type: "number" },
-  targetCoverageMonths: { labelKey: "simulator.inputs.targetCoverageMonths", type: "number" },
-  currentInvestment: { labelKey: "simulator.inputs.currentInvestment", type: "number" },
-  monthlyInvestment: { labelKey: "simulator.inputs.monthlyInvestment", type: "number" },
-  targetReturnGoal: { labelKey: "simulator.inputs.targetReturnGoal", type: "number" },
-  familyPlanningYear: { labelKey: "simulator.inputs.familyPlanningYear", type: "number" },
-  familyMonthlyCost: { labelKey: "simulator.inputs.familyMonthlyCost", type: "number" },
-  insuranceReadiness: { labelKey: "simulator.inputs.insuranceReadiness", type: "text" },
-  startupCapital: { labelKey: "simulator.inputs.startupCapital", type: "number" },
-  launchDate: { labelKey: "simulator.inputs.launchDate", type: "month" },
-  customGoalName: { labelKey: "simulator.inputs.customGoalName", type: "text" },
-  customTargetAmount: { labelKey: "simulator.inputs.customTargetAmount", type: "number" },
-  customTargetDate: { labelKey: "simulator.inputs.customTargetDate", type: "month" },
-  customPriority: { labelKey: "simulator.inputs.customPriority", type: "text" },
-  customCategory: { labelKey: "simulator.inputs.customCategory", type: "text" },
-  customNotes: { labelKey: "simulator.inputs.customNotes", type: "textarea" },
-};
-
-const simulatorFieldGroups = {
-  wedding: ["weddingBudget", "weddingDate", "monthlyIncome", "currentSavings", "retirementAge", "riskPreference"],
-  home: ["targetHomeYear", "targetDownPayment", "propertyBudget", "mortgageReadiness", "monthlyIncome", "currentSavings"],
-  // Empty on purpose: Emergency Fund has its own dedicated real-data planner
-  // (EmergencyNeedContent) - this duplicate simplified input group in the Future Simulator was
-  // redundant. monthlyExpenses/currentEmergencyFund/targetCoverageMonths stay defined above since
-  // other goals' scenario math (buildScenarioFields) still reads them from state.
-  emergency: [],
-  retirement: ["retirementAge", "currentInvestment", "monthlyInvestment", "riskPreference"],
-  family: ["familyPlanningYear", "familyMonthlyCost", "insuranceReadiness"],
-  investment: ["currentInvestment", "monthlyInvestment", "riskPreference", "targetReturnGoal"],
-  business: ["startupCapital", "launchDate", "monthlyIncome", "currentSavings", "riskPreference"],
-  custom: [
-    "customGoalName",
-    "customTargetAmount",
-    "customTargetDate",
-    "monthlyIncome",
-    "currentSavings",
-    "monthlyExpenses",
-    "customPriority",
-    "customCategory",
-    "riskPreference",
-    "customNotes",
-  ],
-};
-
 function numberValue(value, fallback = 0) {
   const parsed = Number(String(value ?? "").replace(/,/g, ""));
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -1933,18 +1915,55 @@ function computeCustomGoalMonthlyPlan(amount, targetDate) {
   return { monthsRemaining, monthlyContribution };
 }
 
-function formatMonthCount(months) {
-  if (months < 12) return `${months} months`;
-  const years = Math.floor(months / 12);
-  const remainder = months % 12;
-  return remainder ? `${years}y ${remainder}m` : `${years} years`;
-}
-
 function formatMonthDate(value, fallback) {
   if (!value) return fallback;
   const [year, month] = String(value).split("-");
   if (!year || !month) return value;
   return `${month}/${year}`;
+}
+
+function shiftMonthString(monthStr, delta) {
+  const [year, month] = String(monthStr).split("-").map(Number);
+  const date = new Date(year, month - 1 + delta, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatMonthAbbrev(monthStr) {
+  const [year, month] = String(monthStr).split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString("en-SG", { month: "short" });
+}
+
+// Last N calendar months ending today, and whether ANY domain had a check-in
+// that month - a plain activity record, not a graded pass/fail. Gaps render as
+// neutral empty cells, never a warning colour, per the Constitution's "calm
+// language even when warning about risk" and "no fear manipulation" rules.
+function getRecentMonthsGrid(timeline, count = 6) {
+  const activeMonths = new Set(timeline.map((entry) => entry.month));
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const grid = [];
+  for (let i = count - 1; i >= 0; i -= 1) {
+    grid.push({ month: shiftMonthString(currentMonth, -i), active: activeMonths.has(shiftMonthString(currentMonth, -i)) });
+  }
+  return grid;
+}
+
+// Counts consecutive months of activity ending at the customer's OWN most
+// recent check-in, not today's calendar month - a customer who checked in
+// last month but hasn't yet this month still sees their real streak instead
+// of an implied "you missed it" state. There is deliberately no "streak
+// broken" UI state anywhere this is used - a lapsed streak just quietly
+// starts counting again from zero next check-in, never called out.
+function computeActiveStreakMonths(timeline) {
+  const activeMonths = new Set(timeline.map((entry) => entry.month));
+  if (!activeMonths.size) return 0;
+  let cursor = [...activeMonths].sort().at(-1);
+  let streak = 0;
+  while (activeMonths.has(cursor)) {
+    streak += 1;
+    cursor = shiftMonthString(cursor, -1);
+  }
+  return streak;
 }
 
 function getSelectedGoalIds(inputs) {
@@ -1970,212 +1989,6 @@ function getPrimaryGoal(inputs) {
   if (selected.includes("investment")) return "investment";
   if (selected.includes("family")) return "family";
   return selected[0] || "wedding";
-}
-
-function getSimulatorFieldGroups(inputs, t) {
-  const seen = new Set();
-  return getSelectedGoalIds(inputs)
-    .map((goalId) => {
-      const fields = (simulatorFieldGroups[goalId] ?? simulatorFieldGroups.custom).filter((field) => {
-        if (seen.has(field)) return false;
-        seen.add(field);
-        return true;
-      });
-
-      return {
-        id: goalId,
-        title: getGoalLabel(goalId, inputs, t),
-        fields,
-      };
-    })
-    .filter((group) => group.fields.length);
-}
-
-function buildScenarioFields(goalType, inputs, variant, t) {
-  const amount = numberValue(inputs.customTargetAmount, numberValue(inputs.weddingBudget, 35000));
-  const weddingBudget = numberValue(inputs.weddingBudget, 35000);
-  const emergencyFund = numberValue(inputs.currentEmergencyFund, 36000);
-  const monthlyExpenses = numberValue(inputs.monthlyExpenses, 4500);
-  const monthsToTarget = monthCountUntil(inputs.customTargetDate);
-  const safeMonthly = Math.ceil(amount / Math.max(monthsToTarget + 2, 1) / 50) * 50;
-  const balancedMonthly = Math.ceil(amount / Math.max(monthsToTarget, 1) / 50) * 50;
-  const highMonthly = Math.ceil(amount / Math.max(monthsToTarget - 2, 1) / 50) * 50;
-  const monthlySaving =
-    variant === "conservative" ? safeMonthly : variant === "balanced" ? balancedMonthly : highMonthly;
-  const completionMonths =
-    variant === "conservative" ? monthsToTarget + 2 : variant === "balanced" ? monthsToTarget : Math.max(1, monthsToTarget - 2);
-  const emergencyImpact = variant === "highRisk" ? t("simulator.output.impact.weak") : t("simulator.output.impact.protected");
-
-  if (goalType === "wedding") {
-    const confirmedMonthly = numberValue(inputs.weddingSavingsMonthly, 0);
-    if (confirmedMonthly > 0) {
-      const scaled = Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10;
-      return [
-        [t("simulator.output.fields.weddingBudget"), formatSgd(Math.round(weddingBudget))],
-        [t("simulator.output.fields.weddingDate"), formatMonthDate(inputs.weddingDate, "12 months")],
-        [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(scaled)],
-      ];
-    }
-    const multiplier = variant === "conservative" ? 0.82 : variant === "balanced" ? 1 : 1.35;
-    return [
-      [t("simulator.output.fields.weddingBudget"), formatSgd(Math.round(weddingBudget * multiplier))],
-      [t("simulator.output.fields.weddingDate"), formatMonthDate(inputs.weddingDate, "12 months")],
-      [t("simulator.output.fields.savingsNeeded"), formatSgd(Math.max(0, Math.round(weddingBudget * multiplier - numberValue(inputs.currentSavings, 0) * 0.25)))],
-    ];
-  }
-
-  if (goalType === "home") {
-    const downPayment = numberValue(inputs.targetDownPayment, 150000);
-    const progress = Math.min(100, Math.round((numberValue(inputs.currentSavings, 0) / downPayment) * 100));
-    const confirmedMonthly = numberValue(inputs.homeSavingsMonthly, 0);
-    const monthlySavingNeeded =
-      confirmedMonthly > 0
-        ? Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10
-        : Math.round(downPayment / 36);
-    return [
-      [t("simulator.output.fields.homeTargetYear"), inputs.targetHomeYear || "2030"],
-      [t("simulator.output.fields.downPaymentProgress"), `${progress}%`],
-      [
-        t("simulator.output.fields.mortgageReadiness"),
-        variant === "highRisk" ? t("simulator.output.impact.reviewNeeded") : inputs.mortgageReadiness || t("status.preparing"),
-      ],
-      [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(monthlySavingNeeded)],
-    ];
-  }
-
-  if (goalType === "car") {
-    const carBudget = amount || 90000;
-    return [
-      [t("simulator.output.fields.carBudget"), formatSgd(carBudget)],
-      [t("simulator.output.fields.monthlyRepayment"), variant === "highRisk" ? formatSgd(1450) : formatSgd(950)],
-      [t("simulator.output.fields.cashFlowImpact"), variant === "highRisk" ? t("simulator.output.impact.tight") : t("simulator.output.impact.manageable")],
-      [t("simulator.output.fields.emergencyImpact"), emergencyImpact],
-    ];
-  }
-
-  if (goalType === "business") {
-    const capital = numberValue(inputs.startupCapital, 80000);
-    return [
-      [t("simulator.output.fields.startupCapital"), formatSgd(capital)],
-      [t("simulator.output.fields.cashRunway"), variant === "highRisk" ? "3 months" : "6 months"],
-      [t("simulator.output.fields.loanReadiness"), variant === "highRisk" ? t("simulator.output.impact.reviewNeeded") : t("status.preparing")],
-      [t("simulator.output.fields.emergencyImpact"), emergencyImpact],
-    ];
-  }
-
-  if (goalType === "emergency") {
-    const target = monthlyExpenses * numberValue(inputs.targetCoverageMonths, 6);
-    return [
-      [t("simulator.output.fields.targetCoverage"), `${inputs.targetCoverageMonths || 6} months`],
-      [t("simulator.output.fields.currentEmergencyFund"), formatSgd(emergencyFund)],
-      [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(Math.max(0, Math.ceil((target - emergencyFund) / 12 / 50) * 50))],
-      [t("simulator.output.fields.emergencyImpact"), variant === "highRisk" ? t("simulator.output.impact.weak") : t("simulator.output.impact.strong")],
-    ];
-  }
-
-  if (goalType === "retirement") {
-    const confirmedMonthly = numberValue(inputs.retirementSavingsMonthly, 0);
-    if (confirmedMonthly > 0) {
-      const scaled = Math.round((confirmedMonthly * scenarioMonthlyMultiplier[variant]) / 10) * 10;
-      return [
-        [t("simulator.output.fields.monthlyInvestment"), formatSgd(scaled)],
-        [t("simulator.output.fields.targetReturn"), `${inputs.targetReturnGoal || 6}%`],
-        [t("simulator.output.fields.retirementImpact"), variant === "highRisk" ? t("simulator.output.impact.delayed") : t("simulator.output.impact.onTrack")],
-      ];
-    }
-  }
-
-  if (goalType === "retirement" || goalType === "investment") {
-    return [
-      [t("simulator.output.fields.currentInvestment"), formatSgd(numberValue(inputs.currentInvestment, 15000))],
-      [t("simulator.output.fields.monthlyInvestment"), formatSgd(numberValue(inputs.monthlyInvestment, 500))],
-      [t("simulator.output.fields.targetReturn"), `${inputs.targetReturnGoal || 6}%`],
-      [t("simulator.output.fields.retirementImpact"), variant === "highRisk" ? t("simulator.output.impact.delayed") : t("simulator.output.impact.onTrack")],
-    ];
-  }
-
-  if (goalType === "family") {
-    return [
-      [t("simulator.output.fields.familyTargetYear"), inputs.familyPlanningYear || "2030"],
-      [t("simulator.output.fields.familyMonthlyCost"), formatSgd(numberValue(inputs.familyMonthlyCost, 1800))],
-      [t("simulator.output.fields.insuranceReadiness"), inputs.insuranceReadiness || t("status.review")],
-      [t("simulator.output.fields.emergencyImpact"), emergencyImpact],
-    ];
-  }
-
-  return [
-    [t("simulator.output.fields.goalName"), inputs.customGoalName?.trim() || t("simulator.goals.customFallback")],
-    [t("simulator.output.fields.targetAmount"), formatSgd(amount)],
-    [
-      t("simulator.output.fields.targetDate"),
-      variant === "balanced" ? formatMonthDate(inputs.customTargetDate, formatMonthCount(completionMonths)) : formatMonthCount(completionMonths),
-    ],
-    [t("simulator.output.fields.monthlySavingNeeded"), formatSgd(monthlySaving)],
-    [t("simulator.output.fields.emergencyImpact"), emergencyImpact],
-  ];
-}
-
-// Future Mirror scenario score (06_Future_Mirror.md): feasibility of each scenario's required
-// monthly saving against the customer's actual income minus expenses, so the score - not just the
-// field details - moves when the customer edits their numbers instead of only toggling by goal type.
-const scenarioMonthlyMultiplier = { conservative: 0.75, balanced: 1, highRisk: 1.4 };
-const scenarioVariantBonus = { conservative: 6, balanced: 0, highRisk: -12 };
-
-function getScenarioScore(variant, inputs) {
-  const availableMonthly = Math.max(
-    numberValue(inputs.monthlyIncome, 7500) - numberValue(inputs.monthlyExpenses, 3600),
-    100
-  );
-  const requiredMonthly = Math.max(getRecommendedMonthlySaving(inputs) * scenarioMonthlyMultiplier[variant], 50);
-  const affordabilityRatio = availableMonthly / requiredMonthly;
-  // Cap the affordability contribution below 96 before applying the variant bonus/malus, so a very
-  // generous income never collapses all three scenarios to the same ceiling - conservative, balanced,
-  // and high-risk must stay meaningfully distinct even when every plan is easily affordable.
-  const affordabilityScore = clampScore(50 + affordabilityRatio * 20, 50, 90);
-  return clampScore(affordabilityScore + scenarioVariantBonus[variant], 35, 96);
-}
-
-function getDynamicSimulatorScenarios(inputs, t) {
-  const goalType = getPrimaryGoal(inputs);
-  return [
-    {
-      id: "conservative",
-      titleKey: "simulator.output.scenarios.conservative.title",
-      detailKey: "simulator.output.scenarios.conservative.detail",
-      score: getScenarioScore("conservative", inputs),
-      riskKey: "risk.low",
-      riskClass: "Low",
-      fields: buildScenarioFields(goalType, inputs, "conservative", t),
-    },
-    {
-      id: "balanced",
-      titleKey: "simulator.output.scenarios.balanced.title",
-      detailKey: "simulator.output.scenarios.balanced.detail",
-      score: getScenarioScore("balanced", inputs),
-      riskKey: "risk.low",
-      riskClass: "Low",
-      fields: buildScenarioFields(goalType, inputs, "balanced", t),
-      recommended: true,
-    },
-    {
-      id: "highRisk",
-      titleKey: "simulator.output.scenarios.highRisk.title",
-      detailKey: "simulator.output.scenarios.highRisk.detail",
-      score: getScenarioScore("highRisk", inputs),
-      riskKey: "risk.high",
-      riskClass: "High",
-      fields: buildScenarioFields(goalType, inputs, "highRisk", t),
-    },
-  ];
-}
-
-function getSimulatorSummary(inputs, t) {
-  const selected = getSelectedGoalIds(inputs).map((goalId) => getGoalLabel(goalId, inputs, t));
-  const primary = getGoalLabel(getPrimaryGoal(inputs) === "car" ? "custom" : getPrimaryGoal(inputs), inputs, t);
-  return t("simulator.output.dynamicSummary", {
-    goal: primary,
-    goals: selected.join(", "),
-  });
 }
 
 function getAgentReasoning(inputs, t) {
@@ -2611,12 +2424,37 @@ function clampScore(value, min = 0, max = 100) {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
 
+// Life Graph data-provider abstraction (OpenBB pattern): Life Graph reads customer
+// data through a registry of providers implementing a common shape, not one
+// hardcoded source. Today there is exactly one REAL provider - the customer's own
+// manually entered profile (no external bank aggregation exists in this prototype,
+// despite the "SGFinDex" framing in the product docs - CrossBankDataScreen's ideas
+// are disclosed concept-previews, not a live integration). Adding a second real
+// source later means implementing this same { getProfile, getCustomGoals } shape
+// and registering it below - not rewriting the ~20 call sites that read through
+// getUserProfile()/getCustomGoals() throughout this file.
+const manualEntryProvider = {
+  id: "manualEntry",
+  labelKey: "lifeGraph.dataProviders.manualEntry",
+  getProfile: (preferences) => mergeDefaults(defaultProfile, preferences?.profile),
+  getCustomGoals: (preferences) => (Array.isArray(preferences?.customGoals) ? preferences.customGoals : []),
+};
+
+// The only provider registered today - see comment above. Deliberately not
+// padded with a fake second entry just to look more "integrated" than this
+// prototype actually is.
+const LIFE_GRAPH_PROVIDERS = [manualEntryProvider];
+
+function getActiveLifeGraphProvider() {
+  return LIFE_GRAPH_PROVIDERS[0];
+}
+
 function getUserProfile(preferences) {
-  return mergeDefaults(defaultProfile, preferences?.profile);
+  return getActiveLifeGraphProvider().getProfile(preferences);
 }
 
 function getCustomGoals(preferences) {
-  return Array.isArray(preferences?.customGoals) ? preferences.customGoals : [];
+  return getActiveLifeGraphProvider().getCustomGoals(preferences);
 }
 
 function getProfileAmount(profile, key, fallback = 0) {
@@ -3854,63 +3692,17 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   );
 }
 
-function DynamicSimulatorField({ fieldId, value, onChange, t }) {
-  const field = simulatorFieldMeta[fieldId];
-  if (!field) return null;
-
-  if (field.type === "select") {
-    return (
-      <label className="inputField" key={fieldId}>
-        <span>{t(field.labelKey)}</span>
-        <select value={value} onChange={(event) => onChange(fieldId, event.target.value)}>
-          {riskPreferenceOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {t(option.labelKey)}
-            </option>
-          ))}
-        </select>
-      </label>
-    );
-  }
-
-  if (field.type === "textarea") {
-    return (
-      <label className="inputField fullWidthField" key={fieldId}>
-        <span>{t(field.labelKey)}</span>
-        <textarea value={value} onChange={(event) => onChange(fieldId, event.target.value)} />
-      </label>
-    );
-  }
-
-  return (
-    <label className="inputField" key={fieldId}>
-      <span>{t(field.labelKey)}</span>
-      <input
-        value={value}
-        onChange={(event) => onChange(fieldId, event.target.value)}
-        type={field.type === "month" ? "month" : "text"}
-        inputMode={field.type === "number" ? "decimal" : undefined}
-      />
-    </label>
-  );
-}
-
 function FutureMirrorSimulator({
   setActiveScreen,
   simulatorInputs,
   setSimulatorInputs,
-  simulatorRan,
-  setSimulatorRan,
-  resetSimulation,
+  language,
   t,
 }) {
-  const level = Number(simulatorInputs.independenceLevel);
-  const fieldGroups = getSimulatorFieldGroups(simulatorInputs, t);
-  const scenarios = getDynamicSimulatorScenarios(simulatorInputs, t);
-  const reasoning = getAgentReasoning(simulatorInputs, t);
-  const recommendedScenario = scenarios.find((scenario) => scenario.recommended) ?? scenarios[1] ?? scenarios[0];
-  const primaryType = getPrimaryGoal(simulatorInputs);
-  const goalName = getGoalLabel(primaryType === "car" ? "custom" : primaryType, simulatorInputs, t);
+  const [debate, setDebate] = useState(null);
+  const [debateLoading, setDebateLoading] = useState(false);
+  const [debateError, setDebateError] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
 
   function updateInput(key, value) {
     setSimulatorInputs((current) => ({ ...current, [key]: value }));
@@ -3924,9 +3716,46 @@ function FutureMirrorSimulator({
     });
   }
 
-  function runSimulation() {
-    setSimulatorRan(true);
-  }
+  const runDebate = async () => {
+    setDebateLoading(true);
+    setDebateError("");
+    setConfirmed(false);
+    try {
+      const goalType = getPrimaryGoal(simulatorInputs);
+      const goalLabel = getGoalLabel(goalType === "car" ? "custom" : goalType, simulatorInputs, t);
+      const response = await fetch("/api/mirror/debate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ situation: simulatorInputs.situation, goalType, goalLabel, language, inputs: simulatorInputs }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setDebateError(t("simulator.output.debateError"));
+        return;
+      }
+      setDebate(data);
+    } catch {
+      setDebateError(t("simulator.output.debateError"));
+    } finally {
+      setDebateLoading(false);
+    }
+  };
+
+  const confirmPlan = async () => {
+    if (!debate?.debateId) return;
+    try {
+      const response = await fetch("/api/mirror/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ debateId: debate.debateId }),
+      });
+      if (response.ok) setConfirmed(true);
+    } catch {
+      // Confirmation is a nice-to-have record of intent, not a blocking step -
+      // the debate itself already rendered, so a network hiccup here shouldn't
+      // trap the customer with no way forward.
+    }
+  };
 
   return (
     <Screen>
@@ -3979,6 +3808,59 @@ function FutureMirrorSimulator({
         </div>
       </section>
 
+      <button type="button" className="primaryButton" onClick={runDebate} disabled={debateLoading}>
+        {debateLoading ? t("simulator.output.debateThinking") : t("simulator.run")}
+        <Sparkles size={18} />
+      </button>
+
+      {debateError ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{debateError}</p>
+        </section>
+      ) : null}
+
+      {debate ? (
+        <motion.section className="simulatorOutput" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <section className="recommendationPanel">
+            <span className="sectionLabel">{t("simulator.sections.futureScore")}</span>
+            <SummaryRow label={t("mirror.futureScore")} value={`${debate.futureScore}/100`} />
+            <SummaryRow label={t("mirror.risk")} value={t(`risk.${debate.riskLevel}`)} />
+            <SummaryRow label={t("simulator.output.confidence")} value={t(`simulator.output.confidenceLevel.${debate.confidence}`)} />
+          </section>
+
+          <section className="recommendationHero debateBullCase">
+            <ThumbsUp size={22} />
+            <div>
+              <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
+              <p>{debate.bullCase}</p>
+            </div>
+          </section>
+
+          <section className="recommendationHero debateBearCase">
+            <ThumbsDown size={22} />
+            <div>
+              <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
+              <p>{debate.bearCase}</p>
+            </div>
+          </section>
+
+          <section className="recommendationHero debateJudge">
+            <ShieldCheck size={22} />
+            <div>
+              <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
+              <p>{debate.judgeSynthesis}</p>
+              <small>{t(`simulator.output.recommendedAction.${debate.recommendedAction}`)}</small>
+            </div>
+          </section>
+
+          <button type="button" className="secondaryButton" onClick={confirmPlan} disabled={confirmed}>
+            {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
+            <ShieldCheck size={18} />
+          </button>
+        </motion.section>
+      ) : null}
+
       <button
         type="button"
         className="checkOption weddingEntryOption"
@@ -3994,100 +3876,6 @@ function FutureMirrorSimulator({
         </span>
       </button>
 
-      <section className="simulatorForm">
-        <div className="dynamicFieldGroups">
-          {fieldGroups.map((group, index) => (
-            <details className="dynamicFieldGroup" key={group.id} open={index === 0 || fieldGroups.length < 3}>
-              <summary>{group.title}</summary>
-              <div className="financialGrid">
-                {group.fields.map((fieldId) => (
-                  <DynamicSimulatorField
-                    key={fieldId}
-                    fieldId={fieldId}
-                    value={simulatorInputs[fieldId] ?? ""}
-                    onChange={updateInput}
-                    t={t}
-                  />
-                ))}
-              </div>
-            </details>
-          ))}
-        </div>
-
-        <div className="buttonPair">
-          <button type="button" className="primaryButton" onClick={runSimulation}>
-            {t("simulator.run")}
-            <Sparkles size={18} />
-          </button>
-          <button type="button" className="secondaryButton" onClick={resetSimulation}>
-            {t("simulator.reset")}
-            <RotateCcw size={17} />
-          </button>
-        </div>
-      </section>
-
-      {simulatorRan ? (
-        <motion.section className="simulatorOutput" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <section className="insightCard">
-            <Bot size={20} />
-            <p>{simulatorInputs.situation.trim() || getSimulatorSummary(simulatorInputs, t)}</p>
-          </section>
-
-          <section className="recommendationPanel">
-            <span className="sectionLabel">{t("simulator.sections.futureScore")}</span>
-            <SummaryRow label={t("mirror.futureScore")} value={`${recommendedScenario.score}/100`} />
-            <SummaryRow label={t("mirror.risk")} value={t(recommendedScenario.riskKey)} />
-            <SummaryRow label={t("simulator.output.bestRecommendation")} value={reasoning.recommendation} />
-          </section>
-
-          <section className="recommendationHero">
-            <ShieldCheck size={22} />
-            <div>
-              <span className="sectionLabel">{t("simulator.output.bestRecommendation")}</span>
-              <p>{reasoning.recommendation}</p>
-              <small>{t(`simulator.output.tone.${level}`)}</small>
-            </div>
-          </section>
-
-          {level === 1 ? (
-            <section className="adviceOnlyPanel">
-              <AlertTriangle size={18} />
-              <p>{t("simulator.output.adviceOnly")}</p>
-            </section>
-          ) : null}
-
-          {level >= 3 ? (
-            <section className="tradeoffPanel">
-              <span className="sectionLabel">{t("simulator.sections.tradeoffAnalysis")}</span>
-              <div className="balanceScale">
-                <span>{goalName}</span>
-                <i />
-                <span>{t("simulator.output.futureGoalsLabel")}</span>
-              </div>
-              <p>{t("simulator.output.tradeoffs")}</p>
-            </section>
-          ) : null}
-
-          <details className="explainPanel">
-            <summary>{t("simulator.output.why")}</summary>
-            <SupportList
-              title={t("simulator.output.explainTitle")}
-              items={[
-                reasoning.situation,
-                t("simulator.output.explain.protectedGoals", { goals: reasoning.goals }),
-                reasoning.risk,
-                t("simulator.output.explain.products"),
-                reasoning.action,
-              ]}
-            />
-          </details>
-
-          <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.GUARDIAN)}>
-            {t("mirror.cta")}
-            <ShieldCheck size={18} />
-          </button>
-        </motion.section>
-      ) : null}
     </Screen>
   );
 }
@@ -4153,6 +3941,8 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
         )
         .sort((a, b) => (a.month < b.month ? 1 : -1))
     : [];
+  const recentMonthsGrid = getRecentMonthsGrid(timeline, 6);
+  const activeStreakMonths = computeActiveStreakMonths(timeline);
 
   const benefitTiers = [0, 1, 2, 3];
 
@@ -4313,6 +4103,22 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
                 <Award size={18} />
               </button>
             )}
+          </section>
+
+          <section className="checkinConsistencyPanel">
+            <span className="sectionLabel">{t("relationshipLedger.consistency.title")}</span>
+            <div className="consistencyGrid">
+              {recentMonthsGrid.map(({ month, active }) => (
+                <div className={active ? "consistencyCell active" : "consistencyCell"} key={month} title={month}>
+                  <span>{formatMonthAbbrev(month)}</span>
+                </div>
+              ))}
+            </div>
+            <p className="consistencyNote">
+              {activeStreakMonths >= 2
+                ? t("relationshipLedger.consistency.streak", { count: activeStreakMonths })
+                : t("relationshipLedger.consistency.encouragement")}
+            </p>
           </section>
 
           <section className="historyTimeline">
@@ -7863,12 +7669,14 @@ function RetirementNeedContent({
   // "Adjust This Plan" and later refine calls after a reload silently fall
   // back to estimated defaults instead of what the customer actually entered.
   const [retirementProfileInput, setRetirementProfileInputState] = useState(() =>
-    typeof window === "undefined" ? null : safeJsonParse(window.localStorage.getItem("futureos-retirement-profile"), null)
+    typeof window === "undefined"
+      ? null
+      : safeJsonParse(window.localStorage.getItem(storageKey("futureos-retirement-profile")), null)
   );
   const setRetirementProfileInput = (value) => {
     setRetirementProfileInputState(value);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("futureos-retirement-profile", JSON.stringify(value));
+      window.localStorage.setItem(storageKey("futureos-retirement-profile"), JSON.stringify(value));
     }
   };
 
@@ -8277,23 +8085,70 @@ const RECOVERY_ACTION_ICONS = {
   other_ocbc_support: ShieldCheck,
 };
 
-function RecoveryActionCard({ action, selected, onToggle, t }) {
+// Four-state approval, not a single checkbox: the customer explicitly approves,
+// edits the amount, or declines with a reason - a decline is a recorded answer,
+// not silence (app/api/hardship/apply/route.js persists it as evidence either way).
+function RecoveryActionCard({ action, decision, onDecisionChange, t }) {
   const Icon = RECOVERY_ACTION_ICONS[action.action_type] ?? ShieldCheck;
+  const current = decision?.decision ?? null;
+
   return (
-    <button
-      type="button"
-      className={selected ? "checkOption selected" : "checkOption"}
-      onClick={() => onToggle(action.id)}
-    >
+    <div className={current ? `checkOption decisionCard decision-${current}` : "checkOption decisionCard"}>
       <Icon size={18} />
       <span>
         <strong>{t(`needDetails.emergency.actionTypes.${action.action_type}`)}</strong>
         {action.target_domain ? <em> — {t(`needDetails.emergency.domains.${action.target_domain}`)}</em> : null}
         <p>{action.rationale}</p>
         {action.action_type !== "other_ocbc_support" ? <b>{formatSgd(Math.round(action.amount))}</b> : null}
+
+        <div className="decisionButtonRow">
+          <button
+            type="button"
+            className={current === "approve" ? "miniToggle selected" : "miniToggle"}
+            onClick={() => onDecisionChange(action.id, { decision: "approve" })}
+          >
+            {t("needDetails.emergency.decision.approve")}
+          </button>
+          <button
+            type="button"
+            className={current === "edit" ? "miniToggle selected" : "miniToggle"}
+            onClick={() => onDecisionChange(action.id, { decision: "edit", editedAmount: decision?.editedAmount ?? action.amount })}
+          >
+            {t("needDetails.emergency.decision.edit")}
+          </button>
+          <button
+            type="button"
+            className={current === "reject" ? "miniToggle selected" : "miniToggle"}
+            onClick={() => onDecisionChange(action.id, { decision: "reject", reason: decision?.reason ?? "" })}
+          >
+            {t("needDetails.emergency.decision.reject")}
+          </button>
+        </div>
+
+        {current === "edit" ? (
+          <label className="inputField">
+            <span>{t("needDetails.emergency.decision.editAmountLabel")}</span>
+            <input
+              value={decision.editedAmount ?? ""}
+              onChange={(event) => onDecisionChange(action.id, { decision: "edit", editedAmount: Number(event.target.value) })}
+              type="number"
+              inputMode="decimal"
+            />
+          </label>
+        ) : null}
+
+        {current === "reject" ? (
+          <label className="inputField fullWidthField">
+            <span>{t("needDetails.emergency.decision.rejectReasonLabel")}</span>
+            <textarea
+              value={decision.reason ?? ""}
+              onChange={(event) => onDecisionChange(action.id, { decision: "reject", reason: event.target.value })}
+              placeholder={t("needDetails.emergency.decision.rejectReasonPlaceholder")}
+            />
+          </label>
+        ) : null}
       </span>
-      {selected ? <Check size={16} /> : null}
-    </button>
+    </div>
   );
 }
 
@@ -9969,7 +9824,7 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [selectedActionIds, setSelectedActionIds] = useState([]);
+  const [decisions, setDecisions] = useState({});
   const [applyResults, setApplyResults] = useState(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
@@ -10028,10 +9883,15 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
       return;
     }
     setSessionData((current) => ({ ...current, proposedActions: proposeData.data }));
-    // Don't pre-select actions the AI itself flagged as needing human/banker
+    // Don't pre-decide actions the AI itself flagged as needing human/banker
     // review before anything happens - the customer must opt in explicitly.
-    setSelectedActionIds(
-      proposeData.data.actions.filter((action) => !action.suitability?.human_review_required).map((action) => action.id)
+    // Everything else defaults to "approve" but stays fully editable/rejectable below.
+    setDecisions(
+      Object.fromEntries(
+        proposeData.data.actions
+          .filter((action) => !action.suitability?.human_review_required)
+          .map((action) => [action.id, { decision: "approve" }])
+      )
     );
   };
 
@@ -10070,21 +9930,23 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
     }
   };
 
-  const toggleActionSelected = (actionId) => {
-    setSelectedActionIds((current) =>
-      current.includes(actionId) ? current.filter((id) => id !== actionId) : [...current, actionId]
-    );
+  const updateDecision = (actionId, decision) => {
+    setDecisions((current) => ({ ...current, [actionId]: decision }));
   };
 
+  const decisionCount = Object.keys(decisions).length;
+
   const applyRecoveryPlan = async () => {
-    if (!selectedActionIds.length) return;
+    if (!decisionCount) return;
     setSubmitting(true);
     setErrorMessage("");
     try {
       const response = await fetch("/api/hardship/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedActionIds }),
+        body: JSON.stringify({
+          decisions: Object.entries(decisions).map(([actionId, decision]) => ({ actionId, ...decision })),
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -10210,13 +10072,13 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
                   <RecoveryActionCard
                     key={action.id}
                     action={action}
-                    selected={selectedActionIds.includes(action.id)}
-                    onToggle={toggleActionSelected}
+                    decision={decisions[action.id]}
+                    onDecisionChange={updateDecision}
                     t={t}
                   />
                 ))}
               </div>
-              <button type="button" className="primaryButton" onClick={applyRecoveryPlan} disabled={submitting || !selectedActionIds.length}>
+              <button type="button" className="primaryButton" onClick={applyRecoveryPlan} disabled={submitting || !decisionCount}>
                 {submitting ? t("weddingPlanner.thinking") : t("needDetails.emergency.applyButton")}
                 <Check size={18} />
               </button>
@@ -10235,10 +10097,12 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
                         ? `${t("needDetails.emergency.actionFailedLabel")}: ${entry.explanation}`
                         : entry.status === "pending_review"
                           ? `${t("needDetails.emergency.actionPendingReviewLabel")}: ${entry.explanation}`
-                          : entry.explanation
+                          : entry.status === "rejected"
+                            ? `${t("needDetails.emergency.actionRejectedLabel")}${entry.decision_reason ? `: ${entry.decision_reason}` : ""}`
+                            : entry.explanation
                     }
                     value={
-                      entry.status === "failed"
+                      entry.status === "failed" || entry.status === "rejected"
                         ? "—"
                         : entry.amount != null
                           ? formatSgd(Math.round(entry.amount))
@@ -10871,6 +10735,26 @@ function ProfileScreen({
           </button>
         </div>
       </SettingsCard>
+
+      <SettingsCard icon={LogOut} title={t("settings.account.title")} description={t("settings.account.description")}>
+        <div className="settingsActions">
+          <button type="button" className="miniButton" onClick={() => window.location.assign("/grants")}>
+            <UserRound size={15} />
+            {t("settings.account.sharedAccess")}
+          </button>
+          <button
+            type="button"
+            className="miniButton danger"
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.assign("/login");
+            }}
+          >
+            <LogOut size={15} />
+            {t("settings.account.logOut")}
+          </button>
+        </div>
+      </SettingsCard>
     </Screen>
   );
 }
@@ -11188,6 +11072,9 @@ function Screen({ children }) {
 }
 
 export default function App() {
+  const router = useRouter();
+  const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
+  const [authUser, setAuthUser] = useState(null);
   const [activeScreen, setActiveScreen] = useState(screens.HOME);
   const [loadingCopyKey, setLoadingCopyKey] = useState("loading.default");
   const [language, setLanguage] = useState("en");
@@ -11206,10 +11093,36 @@ export default function App() {
   const effectiveTheme = getEffectiveTheme(preferences.theme, systemTheme);
   const displayName = getDisplayName(preferences.displayName);
 
+  // Real auth gate: resolves who's logged in before anything reads a
+  // localStorage key, since those keys are namespaced by the real userId
+  // (storageKey()) - reading them before this resolves would read/write the
+  // wrong (or no) namespace. Redirects to /login on 401 rather than falling
+  // through to defaultPreferences.
   useEffect(() => {
-    const storedLanguage = window.localStorage.getItem("futureos-language");
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((user) => {
+        if (cancelled) return;
+        setCurrentSessionUserId(user.id);
+        setAuthUser(user);
+        setAuthStatus("authenticated");
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAuthStatus("redirecting");
+        router.push("/login");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    const storedLanguage = window.localStorage.getItem(storageKey("futureos-language"));
     if (storedLanguage && locales[storedLanguage]) setLanguage(storedLanguage);
-    const savedPreferences = safeJsonParse(window.localStorage.getItem("futureos-preferences"), null);
+    const savedPreferences = safeJsonParse(window.localStorage.getItem(storageKey("futureos-preferences")), null);
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
       // goalLedger, escalationHistory, notificationFeedback, and rejectionCounts all have dynamic
@@ -11221,27 +11134,32 @@ export default function App() {
       notificationFeedback: savedPreferences?.notificationFeedback ?? {},
       rejectionCounts: savedPreferences?.rejectionCounts ?? {},
       dismissedActions: savedPreferences?.dismissedActions ?? [],
+      // The authenticated account's real display name seeds every fresh
+      // login (no more global "Karina" hardcode) - a customer's own edit in
+      // Settings (still stored in preferences.displayName) always wins once
+      // one exists.
+      displayName: savedPreferences?.displayName || authUser?.displayName || defaultPreferences.displayName,
     };
     setPreferences(storedPreferences);
     setSimulatorInputs(
       mergeDefaults(
         getSimulatorDefaultsFromProfile(getUserProfile(storedPreferences), getCustomGoals(storedPreferences)),
-        safeJsonParse(window.localStorage.getItem("futureos-simulator-inputs"), null)
+        safeJsonParse(window.localStorage.getItem(storageKey("futureos-simulator-inputs")), null)
       )
     );
-    setSimulatorRan(safeJsonParse(window.localStorage.getItem("futureos-simulator-ran"), false));
-    setSimulatorApplied(safeJsonParse(window.localStorage.getItem("futureos-simulator-applied"), false));
+    setSimulatorRan(safeJsonParse(window.localStorage.getItem(storageKey("futureos-simulator-ran")), false));
+    setSimulatorApplied(safeJsonParse(window.localStorage.getItem(storageKey("futureos-simulator-applied")), false));
     setSimulatorActionStates(
       mergeDefaults(
         defaultSimulatorActionStates,
-        safeJsonParse(window.localStorage.getItem("futureos-simulator-actions"), null)
+        safeJsonParse(window.localStorage.getItem(storageKey("futureos-simulator-actions")), null)
       )
     );
-    const savedMemory = safeJsonParse(window.localStorage.getItem("futureos-guardian-memory"), null);
+    const savedMemory = safeJsonParse(window.localStorage.getItem(storageKey("futureos-guardian-memory")), null);
     if (Array.isArray(savedMemory) && savedMemory.length > 0) {
       setMemoryEvents(savedMemory);
     }
-  }, []);
+  }, [authStatus, authUser]);
 
   useEffect(() => {
     setSimulatorInputs((current) => ({
@@ -11281,34 +11199,41 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-language", language);
     document.documentElement.lang = language;
-  }, [language]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-language"), language);
+  }, [language, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-preferences", JSON.stringify(preferences));
     document.documentElement.dataset.theme = effectiveTheme;
-  }, [preferences, effectiveTheme]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-preferences"), JSON.stringify(preferences));
+  }, [preferences, effectiveTheme, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-simulator-inputs", JSON.stringify(simulatorInputs));
-  }, [simulatorInputs]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-simulator-inputs"), JSON.stringify(simulatorInputs));
+  }, [simulatorInputs, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-simulator-ran", JSON.stringify(simulatorRan));
-  }, [simulatorRan]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-simulator-ran"), JSON.stringify(simulatorRan));
+  }, [simulatorRan, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-simulator-applied", JSON.stringify(simulatorApplied));
-  }, [simulatorApplied]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-simulator-applied"), JSON.stringify(simulatorApplied));
+  }, [simulatorApplied, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-simulator-actions", JSON.stringify(simulatorActionStates));
-  }, [simulatorActionStates]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-simulator-actions"), JSON.stringify(simulatorActionStates));
+  }, [simulatorActionStates, authStatus]);
 
   useEffect(() => {
-    window.localStorage.setItem("futureos-guardian-memory", JSON.stringify(memoryEvents));
-  }, [memoryEvents]);
+    if (authStatus !== "authenticated") return;
+    window.localStorage.setItem(storageKey("futureos-guardian-memory"), JSON.stringify(memoryEvents));
+  }, [memoryEvents, authStatus]);
 
   function goWithLoading(nextScreen, copyKey) {
     setLoadingCopyKey(copyKey);
@@ -11376,12 +11301,12 @@ export default function App() {
   }
 
   function deleteLocalData() {
-    window.localStorage.removeItem("futureos-preferences");
-    window.localStorage.removeItem("futureos-simulator-inputs");
-    window.localStorage.removeItem("futureos-simulator-ran");
-    window.localStorage.removeItem("futureos-simulator-applied");
-    window.localStorage.removeItem("futureos-simulator-actions");
-    window.localStorage.removeItem("futureos-guardian-memory");
+    window.localStorage.removeItem(storageKey("futureos-preferences"));
+    window.localStorage.removeItem(storageKey("futureos-simulator-inputs"));
+    window.localStorage.removeItem(storageKey("futureos-simulator-ran"));
+    window.localStorage.removeItem(storageKey("futureos-simulator-applied"));
+    window.localStorage.removeItem(storageKey("futureos-simulator-actions"));
+    window.localStorage.removeItem(storageKey("futureos-guardian-memory"));
     restoreMockData();
     setActiveScreen(screens.HOME);
   }
@@ -11505,6 +11430,16 @@ export default function App() {
     [screens.FX]: <QuickActionScreen {...shared} type="fx" />,
     [screens.LOADING]: <LoadingScreen messageKey={loadingCopyKey} t={t} />,
   }[activeScreen];
+
+  if (authStatus !== "authenticated") {
+    return (
+      <main className="stage theme-light">
+        <section className="phone" aria-label={t("app.prototypeLabel")}>
+          <p style={{ padding: 24 }}>{t("loading.detail")}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <PhoneShell
