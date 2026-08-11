@@ -552,3 +552,23 @@ create index if not exists income_entries_profile_idx
 -- than a separate table, since it's an action taken on one specific debate.
 alter table mirror_debates add column if not exists escalation_requested boolean not null default false;
 alter table mirror_debates add column if not exists escalation_requested_at timestamptz;
+
+-- "Decode This": one row per document a customer had FutureOS explain. No
+-- sessions/messages table, same reasoning as decision_checks above - a
+-- single one-shot read, not a multi-turn conversation. extracted_text is the
+-- real text pdf.js pulled from the customer's own PDF (never the raw PDF
+-- binary - this app has no file-storage backend and doesn't need one),
+-- capped client-side to 20000 chars before it ever reaches this table.
+create table if not exists document_reviews (
+  id                uuid primary key default gen_random_uuid(),
+  profile_key       text not null,
+  document_type     text not null, -- loan_agreement | insurance_pds | tenancy_agreement | offer_letter | other
+  extracted_text    text not null,
+  summary           text not null,
+  flagged_clauses   jsonb not null,
+  key_facts         jsonb not null,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists document_reviews_profile_idx
+  on document_reviews (profile_key, created_at desc);

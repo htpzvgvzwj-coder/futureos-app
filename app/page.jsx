@@ -71,6 +71,7 @@ import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
 import { computePeerBenchmark } from "../lib/peer-benchmark.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
+import { extractPdfText } from "../lib/pdf-extract-client.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -107,6 +108,7 @@ const screens = {
   NEED_OTHER: "needOther",
   RELATIONSHIP_LEDGER: "relationshipLedger",
   DECISION_VERDICT: "decisionVerdict",
+  DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
@@ -3983,6 +3985,21 @@ function FutureMirrorSimulator({
         <span>
           {t("decisionVerdict.entryTitle")}
           <small style={{ display: "block", fontWeight: 400 }}>{t("decisionVerdict.entryBody")}</small>
+        </span>
+        <span className="weddingEntryTrailing">
+          <ChevronRight size={14} />
+        </span>
+      </button>
+
+      <button
+        type="button"
+        className="checkOption weddingEntryOption"
+        onClick={() => setActiveScreen(screens.DECODE_DOCUMENT)}
+      >
+        <FileText size={15} />
+        <span>
+          {t("decodeDocument.entryTitle")}
+          <small style={{ display: "block", fontWeight: 400 }}>{t("decodeDocument.entryBody")}</small>
         </span>
         <span className="weddingEntryTrailing">
           <ChevronRight size={14} />
@@ -10051,6 +10068,221 @@ function DecisionVerdictScreen({ t, setActiveScreen, language, profile }) {
   );
 }
 
+const DECODE_SEVERITY_ICONS = { low: Info, medium: AlertTriangle, high: AlertTriangle };
+
+function DecodeDocumentHistoryModal({ entries, loading, onClose, t }) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("decodeDocument.historyTitle")}>
+      <motion.div className="confirmModal weddingHistoryModal" {...screenMotion}>
+        <History size={24} />
+        <strong>{t("decodeDocument.historyTitle")}</strong>
+        {loading ? (
+          <p>{t("loading.detail")}</p>
+        ) : entries.length ? (
+          <div className="historyTimeline">
+            {entries.map((entry) => (
+              <article key={entry.id}>
+                <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
+                <div>
+                  <strong>{t(`decodeDocument.documentType.${entry.documentType}`)}</strong>
+                  <small>{entry.summary}</small>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>{t("decodeDocument.historyEmpty")}</p>
+        )}
+        <button type="button" className="primaryButton" onClick={onClose}>
+          {t("homeBanking.gotIt")}
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
+function DecodeDocumentResultCard({ result, t, onDecodeAnother }) {
+  return (
+    <>
+      <section className="insightCard">
+        <FileText size={20} />
+        <p>
+          <strong>{t(`decodeDocument.documentType.${result.documentType}`)}</strong> — {result.summary}
+        </p>
+      </section>
+
+      <section className="adviceOnlyPanel">
+        <AlertTriangle size={18} />
+        <p>{t("decodeDocument.disclaimer")}</p>
+      </section>
+
+      {result.flaggedClauses.length ? (
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("decodeDocument.flaggedTitle")}</span>
+          {result.flaggedClauses.map((clause, index) => {
+            const Icon = DECODE_SEVERITY_ICONS[clause.severity] ?? Info;
+            return (
+              <div className="proofBlock" key={index}>
+                <strong>
+                  <Icon size={14} /> {t(`decodeDocument.severity.${clause.severity}`)}
+                </strong>
+                <p>{clause.concern}</p>
+                <small>&ldquo;{clause.excerpt}&rdquo;</small>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p>{t("decodeDocument.noFlagsFound")}</p>
+      )}
+
+      {result.keyFacts.length ? (
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("decodeDocument.keyFactsTitle")}</span>
+          {result.keyFacts.map((fact, index) => (
+            <SummaryRow key={index} label={fact.label} value={fact.value} />
+          ))}
+        </div>
+      ) : null}
+
+      <button type="button" className="primaryButton" onClick={onDecodeAnother}>
+        {t("decodeDocument.decodeAnother")}
+        <FileText size={18} />
+      </button>
+    </>
+  );
+}
+
+function DecodeDocumentScreen({ t, setActiveScreen, language }) {
+  const [file, setFile] = useState(null);
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    fetch("/api/decode-document/history")
+      .then((response) => response.json())
+      .then((data) => setHistoryEntries(data.entries ?? []))
+      .catch(() => setHistoryEntries([]))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  const handleFileChange = async (event) => {
+    const selected = event.target.files?.[0];
+    event.target.value = ""; // allow re-selecting the same file after an error
+    if (!selected) return;
+    setExtractError("");
+    setErrorMessage("");
+    setFile(null);
+    setExtracting(true);
+    try {
+      const extraction = await extractPdfText(selected);
+      if (extraction.error === "no_text_layer") {
+        setExtractError(t("decodeDocument.noTextLayerError"));
+        return;
+      }
+      setFile({ name: selected.name, text: extraction.text, truncated: extraction.truncated });
+    } catch {
+      setExtractError(t("decodeDocument.extractError"));
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const submitDecode = async () => {
+    if (!file?.text) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/decode-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ extractedText: file.text, language }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("decodeDocument.genericError"));
+        return;
+      }
+      setResult(data);
+    } catch {
+      setErrorMessage(t("decodeDocument.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const decodeAnother = () => {
+    setResult(null);
+    setFile(null);
+    setExtractError("");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("decodeDocument.title")} subtitle={t("decodeDocument.subtitle")} />
+      <div className="weddingTopRow">
+        <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+        <button type="button" className="historyButton" onClick={openHistory} aria-label={t("decodeDocument.historyTitle")}>
+          <History size={16} />
+        </button>
+      </div>
+      {historyOpen ? (
+        <DecodeDocumentHistoryModal entries={historyEntries} loading={historyLoading} onClose={() => setHistoryOpen(false)} t={t} />
+      ) : null}
+
+      {result ? (
+        <DecodeDocumentResultCard result={result} t={t} onDecodeAnother={decodeAnother} />
+      ) : (
+        <section className="settingsGroup">
+          <section className="trustNote compactTrustNote">
+            <FileText size={17} />
+            <p>{t("decodeDocument.instructions")}</p>
+          </section>
+
+          <label className="checkOption weddingEntryOption">
+            <FileText size={15} />
+            <span>{extracting ? t("decodeDocument.extracting") : file?.name ?? t("decodeDocument.chooseFile")}</span>
+            <input type="file" accept="application/pdf" onChange={handleFileChange} style={{ display: "none" }} disabled={extracting} />
+          </label>
+
+          {extractError ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{extractError}</p>
+            </section>
+          ) : null}
+          {file?.truncated ? (
+            <section className="trustNote compactTrustNote">
+              <Info size={17} />
+              <p>{t("decodeDocument.truncatedNote")}</p>
+            </section>
+          ) : null}
+
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+
+          <button type="button" className="primaryButton" disabled={submitting || extracting || !file?.text} onClick={submitDecode}>
+            {submitting ? t("decodeDocument.thinking") : t("decodeDocument.submit")}
+            <FileText size={18} />
+          </button>
+        </section>
+      )}
+    </Screen>
+  );
+}
+
 function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, language, preferences, setPreferences, profile, healthScores, setMemoryEvents }) {
   const readinessScore = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
   const currentFund = numberValue(profile.currentSavings, 18000);
@@ -11782,6 +12014,7 @@ export default function App() {
     [screens.DECISION_VERDICT]: (
       <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
+    [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,

@@ -11,7 +11,8 @@
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint app --max-warnings=0",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
-    "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs"
+    "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs",
+    "postinstall": "node scripts/copy-pdf-worker.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",
@@ -19,6 +20,7 @@
     "framer-motion": "12.41.0",
     "lucide-react": "1.21.0",
     "next": "16.2.9",
+    "pdfjs-dist": "^6.2.108",
     "pg": "^8.13.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",

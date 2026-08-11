@@ -28,6 +28,13 @@ npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 
+# pdfjs-dist assets - regenerated deterministically from node_modules by
+# scripts/copy-pdf-worker.mjs (wired into postinstall), same treatment as
+# node_modules itself rather than committing ~3.6MB of vendor binary copies.
+public/pdf.worker.min.mjs
+public/pdf-standard-fonts/
+public/pdf-cmaps/
+
 # Codex and temporary files
 .codex/
 .agents/

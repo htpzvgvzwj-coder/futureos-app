@@ -1627,6 +1627,40 @@
       "transcribeError": "Couldn't transcribe that - please try again or type instead."
     }
   },
+  "decodeDocument": {
+    "entryTitle": "Decode a Document",
+    "entryBody": "Upload a loan agreement, insurance PDS, or tenancy agreement and get a plain-language read.",
+    "title": "Decode This",
+    "subtitle": "Upload a real document and FutureOS explains it in plain language.",
+    "instructions": "Upload a PDF - a loan agreement, insurance PDS, tenancy agreement, or similar. Only the extracted text ever leaves your device; the file itself is never uploaded anywhere.",
+    "chooseFile": "Choose a PDF",
+    "extracting": "Reading your PDF...",
+    "extractError": "Couldn't read that PDF - please try another file.",
+    "noTextLayerError": "This PDF looks like a scanned image with no real text in it, so FutureOS can't read it reliably - try a text-based PDF instead.",
+    "truncatedNote": "This document is long - FutureOS read the first part of it.",
+    "submit": "Decode this document",
+    "thinking": "Reading your document...",
+    "genericError": "Couldn't decode that document. Please try again.",
+    "disclaimer": "This is a plain-language read of your document, not legal or financial advice. For anything that matters, confirm with the actual document or a professional.",
+    "flaggedTitle": "Worth a closer look",
+    "noFlagsFound": "Nothing stood out as unusual in this document.",
+    "keyFactsTitle": "Key facts",
+    "decodeAnother": "Decode another document",
+    "historyTitle": "Past documents",
+    "historyEmpty": "No documents decoded yet.",
+    "documentType": {
+      "loan_agreement": "Loan agreement",
+      "insurance_pds": "Insurance PDS",
+      "tenancy_agreement": "Tenancy agreement",
+      "offer_letter": "Offer letter",
+      "other": "Document"
+    },
+    "severity": {
+      "low": "Worth noting",
+      "medium": "Worth reviewing",
+      "high": "Important"
+    }
+  },
   "investmentPlanner": {
     "title": "Investment Planner",
     "subtitle": "Real fund and stock recommendations, priced for how you'd actually buy them.",
