@@ -25,7 +25,15 @@ export async function POST(request) {
 
   let result;
   try {
-    result = await runMirrorDebateTurn(buildMirrorDebateSystemPrompt(language, { situation, goalLabel, computed }));
+    result = await runMirrorDebateTurn(
+      buildMirrorDebateSystemPrompt(language, {
+        situation,
+        goalLabel,
+        computed,
+        isIncomeIrregular: inputs.isIncomeIrregular,
+        incomeSampleSize: inputs.incomeSampleSize,
+      })
+    );
   } catch (error) {
     console.error("mirror/debate: all configured AI providers failed", error.attempts ?? error);
     return Response.json({ error: "upstream_error" }, { status: 502 });

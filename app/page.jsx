@@ -70,6 +70,7 @@ import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } f
 import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
 import { computePeerBenchmark } from "../lib/peer-benchmark.js";
+import { computeSmoothedIncome } from "../lib/income-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -289,7 +290,7 @@ const defaultSimulatorInputs = {
   riskPreference: "balanced",
 };
 
-const currentProfileVersion = "karina-demo-profile-2026-07-03";
+const currentProfileVersion = "karina-demo-profile-2026-08-11-income-history";
 
 const defaultProfile = {
   age: "27",
@@ -299,7 +300,11 @@ const defaultProfile = {
     "Manages campaigns and budgets at work, oversees household finances, and plans for long-term goals.",
   pastExperience: "5 years in marketing, recently promoted",
   lifeStage: "Late 20s, married, considering starting a family",
-  monthlyIncome: "7500",
+  // The customer's own manually-typed figure - distinct from `monthlyIncome`,
+  // which manualEntryProvider.getProfile() computes as the EFFECTIVE number
+  // (smoothed from real incomeHistory when enough exists, this value verbatim
+  // otherwise) that every real consumer in the app actually reads.
+  statedMonthlyIncome: "7500",
   monthlyExpenses: "3600",
   currentSavings: "85000",
   existingLoans: "18000",
@@ -1724,7 +1729,12 @@ function useRelationshipTier(preferences, simulatorInputs, simulatorActionStates
 const confidenceTrackedFields = [
   "age",
   "occupation",
-  "monthlyIncome",
+  // statedMonthlyIncome, not monthlyIncome - the latter is now a COMPUTED
+  // field (smoothed from real income history), comparing it against a
+  // static default would be meaningless; statedMonthlyIncome is the raw
+  // customer-typed value mergeDefaults passes through untouched, same as
+  // every other field in this list.
+  "statedMonthlyIncome",
   "monthlyExpenses",
   "currentSavings",
   "existingLoans",
@@ -2179,6 +2189,13 @@ const defaultPreferences = {
   notificationFeedback: {},
   rejectionCounts: {},
   dismissedActions: [],
+  // Client-side mirror of the real income_entries DB table (lib/income-store.js) -
+  // the table is the source of truth, this is refreshed from it on every
+  // auth-resolve (see the fetch alongside /api/preferences). Living inside
+  // `preferences` (rather than a separate prop threaded through every screen)
+  // means every one of the ~20 real getUserProfile() consumers picks up real
+  // income history for free, since preferences already reaches all of them.
+  incomeHistory: [],
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -2434,6 +2451,19 @@ function applyProfileMigration(preferences, storedPreferences) {
   if (!storedPreferences) {
     return { ...preferences, profileVersion: currentProfileVersion, displayName: "Karina", profile: defaultProfile };
   }
+  // A profile stored before the income-history feature still has the old
+  // `monthlyIncome` key (the customer's own typed figure) and no
+  // `statedMonthlyIncome` yet - carry the real value over so it isn't
+  // silently lost. Additive on top of everything mergeDefaults already
+  // preserved, not a full profile replace.
+  const oldProfile = storedPreferences.profile;
+  if (oldProfile && oldProfile.monthlyIncome != null && oldProfile.statedMonthlyIncome == null) {
+    return {
+      ...preferences,
+      profileVersion: currentProfileVersion,
+      profile: { ...preferences.profile, statedMonthlyIncome: oldProfile.monthlyIncome },
+    };
+  }
   return { ...preferences, profileVersion: currentProfileVersion };
 }
 
@@ -2453,7 +2483,22 @@ function clampScore(value, min = 0, max = 100) {
 const manualEntryProvider = {
   id: "manualEntry",
   labelKey: "lifeGraph.dataProviders.manualEntry",
-  getProfile: (preferences) => mergeDefaults(defaultProfile, preferences?.profile),
+  getProfile: (preferences) => {
+    const merged = mergeDefaults(defaultProfile, preferences?.profile);
+    // `monthlyIncome` here is the EFFECTIVE number every real consumer in the
+    // app reads (Life Graph health scores, peer benchmark, Mirror, every
+    // domain's stage1/stage2 conversation, hardship, loan confirm) - smoothed
+    // from real preferences.incomeHistory once enough real entries exist,
+    // the customer's own statedMonthlyIncome verbatim otherwise (zero
+    // behavior change for a customer who never logs a single entry).
+    const smoothed = computeSmoothedIncome(preferences?.incomeHistory, numberValue(merged.statedMonthlyIncome, 7500));
+    return {
+      ...merged,
+      monthlyIncome: String(smoothed.effectiveMonthlyIncome),
+      isIncomeIrregular: smoothed.isIrregular,
+      incomeSampleSize: smoothed.sampleSize,
+    };
+  },
   getCustomGoals: (preferences) => (Array.isArray(preferences?.customGoals) ? preferences.customGoals : []),
 };
 
@@ -2634,6 +2679,8 @@ function getSimulatorDefaultsFromProfile(profile, customGoals = []) {
     ...defaultSimulatorInputs,
     goals: selectedGoals,
     monthlyIncome: profile.monthlyIncome,
+    isIncomeIrregular: profile.isIncomeIrregular,
+    incomeSampleSize: profile.incomeSampleSize,
     currentSavings: profile.currentSavings,
     monthlyExpenses: profile.monthlyExpenses,
     currentInvestment: profile.investments,
@@ -6867,7 +6914,10 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
       confirmedAt: new Date().toISOString(),
     };
     setPreferences((current) => {
-      const currentProfile = getUserProfile(current);
+      // Raw stored profile, not getUserProfile(current) - same leak this
+      // needs to avoid as updateProfileField (computed fields like the
+      // smoothed monthlyIncome must never get baked into persisted storage).
+      const currentProfile = mergeDefaults(defaultProfile, current.profile);
       const existing = getCustomGoals(current).filter((g) => g.id !== goal.id);
       return {
         ...current,
@@ -10032,7 +10082,13 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
       body: JSON.stringify({
         message: "Please propose a recovery plan based on my situation.",
         language,
-        profile: { monthlyIncome: profile.monthlyIncome, monthlyExpenses: profile.monthlyExpenses, currentSavings: profile.currentSavings },
+        profile: {
+          monthlyIncome: profile.monthlyIncome,
+          monthlyExpenses: profile.monthlyExpenses,
+          currentSavings: profile.currentSavings,
+          isIncomeIrregular: profile.isIncomeIrregular,
+          incomeSampleSize: profile.incomeSampleSize,
+        },
       }),
     });
     const proposeData = await proposeResponse.json();
@@ -10458,6 +10514,60 @@ function SpendingRiskDetailScreen({ setActiveScreen, preferences, successStates,
   );
 }
 
+// Mirrors SavingsCheckinForm's shape (month + amount + optional note) but
+// with its own copy - reusing SavingsCheckinForm directly would show
+// wedding-labeled text ("weddingPlanner.checkins.*") in Settings.
+function IncomeLogEntryForm({ onAddEntry, submitting, t }) {
+  const [entryMonth, setEntryMonth] = useState(currentMonthValue());
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const parsedAmount = Number(amount);
+    if (!entryMonth || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || submitting) return;
+    const ok = await onAddEntry({ entryMonth, amount: parsedAmount, note: note.trim() || undefined });
+    if (ok) {
+      setAmount("");
+      setNote("");
+    }
+  };
+
+  return (
+    <form className="settingsGroup" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("settings.incomeLog.addButton")}</span>
+      <input
+        type="month"
+        className="aiTextInput"
+        value={entryMonth}
+        onChange={(event) => setEntryMonth(event.target.value)}
+        aria-label={t("settings.incomeLog.monthLabel")}
+      />
+      <input
+        type="number"
+        min="0"
+        step="10"
+        className="aiTextInput"
+        placeholder={t("settings.incomeLog.amountLabel")}
+        value={amount}
+        onChange={(event) => setAmount(event.target.value)}
+        aria-label={t("settings.incomeLog.amountLabel")}
+      />
+      <input
+        type="text"
+        className="aiTextInput"
+        placeholder={t("settings.incomeLog.noteLabel")}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        aria-label={t("settings.incomeLog.noteLabel")}
+      />
+      <button type="submit" className="secondaryButton" disabled={submitting}>
+        {submitting ? t("settings.incomeLog.submitting") : t("settings.incomeLog.addButton")}
+      </button>
+    </form>
+  );
+}
+
 function ProfileScreen({
   language,
   setLanguage,
@@ -10475,9 +10585,45 @@ function ProfileScreen({
 }) {
   const [notice, setNotice] = useState("");
   const [policyOpen, setPolicyOpen] = useState(false);
+  const [incomeSubmitting, setIncomeSubmitting] = useState(false);
+  const [incomeError, setIncomeError] = useState("");
   const privacyScore = preferences.consentWithdrawn ? 38 : 92;
   const profile = getUserProfile(preferences);
   const notificationHistory = getNotificationHistory(profile, preferences, t);
+
+  // Writes through the real income_entries table (source of truth), then
+  // mirrors the result into preferences.incomeHistory so every real reader
+  // (Life Graph, Mirror, hardship, every domain's AI conversation - all via
+  // getUserProfile()) sees it on the very next render, not just this screen.
+  async function handleAddIncomeEntry({ entryMonth, amount, note }) {
+    setIncomeSubmitting(true);
+    setIncomeError("");
+    try {
+      const response = await fetch("/api/income/entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryMonth, amount, note }),
+      });
+      if (!response.ok) {
+        setIncomeError(t("settings.incomeLog.error"));
+        return false;
+      }
+      const { entry } = await response.json();
+      setPreferences((current) => {
+        const withoutSameMonth = (current.incomeHistory ?? []).filter((existing) => existing.entry_month !== entry.entry_month);
+        return {
+          ...current,
+          incomeHistory: [entry, ...withoutSameMonth].sort((a, b) => (a.entry_month < b.entry_month ? 1 : -1)),
+        };
+      });
+      return true;
+    } catch {
+      setIncomeError(t("settings.incomeLog.error"));
+      return false;
+    } finally {
+      setIncomeSubmitting(false);
+    }
+  }
 
   function updatePreference(key, value) {
     setPreferences((current) => ({ ...current, [key]: value }));
@@ -10486,13 +10632,18 @@ function ProfileScreen({
   function updateProfileField(key, value) {
     setPreferences((current) => ({
       ...current,
-      profile: { ...getUserProfile(current), [key]: value },
+      // Spread the raw stored profile (mergeDefaults(defaultProfile, ...)),
+      // not getUserProfile(current) - that now also carries computed fields
+      // (monthlyIncome smoothed, isIncomeIrregular, incomeSampleSize) which
+      // must never get baked into persisted storage as if customer-typed.
+      profile: { ...mergeDefaults(defaultProfile, current.profile), [key]: value },
     }));
   }
 
   function toggleProfileGoal(goal) {
     setPreferences((current) => {
-      const currentProfile = getUserProfile(current);
+      // Raw stored profile, not getUserProfile(current) - see updateProfileField.
+      const currentProfile = mergeDefaults(defaultProfile, current.profile);
       const nextGoals = { ...currentProfile.goals, [goal]: !currentProfile.goals?.[goal] };
       if (!Object.values(nextGoals).some(Boolean)) nextGoals[goal] = true;
       return { ...current, profile: { ...currentProfile, goals: nextGoals } };
@@ -10554,7 +10705,7 @@ function ProfileScreen({
             ["pastExperience", "profile.pastExperience", "text"],
             ["lifeStage", "profile.lifeStage", "text"],
             ["responsibilities", "profile.responsibilities", "text"],
-            ["monthlyIncome", "profile.combinedIncome", "number"],
+            ["statedMonthlyIncome", "profile.combinedIncome", "number"],
             ["monthlyExpenses", "profile.monthlyExpenses", "number"],
             ["currentSavings", "profile.currentSavings", "number"],
             ["existingLoans", "profile.existingLoans", "number"],
@@ -10592,6 +10743,44 @@ function ProfileScreen({
             ))}
           </div>
         </div>
+      </SettingsCard>
+
+      <SettingsCard icon={Banknote} title={t("settings.incomeLog.title")} description={t("settings.incomeLog.description")}>
+        <div className="recommendationPanel">
+          <span className="sectionLabel">{t("settings.incomeLog.summaryTitle")}</span>
+          <SummaryRow label={t("settings.incomeLog.effectiveLabel")} value={formatSgd(Math.round(Number(profile.monthlyIncome) || 0))} />
+          {profile.isIncomeIrregular ? (
+            <p>
+              {t("settings.incomeLog.irregularNote", {
+                sampleSize: profile.incomeSampleSize,
+                amount: formatSgd(Math.round(Number(profile.monthlyIncome) || 0)),
+              })}
+            </p>
+          ) : null}
+        </div>
+
+        {(preferences.incomeHistory ?? []).length ? (
+          <div className="weddingLineItems">
+            {(preferences.incomeHistory ?? []).map((entry) => (
+              <SummaryRow
+                key={entry.id ?? entry.entry_month}
+                label={entry.note ? `${entry.entry_month} — ${entry.note}` : entry.entry_month}
+                value={formatSgd(Math.round(Number(entry.amount)))}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>{t("settings.incomeLog.emptyState")}</p>
+        )}
+
+        {incomeError ? (
+          <section className="adviceOnlyPanel">
+            <AlertTriangle size={18} />
+            <p>{incomeError}</p>
+          </section>
+        ) : null}
+
+        <IncomeLogEntryForm onAddEntry={handleAddIncomeEntry} submitting={incomeSubmitting} t={t} />
       </SettingsCard>
 
       <SettingsCard icon={Globe2} title={t("settings.language.title")} description={t("settings.language.description")}>
@@ -11299,6 +11488,20 @@ export default function App() {
     } catch {
       // Offline/unreachable - fall back to whatever this device has cached.
     }
+    // The real income_entries table (lib/income-store.js) is the source of
+    // truth for income history, not the generic preferences blob - fetched
+    // separately and always wins over whatever's cached there, same
+    // reasoning as goalLedger/escalationHistory below.
+    let fetchedIncomeHistory = savedPreferences?.incomeHistory ?? [];
+    try {
+      const incomeResponse = await fetch("/api/income/entries");
+      if (incomeResponse.ok) {
+        const { entries } = await incomeResponse.json();
+        if (Array.isArray(entries)) fetchedIncomeHistory = entries;
+      }
+    } catch {
+      // Offline/unreachable - fall back to whatever was cached in preferences.
+    }
     if (cancelled) return;
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
@@ -11311,6 +11514,7 @@ export default function App() {
       notificationFeedback: savedPreferences?.notificationFeedback ?? {},
       rejectionCounts: savedPreferences?.rejectionCounts ?? {},
       dismissedActions: savedPreferences?.dismissedActions ?? [],
+      incomeHistory: fetchedIncomeHistory,
       // The authenticated account's real display name seeds every fresh
       // login (no more global "Karina" hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once

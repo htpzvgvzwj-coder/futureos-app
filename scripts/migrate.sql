@@ -524,3 +524,22 @@ create table if not exists credentials (
 
 create index if not exists credentials_profile_key_idx
   on credentials (profile_key, issued_at desc);
+
+-- Real income history for the income-smoothing feature (lib/income-finance.js):
+-- unlike the *_savings_checkins tables (cumulative contributions toward a goal,
+-- one profile can have many), this is one real number PER MONTH per customer -
+-- a correction to an already-logged month is expected, not an edge case, so
+-- unlike checkins this uses an upsert (see lib/income-store.js) instead of a
+-- plain insert.
+create table if not exists income_entries (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  entry_month   text not null, -- 'YYYY-MM'
+  amount        numeric not null,
+  note          text,
+  created_at    timestamptz not null default now(),
+  unique (profile_key, entry_month)
+);
+
+create index if not exists income_entries_profile_idx
+  on income_entries (profile_key, entry_month desc);

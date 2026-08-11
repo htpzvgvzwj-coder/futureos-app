@@ -2347,6 +2347,20 @@
       "displayName": "Display name",
       "placeholder": "Enter your name",
       "savedHint": "Saved automatically and shown on Home."
+    },
+    "incomeLog": {
+      "title": "Income Log",
+      "description": "Log real monthly income if it varies - FutureOS uses a smoothed figure across the app instead of one static number.",
+      "summaryTitle": "What FutureOS uses right now",
+      "effectiveLabel": "Effective monthly income",
+      "irregularNote": "Your income varies month to month - this is a {sampleSize}-month median (SGD {amount}), not a single number.",
+      "emptyState": "No months logged yet - FutureOS uses your Combined Monthly Income field above until you log at least 3 real months.",
+      "addButton": "Log this month's income",
+      "monthLabel": "Month",
+      "amountLabel": "Amount (SGD)",
+      "noteLabel": "Note (optional)",
+      "submitting": "Saving...",
+      "error": "Couldn't save that - please try again."
     }
   },
   "homeBanking": {

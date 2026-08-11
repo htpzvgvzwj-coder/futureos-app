@@ -51,7 +51,7 @@ export async function POST(request) {
   }
 
   const commitments = await getCustomerCommitments(userId);
-  const { monthlyExpenses, monthlyIncome, currentFund } = getEmergencyFundSnapshot(profile);
+  const { monthlyExpenses, monthlyIncome, currentFund, isIncomeIrregular, incomeSampleSize } = getEmergencyFundSnapshot(profile);
 
   const outflow = computeCommittedMonthlyOutflow(commitments, monthlyExpenses);
   const gap = computeIncomeGap({
@@ -80,7 +80,12 @@ export async function POST(request) {
       max_tokens: 6000,
       thinking: { type: "adaptive" },
       output_config: { effort: "medium" },
-      system: buildHardshipRecoverySystemPrompt(language, { assessment, computed: { outflow, gap, defaultDrawdown, windfallSplit } }),
+      system: buildHardshipRecoverySystemPrompt(language, {
+        assessment,
+        computed: { outflow, gap, defaultDrawdown, windfallSplit },
+        isIncomeIrregular,
+        incomeSampleSize,
+      }),
       tools: [PROPOSE_RECOVERY_ACTIONS_TOOL],
       tool_choice: { type: "any" },
       messages,
