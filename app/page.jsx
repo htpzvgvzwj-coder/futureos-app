@@ -3871,6 +3871,23 @@ function FutureMirrorSimulator({
             </div>
           </section>
 
+          {debate.computed ? (
+            <section className="recommendationPanel">
+              <span className="sectionLabel">{t("simulator.output.evidence.title")}</span>
+              <SummaryRow label={t("simulator.output.evidence.income")} value={`SGD ${debate.computed.monthlyIncome}`} />
+              <SummaryRow label={t("simulator.output.evidence.expenses")} value={`SGD ${debate.computed.monthlyExpenses}`} />
+              <SummaryRow label={t("simulator.output.evidence.available")} value={`SGD ${debate.computed.availableMonthly}`} />
+              <SummaryRow label={t("simulator.output.evidence.required")} value={`SGD ${debate.computed.requiredMonthly}`} />
+              {debate.aiProvider ? (
+                <SummaryRow
+                  label={t("simulator.output.evidence.answeredBy")}
+                  value={t(`simulator.output.evidence.provider.${debate.aiProvider}`)}
+                />
+              ) : null}
+              <small>{t("simulator.output.evidence.note")}</small>
+            </section>
+          ) : null}
+
           <button type="button" className="secondaryButton" onClick={confirmPlan} disabled={confirmed}>
             {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
             <ShieldCheck size={18} />

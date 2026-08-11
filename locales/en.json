@@ -1940,6 +1940,20 @@
       "bullCase": "Bull case: why this could work",
       "bearCase": "Bear case: what could break this",
       "judgeSynthesis": "Judge's synthesis",
+      "evidence": {
+        "title": "What this was based on",
+        "income": "Monthly income",
+        "expenses": "Monthly expenses",
+        "available": "Available after expenses",
+        "required": "Required for this goal",
+        "answeredBy": "AI reasoning engine",
+        "provider": {
+          "anthropic": "Claude",
+          "groq": "Groq (backup)",
+          "gemini": "Gemini (backup)"
+        },
+        "note": "The dollar figures above are computed by FutureOS, not the AI - the debate only argues about them."
+      },
       "recommendedAction": {
         "proceed": "Recommendation: proceed as planned.",
         "proceed_with_adjustment": "Recommendation: proceed, with an adjustment.",

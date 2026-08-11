@@ -1,13 +1,5 @@
-import {
-  deepCleanStrayEscapes,
-  extractText,
-  findToolUse,
-  getAnthropicClient,
-  runToolTurn,
-  WEDDING_MODEL,
-} from "../../../../lib/anthropic-client.js";
+import { runMirrorDebateTurn } from "../../../../lib/mirror-ai-fallback.js";
 import { buildMirrorDebateSystemPrompt } from "../../../../lib/mirror-prompts.js";
-import { FUTURE_MIRROR_DEBATE_TOOL } from "../../../../lib/mirror-tools.js";
 import { mirrorDebateSchema } from "../../../../lib/mirror-validation.js";
 import { computeGoalFeasibility } from "../../../../lib/mirror-finance.js";
 import { saveDebate } from "../../../../lib/mirror-store.js";
@@ -31,44 +23,40 @@ export async function POST(request) {
   // model - the AI only argues about them (lib/mirror-prompts.js).
   const computed = computeGoalFeasibility(goalType, inputs);
 
-  const client = getAnthropicClient();
-  let response;
+  let result;
   try {
-    response = await runToolTurn(client, {
-      model: WEDDING_MODEL,
-      max_tokens: 4000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "medium" },
-      system: buildMirrorDebateSystemPrompt(language, { situation, goalLabel, computed }),
-      tools: [FUTURE_MIRROR_DEBATE_TOOL],
-      tool_choice: { type: "any" },
-      messages: [{ role: "user", content: "Run the Bull/Bear/Judge debate on this plan." }],
-    });
+    result = await runMirrorDebateTurn(buildMirrorDebateSystemPrompt(language, { situation, goalLabel, computed }));
   } catch (error) {
-    console.error("mirror/debate Anthropic call failed", error);
+    console.error("mirror/debate: all configured AI providers failed", error.attempts ?? error);
     return Response.json({ error: "upstream_error" }, { status: 502 });
   }
 
-  if (response.stop_reason === "refusal") {
+  if (result.refusal) {
     return Response.json({ error: "refusal" }, { status: 422 });
   }
 
-  const toolUse = findToolUse(response.content, ["future_mirror_debate"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+  if (!result.toolInput) {
+    return Response.json({ error: "inconclusive", detail: result.rawText }, { status: 422 });
   }
 
-  const parsed = mirrorDebateSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
+  const parsed = mirrorDebateSchema.safeParse(result.toolInput);
   if (!parsed.success) {
     console.error("mirror/debate tool output failed validation", parsed.error.issues);
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });
   }
 
+  // The real snapshot this specific debate was generated from - inputs the
+  // customer entered, the server-computed feasibility numbers, and which AI
+  // provider actually answered (fallback may mean it wasn't Anthropic). Saved
+  // verbatim, never recomputed later, so a future "why did it say this" view
+  // shows the literal facts used at generation time.
   const saved = await saveDebate(userId, {
     goalType,
     situation: situation ?? null,
     futureScore: computed.feasibilityScore,
     riskLevel: computed.riskLevel,
+    context: { inputs, computed, goalLabel, language },
+    aiProvider: result.provider,
     ...parsed.data,
   });
 
@@ -77,6 +65,7 @@ export async function POST(request) {
     futureScore: computed.feasibilityScore,
     riskLevel: computed.riskLevel,
     computed,
+    aiProvider: result.provider,
     ...parsed.data,
   });
 }

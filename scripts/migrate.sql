@@ -369,6 +369,15 @@ alter table mirror_debates add column if not exists confirmed_at timestamptz;
 alter table mirror_debates add column if not exists resolved_outcome text; -- risk_materialized | risk_did_not_materialize | insufficient_signal
 alter table mirror_debates add column if not exists resolved_at timestamptz;
 
+-- Real trace of what fed this debate: the customer's raw inputs, the
+-- server-computed feasibility numbers, and which AI provider actually
+-- answered (anthropic/groq/gemini - the fallback chain means it isn't always
+-- anthropic). Saved verbatim at generation time, never recomputed after the
+-- fact. Nullable: rows created before this column existed have no trace,
+-- which is honest - that snapshot was never captured and can't be rebuilt.
+alter table mirror_debates add column if not exists context jsonb;
+alter table mirror_debates add column if not exists ai_provider text;
+
 create table if not exists loan_sessions (
   id            uuid primary key default gen_random_uuid(),
   profile_key   text not null default 'karina-demo',
