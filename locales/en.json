@@ -1937,6 +1937,9 @@
         "medium": "Medium",
         "high": "High"
       },
+      "lowConfidenceNote": "Future Self Guardian genuinely isn't confident about this one - a Relationship Manager can look at it with you.",
+      "escalateToRm": "Talk to a Relationship Manager",
+      "escalatedToRm": "Relationship Manager notified",
       "bullCase": "Bull case: why this could work",
       "bearCase": "Bear case: what could break this",
       "judgeSynthesis": "Judge's synthesis",

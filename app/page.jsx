@@ -3767,6 +3767,7 @@ function FutureMirrorSimulator({
   const [debateLoading, setDebateLoading] = useState(false);
   const [debateError, setDebateError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [escalated, setEscalated] = useState(false);
 
   function updateInput(key, value) {
     setSimulatorInputs((current) => ({ ...current, [key]: value }));
@@ -3784,6 +3785,7 @@ function FutureMirrorSimulator({
     setDebateLoading(true);
     setDebateError("");
     setConfirmed(false);
+    setEscalated(false);
     try {
       const goalType = getPrimaryGoal(simulatorInputs);
       const goalLabel = getGoalLabel(goalType === "car" ? "custom" : goalType, simulatorInputs, t);
@@ -3818,6 +3820,23 @@ function FutureMirrorSimulator({
       // Confirmation is a nice-to-have record of intent, not a blocking step -
       // the debate itself already rendered, so a network hiccup here shouldn't
       // trap the customer with no way forward.
+    }
+  };
+
+  // Only offered when the AI's own Judge synthesis came back with confidence
+  // "low" - the AI admitting genuine uncertainty, not a trust/tier gate.
+  // Never blocks the customer from still confirming the plan themselves.
+  const escalateToRm = async () => {
+    if (!debate?.debateId) return;
+    try {
+      const response = await fetch("/api/mirror/escalate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ debateId: debate.debateId }),
+      });
+      if (response.ok) setEscalated(true);
+    } catch {
+      // Same non-blocking treatment as confirmPlan above.
     }
   };
 
@@ -3939,6 +3958,19 @@ function FutureMirrorSimulator({
             {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
             <ShieldCheck size={18} />
           </button>
+
+          {debate.confidence === "low" ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <div>
+                <p>{t("simulator.output.lowConfidenceNote")}</p>
+                <button type="button" className="secondaryButton" onClick={escalateToRm} disabled={escalated}>
+                  {escalated ? t("simulator.output.escalatedToRm") : t("simulator.output.escalateToRm")}
+                  <UserRound size={18} />
+                </button>
+              </div>
+            </section>
+          ) : null}
         </motion.section>
       ) : null}
 

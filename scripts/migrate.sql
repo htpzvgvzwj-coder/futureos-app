@@ -543,3 +543,12 @@ create table if not exists income_entries (
 
 create index if not exists income_entries_profile_idx
   on income_entries (profile_key, entry_month desc);
+
+-- AI confidence -> real human escalation: when Mirror's own Judge synthesis
+-- comes back with confidence "low" (the AI itself flagging genuine
+-- uncertainty, not a UI-only label), the customer can request a real
+-- Relationship Manager follow-up on that specific debate. Recorded on the
+-- debate's own row (same pattern as confirmed/confirmed_at above) rather
+-- than a separate table, since it's an action taken on one specific debate.
+alter table mirror_debates add column if not exists escalation_requested boolean not null default false;
+alter table mirror_debates add column if not exists escalation_requested_at timestamptz;
