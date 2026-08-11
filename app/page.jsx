@@ -1405,6 +1405,7 @@ function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simula
       const existing = Array.isArray(current.escalationHistory) ? current.escalationHistory : [];
       const record = {
         id: `${product.id}-${Date.now()}`,
+        source: "productFit",
         productId: product.id,
         productName: product.name,
         goal: resultInfo.relevantGoal ? t(`simulator.goals.${resultInfo.relevantGoal}`) : t("lifeGraph.productFit.evidence.noGoal"),
@@ -1563,7 +1564,11 @@ function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simula
             <article key={record.id}>
               <span>{new Date(record.at).toLocaleDateString()}</span>
               <div>
-                <strong>{t("lifeGraph.productFit.escalationHistoryItem", { product: record.productName, goal: record.goal })}</strong>
+                <strong>
+                  {record.source === "hardshipRecovery"
+                    ? t("needDetails.emergency.escalation.historyItem", { action: record.title })
+                    : t("lifeGraph.productFit.escalationHistoryItem", { product: record.productName, goal: record.goal })}
+                </strong>
                 <small>{record.reason}</small>
               </div>
             </article>
@@ -3758,223 +3763,239 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   );
 }
 
-function FutureMirrorSimulator({
-  setActiveScreen,
-  simulatorInputs,
-  setSimulatorInputs,
-  language,
-  t,
-}) {
-  const [debate, setDebate] = useState(null);
-  const [debateLoading, setDebateLoading] = useState(false);
-  const [debateError, setDebateError] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
-  const [escalated, setEscalated] = useState(false);
+// Bull/Bear/Judge cards + evidence panel + confirm/escalate buttons - the
+// exact same rendering the old standalone debate form used, extracted so it
+// can render inline inside a chat bubble instead. Nothing about this UI
+// changed, only where it's mounted from.
+function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEscalate, t }) {
+  return (
+    <motion.section className="simulatorOutput" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <section className="recommendationPanel">
+        <span className="sectionLabel">{t("simulator.sections.futureScore")}</span>
+        <SummaryRow label={t("mirror.futureScore")} value={`${debate.futureScore}/100`} />
+        <SummaryRow label={t("mirror.risk")} value={t(`risk.${debate.riskLevel}`)} />
+        <SummaryRow label={t("simulator.output.confidence")} value={t(`simulator.output.confidenceLevel.${debate.confidence}`)} />
+      </section>
 
-  function updateInput(key, value) {
-    setSimulatorInputs((current) => ({ ...current, [key]: value }));
-  }
+      <section className="recommendationHero debateBullCase">
+        <ThumbsUp size={22} />
+        <div>
+          <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
+          <p>{debate.bullCase}</p>
+        </div>
+      </section>
 
-  function toggleGoal(goal) {
-    setSimulatorInputs((current) => {
-      const nextGoals = { ...current.goals, [goal]: !current.goals[goal] };
-      if (!Object.values(nextGoals).some(Boolean)) nextGoals[goal] = true;
-      return { ...current, goals: nextGoals };
-    });
-  }
+      <section className="recommendationHero debateBearCase">
+        <ThumbsDown size={22} />
+        <div>
+          <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
+          <p>{debate.bearCase}</p>
+        </div>
+      </section>
 
-  const runDebate = async () => {
-    setDebateLoading(true);
-    setDebateError("");
-    setConfirmed(false);
-    setEscalated(false);
+      <section className="recommendationHero debateJudge">
+        <ShieldCheck size={22} />
+        <div>
+          <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
+          <p>{debate.judgeSynthesis}</p>
+          <small>{t(`simulator.output.recommendedAction.${debate.recommendedAction}`)}</small>
+        </div>
+      </section>
+
+      {debate.computed ? (
+        <section className="recommendationPanel">
+          <span className="sectionLabel">{t("simulator.output.evidence.title")}</span>
+          <SummaryRow label={t("simulator.output.evidence.income")} value={`SGD ${debate.computed.monthlyIncome}`} />
+          <SummaryRow label={t("simulator.output.evidence.expenses")} value={`SGD ${debate.computed.monthlyExpenses}`} />
+          <SummaryRow label={t("simulator.output.evidence.available")} value={`SGD ${debate.computed.availableMonthly}`} />
+          <SummaryRow label={t("simulator.output.evidence.required")} value={`SGD ${debate.computed.requiredMonthly}`} />
+          {debate.aiProvider ? (
+            <SummaryRow
+              label={t("simulator.output.evidence.answeredBy")}
+              value={t(`simulator.output.evidence.provider.${debate.aiProvider}`)}
+            />
+          ) : null}
+          <small>{t("simulator.output.evidence.note")}</small>
+        </section>
+      ) : null}
+
+      <button type="button" className="secondaryButton" onClick={onConfirm} disabled={confirmed}>
+        {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
+        <ShieldCheck size={18} />
+      </button>
+
+      {debate.confidence === "low" ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <div>
+            <p>{t("simulator.output.lowConfidenceNote")}</p>
+            <button type="button" className="secondaryButton" onClick={onEscalate} disabled={escalated}>
+              {escalated ? t("simulator.output.escalatedToRm") : t("simulator.output.escalateToRm")}
+              <UserRound size={18} />
+            </button>
+          </div>
+        </section>
+      ) : null}
+    </motion.section>
+  );
+}
+
+// FutureOS's first real chat interface (replaces the old FutureMirrorSimulator
+// form - manual situation textarea + goal checkboxes + one Run button). The
+// Bull/Bear/Judge debate is now a real tool the chat can invoke mid-
+// conversation (lib/mirror-chat-tools.js's run_debate, via the new
+// lib/chat-tool-loop.js), not the only thing this screen does - the model is
+// free to just talk (tool_choice: "auto", the first place in this codebase
+// doing that) and only runs a real debate when the customer actually wants
+// one assessed.
+function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
+  const [messages, setMessages] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [confirmedDebateIds, setConfirmedDebateIds] = useState(() => new Set());
+  const [escalatedDebateIds, setEscalatedDebateIds] = useState(() => new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/mirror/chat/history")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setMessages(data.entries ?? []);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const sendMessage = async (text) => {
+    setSending(true);
+    setErrorMessage("");
+    setMessages((current) => [...current, { role: "user", text }]);
     try {
-      const goalType = getPrimaryGoal(simulatorInputs);
-      const goalLabel = getGoalLabel(goalType === "car" ? "custom" : goalType, simulatorInputs, t);
-      const response = await fetch("/api/mirror/debate", {
+      const response = await fetch("/api/mirror/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation: simulatorInputs.situation, goalType, goalLabel, language, inputs: simulatorInputs }),
+        body: JSON.stringify({ message: text, language, baseInputs: simulatorInputs }),
       });
       const data = await response.json();
       if (!response.ok) {
-        setDebateError(t("simulator.output.debateError"));
+        setErrorMessage(t("mirrorChat.genericError"));
         return;
       }
-      setDebate(data);
+      setMessages((current) => [...current, { role: "assistant", text: data.reply, debate: data.debate }]);
     } catch {
-      setDebateError(t("simulator.output.debateError"));
+      setErrorMessage(t("mirrorChat.genericError"));
     } finally {
-      setDebateLoading(false);
+      setSending(false);
     }
   };
 
-  const confirmPlan = async () => {
-    if (!debate?.debateId) return;
+  const confirmDebate = async (debateId) => {
     try {
       const response = await fetch("/api/mirror/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ debateId: debate.debateId }),
+        body: JSON.stringify({ debateId }),
       });
-      if (response.ok) setConfirmed(true);
+      if (response.ok) setConfirmedDebateIds((current) => new Set(current).add(debateId));
     } catch {
-      // Confirmation is a nice-to-have record of intent, not a blocking step -
-      // the debate itself already rendered, so a network hiccup here shouldn't
-      // trap the customer with no way forward.
+      // Same non-blocking treatment as the old form's confirmPlan.
     }
   };
 
-  // Only offered when the AI's own Judge synthesis came back with confidence
-  // "low" - the AI admitting genuine uncertainty, not a trust/tier gate.
-  // Never blocks the customer from still confirming the plan themselves.
-  const escalateToRm = async () => {
-    if (!debate?.debateId) return;
+  const escalateDebate = async (debateId) => {
     try {
       const response = await fetch("/api/mirror/escalate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ debateId: debate.debateId }),
+        body: JSON.stringify({ debateId }),
       });
-      if (response.ok) setEscalated(true);
+      if (response.ok) setEscalatedDebateIds((current) => new Set(current).add(debateId));
     } catch {
-      // Same non-blocking treatment as confirmPlan above.
+      // Same non-blocking treatment as the old form's escalateToRm.
     }
   };
 
   return (
     <Screen>
-      <Header title={t("simulator.title")} subtitle={t("simulator.subtitle")} />
+      <Header title={t("mirrorChat.title")} subtitle={t("mirrorChat.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
-      <section className="simulatorForm">
-        <span className="sectionLabel">{t("simulator.sections.futureSimulator")}</span>
-        <label className="textareaField">
-          <span className="sectionLabel">{t("simulator.inputs.situation")}</span>
-          <textarea
-            value={simulatorInputs.situation}
-            onChange={(event) => updateInput("situation", event.target.value)}
-            placeholder={t("simulator.inputs.situationPlaceholder")}
-          />
-        </label>
-
-        <div className="settingsGroup">
-          <span className="sectionLabel">{t("simulator.inputs.lifeGoals")}</span>
-          <div className="checkboxGrid">
-            {simulatorGoalOptions.map(({ id, labelKey, icon: Icon }) =>
-              DEDICATED_GOAL_SCREENS[id] ? (
-                <button
-                  type="button"
-                  className="checkOption weddingEntryOption"
-                  key={id}
-                  onClick={() => setActiveScreen(DEDICATED_GOAL_SCREENS[id].screen)}
-                >
-                  <Icon size={15} />
-                  <span>{t(labelKey)}</span>
-                  <span className="weddingEntryTrailing">
-                    <b className="miniBadge">{t(DEDICATED_GOAL_SCREENS[id].badgeKey)}</b>
-                    <ChevronRight size={14} />
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={simulatorInputs.goals[id] ? "checkOption selected" : "checkOption"}
-                  key={id}
-                  onClick={() => toggleGoal(id)}
-                >
-                  <Icon size={15} />
-                  <span>{t(labelKey)}</span>
-                  {simulatorInputs.goals[id] ? <Check size={14} /> : null}
-                </button>
-              )
-            )}
-          </div>
+      {historyLoading ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <div className="chatHistoryLog">
+          {messages.length === 0 ? (
+            <section className="trustNote compactTrustNote">
+              <Sparkles size={17} />
+              <p>{t("mirrorChat.emptyState")}</p>
+            </section>
+          ) : null}
+          {messages.map((entry, index) => (
+            <div key={index}>
+              {entry.text ? (
+                <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"}>
+                  <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>{entry.text}</div>
+                </div>
+              ) : null}
+              {entry.debate ? (
+                <MirrorDebateResultCard
+                  debate={entry.debate}
+                  confirmed={confirmedDebateIds.has(entry.debate.debateId)}
+                  onConfirm={() => confirmDebate(entry.debate.debateId)}
+                  escalated={escalatedDebateIds.has(entry.debate.debateId)}
+                  onEscalate={() => escalateDebate(entry.debate.debateId)}
+                  t={t}
+                />
+              ) : null}
+            </div>
+          ))}
         </div>
-      </section>
+      )}
 
-      <button type="button" className="primaryButton" onClick={runDebate} disabled={debateLoading}>
-        {debateLoading ? t("simulator.output.debateThinking") : t("simulator.run")}
-        <Sparkles size={18} />
-      </button>
-
-      {debateError ? (
+      {errorMessage ? (
         <section className="adviceOnlyPanel">
           <AlertTriangle size={18} />
-          <p>{debateError}</p>
+          <p>{errorMessage}</p>
         </section>
       ) : null}
 
-      {debate ? (
-        <motion.section className="simulatorOutput" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <section className="recommendationPanel">
-            <span className="sectionLabel">{t("simulator.sections.futureScore")}</span>
-            <SummaryRow label={t("mirror.futureScore")} value={`${debate.futureScore}/100`} />
-            <SummaryRow label={t("mirror.risk")} value={t(`risk.${debate.riskLevel}`)} />
-            <SummaryRow label={t("simulator.output.confidence")} value={t(`simulator.output.confidenceLevel.${debate.confidence}`)} />
-          </section>
+      <AiTextInputCard
+        t={t}
+        onSubmit={sendMessage}
+        submitting={sending}
+        placeholder={t("mirrorChat.inputPlaceholder")}
+        submitLabelKey="mirrorChat.send"
+        labelKey="mirrorChat.inputLabel"
+      />
 
-          <section className="recommendationHero debateBullCase">
-            <ThumbsUp size={22} />
-            <div>
-              <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
-              <p>{debate.bullCase}</p>
-            </div>
-          </section>
-
-          <section className="recommendationHero debateBearCase">
-            <ThumbsDown size={22} />
-            <div>
-              <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
-              <p>{debate.bearCase}</p>
-            </div>
-          </section>
-
-          <section className="recommendationHero debateJudge">
-            <ShieldCheck size={22} />
-            <div>
-              <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
-              <p>{debate.judgeSynthesis}</p>
-              <small>{t(`simulator.output.recommendedAction.${debate.recommendedAction}`)}</small>
-            </div>
-          </section>
-
-          {debate.computed ? (
-            <section className="recommendationPanel">
-              <span className="sectionLabel">{t("simulator.output.evidence.title")}</span>
-              <SummaryRow label={t("simulator.output.evidence.income")} value={`SGD ${debate.computed.monthlyIncome}`} />
-              <SummaryRow label={t("simulator.output.evidence.expenses")} value={`SGD ${debate.computed.monthlyExpenses}`} />
-              <SummaryRow label={t("simulator.output.evidence.available")} value={`SGD ${debate.computed.availableMonthly}`} />
-              <SummaryRow label={t("simulator.output.evidence.required")} value={`SGD ${debate.computed.requiredMonthly}`} />
-              {debate.aiProvider ? (
-                <SummaryRow
-                  label={t("simulator.output.evidence.answeredBy")}
-                  value={t(`simulator.output.evidence.provider.${debate.aiProvider}`)}
-                />
-              ) : null}
-              <small>{t("simulator.output.evidence.note")}</small>
-            </section>
-          ) : null}
-
-          <button type="button" className="secondaryButton" onClick={confirmPlan} disabled={confirmed}>
-            {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
-            <ShieldCheck size={18} />
-          </button>
-
-          {debate.confidence === "low" ? (
-            <section className="adviceOnlyPanel">
-              <AlertTriangle size={18} />
-              <div>
-                <p>{t("simulator.output.lowConfidenceNote")}</p>
-                <button type="button" className="secondaryButton" onClick={escalateToRm} disabled={escalated}>
-                  {escalated ? t("simulator.output.escalatedToRm") : t("simulator.output.escalateToRm")}
-                  <UserRound size={18} />
-                </button>
-              </div>
-            </section>
-          ) : null}
-        </motion.section>
-      ) : null}
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("mirrorChat.quickPlannersLabel")}</span>
+        <div className="checkboxGrid">
+          {simulatorGoalOptions
+            .filter(({ id }) => DEDICATED_GOAL_SCREENS[id])
+            .map(({ id, labelKey, icon: Icon }) => (
+              <button
+                type="button"
+                className="checkOption weddingEntryOption"
+                key={id}
+                onClick={() => setActiveScreen(DEDICATED_GOAL_SCREENS[id].screen)}
+              >
+                <Icon size={15} />
+                <span>{t(labelKey)}</span>
+                <span className="weddingEntryTrailing">
+                  <b className="miniBadge">{t(DEDICATED_GOAL_SCREENS[id].badgeKey)}</b>
+                  <ChevronRight size={14} />
+                </span>
+              </button>
+            ))}
+        </div>
+      </div>
 
       <button
         type="button"
@@ -4005,7 +4026,6 @@ function FutureMirrorSimulator({
           <ChevronRight size={14} />
         </span>
       </button>
-
     </Screen>
   );
 }
@@ -8237,9 +8257,10 @@ const RECOVERY_ACTION_ICONS = {
 // Four-state approval, not a single checkbox: the customer explicitly approves,
 // edits the amount, or declines with a reason - a decline is a recorded answer,
 // not silence (app/api/hardship/apply/route.js persists it as evidence either way).
-function RecoveryActionCard({ action, decision, onDecisionChange, t }) {
+function RecoveryActionCard({ action, decision, onDecisionChange, escalated, onEscalate, t }) {
   const Icon = RECOVERY_ACTION_ICONS[action.action_type] ?? ShieldCheck;
   const current = decision?.decision ?? null;
+  const needsHumanReview = Boolean(action.suitability?.human_review_required);
 
   return (
     <div className={current ? `checkOption decisionCard decision-${current}` : "checkOption decisionCard"}>
@@ -8249,6 +8270,19 @@ function RecoveryActionCard({ action, decision, onDecisionChange, t }) {
         {action.target_domain ? <em> — {t(`needDetails.emergency.domains.${action.target_domain}`)}</em> : null}
         <p>{action.rationale}</p>
         {action.action_type !== "other_ocbc_support" ? <b>{formatSgd(Math.round(action.amount))}</b> : null}
+
+        {needsHumanReview ? (
+          <section className="adviceOnlyPanel">
+            <UserRound size={18} />
+            <div>
+              <p>{t("needDetails.emergency.escalation.note")}</p>
+              <button type="button" className="secondaryButton" onClick={onEscalate} disabled={escalated}>
+                {escalated ? t("needDetails.emergency.escalation.escalated") : t("needDetails.emergency.escalation.button")}
+                <UserRound size={16} />
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <div className="decisionButtonRow">
           <button
@@ -10301,6 +10335,7 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [escalatedActionIds, setEscalatedActionIds] = useState(() => new Set());
 
   // Snapshot once at mount rather than reading the live preference: the
   // marker gets cleared (below) right after mount so future generic visits
@@ -10411,6 +10446,27 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
   const updateDecision = (actionId, decision) => {
     setDecisions((current) => ({ ...current, [actionId]: decision }));
   };
+
+  // Same real Relationship Manager escalation record ProductFitScreen
+  // writes (preferences.escalationHistory) - one real shared "times you
+  // asked for human help" log, not a second parallel system. Previously
+  // action.suitability.human_review_required had zero visible consequence
+  // beyond silently not pre-selecting "approve" (see runProposeActions
+  // above) - this gives it a real, reachable action.
+  function requestHardshipRmReview(action) {
+    setPreferences((current) => {
+      const existing = Array.isArray(current.escalationHistory) ? current.escalationHistory : [];
+      const record = {
+        id: `hardship-${action.id}-${Date.now()}`,
+        source: "hardshipRecovery",
+        title: t(`needDetails.emergency.actionTypes.${action.action_type}`),
+        reason: action.rationale,
+        at: Date.now(),
+      };
+      return { ...current, escalationHistory: [record, ...existing].slice(0, 10) };
+    });
+    setEscalatedActionIds((current) => new Set(current).add(action.id));
+  }
 
   const decisionCount = Object.keys(decisions).length;
 
@@ -10552,6 +10608,8 @@ function EmergencyNeedContent({ success, setSuccess, t, setActiveScreen, languag
                     action={action}
                     decision={decisions[action.id]}
                     onDecisionChange={updateDecision}
+                    escalated={escalatedActionIds.has(action.id)}
+                    onEscalate={() => requestHardshipRmReview(action)}
                     t={t}
                   />
                 ))}
@@ -11992,20 +12050,7 @@ export default function App() {
     setLoanPlannerInitialPurpose,
   };
 
-  const mirrorSimulatorScreen = (
-    <FutureMirrorSimulator
-      {...shared}
-      simulatorInputs={simulatorInputs}
-      setSimulatorInputs={setSimulatorInputs}
-      simulatorRan={simulatorRan}
-      setSimulatorRan={setSimulatorRan}
-      simulatorApplied={simulatorApplied}
-      setSimulatorApplied={setSimulatorApplied}
-      simulatorActionStates={simulatorActionStates}
-      setSimulatorActionStates={setSimulatorActionStates}
-      resetSimulation={resetSimulation}
-    />
-  );
+  const mirrorSimulatorScreen = <MirrorChatScreen {...shared} simulatorInputs={simulatorInputs} />;
 
   const currentScreen = {
     [screens.HOME]: <HomeDashboard {...shared} />,

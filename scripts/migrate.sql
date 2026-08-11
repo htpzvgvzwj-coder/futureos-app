@@ -572,3 +572,43 @@ create table if not exists document_reviews (
 
 create index if not exists document_reviews_profile_idx
   on document_reviews (profile_key, created_at desc);
+
+-- Mirror's chat interface: one continuous thread per customer, unlike
+-- wedding/home/etc's sessions (no `stage` column here - there's only one
+-- ongoing conversation, not a stage1/stage2 split). Mirrors
+-- wedding_sessions/wedding_messages' exact shape otherwise (lib/wedding-
+-- store.js) - same seq-ordered message log pattern.
+create table if not exists mirror_chat_sessions (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create unique index if not exists mirror_chat_sessions_profile_key_idx
+  on mirror_chat_sessions (profile_key);
+
+create table if not exists mirror_chat_messages (
+  id           bigserial primary key,
+  session_id   uuid not null references mirror_chat_sessions(id),
+  seq          integer not null,
+  role         text not null, -- user | assistant
+  content      jsonb not null,
+  -- Real run_debate results actually executed during this assistant turn
+  -- (see lib/chat-tool-loop.js) - `content` alone only holds the model's
+  -- FINAL text/tool_use blocks, not the intermediate real tool_result that
+  -- happened mid-loop, so without this a reloaded chat would show the
+  -- narration but lose the actual rich debate card data. Null for user
+  -- messages and assistant turns that never ran a tool.
+  tool_results jsonb,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists mirror_chat_messages_session_seq_idx
+  on mirror_chat_messages (session_id, seq);
+
+-- The table above already existed (created earlier this session) before
+-- tool_results was added to its definition - create table if not exists is
+-- a no-op against an existing table, so the column needs its own explicit
+-- alter to actually land on the real database.
+alter table mirror_chat_messages add column if not exists tool_results jsonb;

@@ -1094,6 +1094,12 @@
         "editAmountLabel": "Amount to apply instead",
         "rejectReasonLabel": "Why not this one? (optional)",
         "rejectReasonPlaceholder": "e.g. I'd rather keep this plan running as-is"
+      },
+      "escalation": {
+        "note": "This is worth talking through with a real Relationship Manager before you decide.",
+        "button": "Talk to a Relationship Manager",
+        "escalated": "Relationship Manager notified",
+        "historyItem": "Requested Relationship Manager review — {action}"
       }
     },
     "insurance": {
@@ -1868,6 +1874,16 @@
       "skipHint": "Leave the CPF balance fields blank and we'll estimate them from your income.",
       "continueButton": "Continue"
     }
+  },
+  "mirrorChat": {
+    "title": "Future Self Guardian",
+    "subtitle": "Talk through a real decision - ask for a real assessment whenever you're ready.",
+    "emptyState": "Tell Future Self Guardian what's on your mind - a wedding budget, a home purchase, waiting a year, anything real. Ask for a real assessment whenever you want one.",
+    "inputPlaceholder": "e.g. I'm thinking about buying a home in 2 years, what would that look like?",
+    "inputLabel": "Message Future Self Guardian",
+    "send": "Send",
+    "genericError": "Something went wrong. Please try again.",
+    "quickPlannersLabel": "Or jump straight to a planner"
   },
   "simulator": {
     "title": "Future Mirror",
