@@ -1,11 +1,4 @@
-import {
-  deepCleanStrayEscapes,
-  extractText,
-  findToolUse,
-  getAnthropicClient,
-  runToolTurn,
-  WEDDING_MODEL,
-} from "../../../lib/anthropic-client.js";
+import { runToolTurnWithFallback } from "../../../lib/ai-fallback.js";
 import { buildDecodeDocumentSystemPrompt } from "../../../lib/decode-document-prompts.js";
 import { DECODE_DOCUMENT_TOOL } from "../../../lib/decode-document-tools.js";
 import { decodeDocumentRequestSchema, decodeDocumentSchema, filterGroundedClauses } from "../../../lib/decode-document-validation.js";
@@ -26,34 +19,27 @@ export async function POST(request) {
   }
   const { extractedText, language } = parsedRequest.data;
 
-  const client = getAnthropicClient();
-  let response;
+  let result;
   try {
-    response = await runToolTurn(client, {
-      model: WEDDING_MODEL,
-      max_tokens: 4000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "low" },
-      system: buildDecodeDocumentSystemPrompt(language, { extractedText }),
-      tools: [DECODE_DOCUMENT_TOOL],
-      tool_choice: { type: "any" },
-      messages: [{ role: "user", content: "Decode this document." }],
+    result = await runToolTurnWithFallback({
+      systemPrompt: buildDecodeDocumentSystemPrompt(language, { extractedText }),
+      tool: DECODE_DOCUMENT_TOOL,
+      userMessage: "Decode this document.",
     });
   } catch (error) {
-    console.error("decode-document Anthropic call failed", error);
+    console.error("decode-document: all configured AI providers failed", error.attempts ?? error);
     return Response.json({ error: "upstream_error" }, { status: 502 });
   }
 
-  if (response.stop_reason === "refusal") {
+  if (result.refusal) {
     return Response.json({ error: "refusal" }, { status: 422 });
   }
 
-  const toolUse = findToolUse(response.content, [DECODE_DOCUMENT_TOOL.name]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+  if (!result.toolInput) {
+    return Response.json({ error: "inconclusive", detail: result.rawText }, { status: 422 });
   }
 
-  const parsed = decodeDocumentSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
+  const parsed = decodeDocumentSchema.safeParse(result.toolInput);
   if (!parsed.success) {
     console.error("decode-document tool output failed validation", parsed.error.issues);
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });

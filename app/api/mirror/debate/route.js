@@ -1,5 +1,6 @@
-import { runMirrorDebateTurn } from "../../../../lib/mirror-ai-fallback.js";
+import { runToolTurnWithFallback } from "../../../../lib/ai-fallback.js";
 import { buildMirrorDebateSystemPrompt } from "../../../../lib/mirror-prompts.js";
+import { FUTURE_MIRROR_DEBATE_TOOL } from "../../../../lib/mirror-tools.js";
 import { mirrorDebateSchema } from "../../../../lib/mirror-validation.js";
 import { computeGoalFeasibility } from "../../../../lib/mirror-finance.js";
 import { saveDebate } from "../../../../lib/mirror-store.js";
@@ -25,15 +26,17 @@ export async function POST(request) {
 
   let result;
   try {
-    result = await runMirrorDebateTurn(
-      buildMirrorDebateSystemPrompt(language, {
+    result = await runToolTurnWithFallback({
+      systemPrompt: buildMirrorDebateSystemPrompt(language, {
         situation,
         goalLabel,
         computed,
         isIncomeIrregular: inputs.isIncomeIrregular,
         incomeSampleSize: inputs.incomeSampleSize,
-      })
-    );
+      }),
+      tool: FUTURE_MIRROR_DEBATE_TOOL,
+      userMessage: "Run the Bull/Bear/Judge debate on this plan.",
+    });
   } catch (error) {
     console.error("mirror/debate: all configured AI providers failed", error.attempts ?? error);
     return Response.json({ error: "upstream_error" }, { status: 502 });

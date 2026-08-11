@@ -10,6 +10,7 @@ import {
 import { buildHardshipAssessmentSystemPrompt } from "../../../../lib/hardship-prompts.js";
 import { ASSESS_HARDSHIP_TOOL } from "../../../../lib/hardship-tools.js";
 import { assessHardshipSchema } from "../../../../lib/hardship-validation.js";
+import { buildMockAssessment } from "../../../../lib/hardship-mock.js";
 import {
   appendMessages,
   getMessageHistory,
@@ -39,9 +40,11 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 4000,
       thinking: { type: "adaptive" },
@@ -51,18 +54,19 @@ export async function POST(request) {
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["assess_hardship"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("hardship/assess Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["assess_hardship"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("hardship/assess Anthropic call failed, falling back to mock response", error);
+    toolUse = { name: "assess_hardship", input: buildMockAssessment(message) };
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const parsed = assessHardshipSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
@@ -73,10 +77,10 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage1", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
   await saveArtifact(session.id, "stage1", "hardship_assessment", parsed.data);
   await updateSessionStatus(session.id, { stage1Status: "assessed" });
 
-  return Response.json({ type: "assess_hardship", data: parsed.data });
+  return Response.json({ type: "assess_hardship", data: parsed.data, mocked });
 }

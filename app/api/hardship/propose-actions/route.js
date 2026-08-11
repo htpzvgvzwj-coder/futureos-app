@@ -10,6 +10,7 @@ import {
 import { buildHardshipRecoverySystemPrompt } from "../../../../lib/hardship-prompts.js";
 import { PROPOSE_RECOVERY_ACTIONS_TOOL } from "../../../../lib/hardship-tools.js";
 import { buildProposeRecoveryActionsSchema } from "../../../../lib/hardship-validation.js";
+import { buildMockRecoveryActions } from "../../../../lib/hardship-mock.js";
 import { getCustomerCommitments, getEmergencyFundSnapshot } from "../../../../lib/hardship-context.js";
 import {
   computeCommittedMonthlyOutflow,
@@ -63,6 +64,7 @@ export async function POST(request) {
   const windfallSplit = assessment.windfall_mentioned && assessment.stated_windfall_amount
     ? computeWindfallSplit({ statedWindfallAmount: assessment.stated_windfall_amount, monthlyShortfall: gap.monthlyShortfall })
     : null;
+  const computed = { outflow, gap, defaultDrawdown, windfallSplit };
 
   const currentContributionByDomain = Object.fromEntries(
     outflow.perDomain.filter((d) => d.monthly > 0).map((d) => [d.domain, d.monthly])
@@ -73,35 +75,33 @@ export async function POST(request) {
   const messages = [...history, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
-  let response;
+  let toolUse;
+  let assistantContent;
+  let mocked = false;
   try {
-    response = await runToolTurn(client, {
+    const response = await runToolTurn(client, {
       model: WEDDING_MODEL,
       max_tokens: 6000,
       thinking: { type: "adaptive" },
       output_config: { effort: "medium" },
-      system: buildHardshipRecoverySystemPrompt(language, {
-        assessment,
-        computed: { outflow, gap, defaultDrawdown, windfallSplit },
-        isIncomeIrregular,
-        incomeSampleSize,
-      }),
+      system: buildHardshipRecoverySystemPrompt(language, { assessment, computed, isIncomeIrregular, incomeSampleSize }),
       tools: [PROPOSE_RECOVERY_ACTIONS_TOOL],
       tool_choice: { type: "any" },
       messages,
     });
+    if (response.stop_reason === "refusal") {
+      return Response.json({ error: "refusal" }, { status: 422 });
+    }
+    toolUse = findToolUse(response.content, ["propose_recovery_actions"]);
+    if (!toolUse) {
+      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    }
+    assistantContent = response.content;
   } catch (error) {
-    console.error("hardship/propose-actions Anthropic call failed", error);
-    return Response.json({ error: "upstream_error" }, { status: 502 });
-  }
-
-  if (response.stop_reason === "refusal") {
-    return Response.json({ error: "refusal" }, { status: 422 });
-  }
-
-  const toolUse = findToolUse(response.content, ["propose_recovery_actions"]);
-  if (!toolUse) {
-    return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    console.error("hardship/propose-actions Anthropic call failed, falling back to mock response", error);
+    toolUse = { name: "propose_recovery_actions", input: buildMockRecoveryActions(computed) };
+    mocked = true;
+    assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }
 
   const schema = buildProposeRecoveryActionsSchema({ currentContributionByDomain, defaultDrawdown, windfallSplit });
@@ -113,7 +113,7 @@ export async function POST(request) {
 
   await appendMessages(session.id, "stage2", [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content },
+    { role: "assistant", content: assistantContent },
   ]);
   await saveArtifact(session.id, "stage2", "proposed_recovery_actions", parsed.data);
   await updateSessionStatus(session.id, { stage2Status: "proposed" });
@@ -121,6 +121,7 @@ export async function POST(request) {
   return Response.json({
     type: "propose_recovery_actions",
     data: parsed.data,
-    computed: { outflow, gap, defaultDrawdown, windfallSplit },
+    computed,
+    mocked,
   });
 }
