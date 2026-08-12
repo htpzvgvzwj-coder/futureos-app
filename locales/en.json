@@ -1882,8 +1882,45 @@
     "inputPlaceholder": "e.g. I'm thinking about buying a home in 2 years, what would that look like?",
     "inputLabel": "Message Future Self Guardian",
     "send": "Send",
+    "thinking": "Thinking...",
     "genericError": "Something went wrong. Please try again.",
-    "quickPlannersLabel": "Or jump straight to a planner"
+    "quickPlannersLabel": "Or jump straight to a planner",
+    "voice": {
+      "speak": "Speak",
+      "stop": "Stop recording",
+      "transcribing": "Transcribing...",
+      "micError": "Couldn't access the microphone - check your browser permissions.",
+      "notConfigured": "Voice isn't set up on this deployment yet.",
+      "transcribeError": "Couldn't transcribe that - please try again or type instead."
+    },
+    "pdf": {
+      "attach": "Attach a PDF",
+      "extracting": "Reading your PDF...",
+      "extractError": "Couldn't read that PDF - please try another file.",
+      "noTextLayerError": "This PDF looks like a scanned image with no real text in it - try a text-based PDF instead.",
+      "remove": "Remove"
+    },
+    "whyDidISayThat": "Why did I say that?",
+    "whyDidISayThatTitle": "Why did I say that?",
+    "whyDidISayThatBody": "This reply was generated from the real facts on file for you at the time - not invented, not from memory of a different conversation.",
+    "whyDidISayThatListTitle": "Real facts used for this reply",
+    "whyDidISayThatIncome": "Monthly income: SGD {amount}",
+    "whyDidISayThatExpenses": "Monthly expenses: SGD {amount}",
+    "whyDidISayThatLanguage": "Reply language: {language}",
+    "openLoopsLabel": "Still open",
+    "openLoopTypes": {
+      "missing_checkin": "No check-in this month",
+      "unresolved_debate": "Waiting to see if this played out"
+    },
+    "memoryShelfLabel": "What Future Self Guardian remembers",
+    "memoryTypes": {
+      "confirmed_plan": "A plan you confirmed",
+      "hardship_action": "A recovery action applied",
+      "decision_check": "A Quick Verdict check",
+      "document_review": "A document you decoded",
+      "income_entry": "An income entry logged",
+      "mirror_debate": "A debate you confirmed"
+    }
   },
   "simulator": {
     "title": "Future Mirror",

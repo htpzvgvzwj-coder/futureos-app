@@ -56,13 +56,22 @@ export async function POST(request) {
 
   const reply = extractText(response.content);
 
+  // "Why did I say that?" - the real facts this specific reply was
+  // generated from, same principle as mirror_debates.context (P1, earlier
+  // this session), persisted per chat turn instead of per debate.
   await appendMessages(session.id, [
     { role: "user", content: userContent },
-    { role: "assistant", content: response.content, toolResults: toolResults.length ? toolResults : null },
+    {
+      role: "assistant",
+      content: response.content,
+      toolResults: toolResults.length ? toolResults : null,
+      context: { baseInputs, language },
+    },
   ]);
 
   return Response.json({
     reply,
     debate: toolResults.find((entry) => entry.name === "run_debate" && entry.result?.ok)?.result ?? null,
+    context: { baseInputs, language },
   });
 }

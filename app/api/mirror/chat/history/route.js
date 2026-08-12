@@ -19,6 +19,7 @@ export async function GET(request) {
       role: message.role,
       text: extractText(Array.isArray(message.content) ? message.content : []),
       debate: message.toolResults?.find((entry) => entry.name === "run_debate" && entry.result?.ok)?.result ?? null,
+      context: message.context ?? null,
     }))
     .filter((entry) => entry.text || entry.debate);
 

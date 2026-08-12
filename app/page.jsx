@@ -3848,13 +3848,194 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
 // free to just talk (tool_choice: "auto", the first place in this codebase
 // doing that) and only runs a real debate when the customer actually wants
 // one assessed.
-function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
+// A dedicated input for Mirror chat (NOT a change to the shared
+// AiTextInputCard, which 10+ other domain screens depend on unchanged) -
+// text + real voice input (reuses DecisionVerdictScreen's exact
+// MediaRecorder -> /api/decision/voice/transcribe flow, never auto-sends)
+// + real inline PDF attach (reuses extractPdfText from Decode This - only
+// extracted text ever leaves the browser, same as the standalone screen).
+function MirrorChatInputCard({ t, onSubmit, submitting }) {
+  const [value, setValue] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [attachedFile, setAttachedFile] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  const startRecording = async () => {
+    setErrorMessage("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        transcribeRecording(new Blob(audioChunksRef.current, { type: "audio/webm" }));
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setErrorMessage(t("mirrorChat.voice.micError"));
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  };
+
+  const transcribeRecording = async (blob) => {
+    setTranscribing(true);
+    try {
+      const audioBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const response = await fetch("/api/decision/voice/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audioBase64, mimeType: "audio/webm" }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data.error === "voice_not_configured" ? t("mirrorChat.voice.notConfigured") : t("mirrorChat.voice.transcribeError"));
+        return;
+      }
+      setValue((current) => (current.trim() ? `${current.trim()} ${data.transcript}` : data.transcript));
+    } catch {
+      setErrorMessage(t("mirrorChat.voice.transcribeError"));
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const selected = event.target.files?.[0];
+    event.target.value = "";
+    if (!selected) return;
+    setErrorMessage("");
+    setAttachedFile({ name: selected.name, text: null, extracting: true, error: null });
+    try {
+      const extraction = await extractPdfText(selected);
+      if (extraction.error === "no_text_layer") {
+        setAttachedFile({ name: selected.name, text: null, extracting: false, error: t("mirrorChat.pdf.noTextLayerError") });
+        return;
+      }
+      setAttachedFile({ name: selected.name, text: extraction.text, extracting: false, error: null });
+    } catch {
+      setAttachedFile({ name: selected.name, text: null, extracting: false, error: t("mirrorChat.pdf.extractError") });
+    }
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (submitting || attachedFile?.extracting || (!value.trim() && !attachedFile?.text)) return;
+    const messageText = attachedFile?.text
+      ? `${value.trim()}\n\n[Attached document text]\n${attachedFile.text}`.trim()
+      : value.trim();
+    onSubmit(messageText);
+    setValue("");
+    setAttachedFile(null);
+  };
+
+  return (
+    <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("mirrorChat.inputLabel")}</span>
+      <textarea
+        className="aiTextInput"
+        rows={3}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder={t("mirrorChat.inputPlaceholder")}
+        disabled={submitting}
+      />
+
+      {attachedFile ? (
+        <section className="trustNote compactTrustNote">
+          <FileText size={17} />
+          <div>
+            <p>{attachedFile.extracting ? t("mirrorChat.pdf.extracting") : attachedFile.name}</p>
+            {attachedFile.error ? <small>{attachedFile.error}</small> : null}
+          </div>
+          <button type="button" className="secondaryButton" onClick={() => setAttachedFile(null)}>
+            {t("mirrorChat.pdf.remove")}
+          </button>
+        </section>
+      ) : null}
+
+      {errorMessage ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{errorMessage}</p>
+        </section>
+      ) : null}
+
+      <div className="decisionButtonRow">
+        <button
+          type="button"
+          className={recording ? "primaryButton" : "secondaryButton"}
+          onClick={recording ? stopRecording : startRecording}
+          disabled={transcribing || submitting}
+        >
+          <Mic size={16} />
+          {transcribing ? t("mirrorChat.voice.transcribing") : recording ? t("mirrorChat.voice.stop") : t("mirrorChat.voice.speak")}
+        </button>
+
+        <label className="secondaryButton" style={{ cursor: "pointer" }}>
+          <FileText size={16} />
+          {t("mirrorChat.pdf.attach")}
+          <input type="file" accept="application/pdf" onChange={handleFileChange} style={{ display: "none" }} disabled={submitting} />
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        className="primaryButton"
+        disabled={submitting || attachedFile?.extracting || (!value.trim() && !attachedFile?.text)}
+      >
+        {submitting ? t("mirrorChat.thinking") : t("mirrorChat.send")}
+        <Send size={18} />
+      </button>
+    </form>
+  );
+}
+
+function MirrorChatScreen({ setActiveScreen, simulatorInputs, preferences, simulatorActionStates, language, t }) {
   const [messages, setMessages] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [confirmedDebateIds, setConfirmedDebateIds] = useState(() => new Set());
   const [escalatedDebateIds, setEscalatedDebateIds] = useState(() => new Set());
+  const [guardianStateInfoOpen, setGuardianStateInfoOpen] = useState(false);
+  const [openLoops, setOpenLoops] = useState([]);
+  const [memories, setMemories] = useState([]);
+  const [contextModalIndex, setContextModalIndex] = useState(null);
+
+  // Real status, reused as-is from FutureSelfGuardian's own derivation
+  // (app/page.jsx ~4330-4360) - not a new metric, just surfaced somewhere
+  // persistent instead of buried inside a sub-screen only reachable via
+  // Guardian. Zero new backend - every input here already reaches this
+  // screen via the `shared` prop spread.
+  const profile = getUserProfile(preferences);
+  const customGoals = getCustomGoals(preferences);
+  const selectedGoalIds = getSelectedGoalIds(simulatorInputs);
+  const visibleActionCards = simulatorActionCards.filter(({ id }) => {
+    if (id === "mortgageReadiness") return selectedGoalIds.includes("home");
+    if (id === "insuranceReview") return selectedGoalIds.includes("family") || selectedGoalIds.includes("home");
+    if (id === "investmentPlan") return selectedGoalIds.includes("investment") || selectedGoalIds.includes("retirement");
+    return true;
+  });
+  const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
+  const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
+  const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
 
   useEffect(() => {
     let cancelled = false;
@@ -3867,6 +4048,18 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
       .finally(() => {
         if (!cancelled) setHistoryLoading(false);
       });
+    fetch("/api/mirror/open-loops")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setOpenLoops(data.loops ?? []);
+      })
+      .catch(() => {});
+    fetch("/api/mirror/memory-shelf")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setMemories(data.memories ?? []);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -3887,7 +4080,7 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
         setErrorMessage(t("mirrorChat.genericError"));
         return;
       }
-      setMessages((current) => [...current, { role: "assistant", text: data.reply, debate: data.debate }]);
+      setMessages((current) => [...current, { role: "assistant", text: data.reply, debate: data.debate, context: data.context }]);
     } catch {
       setErrorMessage(t("mirrorChat.genericError"));
     } finally {
@@ -3926,6 +4119,29 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
       <Header title={t("mirrorChat.title")} subtitle={t("mirrorChat.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
+      <div className="productStateRow">
+        <b className={`statePill ledgerState-${guardianState}`}>{t(`guardian.state.label.${guardianState}`)}</b>
+        <button
+          type="button"
+          className="infoButton tinyInfoButton"
+          onClick={() => setGuardianStateInfoOpen(true)}
+          aria-label={t("homeBanking.infoLabel", { item: t("guardian.state.title") })}
+        >
+          <Info size={14} />
+        </button>
+        <b className={`statePill state-${reputationBand}`}>{t(`guardian.reputation.band.${reputationBand}`)}</b>
+      </div>
+      {guardianStateInfoOpen ? (
+        <InfoModal
+          icon={ShieldCheck}
+          title={t("guardian.state.title")}
+          tag={t(`guardian.state.label.${guardianState}`)}
+          body={t(`guardian.state.reason.${guardianState}`)}
+          onClose={() => setGuardianStateInfoOpen(false)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
+      ) : null}
+
       {historyLoading ? (
         <p>{t("loading.detail")}</p>
       ) : (
@@ -3940,7 +4156,14 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
             <div key={index}>
               {entry.text ? (
                 <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"}>
-                  <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>{entry.text}</div>
+                  <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>
+                    {entry.text}
+                    {entry.role === "assistant" && entry.context ? (
+                      <button type="button" className="linkButton" onClick={() => setContextModalIndex(index)}>
+                        {t("mirrorChat.whyDidISayThat")}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               ) : null}
               {entry.debate ? (
@@ -3958,6 +4181,22 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
         </div>
       )}
 
+      {contextModalIndex !== null && messages[contextModalIndex]?.context ? (
+        <InfoModal
+          icon={Info}
+          title={t("mirrorChat.whyDidISayThatTitle")}
+          body={t("mirrorChat.whyDidISayThatBody")}
+          listTitle={t("mirrorChat.whyDidISayThatListTitle")}
+          listItems={[
+            t("mirrorChat.whyDidISayThatIncome", { amount: messages[contextModalIndex].context.baseInputs?.monthlyIncome }),
+            t("mirrorChat.whyDidISayThatExpenses", { amount: messages[contextModalIndex].context.baseInputs?.monthlyExpenses }),
+            t("mirrorChat.whyDidISayThatLanguage", { language: messages[contextModalIndex].context.language }),
+          ]}
+          onClose={() => setContextModalIndex(null)}
+          closeLabel={t("homeBanking.gotIt")}
+        />
+      ) : null}
+
       {errorMessage ? (
         <section className="adviceOnlyPanel">
           <AlertTriangle size={18} />
@@ -3965,14 +4204,35 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, language, t }) {
         </section>
       ) : null}
 
-      <AiTextInputCard
-        t={t}
-        onSubmit={sendMessage}
-        submitting={sending}
-        placeholder={t("mirrorChat.inputPlaceholder")}
-        submitLabelKey="mirrorChat.send"
-        labelKey="mirrorChat.inputLabel"
-      />
+      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending} />
+
+      {openLoops.length ? (
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("mirrorChat.openLoopsLabel")}</span>
+          <div className="workbenchScrollRow">
+            {openLoops.map((loop, index) => (
+              <div className="workbenchScrollCard" key={index}>
+                <strong>{t(`mirrorChat.openLoopTypes.${loop.type}`)}</strong>
+                <small>{t(`simulator.goals.${loop.domain}`)}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {memories.length ? (
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("mirrorChat.memoryShelfLabel")}</span>
+          <div className="workbenchScrollRow">
+            {memories.map((memory, index) => (
+              <div className="workbenchScrollCard" key={index}>
+                <strong>{t(`mirrorChat.memoryTypes.${memory.type}`)}</strong>
+                <small>{memory.detail}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="settingsGroup">
         <span className="sectionLabel">{t("mirrorChat.quickPlannersLabel")}</span>

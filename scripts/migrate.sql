@@ -612,3 +612,9 @@ create index if not exists mirror_chat_messages_session_seq_idx
 -- a no-op against an existing table, so the column needs its own explicit
 -- alter to actually land on the real database.
 alter table mirror_chat_messages add column if not exists tool_results jsonb;
+
+-- "Why did I say that?" for chat replies - the same principle as
+-- mirror_debates.context (P1, earlier this session), applied per chat turn:
+-- the real baseInputs/language the system prompt was built from for this
+-- specific assistant reply. Null for user messages.
+alter table mirror_chat_messages add column if not exists context jsonb;
