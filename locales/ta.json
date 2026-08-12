@@ -2013,6 +2013,12 @@
       "note": "Rates mock values ஆகும்."
     }
   },
+  "guardianNudge": {
+    "label": "Guardian ஒன்றைக் கவனித்தது",
+    "title": "{need} திட்டமிடுவது பயனுள்ளதாக இருக்கலாம்",
+    "detail": "Future Self Guardian உடன் பேச தட்டவும் - உங்கள் உண்மையான எண்களின் அடிப்படையில், ஒரு யூகம் அல்ல.",
+    "cta": "Guardian உடன் பேசுங்கள்"
+  },
   "spendingRisk": {
     "title": "செலவு அபாய விவரம்",
     "subtitle": "Karina வின் எதிர்கால இலக்குகளை பாதிக்கக்கூடிய ஒரு செலவு முறையை FutureOS கண்டறிந்துள்ளது.",

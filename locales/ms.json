@@ -2013,6 +2013,12 @@
       "note": "Kadar adalah nilai mock dan bukan untuk dagangan sebenar."
     }
   },
+  "guardianNudge": {
+    "label": "Guardian perasan sesuatu",
+    "title": "{need} mungkin patut dirancang",
+    "detail": "Ketik untuk berbincang dengan Future Self Guardian - berdasarkan nombor sebenar anda, bukan tekaan.",
+    "cta": "Bercakap dengan Guardian"
+  },
   "spendingRisk": {
     "title": "Butiran Risiko Perbelanjaan",
     "subtitle": "FutureOS mengesan corak perbelanjaan yang mungkin menjejaskan matlamat masa depan Karina.",

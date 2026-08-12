@@ -3030,7 +3030,7 @@ function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
   );
 }
 
-function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, t }) {
+function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [noticeModal, setNoticeModal] = useState(null);
@@ -3039,6 +3039,15 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
+
+  // Same real "detected need" evidence already shown passively on the Life
+  // Graph screen (a declared goal, or a health score below a real
+  // threshold) - surfaced here too so a customer who never opens Life Graph
+  // still gets nudged. Only the first (deterministic, not arbitrary) need
+  // is shown - this is a nudge, not a report.
+  const customGoals = getCustomGoals(preferences);
+  const detectedNeeds = getDetectedNeeds(getProfileGoalIds(profile, customGoals), healthScores);
+  const topDetectedNeed = detectedNeeds[0] ?? null;
 
   useEffect(() => {
     let cancelled = false;
@@ -3259,6 +3268,31 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
           </span>
           <ChevronRight size={17} />
         </motion.button>
+
+        {topDetectedNeed ? (
+          <motion.button
+            type="button"
+            className="futureAlertCard guardianNudgeCard"
+            data-testid="guardian-nudge-card"
+            onClick={() => {
+              setMirrorChatSeed({ id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey });
+              goWithLoading(screens.MIRROR, "loading.mirror");
+            }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.36, delay: 0.16, ease: "easeOut" }}
+          >
+            <span className="futureAlertIcon">
+              <Sparkles size={18} />
+            </span>
+            <span>
+              <small>{t("guardianNudge.label")}</small>
+              <strong>{t("guardianNudge.title", { need: t(topDetectedNeed.titleKey) })}</strong>
+              <em>{t("guardianNudge.detail")}</em>
+            </span>
+            <ChevronRight size={17} />
+          </motion.button>
+        ) : null}
 
         <SharedJourneySection memoryEvents={memoryEvents} t={t} setActiveScreen={setActiveScreen} />
 
@@ -4007,7 +4041,16 @@ function MirrorChatInputCard({ t, onSubmit, submitting }) {
   );
 }
 
-function MirrorChatScreen({ setActiveScreen, simulatorInputs, preferences, simulatorActionStates, language, t }) {
+function MirrorChatScreen({
+  setActiveScreen,
+  simulatorInputs,
+  preferences,
+  simulatorActionStates,
+  language,
+  t,
+  mirrorChatSeed,
+  onConsumeMirrorChatSeed,
+}) {
   const [messages, setMessages] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -4096,6 +4139,21 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, preferences, simul
       setSending(false);
     }
   };
+
+  // Coming from the Home nudge card: auto-open with the flagged need already
+  // on the table, instead of dropping the customer into a blank chat after
+  // they already saw why they're here. Only fires into a genuinely fresh
+  // conversation (never interrupts one already in progress) and only once
+  // per seed, even under React double-invoke.
+  const seedConsumedRef = useRef(false);
+  useEffect(() => {
+    if (!mirrorChatSeed || historyLoading || seedConsumedRef.current) return;
+    seedConsumedRef.current = true;
+    onConsumeMirrorChatSeed();
+    if (messages.length === 0) {
+      sendMessage(t("mirrorChat.seedPrompt", { need: t(mirrorChatSeed.titleKey) }));
+    }
+  }, [mirrorChatSeed, historyLoading, messages.length]);
 
   const confirmDebate = async (debateId) => {
     try {
@@ -12026,6 +12084,7 @@ export default function App() {
   const [simulatorActionStates, setSimulatorActionStates] = useState(defaultSimulatorActionStates);
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [loanPlannerInitialPurpose, setLoanPlannerInitialPurpose] = useState(null);
+  const [mirrorChatSeed, setMirrorChatSeed] = useState(null);
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -12317,9 +12376,17 @@ export default function App() {
     memoryEvents,
     setMemoryEvents,
     setLoanPlannerInitialPurpose,
+    setMirrorChatSeed,
   };
 
-  const mirrorSimulatorScreen = <MirrorChatScreen {...shared} simulatorInputs={simulatorInputs} />;
+  const mirrorSimulatorScreen = (
+    <MirrorChatScreen
+      {...shared}
+      simulatorInputs={simulatorInputs}
+      mirrorChatSeed={mirrorChatSeed}
+      onConsumeMirrorChatSeed={() => setMirrorChatSeed(null)}
+    />
+  );
 
   const currentScreen = {
     [screens.HOME]: <HomeDashboard {...shared} />,

@@ -2376,6 +2376,12 @@
       "note": "汇率为模拟值。"
     }
   },
+  "guardianNudge": {
+    "label": "Guardian 注意到一件事",
+    "title": "或许值得规划一下：{need}",
+    "detail": "点击与 Future Self Guardian 聊聊——基于你的真实数据,不是猜测。",
+    "cta": "跟 Guardian 聊聊"
+  },
   "spendingRisk": {
     "title": "消费风险详情",
     "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",
