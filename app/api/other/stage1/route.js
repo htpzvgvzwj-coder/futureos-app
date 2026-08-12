@@ -65,7 +65,11 @@ export async function POST(request) {
       model: WEDDING_MODEL,
       max_tokens: 12000,
       thinking: { type: "adaptive" },
-      output_config: { effort: "medium" },
+      // "low", not "medium" - see app/api/wedding/stage1/route.js's
+      // identical fix for why (a real confirmed Vercel 60s timeout, not
+      // theoretical). Matches home/retirement/investment/loan's stage1
+      // routes, which were already at "low".
+      output_config: { effort: "low" },
       system: buildStage1SystemPrompt(language),
       tools: [WEB_SEARCH_TOOL, PROPOSE_PLANS_TOOL, CONFIRM_GOAL_PLAN_TOOL],
       tool_choice: { type: "any" },
