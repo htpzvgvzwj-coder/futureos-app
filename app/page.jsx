@@ -4037,6 +4037,15 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, preferences, simul
   const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
   const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
 
+  // Real signals for a customer who doesn't know what to plan for yet -
+  // both already exist and are already shown passively on the Life Graph
+  // screen, just never fed into the chat before. getDetectedNeeds only
+  // flags something when there's real evidence (a declared goal, or a
+  // health score below a real threshold) - never a guess dressed as one.
+  const healthScores = getHealthScores(profile);
+  const detectedLifeStage = getDetectedLifeStage(profile, customGoals, t);
+  const detectedNeeds = getDetectedNeeds(getProfileGoalIds(profile, customGoals), healthScores).map((need) => t(need.titleKey));
+
   useEffect(() => {
     let cancelled = false;
     fetch("/api/mirror/chat/history")
@@ -4073,7 +4082,7 @@ function MirrorChatScreen({ setActiveScreen, simulatorInputs, preferences, simul
       const response = await fetch("/api/mirror/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, language, baseInputs: simulatorInputs }),
+        body: JSON.stringify({ message: text, language, baseInputs: { ...simulatorInputs, detectedLifeStage, detectedNeeds } }),
       });
       const data = await response.json();
       if (!response.ok) {
