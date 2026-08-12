@@ -2016,6 +2016,7 @@
   "guardianNudge": {
     "label": "Guardian perasan sesuatu",
     "title": "{need} mungkin patut dirancang",
+    "openLoopTitle": "{domain}: {loopType}",
     "detail": "Ketik untuk berbincang dengan Future Self Guardian - berdasarkan nombor sebenar anda, bukan tekaan.",
     "cta": "Bercakap dengan Guardian"
   },

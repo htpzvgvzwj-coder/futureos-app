@@ -1886,6 +1886,7 @@
     "genericError": "Something went wrong. Please try again.",
     "quickPlannersLabel": "Or jump straight to a planner",
     "seedPrompt": "I'm not sure where to start - can we talk about {need}?",
+    "seedPromptOpenLoop": "Can we follow up on this - {domain}: {loopType}?",
     "voice": {
       "speak": "Speak",
       "stop": "Stop recording",
@@ -2643,6 +2644,7 @@
   "guardianNudge": {
     "label": "Guardian noticed something",
     "title": "{need} might be worth planning",
+    "openLoopTitle": "{domain}: {loopType}",
     "detail": "Tap to talk it through with Future Self Guardian - grounded in your real numbers, not a guess.",
     "cta": "Talk to Guardian"
   },

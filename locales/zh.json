@@ -2379,6 +2379,7 @@
   "guardianNudge": {
     "label": "Guardian 注意到一件事",
     "title": "或许值得规划一下：{need}",
+    "openLoopTitle": "{domain}：{loopType}",
     "detail": "点击与 Future Self Guardian 聊聊——基于你的真实数据,不是猜测。",
     "cta": "跟 Guardian 聊聊"
   },

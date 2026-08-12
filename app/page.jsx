@@ -3049,6 +3049,20 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const detectedNeeds = getDetectedNeeds(getProfileGoalIds(profile, customGoals), healthScores);
   const topDetectedNeed = detectedNeeds[0] ?? null;
 
+  // Same real open-loops signal already surfaced inside Mirror chat
+  // (missing this-month check-ins, unresolved debate predictions) - a
+  // customer with an already-confirmed plan that needs follow-up never saw
+  // this unless they opened chat themselves. Takes priority over a
+  // detected need below: following up on something already committed to
+  // is more time-sensitive than suggesting something new.
+  const [openLoops, setOpenLoops] = useState([]);
+  const topOpenLoop = openLoops[0] ?? null;
+  const guardianNudge = topOpenLoop
+    ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
+    : topDetectedNeed
+      ? { kind: "detectedNeed", id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey }
+      : null;
+
   useEffect(() => {
     let cancelled = false;
     const params = getFollowThroughQueryParams(preferences);
@@ -3056,6 +3070,12 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
       .then((response) => response.json())
       .then((data) => {
         if (!cancelled) setFollowThrough(data);
+      })
+      .catch(() => {});
+    fetch("/api/mirror/open-loops")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setOpenLoops(data.loops ?? []);
       })
       .catch(() => {});
     return () => {
@@ -3269,13 +3289,13 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
           <ChevronRight size={17} />
         </motion.button>
 
-        {topDetectedNeed ? (
+        {guardianNudge ? (
           <motion.button
             type="button"
             className="futureAlertCard guardianNudgeCard"
             data-testid="guardian-nudge-card"
             onClick={() => {
-              setMirrorChatSeed({ id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey });
+              setMirrorChatSeed(guardianNudge);
               goWithLoading(screens.MIRROR, "loading.mirror");
             }}
             initial={{ opacity: 0, y: 14 }}
@@ -3286,8 +3306,17 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
               <Sparkles size={18} />
             </span>
             <span>
-              <small>{t("guardianNudge.label")}</small>
-              <strong>{t("guardianNudge.title", { need: t(topDetectedNeed.titleKey) })}</strong>
+              <small>
+                {guardianNudge.kind === "openLoop" ? t("mirrorChat.openLoopsLabel") : t("guardianNudge.label")}
+              </small>
+              <strong>
+                {guardianNudge.kind === "openLoop"
+                  ? t("guardianNudge.openLoopTitle", {
+                      domain: t(`simulator.goals.${guardianNudge.domain}`),
+                      loopType: t(`mirrorChat.openLoopTypes.${guardianNudge.type}`),
+                    })
+                  : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
+              </strong>
               <em>{t("guardianNudge.detail")}</em>
             </span>
             <ChevronRight size={17} />
@@ -4151,7 +4180,14 @@ function MirrorChatScreen({
     seedConsumedRef.current = true;
     onConsumeMirrorChatSeed();
     if (messages.length === 0) {
-      sendMessage(t("mirrorChat.seedPrompt", { need: t(mirrorChatSeed.titleKey) }));
+      const seedText =
+        mirrorChatSeed.kind === "openLoop"
+          ? t("mirrorChat.seedPromptOpenLoop", {
+              domain: t(`simulator.goals.${mirrorChatSeed.domain}`),
+              loopType: t(`mirrorChat.openLoopTypes.${mirrorChatSeed.type}`),
+            })
+          : t("mirrorChat.seedPrompt", { need: t(mirrorChatSeed.titleKey) });
+      sendMessage(seedText);
     }
   }, [mirrorChatSeed, historyLoading, messages.length]);
 
