@@ -1691,7 +1691,13 @@ const REPUTATION_BAND_RANK = { restricted: 0, underReview: 1, buildingTrust: 2, 
 // approved/skipped counts, approved OCBC service count) everywhere it's read - factored out once
 // FutureSelfGuardian, ProductFitScreen, RelationshipLedgerScreen, and Home's stat row all needed
 // the identical computation rather than re-deriving it four separate times.
-function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates, predictiveAccuracy = null) {
+// Reads predictiveAccuracy from preferences.mirrorOutcomeStats (real Mirror
+// debate accountability data, fetched once at app mount - see the auth-
+// resolve effect) rather than taking it as a per-call-site argument, so
+// every one of this function's ~6 call sites sees the exact same number
+// instead of only the one screen that used to fetch it separately.
+function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates) {
+  const predictiveAccuracy = preferences?.mirrorOutcomeStats?.predictiveAccuracy ?? null;
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
@@ -2247,6 +2253,14 @@ const defaultPreferences = {
   // getUserProfile()'s manualEntryProvider can fold real asset-derived sums
   // into the computed profile for every one of its ~20 consumers for free.
   assets: [],
+  // Real Mirror debate accountability stats (lib/mirror-outcome-resolver.js's
+  // resolveDebateOutcomes, via /api/mirror/outcomes) - refreshed on every
+  // auth-resolve so resolution runs on real app load, not only when the
+  // customer happens to visit Relationship Ledger. Living inside
+  // `preferences` means computeGuardianReputation reads the same number
+  // everywhere it's called, instead of the 5 different call sites each
+  // deciding independently whether to fetch it.
+  mirrorOutcomeStats: null,
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -3940,6 +3954,16 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </div>
       </section>
 
+      {debate.bullRebuttal ? (
+        <section className="recommendationHero debateBullCase">
+          <RotateCcw size={22} />
+          <div>
+            <span className="sectionLabel">{t("simulator.output.bullRebuttal")}</span>
+            <p>{debate.bullRebuttal}</p>
+          </div>
+        </section>
+      ) : null}
+
       <section className="recommendationHero debateJudge">
         <ShieldCheck size={22} />
         <div>
@@ -3956,6 +3980,15 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
           <SummaryRow label={t("simulator.output.evidence.expenses")} value={`SGD ${debate.computed.monthlyExpenses}`} />
           <SummaryRow label={t("simulator.output.evidence.available")} value={`SGD ${debate.computed.availableMonthly}`} />
           <SummaryRow label={t("simulator.output.evidence.required")} value={`SGD ${debate.computed.requiredMonthly}`} />
+          {debate.computed.availableLiquidSavings != null ? (
+            <SummaryRow label={t("simulator.output.evidence.liquidSavings")} value={`SGD ${debate.computed.availableLiquidSavings}`} />
+          ) : null}
+          {debate.computed.emergencyBufferMonths != null ? (
+            <SummaryRow
+              label={t("simulator.output.evidence.emergencyBuffer")}
+              value={t("simulator.output.evidence.emergencyBufferValue", { months: debate.computed.emergencyBufferMonths })}
+            />
+          ) : null}
           {debate.aiProvider ? (
             <SummaryRow
               label={t("simulator.output.evidence.answeredBy")}
@@ -4488,19 +4521,13 @@ const followThroughComponentIcons = {
 // Reached from Home's entry card and stat row. Shows two deliberately separate ledgers side by
 // side - Follow-Through Score (did the customer keep their own word) and Guardian Reputation Score
 // (did the AI's recommendations hold up) - then the benefit ladder that requires BOTH to qualify.
-function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
+function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs, simulatorActionStates, t, setActiveScreen }) {
   const [followThrough, setFollowThrough] = useState(null);
   const [loading, setLoading] = useState(true);
   const [credential, setCredential] = useState(null);
   const [issuingCredential, setIssuingCredential] = useState(false);
-  const [debateOutcomes, setDebateOutcomes] = useState(null);
 
-  const { reputation, reputationBand } = computeGuardianReputation(
-    preferences,
-    simulatorInputs,
-    simulatorActionStates,
-    debateOutcomes?.predictiveAccuracy ?? null
-  );
+  const { reputation, reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
 
   useEffect(() => {
     let cancelled = false;
@@ -4517,12 +4544,14 @@ function RelationshipLedgerScreen({ preferences, simulatorInputs, simulatorActio
       });
     // Checks any of Future Mirror's confirmed debates for a resolvable real-world
     // outcome every time this screen loads (no cron infra in this app - same
-    // recompute-on-read pattern as follow-through/strategic-balance), then folds
-    // the result into Guardian Reputation Score above.
+    // recompute-on-read pattern as follow-through/strategic-balance). Written
+    // into the shared preferences.mirrorOutcomeStats cache (not local state) so
+    // every other screen's computeGuardianReputation call also picks up a
+    // fresher result, not just this one.
     fetch("/api/mirror/outcomes")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (!cancelled && data) setDebateOutcomes(data);
+        if (!cancelled && data) setPreferences((current) => ({ ...current, mirrorOutcomeStats: data }));
       })
       .catch(() => {});
     return () => {
@@ -12928,6 +12957,17 @@ export default function App() {
     } catch {
       // Offline/unreachable - fall back to whatever was cached in preferences.
     }
+    // Runs Mirror's real outcome-resolution job (lib/mirror-outcome-resolver.js,
+    // no cron infra in this app - same recompute-on-read pattern as
+    // follow-through/strategic-balance) on every real app load, and caches the
+    // result so computeGuardianReputation reads the same number everywhere.
+    let fetchedMirrorOutcomeStats = savedPreferences?.mirrorOutcomeStats ?? null;
+    try {
+      const outcomesResponse = await fetch("/api/mirror/outcomes");
+      if (outcomesResponse.ok) fetchedMirrorOutcomeStats = await outcomesResponse.json();
+    } catch {
+      // Offline/unreachable - fall back to whatever was cached in preferences.
+    }
     if (cancelled) return;
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
@@ -12942,6 +12982,7 @@ export default function App() {
       dismissedActions: savedPreferences?.dismissedActions ?? [],
       incomeHistory: fetchedIncomeHistory,
       assets: fetchedAssets,
+      mirrorOutcomeStats: fetchedMirrorOutcomeStats,
       // The authenticated account's real display name seeds every fresh
       // login (no more global "Karina" hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once

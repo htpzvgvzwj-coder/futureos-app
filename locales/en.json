@@ -2050,6 +2050,7 @@
       "escalatedToRm": "Relationship Manager notified",
       "bullCase": "Bull case: why this could work",
       "bearCase": "Bear case: what could break this",
+      "bullRebuttal": "Bull's rebuttal",
       "judgeSynthesis": "Judge's synthesis",
       "evidence": {
         "title": "What this was based on",
@@ -2057,6 +2058,9 @@
         "expenses": "Monthly expenses",
         "available": "Available after expenses",
         "required": "Required for this goal",
+        "liquidSavings": "Real liquid savings on hand",
+        "emergencyBuffer": "Emergency buffer",
+        "emergencyBufferValue": "{months} months of expenses",
         "answeredBy": "AI reasoning engine",
         "provider": {
           "anthropic": "Claude",

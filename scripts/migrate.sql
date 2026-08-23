@@ -378,6 +378,11 @@ alter table mirror_debates add column if not exists resolved_at timestamptz;
 alter table mirror_debates add column if not exists context jsonb;
 alter table mirror_debates add column if not exists ai_provider text;
 
+-- Bull's direct response to bearCase's specific named risk, before the
+-- Judge's synthesis - a real rebuttal round instead of two isolated
+-- one-shot paragraphs. Nullable: rows created before this existed have none.
+alter table mirror_debates add column if not exists bull_rebuttal text;
+
 create table if not exists loan_sessions (
   id            uuid primary key default gen_random_uuid(),
   profile_key   text not null default 'karina-demo',

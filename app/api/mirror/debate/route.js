@@ -5,6 +5,9 @@ import { mirrorDebateSchema } from "../../../../lib/mirror-validation.js";
 import { computeGoalFeasibility } from "../../../../lib/mirror-finance.js";
 import { saveDebate } from "../../../../lib/mirror-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { listAssets } from "../../../../lib/asset-store.js";
+import { computeInsuranceCoverage } from "../../../../lib/asset-finance.js";
+import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,9 +23,18 @@ export async function POST(request) {
     return Response.json({ error: "missing_goal" }, { status: 400 });
   }
 
+  // Real Asset Profile ledger context (lib/asset-store.js) - "flexible"
+  // horizon since Mirror is exploratory analysis, not an actual
+  // money-committing action like a domain confirm route.
+  const assets = await listAssets(userId);
+  const assetContext = {
+    availableLiquidSavings: await resolveAvailableLiquidSavings(userId, inputs.currentSavings, "flexible"),
+    hasActiveInsurance: computeInsuranceCoverage(assets).hasActiveInsurance,
+  };
+
   // Numbers are computed here from the real inputs, never trusted from the
   // model - the AI only argues about them (lib/mirror-prompts.js).
-  const computed = computeGoalFeasibility(goalType, inputs);
+  const computed = computeGoalFeasibility(goalType, inputs, assetContext);
 
   let result;
   try {
