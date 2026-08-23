@@ -1,6 +1,7 @@
 import { computeLoanArchetype, applyLoanModifiers } from "../../../../lib/loan-finance.js";
 import { confirmLoanSchema } from "../../../../lib/loan-validation.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/loan-context.js";
+import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 import { getTotalConfirmedLoanLiabilities } from "../../../../lib/micro-insurance-context.js";
 import { computeCoverageGap, computeMicroTopUp } from "../../../../lib/micro-insurance-finance.js";
 import { saveOffer } from "../../../../lib/micro-insurance-store.js";
@@ -40,6 +41,10 @@ export async function POST(request) {
   } = parsed.data;
 
   const otherGoals = await getOtherGoalsMonthlyCommitment(purpose === "home" ? "home" : null, userId);
+  // Server-truth available liquid savings - real itemized ledger sum minus
+  // any already-confirmed lump-sum investment draw, not the raw client-sent
+  // figure. See lib/liquid-savings-context.js.
+  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings);
 
   const params = {
     principalBasis,
@@ -47,7 +52,7 @@ export async function POST(request) {
     monthlyIncome,
     monthlyExpenses,
     existingMonthlyDebt,
-    currentSavings,
+    currentSavings: availableSavings,
     otherGoalsMonthlyOutflow: otherGoals.total,
     relationshipTier,
   };

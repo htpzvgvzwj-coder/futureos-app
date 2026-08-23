@@ -20,6 +20,7 @@ import {
   updateSessionStatus,
 } from "../../../../lib/other-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -54,6 +55,13 @@ export async function POST(request) {
   if (!profile || typeof profile.monthlyIncome === "undefined") {
     return Response.json({ error: "missing_profile" }, { status: 400 });
   }
+  // Server-truth available liquid savings instead of the raw client-sent
+  // figure - already nets out any confirmed lump-sum investment draw. See
+  // lib/liquid-savings-context.js.
+  const resolvedProfile = {
+    ...profile,
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+  };
 
   const session = await getOrCreateSession(userId);
   const confirmedPlan = await getLatestArtifact(session.id, "stage1", "confirmed_goal_plan");
@@ -75,7 +83,7 @@ export async function POST(request) {
       max_tokens: 8000,
       thinking: { type: "adaptive" },
       output_config: { effort: "medium" },
-      system: buildStage2SystemPrompt(language, profile, confirmedPlan),
+      system: buildStage2SystemPrompt(language, resolvedProfile, confirmedPlan),
       tools: [PROPOSE_SAVINGS_PLAN_TOOL, FINALIZE_SAVINGS_PLAN_TOOL],
       tool_choice: { type: "any" },
       messages,
@@ -90,7 +98,7 @@ export async function POST(request) {
     assistantContent = response.content;
   } catch (error) {
     console.error("other/stage2 Anthropic call failed, falling back to mock response", error);
-    toolUse = await buildMockToolUse(message, session.id, confirmedPlan, profile);
+    toolUse = await buildMockToolUse(message, session.id, confirmedPlan, resolvedProfile);
     mocked = true;
     assistantContent = [{ type: "tool_use", id: `mock-${Date.now()}`, name: toolUse.name, input: toolUse.input }];
   }

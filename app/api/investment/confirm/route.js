@@ -1,5 +1,6 @@
 import { confirmInvestmentSchema } from "../../../../lib/investment-validation.js";
 import { getOtherGoalsMonthlyCommitment } from "../../../../lib/investment-context.js";
+import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 import { INVESTMENT_CATALOG } from "../../../../lib/investment-catalog.js";
 import {
   projectPurchaseMode,
@@ -47,6 +48,10 @@ export async function POST(request) {
 
   const otherGoals = await getOtherGoalsMonthlyCommitment(userId);
   const availableMonthlyCashflow = Math.max(0, monthlyIncome - monthlyExpenses - otherGoals.total);
+  // Server-truth available liquid savings - already nets out any PRIOR
+  // confirmed lump-sum pick, since this new pick hasn't been saved yet at
+  // this point. See lib/liquid-savings-context.js.
+  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings);
 
   const candidateScore = scoreInvestmentCandidate(entry, {
     riskBand: intake.riskPreference,
@@ -64,7 +69,7 @@ export async function POST(request) {
     lumpSumUsed,
     monthlyIncome,
     monthlyExpenses,
-    currentSavings,
+    currentSavings: availableSavings,
     otherGoalsMonthlyOutflow: otherGoals.total,
     diversificationScore: candidateScore.diversification_score,
     horizonFitScore: candidateScore.horizon_fit_score,

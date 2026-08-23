@@ -27,6 +27,7 @@ import {
   updateSessionStatus,
 } from "../../../../lib/hardship-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -52,7 +53,14 @@ export async function POST(request) {
   }
 
   const commitments = await getCustomerCommitments(userId);
-  const { monthlyExpenses, monthlyIncome, currentFund, isIncomeIrregular, incomeSampleSize } = getEmergencyFundSnapshot(profile);
+  // Server-truth available liquid savings instead of the raw client-sent
+  // figure - already nets out any confirmed lump-sum investment draw. See
+  // lib/liquid-savings-context.js.
+  const resolvedProfile = {
+    ...profile,
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+  };
+  const { monthlyExpenses, monthlyIncome, currentFund, isIncomeIrregular, incomeSampleSize } = getEmergencyFundSnapshot(resolvedProfile);
 
   const outflow = computeCommittedMonthlyOutflow(commitments, monthlyExpenses);
   const gap = computeIncomeGap({
