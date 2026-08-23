@@ -56,9 +56,12 @@ export async function POST(request) {
   // Server-truth available liquid savings instead of the raw client-sent
   // figure - already nets out any confirmed lump-sum investment draw. See
   // lib/liquid-savings-context.js.
+  // "tight" horizon - emergency money must be available now, so
+  // market-exposed "liquid" holdings don't count. See
+  // lib/asset-finance.js's computeAvailableSavings.
   const resolvedProfile = {
     ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight")),
   };
   const { monthlyExpenses, monthlyIncome, currentFund, isIncomeIrregular, incomeSampleSize } = getEmergencyFundSnapshot(resolvedProfile);
 

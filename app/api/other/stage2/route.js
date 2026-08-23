@@ -58,9 +58,13 @@ export async function POST(request) {
   // Server-truth available liquid savings instead of the raw client-sent
   // figure - already nets out any confirmed lump-sum investment draw. See
   // lib/liquid-savings-context.js.
+  // "tight" horizon - a custom goal's real timeline is unknown here, so
+  // this defaults to the conservative pool rather than assuming enough
+  // runway to liquidate a market-exposed holding. See
+  // lib/asset-finance.js's computeAvailableSavings.
   const resolvedProfile = {
     ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight")),
   };
 
   const session = await getOrCreateSession(userId);

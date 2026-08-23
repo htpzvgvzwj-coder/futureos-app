@@ -51,7 +51,10 @@ export async function POST(request) {
   // Server-truth available liquid savings - already nets out any PRIOR
   // confirmed lump-sum pick, since this new pick hasn't been saved yet at
   // this point. See lib/liquid-savings-context.js.
-  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings);
+  // "flexible" horizon - a voluntary investment purchase is never urgent,
+  // so market-exposed "liquid" holdings can count as available too. See
+  // lib/asset-finance.js's computeAvailableSavings.
+  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings, "flexible");
 
   const candidateScore = scoreInvestmentCandidate(entry, {
     riskBand: intake.riskPreference,

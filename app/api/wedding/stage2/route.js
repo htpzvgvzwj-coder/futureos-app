@@ -57,9 +57,13 @@ export async function POST(request) {
   // Server-truth available liquid savings instead of the raw client-sent
   // figure - already nets out any confirmed lump-sum investment draw. See
   // lib/liquid-savings-context.js.
+  // "tight" horizon - a wedding is typically months away, close enough
+  // that forcing a sale of a market-exposed "liquid" holding right before
+  // the money is needed would be a bad idea. See lib/asset-finance.js's
+  // computeAvailableSavings.
   const resolvedProfile = {
     ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight")),
   };
 
   const session = await getOrCreateSession(userId);

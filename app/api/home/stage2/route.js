@@ -58,9 +58,12 @@ export async function POST(request) {
   // Server-truth available liquid savings instead of the raw client-sent
   // figure - already nets out any confirmed lump-sum investment draw. See
   // lib/liquid-savings-context.js.
+  // "flexible" horizon - a home down payment is typically saved toward
+  // over years, enough runway to plan liquidating a market-exposed
+  // holding. See lib/asset-finance.js's computeAvailableSavings.
   const resolvedProfile = {
     ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings)),
+    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "flexible")),
   };
 
   const session = await getOrCreateSession(userId);

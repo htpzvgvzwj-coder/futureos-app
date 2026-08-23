@@ -44,7 +44,10 @@ export async function POST(request) {
   // Server-truth available liquid savings - real itemized ledger sum minus
   // any already-confirmed lump-sum investment draw, not the raw client-sent
   // figure. See lib/liquid-savings-context.js.
-  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings);
+  // "flexible" horizon - a loan decision has enough lead time to plan
+  // liquidating a market-exposed position if needed, unlike a true
+  // emergency. See lib/asset-finance.js's computeAvailableSavings.
+  const availableSavings = await resolveAvailableLiquidSavings(userId, currentSavings, "flexible");
 
   const params = {
     principalBasis,
