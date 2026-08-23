@@ -1440,6 +1440,13 @@
     "title": "Life Journey View",
     "subtitle": "An alternate way to navigate - the same real planners you already have, grouped by what's actually happening in your life instead of by bank product category.",
     "disclaimer": "This doesn't replace anything - every planner below is the exact same real, fully working feature you'd reach from Mirror's Life Goal Selection grid, just regrouped.",
+    "status": {
+      "notStarted": "Not started yet",
+      "inProgress": "In progress",
+      "confirmed": "Confirmed",
+      "emergencyScore": "Emergency readiness: {score}/100",
+      "investmentSummary": "{count} positions, {amount} total"
+    },
     "moments": {
       "gettingMarried": {
         "title": "Getting Married",

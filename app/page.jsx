@@ -428,45 +428,49 @@ const futureSystems = [
 // additional way to navigate, not a replacement for the existing product-first Life Goal Selection
 // grid on Mirror. Each moment can bundle more than one underlying planner (e.g. buying a home also
 // needs financing).
+// `statusKey` matches lib/life-journey-context.js's getLifeJourneyStatus()
+// response keys (or "emergency", computed client-side from real health
+// scores instead - see LifeJourneyScreen) - the real per-planner status
+// LifeJourneyScreen renders instead of just a static navigation label.
 const LIFE_MOMENTS = [
   {
     id: "gettingMarried",
     icon: HeartHandshake,
-    plannerScreens: [{ screen: screens.NEED_WEDDING, labelKey: "weddingPlanner.title" }],
+    plannerScreens: [{ screen: screens.NEED_WEDDING, labelKey: "weddingPlanner.title", statusKey: "wedding" }],
   },
   {
     id: "buyingHome",
     icon: Building2,
     plannerScreens: [
-      { screen: screens.NEED_HOME, labelKey: "homePlanner.title" },
-      { screen: screens.NEED_LOAN, labelKey: "loanPlanner.title" },
+      { screen: screens.NEED_HOME, labelKey: "homePlanner.title", statusKey: "home" },
+      { screen: screens.NEED_LOAN, labelKey: "loanPlanner.title", statusKey: "loan:home" },
     ],
   },
   {
     id: "growingFamily",
     icon: Sparkles,
     plannerScreens: [
-      { screen: screens.NEED_INSURANCE, labelKey: "needDetails.insurance.title" },
-      { screen: screens.NEED_EMERGENCY, labelKey: "needDetails.emergency.title" },
+      { screen: screens.NEED_INSURANCE, labelKey: "needDetails.insurance.title", statusKey: "insurance" },
+      { screen: screens.NEED_EMERGENCY, labelKey: "needDetails.emergency.title", statusKey: "emergency" },
     ],
   },
   {
     id: "buildingWealth",
     icon: LineChart,
     plannerScreens: [
-      { screen: screens.NEED_RETIREMENT, labelKey: "retirementPlanner.title" },
-      { screen: screens.NEED_INVESTMENT, labelKey: "investmentPlanner.title" },
+      { screen: screens.NEED_RETIREMENT, labelKey: "retirementPlanner.title", statusKey: "retirement" },
+      { screen: screens.NEED_INVESTMENT, labelKey: "investmentPlanner.title", statusKey: "investment" },
     ],
   },
   {
     id: "careerMove",
     icon: BriefcaseBusiness,
-    plannerScreens: [{ screen: screens.NEED_LOAN, labelKey: "loanPlanner.title" }],
+    plannerScreens: [{ screen: screens.NEED_LOAN, labelKey: "loanPlanner.title", statusKey: "loan:personal" }],
   },
   {
     id: "somethingElse",
     icon: SlidersHorizontal,
-    plannerScreens: [{ screen: screens.NEED_OTHER, labelKey: "otherPlanner.title" }],
+    plannerScreens: [{ screen: screens.NEED_OTHER, labelKey: "otherPlanner.title", statusKey: "other" }],
   },
 ];
 
@@ -1332,8 +1336,53 @@ function PeerBenchmarkScreen({ preferences, t, setActiveScreen }) {
 // Life-transition view - the same dedicated planners, organized around what's happening in the
 // customer's life instead of by bank product category. An additional way to navigate, reachable
 // from Home; does not replace Mirror's existing product-first Life Goal Selection grid.
-function LifeJourneyScreen({ setActiveScreen, t }) {
+function LifeJourneyScreen({ setActiveScreen, preferences, t }) {
+  const profile = getUserProfile(preferences);
+  const healthScores = getHealthScores(profile);
   const [openItem, setOpenItem] = useState(null);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/life-journey")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setStatus(data.status);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Emergency readiness has no dedicated session/store (see
+  // lib/life-journey-context.js's comment on insurance for why) - the real
+  // signal is the same asset-ledger-derived health score every other screen
+  // already shows, computed here client-side rather than duplicated
+  // server-side.
+  const emergencyScore = healthScores.find((score) => score.id === "emergency")?.value ?? null;
+  const mergedStatus = {
+    ...status,
+    emergency:
+      emergencyScore == null
+        ? null
+        : {
+            state: emergencyScore >= 80 ? "confirmed" : emergencyScore >= 60 ? "in_progress" : "not_started",
+            score: emergencyScore,
+          },
+  };
+
+  function describePlannerStatus(statusKey) {
+    const entry = mergedStatus[statusKey];
+    if (!entry) return null;
+    if (entry.state === "not_started") return t("lifeJourney.status.notStarted");
+    if (statusKey === "emergency") return t("lifeJourney.status.emergencyScore", { score: entry.score });
+    if (statusKey === "investment" && entry.count) {
+      return t("lifeJourney.status.investmentSummary", { count: entry.count, amount: formatSgd(entry.amount ?? 0) });
+    }
+    const label = entry.state === "confirmed" ? t("lifeJourney.status.confirmed") : t("lifeJourney.status.inProgress");
+    return entry.amount != null ? `${label} — ${formatSgd(Math.round(entry.amount))}` : label;
+  }
 
   return (
     <Screen>
@@ -1369,12 +1418,18 @@ function LifeJourneyScreen({ setActiveScreen, t }) {
               {expanded ? (
                 <div className="strategicAccordionDetail">
                   <p>{t(`lifeJourney.moments.${id}.body`)}</p>
-                  {plannerScreens.map((planner) => (
-                    <button type="button" className="secondaryButton" key={planner.screen} onClick={() => setActiveScreen(planner.screen)}>
-                      {t(planner.labelKey)}
-                      <ChevronRight size={14} />
-                    </button>
-                  ))}
+                  {plannerScreens.map((planner) => {
+                    const statusText = describePlannerStatus(planner.statusKey);
+                    return (
+                      <button type="button" className="secondaryButton" key={planner.screen} onClick={() => setActiveScreen(planner.screen)}>
+                        <span>
+                          {t(planner.labelKey)}
+                          {statusText ? <small style={{ display: "block", fontWeight: 400 }}>{statusText}</small> : null}
+                        </span>
+                        <ChevronRight size={14} />
+                      </button>
+                    );
+                  })}
                 </div>
               ) : null}
             </div>
@@ -13300,7 +13355,7 @@ export default function App() {
     [screens.STRATEGIC_BALANCE]: <StrategicBalanceScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.CROSS_BANK_DATA]: <CrossBankDataScreen t={t} setActiveScreen={setActiveScreen} profile={getUserProfile(preferences)} />,
     [screens.PEER_BENCHMARK]: <PeerBenchmarkScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
-    [screens.LIFE_JOURNEY]: <LifeJourneyScreen setActiveScreen={setActiveScreen} t={t} />,
+    [screens.LIFE_JOURNEY]: <LifeJourneyScreen setActiveScreen={setActiveScreen} preferences={preferences} t={t} />,
     [screens.PRODUCT_FIT]: (
       <ProductFitScreen
         preferences={preferences}

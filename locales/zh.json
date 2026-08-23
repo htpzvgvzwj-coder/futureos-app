@@ -1395,6 +1395,13 @@
     "title": "人生阶段视图",
     "subtitle": "另一种浏览方式——还是你已经有的那些真实规划器，只是按人生实际发生的阶段重新分组，而不是按银行产品分类。",
     "disclaimer": "这不是替代任何东西——下面每一个规划器都是你从 Mirror 的人生目标选择区能拿到的、完全一样的真实功能，只是重新分组了而已。",
+    "status": {
+      "notStarted": "还没开始",
+      "inProgress": "进行中",
+      "confirmed": "已确认",
+      "emergencyScore": "应急准备度：{score}/100",
+      "investmentSummary": "{count} 笔持仓，共 {amount}"
+    },
     "moments": {
       "gettingMarried": {
         "title": "准备结婚",
