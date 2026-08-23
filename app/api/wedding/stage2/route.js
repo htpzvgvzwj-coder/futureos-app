@@ -20,7 +20,7 @@ import {
   updateSessionStatus,
 } from "../../../../lib/wedding-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
-import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
+import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
 import { computeMilestoneFeasibility } from "../../../../lib/wedding-finance.js";
 import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
@@ -64,8 +64,14 @@ export async function POST(request) {
   // that forcing a sale of a market-exposed "liquid" holding right before
   // the money is needed would be a bad idea. See lib/asset-finance.js's
   // computeAvailableSavings.
-  const availableSavingsNow = await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight");
-  const resolvedProfile = { ...profile, currentSavings: String(availableSavingsNow) };
+  const assetContext = await resolveAssetPromptContext(userId, profile.currentSavings, profile.monthlyExpenses, "tight");
+  const availableSavingsNow = assetContext.availableLiquidSavings;
+  const resolvedProfile = {
+    ...profile,
+    currentSavings: String(availableSavingsNow),
+    emergencyBufferMonths: assetContext.emergencyBufferMonths,
+    hasActiveInsurance: assetContext.hasActiveInsurance,
+  };
 
   const session = await getOrCreateSession(userId);
   const confirmedBudget = await getLatestArtifact(session.id, "stage1", "confirmed_budget");

@@ -21,7 +21,7 @@ import {
 } from "../../../../lib/home-store.js";
 import { getLatestArtifact as getLatestLoanArtifact, getOrCreateSession as getOrCreateLoanSession } from "../../../../lib/loan-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
-import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
+import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -61,9 +61,12 @@ export async function POST(request) {
   // "flexible" horizon - a home down payment is typically saved toward
   // over years, enough runway to plan liquidating a market-exposed
   // holding. See lib/asset-finance.js's computeAvailableSavings.
+  const assetContext = await resolveAssetPromptContext(userId, profile.currentSavings, profile.monthlyExpenses, "flexible");
   const resolvedProfile = {
     ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "flexible")),
+    currentSavings: String(assetContext.availableLiquidSavings),
+    emergencyBufferMonths: assetContext.emergencyBufferMonths,
+    hasActiveInsurance: assetContext.hasActiveInsurance,
   };
 
   const session = await getOrCreateSession(userId);
