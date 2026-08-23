@@ -20,6 +20,8 @@ import {
   updateSessionStatus,
 } from "../../../../lib/wedding-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { findActGrantor } from "../../../../lib/access-grant-store.js";
+import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -103,6 +105,38 @@ export async function POST(request) {
     { role: "user", content: userContent },
     { role: "assistant", content: assistantContent },
   ]);
+
+  // Joint (couple) confirmation: if a partner has granted this user
+  // "view_and_act" on the wedding domain, the budget isn't saved directly -
+  // it's proposed as a joint action and only actually written once that
+  // partner separately confirms (lib/wedding-actions.js's
+  // applyWeddingJointConfirm, dispatched via app/api/joint-actions/[id]/
+  // confirm). No grant -> unchanged direct-save behavior below.
+  if (toolUse.name === "confirm_wedding_budget") {
+    const grantor = await findActGrantor(userId, "wedding");
+    if (grantor) {
+      try {
+        const action = await proposeJointAction({
+          initiatorUserId: userId,
+          targetUserId: grantor.grantor_user_id,
+          domain: "wedding",
+          actionType: "confirm_wedding_plan",
+          payload: { kind: "budget", ...parsed.data },
+        });
+        return Response.json({
+          type: toolUse.name,
+          status: "pending_partner_confirmation",
+          jointActionId: action.id,
+          data: parsed.data,
+          mocked,
+        });
+      } catch (error) {
+        // Grant was revoked in the moment between findActGrantor and here -
+        // fall through to the direct-save path below rather than 500ing.
+        if (error.code !== "no_joint_grant") throw error;
+      }
+    }
+  }
 
   const artifactType = toolUse.name === "propose_plans" ? "plan_options" : "confirmed_budget";
   const createdAt = await saveArtifact(session.id, "stage1", artifactType, parsed.data);

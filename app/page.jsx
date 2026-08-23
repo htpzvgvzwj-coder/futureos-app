@@ -6115,6 +6115,14 @@ const WEDDING_ATTIRE_TIER_LABEL_KEYS = {
   premium: "weddingPlanner.attireTiers.premium",
 };
 
+// Fixed set of milestone ids computePaymentSchedule can produce
+// (lib/wedding-finance.js) - a closed taxonomy, not free text.
+const WEDDING_PAYMENT_MILESTONE_LABEL_KEYS = {
+  deposit: "weddingPlanner.paymentSchedule.milestones.deposit",
+  progress: "weddingPlanner.paymentSchedule.milestones.progress",
+  balance: "weddingPlanner.paymentSchedule.milestones.balance",
+};
+
 function WeddingPlanCards({ plans, researchNotes, onSelectPlan, t }) {
   const medianCost = [...plans].map((plan) => plan.total_cost).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
   return (
@@ -6220,6 +6228,20 @@ function WeddingConfirmedBudgetCard({ budget, t }) {
           <WeddingLineItemRow item={item} key={item.label} />
         ))}
       </div>
+      {Array.isArray(budget.payment_schedule) && budget.payment_schedule.length ? (
+        <>
+          <span className="sectionLabel">{t("weddingPlanner.paymentSchedule.title")}</span>
+          <div className="weddingLineItems">
+            {budget.payment_schedule.map((milestone) => (
+              <SummaryRow
+                key={milestone.id}
+                label={`${t(WEDDING_PAYMENT_MILESTONE_LABEL_KEYS[milestone.id] ?? milestone.id)} — ${new Date(milestone.dueDate).toLocaleDateString()}`}
+                value={formatSgd(Math.round(milestone.amount))}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
       <section className="insightCard">
         <Bot size={20} />
         <p>{budget.confirmation_note}</p>
@@ -6403,6 +6425,21 @@ function ConfirmedSavingsPlanCard({
           <SavingsAllocationRow entry={entry} t={t} key={entry.vehicle} />
         ))}
       </div>
+      {Array.isArray(plan.milestone_feasibility) && plan.milestone_feasibility.length ? (
+        <>
+          <span className="sectionLabel">{t("weddingPlanner.paymentSchedule.feasibilityTitle")}</span>
+          <div className="weddingStatChips">
+            {plan.milestone_feasibility.map((milestone) => (
+              <span className={milestone.funded ? "statChip" : "statChip warning"} key={milestone.id}>
+                {t(WEDDING_PAYMENT_MILESTONE_LABEL_KEYS[milestone.id] ?? milestone.id)}:{" "}
+                {milestone.funded
+                  ? t("weddingPlanner.paymentSchedule.funded")
+                  : t("weddingPlanner.paymentSchedule.shortfall", { amount: formatSgd(milestone.shortfallAmount) })}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : null}
       <section className="insightCard">
         <Bot size={20} />
         <p>{plan.notes}</p>
@@ -6552,6 +6589,13 @@ function WeddingNeedContent({
         setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("weddingPlanner.genericError"));
         return false;
       }
+      // A partner with "view_and_act" access must separately confirm before
+      // this becomes real - not saved yet, so none of the normal
+      // confirmed-budget state/side-effects below apply.
+      if (data.status === "pending_partner_confirmation") {
+        setSessionData((current) => ({ ...current, pendingPartnerConfirmation: { kind: "budget" } }));
+        return true;
+      }
       setSessionData((current) => ({
         ...current,
         planOptions: data.type === "propose_plans" ? data.data : current?.planOptions,
@@ -6642,6 +6686,10 @@ function WeddingNeedContent({
       if (!response.ok) {
         setErrorMessage(data.error === "inconclusive" && data.detail ? data.detail : t("weddingPlanner.genericError"));
         return false;
+      }
+      if (data.status === "pending_partner_confirmation") {
+        setSessionData((current) => ({ ...current, pendingPartnerConfirmation: { kind: "savings_plan" } }));
+        return true;
       }
       setSessionData((current) => ({
         ...current,
@@ -6783,6 +6831,16 @@ function WeddingNeedContent({
             </section>
           ) : null}
         </>
+      ) : sessionData?.pendingPartnerConfirmation ? (
+        <section className="needHeroCard">
+          <Bot size={20} />
+          <span className="sectionLabel">{t("weddingPlanner.jointConfirmation.pendingTitle")}</span>
+          <p>
+            {sessionData.pendingPartnerConfirmation.kind === "budget"
+              ? t("weddingPlanner.jointConfirmation.pendingBudgetBody")
+              : t("weddingPlanner.jointConfirmation.pendingSavingsPlanBody")}
+          </p>
+        </section>
       ) : sessionData?.confirmedBudget && !exploringNewPlan ? (
         <>
           <WeddingConfirmedBudgetCard budget={sessionData.confirmedBudget} t={t} />

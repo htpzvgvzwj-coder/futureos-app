@@ -1075,6 +1075,22 @@
       "budget": "Jimat",
       "midRange": "Sederhana",
       "premium": "Premium"
+    },
+    "paymentSchedule": {
+      "title": "Payment schedule",
+      "feasibilityTitle": "Milestone funding check",
+      "funded": "On track",
+      "shortfall": "Short by {amount}",
+      "milestones": {
+        "deposit": "Deposit",
+        "progress": "Progress payment",
+        "balance": "Balance"
+      }
+    },
+    "jointConfirmation": {
+      "pendingTitle": "Waiting on your partner",
+      "pendingBudgetBody": "You've proposed this wedding budget - it becomes official once your partner confirms it too. They can do that from Shared access.",
+      "pendingSavingsPlanBody": "You've proposed this savings plan - it becomes official once your partner confirms it too. They can do that from Shared access."
     }
   },
   "homePlanner": {

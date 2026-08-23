@@ -1151,6 +1151,11 @@
     "memoryEventAction": "Guardian 研究了当前市场行情，并帮助确认了一份只针对这个目标的婚礼预算。",
     "memoryEventReason": "你在对比过贴合市场行情的多个方案后，确认了具体的一套方案。",
     "memoryEventDataUsed": "你描述的婚礼需求，以及当前新加坡婚礼市场行情。",
+    "jointConfirmation": {
+      "pendingTitle": "等待对方确认",
+      "pendingBudgetBody": "你已经提出了这份婚礼预算——需要另一半也确认之后才会正式生效。对方可以在\"共享权限\"页面完成确认。",
+      "pendingSavingsPlanBody": "你已经提出了这份存钱计划——需要另一半也确认之后才会正式生效。对方可以在\"共享权限\"页面完成确认。"
+    },
     "savingsPlanCtaLabel": "接下来规划储蓄方案",
     "savingsPlanCtaBody": "结合你真实的收入、支出和现有储蓄，我们会给出一份专为这场婚礼定制的储蓄策略——而不是简单的预算除以月数。",
     "savingsPlanCtaButton": "获取储蓄方案",
@@ -1206,6 +1211,17 @@
       "budget": "经济型",
       "midRange": "中档",
       "premium": "高档"
+    },
+    "paymentSchedule": {
+      "title": "分期付款时间线",
+      "feasibilityTitle": "各期资金到位检查",
+      "funded": "资金充足",
+      "shortfall": "缺口 {amount}",
+      "milestones": {
+        "deposit": "订金",
+        "progress": "中期付款",
+        "balance": "尾款"
+      }
     }
   },
   "homePlanner": {

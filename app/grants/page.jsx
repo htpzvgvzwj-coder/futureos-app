@@ -4,16 +4,45 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment"];
+const ACCESS_LEVEL_OPTIONS = [
+  { value: "view", label: "View only" },
+  { value: "view_and_act", label: "View and jointly decide (e.g. confirm a wedding budget together)" },
+];
+
+function formatSgd(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? `SGD ${n.toLocaleString("en-SG")}` : "SGD 0";
+}
+
+// Plain-language summary of a pending joint action's payload - shapes vary
+// by action_type (see lib/joint-action-dispatch.js for the full registry).
+function describeJointAction(action) {
+  if (action.action_type === "confirm_wedding_plan") {
+    if (action.payload.kind === "budget") {
+      return `Wedding budget: ${formatSgd(action.payload.total_budget)} for a wedding on ${action.payload.wedding_date}`;
+    }
+    if (action.payload.kind === "savings_plan") {
+      return `Wedding savings plan: ${formatSgd(action.payload.monthly_contribution)}/month, ${action.payload.start_month} to ${action.payload.target_complete_month}`;
+    }
+  }
+  if (action.action_type === "pause_goal_plan" || action.action_type === "reduce_goal_plan") {
+    return `${action.domain}: change monthly contribution to ${formatSgd(action.payload.newMonthlyContribution)} - ${action.payload.explanation}`;
+  }
+  return `${action.domain} / ${action.action_type}`;
+}
 
 export default function GrantsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [given, setGiven] = useState([]);
   const [received, setReceived] = useState([]);
+  const [pendingJointActions, setPendingJointActions] = useState([]);
   const [granteeEmail, setGranteeEmail] = useState("");
   const [scope, setScope] = useState("all");
+  const [accessLevel, setAccessLevel] = useState("view");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [jointActionBusyId, setJointActionBusyId] = useState(null);
 
   const loadGrants = () => {
     fetch("/api/grants")
@@ -25,12 +54,20 @@ export default function GrantsPage() {
       .catch(() => router.push("/login"));
   };
 
+  const loadPendingJointActions = () => {
+    fetch("/api/joint-actions")
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((data) => setPendingJointActions(data.pending ?? []))
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetch("/api/auth/me")
       .then((response) => (response.ok ? Promise.resolve() : Promise.reject(response)))
       .then(() => {
         setAuthChecked(true);
         loadGrants();
+        loadPendingJointActions();
       })
       .catch(() => router.push("/login"));
   }, []);
@@ -43,7 +80,7 @@ export default function GrantsPage() {
       const response = await fetch("/api/grants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ granteeEmail, scope, accessLevel: "view" }),
+        body: JSON.stringify({ granteeEmail, scope, accessLevel }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -75,6 +112,26 @@ export default function GrantsPage() {
   const revoke = async (id) => {
     await fetch(`/api/grants/${id}/revoke`, { method: "POST" });
     loadGrants();
+  };
+
+  const confirmJointAction = async (id) => {
+    setJointActionBusyId(id);
+    try {
+      await fetch(`/api/joint-actions/${id}/confirm`, { method: "POST" });
+      loadPendingJointActions();
+    } finally {
+      setJointActionBusyId(null);
+    }
+  };
+
+  const declineJointAction = async (id) => {
+    setJointActionBusyId(id);
+    try {
+      await fetch(`/api/joint-actions/${id}/decline`, { method: "POST" });
+      loadPendingJointActions();
+    } finally {
+      setJointActionBusyId(null);
+    }
   };
 
   if (!authChecked) return null;
@@ -111,6 +168,16 @@ export default function GrantsPage() {
                 ))}
               </select>
             </label>
+            <label className="inputField">
+              <span>Access level</span>
+              <select value={accessLevel} onChange={(event) => setAccessLevel(event.target.value)}>
+                {ACCESS_LEVEL_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             {error ? (
               <section className="adviceOnlyPanel">
                 <p>{error}</p>
@@ -120,6 +187,42 @@ export default function GrantsPage() {
               {submitting ? "Sending..." : "Send invite"}
             </button>
           </form>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">Pending joint decisions</span>
+            <div className="strategyList">
+              {pendingJointActions.length ? (
+                pendingJointActions.map((action) => (
+                  <article className="strategyItem" key={action.id}>
+                    <div>
+                      <strong>{action.initiator_display_name} proposed:</strong>
+                      <small>{describeJointAction(action)}</small>
+                    </div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button
+                        type="button"
+                        className="miniButton"
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => confirmJointAction(action.id)}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        type="button"
+                        className="miniButton danger"
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => declineJointAction(action.id)}
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>Nothing waiting on your confirmation right now.</p>
+              )}
+            </div>
+          </section>
 
           <section className="financialStrategyPanel">
             <span className="sectionLabel">Access you've given</span>

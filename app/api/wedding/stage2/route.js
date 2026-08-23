@@ -21,6 +21,9 @@ import {
 } from "../../../../lib/wedding-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
+import { computeMilestoneFeasibility } from "../../../../lib/wedding-finance.js";
+import { findActGrantor } from "../../../../lib/access-grant-store.js";
+import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -61,10 +64,8 @@ export async function POST(request) {
   // that forcing a sale of a market-exposed "liquid" holding right before
   // the money is needed would be a bad idea. See lib/asset-finance.js's
   // computeAvailableSavings.
-  const resolvedProfile = {
-    ...profile,
-    currentSavings: String(await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight")),
-  };
+  const availableSavingsNow = await resolveAvailableLiquidSavings(userId, profile.currentSavings, "tight");
+  const resolvedProfile = { ...profile, currentSavings: String(availableSavingsNow) };
 
   const session = await getOrCreateSession(userId);
   const confirmedBudget = await getLatestArtifact(session.id, "stage1", "confirmed_budget");
@@ -118,8 +119,53 @@ export async function POST(request) {
     { role: "assistant", content: assistantContent },
   ]);
 
+  // Real gap this closes: the model only ever sees ONE final target date,
+  // so a backloaded plan can look fully funded overall while still failing
+  // to cover a deposit due next month. Checked deterministically against
+  // the real payment_schedule (lib/wedding-finance.js), never left to the
+  // model to reason about.
+  const finalData =
+    toolUse.name === "finalize_savings_plan" && Array.isArray(confirmedBudget.payment_schedule)
+      ? {
+          ...parsed.data,
+          milestone_feasibility: computeMilestoneFeasibility(confirmedBudget.payment_schedule, {
+            monthlyContribution: parsed.data.monthly_contribution,
+            startMonth: parsed.data.start_month,
+            availableSavingsNow,
+          }),
+        }
+      : parsed.data;
+
+  // Joint (couple) confirmation: same gate as stage1's confirm_wedding_budget
+  // - if a partner has granted this user "view_and_act" on the wedding
+  // domain, the finalized savings plan isn't saved directly, it's proposed
+  // as a joint action. No grant -> unchanged direct-save behavior below.
+  if (toolUse.name === "finalize_savings_plan") {
+    const grantor = await findActGrantor(userId, "wedding");
+    if (grantor) {
+      try {
+        const action = await proposeJointAction({
+          initiatorUserId: userId,
+          targetUserId: grantor.grantor_user_id,
+          domain: "wedding",
+          actionType: "confirm_wedding_plan",
+          payload: { kind: "savings_plan", ...finalData },
+        });
+        return Response.json({
+          type: toolUse.name,
+          status: "pending_partner_confirmation",
+          jointActionId: action.id,
+          data: finalData,
+          mocked,
+        });
+      } catch (error) {
+        if (error.code !== "no_joint_grant") throw error;
+      }
+    }
+  }
+
   const artifactType = toolUse.name === "propose_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
-  await saveArtifact(session.id, "stage2", artifactType, parsed.data);
+  await saveArtifact(session.id, "stage2", artifactType, finalData);
 
   if (toolUse.name === "finalize_savings_plan") {
     await updateSessionStatus(session.id, { stage2Status: "confirmed" });
@@ -127,5 +173,5 @@ export async function POST(request) {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }
 
-  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
+  return Response.json({ type: toolUse.name, data: finalData, mocked });
 }
