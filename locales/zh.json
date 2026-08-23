@@ -1549,6 +1549,15 @@
     "confirmedSavingsTitle": "已确认的储蓄计划",
     "startMonth": "开始时间",
     "targetCompleteMonth": "目标完成时间",
+    "feasibility": {
+      "title": "真实可行性检查",
+      "score": "可行性评分",
+      "risk": "风险等级",
+      "requiredMonthly": "要按计划完成需要每月存",
+      "liquidSavings": "真实持有的流动资产",
+      "funded": "按当前节奏能按时达成",
+      "shortfall": "按当前节奏差 {amount}"
+    },
     "checkins": {
       "title": "记录储蓄打卡",
       "month": "月份",

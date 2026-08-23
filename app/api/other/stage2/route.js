@@ -21,6 +21,7 @@ import {
 } from "../../../../lib/other-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
+import { computeGoalFeasibility, computeSavingsPlanFeasibility } from "../../../../lib/other-finance.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -76,6 +77,17 @@ export async function POST(request) {
     return Response.json({ error: "no_confirmed_plan" }, { status: 409 });
   }
 
+  // Real deterministic affordability signal for this confirmed goal - "Other"
+  // has no server-computed cost categories (unlike wedding), but this gives
+  // it the same real feasibility backstop every sibling domain has in some
+  // form. Recomputed fresh every call (reflects the customer's current real
+  // financial data, not a snapshot) - see lib/other-finance.js.
+  const goalFeasibility = computeGoalFeasibility(confirmedPlan, {
+    monthlyIncome: profile.monthlyIncome,
+    monthlyExpenses: profile.monthlyExpenses,
+    availableLiquidSavings: assetContext.availableLiquidSavings,
+  });
+
   const history = await getMessageHistory(session.id, "stage2");
   const userContent = buildFollowUpUserContent(history, message);
   const messages = [...history, { role: "user", content: userContent }];
@@ -122,8 +134,24 @@ export async function POST(request) {
     { role: "assistant", content: assistantContent },
   ]);
 
+  // Real check on the ACTUAL finalized plan (not just the goal in the
+  // abstract) - does its real monthly_contribution really reach the target
+  // by the real target_date, given real liquid savings already on hand?
+  // Attached to the persisted artifact so it survives a reload, matching
+  // wedding's milestone_feasibility pattern.
+  const finalData =
+    toolUse.name === "finalize_savings_plan"
+      ? {
+          ...parsed.data,
+          savings_plan_feasibility: computeSavingsPlanFeasibility(confirmedPlan, {
+            monthlyContribution: parsed.data.monthly_contribution,
+            availableLiquidSavings: assetContext.availableLiquidSavings,
+          }),
+        }
+      : parsed.data;
+
   const artifactType = toolUse.name === "propose_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
-  await saveArtifact(session.id, "stage2", artifactType, parsed.data);
+  await saveArtifact(session.id, "stage2", artifactType, finalData);
 
   if (toolUse.name === "finalize_savings_plan") {
     await updateSessionStatus(session.id, { stage2Status: "confirmed" });
@@ -131,5 +159,5 @@ export async function POST(request) {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }
 
-  return Response.json({ type: toolUse.name, data: parsed.data, mocked });
+  return Response.json({ type: toolUse.name, data: finalData, goalFeasibility, mocked });
 }

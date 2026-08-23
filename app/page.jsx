@@ -7614,6 +7614,7 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
         ...current,
         savingsPlanOptions: data.type === "propose_savings_plan" ? data.data : current?.savingsPlanOptions,
         confirmedSavingsPlan: data.type === "finalize_savings_plan" ? data.data : current?.confirmedSavingsPlan,
+        goalFeasibility: data.goalFeasibility ?? current?.goalFeasibility,
       }));
       if (data.type === "finalize_savings_plan" && sessionData?.confirmedPlan) {
         setExploringSavings(false);
@@ -7787,6 +7788,17 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                         <p>{t("otherPlanner.exploringNote")}</p>
                       </section>
                     ) : null}
+                    {sessionData.goalFeasibility ? (
+                      <section className="recommendationPanel">
+                        <span className="sectionLabel">{t("otherPlanner.feasibility.title")}</span>
+                        <SummaryRow label={t("otherPlanner.feasibility.score")} value={`${sessionData.goalFeasibility.feasibilityScore}/100`} />
+                        <SummaryRow label={t("otherPlanner.feasibility.risk")} value={t(`risk.${sessionData.goalFeasibility.riskLevel}`)} />
+                        <SummaryRow label={t("otherPlanner.feasibility.requiredMonthly")} value={t("common.perMonth", { amount: formatSgd(sessionData.goalFeasibility.requiredMonthly) })} />
+                        {sessionData.goalFeasibility.availableLiquidSavings > 0 ? (
+                          <SummaryRow label={t("otherPlanner.feasibility.liquidSavings")} value={formatSgd(sessionData.goalFeasibility.availableLiquidSavings)} />
+                        ) : null}
+                      </section>
+                    ) : null}
                     <AiTextInputCard
                       t={t}
                       onSubmit={handleSavingsSubmit}
@@ -7830,6 +7842,17 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                     />
                     <SummaryRow label={t("otherPlanner.startMonth")} value={sessionData.confirmedSavingsPlan.start_month} />
                     <SummaryRow label={t("otherPlanner.targetCompleteMonth")} value={sessionData.confirmedSavingsPlan.target_complete_month} />
+                    {sessionData.confirmedSavingsPlan.savings_plan_feasibility ? (
+                      <div className="weddingStatChips">
+                        <span className={sessionData.confirmedSavingsPlan.savings_plan_feasibility.funded ? "statChip" : "statChip warning"}>
+                          {sessionData.confirmedSavingsPlan.savings_plan_feasibility.funded
+                            ? t("otherPlanner.feasibility.funded")
+                            : t("otherPlanner.feasibility.shortfall", {
+                                amount: formatSgd(sessionData.confirmedSavingsPlan.savings_plan_feasibility.shortfallAmount),
+                              })}
+                        </span>
+                      </div>
+                    ) : null}
                   </section>
 
                   <button type="button" className="secondaryButton" onClick={handleExploreSavings}>

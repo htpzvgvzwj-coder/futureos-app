@@ -1599,6 +1599,15 @@
     "confirmedSavingsTitle": "Confirmed savings plan",
     "startMonth": "Starts",
     "targetCompleteMonth": "Target completion",
+    "feasibility": {
+      "title": "Real affordability check",
+      "score": "Feasibility score",
+      "risk": "Risk level",
+      "requiredMonthly": "Required to stay on track",
+      "liquidSavings": "Real liquid savings on hand",
+      "funded": "On track to reach the target",
+      "shortfall": "Short by {amount} at this pace"
+    },
     "checkins": {
       "title": "Log a savings check-in",
       "month": "Month",
