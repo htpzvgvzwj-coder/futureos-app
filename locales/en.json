@@ -75,6 +75,9 @@
     "detectedNeeds": "Detected needs",
     "noDetectedNeeds": "No needs detected from your current goals and financial health signals.",
     "openMirror": "Analyse Future Decisions",
+    "assetProfile": {
+      "title": "Net Worth / Asset Profile"
+    },
     "futureAnalyst": {
       "title": "Future Analyst",
       "profileSignal": "Profile signal",
@@ -2262,6 +2265,8 @@
     "subtitle": "Control your profile, language, appearance, notifications, AI Guardian permissions, privacy, and consent.",
     "openSimulator": "Open Future Mirror",
     "openSimulatorDetail": "Create a custom simulation from Profile settings.",
+    "openAssetProfile": "Open Asset Profile",
+    "openAssetProfileDetail": "Build your itemized net worth ledger across 8 asset categories.",
     "language": {
       "title": "Language",
       "description": "Choose your preferred app language."
@@ -2704,6 +2709,180 @@
         "protect": "Keep emergency reserve and family planning funds separate from daily spending.",
         "review": "Review cash flow weekly and update Guardian Memory with the decision."
       }
+    }
+  },
+  "assetProfile": {
+    "eyebrow": "Net Worth",
+    "title": "Asset Profile",
+    "subtitle": "Your itemized personal balance sheet across 8 real-world asset categories.",
+    "netWorth": {
+      "title": "Net worth",
+      "total": "Net worth",
+      "assets": "Total assets",
+      "liabilities": "Liabilities (loans + credit card)"
+    },
+    "stages": {
+      "protect": "Protect (保命)",
+      "grow": "Grow (增长)",
+      "amplify": "Amplify (放大)",
+      "inherit": "Inherit (传承)",
+      "itemCount": "{count} items",
+      "itemsSuffix": "items"
+    },
+    "categories": {
+      "financial": "Financial assets",
+      "physical": "Physical assets",
+      "business": "Business / operating assets",
+      "human": "Human capital",
+      "social": "Social capital",
+      "knowledge": "Knowledge & judgment",
+      "digital": "Digital assets",
+      "legal": "Legal & protection"
+    },
+    "subtypes": {
+      "financial": {
+        "cash": "Cash",
+        "checking_deposit": "Checking / current deposit",
+        "fixed_deposit": "Fixed deposit",
+        "fund": "Fund",
+        "stock": "Stock",
+        "bond": "Bond",
+        "pension": "Pension / CPF",
+        "insurance_cash_value": "Insurance cash value",
+        "crypto": "Cryptocurrency"
+      },
+      "physical": {
+        "property": "Property",
+        "vehicle": "Vehicle",
+        "gold": "Gold",
+        "collectible": "Collectible",
+        "equipment": "Equipment"
+      },
+      "business": {
+        "equity": "Company equity",
+        "business_shop": "Business / shop",
+        "project": "Project",
+        "royalty": "Royalty / copyright income",
+        "brand_account": "Brand account",
+        "course_product": "Course / product"
+      },
+      "human": {
+        "education": "Education",
+        "skill": "Skill",
+        "experience": "Experience",
+        "health": "Health",
+        "time_energy": "Time & energy",
+        "professional_reputation": "Professional reputation"
+      },
+      "social": {
+        "network": "Network",
+        "credit": "Credit standing",
+        "reputation": "Reputation",
+        "circle": "Circle / community",
+        "partnership": "Partnership",
+        "family_support": "Family support system"
+      },
+      "knowledge": {
+        "expertise": "Domain expertise",
+        "judgment": "Judgment",
+        "learning_ability": "Learning ability",
+        "methodology": "Methodology",
+        "info_channel": "Information channel"
+      },
+      "digital": {
+        "personal_account": "Personal account",
+        "content_work": "Content work",
+        "followers": "Followers / audience",
+        "domain": "Domain",
+        "data": "Data",
+        "software_tool": "Software tool",
+        "ai_workflow": "AI workflow"
+      },
+      "legal": {
+        "insurance_policy": "Insurance policy",
+        "will": "Will",
+        "marital_property_agreement": "Marital property agreement",
+        "company_structure": "Company structure",
+        "contract": "Contract",
+        "ip_registration": "IP registration"
+      }
+    },
+    "fields": {
+      "category": "Category",
+      "subtype": "Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. DBS Multiplier savings",
+      "notes": "Notes",
+      "value": "Value (SGD)",
+      "valueOptional": "Valuation (optional)",
+      "estimatedValueOptional": "Estimated value (optional)",
+      "strengthRating": "Strength rating (1-5)",
+      "liquidity": "Liquidity",
+      "liquidityOptions": {
+        "cash": "Cash",
+        "near_cash": "Near-cash",
+        "liquid": "Liquid",
+        "illiquid": "Illiquid"
+      },
+      "risk": "Risk",
+      "riskOptions": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "expectedReturnPct": "Expected annual return (%)",
+      "maturityDate": "Maturity date",
+      "appreciates": "Holds/appreciates in value",
+      "producesCashflow": "Produces monthly cash flow",
+      "monthlyCashflow": "Monthly cash flow (SGD)",
+      "maintenanceCostMonthly": "Monthly maintenance cost (SGD)",
+      "liquidityDifficulty": "How hard to sell",
+      "liquidityDifficultyOptions": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "monthlyIncome": "Monthly income (SGD)",
+      "ownerDependency": "Depends on me",
+      "ownerDependencyOptions": {
+        "full": "Fully dependent",
+        "partial": "Partially dependent",
+        "independent": "Independent of me"
+      },
+      "replicable": "Can be replicated / scaled",
+      "status": "Status",
+      "statusOptions": {
+        "active": "Active",
+        "pending": "Pending",
+        "missing": "Missing"
+      },
+      "coverageAmount": "Coverage amount (SGD)",
+      "expiryDate": "Expiry date",
+      "metricLabel": "Metric label (e.g. followers)",
+      "metricValue": "Metric value",
+      "opportunityTypeOptions": {
+        "opportunity": "Brings opportunity",
+        "trust": "Brings trust",
+        "resource": "Brings resources",
+        "info_edge": "Brings information edge"
+      }
+    },
+    "form": {
+      "addToCategory": "Add asset",
+      "submit": "Save asset",
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "error": "Could not save this asset. Please try again."
+    },
+    "emptyCategory": "No items yet in this category.",
+    "migration": {
+      "prompt": "You have existing profile numbers (savings, investments, or insurance). Import them into your itemized asset ledger?",
+      "action": "Import my existing numbers",
+      "cashName": "Existing savings",
+      "investmentName": "Existing investments",
+      "insuranceName": "Existing insurance coverage"
     }
   }
 }

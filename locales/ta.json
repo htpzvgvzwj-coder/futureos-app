@@ -1241,15 +1241,33 @@
     "availableCashflowNote": "உங்கள் மற்ற உறுதிசெய்யப்பட்ட இலக்குகளுக்குப் பிறகு, முதலீடு செய்ய மாதம் சுமார் {amount} உங்களிடம் உள்ளது.",
     "riskLabel": "இடர் விருப்பம்",
     "riskOptions": {
-      "conservative": { "label": "பாதுகாப்பானது", "description": "குறைந்த எதிர்பார்க்கப்படும் வளர்ச்சி, குறைந்த ஏற்ற இறக்கம் - மூலதனத்தைப் பாதுகாப்பதே முதன்மை." },
-      "balanced": { "label": "சமநிலையானது", "description": "வளர்ச்சி மற்றும் நிலைத்தன்மையின் கலவை - பெரும்பாலானோருக்கு ஏற்றது." },
-      "growth": { "label": "வளர்ச்சி நோக்கியது", "description": "அதிக எதிர்பார்க்கப்படும் வளர்ச்சி, அதிக ஏற்ற இறக்கம் - நீண்ட கால அளவுக்கு ஏற்றது." }
+      "conservative": {
+        "label": "பாதுகாப்பானது",
+        "description": "குறைந்த எதிர்பார்க்கப்படும் வளர்ச்சி, குறைந்த ஏற்ற இறக்கம் - மூலதனத்தைப் பாதுகாப்பதே முதன்மை."
+      },
+      "balanced": {
+        "label": "சமநிலையானது",
+        "description": "வளர்ச்சி மற்றும் நிலைத்தன்மையின் கலவை - பெரும்பாலானோருக்கு ஏற்றது."
+      },
+      "growth": {
+        "label": "வளர்ச்சி நோக்கியது",
+        "description": "அதிக எதிர்பார்க்கப்படும் வளர்ச்சி, அதிக ஏற்ற இறக்கம் - நீண்ட கால அளவுக்கு ஏற்றது."
+      }
     },
     "goalCategoryLabel": "இந்த முதலீடு எதற்காக?",
     "goalCategories": {
-      "retirementGap": { "label": "ஓய்வூதிய இடைவெளி", "description": "உங்கள் இலக்கு ஓய்வூதிய வருமானத்திற்கும் CPF LIFE-க்கும் இடையிலான இடைவெளியை நிரப்ப உதவும்." },
-      "generalWealthBuilding": { "label": "பொது செல்வம் சேர்த்தல்", "description": "குறிப்பிட்ட இலக்கு இல்லை - காலப்போக்கில் நிலையான முதலீட்டுப் பழக்கத்தை உருவாக்குதல்." },
-      "customTarget": { "label": "தனிப்பயன் இலக்கு", "description": "உங்களிடம் குறிப்பிட்ட தொகையும் காலக்கெடுவும் உள்ளது." }
+      "retirementGap": {
+        "label": "ஓய்வூதிய இடைவெளி",
+        "description": "உங்கள் இலக்கு ஓய்வூதிய வருமானத்திற்கும் CPF LIFE-க்கும் இடையிலான இடைவெளியை நிரப்ப உதவும்."
+      },
+      "generalWealthBuilding": {
+        "label": "பொது செல்வம் சேர்த்தல்",
+        "description": "குறிப்பிட்ட இலக்கு இல்லை - காலப்போக்கில் நிலையான முதலீட்டுப் பழக்கத்தை உருவாக்குதல்."
+      },
+      "customTarget": {
+        "label": "தனிப்பயன் இலக்கு",
+        "description": "உங்களிடம் குறிப்பிட்ட தொகையும் காலக்கெடுவும் உள்ளது."
+      }
     },
     "horizonYearsLabel": "முதலீட்டு காலம் (ஆண்டுகள்)",
     "customTargetAmountLabel": "இலக்கு தொகை (SGD)",
@@ -1263,10 +1281,22 @@
     },
     "purchaseModeLabel": "நீங்கள் எப்படி வாங்க விரும்புகிறீர்கள்?",
     "purchaseModes": {
-      "monthlyRsp": { "label": "மாதாந்திர RSP", "description": "ஒவ்வொரு மாதமும் நிலையான தேதியில் நிலையான தொகை - OCBC BCIP போன்றது, உங்கள் செலவை சராசரியாக்குகிறது." },
-      "lumpSum": { "label": "ஒரே தொகை", "description": "காலப்போக்கில் பரவலாக்காமல், ஒரே முறையில் பெரிய தொகையை முதலீடு செய்தல்." },
-      "dailyMicroDca": { "label": "தினசரி நுண் முதலீடு", "description": "ஒவ்வொரு வர்த்தக நாளும் நிலையான சிறு தொகை - அதிக அதிர்வெண் சராசரி, பகுதி பங்கு தரகர் தேவை." },
-      "valueAveraging": { "label": "மதிப்பு சராசரி முறை", "description": "ஒவ்வொரு மாதமும் இலக்கு வளர்ச்சி பாதைக்கு ஏற்ப நிரப்புதல் - தொடக்கத்தில் அதிகமாகவும் பின்னர் படிப்படியாகக் குறையும் வகையிலும் பங்களிப்புகள் இருக்கும்." }
+      "monthlyRsp": {
+        "label": "மாதாந்திர RSP",
+        "description": "ஒவ்வொரு மாதமும் நிலையான தேதியில் நிலையான தொகை - OCBC BCIP போன்றது, உங்கள் செலவை சராசரியாக்குகிறது."
+      },
+      "lumpSum": {
+        "label": "ஒரே தொகை",
+        "description": "காலப்போக்கில் பரவலாக்காமல், ஒரே முறையில் பெரிய தொகையை முதலீடு செய்தல்."
+      },
+      "dailyMicroDca": {
+        "label": "தினசரி நுண் முதலீடு",
+        "description": "ஒவ்வொரு வர்த்தக நாளும் நிலையான சிறு தொகை - அதிக அதிர்வெண் சராசரி, பகுதி பங்கு தரகர் தேவை."
+      },
+      "valueAveraging": {
+        "label": "மதிப்பு சராசரி முறை",
+        "description": "ஒவ்வொரு மாதமும் இலக்கு வளர்ச்சி பாதைக்கு ஏற்ப நிரப்புதல் - தொடக்கத்தில் அதிகமாகவும் பின்னர் படிப்படியாகக் குறையும் வகையிலும் பங்களிப்புகள் இருக்கும்."
+      }
     },
     "valueAveragingDisclaimer": "இந்த மதிப்பீடு சந்தை ஏற்ற இறக்கம் இல்லாமல் நிலையான எதிர்பார்க்கப்படும் வருமானத்தை அனுமானிக்கிறது. விலை குறையும்போது அதிகமாக வாங்குவது என்ற மதிப்பு சராசரி முறையின் நிஜ-உலக நன்மை இதில் இடம்பெறவில்லை; நீங்கள் காண்பது சந்தை நேரம் பார்த்து வேறுபட்ட இறுதி முடிவு அல்ல, மாறாக தொடக்கத்தில் அதிகமாக இருக்கும் உண்மையிலேயே வேறுபட்ட பங்களிப்பு அட்டவணையாகும்.",
     "submitIntake": "எனது பரிந்துரைகளைக் காட்டு",
@@ -2013,6 +2043,55 @@
       "note": "Rates mock values ஆகும்."
     }
   },
+  "mirrorChat": {
+    "title": "Future Self Guardian",
+    "subtitle": "ஒரு உண்மையான முடிவைப் பற்றி பேசுங்கள் - நீங்கள் தயாராக இருக்கும்போது உண்மையான மதிப்பீட்டைக் கேளுங்கள்.",
+    "emptyState": "உங்கள் மனதில் இருப்பதை Future Self Guardian இடம் சொல்லுங்கள் - திருமண பட்ஜெட், வீடு வாங்குதல், ஒரு வருடம் காத்திருத்தல், எதுவும் உண்மையானது. நீங்கள் விரும்பும்போது உண்மையான மதிப்பீட்டைக் கேளுங்கள்.",
+    "inputPlaceholder": "எ.கா. 2 ஆண்டுகளில் வீடு வாங்க யோசிக்கிறேன், அது எப்படி இருக்கும்?",
+    "inputLabel": "Future Self Guardian க்கு செய்தி அனுப்பவும்",
+    "send": "அனுப்பு",
+    "thinking": "யோசிக்கிறது...",
+    "genericError": "ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.",
+    "quickPlannersLabel": "அல்லது நேரடியாக ஒரு திட்டமிடுபவருக்குச் செல்லுங்கள்",
+    "seedPrompt": "எங்கிருந்து தொடங்குவது என்று தெரியவில்லை - {need} பற்றி பேசலாமா?",
+    "seedPromptOpenLoop": "இதைப் பின்தொடரலாமா - {domain}: {loopType}?",
+    "voice": {
+      "speak": "பேசுங்கள்",
+      "stop": "பதிவு செய்வதை நிறுத்து",
+      "transcribing": "எழுத்துப்படி மாற்றுகிறது...",
+      "micError": "மைக்ரோஃபோனை அணுக முடியவில்லை - உங்கள் உலாவி அனுமதிகளைச் சரிபார்க்கவும்.",
+      "notConfigured": "இந்த deployment இல் குரல் இன்னும் அமைக்கப்படவில்லை.",
+      "transcribeError": "அதை எழுத்துப்படி மாற்ற முடியவில்லை - மீண்டும் முயற்சிக்கவும் அல்லது தட்டச்சு செய்யவும்."
+    },
+    "pdf": {
+      "attach": "PDF ஐ இணைக்கவும்",
+      "extracting": "உங்கள் PDF ஐப் படிக்கிறது...",
+      "extractError": "அந்த PDF ஐப் படிக்க முடியவில்லை - வேறு கோப்பை முயற்சிக்கவும்.",
+      "noTextLayerError": "இந்த PDF உண்மையான உரை இல்லாத ஸ்கேன் செய்யப்பட்ட படம் போல் தெரிகிறது - உரை அடிப்படையிலான PDF ஐ முயற்சிக்கவும்.",
+      "remove": "அகற்று"
+    },
+    "whyDidISayThat": "நான் ஏன் அப்படிச் சொன்னேன்?",
+    "whyDidISayThatTitle": "நான் ஏன் அப்படிச் சொன்னேன்?",
+    "whyDidISayThatBody": "இந்த பதில் அந்த நேரத்தில் உங்கள் கோப்பில் இருந்த உண்மையான தகவல்களிலிருந்து உருவாக்கப்பட்டது - கற்பனை செய்யப்பட்டதல்ல, வேறு உரையாடலின் நினைவிலிருந்தும் அல்ல.",
+    "whyDidISayThatListTitle": "இந்த பதிலுக்குப் பயன்படுத்தப்பட்ட உண்மையான தகவல்கள்",
+    "whyDidISayThatIncome": "மாதாந்திர வருமானம்: SGD {amount}",
+    "whyDidISayThatExpenses": "மாதாந்திர செலவுகள்: SGD {amount}",
+    "whyDidISayThatLanguage": "பதில் மொழி: {language}",
+    "openLoopsLabel": "இன்னும் திறந்திருக்கிறது",
+    "openLoopTypes": {
+      "missing_checkin": "இந்த மாதம் செக்-இன் இல்லை",
+      "unresolved_debate": "இது எப்படி நடந்தது என்பதைப் பார்க்க காத்திருக்கிறது"
+    },
+    "memoryShelfLabel": "Future Self Guardian நினைவில் வைத்திருப்பவை",
+    "memoryTypes": {
+      "confirmed_plan": "நீங்கள் உறுதிப்படுத்திய ஒரு திட்டம்",
+      "hardship_action": "பயன்படுத்தப்பட்ட ஒரு மீட்பு நடவடிக்கை",
+      "decision_check": "ஒரு Quick Verdict சோதனை",
+      "document_review": "நீங்கள் விளக்கிய ஒரு ஆவணம்",
+      "income_entry": "பதிவு செய்யப்பட்ட வருமான உள்ளீடு",
+      "mirror_debate": "நீங்கள் உறுதிப்படுத்திய ஒரு விவாதம்"
+    }
+  },
   "guardianNudge": {
     "label": "Guardian ஒன்றைக் கவனித்தது",
     "title": "{need} திட்டமிடுவது பயனுள்ளதாக இருக்கலாம்",
@@ -2157,5 +2236,179 @@
   "scoreInfo": {
     "body": "{item} என்பது ஒரு முன்மாதிரி FutureOS தயார்நிலை குறிகாட்டியாகும். தொடர்புடைய வாழ்க்கை இலக்கு சரியான பாதையில் உள்ளதா என்பதை வாடிக்கையாளர் புரிந்துகொள்ள இது உதவுகிறது.",
     "method": "FutureOS போலி சுயவிவர தரவு, தேர்ந்தெடுக்கப்பட்ட இலக்குகள், சேமிப்பு இடையகம், கடன் அழுத்தம், தயாரிப்பு தயார்நிலை மற்றும் Guardian அபாய விதிகளை ஒரு வெளிப்படையான 0-100 மதிப்பீடாக இணைக்கிறது."
+  },
+  "assetProfile": {
+    "eyebrow": "Net Worth",
+    "title": "Asset Profile",
+    "subtitle": "Your itemized personal balance sheet across 8 real-world asset categories.",
+    "netWorth": {
+      "title": "Net worth",
+      "total": "Net worth",
+      "assets": "Total assets",
+      "liabilities": "Liabilities (loans + credit card)"
+    },
+    "stages": {
+      "protect": "Protect (保命)",
+      "grow": "Grow (增长)",
+      "amplify": "Amplify (放大)",
+      "inherit": "Inherit (传承)",
+      "itemCount": "{count} items",
+      "itemsSuffix": "items"
+    },
+    "categories": {
+      "financial": "Financial assets",
+      "physical": "Physical assets",
+      "business": "Business / operating assets",
+      "human": "Human capital",
+      "social": "Social capital",
+      "knowledge": "Knowledge & judgment",
+      "digital": "Digital assets",
+      "legal": "Legal & protection"
+    },
+    "subtypes": {
+      "financial": {
+        "cash": "Cash",
+        "checking_deposit": "Checking / current deposit",
+        "fixed_deposit": "Fixed deposit",
+        "fund": "Fund",
+        "stock": "Stock",
+        "bond": "Bond",
+        "pension": "Pension / CPF",
+        "insurance_cash_value": "Insurance cash value",
+        "crypto": "Cryptocurrency"
+      },
+      "physical": {
+        "property": "Property",
+        "vehicle": "Vehicle",
+        "gold": "Gold",
+        "collectible": "Collectible",
+        "equipment": "Equipment"
+      },
+      "business": {
+        "equity": "Company equity",
+        "business_shop": "Business / shop",
+        "project": "Project",
+        "royalty": "Royalty / copyright income",
+        "brand_account": "Brand account",
+        "course_product": "Course / product"
+      },
+      "human": {
+        "education": "Education",
+        "skill": "Skill",
+        "experience": "Experience",
+        "health": "Health",
+        "time_energy": "Time & energy",
+        "professional_reputation": "Professional reputation"
+      },
+      "social": {
+        "network": "Network",
+        "credit": "Credit standing",
+        "reputation": "Reputation",
+        "circle": "Circle / community",
+        "partnership": "Partnership",
+        "family_support": "Family support system"
+      },
+      "knowledge": {
+        "expertise": "Domain expertise",
+        "judgment": "Judgment",
+        "learning_ability": "Learning ability",
+        "methodology": "Methodology",
+        "info_channel": "Information channel"
+      },
+      "digital": {
+        "personal_account": "Personal account",
+        "content_work": "Content work",
+        "followers": "Followers / audience",
+        "domain": "Domain",
+        "data": "Data",
+        "software_tool": "Software tool",
+        "ai_workflow": "AI workflow"
+      },
+      "legal": {
+        "insurance_policy": "Insurance policy",
+        "will": "Will",
+        "marital_property_agreement": "Marital property agreement",
+        "company_structure": "Company structure",
+        "contract": "Contract",
+        "ip_registration": "IP registration"
+      }
+    },
+    "fields": {
+      "category": "Category",
+      "subtype": "Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. DBS Multiplier savings",
+      "notes": "Notes",
+      "value": "Value (SGD)",
+      "valueOptional": "Valuation (optional)",
+      "estimatedValueOptional": "Estimated value (optional)",
+      "strengthRating": "Strength rating (1-5)",
+      "liquidity": "Liquidity",
+      "liquidityOptions": {
+        "cash": "Cash",
+        "near_cash": "Near-cash",
+        "liquid": "Liquid",
+        "illiquid": "Illiquid"
+      },
+      "risk": "Risk",
+      "riskOptions": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "expectedReturnPct": "Expected annual return (%)",
+      "maturityDate": "Maturity date",
+      "appreciates": "Holds/appreciates in value",
+      "producesCashflow": "Produces monthly cash flow",
+      "monthlyCashflow": "Monthly cash flow (SGD)",
+      "maintenanceCostMonthly": "Monthly maintenance cost (SGD)",
+      "liquidityDifficulty": "How hard to sell",
+      "liquidityDifficultyOptions": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "monthlyIncome": "Monthly income (SGD)",
+      "ownerDependency": "Depends on me",
+      "ownerDependencyOptions": {
+        "full": "Fully dependent",
+        "partial": "Partially dependent",
+        "independent": "Independent of me"
+      },
+      "replicable": "Can be replicated / scaled",
+      "status": "Status",
+      "statusOptions": {
+        "active": "Active",
+        "pending": "Pending",
+        "missing": "Missing"
+      },
+      "coverageAmount": "Coverage amount (SGD)",
+      "expiryDate": "Expiry date",
+      "metricLabel": "Metric label (e.g. followers)",
+      "metricValue": "Metric value",
+      "opportunityTypeOptions": {
+        "opportunity": "Brings opportunity",
+        "trust": "Brings trust",
+        "resource": "Brings resources",
+        "info_edge": "Brings information edge"
+      }
+    },
+    "form": {
+      "addToCategory": "Add asset",
+      "submit": "Save asset",
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "error": "Could not save this asset. Please try again."
+    },
+    "emptyCategory": "No items yet in this category.",
+    "migration": {
+      "prompt": "You have existing profile numbers (savings, investments, or insurance). Import them into your itemized asset ledger?",
+      "action": "Import my existing numbers",
+      "cashName": "Existing savings",
+      "investmentName": "Existing investments",
+      "insuranceName": "Existing insurance coverage"
+    }
   }
 }

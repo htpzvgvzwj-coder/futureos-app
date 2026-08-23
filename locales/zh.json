@@ -51,6 +51,9 @@
     "timelineTitle": "连接式人生时间线",
     "detectedNeeds": "已识别需求",
     "openMirror": "分析未来决策",
+    "assetProfile": {
+      "title": "净资产 / 资产画像"
+    },
     "productFit": {
       "title": "OCBC 产品适配",
       "purpose": "Life Graph 将客户目标与 OCBC 相关产品类别相连接。",
@@ -2083,6 +2086,8 @@
     "subtitle": "管理个人资料、语言、外观、通知、AI Guardian 权限、隐私与同意。",
     "openSimulator": "打开 Future Mirror 模拟器",
     "openSimulatorDetail": "从设置中创建自定义模拟。",
+    "openAssetProfile": "打开资产画像",
+    "openAssetProfileDetail": "在 8 大资产类别中,建立你逐笔记录的净资产台账。",
     "language": {
       "title": "语言",
       "description": "选择你的首选应用语言。"
@@ -2376,6 +2381,55 @@
       "note": "汇率为模拟值。"
     }
   },
+  "mirrorChat": {
+    "title": "Future Self Guardian",
+    "subtitle": "聊聊一个真实的决定——准备好了随时可以要求真实评估。",
+    "emptyState": "告诉 Future Self Guardian 你在想什么——婚礼预算、买房、再等一年,任何真实的事都可以。想要真实评估时随时开口。",
+    "inputPlaceholder": "例如：我在考虑 2 年后买房,情况会是怎样？",
+    "inputLabel": "给 Future Self Guardian 发消息",
+    "send": "发送",
+    "thinking": "思考中……",
+    "genericError": "出了点问题,请重试。",
+    "quickPlannersLabel": "或直接跳转到某个规划工具",
+    "seedPrompt": "我不太确定从哪里开始——我们能聊聊{need}吗？",
+    "seedPromptOpenLoop": "能跟进一下这件事吗——{domain}：{loopType}？",
+    "voice": {
+      "speak": "语音输入",
+      "stop": "停止录音",
+      "transcribing": "转录中……",
+      "micError": "无法访问麦克风——请检查浏览器权限设置。",
+      "notConfigured": "此部署尚未设置语音功能。",
+      "transcribeError": "无法转录——请重试或改为输入文字。"
+    },
+    "pdf": {
+      "attach": "上传 PDF",
+      "extracting": "正在读取你的 PDF……",
+      "extractError": "无法读取该 PDF——请尝试另一个文件。",
+      "noTextLayerError": "这份 PDF 看起来是扫描图片,没有可提取的文字——请改用文字版 PDF。",
+      "remove": "移除"
+    },
+    "whyDidISayThat": "为什么我会这么说？",
+    "whyDidISayThatTitle": "为什么我会这么说？",
+    "whyDidISayThatBody": "这条回复是根据当时你名下的真实资料生成的——不是编造的,也不是来自其他对话的记忆。",
+    "whyDidISayThatListTitle": "生成这条回复所用的真实资料",
+    "whyDidISayThatIncome": "月收入：SGD {amount}",
+    "whyDidISayThatExpenses": "月支出：SGD {amount}",
+    "whyDidISayThatLanguage": "回复语言：{language}",
+    "openLoopsLabel": "尚未处理",
+    "openLoopTypes": {
+      "missing_checkin": "本月尚未打卡",
+      "unresolved_debate": "还在等待结果验证"
+    },
+    "memoryShelfLabel": "Future Self Guardian 记得的事",
+    "memoryTypes": {
+      "confirmed_plan": "你确认过的一个计划",
+      "hardship_action": "已执行的一项纾困行动",
+      "decision_check": "一次 Quick Verdict 检查",
+      "document_review": "你解读过的一份文件",
+      "income_entry": "记录的一笔收入",
+      "mirror_debate": "你确认过的一次辩论"
+    }
+  },
   "guardianNudge": {
     "label": "Guardian 注意到一件事",
     "title": "或许值得规划一下：{need}",
@@ -2528,5 +2582,179 @@
   "scoreInfo": {
     "body": "{item} 是一个原型 FutureOS 准备度指标,帮助客户了解相关生活目标是否处于正轨。",
     "method": "FutureOS 综合模拟资料、已选目标、储蓄缓冲、债务压力、产品准备度及 Guardian 风险规则,得出透明的 0-100 估算值。"
+  },
+  "assetProfile": {
+    "eyebrow": "净资产",
+    "title": "资产画像",
+    "subtitle": "覆盖 8 大真实资产类别的逐笔个人资产负债表。",
+    "netWorth": {
+      "title": "净资产",
+      "total": "净资产",
+      "assets": "资产总额",
+      "liabilities": "负债(贷款 + 信用卡欠款)"
+    },
+    "stages": {
+      "protect": "先保命",
+      "grow": "再增长",
+      "amplify": "再放大",
+      "inherit": "最后传承",
+      "itemCount": "{count} 项",
+      "itemsSuffix": "项"
+    },
+    "categories": {
+      "financial": "金融资产",
+      "physical": "实物资产",
+      "business": "经营性资产",
+      "human": "人力资产",
+      "social": "社会资产",
+      "knowledge": "知识与认知资产",
+      "digital": "数字资产",
+      "legal": "法律与保障资产"
+    },
+    "subtypes": {
+      "financial": {
+        "cash": "现金",
+        "checking_deposit": "活期存款",
+        "fixed_deposit": "定期存款",
+        "fund": "基金",
+        "stock": "股票",
+        "bond": "债券",
+        "pension": "养老金 / 公积金",
+        "insurance_cash_value": "保险现金价值",
+        "crypto": "数字货币"
+      },
+      "physical": {
+        "property": "房产",
+        "vehicle": "车辆",
+        "gold": "黄金",
+        "collectible": "收藏品",
+        "equipment": "设备"
+      },
+      "business": {
+        "equity": "公司股权",
+        "business_shop": "生意 / 店铺",
+        "project": "项目",
+        "royalty": "版权收益",
+        "brand_account": "品牌账号",
+        "course_product": "课程产品"
+      },
+      "human": {
+        "education": "学历",
+        "skill": "技能",
+        "experience": "经验",
+        "health": "健康",
+        "time_energy": "时间与精力",
+        "professional_reputation": "职业信誉"
+      },
+      "social": {
+        "network": "人脉",
+        "credit": "信用",
+        "reputation": "口碑",
+        "circle": "圈层",
+        "partnership": "合作关系",
+        "family_support": "家庭支持系统"
+      },
+      "knowledge": {
+        "expertise": "专业知识",
+        "judgment": "判断力",
+        "learning_ability": "学习能力",
+        "methodology": "方法论",
+        "info_channel": "信息渠道"
+      },
+      "digital": {
+        "personal_account": "个人账号",
+        "content_work": "内容作品",
+        "followers": "粉丝 / 关注者",
+        "domain": "域名",
+        "data": "数据",
+        "software_tool": "软件工具",
+        "ai_workflow": "AI 工作流"
+      },
+      "legal": {
+        "insurance_policy": "保险",
+        "will": "遗嘱",
+        "marital_property_agreement": "婚前 / 婚内财产安排",
+        "company_structure": "公司架构",
+        "contract": "合同",
+        "ip_registration": "知识产权登记"
+      }
+    },
+    "fields": {
+      "category": "类别",
+      "subtype": "类型",
+      "name": "名称",
+      "namePlaceholder": "例如:招商银行活期",
+      "notes": "备注",
+      "value": "价值(元)",
+      "valueOptional": "估值(可选)",
+      "estimatedValueOptional": "预估价值(可选)",
+      "strengthRating": "强度评分(1-5)",
+      "liquidity": "流动性",
+      "liquidityOptions": {
+        "cash": "现金",
+        "near_cash": "近现金",
+        "liquid": "可变现",
+        "illiquid": "不可变现"
+      },
+      "risk": "风险",
+      "riskOptions": {
+        "low": "低",
+        "medium": "中",
+        "high": "高"
+      },
+      "expectedReturnPct": "预期年化收益率(%)",
+      "maturityDate": "到期日",
+      "appreciates": "是否保值/增值",
+      "producesCashflow": "是否产生现金流",
+      "monthlyCashflow": "每月现金流(元)",
+      "maintenanceCostMonthly": "每月维护成本(元)",
+      "liquidityDifficulty": "变现难度",
+      "liquidityDifficultyOptions": {
+        "easy": "容易",
+        "medium": "中等",
+        "hard": "困难"
+      },
+      "monthlyIncome": "每月收入(元)",
+      "ownerDependency": "是否依赖本人",
+      "ownerDependencyOptions": {
+        "full": "完全依赖",
+        "partial": "部分依赖",
+        "independent": "不依赖本人"
+      },
+      "replicable": "是否可复制/扩展",
+      "status": "状态",
+      "statusOptions": {
+        "active": "生效中",
+        "pending": "待完善",
+        "missing": "缺失"
+      },
+      "coverageAmount": "保额(元)",
+      "expiryDate": "到期日",
+      "metricLabel": "指标名称(如粉丝数)",
+      "metricValue": "指标数值",
+      "opportunityTypeOptions": {
+        "opportunity": "带来机会",
+        "trust": "带来信任",
+        "resource": "带来资源",
+        "info_edge": "带来信息差"
+      }
+    },
+    "form": {
+      "addToCategory": "添加资产",
+      "submit": "保存资产",
+      "submitting": "保存中...",
+      "cancel": "取消",
+      "edit": "编辑",
+      "delete": "删除",
+      "error": "保存失败,请重试。"
+    },
+    "emptyCategory": "该类别下暂无条目。",
+    "migration": {
+      "prompt": "检测到你原有的个人资料数字(储蓄、投资或保险)。是否将它们导入到逐笔资产台账中?",
+      "action": "导入我的现有数字",
+      "cashName": "原有储蓄",
+      "investmentName": "原有投资",
+      "insuranceName": "原有保险保额"
+    }
   }
 }

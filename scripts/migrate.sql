@@ -618,3 +618,31 @@ alter table mirror_chat_messages add column if not exists tool_results jsonb;
 -- the real baseInputs/language the system prompt was built from for this
 -- specific assistant reply. Null for user messages.
 alter table mirror_chat_messages add column if not exists context jsonb;
+
+-- Asset Profile (资产台账): one row per itemized asset entry across the
+-- customer's 8 fixed categories (see lib/asset-taxonomy.js for the closed
+-- category/subtype lists - category and subtype are always validated
+-- server-side against that taxonomy before a row is written here, never
+-- free text). `value` is the customer's own stated amount - null for
+-- non-monetary categories 4-8 items that were left unvalued (e.g. "learning
+-- ability" has a strength rating but no dollar figure). `details` holds the
+-- category-specific structured fields (liquidity/risk for financial,
+-- ownerDependency for business, etc.) as flexible jsonb, same convention as
+-- mirror_debates.context above - this app has no per-category tables, one
+-- shared shape keeps the store/API/taxonomy validation single-sourced.
+create table if not exists assets (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  category         text not null,
+  subtype          text not null,
+  name             text not null,
+  value            numeric,
+  strength_rating  smallint,
+  details          jsonb not null default '{}',
+  notes            text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+create index if not exists assets_profile_category_idx
+  on assets (profile_key, category);

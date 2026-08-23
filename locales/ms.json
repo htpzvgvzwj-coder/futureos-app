@@ -50,6 +50,9 @@
     "timelineTitle": "Garis masa hidup tersambung",
     "detectedNeeds": "Keperluan dikesan",
     "openMirror": "Analisis Keputusan Masa Depan",
+    "assetProfile": {
+      "title": "Net Worth / Asset Profile"
+    },
     "productFit": {
       "title": "Kesesuaian Produk OCBC",
       "purpose": "Life Graph menghubungkan matlamat pelanggan dengan kategori produk berkaitan OCBC.",
@@ -1241,15 +1244,33 @@
     "availableCashflowNote": "Selepas matlamat lain yang telah disahkan, anda mempunyai kira-kira {amount}/bulan untuk dilaburkan.",
     "riskLabel": "Keutamaan Risiko",
     "riskOptions": {
-      "conservative": { "label": "Konservatif", "description": "Jangkaan pertumbuhan lebih rendah, turun naik lebih rendah - keutamaan mengekalkan modal." },
-      "balanced": { "label": "Seimbang", "description": "Gabungan pertumbuhan dan kestabilan - sesuai untuk kebanyakan orang." },
-      "growth": { "label": "Pertumbuhan", "description": "Jangkaan pertumbuhan lebih tinggi, turun naik lebih tinggi - untuk tempoh masa lebih panjang." }
+      "conservative": {
+        "label": "Konservatif",
+        "description": "Jangkaan pertumbuhan lebih rendah, turun naik lebih rendah - keutamaan mengekalkan modal."
+      },
+      "balanced": {
+        "label": "Seimbang",
+        "description": "Gabungan pertumbuhan dan kestabilan - sesuai untuk kebanyakan orang."
+      },
+      "growth": {
+        "label": "Pertumbuhan",
+        "description": "Jangkaan pertumbuhan lebih tinggi, turun naik lebih tinggi - untuk tempoh masa lebih panjang."
+      }
     },
     "goalCategoryLabel": "Untuk apa pelaburan ini?",
     "goalCategories": {
-      "retirementGap": { "label": "Jurang Persaraan", "description": "Bantu tutup jurang antara pendapatan sasaran persaraan anda dengan CPF LIFE." },
-      "generalWealthBuilding": { "label": "Pembinaan Kekayaan Umum", "description": "Tiada matlamat khusus - membina tabiat melabur yang berterusan dari semasa ke semasa." },
-      "customTarget": { "label": "Sasaran Tersuai", "description": "Anda mempunyai jumlah dan tempoh masa yang khusus dalam fikiran." }
+      "retirementGap": {
+        "label": "Jurang Persaraan",
+        "description": "Bantu tutup jurang antara pendapatan sasaran persaraan anda dengan CPF LIFE."
+      },
+      "generalWealthBuilding": {
+        "label": "Pembinaan Kekayaan Umum",
+        "description": "Tiada matlamat khusus - membina tabiat melabur yang berterusan dari semasa ke semasa."
+      },
+      "customTarget": {
+        "label": "Sasaran Tersuai",
+        "description": "Anda mempunyai jumlah dan tempoh masa yang khusus dalam fikiran."
+      }
     },
     "horizonYearsLabel": "Tempoh Pelaburan (tahun)",
     "customTargetAmountLabel": "Jumlah Sasaran (SGD)",
@@ -1263,10 +1284,22 @@
     },
     "purchaseModeLabel": "Bagaimana anda mahu membeli?",
     "purchaseModes": {
-      "monthlyRsp": { "label": "RSP Bulanan", "description": "Jumlah tetap pada tarikh tetap setiap bulan - seperti OCBC BCIP, meratakan kos anda." },
-      "lumpSum": { "label": "Sekali Bayar", "description": "Melabur jumlah yang lebih besar sekali gus, bukan disebarkan mengikut masa." },
-      "dailyMicroDca": { "label": "Pelaburan Mikro Harian", "description": "Jumlah kecil tetap setiap hari perdagangan - purata kos frekuensi lebih tinggi, memerlukan broker saham pecahan." },
-      "valueAveraging": { "label": "Purata Nilai", "description": "Tambah ke arah laluan pertumbuhan sasaran setiap bulan - sumbangan bermula lebih tinggi dan berkurangan dari semasa ke semasa." }
+      "monthlyRsp": {
+        "label": "RSP Bulanan",
+        "description": "Jumlah tetap pada tarikh tetap setiap bulan - seperti OCBC BCIP, meratakan kos anda."
+      },
+      "lumpSum": {
+        "label": "Sekali Bayar",
+        "description": "Melabur jumlah yang lebih besar sekali gus, bukan disebarkan mengikut masa."
+      },
+      "dailyMicroDca": {
+        "label": "Pelaburan Mikro Harian",
+        "description": "Jumlah kecil tetap setiap hari perdagangan - purata kos frekuensi lebih tinggi, memerlukan broker saham pecahan."
+      },
+      "valueAveraging": {
+        "label": "Purata Nilai",
+        "description": "Tambah ke arah laluan pertumbuhan sasaran setiap bulan - sumbangan bermula lebih tinggi dan berkurangan dari semasa ke semasa."
+      }
     },
     "valueAveragingDisclaimer": "Unjuran ini menganggap pulangan jangkaan yang tetap tanpa turun naik pasaran. Kelebihan sebenar purata nilai - membeli lebih banyak apabila harga jatuh - tidak ditangkap di sini; apa yang anda akan lihat ialah jadual sumbangan yang benar-benar berbeza dan lebih tinggi pada peringkat awal, bukan hasil akhir yang berbeza kerana pemasaan pasaran.",
     "submitIntake": "Tunjukkan Cadangan Saya",
@@ -1726,6 +1759,8 @@
     "subtitle": "Kawal profil, bahasa, penampilan, notifikasi, kebenaran AI Guardian, privasi dan persetujuan.",
     "openSimulator": "Buka Future Mirror Simulator",
     "openSimulatorDetail": "Cipta simulasi tersuai daripada tetapan Profil.",
+    "openAssetProfile": "Open Asset Profile",
+    "openAssetProfileDetail": "Build your itemized net worth ledger across 8 asset categories.",
     "language": {
       "title": "Language",
       "description": "Choose your preferred app language."
@@ -2013,6 +2048,55 @@
       "note": "Kadar adalah nilai mock dan bukan untuk dagangan sebenar."
     }
   },
+  "mirrorChat": {
+    "title": "Future Self Guardian",
+    "subtitle": "Bincangkan satu keputusan sebenar - minta penilaian sebenar bila-bila masa anda bersedia.",
+    "emptyState": "Beritahu Future Self Guardian apa yang difikirkan - bajet perkahwinan, pembelian rumah, menunggu setahun, apa sahaja yang sebenar. Minta penilaian sebenar bila-bila masa anda mahu.",
+    "inputPlaceholder": "cth. Saya sedang fikir untuk membeli rumah dalam 2 tahun, macam mana agaknya?",
+    "inputLabel": "Hantar mesej kepada Future Self Guardian",
+    "send": "Hantar",
+    "thinking": "Sedang berfikir...",
+    "genericError": "Sesuatu tidak kena. Sila cuba lagi.",
+    "quickPlannersLabel": "Atau terus ke perancang",
+    "seedPrompt": "Saya tidak pasti nak mula dari mana - bolehkah kita bincang tentang {need}?",
+    "seedPromptOpenLoop": "Bolehkah kita susulan perkara ini - {domain}: {loopType}?",
+    "voice": {
+      "speak": "Cakap",
+      "stop": "Berhenti merakam",
+      "transcribing": "Sedang mentranskripsi...",
+      "micError": "Tidak dapat mengakses mikrofon - semak kebenaran pelayar anda.",
+      "notConfigured": "Suara belum disediakan pada deployment ini.",
+      "transcribeError": "Tidak dapat mentranskripsi - sila cuba lagi atau taip sebaliknya."
+    },
+    "pdf": {
+      "attach": "Lampirkan PDF",
+      "extracting": "Membaca PDF anda...",
+      "extractError": "Tidak dapat membaca PDF itu - sila cuba fail lain.",
+      "noTextLayerError": "PDF ini kelihatan seperti imej terimbas tanpa teks sebenar - cuba PDF berasaskan teks sebaliknya.",
+      "remove": "Buang"
+    },
+    "whyDidISayThat": "Kenapa saya kata begitu?",
+    "whyDidISayThatTitle": "Kenapa saya kata begitu?",
+    "whyDidISayThatBody": "Jawapan ini dijana daripada fakta sebenar yang ada pada fail anda pada masa itu - bukan direka, bukan daripada ingatan perbualan lain.",
+    "whyDidISayThatListTitle": "Fakta sebenar yang digunakan untuk jawapan ini",
+    "whyDidISayThatIncome": "Pendapatan bulanan: SGD {amount}",
+    "whyDidISayThatExpenses": "Perbelanjaan bulanan: SGD {amount}",
+    "whyDidISayThatLanguage": "Bahasa jawapan: {language}",
+    "openLoopsLabel": "Masih terbuka",
+    "openLoopTypes": {
+      "missing_checkin": "Belum daftar masuk bulan ini",
+      "unresolved_debate": "Menunggu untuk lihat hasilnya"
+    },
+    "memoryShelfLabel": "Apa yang Future Self Guardian ingat",
+    "memoryTypes": {
+      "confirmed_plan": "Pelan yang anda sahkan",
+      "hardship_action": "Tindakan pemulihan yang dilaksanakan",
+      "decision_check": "Semakan Quick Verdict",
+      "document_review": "Dokumen yang anda nyahkod",
+      "income_entry": "Catatan pendapatan direkodkan",
+      "mirror_debate": "Perbahasan yang anda sahkan"
+    }
+  },
   "guardianNudge": {
     "label": "Guardian perasan sesuatu",
     "title": "{need} mungkin patut dirancang",
@@ -2157,5 +2241,179 @@
   "scoreInfo": {
     "body": "{item} ialah penunjuk kesediaan prototaip FutureOS. Ia membantu pelanggan memahami sama ada matlamat hidup berkaitan berada di landasan.",
     "method": "FutureOS menggabungkan data profil mock, matlamat dipilih, penampan simpanan, tekanan hutang, kesediaan produk dan peraturan risiko Guardian ke dalam anggaran 0-100 yang telus."
+  },
+  "assetProfile": {
+    "eyebrow": "Net Worth",
+    "title": "Asset Profile",
+    "subtitle": "Your itemized personal balance sheet across 8 real-world asset categories.",
+    "netWorth": {
+      "title": "Net worth",
+      "total": "Net worth",
+      "assets": "Total assets",
+      "liabilities": "Liabilities (loans + credit card)"
+    },
+    "stages": {
+      "protect": "Protect (保命)",
+      "grow": "Grow (增长)",
+      "amplify": "Amplify (放大)",
+      "inherit": "Inherit (传承)",
+      "itemCount": "{count} items",
+      "itemsSuffix": "items"
+    },
+    "categories": {
+      "financial": "Financial assets",
+      "physical": "Physical assets",
+      "business": "Business / operating assets",
+      "human": "Human capital",
+      "social": "Social capital",
+      "knowledge": "Knowledge & judgment",
+      "digital": "Digital assets",
+      "legal": "Legal & protection"
+    },
+    "subtypes": {
+      "financial": {
+        "cash": "Cash",
+        "checking_deposit": "Checking / current deposit",
+        "fixed_deposit": "Fixed deposit",
+        "fund": "Fund",
+        "stock": "Stock",
+        "bond": "Bond",
+        "pension": "Pension / CPF",
+        "insurance_cash_value": "Insurance cash value",
+        "crypto": "Cryptocurrency"
+      },
+      "physical": {
+        "property": "Property",
+        "vehicle": "Vehicle",
+        "gold": "Gold",
+        "collectible": "Collectible",
+        "equipment": "Equipment"
+      },
+      "business": {
+        "equity": "Company equity",
+        "business_shop": "Business / shop",
+        "project": "Project",
+        "royalty": "Royalty / copyright income",
+        "brand_account": "Brand account",
+        "course_product": "Course / product"
+      },
+      "human": {
+        "education": "Education",
+        "skill": "Skill",
+        "experience": "Experience",
+        "health": "Health",
+        "time_energy": "Time & energy",
+        "professional_reputation": "Professional reputation"
+      },
+      "social": {
+        "network": "Network",
+        "credit": "Credit standing",
+        "reputation": "Reputation",
+        "circle": "Circle / community",
+        "partnership": "Partnership",
+        "family_support": "Family support system"
+      },
+      "knowledge": {
+        "expertise": "Domain expertise",
+        "judgment": "Judgment",
+        "learning_ability": "Learning ability",
+        "methodology": "Methodology",
+        "info_channel": "Information channel"
+      },
+      "digital": {
+        "personal_account": "Personal account",
+        "content_work": "Content work",
+        "followers": "Followers / audience",
+        "domain": "Domain",
+        "data": "Data",
+        "software_tool": "Software tool",
+        "ai_workflow": "AI workflow"
+      },
+      "legal": {
+        "insurance_policy": "Insurance policy",
+        "will": "Will",
+        "marital_property_agreement": "Marital property agreement",
+        "company_structure": "Company structure",
+        "contract": "Contract",
+        "ip_registration": "IP registration"
+      }
+    },
+    "fields": {
+      "category": "Category",
+      "subtype": "Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. DBS Multiplier savings",
+      "notes": "Notes",
+      "value": "Value (SGD)",
+      "valueOptional": "Valuation (optional)",
+      "estimatedValueOptional": "Estimated value (optional)",
+      "strengthRating": "Strength rating (1-5)",
+      "liquidity": "Liquidity",
+      "liquidityOptions": {
+        "cash": "Cash",
+        "near_cash": "Near-cash",
+        "liquid": "Liquid",
+        "illiquid": "Illiquid"
+      },
+      "risk": "Risk",
+      "riskOptions": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "expectedReturnPct": "Expected annual return (%)",
+      "maturityDate": "Maturity date",
+      "appreciates": "Holds/appreciates in value",
+      "producesCashflow": "Produces monthly cash flow",
+      "monthlyCashflow": "Monthly cash flow (SGD)",
+      "maintenanceCostMonthly": "Monthly maintenance cost (SGD)",
+      "liquidityDifficulty": "How hard to sell",
+      "liquidityDifficultyOptions": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "monthlyIncome": "Monthly income (SGD)",
+      "ownerDependency": "Depends on me",
+      "ownerDependencyOptions": {
+        "full": "Fully dependent",
+        "partial": "Partially dependent",
+        "independent": "Independent of me"
+      },
+      "replicable": "Can be replicated / scaled",
+      "status": "Status",
+      "statusOptions": {
+        "active": "Active",
+        "pending": "Pending",
+        "missing": "Missing"
+      },
+      "coverageAmount": "Coverage amount (SGD)",
+      "expiryDate": "Expiry date",
+      "metricLabel": "Metric label (e.g. followers)",
+      "metricValue": "Metric value",
+      "opportunityTypeOptions": {
+        "opportunity": "Brings opportunity",
+        "trust": "Brings trust",
+        "resource": "Brings resources",
+        "info_edge": "Brings information edge"
+      }
+    },
+    "form": {
+      "addToCategory": "Add asset",
+      "submit": "Save asset",
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "error": "Could not save this asset. Please try again."
+    },
+    "emptyCategory": "No items yet in this category.",
+    "migration": {
+      "prompt": "You have existing profile numbers (savings, investments, or insurance). Import them into your itemized asset ledger?",
+      "action": "Import my existing numbers",
+      "cashName": "Existing savings",
+      "investmentName": "Existing investments",
+      "insuranceName": "Existing insurance coverage"
+    }
   }
 }

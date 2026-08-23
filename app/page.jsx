@@ -39,7 +39,9 @@ import {
   Moon,
   Music,
   PartyPopper,
+  Pencil,
   PiggyBank,
+  Plus,
   QrCode,
   RotateCcw,
   ScanLine,
@@ -57,6 +59,7 @@ import {
   UserRound,
   Utensils,
   Volume2,
+  Wallet,
   Wine,
   X,
   Zap,
@@ -72,6 +75,13 @@ import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMAN
 import { computePeerBenchmark } from "../lib/peer-benchmark.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
+import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
+import {
+  computeNetWorth,
+  computeCategoryTotals,
+  computeStageRollup,
+  computeAssetHealthInputs,
+} from "../lib/asset-finance.js";
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
 import ta from "../locales/ta.json";
@@ -98,6 +108,7 @@ const screens = {
   MIRROR: "mirror",
   GUARDIAN: "guardian",
   PROFILE: "profile",
+  ASSET_PROFILE: "assetProfile",
   NEED_WEDDING: "needWedding",
   NEED_HOME: "needHome",
   NEED_RETIREMENT: "needRetirement",
@@ -335,6 +346,33 @@ const defaultCustomGoalDraft = {
   category: "Lifestyle",
   notes: "",
 };
+
+// UI registry for the Asset Profile's fixed, closed taxonomy
+// (lib/asset-taxonomy.js) - icon + i18n labelKey per category/subtype, so
+// the "add asset" picker only ever offers this designed list, never free
+// text. Kept next to lib/asset-taxonomy.js's ASSET_CATEGORIES/ASSET_SUBTYPES
+// (imported above) as the single ordering/labeling source for the picker.
+const assetCategoryMeta = {
+  financial: { labelKey: "assetProfile.categories.financial", icon: Wallet },
+  physical: { labelKey: "assetProfile.categories.physical", icon: Building2 },
+  business: { labelKey: "assetProfile.categories.business", icon: BriefcaseBusiness },
+  human: { labelKey: "assetProfile.categories.human", icon: UserRound },
+  social: { labelKey: "assetProfile.categories.social", icon: Sparkles },
+  knowledge: { labelKey: "assetProfile.categories.knowledge", icon: Bot },
+  digital: { labelKey: "assetProfile.categories.digital", icon: LineChart },
+  legal: { labelKey: "assetProfile.categories.legal", icon: ShieldCheck },
+};
+
+const assetStageMeta = {
+  protect: { labelKey: "assetProfile.stages.protect", icon: LockKeyhole },
+  grow: { labelKey: "assetProfile.stages.grow", icon: LineChart },
+  amplify: { labelKey: "assetProfile.stages.amplify", icon: Sparkles },
+  inherit: { labelKey: "assetProfile.stages.inherit", icon: Landmark },
+};
+
+function assetSubtypeLabelKey(category, subtype) {
+  return `assetProfile.subtypes.${category}.${subtype}`;
+}
 
 const profileGoalOptions = [
   { id: "wedding", labelKey: "simulator.goals.wedding", icon: HeartHandshake },
@@ -2203,6 +2241,12 @@ const defaultPreferences = {
   // means every one of the ~20 real getUserProfile() consumers picks up real
   // income history for free, since preferences already reaches all of them.
   incomeHistory: [],
+  // Client-side mirror of the real `assets` DB table (lib/asset-store.js) -
+  // same reasoning as incomeHistory above: the table is the source of truth,
+  // refreshed on every auth-resolve, and living inside `preferences` means
+  // getUserProfile()'s manualEntryProvider can fold real asset-derived sums
+  // into the computed profile for every one of its ~20 consumers for free.
+  assets: [],
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -2499,11 +2543,35 @@ const manualEntryProvider = {
     // the customer's own statedMonthlyIncome verbatim otherwise (zero
     // behavior change for a customer who never logs a single entry).
     const smoothed = computeSmoothedIncome(preferences?.incomeHistory, numberValue(merged.statedMonthlyIncome, 7500));
+    // Same technique as monthlyIncome smoothing above, applied to the Asset
+    // Profile ledger (lib/asset-store.js, cached client-side as
+    // preferences.assets): once the customer has logged at least one real
+    // itemized asset, `currentSavings`/`investments`/`insuranceStatus`/
+    // `insuranceCoverageAmount` become the REAL computed sums instead of the
+    // old flat manually-typed numbers - every one of getHealthScores()'s ~10
+    // call sites picks this up for free since they all read through
+    // getUserProfile(). Falls back to the flat fields verbatim when no
+    // assets exist yet (brand-new / not-yet-migrated profile) - zero
+    // behavior change until the customer actually uses the ledger.
+    const assets = Array.isArray(preferences?.assets) ? preferences.assets : [];
+    const assetOverrides =
+      assets.length > 0
+        ? (() => {
+            const inputs = computeAssetHealthInputs(assets);
+            return {
+              currentSavings: String(inputs.savings),
+              investments: String(inputs.investments),
+              insuranceStatus: inputs.hasActiveInsurance ? "Covered" : merged.insuranceStatus,
+              insuranceCoverageAmount: inputs.hasActiveInsurance ? String(inputs.insuranceCoverage) : merged.insuranceCoverageAmount,
+            };
+          })()
+        : {};
     return {
       ...merged,
       monthlyIncome: String(smoothed.effectiveMonthlyIncome),
       isIncomeIrregular: smoothed.isIrregular,
       incomeSampleSize: smoothed.sampleSize,
+      ...assetOverrides,
     };
   },
   getCustomGoals: (preferences) => (Array.isArray(preferences?.customGoals) ? preferences.customGoals : []),
@@ -3730,6 +3798,22 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         <SummaryRow label={t("lifeGraph.futureAnalyst.riskSignal")} value={t("lifeGraph.futureAnalyst.riskValue")} />
         <SummaryRow label={t("lifeGraph.futureAnalyst.nextSignal")} value={t("lifeGraph.futureAnalyst.nextValue")} />
       </section>
+
+      <button type="button" className="profileQuickAction" onClick={() => setActiveScreen(screens.ASSET_PROFILE)}>
+        <Wallet size={18} />
+        <span>
+          <strong>{t("lifeGraph.assetProfile.title")}</strong>
+          <small>
+            {formatSgd(
+              computeNetWorth(preferences.assets, {
+                existingLoans: numberValue(profile.existingLoans, 0),
+                creditCardOutstanding: numberValue(profile.creditCardOutstanding, 0),
+              }).netWorth
+            )}
+          </small>
+        </span>
+        <ChevronRight size={16} />
+      </button>
 
       <section className="detectedNeeds">
         <span className="sectionLabel">{t("lifeGraph.detectedNeeds")}</span>
@@ -11369,6 +11453,15 @@ function ProfileScreen({
         <ChevronRight size={16} />
       </button>
 
+      <button type="button" className="profileQuickAction" onClick={() => setActiveScreen(screens.ASSET_PROFILE)}>
+        <Wallet size={18} />
+        <span>
+          <strong>{t("settings.openAssetProfile")}</strong>
+          <small>{t("settings.openAssetProfileDetail")}</small>
+        </span>
+        <ChevronRight size={16} />
+      </button>
+
       <SettingsCard icon={UserRound} title={t("settings.profile.title")} description={t("settings.profile.description")}>
         <label className="profileNameField">
           <span>{t("settings.profile.displayName")}</span>
@@ -11791,6 +11884,582 @@ function ProfileScreen({
   );
 }
 
+// Blank draft for the "add asset" form, keyed by the fixed taxonomy field
+// shape (lib/asset-taxonomy.js). `details` fields are all optional strings
+// here (parsed/validated on submit) so every input can stay a controlled
+// component regardless of which category is selected.
+function blankAssetDraft(category) {
+  return {
+    category,
+    subtype: ASSET_SUBTYPES[category][0],
+    name: "",
+    value: "",
+    strengthRating: "3",
+    notes: "",
+    details: {
+      liquidity: "liquid",
+      risk: "medium",
+      expectedReturnPct: "",
+      maturityDate: "",
+      appreciates: false,
+      producesCashflow: false,
+      monthlyCashflow: "",
+      maintenanceCostMonthly: "",
+      liquidityDifficulty: "medium",
+      monthlyIncome: "",
+      ownerDependency: "partial",
+      replicable: false,
+      status: "active",
+      coverageAmount: "",
+      expiryDate: "",
+      metricLabel: "",
+      metricValue: "",
+      opportunityTypes: [],
+    },
+  };
+}
+
+// Renders only the fields that matter for the selected category, per the
+// per-category field schema in the approved plan - a financial asset never
+// shows a "strength rating", a human-capital asset never shows "liquidity".
+function AssetDetailFields({ draft, setDraft, t }) {
+  const { category, details } = draft;
+  const setDetail = (key, value) => setDraft((current) => ({ ...current, details: { ...current.details, [key]: value } }));
+
+  if (category === "financial") {
+    return (
+      <>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.value")}</span>
+          <input type="text" inputMode="decimal" value={draft.value} onChange={(e) => setDraft((c) => ({ ...c, value: e.target.value }))} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.liquidity")}</span>
+          <select value={details.liquidity} onChange={(e) => setDetail("liquidity", e.target.value)}>
+            {FIELD_ENUMS.liquidity.map((option) => (
+              <option key={option} value={option}>
+                {t(`assetProfile.fields.liquidityOptions.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.risk")}</span>
+          <select value={details.risk} onChange={(e) => setDetail("risk", e.target.value)}>
+            {FIELD_ENUMS.risk.map((option) => (
+              <option key={option} value={option}>
+                {t(`assetProfile.fields.riskOptions.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.expectedReturnPct")}</span>
+          <input type="text" inputMode="decimal" value={details.expectedReturnPct} onChange={(e) => setDetail("expectedReturnPct", e.target.value)} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.maturityDate")}</span>
+          <input type="date" value={details.maturityDate} onChange={(e) => setDetail("maturityDate", e.target.value)} />
+        </label>
+      </>
+    );
+  }
+
+  if (category === "physical") {
+    return (
+      <>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.value")}</span>
+          <input type="text" inputMode="decimal" value={draft.value} onChange={(e) => setDraft((c) => ({ ...c, value: e.target.value }))} />
+        </label>
+        <button type="button" className={details.appreciates ? "checkOption selected" : "checkOption"} onClick={() => setDetail("appreciates", !details.appreciates)}>
+          <span>{t("assetProfile.fields.appreciates")}</span>
+          {details.appreciates ? <Check size={14} /> : null}
+        </button>
+        <button type="button" className={details.producesCashflow ? "checkOption selected" : "checkOption"} onClick={() => setDetail("producesCashflow", !details.producesCashflow)}>
+          <span>{t("assetProfile.fields.producesCashflow")}</span>
+          {details.producesCashflow ? <Check size={14} /> : null}
+        </button>
+        {details.producesCashflow ? (
+          <label className="inputField">
+            <span>{t("assetProfile.fields.monthlyCashflow")}</span>
+            <input type="text" inputMode="decimal" value={details.monthlyCashflow} onChange={(e) => setDetail("monthlyCashflow", e.target.value)} />
+          </label>
+        ) : null}
+        <label className="inputField">
+          <span>{t("assetProfile.fields.maintenanceCostMonthly")}</span>
+          <input type="text" inputMode="decimal" value={details.maintenanceCostMonthly} onChange={(e) => setDetail("maintenanceCostMonthly", e.target.value)} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.liquidityDifficulty")}</span>
+          <select value={details.liquidityDifficulty} onChange={(e) => setDetail("liquidityDifficulty", e.target.value)}>
+            {FIELD_ENUMS.liquidityDifficulty.map((option) => (
+              <option key={option} value={option}>
+                {t(`assetProfile.fields.liquidityDifficultyOptions.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </>
+    );
+  }
+
+  if (category === "business") {
+    return (
+      <>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.monthlyIncome")}</span>
+          <input type="text" inputMode="decimal" value={details.monthlyIncome} onChange={(e) => setDetail("monthlyIncome", e.target.value)} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.valueOptional")}</span>
+          <input type="text" inputMode="decimal" value={draft.value} onChange={(e) => setDraft((c) => ({ ...c, value: e.target.value }))} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.ownerDependency")}</span>
+          <select value={details.ownerDependency} onChange={(e) => setDetail("ownerDependency", e.target.value)}>
+            {FIELD_ENUMS.ownerDependency.map((option) => (
+              <option key={option} value={option}>
+                {t(`assetProfile.fields.ownerDependencyOptions.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" className={details.replicable ? "checkOption selected" : "checkOption"} onClick={() => setDetail("replicable", !details.replicable)}>
+          <span>{t("assetProfile.fields.replicable")}</span>
+          {details.replicable ? <Check size={14} /> : null}
+        </button>
+      </>
+    );
+  }
+
+  if (category === "legal") {
+    return (
+      <>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.status")}</span>
+          <select value={details.status} onChange={(e) => setDetail("status", e.target.value)}>
+            {FIELD_ENUMS.legalStatus.map((option) => (
+              <option key={option} value={option}>
+                {t(`assetProfile.fields.statusOptions.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.coverageAmount")}</span>
+          <input type="text" inputMode="decimal" value={details.coverageAmount} onChange={(e) => setDetail("coverageAmount", e.target.value)} />
+        </label>
+        <label className="inputField">
+          <span>{t("assetProfile.fields.expiryDate")}</span>
+          <input type="date" value={details.expiryDate} onChange={(e) => setDetail("expiryDate", e.target.value)} />
+        </label>
+        <AssetStrengthRatingField draft={draft} setDraft={setDraft} t={t} />
+      </>
+    );
+  }
+
+  // human, social, knowledge, digital - the mostly-non-monetary categories:
+  // required strength rating, optional value, plus digital's follower-count-
+  // style metric and social's opportunity-type tags.
+  return (
+    <>
+      <AssetStrengthRatingField draft={draft} setDraft={setDraft} t={t} />
+      <label className="inputField">
+        <span>{t("assetProfile.fields.estimatedValueOptional")}</span>
+        <input type="text" inputMode="decimal" value={draft.value} onChange={(e) => setDraft((c) => ({ ...c, value: e.target.value }))} />
+      </label>
+      {category === "social" ? (
+        <div className="checkboxGrid">
+          {FIELD_ENUMS.opportunityType.map((option) => {
+            const selected = (details.opportunityTypes ?? []).includes(option);
+            return (
+              <button
+                type="button"
+                key={option}
+                className={selected ? "checkOption selected" : "checkOption"}
+                onClick={() =>
+                  setDetail(
+                    "opportunityTypes",
+                    selected ? details.opportunityTypes.filter((o) => o !== option) : [...(details.opportunityTypes ?? []), option]
+                  )
+                }
+              >
+                <span>{t(`assetProfile.fields.opportunityTypeOptions.${option}`)}</span>
+                {selected ? <Check size={14} /> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+      {category === "digital" ? (
+        <>
+          <label className="inputField">
+            <span>{t("assetProfile.fields.metricLabel")}</span>
+            <input type="text" value={details.metricLabel} onChange={(e) => setDetail("metricLabel", e.target.value)} />
+          </label>
+          <label className="inputField">
+            <span>{t("assetProfile.fields.metricValue")}</span>
+            <input type="text" inputMode="decimal" value={details.metricValue} onChange={(e) => setDetail("metricValue", e.target.value)} />
+          </label>
+        </>
+      ) : null}
+    </>
+  );
+}
+
+function AssetStrengthRatingField({ draft, setDraft, t }) {
+  return (
+    <label className="inputField">
+      <span>{t("assetProfile.fields.strengthRating")}</span>
+      <select value={draft.strengthRating} onChange={(e) => setDraft((c) => ({ ...c, strengthRating: e.target.value }))}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function AssetEntryForm({ initialDraft, onSubmit, onCancel, submitting, t }) {
+  const [draft, setDraft] = useState(initialDraft);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSubmit(draft);
+  };
+
+  return (
+    <form className="settingsGroup" onSubmit={handleSubmit}>
+      <label className="inputField">
+        <span>{t("assetProfile.fields.category")}</span>
+        <select
+          value={draft.category}
+          onChange={(e) => {
+            const category = e.target.value;
+            setDraft((current) => ({ ...blankAssetDraft(category), name: current.name, notes: current.notes }));
+          }}
+        >
+          {ASSET_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {t(assetCategoryMeta[category].labelKey)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="inputField">
+        <span>{t("assetProfile.fields.subtype")}</span>
+        <select value={draft.subtype} onChange={(e) => setDraft((c) => ({ ...c, subtype: e.target.value }))}>
+          {ASSET_SUBTYPES[draft.category].map((subtype) => (
+            <option key={subtype} value={subtype}>
+              {t(assetSubtypeLabelKey(draft.category, subtype))}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="inputField">
+        <span>{t("assetProfile.fields.name")}</span>
+        <input
+          type="text"
+          className="aiTextInput"
+          placeholder={t("assetProfile.fields.namePlaceholder")}
+          value={draft.name}
+          onChange={(e) => setDraft((c) => ({ ...c, name: e.target.value }))}
+        />
+      </label>
+
+      <AssetDetailFields draft={draft} setDraft={setDraft} t={t} />
+
+      <label className="inputField">
+        <span>{t("assetProfile.fields.notes")}</span>
+        <input type="text" className="aiTextInput" value={draft.notes} onChange={(e) => setDraft((c) => ({ ...c, notes: e.target.value }))} />
+      </label>
+
+      <div className="settingsActions">
+        <button type="submit" className="primaryButton" disabled={submitting || !draft.name.trim()}>
+          {submitting ? t("assetProfile.form.submitting") : t("assetProfile.form.submit")}
+        </button>
+        <button type="button" className="miniButton" onClick={onCancel}>
+          {t("assetProfile.form.cancel")}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function AssetProfileScreen({ preferences, setPreferences, t, setActiveScreen }) {
+  const [addingCategory, setAddingCategory] = useState(null);
+  const [editingAssetId, setEditingAssetId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const assets = preferences.assets ?? [];
+  const profile = getUserProfile(preferences);
+  const netWorth = computeNetWorth(assets, {
+    existingLoans: numberValue(profile.existingLoans, 0),
+    creditCardOutstanding: numberValue(profile.creditCardOutstanding, 0),
+  });
+  const categoryTotals = computeCategoryTotals(assets);
+  const stageRollup = computeStageRollup(assets);
+
+  const hasLegacyNumbers = numberValue(profile.currentSavings, 0) > 0 || numberValue(profile.investments, 0) > 0 || numberValue(profile.insuranceCoverageAmount, 0) > 0;
+  const showMigrationPrompt = assets.length === 0 && hasLegacyNumbers;
+
+  function draftToPayload(draft) {
+    return {
+      category: draft.category,
+      subtype: draft.subtype,
+      name: draft.name.trim(),
+      value: draft.value === "" ? null : Number(draft.value),
+      strengthRating: isNonMonetaryCategory(draft.category) ? Number(draft.strengthRating) : null,
+      details: draft.details,
+      notes: draft.notes.trim() || undefined,
+    };
+  }
+
+  async function handleCreate(draft) {
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draftToPayload(draft)),
+      });
+      if (!response.ok) {
+        setError(t("assetProfile.form.error"));
+        return;
+      }
+      const { asset } = await response.json();
+      setPreferences((current) => ({ ...current, assets: [asset, ...(current.assets ?? [])] }));
+      setAddingCategory(null);
+    } catch {
+      setError(t("assetProfile.form.error"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleUpdate(id, draft) {
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/assets/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draftToPayload(draft)),
+      });
+      if (!response.ok) {
+        setError(t("assetProfile.form.error"));
+        return;
+      }
+      const { asset } = await response.json();
+      setPreferences((current) => ({ ...current, assets: (current.assets ?? []).map((a) => (a.id === id ? asset : a)) }));
+      setEditingAssetId(null);
+    } catch {
+      setError(t("assetProfile.form.error"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/assets/${id}`, { method: "DELETE" });
+      if (!response.ok) {
+        setError(t("assetProfile.form.error"));
+        return;
+      }
+      setPreferences((current) => ({ ...current, assets: (current.assets ?? []).filter((a) => a.id !== id) }));
+    } catch {
+      setError(t("assetProfile.form.error"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleMigrateLegacy() {
+    const starters = [];
+    if (numberValue(profile.currentSavings, 0) > 0) {
+      starters.push({
+        category: "financial",
+        subtype: "cash",
+        name: t("assetProfile.migration.cashName"),
+        value: numberValue(profile.currentSavings, 0),
+        details: { liquidity: "cash", risk: "low" },
+      });
+    }
+    if (numberValue(profile.investments, 0) > 0) {
+      starters.push({
+        category: "financial",
+        subtype: "fund",
+        name: t("assetProfile.migration.investmentName"),
+        value: numberValue(profile.investments, 0),
+        details: { liquidity: "liquid", risk: "medium" },
+      });
+    }
+    if (numberValue(profile.insuranceCoverageAmount, 0) > 0) {
+      starters.push({
+        category: "legal",
+        subtype: "insurance_policy",
+        name: t("assetProfile.migration.insuranceName"),
+        details: { status: "active", coverageAmount: numberValue(profile.insuranceCoverageAmount, 0) },
+      });
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const created = [];
+      for (const starter of starters) {
+        const response = await fetch("/api/assets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(starter),
+        });
+        if (response.ok) {
+          const { asset } = await response.json();
+          created.push(asset);
+        }
+      }
+      setPreferences((current) => ({ ...current, assets: [...created, ...(current.assets ?? [])] }));
+    } catch {
+      setError(t("assetProfile.form.error"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Screen>
+      <Header eyebrow={t("assetProfile.eyebrow")} title={t("assetProfile.title")} subtitle={t("assetProfile.subtitle")} />
+      <div className="weddingTopRow">
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+      </div>
+
+      <section className="recommendationPanel">
+        <span className="sectionLabel">{t("assetProfile.netWorth.title")}</span>
+        <SummaryRow label={t("assetProfile.netWorth.total")} value={formatSgd(netWorth.netWorth)} />
+        <SummaryRow label={t("assetProfile.netWorth.assets")} value={formatSgd(netWorth.assetTotal)} />
+        <SummaryRow label={t("assetProfile.netWorth.liabilities")} value={formatSgd(netWorth.liabilities)} />
+      </section>
+
+      {showMigrationPrompt ? (
+        <section className="adviceOnlyPanel">
+          <Info size={18} />
+          <p>{t("assetProfile.migration.prompt")}</p>
+          <button type="button" className="secondaryButton" onClick={handleMigrateLegacy} disabled={submitting}>
+            {t("assetProfile.migration.action")}
+          </button>
+        </section>
+      ) : null}
+
+      <section className="scoreGrid">
+        {STAGES.map((stage) => {
+          const rollup = stageRollup[stage];
+          const Icon = assetStageMeta[stage].icon;
+          return (
+            <article className="healthScoreCard" key={stage}>
+              <div>
+                <strong>{t(assetStageMeta[stage].labelKey)}</strong>
+                <Icon size={15} />
+              </div>
+              <b>{rollup.valueTotal > 0 ? formatSgd(rollup.valueTotal) : `${rollup.itemCount} ${t("assetProfile.stages.itemsSuffix")}`}</b>
+              <small>{t("assetProfile.stages.itemCount", { count: rollup.itemCount })}</small>
+            </article>
+          );
+        })}
+      </section>
+
+      {error ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{error}</p>
+        </section>
+      ) : null}
+
+      {ASSET_CATEGORIES.map((category) => {
+        const Icon = assetCategoryMeta[category].icon;
+        const categoryAssets = assets.filter((asset) => asset.category === category);
+        const totals = categoryTotals[category];
+        return (
+          <SettingsCard
+            key={category}
+            icon={Icon}
+            title={t(assetCategoryMeta[category].labelKey)}
+            description={totals.valueTotal > 0 ? formatSgd(totals.valueTotal) : t("assetProfile.stages.itemCount", { count: totals.itemCount })}
+          >
+            {categoryAssets.length ? (
+              <div className="weddingLineItems">
+                {categoryAssets.map((asset) =>
+                  editingAssetId === asset.id ? (
+                    <AssetEntryForm
+                      key={asset.id}
+                      initialDraft={assetToDraft(asset)}
+                      onSubmit={(draft) => handleUpdate(asset.id, draft)}
+                      onCancel={() => setEditingAssetId(null)}
+                      submitting={submitting}
+                      t={t}
+                    />
+                  ) : (
+                    <div className="weddingLineItem" key={asset.id}>
+                      <SummaryRow
+                        label={`${asset.name} — ${t(assetSubtypeLabelKey(asset.category, asset.subtype))}`}
+                        value={asset.value != null ? formatSgd(asset.value) : asset.strengthRating != null ? `${asset.strengthRating}/5` : "—"}
+                      />
+                      <div className="settingsActions">
+                        <button type="button" className="miniButton" onClick={() => setEditingAssetId(asset.id)} aria-label={t("assetProfile.form.edit")}>
+                          <Pencil size={14} />
+                        </button>
+                        <button type="button" className="miniButton danger" onClick={() => handleDelete(asset.id)} aria-label={t("assetProfile.form.delete")}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            ) : (
+              <p>{t("assetProfile.emptyCategory")}</p>
+            )}
+
+            {addingCategory === category ? (
+              <AssetEntryForm
+                initialDraft={blankAssetDraft(category)}
+                onSubmit={handleCreate}
+                onCancel={() => setAddingCategory(null)}
+                submitting={submitting}
+                t={t}
+              />
+            ) : (
+              <button type="button" className="secondaryButton" onClick={() => setAddingCategory(category)}>
+                <Plus size={15} />
+                {t("assetProfile.form.addToCategory")}
+              </button>
+            )}
+          </SettingsCard>
+        );
+      })}
+    </Screen>
+  );
+}
+
+function assetToDraft(asset) {
+  const blank = blankAssetDraft(asset.category);
+  return {
+    ...blank,
+    subtype: asset.subtype,
+    name: asset.name,
+    value: asset.value != null ? String(asset.value) : "",
+    strengthRating: asset.strengthRating != null ? String(asset.strengthRating) : "3",
+    notes: asset.notes ?? "",
+    details: { ...blank.details, ...(asset.details ?? {}) },
+  };
+}
+
 function LoadingScreen({ messageKey, t }) {
   return (
     <Screen>
@@ -12188,6 +12857,19 @@ export default function App() {
     } catch {
       // Offline/unreachable - fall back to whatever was cached in preferences.
     }
+    // Same reasoning as fetchedIncomeHistory above: the real `assets` table
+    // (lib/asset-store.js) is the source of truth, not the generic
+    // preferences blob.
+    let fetchedAssets = savedPreferences?.assets ?? [];
+    try {
+      const assetsResponse = await fetch("/api/assets");
+      if (assetsResponse.ok) {
+        const { assets: fetched } = await assetsResponse.json();
+        if (Array.isArray(fetched)) fetchedAssets = fetched;
+      }
+    } catch {
+      // Offline/unreachable - fall back to whatever was cached in preferences.
+    }
     if (cancelled) return;
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
@@ -12201,6 +12883,7 @@ export default function App() {
       rejectionCounts: savedPreferences?.rejectionCounts ?? {},
       dismissedActions: savedPreferences?.dismissedActions ?? [],
       incomeHistory: fetchedIncomeHistory,
+      assets: fetchedAssets,
       // The authenticated account's real display name seeds every fresh
       // login (no more global "Karina" hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once
@@ -12458,6 +13141,7 @@ export default function App() {
         resetRelationship={resetRelationship}
       />
     ),
+    [screens.ASSET_PROFILE]: <AssetProfileScreen {...shared} />,
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,
     [screens.NEED_HOME]: <NeedDetailScreen {...shared} type="home" />,
     [screens.NEED_RETIREMENT]: <NeedDetailScreen {...shared} type="retirement" />,
