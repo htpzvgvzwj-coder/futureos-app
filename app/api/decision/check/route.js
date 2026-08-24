@@ -1,4 +1,4 @@
-import { deepCleanStrayEscapes, extractText, findToolUse, getAnthropicClient, runToolTurn, WEDDING_MODEL } from "../../../../lib/anthropic-client.js";
+import { runToolTurnWithFallback } from "../../../../lib/ai-fallback.js";
 import { buildDecisionNarrationSystemPrompt } from "../../../../lib/decision-prompts.js";
 import { NARRATE_VERDICT_TOOL } from "../../../../lib/decision-tools.js";
 import { decisionCheckRequestSchema, narrateVerdictSchema } from "../../../../lib/decision-validation.js";
@@ -37,35 +37,32 @@ export async function POST(request) {
     otherGoalsMonthlyOutflow: otherGoals.total,
   });
 
-  const client = getAnthropicClient();
+  // anthropic -> groq -> gemini (lib/ai-fallback.js) before ever falling
+  // back to the local mock below - decision/check is a genuine single-shot
+  // call (no conversation history to translate across providers), the same
+  // shape Mirror debate and Decode This already use.
   let narration;
   let mocked = false;
   try {
-    const response = await runToolTurn(client, {
-      model: WEDDING_MODEL,
-      max_tokens: 2000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "low" },
-      system: buildDecisionNarrationSystemPrompt(language, verdict, description),
-      tools: [NARRATE_VERDICT_TOOL],
-      tool_choice: { type: "any" },
-      messages: [{ role: "user", content: description }],
+    const result = await runToolTurnWithFallback({
+      systemPrompt: buildDecisionNarrationSystemPrompt(language, verdict, description),
+      tool: NARRATE_VERDICT_TOOL,
+      userMessage: description,
     });
-    if (response.stop_reason === "refusal") {
+    if (result.refusal) {
       return Response.json({ error: "refusal" }, { status: 422 });
     }
-    const toolUse = findToolUse(response.content, ["narrate_verdict"]);
-    if (!toolUse) {
-      return Response.json({ error: "inconclusive", detail: extractText(response.content) }, { status: 422 });
+    if (!result.toolInput) {
+      return Response.json({ error: "inconclusive", detail: result.rawText }, { status: 422 });
     }
-    const parsedNarration = narrateVerdictSchema.safeParse(deepCleanStrayEscapes(toolUse.input));
+    const parsedNarration = narrateVerdictSchema.safeParse(result.toolInput);
     if (!parsedNarration.success) {
       console.error("decision/check tool output failed validation", parsedNarration.error.issues);
       return Response.json({ error: "validation_failed", detail: parsedNarration.error.issues }, { status: 422 });
     }
     narration = parsedNarration.data;
   } catch (error) {
-    console.error("decision/check Anthropic call failed, falling back to mock response", error);
+    console.error("decision/check: all configured AI providers failed, falling back to mock response", error.attempts ?? error);
     narration = buildMockNarration(verdict.verdict);
     mocked = true;
   }
