@@ -2106,6 +2106,12 @@
           "groq": "Groq (backup)",
           "gemini": "Gemini (backup)"
         },
+        "historyCited": "Real history this debate could draw on",
+        "historyCitedValue": "{count} of your own resolved past debate(s)",
+        "predictiveAccuracy": "This app's own past risk calls",
+        "predictiveAccuracyValue": "Right {percent}% of the time",
+        "customerCalibration": "Your own past disagreements with a flagged risk",
+        "customerCalibrationValue": "Right {percent}% of the time",
         "note": "The dollar figures above are computed by FutureOS, not the AI - the debate only argues about them."
       },
       "wholePicture": {

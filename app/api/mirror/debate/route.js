@@ -3,7 +3,7 @@ import { buildMirrorDebateSystemPrompt } from "../../../../lib/mirror-prompts.js
 import { FUTURE_MIRROR_DEBATE_TOOL } from "../../../../lib/mirror-tools.js";
 import { mirrorDebateSchema } from "../../../../lib/mirror-validation.js";
 import { computeGoalFeasibility } from "../../../../lib/mirror-finance.js";
-import { saveDebate } from "../../../../lib/mirror-store.js";
+import { saveDebate, getMirrorHistoryContext } from "../../../../lib/mirror-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { listAssets } from "../../../../lib/asset-store.js";
 import { computeInsuranceCoverage } from "../../../../lib/asset-finance.js";
@@ -44,6 +44,13 @@ export async function POST(request) {
   const crossGoalSnapshot = await getCrossGoalSnapshot(userId);
   computed.wholePicture = computeWholePictureImpact(computed, crossGoalSnapshot);
 
+  // Real self-referencing history: this customer's own resolved past
+  // debates, this app's own predictive accuracy, and this customer's own
+  // calibration record - passed as debate INPUT so the Bull/Bear/Judge can
+  // cite real past evidence instead of arguing from nothing but this one
+  // plan. See lib/mirror-store.js's getMirrorHistoryContext.
+  const history = await getMirrorHistoryContext(userId);
+
   let result;
   try {
     result = await runToolTurnWithFallback({
@@ -53,6 +60,7 @@ export async function POST(request) {
         computed,
         isIncomeIrregular: inputs.isIncomeIrregular,
         incomeSampleSize: inputs.incomeSampleSize,
+        history,
       }),
       tool: FUTURE_MIRROR_DEBATE_TOOL,
       userMessage: "Run the Bull/Bear/Judge debate on this plan.",
@@ -86,7 +94,7 @@ export async function POST(request) {
     situation: situation ?? null,
     futureScore: computed.feasibilityScore,
     riskLevel: computed.riskLevel,
-    context: { inputs, computed, goalLabel, language },
+    context: { inputs, computed, goalLabel, language, history },
     aiProvider: result.provider,
     ...parsed.data,
   });
@@ -97,6 +105,7 @@ export async function POST(request) {
     riskLevel: computed.riskLevel,
     computed,
     aiProvider: result.provider,
+    history,
     ...parsed.data,
   });
 }

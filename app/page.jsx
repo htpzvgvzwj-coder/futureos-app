@@ -4154,6 +4154,24 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
               value={t(`simulator.output.evidence.provider.${debate.aiProvider}`)}
             />
           ) : null}
+          {debate.history?.resolvedDebates?.length ? (
+            <SummaryRow
+              label={t("simulator.output.evidence.historyCited")}
+              value={t("simulator.output.evidence.historyCitedValue", { count: debate.history.resolvedDebates.length })}
+            />
+          ) : null}
+          {debate.history?.predictiveAccuracy != null ? (
+            <SummaryRow
+              label={t("simulator.output.evidence.predictiveAccuracy")}
+              value={t("simulator.output.evidence.predictiveAccuracyValue", { percent: debate.history.predictiveAccuracy })}
+            />
+          ) : null}
+          {debate.history?.customerCalibration != null ? (
+            <SummaryRow
+              label={t("simulator.output.evidence.customerCalibration")}
+              value={t("simulator.output.evidence.customerCalibrationValue", { percent: debate.history.customerCalibration })}
+            />
+          ) : null}
           <small>{t("simulator.output.evidence.note")}</small>
         </section>
       ) : null}
