@@ -4054,6 +4054,33 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </section>
       ) : null}
 
+      {debate.computed?.wholePicture ? (
+        <section className="recommendationPanel">
+          <span className="sectionLabel">{t("simulator.output.wholePicture.title")}</span>
+          <SummaryRow
+            label={t("simulator.output.wholePicture.committedTotal")}
+            value={`SGD ${debate.computed.wholePicture.committedMonthlyTotal}`}
+          />
+          <SummaryRow
+            label={t("simulator.output.wholePicture.utilization")}
+            value={`${debate.computed.wholePicture.wholePictureUtilizationPercent}%`}
+          />
+          <SummaryRow
+            label={t("simulator.output.wholePicture.residual")}
+            value={`SGD ${debate.computed.wholePicture.residualAfterAllCommitments}`}
+          />
+          {debate.computed.wholePicture.loanImpact.length ? (
+            <div className="weddingStatChips">
+              {debate.computed.wholePicture.loanImpact.map((loan) => (
+                <span className={loan.delta <= -10 ? "statChip warning" : "statChip"} key={loan.purpose}>
+                  {t(`loanPlanner.purposes.${loan.purpose}`)}: {loan.scoreBefore} → {loan.scoreAfter}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <button type="button" className="secondaryButton" onClick={onConfirm} disabled={confirmed}>
         {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
         <ShieldCheck size={18} />

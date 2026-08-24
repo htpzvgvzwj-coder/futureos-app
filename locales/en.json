@@ -2085,6 +2085,12 @@
         },
         "note": "The dollar figures above are computed by FutureOS, not the AI - the debate only argues about them."
       },
+      "wholePicture": {
+        "title": "Whole-picture check",
+        "committedTotal": "Already committed monthly (other goals)",
+        "utilization": "Total commitment if this is added",
+        "residual": "Left over after everything"
+      },
       "recommendedAction": {
         "proceed": "Recommendation: proceed as planned.",
         "proceed_with_adjustment": "Recommendation: proceed, with an adjustment.",

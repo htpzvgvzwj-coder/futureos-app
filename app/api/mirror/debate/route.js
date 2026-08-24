@@ -8,6 +8,7 @@ import { getCurrentUserId } from "../../../../lib/auth.js";
 import { listAssets } from "../../../../lib/asset-store.js";
 import { computeInsuranceCoverage } from "../../../../lib/asset-finance.js";
 import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
+import { getCrossGoalSnapshot, computeWholePictureImpact } from "../../../../lib/cross-goal-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -35,6 +36,13 @@ export async function POST(request) {
   // Numbers are computed here from the real inputs, never trusted from the
   // model - the AI only argues about them (lib/mirror-prompts.js).
   const computed = computeGoalFeasibility(goalType, inputs, assetContext);
+
+  // Whole-picture context: what this goal would do layered on top of every
+  // OTHER commitment already confirmed elsewhere in the app (a home loan,
+  // an investment, another goal's savings plan) - never just this goal in
+  // isolation. See lib/cross-goal-context.js.
+  const crossGoalSnapshot = await getCrossGoalSnapshot(userId);
+  computed.wholePicture = computeWholePictureImpact(computed, crossGoalSnapshot);
 
   let result;
   try {
