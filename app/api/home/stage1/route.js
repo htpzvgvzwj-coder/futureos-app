@@ -20,6 +20,8 @@ import {
   updateSessionStatus,
 } from "../../../../lib/home-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { findActGrantor } from "../../../../lib/access-grant-store.js";
+import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -109,6 +111,35 @@ export async function POST(request) {
     { role: "user", content: userContent },
     { role: "assistant", content: assistantContent },
   ]);
+
+  // Joint (couple) confirmation: same pattern as wedding's stage1 (see
+  // lib/goal-plan-actions.js) - if a partner has granted this user
+  // "view_and_act" on the home domain, the plan isn't saved directly, it's
+  // proposed as a joint action. No grant -> unchanged direct-save behavior
+  // below.
+  if (toolUse.name === "confirm_home_plan") {
+    const grantor = await findActGrantor(userId, "home");
+    if (grantor) {
+      try {
+        const action = await proposeJointAction({
+          initiatorUserId: userId,
+          targetUserId: grantor.grantor_user_id,
+          domain: "home",
+          actionType: "confirm_home_plan",
+          payload: { kind: "plan", ...parsed.data },
+        });
+        return Response.json({
+          type: toolUse.name,
+          status: "pending_partner_confirmation",
+          jointActionId: action.id,
+          data: parsed.data,
+          mocked,
+        });
+      } catch (error) {
+        if (error.code !== "no_joint_grant") throw error;
+      }
+    }
+  }
 
   const artifactType = toolUse.name === "propose_home_plans" ? "plan_options" : "confirmed_plan";
   const createdAt = await saveArtifact(session.id, "stage1", artifactType, parsed.data);

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment"];
 const ACCESS_LEVEL_OPTIONS = [
   { value: "view", label: "View only" },
-  { value: "view_and_act", label: "View and jointly decide (e.g. confirm a wedding budget together)" },
+  { value: "view_and_act", label: "View and jointly decide (e.g. confirm a wedding, home, retirement, or other goal plan together)" },
 ];
 
 function formatSgd(value) {
@@ -14,21 +14,32 @@ function formatSgd(value) {
   return Number.isFinite(n) ? `SGD ${n.toLocaleString("en-SG")}` : "SGD 0";
 }
 
+const DOMAIN_LABELS = { wedding: "Wedding", home: "Home", retirement: "Retirement", other: "Other goal" };
+
 // Plain-language summary of a pending joint action's payload - shapes vary
-// by action_type (see lib/joint-action-dispatch.js for the full registry).
+// by action_type (see lib/goal-plan-actions.js for the full domain
+// registry). Every "confirm_<domain>_plan" action_type shares the same two
+// real kinds: "budget"/"plan" (stage1) and "savings_plan" (stage2, whose
+// monthly_contribution/start_month/target_complete_month fields are
+// uniform across all four domains - lib/{wedding,home,retirement,other}-
+// validation.js's finalize schemas all use the exact same names).
 function describeJointAction(action) {
-  if (action.action_type === "confirm_wedding_plan") {
+  const domainLabel = DOMAIN_LABELS[action.domain] ?? action.domain;
+  if (action.action_type.startsWith("confirm_") && action.action_type.endsWith("_plan")) {
     if (action.payload.kind === "budget") {
-      return `Wedding budget: ${formatSgd(action.payload.total_budget)} for a wedding on ${action.payload.wedding_date}`;
+      return `${domainLabel} budget: ${formatSgd(action.payload.total_budget)} for a wedding on ${action.payload.wedding_date}`;
+    }
+    if (action.payload.kind === "plan") {
+      return `${domainLabel} plan confirmed and proposed for your joint decision.`;
     }
     if (action.payload.kind === "savings_plan") {
-      return `Wedding savings plan: ${formatSgd(action.payload.monthly_contribution)}/month, ${action.payload.start_month} to ${action.payload.target_complete_month}`;
+      return `${domainLabel} savings plan: ${formatSgd(action.payload.monthly_contribution)}/month, ${action.payload.start_month} to ${action.payload.target_complete_month}`;
     }
   }
   if (action.action_type === "pause_goal_plan" || action.action_type === "reduce_goal_plan") {
-    return `${action.domain}: change monthly contribution to ${formatSgd(action.payload.newMonthlyContribution)} - ${action.payload.explanation}`;
+    return `${domainLabel}: change monthly contribution to ${formatSgd(action.payload.newMonthlyContribution)} - ${action.payload.explanation}`;
   }
-  return `${action.domain} / ${action.action_type}`;
+  return `${domainLabel} / ${action.action_type}`;
 }
 
 export default function GrantsPage() {

@@ -159,10 +159,10 @@ export async function POST(request) {
           payload: {
             kind: "savings_plan",
             ...finalData,
-            // Carried through so dispatchWeddingConfirm can run the same
+            // Carried through so the joint dispatcher can run the same
             // triggerCrossGoalCheck the direct-save path below runs - the
             // partner's later confirm has no request body of its own to
-            // read these from. See lib/wedding-actions.js.
+            // read these from. See lib/goal-plan-actions.js.
             crossGoalCheckInputs: {
               monthlyIncome: profile.monthlyIncome,
               monthlyExpenses: profile.monthlyExpenses,

@@ -109,8 +109,8 @@ export async function POST(request) {
   // Joint (couple) confirmation: if a partner has granted this user
   // "view_and_act" on the wedding domain, the budget isn't saved directly -
   // it's proposed as a joint action and only actually written once that
-  // partner separately confirms (lib/wedding-actions.js's
-  // applyWeddingJointConfirm, dispatched via app/api/joint-actions/[id]/
+  // partner separately confirms (lib/goal-plan-actions.js's
+  // applyGoalPlanJointConfirm, dispatched via app/api/joint-actions/[id]/
   // confirm). No grant -> unchanged direct-save behavior below.
   if (toolUse.name === "confirm_wedding_budget") {
     const grantor = await findActGrantor(userId, "wedding");

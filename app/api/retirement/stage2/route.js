@@ -22,6 +22,8 @@ import {
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
 import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
+import { findActGrantor } from "../../../../lib/access-grant-store.js";
+import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -123,6 +125,43 @@ export async function POST(request) {
     { role: "user", content: userContent },
     { role: "assistant", content: assistantContent },
   ]);
+
+  // Joint (couple) confirmation: same pattern as wedding's stage2 (see
+  // lib/goal-plan-actions.js) - if a partner has granted this user
+  // "view_and_act" on the retirement domain, the finalized savings plan
+  // isn't saved directly, it's proposed as a joint action. No grant ->
+  // unchanged direct-save behavior below.
+  if (toolUse.name === "finalize_retirement_savings_plan") {
+    const grantor = await findActGrantor(userId, "retirement");
+    if (grantor) {
+      try {
+        const action = await proposeJointAction({
+          initiatorUserId: userId,
+          targetUserId: grantor.grantor_user_id,
+          domain: "retirement",
+          actionType: "confirm_retirement_plan",
+          payload: {
+            kind: "savings_plan",
+            ...parsed.data,
+            crossGoalCheckInputs: {
+              monthlyIncome: profile.monthlyIncome,
+              monthlyExpenses: profile.monthlyExpenses,
+              currentSavings: assetContext.availableLiquidSavings,
+            },
+          },
+        });
+        return Response.json({
+          type: toolUse.name,
+          status: "pending_partner_confirmation",
+          jointActionId: action.id,
+          data: parsed.data,
+          mocked,
+        });
+      } catch (error) {
+        if (error.code !== "no_joint_grant") throw error;
+      }
+    }
+  }
 
   const artifactType = toolUse.name === "propose_retirement_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
   await saveArtifact(session.id, "stage2", artifactType, parsed.data);

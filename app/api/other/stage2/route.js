@@ -23,6 +23,8 @@ import { getCurrentUserId } from "../../../../lib/auth.js";
 import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
 import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 import { computeGoalFeasibility, computeSavingsPlanFeasibility } from "../../../../lib/other-finance.js";
+import { findActGrantor } from "../../../../lib/access-grant-store.js";
+import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -150,6 +152,44 @@ export async function POST(request) {
           }),
         }
       : parsed.data;
+
+  // Joint (couple) confirmation: same pattern as wedding's stage2 (see
+  // lib/goal-plan-actions.js) - if a partner has granted this user
+  // "view_and_act" on the other domain, the finalized savings plan isn't
+  // saved directly, it's proposed as a joint action. No grant -> unchanged
+  // direct-save behavior below.
+  if (toolUse.name === "finalize_savings_plan") {
+    const grantor = await findActGrantor(userId, "other");
+    if (grantor) {
+      try {
+        const action = await proposeJointAction({
+          initiatorUserId: userId,
+          targetUserId: grantor.grantor_user_id,
+          domain: "other",
+          actionType: "confirm_other_plan",
+          payload: {
+            kind: "savings_plan",
+            ...finalData,
+            crossGoalCheckInputs: {
+              monthlyIncome: profile.monthlyIncome,
+              monthlyExpenses: profile.monthlyExpenses,
+              currentSavings: assetContext.availableLiquidSavings,
+            },
+          },
+        });
+        return Response.json({
+          type: toolUse.name,
+          status: "pending_partner_confirmation",
+          jointActionId: action.id,
+          data: finalData,
+          goalFeasibility,
+          mocked,
+        });
+      } catch (error) {
+        if (error.code !== "no_joint_grant") throw error;
+      }
+    }
+  }
 
   const artifactType = toolUse.name === "propose_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
   await saveArtifact(session.id, "stage2", artifactType, finalData);
