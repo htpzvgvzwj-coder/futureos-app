@@ -1922,6 +1922,7 @@
     "quickPlannersLabel": "Or jump straight to a planner",
     "seedPrompt": "I'm not sure where to start - can we talk about {need}?",
     "seedPromptOpenLoop": "Can we follow up on this - {domain}: {loopType}?",
+    "seedPromptCrossGoalRisk": "I just confirmed something in {domain}, and it looks like it might affect my other commitments (total commitment is now {utilization}% of my income) - can you help me think through whether I should adjust something?",
     "voice": {
       "speak": "Speak",
       "stop": "Stop recording",
@@ -2694,6 +2695,13 @@
     "openLoopTitle": "{domain}: {loopType}",
     "detail": "Tap to talk it through with Future Self Guardian - grounded in your real numbers, not a guess.",
     "cta": "Talk to Guardian"
+  },
+  "guardianAlert": {
+    "label": "Real risk detected",
+    "title": "Your total commitments are now at {utilization}% of income",
+    "detailLoanImpact": "Your confirmed {purpose} loan's outlook would move from {before} to {after} if nothing changes.",
+    "detailUtilizationOnly": "Tap to talk through your whole picture with Future Self Guardian.",
+    "dismiss": "Dismiss"
   },
   "spendingRisk": {
     "title": "Spending Risk Detail",

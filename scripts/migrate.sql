@@ -651,3 +651,26 @@ create table if not exists assets (
 
 create index if not exists assets_profile_category_idx
   on assets (profile_key, category);
+
+-- Real, persisted, screen-independent proactive alert - before this,
+-- nothing in the app could surface "the customer should know this" outside
+-- of them opening a specific screen. Created deterministically (see
+-- lib/cross-goal-context.js's checkCrossGoalRisk) right after any domain
+-- confirms a new commitment, if the customer's real total committed
+-- monthly outflow (or an already-confirmed loan's real Future Score)
+-- crosses a real threshold. Surfaced on Home (app/page.jsx's
+-- HomeDashboard), not buried inside Guardian.
+create table if not exists guardian_alerts (
+  id             uuid primary key default gen_random_uuid(),
+  profile_key    text not null,
+  alert_type     text not null, -- cross_goal_risk (only type today)
+  domain         text,          -- which goal's confirm triggered this
+  severity       text not null, -- monitoring | atRisk
+  detail         jsonb not null, -- real numbers from checkCrossGoalRisk
+  status         text not null default 'open', -- open | dismissed
+  created_at     timestamptz not null default now(),
+  dismissed_at   timestamptz
+);
+
+create index if not exists guardian_alerts_profile_status_idx
+  on guardian_alerts (profile_key, status, created_at desc);

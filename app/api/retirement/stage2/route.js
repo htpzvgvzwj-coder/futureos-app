@@ -21,6 +21,7 @@ import {
 } from "../../../../lib/retirement-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-context.js";
+import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -128,6 +129,11 @@ export async function POST(request) {
 
   if (toolUse.name === "finalize_retirement_savings_plan") {
     await updateSessionStatus(session.id, { stage2Status: "confirmed" });
+    await triggerCrossGoalCheck(userId, "retirement", {
+      monthlyIncome: profile.monthlyIncome,
+      monthlyExpenses: profile.monthlyExpenses,
+      currentSavings: assetContext.availableLiquidSavings,
+    });
   } else {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }

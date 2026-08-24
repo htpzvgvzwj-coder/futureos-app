@@ -7,6 +7,7 @@ import { computeCoverageGap, computeMicroTopUp } from "../../../../lib/micro-ins
 import { saveOffer } from "../../../../lib/micro-insurance-store.js";
 import { getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/loan-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 
 export const runtime = "nodejs";
 const MICRO_TOPUP_DURATION_MONTHS = 6;
@@ -66,6 +67,7 @@ export async function POST(request) {
   const session = await getOrCreateSession(userId, purpose);
   const createdAt = await saveArtifact(session.id, "stage1", "confirmed_loan", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
+  await triggerCrossGoalCheck(userId, "loan", { monthlyIncome, monthlyExpenses, currentSavings: availableSavings });
 
   // Event-triggered micro-insurance: this new loan is the trigger event. Re-reads total liabilities
   // AFTER the save above, so it already reflects this loan - if the customer's declared coverage no

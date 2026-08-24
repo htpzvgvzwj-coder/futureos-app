@@ -10,6 +10,7 @@ import {
 } from "../../../../lib/investment-finance.js";
 import { getLatestArtifact, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/investment-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 
 export const runtime = "nodejs";
 
@@ -93,6 +94,7 @@ export async function POST(request) {
 
   const createdAt = await saveArtifact(session.id, "stage1", "confirmed_investment_pick", result);
   await updateSessionStatus(session.id, { stage1Status: "confirmed" });
+  await triggerCrossGoalCheck(userId, "investment", { monthlyIncome, monthlyExpenses, currentSavings: availableSavings });
 
   return Response.json({ type: "confirm_investment", data: result, confirmedAt: createdAt });
 }

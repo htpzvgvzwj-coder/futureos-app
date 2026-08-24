@@ -3194,11 +3194,34 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   // is more time-sensitive than suggesting something new.
   const [openLoops, setOpenLoops] = useState([]);
   const topOpenLoop = openLoops[0] ?? null;
-  const guardianNudge = topOpenLoop
-    ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
-    : topDetectedNeed
-      ? { kind: "detectedNeed", id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey }
-      : null;
+
+  // Real, persisted, screen-independent proactive alerts (lib/guardian-
+  // alert-store.js) - a real risk to something ALREADY confirmed (a loan's
+  // outlook worsening, total commitment utilization crossing a threshold)
+  // outranks both open loops and a generic detected need, since it's about
+  // money already committed rather than a suggestion.
+  const [crossGoalAlerts, setCrossGoalAlerts] = useState([]);
+  const topCrossGoalAlert = crossGoalAlerts[0] ?? null;
+  const [dismissingAlertId, setDismissingAlertId] = useState(null);
+
+  const guardianNudge = topCrossGoalAlert
+    ? { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
+    : topOpenLoop
+      ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
+      : topDetectedNeed
+        ? { kind: "detectedNeed", id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey }
+        : null;
+
+  const dismissCrossGoalAlert = async (event, alertId) => {
+    event.stopPropagation();
+    setDismissingAlertId(alertId);
+    try {
+      await fetch(`/api/guardian-alerts/${alertId}/dismiss`, { method: "POST" });
+      setCrossGoalAlerts((current) => current.filter((alert) => alert.id !== alertId));
+    } finally {
+      setDismissingAlertId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -3213,6 +3236,12 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
       .then((response) => response.json())
       .then((data) => {
         if (!cancelled) setOpenLoops(data.loops ?? []);
+      })
+      .catch(() => {});
+    fetch("/api/guardian-alerts")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setCrossGoalAlerts(data.alerts ?? []);
       })
       .catch(() => {});
     return () => {
@@ -3429,7 +3458,7 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
         {guardianNudge ? (
           <motion.button
             type="button"
-            className="futureAlertCard guardianNudgeCard"
+            className={guardianNudge.kind === "crossGoalRisk" && guardianNudge.severity === "atRisk" ? "futureAlertCard risk" : "futureAlertCard guardianNudgeCard"}
             data-testid="guardian-nudge-card"
             onClick={() => {
               setMirrorChatSeed(guardianNudge);
@@ -3440,23 +3469,51 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             transition={{ duration: 0.36, delay: 0.16, ease: "easeOut" }}
           >
             <span className="futureAlertIcon">
-              <Sparkles size={18} />
+              {guardianNudge.kind === "crossGoalRisk" ? <AlertTriangle size={18} /> : <Sparkles size={18} />}
             </span>
             <span>
               <small>
-                {guardianNudge.kind === "openLoop" ? t("mirrorChat.openLoopsLabel") : t("guardianNudge.label")}
+                {guardianNudge.kind === "crossGoalRisk"
+                  ? t("guardianAlert.label")
+                  : guardianNudge.kind === "openLoop"
+                    ? t("mirrorChat.openLoopsLabel")
+                    : t("guardianNudge.label")}
               </small>
               <strong>
-                {guardianNudge.kind === "openLoop"
-                  ? t("guardianNudge.openLoopTitle", {
-                      domain: t(`simulator.goals.${guardianNudge.domain}`),
-                      loopType: t(`mirrorChat.openLoopTypes.${guardianNudge.type}`),
-                    })
-                  : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
+                {guardianNudge.kind === "crossGoalRisk"
+                  ? t("guardianAlert.title", { utilization: guardianNudge.detail.utilizationPercent })
+                  : guardianNudge.kind === "openLoop"
+                    ? t("guardianNudge.openLoopTitle", {
+                        domain: t(`simulator.goals.${guardianNudge.domain}`),
+                        loopType: t(`mirrorChat.openLoopTypes.${guardianNudge.type}`),
+                      })
+                    : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
               </strong>
-              <em>{t("guardianNudge.detail")}</em>
+              <em>
+                {guardianNudge.kind === "crossGoalRisk"
+                  ? guardianNudge.detail.worseningLoans?.length
+                    ? t("guardianAlert.detailLoanImpact", {
+                        purpose: t(`loanPlanner.purposes.${guardianNudge.detail.worseningLoans[0].purpose}`),
+                        before: guardianNudge.detail.worseningLoans[0].scoreBefore,
+                        after: guardianNudge.detail.worseningLoans[0].scoreAfter,
+                      })
+                    : t("guardianAlert.detailUtilizationOnly")
+                  : t("guardianNudge.detail")}
+              </em>
             </span>
-            <ChevronRight size={17} />
+            {guardianNudge.kind === "crossGoalRisk" ? (
+              <button
+                type="button"
+                className="miniButton"
+                disabled={dismissingAlertId === guardianNudge.alertId}
+                onClick={(event) => dismissCrossGoalAlert(event, guardianNudge.alertId)}
+                aria-label={t("guardianAlert.dismiss")}
+              >
+                <X size={14} />
+              </button>
+            ) : (
+              <ChevronRight size={17} />
+            )}
           </motion.button>
         ) : null}
 
@@ -4380,12 +4437,17 @@ function MirrorChatScreen({
     onConsumeMirrorChatSeed();
     if (messages.length === 0) {
       const seedText =
-        mirrorChatSeed.kind === "openLoop"
-          ? t("mirrorChat.seedPromptOpenLoop", {
+        mirrorChatSeed.kind === "crossGoalRisk"
+          ? t("mirrorChat.seedPromptCrossGoalRisk", {
               domain: t(`simulator.goals.${mirrorChatSeed.domain}`),
-              loopType: t(`mirrorChat.openLoopTypes.${mirrorChatSeed.type}`),
+              utilization: mirrorChatSeed.detail?.utilizationPercent,
             })
-          : t("mirrorChat.seedPrompt", { need: t(mirrorChatSeed.titleKey) });
+          : mirrorChatSeed.kind === "openLoop"
+            ? t("mirrorChat.seedPromptOpenLoop", {
+                domain: t(`simulator.goals.${mirrorChatSeed.domain}`),
+                loopType: t(`mirrorChat.openLoopTypes.${mirrorChatSeed.type}`),
+              })
+            : t("mirrorChat.seedPrompt", { need: t(mirrorChatSeed.titleKey) });
       sendMessage(seedText);
     }
   }, [mirrorChatSeed, historyLoading, messages.length]);

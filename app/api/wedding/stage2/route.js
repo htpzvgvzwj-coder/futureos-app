@@ -24,6 +24,7 @@ import { resolveAssetPromptContext } from "../../../../lib/liquid-savings-contex
 import { computeMilestoneFeasibility } from "../../../../lib/wedding-finance.js";
 import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
+import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -175,6 +176,15 @@ export async function POST(request) {
 
   if (toolUse.name === "finalize_savings_plan") {
     await updateSessionStatus(session.id, { stage2Status: "confirmed" });
+    // Real proactive check: does this new commitment push the customer's
+    // real total committed outflow (or an already-confirmed loan's real
+    // Future Score) past a risk threshold? See lib/cross-goal-context.js /
+    // lib/guardian-alert-store.js. Never fails the confirm itself.
+    await triggerCrossGoalCheck(userId, "wedding", {
+      monthlyIncome: profile.monthlyIncome,
+      monthlyExpenses: profile.monthlyExpenses,
+      currentSavings: availableSavingsNow,
+    });
   } else {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });
   }
