@@ -156,7 +156,19 @@ export async function POST(request) {
           targetUserId: grantor.grantor_user_id,
           domain: "wedding",
           actionType: "confirm_wedding_plan",
-          payload: { kind: "savings_plan", ...finalData },
+          payload: {
+            kind: "savings_plan",
+            ...finalData,
+            // Carried through so dispatchWeddingConfirm can run the same
+            // triggerCrossGoalCheck the direct-save path below runs - the
+            // partner's later confirm has no request body of its own to
+            // read these from. See lib/wedding-actions.js.
+            crossGoalCheckInputs: {
+              monthlyIncome: profile.monthlyIncome,
+              monthlyExpenses: profile.monthlyExpenses,
+              currentSavings: availableSavingsNow,
+            },
+          },
         });
         return Response.json({
           type: toolUse.name,
