@@ -9,6 +9,7 @@ import { listAssets } from "../../../../lib/asset-store.js";
 import { computeInsuranceCoverage } from "../../../../lib/asset-finance.js";
 import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 import { getCrossGoalSnapshot, computeWholePictureImpact } from "../../../../lib/cross-goal-context.js";
+import { getJointPartnerId, getPartnerFeasibilityView } from "../../../../lib/joint-debate-context.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -51,6 +52,15 @@ export async function POST(request) {
   // plan. See lib/mirror-store.js's getMirrorHistoryContext.
   const history = await getMirrorHistoryContext(userId);
 
+  // Real joint-partner context: if this goal is one the customer actually
+  // manages with a real partner (a real view_and_act grant on file, either
+  // direction - see lib/joint-debate-context.js), fold the partner's own
+  // real financial situation into the debate. null when no such
+  // relationship exists or the partner has never saved a real profile -
+  // never fabricated.
+  const jointPartnerId = await getJointPartnerId(userId, goalType);
+  const partnerComputed = jointPartnerId ? await getPartnerFeasibilityView(jointPartnerId, goalType, inputs) : null;
+
   let result;
   try {
     result = await runToolTurnWithFallback({
@@ -61,6 +71,7 @@ export async function POST(request) {
         isIncomeIrregular: inputs.isIncomeIrregular,
         incomeSampleSize: inputs.incomeSampleSize,
         history,
+        partnerComputed,
       }),
       tool: FUTURE_MIRROR_DEBATE_TOOL,
       userMessage: "Run the Bull/Bear/Judge debate on this plan.",
@@ -94,7 +105,7 @@ export async function POST(request) {
     situation: situation ?? null,
     futureScore: computed.feasibilityScore,
     riskLevel: computed.riskLevel,
-    context: { inputs, computed, goalLabel, language, history },
+    context: { inputs, computed, goalLabel, language, history, partnerComputed },
     aiProvider: result.provider,
     ...parsed.data,
   });
@@ -106,6 +117,7 @@ export async function POST(request) {
     computed,
     aiProvider: result.provider,
     history,
+    partnerComputed,
     ...parsed.data,
   });
 }

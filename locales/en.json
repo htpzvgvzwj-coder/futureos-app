@@ -2112,6 +2112,9 @@
         "predictiveAccuracyValue": "Right {percent}% of the time",
         "customerCalibration": "Your own past disagreements with a flagged risk",
         "customerCalibrationValue": "Right {percent}% of the time",
+        "jointPartner": "Joint decision - partner's own real situation",
+        "jointPartnerValue": "Their own feasibility score: {score}/100",
+        "jointPartnerAvailable": "Their available monthly after expenses",
         "note": "The dollar figures above are computed by FutureOS, not the AI - the debate only argues about them."
       },
       "wholePicture": {

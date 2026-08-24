@@ -4172,6 +4172,18 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
               value={t("simulator.output.evidence.customerCalibrationValue", { percent: debate.history.customerCalibration })}
             />
           ) : null}
+          {debate.partnerComputed ? (
+            <>
+              <SummaryRow
+                label={t("simulator.output.evidence.jointPartner")}
+                value={t("simulator.output.evidence.jointPartnerValue", { score: debate.partnerComputed.feasibilityScore })}
+              />
+              <SummaryRow
+                label={t("simulator.output.evidence.jointPartnerAvailable")}
+                value={`SGD ${debate.partnerComputed.availableMonthly}`}
+              />
+            </>
+          ) : null}
           <small>{t("simulator.output.evidence.note")}</small>
         </section>
       ) : null}
