@@ -89,6 +89,13 @@ export async function POST(request) {
     amount,
     horizon_years: horizonYears,
     projection,
+    // Persisted so a later real cross-goal impact recompute (lib/cross-goal-
+    // context.js) can reproduce computeInvestmentFutureScore's full formula -
+    // these two components are fixed properties of THIS pick (instrument mix,
+    // horizon fit), unaffected by any other goal confirmed later, so they
+    // don't need to be recomputed, only carried forward.
+    diversification_score: candidateScore.diversification_score,
+    horizon_fit_score: candidateScore.horizon_fit_score,
     ...futureScore,
   };
 

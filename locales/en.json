@@ -2700,6 +2700,7 @@
     "label": "Real risk detected",
     "title": "Your total commitments are now at {utilization}% of income",
     "detailLoanImpact": "Your confirmed {purpose} loan's outlook would move from {before} to {after} if nothing changes.",
+    "detailInvestmentImpact": "Your confirmed investment \"{name}\"'s outlook would move from {before} to {after} if nothing changes.",
     "detailUtilizationOnly": "Tap to talk through your whole picture with Future Self Guardian.",
     "dismiss": "Dismiss"
   },

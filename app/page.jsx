@@ -3497,7 +3497,13 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                         before: guardianNudge.detail.worseningLoans[0].scoreBefore,
                         after: guardianNudge.detail.worseningLoans[0].scoreAfter,
                       })
-                    : t("guardianAlert.detailUtilizationOnly")
+                    : guardianNudge.detail.worseningInvestments?.length
+                      ? t("guardianAlert.detailInvestmentImpact", {
+                          name: guardianNudge.detail.worseningInvestments[0].name,
+                          before: guardianNudge.detail.worseningInvestments[0].scoreBefore,
+                          after: guardianNudge.detail.worseningInvestments[0].scoreAfter,
+                        })
+                      : t("guardianAlert.detailUtilizationOnly")
                   : t("guardianNudge.detail")}
               </em>
             </span>
@@ -4040,50 +4046,89 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
 // exact same rendering the old standalone debate form used, extracted so it
 // can render inline inside a chat bubble instead. Nothing about this UI
 // changed, only where it's mounted from.
+// Each argument reveals a beat after the last (real debate pacing, not
+// everything landing on screen at once) - framer-motion stagger via
+// increasing `delay`, same `motion.section` primitive already used
+// throughout this file.
+function DebateBeat({ delay, className, icon: Icon, children }) {
+  return (
+    <motion.section
+      className={className}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay, ease: "easeOut" }}
+    >
+      <Icon size={22} />
+      <div>{children}</div>
+    </motion.section>
+  );
+}
+
+// Real before -> after Future Score comparison for one already-confirmed
+// commitment (loan or investment), two ProgressRings side by side - the
+// same real numbers lib/mirror-prompts.js's whole-picture section cites in
+// text, made visible instead of only read.
+function ImpactRing({ item, label }) {
+  const ringColor = (score) => (score >= 70 ? "#0f9f84" : score >= 45 ? "#f59e0b" : "#d71920");
+  const worsened = item.delta <= -10;
+  return (
+    <div className={worsened ? "impactRingRow worsened" : "impactRingRow"}>
+      <span className="impactRingLabel">{label}</span>
+      <div className="impactRingPair">
+        <ProgressRing value={item.scoreBefore} size={52} stroke={5} color={ringColor(item.scoreBefore)} />
+        <ChevronRight size={16} className={worsened ? "impactArrow worsened" : "impactArrow"} />
+        <ProgressRing value={item.scoreAfter} size={52} stroke={5} color={ringColor(item.scoreAfter)} />
+      </div>
+    </div>
+  );
+}
+
 function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEscalate, t }) {
+  const wholePicture = debate.computed?.wholePicture;
+  const utilizationColor = wholePicture
+    ? wholePicture.wholePictureUtilizationPercent > 80
+      ? "#d71920"
+      : wholePicture.wholePictureUtilizationPercent > 60
+        ? "#f59e0b"
+        : "#0f9f84"
+    : "#0f9f84";
+
   return (
     <motion.section className="simulatorOutput" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <section className="recommendationPanel">
+      <motion.section
+        className="recommendationPanel"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
         <span className="sectionLabel">{t("simulator.sections.futureScore")}</span>
         <SummaryRow label={t("mirror.futureScore")} value={`${debate.futureScore}/100`} />
         <SummaryRow label={t("mirror.risk")} value={t(`risk.${debate.riskLevel}`)} />
         <SummaryRow label={t("simulator.output.confidence")} value={t(`simulator.output.confidenceLevel.${debate.confidence}`)} />
-      </section>
+      </motion.section>
 
-      <section className="recommendationHero debateBullCase">
-        <ThumbsUp size={22} />
-        <div>
-          <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
-          <p>{debate.bullCase}</p>
-        </div>
-      </section>
+      <DebateBeat delay={0.15} className="recommendationHero debateBullCase" icon={ThumbsUp}>
+        <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
+        <p>{debate.bullCase}</p>
+      </DebateBeat>
 
-      <section className="recommendationHero debateBearCase">
-        <ThumbsDown size={22} />
-        <div>
-          <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
-          <p>{debate.bearCase}</p>
-        </div>
-      </section>
+      <DebateBeat delay={0.3} className="recommendationHero debateBearCase" icon={ThumbsDown}>
+        <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
+        <p>{debate.bearCase}</p>
+      </DebateBeat>
 
       {debate.bullRebuttal ? (
-        <section className="recommendationHero debateBullCase">
-          <RotateCcw size={22} />
-          <div>
-            <span className="sectionLabel">{t("simulator.output.bullRebuttal")}</span>
-            <p>{debate.bullRebuttal}</p>
-          </div>
-        </section>
+        <DebateBeat delay={0.45} className="recommendationHero debateBullCase" icon={RotateCcw}>
+          <span className="sectionLabel">{t("simulator.output.bullRebuttal")}</span>
+          <p>{debate.bullRebuttal}</p>
+        </DebateBeat>
       ) : null}
 
-      <section className="recommendationHero debateJudge">
-        <ShieldCheck size={22} />
-        <div>
-          <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
-          <p>{debate.judgeSynthesis}</p>
-          <small>{t(`simulator.output.recommendedAction.${debate.recommendedAction}`)}</small>
-        </div>
-      </section>
+      <DebateBeat delay={debate.bullRebuttal ? 0.6 : 0.45} className="recommendationHero debateJudge" icon={ShieldCheck}>
+        <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
+        <p>{debate.judgeSynthesis}</p>
+        <small>{t(`simulator.output.recommendedAction.${debate.recommendedAction}`)}</small>
+      </DebateBeat>
 
       {debate.computed ? (
         <section className="recommendationPanel">
@@ -4111,31 +4156,37 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </section>
       ) : null}
 
-      {debate.computed?.wholePicture ? (
-        <section className="recommendationPanel">
+      {wholePicture ? (
+        <motion.section
+          className="recommendationPanel"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: debate.bullRebuttal ? 0.75 : 0.6, ease: "easeOut" }}
+        >
           <span className="sectionLabel">{t("simulator.output.wholePicture.title")}</span>
+          <div className="wholePictureGauge">
+            <ProgressRing value={wholePicture.wholePictureUtilizationPercent} size={88} stroke={8} color={utilizationColor} />
+            <small>{t("simulator.output.wholePicture.utilization")}</small>
+          </div>
           <SummaryRow
             label={t("simulator.output.wholePicture.committedTotal")}
-            value={`SGD ${debate.computed.wholePicture.committedMonthlyTotal}`}
-          />
-          <SummaryRow
-            label={t("simulator.output.wholePicture.utilization")}
-            value={`${debate.computed.wholePicture.wholePictureUtilizationPercent}%`}
+            value={`SGD ${wholePicture.committedMonthlyTotal}`}
           />
           <SummaryRow
             label={t("simulator.output.wholePicture.residual")}
-            value={`SGD ${debate.computed.wholePicture.residualAfterAllCommitments}`}
+            value={`SGD ${wholePicture.residualAfterAllCommitments}`}
           />
-          {debate.computed.wholePicture.loanImpact.length ? (
-            <div className="weddingStatChips">
-              {debate.computed.wholePicture.loanImpact.map((loan) => (
-                <span className={loan.delta <= -10 ? "statChip warning" : "statChip"} key={loan.purpose}>
-                  {t(`loanPlanner.purposes.${loan.purpose}`)}: {loan.scoreBefore} → {loan.scoreAfter}
-                </span>
+          {wholePicture.loanImpact.length || wholePicture.investmentImpact.length ? (
+            <div className="impactRingList">
+              {wholePicture.loanImpact.map((loan) => (
+                <ImpactRing key={`loan-${loan.purpose}`} item={loan} label={t(`loanPlanner.purposes.${loan.purpose}`)} />
+              ))}
+              {wholePicture.investmentImpact.map((pick) => (
+                <ImpactRing key={`investment-${pick.name}`} item={pick} label={pick.name} />
               ))}
             </div>
           ) : null}
-        </section>
+        </motion.section>
       ) : null}
 
       <button type="button" className="secondaryButton" onClick={onConfirm} disabled={confirmed}>
