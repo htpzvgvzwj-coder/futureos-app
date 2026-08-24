@@ -2083,6 +2083,14 @@
       "customerRebuttalLabel": "Your take? (optional)",
       "customerRebuttalPlaceholder": "Why are you comfortable proceeding despite the risk above?",
       "customerRebuttalHint": "If you write something here, we'll check back in a few months whether the risk actually happened - and add it to your track record either way.",
+      "whatIf": {
+        "title": "Explore what-if",
+        "hint": "Drag either slider to see your real Future Score and whole-picture impact recalculated instantly - no AI call, same math the debate above used.",
+        "delayLabel": "Delay by {months} month(s)",
+        "monthlyLabel": "Monthly commitment: SGD {amount}",
+        "futureScoreLabel": "Future Score",
+        "utilizationLabel": "Whole-picture utilization"
+      },
       "evidence": {
         "title": "What this was based on",
         "income": "Monthly income",

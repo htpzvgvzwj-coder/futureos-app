@@ -4191,6 +4191,8 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </motion.section>
       ) : null}
 
+      <MirrorWhatIfExplorer debate={debate} t={t} />
+
       {!confirmed ? (
         <div className="settingsGroup">
           <span className="sectionLabel">{t("simulator.output.customerRebuttalLabel")}</span>
@@ -4224,6 +4226,119 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </section>
       ) : null}
     </motion.section>
+  );
+}
+
+// Instant what-if branching: drag a slider, get a real recomputed Future
+// Score and whole-picture impact back from /api/mirror/whatif - zero new AI
+// call, same "AI touches zero numbers" discipline, same debounced-slider
+// pattern already established for Strategic Balance's rebalance explorer
+// (see requestRebalance above). Only rendered once a real requiredMonthly
+// baseline exists on the debate.
+function MirrorWhatIfExplorer({ debate, t }) {
+  const baseRequired = debate.computed?.requiredMonthly ?? 0;
+  const isLumpSum = debate.computed?.targetAmount != null;
+  const [delayMonths, setDelayMonths] = useState(0);
+  const [monthlyAmount, setMonthlyAmount] = useState(baseRequired);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef(null);
+
+  const isDefault = delayMonths === 0 && monthlyAmount === baseRequired;
+
+  const runWhatIf = (nextDelayMonths, nextMonthlyAmount) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (nextDelayMonths === 0 && nextMonthlyAmount === baseRequired) {
+      setResult(null);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setLoading(true);
+      fetch("/api/mirror/whatif", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ debateId: debate.debateId, delayMonths: nextDelayMonths, monthlyOverride: nextMonthlyAmount }),
+      })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data) => {
+          if (data) setResult(data);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }, 350);
+  };
+
+  if (baseRequired <= 0) return null;
+
+  const minMonthly = Math.max(50, Math.round((baseRequired * 0.5) / 50) * 50);
+  const maxMonthly = Math.round((baseRequired * 1.5) / 50) * 50;
+  const computedAfter = result?.computed;
+  const utilizationBefore = debate.computed?.wholePicture?.wholePictureUtilizationPercent ?? null;
+  const utilizationAfter = computedAfter?.wholePicture?.wholePictureUtilizationPercent ?? null;
+
+  return (
+    <section className="recommendationPanel">
+      <div className="panelHead">
+        <span className="sectionLabel">{t("simulator.output.whatIf.title")}</span>
+        <SlidersHorizontal size={17} />
+      </div>
+      <p>{t("simulator.output.whatIf.hint")}</p>
+
+      {isLumpSum ? (
+        <div className="rebalanceSlider">
+          <span className="sectionLabel">{t("simulator.output.whatIf.delayLabel", { months: delayMonths })}</span>
+          <input
+            type="range"
+            min={0}
+            max={12}
+            step={1}
+            value={delayMonths}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              setDelayMonths(next);
+              runWhatIf(next, monthlyAmount);
+            }}
+            aria-label={t("simulator.output.whatIf.delayLabel", { months: delayMonths })}
+          />
+        </div>
+      ) : null}
+
+      <div className="rebalanceSlider">
+        <span className="sectionLabel">{t("simulator.output.whatIf.monthlyLabel", { amount: monthlyAmount })}</span>
+        <input
+          type="range"
+          min={minMonthly}
+          max={maxMonthly}
+          step={50}
+          value={monthlyAmount}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            setMonthlyAmount(next);
+            runWhatIf(delayMonths, next);
+          }}
+          aria-label={t("simulator.output.whatIf.monthlyLabel", { amount: monthlyAmount })}
+        />
+        {loading ? <p>{t("loading.detail")}</p> : null}
+        {!isDefault && computedAfter ? (
+          <div className="rebalanceResult">
+            <ImpactRing
+              item={{
+                scoreBefore: debate.futureScore,
+                scoreAfter: computedAfter.feasibilityScore,
+                delta: computedAfter.feasibilityScore - debate.futureScore,
+              }}
+              label={t("simulator.output.whatIf.futureScoreLabel")}
+            />
+            {utilizationBefore != null && utilizationAfter != null ? (
+              <SummaryRow
+                label={t("simulator.output.whatIf.utilizationLabel")}
+                value={`${utilizationBefore}% -> ${utilizationAfter}%`}
+              />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
