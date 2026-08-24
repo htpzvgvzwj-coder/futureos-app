@@ -1501,12 +1501,13 @@
         "steadfast": "A strong, sustained record - consistent check-ins, amounts close to target, multiple goals.",
         "anchor": "The deepest tier - long, consistent history across your confirmed goals."
       },
-      "componentsTitle": "How this is calculated (four real dimensions)",
+      "componentsTitle": "How this is calculated (five real dimensions)",
       "components": {
         "checkInConsistency": "Check-In Consistency ({weight}%)",
         "amountFidelity": "Amount Fidelity ({weight}%)",
         "recoveryHonesty": "Recovery Honesty ({weight}%)",
-        "multiGoalDepth": "Multi-Goal Commitment Depth ({weight}%)"
+        "multiGoalDepth": "Multi-Goal Commitment Depth ({weight}%)",
+        "judgmentCalibration": "Judgment Calibration ({weight}%)"
       },
       "detail": {
         "checkInConsistency": "You've checked in {monthsWithCheckin} of {monthsSincePlan} months since confirming a plan.",
@@ -1516,14 +1517,24 @@
           "usedRecovery": "You hit a risk signal and used hardship recovery instead of going quiet - that's what this rewards.",
           "wentQuiet": "You hit a risk signal but haven't used hardship recovery yet - this is what's holding the dimension back."
         },
-        "multiGoalDepth": "You have {confirmedGoalCount} goal(s) actually confirmed and tracked (capped at 3 for this score)."
+        "multiGoalDepth": "You have {confirmedGoalCount} goal(s) actually confirmed and tracked (capped at 3 for this score).",
+        "judgmentCalibration": "Of {resolvedCount} time(s) you disagreed with a Future Mirror risk and proceeded anyway, {heldUpCount} held up."
       }
     },
     "nextStep": {
       "checkInConsistency": "Log this month's check-in on any confirmed goal - that's the fastest way to move this score.",
       "amountFidelity": "Your check-ins are running below your confirmed monthly target - even a partial top-up next month helps.",
       "recoveryHonesty": "Use the hardship recovery flow on the goal that's at risk - honest recovery scores the same as never needing it.",
-      "multiGoalDepth": "Confirm a savings plan on another goal - breadth of commitment is part of this score too."
+      "multiGoalDepth": "Confirm a savings plan on another goal - breadth of commitment is part of this score too.",
+      "judgmentCalibration": "Next time Future Mirror flags a risk you disagree with, write down why in the debate - it's checked against what actually happens."
+    },
+    "calibration": {
+      "title": "Your Track Record",
+      "summary": "You've disagreed with a Future Mirror risk and proceeded anyway {resolvedCount} time(s). It held up {heldUpCount} of those times.",
+      "outcome": {
+        "risk_did_not_materialize": "Held up",
+        "risk_materialized": "Risk happened"
+      }
     },
     "reputation": {
       "title": "Guardian Reputation Score",
@@ -2069,6 +2080,9 @@
       "bearCase": "Bear case: what could break this",
       "bullRebuttal": "Bull's rebuttal",
       "judgeSynthesis": "Judge's synthesis",
+      "customerRebuttalLabel": "Your take? (optional)",
+      "customerRebuttalPlaceholder": "Why are you comfortable proceeding despite the risk above?",
+      "customerRebuttalHint": "If you write something here, we'll check back in a few months whether the risk actually happened - and add it to your track record either way.",
       "evidence": {
         "title": "What this was based on",
         "income": "Monthly income",

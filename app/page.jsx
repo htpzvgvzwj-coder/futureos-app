@@ -44,6 +44,7 @@ import {
   Plus,
   QrCode,
   RotateCcw,
+  Scale,
   ScanLine,
   Send,
   Settings,
@@ -4084,6 +4085,7 @@ function ImpactRing({ item, label }) {
 }
 
 function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEscalate, t }) {
+  const [rebuttal, setRebuttal] = useState("");
   const wholePicture = debate.computed?.wholePicture;
   const utilizationColor = wholePicture
     ? wholePicture.wholePictureUtilizationPercent > 80
@@ -4189,7 +4191,22 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
         </motion.section>
       ) : null}
 
-      <button type="button" className="secondaryButton" onClick={onConfirm} disabled={confirmed}>
+      {!confirmed ? (
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("simulator.output.customerRebuttalLabel")}</span>
+          <textarea
+            className="aiTextInput"
+            rows={2}
+            maxLength={1000}
+            value={rebuttal}
+            onChange={(event) => setRebuttal(event.target.value)}
+            placeholder={t("simulator.output.customerRebuttalPlaceholder")}
+          />
+          <small>{t("simulator.output.customerRebuttalHint")}</small>
+        </div>
+      ) : null}
+
+      <button type="button" className="secondaryButton" onClick={() => onConfirm(rebuttal)} disabled={confirmed}>
         {confirmed ? t("simulator.output.confirmed") : t("simulator.output.confirmPlan")}
         <ShieldCheck size={18} />
       </button>
@@ -4503,12 +4520,12 @@ function MirrorChatScreen({
     }
   }, [mirrorChatSeed, historyLoading, messages.length]);
 
-  const confirmDebate = async (debateId) => {
+  const confirmDebate = async (debateId, customerRebuttal) => {
     try {
       const response = await fetch("/api/mirror/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ debateId }),
+        body: JSON.stringify({ debateId, customerRebuttal: customerRebuttal?.trim() || null }),
       });
       if (response.ok) setConfirmedDebateIds((current) => new Set(current).add(debateId));
     } catch {
@@ -4585,7 +4602,7 @@ function MirrorChatScreen({
                 <MirrorDebateResultCard
                   debate={entry.debate}
                   confirmed={confirmedDebateIds.has(entry.debate.debateId)}
-                  onConfirm={() => confirmDebate(entry.debate.debateId)}
+                  onConfirm={(rebuttal) => confirmDebate(entry.debate.debateId, rebuttal)}
                   escalated={escalatedDebateIds.has(entry.debate.debateId)}
                   onEscalate={() => escalateDebate(entry.debate.debateId)}
                   t={t}
@@ -4705,12 +4722,13 @@ function MirrorChatScreen({
   );
 }
 
-const followThroughComponentOrder = ["checkInConsistency", "amountFidelity", "recoveryHonesty", "multiGoalDepth"];
+const followThroughComponentOrder = ["checkInConsistency", "amountFidelity", "recoveryHonesty", "multiGoalDepth", "judgmentCalibration"];
 const followThroughComponentIcons = {
   checkInConsistency: CalendarClock,
   amountFidelity: Target,
   recoveryHonesty: ShieldCheck,
   multiGoalDepth: Award,
+  judgmentCalibration: Scale,
 };
 
 // Reached from Home's entry card and stat row. Shows two deliberately separate ledgers side by
@@ -4765,6 +4783,8 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
   const weakestComponent = knownComponents.length
     ? knownComponents.reduce((weakest, c) => (c.value < weakest.value ? c : weakest))
     : null;
+
+  const customerCalibration = preferences?.mirrorOutcomeStats?.customerCalibration ?? null;
 
   const timeline = followThrough
     ? followThrough.domains
@@ -4871,6 +4891,39 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
             <section className="trustNote compactTrustNote">
               <Info size={17} />
               <p>{t(`relationshipLedger.nextStep.${weakestComponent.key}`)}</p>
+            </section>
+          ) : null}
+
+          {customerCalibration && customerCalibration.resolvedCount > 0 ? (
+            <section className="recommendationPanel">
+              <div className="panelHead">
+                <span className="sectionLabel">{t("relationshipLedger.calibration.title")}</span>
+                <Scale size={17} />
+              </div>
+              <p>
+                {t("relationshipLedger.calibration.summary", {
+                  heldUpCount: customerCalibration.heldUpCount,
+                  resolvedCount: customerCalibration.resolvedCount,
+                })}
+              </p>
+              <div className="strategyList">
+                {customerCalibration.recent.map((entry) => {
+                  const heldUp = entry.resolvedOutcome === "risk_did_not_materialize";
+                  return (
+                    <article className="strategyItem" key={entry.id}>
+                      <span className="iconBubble">{heldUp ? <Check size={16} /> : <AlertTriangle size={16} />}</span>
+                      <div>
+                        <strong>{t(`simulator.goals.${entry.goalType}`)}</strong>
+                        <small>{entry.bearCase}</small>
+                        <small className="calibrationRebuttalQuote">&ldquo;{entry.customerRebuttal}&rdquo;</small>
+                      </div>
+                      <b className={heldUp ? "statePill state-healthy" : "statePill state-at_risk"}>
+                        {t(`relationshipLedger.calibration.outcome.${entry.resolvedOutcome}`)}
+                      </b>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           ) : null}
 

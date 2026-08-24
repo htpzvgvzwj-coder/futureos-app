@@ -674,3 +674,12 @@ create table if not exists guardian_alerts (
 
 create index if not exists guardian_alerts_profile_status_idx
   on guardian_alerts (profile_key, status, created_at desc);
+
+-- Customer Calibration Score: the customer's own optional counter-argument
+-- at confirm time ("I'm proceeding despite this flagged risk because...").
+-- Only set on confirm (lib/mirror-store.js confirmDebate), never at debate
+-- generation - it only makes sense once the customer has actually committed
+-- despite the named risk. Checked against the SAME real 90-day resolution
+-- mirror-outcome-resolver.js already runs for the AI's own accountability
+-- (resolved_outcome), never a separate/invented judgment of the text itself.
+alter table mirror_debates add column if not exists customer_rebuttal text;

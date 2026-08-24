@@ -1,6 +1,7 @@
 import { getFollowThroughSnapshot } from "../../../../lib/follow-through-context.js";
 import { computeFollowThroughScore } from "../../../../lib/follow-through-finance.js";
 import { resolveEffectiveProfileKey } from "../../../../lib/auth.js";
+import { getCustomerCalibrationStats } from "../../../../lib/mirror-store.js";
 
 export const runtime = "nodejs";
 
@@ -17,10 +18,13 @@ export async function GET(request) {
   // (wedding/home/retirement) this route already knows have a confirmed plan.
   const clientConfirmedGoalCount = Number(searchParams.get("customGoalCount")) || 0;
 
-  const { domains, hardshipEvidence } = await getFollowThroughSnapshot(resolved.profileKey);
+  const [{ domains, hardshipEvidence }, calibrationStats] = await Promise.all([
+    getFollowThroughSnapshot(resolved.profileKey),
+    getCustomerCalibrationStats(resolved.profileKey),
+  ]);
   const confirmedGoalCount = domains.length + clientConfirmedGoalCount;
 
-  const result = computeFollowThroughScore({ domains, hardshipEvidence, everAtRisk, confirmedGoalCount });
+  const result = computeFollowThroughScore({ domains, hardshipEvidence, everAtRisk, confirmedGoalCount, calibrationStats });
 
   return Response.json({ ...result, domains, hardshipEvidenceCount: hardshipEvidence.length });
 }

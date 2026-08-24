@@ -3602,6 +3602,12 @@ nextjs-portal {
   line-height: 1.2;
 }
 
+.calibrationRebuttalQuote {
+  font-style: italic;
+  color: var(--navy) !important;
+  opacity: 0.75;
+}
+
 .productStrip {
   display: flex;
   gap: 7px;

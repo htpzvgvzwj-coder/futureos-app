@@ -1456,12 +1456,13 @@
         "steadfast": "记录持续且强劲——打卡稳定、金额接近目标、涉及多个目标。",
         "anchor": "最深的一档——在你已确认的目标上，有长期且持续一致的记录。"
       },
-      "componentsTitle": "怎么算出来的（四个真实维度）",
+      "componentsTitle": "怎么算出来的（五个真实维度）",
       "components": {
         "checkInConsistency": "打卡一致性（{weight}%）",
         "amountFidelity": "金额符合度（{weight}%）",
         "recoveryHonesty": "困境诚实度（{weight}%）",
-        "multiGoalDepth": "多目标承诺深度（{weight}%）"
+        "multiGoalDepth": "多目标承诺深度（{weight}%）",
+        "judgmentCalibration": "判断校准度（{weight}%）"
       },
       "detail": {
         "checkInConsistency": "自从确认计划以来，你在 {monthsSincePlan} 个月里打卡了 {monthsWithCheckin} 个月。",
@@ -1471,14 +1472,24 @@
           "usedRecovery": "你触发过风险信号，并且用了困境恢复功能处理，而不是放着不管——这正是这一项在奖励的行为。",
           "wentQuiet": "你触发过风险信号，但还没用困境恢复功能处理——这是这一项被拖分的原因。"
         },
-        "multiGoalDepth": "你真实确认并在追踪的目标有 {confirmedGoalCount} 个（这项分数最多算到 3 个）。"
+        "multiGoalDepth": "你真实确认并在追踪的目标有 {confirmedGoalCount} 个（这项分数最多算到 3 个）。",
+        "judgmentCalibration": "你曾对 Future Mirror 标记的风险提出异议并仍然继续推进 {resolvedCount} 次，其中 {heldUpCount} 次的判断被证实是对的。"
       }
     },
     "nextStep": {
       "checkInConsistency": "去任意一个已确认的目标打卡本月记录——这是提升这项分数最快的办法。",
       "amountFidelity": "你最近打卡的金额低于承诺的每月目标——下个月哪怕只补一部分也有帮助。",
       "recoveryHonesty": "对正处于风险状态的目标使用困境恢复功能——诚实处理跟从没出过问题拿的是一样的分数。",
-      "multiGoalDepth": "去确认另一个目标的储蓄计划——承诺的广度也是这项分数的一部分。"
+      "multiGoalDepth": "去确认另一个目标的储蓄计划——承诺的广度也是这项分数的一部分。",
+      "judgmentCalibration": "下次 Future Mirror 标记出你不认同的风险时，在辩论里写下你的理由——之后会对照实际发生的情况来核实。"
+    },
+    "calibration": {
+      "title": "你的判断记录",
+      "summary": "你曾对 Future Mirror 标记的风险提出异议并仍然继续推进 {resolvedCount} 次，其中 {heldUpCount} 次结果证明判断正确。",
+      "outcome": {
+        "risk_did_not_materialize": "判断正确",
+        "risk_materialized": "风险确实发生了"
+      }
     },
     "reputation": {
       "title": "Guardian 声誉分",
