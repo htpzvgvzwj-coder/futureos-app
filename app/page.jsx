@@ -5119,6 +5119,26 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
             {credential ? (
               <>
                 <SummaryRow label={t("relationshipLedger.credential.issuedLabel")} value={new Date(credential.issuedAt).toLocaleString()} />
+                {credential.snapshot?.decisionQuality?.resolvedDebateCount > 0 ? (
+                  <>
+                    <SummaryRow
+                      label={t("relationshipLedger.credential.resolvedDebateCount")}
+                      value={String(credential.snapshot.decisionQuality.resolvedDebateCount)}
+                    />
+                    {credential.snapshot.decisionQuality.aiPredictiveAccuracy != null ? (
+                      <SummaryRow
+                        label={t("relationshipLedger.credential.aiPredictiveAccuracy")}
+                        value={`${credential.snapshot.decisionQuality.aiPredictiveAccuracy}%`}
+                      />
+                    ) : null}
+                    {credential.snapshot.decisionQuality.customerCalibrationAccuracy != null ? (
+                      <SummaryRow
+                        label={t("relationshipLedger.credential.customerCalibrationAccuracy")}
+                        value={`${credential.snapshot.decisionQuality.customerCalibrationAccuracy}%`}
+                      />
+                    ) : null}
+                  </>
+                ) : null}
                 <div className="proofBlock">
                   <strong>{t("relationshipLedger.credential.hashLabel")}</strong>
                   <p className="credentialHash">{credential.contentHash}</p>

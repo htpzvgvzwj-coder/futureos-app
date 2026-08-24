@@ -1522,9 +1522,12 @@
     },
     "credential": {
       "title": "可携带的财务健康凭证",
-      "body": "把你在这里积累的真实记录，变成一份能带出 OCBC 之外使用的东西——房东、新雇主，或者另一个国家的银行都可以独立验证它，而不只是相信一张截图。",
+      "body": "把你在这里积累的真实记录，变成一份能带出 OCBC 之外使用的东西——房东、新雇主，或者另一个国家的银行都可以独立验证它，而不只是相信一张截图。一旦你有至少一次 Future Mirror 辩论真正对照现实解决过，这里也会包含你真实的判断质量记录。",
       "issueButton": "签发我的凭证",
       "issuedLabel": "签发时间",
+      "resolvedDebateCount": "有真实解决结果的 Future Mirror 辩论数",
+      "aiPredictiveAccuracy": "本应用自己的风险判断，判断正确率",
+      "customerCalibrationAccuracy": "你自己对被标记风险的判断，判断正确率",
       "hashLabel": "内容哈希值（应该和你展示给别人的一致）",
       "verifyLabel": "验证链接（任何拿到这个的人都能从 OCBC 重新取回原始版本）",
       "downloadButton": "下载凭证"

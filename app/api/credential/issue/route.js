@@ -2,6 +2,7 @@ import { z } from "zod";
 import { issueCredential } from "../../../../lib/credential-store.js";
 import { getStrategicBalanceSnapshot } from "../../../../lib/strategic-balance-context.js";
 import { getOrCreateJourneyStart } from "../../../../lib/relationship-store.js";
+import { getResolvedDebateStats, getCustomerCalibrationStats } from "../../../../lib/mirror-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
@@ -29,13 +30,28 @@ export async function POST(request) {
     return Response.json({ error: "validation_failed", detail: parsed.error.issues }, { status: 422 });
   }
 
-  const [balanceSnapshot, relationshipStartedAt] = await Promise.all([
+  const [balanceSnapshot, relationshipStartedAt, resolvedStats, calibrationStats] = await Promise.all([
     getStrategicBalanceSnapshot(userId),
     getOrCreateJourneyStart(userId),
+    getResolvedDebateStats(userId),
+    getCustomerCalibrationStats(userId),
   ]);
   const confirmedGoalsCount = balanceSnapshot.loans.length + balanceSnapshot.investments.length + balanceSnapshot.savings.length;
 
-  const snapshot = { ...parsed.data, confirmedGoalsCount, relationshipStartedAt };
+  // Decision quality: unlike followThroughScore/reputationBand above, this
+  // has a real server-side source of truth (lib/mirror-store.js, the same
+  // queries /api/mirror/outcomes and Customer Calibration Score already
+  // use) - independently re-derived here, never trusted from the client.
+  // null (not 0) when a customer has no resolved debates yet - there is
+  // nothing to certify, not a bad score.
+  const decisionQuality = {
+    resolvedDebateCount: resolvedStats.resolvedCount,
+    aiPredictiveAccuracy: resolvedStats.resolvedCount > 0 ? Math.round((resolvedStats.correctCount / resolvedStats.resolvedCount) * 100) : null,
+    customerCalibrationCount: calibrationStats.resolvedCount,
+    customerCalibrationAccuracy: calibrationStats.resolvedCount > 0 ? Math.round((calibrationStats.heldUpCount / calibrationStats.resolvedCount) * 100) : null,
+  };
+
+  const snapshot = { ...parsed.data, confirmedGoalsCount, relationshipStartedAt, decisionQuality };
   const issued = await issueCredential(userId, snapshot);
   return Response.json(issued);
 }

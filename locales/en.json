@@ -1567,9 +1567,12 @@
     },
     "credential": {
       "title": "Portable Financial Health Credential",
-      "body": "Turn the track record you've built here into something you can take outside OCBC - a landlord, a new employer, or a bank in another country can verify it independently, not just trust a screenshot.",
+      "body": "Turn the track record you've built here into something you can take outside OCBC - a landlord, a new employer, or a bank in another country can verify it independently, not just trust a screenshot. Once you've had at least one Future Mirror debate actually resolve against reality, this also includes your real decision-quality record.",
       "issueButton": "Issue my credential",
       "issuedLabel": "Issued",
+      "resolvedDebateCount": "Future Mirror debates with a real resolved outcome",
+      "aiPredictiveAccuracy": "This app's own risk calls, right",
+      "customerCalibrationAccuracy": "Your own judgment on flagged risks, right",
       "hashLabel": "Content hash (should match what you were shown)",
       "verifyLabel": "Verification link (anyone with this can re-fetch the original from OCBC)",
       "downloadButton": "Download credential"
