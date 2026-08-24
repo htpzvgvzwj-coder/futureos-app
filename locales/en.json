@@ -1234,7 +1234,9 @@
       "guardianAutoTopUpLabel": "Guardian Auto Top-Up",
       "guardianAutoTopUpBody": "Your Relationship Ledger tier and your Autonomous Savings permission both allow Guardian to log this month's {amount} contribution for you - one tap instead of typing it in yourself.",
       "guardianAutoTopUpButton": "Let Guardian log it",
-      "guardianAutoAppliedNote": "Guardian auto-applied (Relationship Ledger tier + your standing permission)"
+      "guardianAutoAppliedNote": "Guardian auto-applied (Relationship Ledger tier + your standing permission)",
+      "guardianAutoTopUpStretchNote": "Stretched up from your usual amount - your Judgment Calibration score ({score}%) shows your instincts on flagged risks hold up, so Guardian raised the ceiling.",
+      "guardianAutoAppliedStretchNote": "Guardian auto-applied, stretched (Judgment Calibration unlocked a higher ceiling)"
     },
     "venueTiers": {
       "budget": "Budget",

@@ -1826,7 +1826,15 @@ function useRelationshipTier(preferences, simulatorInputs, simulatorActionStates
   }, []);
   const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
   const followThroughBand = followThrough?.band ?? "newRelationship";
-  return getRelationshipBenefits(followThroughBand, reputationBand).tier;
+  const tier = getRelationshipBenefits(followThroughBand, reputationBand).tier;
+  // Real judgment-calibration signal (Follow-Through Score's judgmentCalibration
+  // component, lib/follow-through-finance.js) - null until the customer has an
+  // actual resolved Mirror rebuttal, same "insufficient data, not a guess"
+  // rule the component itself already follows. Exposed alongside tier so
+  // Guardian Auto Top-Up can unlock a real stretch amount from it, not just
+  // gate on the aggregate Follow-Through band.
+  const judgmentCalibrationScore = followThrough?.components?.judgmentCalibration?.value ?? null;
+  return { tier, judgmentCalibrationScore };
 }
 
 // Confidence Model (04_AI_Agent.md "AI confidence must be explicit and meaningful"): confidence
@@ -6824,6 +6832,15 @@ function SavingsCheckinForm({ onAddCheckin, submitting, t }) {
   );
 }
 
+// Judgment Calibration (Follow-Through Score's 5th component, real data
+// only once a Mirror rebuttal has actually resolved - lib/follow-through-
+// finance.js) unlocking a real stretch amount on top of Auto Top-Up's
+// existing tier-2 gate, not just another number on a screen. 20%, rounded
+// to the nearest $50 like every other monthly figure in this app - a
+// deliberately modest stretch, not a reckless one.
+const AUTO_TOP_UP_STRETCH_THRESHOLD = 80;
+const AUTO_TOP_UP_STRETCH_MULTIPLIER = 1.2;
+
 function ConfirmedSavingsPlanCard({
   plan,
   checkins = [],
@@ -6831,6 +6848,7 @@ function ConfirmedSavingsPlanCard({
   checkinSubmitting,
   checkinError,
   relationshipTier = 0,
+  judgmentCalibrationScore = null,
   autonomousSavingsEnabled = false,
   t,
 }) {
@@ -6844,12 +6862,19 @@ function ConfirmedSavingsPlanCard({
   // customer's own permission still has to be on.
   const hasCheckinThisMonth = checkins.some((checkin) => checkin.checkin_month === currentMonthValue());
   const autoTopUpAvailable = Boolean(onAddCheckin) && relationshipTier >= 2 && autonomousSavingsEnabled && !hasCheckinThisMonth;
+  const autoTopUpStretchAvailable =
+    autoTopUpAvailable && judgmentCalibrationScore != null && judgmentCalibrationScore >= AUTO_TOP_UP_STRETCH_THRESHOLD;
+  const autoTopUpAmount = autoTopUpStretchAvailable
+    ? Math.ceil((plan.monthly_contribution * AUTO_TOP_UP_STRETCH_MULTIPLIER) / 50) * 50
+    : plan.monthly_contribution;
 
   const handleAutoTopUp = () => {
     onAddCheckin({
       checkinMonth: currentMonthValue(),
-      amount: plan.monthly_contribution,
-      note: t("weddingPlanner.checkins.guardianAutoAppliedNote"),
+      amount: autoTopUpAmount,
+      note: autoTopUpStretchAvailable
+        ? t("weddingPlanner.checkins.guardianAutoAppliedStretchNote")
+        : t("weddingPlanner.checkins.guardianAutoAppliedNote"),
     });
   };
 
@@ -6918,7 +6943,12 @@ function ConfirmedSavingsPlanCard({
       {autoTopUpAvailable ? (
         <div className="needHeroCard">
           <span className="sectionLabel">{t("weddingPlanner.checkins.guardianAutoTopUpLabel")}</span>
-          <p>{t("weddingPlanner.checkins.guardianAutoTopUpBody", { amount: formatSgd(Math.round(plan.monthly_contribution)) })}</p>
+          <p>{t("weddingPlanner.checkins.guardianAutoTopUpBody", { amount: formatSgd(Math.round(autoTopUpAmount)) })}</p>
+          {autoTopUpStretchAvailable ? (
+            <p className="calibrationRebuttalQuote">
+              {t("weddingPlanner.checkins.guardianAutoTopUpStretchNote", { score: judgmentCalibrationScore })}
+            </p>
+          ) : null}
           <button type="button" className="primaryButton" disabled={checkinSubmitting} onClick={handleAutoTopUp}>
             {checkinSubmitting ? t("weddingPlanner.thinking") : t("weddingPlanner.checkins.guardianAutoTopUpButton")}
             <Zap size={18} />
@@ -6971,7 +7001,7 @@ function WeddingNeedContent({
   simulatorInputs,
   simulatorActionStates,
 }) {
-  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const { tier: relationshipTier, judgmentCalibrationScore } = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
   const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -7302,6 +7332,7 @@ function WeddingNeedContent({
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
               relationshipTier={relationshipTier}
+              judgmentCalibrationScore={judgmentCalibrationScore}
               autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
@@ -8336,7 +8367,7 @@ function HomeNeedContent({
   simulatorInputs,
   simulatorActionStates,
 }) {
-  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const { tier: relationshipTier, judgmentCalibrationScore } = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
   const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [confirmedLoan, setConfirmedLoan] = useState(null);
@@ -8685,6 +8716,7 @@ function HomeNeedContent({
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
               relationshipTier={relationshipTier}
+              judgmentCalibrationScore={judgmentCalibrationScore}
               autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
@@ -8788,7 +8820,7 @@ function RetirementNeedContent({
   preferences,
   simulatorActionStates,
 }) {
-  const relationshipTier = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
+  const { tier: relationshipTier, judgmentCalibrationScore } = useRelationshipTier(preferences, simulatorInputs, simulatorActionStates);
   const autonomousSavingsEnabled = Boolean(preferences?.guardianPermissions?.autonomousSavings);
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -9126,6 +9158,7 @@ function RetirementNeedContent({
               checkinSubmitting={checkinSubmitting}
               checkinError={checkinError}
               relationshipTier={relationshipTier}
+              judgmentCalibrationScore={judgmentCalibrationScore}
               autonomousSavingsEnabled={autonomousSavingsEnabled}
               t={t}
             />
