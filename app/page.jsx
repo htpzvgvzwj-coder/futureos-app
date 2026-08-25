@@ -10294,7 +10294,20 @@ function InvestmentShortlistCard({
         </span>
       </div>
       <p className="weddingPlanSummary">{t(item.description_key)}</p>
+      {item.live_quote ? (
+        <SummaryRow
+          label={t("investmentPlanner.liveQuoteLabel")}
+          value={t("investmentPlanner.liveQuoteValue", {
+            currency: item.live_quote.currency ?? "",
+            price: item.live_quote.price,
+            time: new Date(item.live_quote.asOf).toLocaleTimeString(),
+          })}
+        />
+      ) : item.ticker ? (
+        <SummaryRow label={t("investmentPlanner.liveQuoteLabel")} value={t("investmentPlanner.liveQuoteUnavailable")} />
+      ) : null}
       <SummaryRow label={t("investmentPlanner.expectedReturnLabel")} value={`${item.expected_annual_return_percent}%`} />
+      <small className="calibrationRebuttalQuote">{t("investmentPlanner.expectedReturnDisclaimer")}</small>
       {item.expense_ratio_percent != null ? (
         <SummaryRow label={t("investmentPlanner.expenseRatioLabel")} value={`${item.expense_ratio_percent}%`} />
       ) : null}

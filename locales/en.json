@@ -1768,7 +1768,11 @@
       "fund": "Fund",
       "stock": "Stock"
     },
+    "liveQuoteLabel": "Current market price",
+    "liveQuoteValue": "{currency} {price} (as of {time})",
+    "liveQuoteUnavailable": "Live quote unavailable right now",
     "expectedReturnLabel": "Expected Annual Return",
+    "expectedReturnDisclaimer": "A static long-run assumption, not a live figure - re-verify against a real factsheet before relying on it.",
     "expenseRatioLabel": "Expense Ratio",
     "dividendYieldLabel": "Dividend Yield",
     "projectedEndValueLabel": "Projected Value",

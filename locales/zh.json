@@ -1674,7 +1674,11 @@
       "fund": "基金",
       "stock": "股票"
     },
+    "liveQuoteLabel": "当前市场报价",
+    "liveQuoteValue": "{currency} {price}（截至 {time}）",
+    "liveQuoteUnavailable": "暂时无法获取实时报价",
     "expectedReturnLabel": "预期年回报率",
+    "expectedReturnDisclaimer": "这是长期静态假设，不是实时数据——正式依赖前请对照真实招股书核实。",
     "expenseRatioLabel": "费用比率",
     "dividendYieldLabel": "股息率",
     "projectedEndValueLabel": "预计价值",

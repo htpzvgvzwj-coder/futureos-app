@@ -4,6 +4,7 @@ import { shortlistInvestments, projectPurchaseMode } from "../../../../lib/inves
 import { INVESTMENT_CATALOG } from "../../../../lib/investment-catalog.js";
 import { getOrCreateSession, saveArtifact } from "../../../../lib/investment-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { getLiveQuotes } from "../../../../lib/market-quote-provider.js";
 
 export const runtime = "nodejs";
 
@@ -52,9 +53,19 @@ export async function POST(request) {
   });
 
   const previewAmount = computeDefaultPreviewAmount(purchaseMode, availableMonthlyCashflow);
+  // Real live current-price quotes (lib/market-quote-provider.js) for
+  // whichever shortlisted entries have a real ticker - current price only,
+  // never a substitute for the disclosed static expected-return figures
+  // below. A failed/unavailable quote is null, never silently omitted or
+  // faked with the static figure.
+  const liveQuotes = await getLiveQuotes(shortlist.map((item) => item.ticker));
   const shortlistWithPreview = shortlist.map((item) => {
     const entry = INVESTMENT_CATALOG.find((catalogEntry) => catalogEntry.id === item.entry_id);
-    return { ...item, projection: projectPurchaseMode({ mode: purchaseMode, entry, amount: previewAmount, horizonYears }) };
+    return {
+      ...item,
+      projection: projectPurchaseMode({ mode: purchaseMode, entry, amount: previewAmount, horizonYears }),
+      live_quote: item.ticker ? (liveQuotes[item.ticker] ?? null) : null,
+    };
   });
 
   const intake = { riskPreference, goalCategory, horizonYears, customTargetAmount: customTargetAmount ?? null, holdingsCategories, purchaseMode };
