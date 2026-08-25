@@ -11,6 +11,7 @@ import {
 import { getLatestArtifact, getOrCreateSession, saveArtifact, updateSessionStatus } from "../../../../lib/investment-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
+import { getLiveQuotes } from "../../../../lib/market-quote-provider.js";
 
 export const runtime = "nodejs";
 
@@ -79,6 +80,13 @@ export async function POST(request) {
     horizonFitScore: candidateScore.horizon_fit_score,
   });
 
+  // Real live price at the moment of confirm (lib/market-quote-provider.js) -
+  // the baseline a later real predicted-vs-actual comparison needs
+  // (app/api/investment/outcomes/route.js). null when there's no real
+  // ticker or the live fetch fails right now - never guessed or backfilled
+  // later, so a pick either has a real baseline or honestly has none.
+  const quoteAtConfirm = entry.ticker ? (await getLiveQuotes([entry.ticker]))[entry.ticker] ?? null : null;
+
   const result = {
     entry_id: entry.id,
     name: entry.name,
@@ -88,6 +96,7 @@ export async function POST(request) {
     purchase_mode: purchaseMode,
     amount,
     horizon_years: horizonYears,
+    quote_at_confirm: quoteAtConfirm,
     projection,
     // Persisted so a later real cross-goal impact recompute (lib/cross-goal-
     // context.js) can reproduce computeInvestmentFutureScore's full formula -

@@ -10385,7 +10385,7 @@ function InvestmentShortlistCard({
   );
 }
 
-function InvestmentConfirmedCard({ pick, t }) {
+function InvestmentConfirmedCard({ pick, outcome, t }) {
   return (
     <section className="recommendationPanel">
       <span className="sectionLabel">{t("investmentPlanner.confirmedLabel")}</span>
@@ -10406,15 +10406,58 @@ function InvestmentConfirmedCard({ pick, t }) {
         <LoanImpactChip impact={pick.emergency_fund_impact} labelKeys={INVESTMENT_EMERGENCY_FUND_IMPACT_LABEL_KEYS} t={t} />
         <LoanImpactChip impact={pick.cashflow_impact} labelKeys={INVESTMENT_CASHFLOW_IMPACT_LABEL_KEYS} t={t} />
       </div>
+      {outcome?.hasRealData ? <RealAccuracyCheck outcome={outcome} t={t} /> : null}
       <AccuracyGuaranteeExplorer pick={pick} t={t} />
     </section>
+  );
+}
+
+// The real counterpart to AccuracyGuaranteeExplorer below - same formula
+// (lib/accuracy-guarantee-finance.js), but fed real elapsed time and a real
+// actual-value estimate derived from a live market quote
+// (app/api/investment/outcomes/route.js), not a hypothetical typed-in
+// number. Only rendered once a real baseline quote exists (captured at
+// confirm time) and a real current quote was just fetched - never a guess
+// standing in for either.
+function RealAccuracyCheck({ outcome, t }) {
+  const result = computeAccuracyGuarantee({ expectedValueAtElapsed: outcome.expectedValueAtElapsed, actualValue: outcome.actualValue });
+  return (
+    <div className="strategicAccordionItem expanded">
+      <span className="sectionLabel">{t("investmentPlanner.accuracyGuarantee.realTitle")}</span>
+      <p className="weddingCarouselHint">
+        {t("investmentPlanner.accuracyGuarantee.realExplainer", {
+          months: outcome.elapsedMonths,
+          entryPrice: outcome.quoteAtConfirmPrice,
+          currentPrice: outcome.currentPrice,
+          asOf: new Date(outcome.currentPriceAsOf).toLocaleString(),
+        })}
+      </p>
+      <div className="weddingStatChips">
+        <span className="statChip">
+          {t("investmentPlanner.accuracyGuarantee.expectedLabel")}: {formatSgd(outcome.expectedValueAtElapsed)}
+        </span>
+        <span className="statChip">
+          {t("investmentPlanner.accuracyGuarantee.realActualLabel")}: {formatSgd(outcome.actualValue)}
+        </span>
+        <span className={result.triggered ? "statChip warning" : "statChip"}>
+          {t("investmentPlanner.accuracyGuarantee.shortfallLabel")}: {result.shortfallPercent}%
+        </span>
+      </div>
+      {result.triggered ? (
+        <p className="weddingCarouselHint">{t("investmentPlanner.accuracyGuarantee.triggeredNote", { amount: formatSgd(result.creditAmount) })}</p>
+      ) : (
+        <p className="weddingCarouselHint">{t("investmentPlanner.accuracyGuarantee.realNotTriggeredNote")}</p>
+      )}
+    </div>
   );
 }
 
 // "Recommendation accuracy accountability" concept preview (see lib/accuracy-guarantee-finance.js's
 // header comment for why this is explorable-but-hypothetical rather than backed by a real elapsed-
 // time market feed). The formula and every number it computes are real; only "actual value" is a
-// hypothetical the customer types in to see how the policy would apply.
+// hypothetical the customer types in to see how the policy would apply. RealAccuracyCheck above
+// shows the real version when real data exists - this explorer stays available regardless, since
+// "what if it dropped further" is still a meaningful question even with real data on hand.
 function AccuracyGuaranteeExplorer({ pick, t }) {
   const [open, setOpen] = useState(false);
   const horizonMonths = pick.horizon_years * 12;
@@ -10423,8 +10466,10 @@ function AccuracyGuaranteeExplorer({ pick, t }) {
 
   const expectedValueAtElapsed = computeExpectedValueAtElapsed({
     projectedEndValue: pick.projection.projectedEndValue,
+    totalContributed: pick.projection.totalContributed,
     elapsedMonths,
     horizonMonths,
+    purchaseMode: pick.purchase_mode,
   });
   const result = computeAccuracyGuarantee({ expectedValueAtElapsed, actualValue: numberValue(actualValue, expectedValueAtElapsed) });
 
@@ -10499,6 +10544,7 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
   const [selectionHorizonYears, setSelectionHorizonYears] = useState("");
 
   const [confirmedPicks, setConfirmedPicks] = useState([]);
+  const [outcomesByKey, setOutcomesByKey] = useState({});
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState([]);
@@ -10537,6 +10583,18 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
       if (sessionJson.confirmedPicks?.length) {
         setConfirmedPicks(sessionJson.confirmedPicks);
         setStage("confirmed");
+        // Real predicted-vs-actual data (app/api/investment/outcomes) - only
+        // fetched once there's actually a confirmed pick to check. A failed
+        // fetch just leaves outcomesByKey empty - every card falls back to
+        // hasRealData: false (the existing hypothetical explorer), never a
+        // broken screen.
+        fetch("/api/investment/outcomes")
+          .then((response) => (response.ok ? response.json() : null))
+          .then((data) => {
+            if (cancelled || !data) return;
+            setOutcomesByKey(Object.fromEntries(data.outcomes.map((entry) => [entry.key, entry])));
+          })
+          .catch(() => {});
       } else if (sessionJson.shortlist) {
         setStage("shortlist");
       }
@@ -10721,7 +10779,12 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
       ) : stage === "confirmed" ? (
         <>
           {confirmedPicks.map((pick, index) => (
-            <InvestmentConfirmedCard key={`${pick.entry_id}-${index}`} pick={pick} t={t} />
+            <InvestmentConfirmedCard
+              key={`${pick.entry_id}-${index}`}
+              pick={pick}
+              outcome={outcomesByKey[`${pick.entry_id}:${pick.confirmedAt}`] ?? null}
+              t={t}
+            />
           ))}
           <button type="button" className="secondaryButton" onClick={addAnotherInstrument}>
             {t("investmentPlanner.addAnotherPick")}
