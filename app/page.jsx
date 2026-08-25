@@ -4148,7 +4148,14 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
           <SummaryRow label={t("simulator.output.evidence.available")} value={`SGD ${debate.computed.availableMonthly}`} />
           <SummaryRow label={t("simulator.output.evidence.required")} value={`SGD ${debate.computed.requiredMonthly}`} />
           {debate.computed.availableLiquidSavings != null ? (
-            <SummaryRow label={t("simulator.output.evidence.liquidSavings")} value={`SGD ${debate.computed.availableLiquidSavings}`} />
+            <SummaryRow
+              label={t(
+                debate.computed.liquidSavingsSourcedFromLedger
+                  ? "simulator.output.evidence.liquidSavings"
+                  : "simulator.output.evidence.liquidSavingsStated"
+              )}
+              value={`SGD ${debate.computed.availableLiquidSavings}`}
+            />
           ) : null}
           {debate.computed.emergencyBufferMonths != null ? (
             <SummaryRow

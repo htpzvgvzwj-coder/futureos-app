@@ -37,6 +37,13 @@ export async function POST(request) {
   // Numbers are computed here from the real inputs, never trusted from the
   // model - the AI only argues about them (lib/mirror-prompts.js).
   const computed = computeGoalFeasibility(goalType, inputs, assetContext);
+  // Honesty audit finding: resolveAvailableLiquidSavings silently falls back
+  // to the client-typed currentSavings figure when the customer has never
+  // itemized a real Asset Profile ledger entry (lib/liquid-savings-context.js)
+  // - the prompt was unconditionally claiming that number came from "the
+  // customer's actual Asset Profile ledger" even in the fallback case. This
+  // flag lets the prompt say which one it actually is.
+  computed.liquidSavingsSourcedFromLedger = assets.length > 0;
 
   // Whole-picture context: what this goal would do layered on top of every
   // OTHER commitment already confirmed elsewhere in the app (a home loan,
