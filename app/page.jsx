@@ -2784,10 +2784,15 @@ function getNotificationHistory(profile, preferences, t) {
     preferences.notifications?.spending &&
     preferences.guardianPermissions?.spendingAlerts &&
     !preferences.consentWithdrawn;
+  // Same real gap as HomeDashboard's spendingRisk card - a customer who
+  // hasn't entered their real income/expenses yet must never see a
+  // fabricated "over budget" notification computed from the default
+  // demo persona's numbers.
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
 
   const history = [];
 
-  if (spendingAlertsEnabled && spendingRisk.hasRisk) {
+  if (hasRealProfile && spendingAlertsEnabled && spendingRisk.hasRisk) {
     history.push({
       id: "over-budget",
       icon: AlertTriangle,
@@ -3208,13 +3213,27 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
 
+  // Real gap found by looking at what a brand-new signup actually sees:
+  // every field in `profile` silently falls back to `defaultProfile` (a
+  // fictional demo persona - 27yo married marketing exec, $7500 income,
+  // $85000 savings) until the customer edits it in Profile/Life Graph.
+  // spendingRisk and detectedNeeds below are both computed from those
+  // fictional numbers for a customer who hasn't entered anything yet, and
+  // were being presented as real findings ("1 financial risk detected
+  // today") with zero disclosure - reusing the same "confirmed away from
+  // default" signal getAiConfidence already established for exactly this
+  // purpose (see confidenceTrackedFields above), not inventing a new one.
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+
   // Same real "detected need" evidence already shown passively on the Life
   // Graph screen (a declared goal, or a health score below a real
   // threshold) - surfaced here too so a customer who never opens Life Graph
   // still gets nudged. Only the first (deterministic, not arbitrary) need
-  // is shown - this is a nudge, not a report.
+  // is shown - this is a nudge, not a report. Excluded (not computed at
+  // all) until hasRealProfile, since it's otherwise a "need" inferred from
+  // the fictional default persona's numbers, not this customer's own.
   const customGoals = getCustomGoals(preferences);
-  const detectedNeeds = getDetectedNeeds(getProfileGoalIds(profile, customGoals), healthScores);
+  const detectedNeeds = hasRealProfile ? getDetectedNeeds(getProfileGoalIds(profile, customGoals), healthScores) : [];
   const topDetectedNeed = detectedNeeds[0] ?? null;
 
   // Same real open-loops signal already surfaced inside Mirror chat
@@ -3462,29 +3481,31 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
 
         <motion.button
           type="button"
-          className={spendingRisk.hasRisk ? "futureAlertCard risk" : "futureAlertCard"}
-          onClick={() => setActiveScreen(screens.SPENDING_RISK)}
+          className={hasRealProfile && spendingRisk.hasRisk ? "futureAlertCard risk" : "futureAlertCard"}
+          onClick={() => setActiveScreen(hasRealProfile ? screens.SPENDING_RISK : screens.PROFILE)}
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.36, delay: 0.12, ease: "easeOut" }}
         >
-          <span className="futureAlertIcon">
-            <AlertTriangle size={18} />
-          </span>
+          <span className="futureAlertIcon">{hasRealProfile ? <AlertTriangle size={18} /> : <Info size={18} />}</span>
           <span>
-            <small>{t("spendingRisk.homeLabel")}</small>
+            <small>{hasRealProfile ? t("spendingRisk.homeLabel") : t("spendingRisk.homeNoProfileLabel")}</small>
             <strong>
-              {spendingRisk.hasRisk
-                ? t("spendingRisk.homeTitleRisk")
-                : t("spendingRisk.homeTitleSafe")}
+              {hasRealProfile
+                ? spendingRisk.hasRisk
+                  ? t("spendingRisk.homeTitleRisk")
+                  : t("spendingRisk.homeTitleSafe")
+                : t("spendingRisk.homeNoProfileTitle")}
             </strong>
             <em>
-              {spendingRisk.hasRisk
-                ? t("spendingRisk.homeDetailRisk", {
-                    amount: formatSgd(spendingRisk.overBudgetAmount),
-                    budget: formatSgd(spendingRisk.safeBudget),
-                  })
-                : t("spendingRisk.homeDetailSafe", { budget: formatSgd(spendingRisk.safeBudget) })}
+              {hasRealProfile
+                ? spendingRisk.hasRisk
+                  ? t("spendingRisk.homeDetailRisk", {
+                      amount: formatSgd(spendingRisk.overBudgetAmount),
+                      budget: formatSgd(spendingRisk.safeBudget),
+                    })
+                  : t("spendingRisk.homeDetailSafe", { budget: formatSgd(spendingRisk.safeBudget) })
+                : t("spendingRisk.homeNoProfileDetail")}
             </em>
           </span>
           <ChevronRight size={17} />
@@ -13619,6 +13640,15 @@ export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
   const [authUser, setAuthUser] = useState(null);
+  // True only once the real fetched profile/preferences have actually
+  // landed in state (setPreferences below) - `authStatus` alone flips to
+  // "authenticated" before that async chain finishes, and `preferences`
+  // is still the initial defaultPreferences (displayName "Karina") during
+  // that gap. Found via live verification: the debounced persist effect
+  // used to fire on authStatus alone, genuinely PUTting the stale default
+  // name to the server on every fresh signup/login before a second,
+  // correct PUT landed moments later.
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [activeScreen, setActiveScreen] = useState(screens.HOME);
   const [loadingCopyKey, setLoadingCopyKey] = useState("loading.default");
   const [language, setLanguage] = useState("en");
@@ -13757,6 +13787,7 @@ export default function App() {
       displayName: savedPreferences?.displayName || authUser?.displayName || defaultPreferences.displayName,
     };
     setPreferences(storedPreferences);
+    setPreferencesLoaded(true);
     setSimulatorInputs(
       mergeDefaults(
         getSimulatorDefaultsFromProfile(getUserProfile(storedPreferences), getCustomGoals(storedPreferences)),
@@ -13828,6 +13859,12 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = effectiveTheme;
     if (authStatus !== "authenticated") return;
+    // Also wait for the real fetched preferences to have landed, not just
+    // authStatus - otherwise this fires while `preferences` is still the
+    // initial defaultPreferences (displayName "Karina") during the gap
+    // before the async profile/preferences load finishes, genuinely
+    // persisting the stale default to the server and localStorage.
+    if (!preferencesLoaded) return;
     window.localStorage.setItem(storageKey("futureos-preferences"), JSON.stringify(preferences));
 
     // Debounced server sync so a login on a different device sees real data
@@ -13841,7 +13878,7 @@ export default function App() {
         body: JSON.stringify(preferences),
       }).catch(() => {});
     }, 1000);
-  }, [preferences, effectiveTheme, authStatus]);
+  }, [preferences, effectiveTheme, authStatus, preferencesLoaded]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
