@@ -440,50 +440,50 @@
       "nextReview": "Semakan Seterusnya"
     },
     "hub": {
-      "subtitle": "Ejen AI kewangan autonomi anda.",
+      "subtitle": "Satu tempat yang sentiasa mengawasi wang anda, supaya anda tak perlu.",
       "gridLabel": "Grid ciri Future Self Guardian",
       "back": "Kembali ke Guardian",
       "openSettings": "Buka tetapan penuh",
       "cards": {
         "recommendation": {
           "title": "Cadangan Guardian",
-          "subtitle": "Cadangan AI peribadi hari ini."
+          "subtitle": "Satu perkara benar yang berbaloi dilakukan hari ini, bukan senarai untuk disaring sendiri."
         },
         "actionCentre": {
           "title": "Pusat Tindakan",
-          "subtitle": "Lulus, ubah atau tolak tindakan AI."
+          "subtitle": "Tiada apa berlaku pada wang anda tanpa kebenaran anda."
         },
         "monitoring": {
           "title": "Pemantauan Matlamat",
-          "subtitle": "Jejaki perlindungan setiap matlamat kewangan."
+          "subtitle": "Tahu serta-merta jika mana-mana matlamat semakin ketinggalan."
         },
         "financialStrategy": {
           "title": "Strategi Kewangan",
-          "subtitle": "Simpanan, pelaburan, insurans dan pinjaman."
+          "subtitle": "Semua yang anda miliki dan hutang, dalam satu gambaran jujur."
         },
         "aiReasoning": {
           "title": "Penaakulan AI",
-          "subtitle": "Fahami sebab Guardian membuat cadangan ini."
+          "subtitle": "Tak perlu lagi percaya cadangan tanpa sebab."
         },
         "memory": {
           "title": "Memori Guardian",
-          "subtitle": "Semak perjalanan kewangan jangka panjang anda."
+          "subtitle": "Tiada yang anda sahkan dengan Guardian pernah dilupakan."
         },
         "monthlyReview": {
           "title": "Semakan Bulanan",
-          "subtitle": "Laporan prestasi AI bulanan."
+          "subtitle": "Lihat sama ada Guardian benar-benar menepati bulan ini, bukan sekadar berjanji."
         },
         "settings": {
           "title": "Tetapan Guardian",
-          "subtitle": "Kebenaran autonomi dan pilihan Guardian."
+          "subtitle": "Anda yang menentukan sejauh mana Guardian boleh bertindak sendiri."
         },
         "reputation": {
           "title": "Reputasi Guardian",
-          "subtitle": "Sejauh mana autonomi yang diperoleh Guardian"
+          "subtitle": "Had sebenar yang telah diperoleh Guardian setakat ini, bukan had tetap"
         },
         "goalLedger": {
           "title": "Lejar Matlamat",
-          "subtitle": "Lihat status kitaran hayat di sebalik setiap matlamat yang dilindungi"
+          "subtitle": "Tahu kedudukan sebenar setiap matlamat, bukan sekadar labelnya"
         }
       }
     },

@@ -565,50 +565,50 @@
       "nextReview": "下次审查"
     },
     "hub": {
-      "subtitle": "你的自主财务 AI 助理。",
+      "subtitle": "有人在替你盯着你的钱，你不用自己一直盯着。",
       "gridLabel": "Future Self Guardian 功能网格",
       "back": "返回 Guardian",
       "openSettings": "打开完整设置",
       "cards": {
         "recommendation": {
           "title": "Guardian 建议",
-          "subtitle": "今日个性化 AI 建议。"
+          "subtitle": "今天真正值得做的一件事，不是一堆要你自己筛选的清单。"
         },
         "actionCentre": {
           "title": "行动中心",
-          "subtitle": "批准、修改或拒绝 AI 行动。"
+          "subtitle": "没有你的同意，你的钱不会有任何变动。"
         },
         "monitoring": {
           "title": "目标监测",
-          "subtitle": "追踪每个财务目标的保障情况。"
+          "subtitle": "哪个目标正在悄悄掉队，你会立刻知道。"
         },
         "financialStrategy": {
           "title": "财务策略",
-          "subtitle": "储蓄、投资、保险及贷款。"
+          "subtitle": "你拥有的、你欠的，一份诚实完整的全貌。"
         },
         "aiReasoning": {
           "title": "AI 推理",
-          "subtitle": "了解 Guardian 为何做出此建议。"
+          "subtitle": "再也不用凭空相信一条建议。"
         },
         "memory": {
           "title": "Guardian 记忆",
-          "subtitle": "回顾你的长期财务历程。"
+          "subtitle": "你和 Guardian 确认过的每一件事，都不会被遗忘。"
         },
         "monthlyReview": {
           "title": "月度审查",
-          "subtitle": "月度 AI 表现报告。"
+          "subtitle": "看看 Guardian 这个月是不是真的兑现了，不只是嘴上说说。"
         },
         "settings": {
           "title": "Guardian 设置",
-          "subtitle": "自主权限及 Guardian 偏好设置。"
+          "subtitle": "Guardian 能自己做多少事，完全由你决定。"
         },
         "reputation": {
           "title": "Guardian 信誉",
-          "subtitle": "Guardian 已赢得多少自主权"
+          "subtitle": "Guardian 目前真正赢得的上限，不是一个固定额度"
         },
         "goalLedger": {
           "title": "目标台账",
-          "subtitle": "查看每个受保护目标背后的生命周期状态"
+          "subtitle": "每个目标真实的进展，而不只是一个标签"
         }
       }
     },

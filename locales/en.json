@@ -531,50 +531,50 @@
       "autonomousLevel": "Autonomous Level"
     },
     "hub": {
-      "subtitle": "Your autonomous financial AI agent.",
+      "subtitle": "The one place watching over your money, so you don't have to.",
       "gridLabel": "Future Self Guardian feature grid",
       "back": "Back to Guardian",
       "openSettings": "Open full settings",
       "cards": {
         "recommendation": {
           "title": "Guardian Recommendation",
-          "subtitle": "Today's personalised AI recommendation."
+          "subtitle": "One real thing worth doing today, not a list to sort through."
         },
         "actionCentre": {
           "title": "Action Centre",
-          "subtitle": "Approve, modify or reject AI actions."
+          "subtitle": "Nothing happens with your money without your say."
         },
         "monitoring": {
           "title": "Goal Monitoring",
-          "subtitle": "Track protection of every financial goal."
+          "subtitle": "Know instantly if any goal is quietly falling behind."
         },
         "financialStrategy": {
           "title": "Financial Strategy",
-          "subtitle": "Savings, investments, insurance and loans."
+          "subtitle": "Everything you own and owe, in one honest picture."
         },
         "aiReasoning": {
           "title": "AI Reasoning",
-          "subtitle": "Understand why Guardian made this recommendation."
+          "subtitle": "Never take a recommendation on faith again."
         },
         "memory": {
           "title": "Guardian Memory",
-          "subtitle": "Review your long-term financial journey."
+          "subtitle": "Nothing you've confirmed with Guardian is ever forgotten."
         },
         "monthlyReview": {
           "title": "Monthly Review",
-          "subtitle": "Monthly AI performance report."
+          "subtitle": "See whether Guardian actually delivered this month, not just promised to."
         },
         "settings": {
           "title": "Guardian Settings",
-          "subtitle": "Autonomy permissions and Guardian preferences."
+          "subtitle": "You decide exactly how much Guardian can do on its own."
         },
         "reputation": {
           "title": "Guardian Reputation",
-          "subtitle": "How much autonomy Guardian has earned"
+          "subtitle": "The real ceiling Guardian has earned so far, not a fixed limit"
         },
         "goalLedger": {
           "title": "Goal Ledger",
-          "subtitle": "See the lifecycle state behind every protected goal"
+          "subtitle": "Know exactly where every goal really stands, not just its label"
         }
       }
     },
