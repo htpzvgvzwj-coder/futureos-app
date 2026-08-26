@@ -2372,6 +2372,25 @@ nextjs-portal {
   color: #f4f6fb;
 }
 
+.stage.theme-dark .chatComposerBar {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.stage.theme-dark .chatComposerInput {
+  color: #f4f6fb;
+}
+
+.stage.theme-dark .chatIconButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f6fb;
+}
+
+.stage.theme-dark .chatAttachmentChip {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f6fb;
+}
+
 .stage.theme-dark .weddingHero {
   background:
     linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.86)),
@@ -2701,6 +2720,176 @@ nextjs-portal {
 
 .workbenchScrollRow::-webkit-scrollbar {
   display: none;
+}
+
+/* Real chatroom layout (Future Self Guardian) - a fixed header, a message
+   log that's the ONLY thing that scrolls, and a composer pinned at the
+   bottom. Everything else in this app is a normal stacked-and-scrolling
+   .screen; this is the one screen that behaves like an actual chat app
+   instead of a long form. */
+.chatScreenRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.chatScreenHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-bottom: 10px;
+}
+
+.chatScreenHeaderRow h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.chatScreenHeaderRow .backHomeButton {
+  flex-shrink: 0;
+}
+
+.chatScreenLog {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0 14px;
+}
+
+.chatScreenLog::-webkit-scrollbar {
+  display: none;
+}
+
+.chatEmptyState {
+  margin: auto 6px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.chatComposerWrap {
+  flex-shrink: 0;
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.chatAttachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: flex-start;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(20, 36, 58, 0.06);
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chatAttachmentChip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.chatAttachmentRemove {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.chatComposerError {
+  color: var(--ocbc-red);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 2px;
+}
+
+.chatComposerBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(20, 36, 58, 0.14);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.chatComposerInput {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--navy);
+  padding: 8px 4px;
+  max-height: 96px;
+  overflow-y: auto;
+  line-height: 1.35;
+}
+
+.chatIconButton {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(20, 36, 58, 0.06);
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.chatIconButton.recording {
+  background: var(--ocbc-red);
+  color: #fff;
+}
+
+.chatIconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chatSendButton {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--ocbc-red);
+  color: #fff;
+  cursor: pointer;
+}
+
+.chatSendButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .workbenchScrollCard {

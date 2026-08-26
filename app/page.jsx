@@ -31,6 +31,7 @@ import {
   Home,
   Info,
   Landmark,
+  LayoutGrid,
   LineChart,
   LockKeyhole,
   LogOut,
@@ -4614,7 +4615,7 @@ function JointDebateResponseScreen({ t, setActiveScreen, debateId }) {
 // MediaRecorder -> /api/decision/voice/transcribe flow, never auto-sends)
 // + real inline PDF attach (reuses extractPdfText from Decode This - only
 // extracted text ever leaves the browser, same as the standalone screen).
-function MirrorChatInputCard({ t, onSubmit, submitting }) {
+function MirrorChatInputCard({ t, onSubmit, submitting, errorMessage: sendErrorMessage }) {
   const [value, setValue] = useState("");
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -4706,64 +4707,152 @@ function MirrorChatInputCard({ t, onSubmit, submitting }) {
   };
 
   return (
-    <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
-      <span className="sectionLabel">{t("mirrorChat.inputLabel")}</span>
-      <textarea
-        className="aiTextInput"
-        rows={3}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder={t("mirrorChat.inputPlaceholder")}
-        disabled={submitting}
-      />
-
+    <div className="chatComposerWrap">
       {attachedFile ? (
-        <section className="trustNote compactTrustNote">
-          <FileText size={17} />
-          <div>
-            <p>{attachedFile.extracting ? t("mirrorChat.pdf.extracting") : attachedFile.name}</p>
-            {attachedFile.error ? <small>{attachedFile.error}</small> : null}
-          </div>
-          <button type="button" className="secondaryButton" onClick={() => setAttachedFile(null)}>
-            {t("mirrorChat.pdf.remove")}
+        <div className="chatAttachmentChip">
+          <FileText size={13} />
+          <span>{attachedFile.extracting ? t("mirrorChat.pdf.extracting") : attachedFile.name}</span>
+          <button
+            type="button"
+            className="chatAttachmentRemove"
+            onClick={() => setAttachedFile(null)}
+            aria-label={t("mirrorChat.pdf.remove")}
+          >
+            <X size={12} />
           </button>
-        </section>
+        </div>
       ) : null}
+      {attachedFile?.error ? <small className="chatComposerError">{attachedFile.error}</small> : null}
+      {errorMessage ? <small className="chatComposerError">{errorMessage}</small> : null}
+      {sendErrorMessage ? <small className="chatComposerError">{sendErrorMessage}</small> : null}
 
-      {errorMessage ? (
-        <section className="adviceOnlyPanel">
-          <AlertTriangle size={18} />
-          <p>{errorMessage}</p>
-        </section>
-      ) : null}
-
-      <div className="decisionButtonRow">
-        <button
-          type="button"
-          className={recording ? "primaryButton" : "secondaryButton"}
-          onClick={recording ? stopRecording : startRecording}
-          disabled={transcribing || submitting}
-        >
-          <Mic size={16} />
-          {transcribing ? t("mirrorChat.voice.transcribing") : recording ? t("mirrorChat.voice.stop") : t("mirrorChat.voice.speak")}
-        </button>
-
-        <label className="secondaryButton" style={{ cursor: "pointer" }}>
+      <form className="chatComposerBar" onSubmit={handleSubmit}>
+        <label className="chatIconButton" aria-label={t("mirrorChat.pdf.attach")}>
           <FileText size={16} />
-          {t("mirrorChat.pdf.attach")}
           <input type="file" accept="application/pdf" onChange={handleFileChange} style={{ display: "none" }} disabled={submitting} />
         </label>
-      </div>
+        <textarea
+          className="chatComposerInput"
+          rows={1}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder={t("mirrorChat.inputPlaceholder")}
+          aria-label={t("mirrorChat.inputLabel")}
+          disabled={submitting}
+        />
+        <button
+          type="button"
+          className={recording ? "chatIconButton recording" : "chatIconButton"}
+          onClick={recording ? stopRecording : startRecording}
+          disabled={transcribing || submitting}
+          aria-label={transcribing ? t("mirrorChat.voice.transcribing") : recording ? t("mirrorChat.voice.stop") : t("mirrorChat.voice.speak")}
+        >
+          <Mic size={16} />
+        </button>
+        <button
+          type="submit"
+          className="chatSendButton"
+          disabled={submitting || attachedFile?.extracting || (!value.trim() && !attachedFile?.text)}
+          aria-label={submitting ? t("mirrorChat.thinking") : t("mirrorChat.send")}
+        >
+          <Send size={16} />
+        </button>
+      </form>
+    </div>
+  );
+}
 
-      <button
-        type="submit"
-        className="primaryButton"
-        disabled={submitting || attachedFile?.extracting || (!value.trim() && !attachedFile?.text)}
-      >
-        {submitting ? t("mirrorChat.thinking") : t("mirrorChat.send")}
-        <Send size={18} />
-      </button>
-    </form>
+// Everything that isn't the chat itself (quick planners, Quick Verdict,
+// Decode Document, open loops, what Guardian remembers) - previously
+// stacked permanently below the chat input, competing with the actual
+// conversation for space on every single screen. A real chatroom's primary
+// surface is just messages + a composer; secondary tools belong behind a
+// menu, not inline clutter. Nothing here was deleted, only moved - every
+// entry point below is unchanged.
+function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("mirrorChat.toolsMenuLabel")}>
+      <motion.div className="confirmModal" {...screenMotion}>
+        <strong>{t("mirrorChat.toolsMenuLabel")}</strong>
+
+        <div className="settingsGroup">
+          <span className="sectionLabel">{t("mirrorChat.quickPlannersLabel")}</span>
+          <div className="checkboxGrid">
+            {simulatorGoalOptions
+              .filter(({ id }) => DEDICATED_GOAL_SCREENS[id])
+              .map(({ id, labelKey, icon: Icon }) => (
+                <button
+                  type="button"
+                  className="checkOption weddingEntryOption"
+                  key={id}
+                  onClick={() => setActiveScreen(DEDICATED_GOAL_SCREENS[id].screen)}
+                >
+                  <Icon size={15} />
+                  <span>{t(labelKey)}</span>
+                  <span className="weddingEntryTrailing">
+                    <b className="miniBadge">{t(DEDICATED_GOAL_SCREENS[id].badgeKey)}</b>
+                    <ChevronRight size={14} />
+                  </span>
+                </button>
+              ))}
+          </div>
+        </div>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.DECISION_VERDICT)}>
+          <Zap size={15} />
+          <span>
+            {t("decisionVerdict.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("decisionVerdict.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.DECODE_DOCUMENT)}>
+          <FileText size={15} />
+          <span>
+            {t("decodeDocument.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("decodeDocument.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        {openLoops.length ? (
+          <div className="settingsGroup">
+            <span className="sectionLabel">{t("mirrorChat.openLoopsLabel")}</span>
+            <div className="workbenchScrollRow">
+              {openLoops.map((loop, index) => (
+                <div className="workbenchScrollCard" key={index}>
+                  <strong>{t(`mirrorChat.openLoopTypes.${loop.type}`)}</strong>
+                  <small>{t(`simulator.goals.${loop.domain}`)}</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {memories.length ? (
+          <div className="settingsGroup">
+            <span className="sectionLabel">{t("mirrorChat.memoryShelfLabel")}</span>
+            <div className="workbenchScrollRow">
+              {memories.map((memory, index) => (
+                <div className="workbenchScrollCard" key={index}>
+                  <strong>{t(`mirrorChat.memoryTypes.${memory.type}`)}</strong>
+                  <small>{memory.detail}</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <button type="button" className="secondaryButton" onClick={onClose}>
+          {t("homeBanking.gotIt")}
+        </button>
+      </motion.div>
+    </section>
   );
 }
 
@@ -4771,7 +4860,6 @@ function MirrorChatScreen({
   setActiveScreen,
   simulatorInputs,
   preferences,
-  simulatorActionStates,
   language,
   t,
   mirrorChatSeed,
@@ -4783,28 +4871,14 @@ function MirrorChatScreen({
   const [errorMessage, setErrorMessage] = useState("");
   const [confirmedDebateIds, setConfirmedDebateIds] = useState(() => new Set());
   const [escalatedDebateIds, setEscalatedDebateIds] = useState(() => new Set());
-  const [guardianStateInfoOpen, setGuardianStateInfoOpen] = useState(false);
   const [openLoops, setOpenLoops] = useState([]);
   const [memories, setMemories] = useState([]);
   const [contextModalIndex, setContextModalIndex] = useState(null);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const logEndRef = useRef(null);
 
-  // Real status, reused as-is from FutureSelfGuardian's own derivation
-  // (app/page.jsx ~4330-4360) - not a new metric, just surfaced somewhere
-  // persistent instead of buried inside a sub-screen only reachable via
-  // Guardian. Zero new backend - every input here already reaches this
-  // screen via the `shared` prop spread.
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
-  const selectedGoalIds = getSelectedGoalIds(simulatorInputs);
-  const visibleActionCards = simulatorActionCards.filter(({ id }) => {
-    if (id === "mortgageReadiness") return selectedGoalIds.includes("home");
-    if (id === "insuranceReview") return selectedGoalIds.includes("family") || selectedGoalIds.includes("home");
-    if (id === "investmentPlan") return selectedGoalIds.includes("investment") || selectedGoalIds.includes("retirement");
-    return true;
-  });
-  const ledgerGoalEntries = getLedgerGoalEntries(profile, customGoals, t);
-  const guardianState = getGuardianState(preferences, ledgerGoalEntries, visibleActionCards, simulatorActionStates);
-  const { reputationBand } = computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates);
 
   // Real signals for a customer who doesn't know what to plan for yet -
   // both already exist and are already shown passively on the Life Graph
@@ -4842,6 +4916,14 @@ function MirrorChatScreen({
       cancelled = true;
     };
   }, []);
+
+  // Real chatroom behavior: always land on the newest message, matching
+  // every real chat app - previously this screen just scrolled like any
+  // other stacked form, so a new reply could land off-screen below the
+  // fold.
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages.length]);
 
   const sendMessage = async (text) => {
     setSending(true);
@@ -4920,44 +5002,31 @@ function MirrorChatScreen({
   };
 
   return (
-    <Screen>
-      <Header title={t("mirrorChat.title")} subtitle={t("mirrorChat.subtitle")} />
-      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
-
-      <div className="productStateRow">
-        <b className={`statePill ledgerState-${guardianState}`}>{t(`guardian.state.label.${guardianState}`)}</b>
+    <Screen className="chatScreenRoot">
+      <div className="chatScreenHeaderRow">
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+        <h1>{t("mirrorChat.title")}</h1>
         <button
           type="button"
-          className="infoButton tinyInfoButton"
-          onClick={() => setGuardianStateInfoOpen(true)}
-          aria-label={t("homeBanking.infoLabel", { item: t("guardian.state.title") })}
+          className="chatIconButton"
+          onClick={() => setToolsOpen(true)}
+          aria-label={t("mirrorChat.toolsMenuLabel")}
         >
-          <Info size={14} />
+          <LayoutGrid size={17} />
         </button>
-        <b className={`statePill state-${reputationBand}`}>{t(`guardian.reputation.band.${reputationBand}`)}</b>
       </div>
-      {guardianStateInfoOpen ? (
-        <InfoModal
-          icon={ShieldCheck}
-          title={t("guardian.state.title")}
-          tag={t(`guardian.state.label.${guardianState}`)}
-          body={t(`guardian.state.reason.${guardianState}`)}
-          onClose={() => setGuardianStateInfoOpen(false)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
+
+      {toolsOpen ? (
+        <ChatToolsModal t={t} setActiveScreen={setActiveScreen} onClose={() => setToolsOpen(false)} openLoops={openLoops} memories={memories} />
       ) : null}
 
-      {historyLoading ? (
-        <p>{t("loading.detail")}</p>
-      ) : (
-        <div className="chatHistoryLog">
-          {messages.length === 0 ? (
-            <section className="trustNote compactTrustNote">
-              <Sparkles size={17} />
-              <p>{t("mirrorChat.emptyState")}</p>
-            </section>
-          ) : null}
-          {messages.map((entry, index) => (
+      <div className="chatScreenLog">
+        {historyLoading ? (
+          <p>{t("loading.detail")}</p>
+        ) : messages.length === 0 ? (
+          <p className="chatEmptyState">{t("mirrorChat.emptyState")}</p>
+        ) : (
+          messages.map((entry, index) => (
             <div key={index}>
               {entry.text ? (
                 <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"}>
@@ -4982,9 +5051,10 @@ function MirrorChatScreen({
                 />
               ) : null}
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+        <div ref={logEndRef} />
+      </div>
 
       {contextModalIndex !== null && messages[contextModalIndex]?.context ? (
         <InfoModal
@@ -5002,95 +5072,7 @@ function MirrorChatScreen({
         />
       ) : null}
 
-      {errorMessage ? (
-        <section className="adviceOnlyPanel">
-          <AlertTriangle size={18} />
-          <p>{errorMessage}</p>
-        </section>
-      ) : null}
-
-      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending} />
-
-      {openLoops.length ? (
-        <div className="settingsGroup">
-          <span className="sectionLabel">{t("mirrorChat.openLoopsLabel")}</span>
-          <div className="workbenchScrollRow">
-            {openLoops.map((loop, index) => (
-              <div className="workbenchScrollCard" key={index}>
-                <strong>{t(`mirrorChat.openLoopTypes.${loop.type}`)}</strong>
-                <small>{t(`simulator.goals.${loop.domain}`)}</small>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {memories.length ? (
-        <div className="settingsGroup">
-          <span className="sectionLabel">{t("mirrorChat.memoryShelfLabel")}</span>
-          <div className="workbenchScrollRow">
-            {memories.map((memory, index) => (
-              <div className="workbenchScrollCard" key={index}>
-                <strong>{t(`mirrorChat.memoryTypes.${memory.type}`)}</strong>
-                <small>{memory.detail}</small>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="settingsGroup">
-        <span className="sectionLabel">{t("mirrorChat.quickPlannersLabel")}</span>
-        <div className="checkboxGrid">
-          {simulatorGoalOptions
-            .filter(({ id }) => DEDICATED_GOAL_SCREENS[id])
-            .map(({ id, labelKey, icon: Icon }) => (
-              <button
-                type="button"
-                className="checkOption weddingEntryOption"
-                key={id}
-                onClick={() => setActiveScreen(DEDICATED_GOAL_SCREENS[id].screen)}
-              >
-                <Icon size={15} />
-                <span>{t(labelKey)}</span>
-                <span className="weddingEntryTrailing">
-                  <b className="miniBadge">{t(DEDICATED_GOAL_SCREENS[id].badgeKey)}</b>
-                  <ChevronRight size={14} />
-                </span>
-              </button>
-            ))}
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className="checkOption weddingEntryOption"
-        onClick={() => setActiveScreen(screens.DECISION_VERDICT)}
-      >
-        <Zap size={15} />
-        <span>
-          {t("decisionVerdict.entryTitle")}
-          <small style={{ display: "block", fontWeight: 400 }}>{t("decisionVerdict.entryBody")}</small>
-        </span>
-        <span className="weddingEntryTrailing">
-          <ChevronRight size={14} />
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className="checkOption weddingEntryOption"
-        onClick={() => setActiveScreen(screens.DECODE_DOCUMENT)}
-      >
-        <FileText size={15} />
-        <span>
-          {t("decodeDocument.entryTitle")}
-          <small style={{ display: "block", fontWeight: 400 }}>{t("decodeDocument.entryBody")}</small>
-        </span>
-        <span className="weddingEntryTrailing">
-          <ChevronRight size={14} />
-        </span>
-      </button>
+      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending} errorMessage={errorMessage} />
     </Screen>
   );
 }
@@ -13616,9 +13598,9 @@ function SummaryRow({ label, value }) {
   );
 }
 
-function Screen({ children }) {
+function Screen({ children, className }) {
   return (
-    <motion.div className="screen" {...screenMotion}>
+    <motion.div className={className ? `screen ${className}` : "screen"} {...screenMotion}>
       {children}
     </motion.div>
   );
