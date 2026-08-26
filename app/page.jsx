@@ -1678,7 +1678,16 @@ function ProductFitScreen({ preferences, setPreferences, simulatorInputs, simula
 // This prototype has no persistent event ledger yet (that lands with Goal Ledger Lifecycle), so each
 // component is derived from the closest real signal already tracked in the app rather than left static.
 function getGuardianReputationScore(ctx) {
-  const { preferences, healthScores, spendingRisk, approvedCount, decidedCount, approvedServiceCount, predictiveAccuracy = null } = ctx;
+  const {
+    preferences,
+    healthScores,
+    spendingRisk,
+    approvedCount,
+    decidedCount,
+    approvedServiceCount,
+    predictiveAccuracy = null,
+    investmentAccuracy = null,
+  } = ctx;
 
   const permissionValues = Object.values(preferences.guardianPermissions ?? {});
   const grantedRatio = permissionValues.length
@@ -1703,6 +1712,10 @@ function getGuardianReputationScore(ctx) {
   // present once at least one debate has a real resolved outcome (lib/mirror-outcome-resolver.js);
   // excluded from the weighted average (not defaulted to a guess) until then, same
   // "insufficient data is excluded, not scored as 0" pattern as Follow-Through Score.
+  // investmentAccuracy is the same real closed loop for confirmed investment picks
+  // (app/api/investment/outcomes) - did the real live price stay within the
+  // Accuracy Guarantee's own real threshold of what was projected, not a
+  // separate invented bar.
   const components = [
     { value: consentRespect, weight: 0.3 },
     { value: goalProtectionRate, weight: 0.25 },
@@ -1710,6 +1723,7 @@ function getGuardianReputationScore(ctx) {
     { value: recommendationOutcomeAccuracy, weight: 0.15 },
     { value: humanEscalationQuality, weight: 0.1 },
     { value: predictiveAccuracy, weight: 0.15 },
+    { value: investmentAccuracy, weight: 0.15 },
   ].filter((component) => component.value != null);
   const totalWeight = components.reduce((sum, component) => sum + component.weight, 0);
   const score = clampScore(components.reduce((sum, component) => sum + component.value * component.weight, 0) / totalWeight);
@@ -1722,6 +1736,7 @@ function getGuardianReputationScore(ctx) {
     recommendationOutcomeAccuracy,
     humanEscalationQuality,
     predictiveAccuracy,
+    investmentAccuracy,
   };
 }
 
@@ -1754,6 +1769,7 @@ const REPUTATION_BAND_RANK = { restricted: 0, underReview: 1, buildingTrust: 2, 
 // instead of only the one screen that used to fetch it separately.
 function computeGuardianReputation(preferences, simulatorInputs, simulatorActionStates) {
   const predictiveAccuracy = preferences?.mirrorOutcomeStats?.predictiveAccuracy ?? null;
+  const investmentAccuracy = preferences?.investmentOutcomeStats?.accuracy?.accuratePercent ?? null;
   const profile = getUserProfile(preferences);
   const healthScores = getHealthScores(profile);
   const spendingRisk = getSpendingRisk(profile);
@@ -1775,6 +1791,7 @@ function computeGuardianReputation(preferences, simulatorInputs, simulatorAction
     decidedCount: approvedActionCount + skippedActionCount,
     approvedServiceCount,
     predictiveAccuracy,
+    investmentAccuracy,
   });
   return { reputation, reputationBand: getReputationBand(reputation.score) };
 }
@@ -2325,6 +2342,9 @@ const defaultPreferences = {
   // everywhere it's called, instead of the 5 different call sites each
   // deciding independently whether to fetch it.
   mirrorOutcomeStats: null,
+  // Real confirmed-investment-pick accuracy (app/api/investment/outcomes) -
+  // same caching rationale as mirrorOutcomeStats above.
+  investmentOutcomeStats: null,
   quickActionVisibility: {
     paynow: true,
     scanPay: true,
@@ -13520,6 +13540,15 @@ export default function App() {
     } catch {
       // Offline/unreachable - fall back to whatever was cached in preferences.
     }
+    // Same real-accountability caching pattern as mirrorOutcomeStats above,
+    // for confirmed investment picks (app/api/investment/outcomes).
+    let fetchedInvestmentOutcomeStats = savedPreferences?.investmentOutcomeStats ?? null;
+    try {
+      const investmentOutcomesResponse = await fetch("/api/investment/outcomes");
+      if (investmentOutcomesResponse.ok) fetchedInvestmentOutcomeStats = await investmentOutcomesResponse.json();
+    } catch {
+      // Offline/unreachable - fall back to whatever was cached in preferences.
+    }
     if (cancelled) return;
     const storedPreferences = {
       ...applyProfileMigration(mergeDefaults(defaultPreferences, savedPreferences), savedPreferences),
@@ -13535,6 +13564,7 @@ export default function App() {
       incomeHistory: fetchedIncomeHistory,
       assets: fetchedAssets,
       mirrorOutcomeStats: fetchedMirrorOutcomeStats,
+      investmentOutcomeStats: fetchedInvestmentOutcomeStats,
       // The authenticated account's real display name seeds every fresh
       // login (no more global "Karina" hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once

@@ -1,7 +1,7 @@
 import { getOrCreateSession, getAllArtifactsWithTimestamps } from "../../../../lib/investment-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { getLiveQuotes } from "../../../../lib/market-quote-provider.js";
-import { computeExpectedValueAtElapsed } from "../../../../lib/accuracy-guarantee-finance.js";
+import { computeExpectedValueAtElapsed, computeAccuracyGuarantee } from "../../../../lib/accuracy-guarantee-finance.js";
 
 export const runtime = "nodejs";
 
@@ -11,6 +11,14 @@ function monthsBetween(fromIso, toDate) {
   const dayAdjust = toDate.getDate() < from.getDate() ? -1 : 0;
   return Math.max(0, months + dayAdjust);
 }
+
+// A pick isn't counted toward the aggregate accuracy signal (fed into
+// Guardian Reputation Score) until at least this much real time has passed -
+// day-to-day price noise on a fresh pick would make the signal meaningless,
+// same reasoning as mirror-outcome-resolver.js's 90-day window, just a
+// shorter bar since a price observation (not a binary life event) is being
+// checked here.
+const MIN_MONTHS_FOR_AGGREGATE = 3;
 
 // Real predicted-vs-actual for every confirmed investment pick that has a
 // real ticker AND a real quote captured at confirm time (both introduced
@@ -79,5 +87,21 @@ export async function GET(request) {
     };
   });
 
-  return Response.json({ outcomes });
+  // Real aggregate accuracy signal for Guardian Reputation Score
+  // (app/page.jsx's getGuardianReputationScore) - "accurate" reuses the
+  // exact same computeAccuracyGuarantee().triggered the customer already
+  // sees per pick, never a separate invented threshold. Excluded (null),
+  // not scored as 0, until at least one real pick has cleared
+  // MIN_MONTHS_FOR_AGGREGATE - same "insufficient data is excluded"
+  // pattern as every other Guardian Reputation Score component.
+  const resolvable = outcomes.filter((entry) => entry.hasRealData && entry.elapsedMonths >= MIN_MONTHS_FOR_AGGREGATE);
+  const accurateCount = resolvable.filter(
+    (entry) => !computeAccuracyGuarantee({ expectedValueAtElapsed: entry.expectedValueAtElapsed, actualValue: entry.actualValue }).triggered
+  ).length;
+  const accuracy = {
+    resolvedCount: resolvable.length,
+    accuratePercent: resolvable.length > 0 ? Math.round((accurateCount / resolvable.length) * 100) : null,
+  };
+
+  return Response.json({ outcomes, accuracy });
 }
