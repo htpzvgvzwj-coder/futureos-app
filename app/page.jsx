@@ -5029,11 +5029,12 @@ function MirrorChatScreen({
         <h1>{t("mirrorChat.title")}</h1>
         <button
           type="button"
-          className="chatIconButton"
+          className="chatIconButton chatToolsButton"
           onClick={() => setToolsOpen(true)}
           aria-label={t("mirrorChat.toolsMenuLabel")}
         >
-          <LayoutGrid size={17} />
+          <LayoutGrid size={16} />
+          {t("mirrorChat.toolsButtonLabel")}
         </button>
       </div>
 

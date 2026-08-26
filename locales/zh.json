@@ -2447,6 +2447,7 @@
     "thinking": "思考中……",
     "genericError": "出了点问题,请重试。",
     "toolsMenuLabel": "工具与快捷入口",
+    "toolsButtonLabel": "工具",
     "quickPlannersLabel": "或直接跳转到某个规划工具",
     "seedPrompt": "我不太确定从哪里开始——我们能聊聊{need}吗？",
     "seedPromptOpenLoop": "能跟进一下这件事吗——{domain}：{loopType}？",

@@ -2074,6 +2074,7 @@
     "thinking": "Sedang berfikir...",
     "genericError": "Sesuatu tidak kena. Sila cuba lagi.",
     "toolsMenuLabel": "Alat & pintasan",
+    "toolsButtonLabel": "Alat",
     "quickPlannersLabel": "Atau terus ke perancang",
     "seedPrompt": "Saya tidak pasti nak mula dari mana - bolehkah kita bincang tentang {need}?",
     "seedPromptOpenLoop": "Bolehkah kita susulan perkara ini - {domain}: {loopType}?",
