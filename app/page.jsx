@@ -4308,7 +4308,6 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
 
       {!confirmed ? (
         <div className="settingsGroup">
-          <span className="sectionLabel">{t("simulator.output.customerRebuttalLabel")}</span>
           <textarea
             className="aiTextInput"
             rows={2}
@@ -4316,6 +4315,7 @@ function MirrorDebateResultCard({ debate, confirmed, onConfirm, escalated, onEsc
             value={rebuttal}
             onChange={(event) => setRebuttal(event.target.value)}
             placeholder={t("simulator.output.customerRebuttalPlaceholder")}
+            aria-label={t("simulator.output.customerRebuttalLabel")}
           />
           <small>{t("simulator.output.customerRebuttalHint")}</small>
         </div>
@@ -4573,7 +4573,6 @@ function JointDebateResponseScreen({ t, setActiveScreen, debateId }) {
             </>
           ) : (
             <div className="settingsGroup">
-              <span className="sectionLabel">{t("jointDebateResponse.responseLabel")}</span>
               <textarea
                 className="aiTextInput"
                 rows={3}
@@ -4581,6 +4580,7 @@ function JointDebateResponseScreen({ t, setActiveScreen, debateId }) {
                 value={rebuttalText}
                 onChange={(event) => setRebuttalText(event.target.value)}
                 placeholder={t("jointDebateResponse.responsePlaceholder")}
+                aria-label={t("jointDebateResponse.responseLabel")}
               />
               <small>{t("jointDebateResponse.responseHint")}</small>
               {errorMessage ? (
@@ -6725,13 +6725,13 @@ function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey 
 
   return (
     <form className="needHeroCard aiTextInputCard" onSubmit={handleSubmit}>
-      <span className="sectionLabel">{t(labelKey)}</span>
       <textarea
         className="aiTextInput"
         rows={3}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
+        aria-label={t(labelKey)}
         disabled={submitting}
       />
       <button type="submit" className="primaryButton" disabled={submitting || !value.trim()}>
@@ -7771,13 +7771,13 @@ function HomePlanEditorPanel({
       </div>
 
       <div className="settingsGroup">
-        <span className="sectionLabel">{t("homePlanner.customRequestLabel")}</span>
         <textarea
           className="aiTextInput"
           rows={2}
           value={customText}
           onChange={(event) => onCustomTextChange(event.target.value)}
           placeholder={t("homePlanner.customRequestPlaceholder")}
+          aria-label={t("homePlanner.customRequestLabel")}
         />
         <button type="button" className="secondaryButton" onClick={onSubmitCustom} disabled={submitting}>
           {submitting ? t("weddingPlanner.thinking") : t("homePlanner.submitCustomChanges")}
@@ -7961,13 +7961,13 @@ function RetirementPlanEditorPanel({
       </div>
 
       <div className="settingsGroup">
-        <span className="sectionLabel">{t("retirementPlanner.customRequestLabel")}</span>
         <textarea
           className="aiTextInput"
           rows={2}
           value={customText}
           onChange={(event) => onCustomTextChange(event.target.value)}
           placeholder={t("retirementPlanner.customRequestPlaceholder")}
+          aria-label={t("retirementPlanner.customRequestLabel")}
         />
         <button type="button" className="secondaryButton" onClick={onSubmitCustom} disabled={submitting}>
           {submitting ? t("weddingPlanner.thinking") : t("retirementPlanner.submitCustomChanges")}
