@@ -705,3 +705,14 @@ alter table mirror_debates add column if not exists joint_synthesis_at timestamp
 create index if not exists mirror_debates_partner_idx
   on mirror_debates (partner_id, joint_synthesis_at)
   where partner_id is not null;
+
+-- Joint action initiator visibility: previously the initiator of a
+-- pause/reduce or joint plan-confirm proposal had zero real feedback after
+-- proposing - no list of their own proposals, no notification when the
+-- target confirmed or declined, and a decline carried no reason at all.
+-- decline_reason is the target's own optional real explanation (never
+-- required, never invented if they skip it); the initiator learns the
+-- outcome via a real guardian_alerts row (alert_type 'joint_action_resolved',
+-- lib/joint-action-store.js), the same notification channel
+-- joint_debate_pending already established.
+alter table joint_actions add column if not exists decline_reason text;

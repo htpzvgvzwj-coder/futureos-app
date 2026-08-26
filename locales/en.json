@@ -2772,6 +2772,14 @@
     },
     "yourPartnerFallback": "Your partner"
   },
+  "jointActionResolved": {
+    "alertLabel": "Your proposal was answered",
+    "confirmedTitle": "{name} confirmed your proposal",
+    "declinedTitle": "{name} declined your proposal",
+    "confirmedDetail": "The change went ahead - tap to see the real result on Shared access.",
+    "declinedDetail": "No reason was given - tap to see it on Shared access.",
+    "declinedDetailWithReason": "Their reason: \"{reason}\""
+  },
   "spendingRisk": {
     "title": "Spending Risk Detail",
     "subtitle": "FutureOS detected a spending pattern that may affect Karina's future goals.",

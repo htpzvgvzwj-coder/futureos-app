@@ -107,18 +107,22 @@ function PauseFeasibilityPanel({ check }) {
   );
 }
 
+const JOINT_ACTION_STATUS_LABELS = { pending: "Waiting for a response", confirmed: "Confirmed", declined: "Declined" };
+
 export default function GrantsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [given, setGiven] = useState([]);
   const [received, setReceived] = useState([]);
   const [pendingJointActions, setPendingJointActions] = useState([]);
+  const [initiatedJointActions, setInitiatedJointActions] = useState([]);
   const [granteeEmail, setGranteeEmail] = useState("");
   const [scope, setScope] = useState("all");
   const [accessLevel, setAccessLevel] = useState("view");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [jointActionBusyId, setJointActionBusyId] = useState(null);
+  const [declineReasons, setDeclineReasons] = useState({});
 
   const loadGrants = () => {
     fetch("/api/grants")
@@ -137,6 +141,15 @@ export default function GrantsPage() {
       .catch(() => {});
   };
 
+  // What THIS user has proposed to someone else - previously invisible once
+  // sent, see lib/joint-action-store.js's listInitiatedJointActions.
+  const loadInitiatedJointActions = () => {
+    fetch("/api/joint-actions/mine")
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((data) => setInitiatedJointActions(data.proposed ?? []))
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetch("/api/auth/me")
       .then((response) => (response.ok ? Promise.resolve() : Promise.reject(response)))
@@ -144,6 +157,7 @@ export default function GrantsPage() {
         setAuthChecked(true);
         loadGrants();
         loadPendingJointActions();
+        loadInitiatedJointActions();
       })
       .catch(() => router.push("/login"));
   }, []);
@@ -203,7 +217,11 @@ export default function GrantsPage() {
   const declineJointAction = async (id) => {
     setJointActionBusyId(id);
     try {
-      await fetch(`/api/joint-actions/${id}/decline`, { method: "POST" });
+      await fetch(`/api/joint-actions/${id}/decline`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: declineReasons[id]?.trim() || undefined }),
+      });
       loadPendingJointActions();
     } finally {
       setJointActionBusyId(null);
@@ -275,7 +293,14 @@ export default function GrantsPage() {
                         <strong>{action.initiator_display_name} proposed:</strong>
                         <small>{describeJointAction(action)}</small>
                       </div>
-                      <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                      <div style={{ display: "flex", gap: "6px", flexShrink: 0, alignItems: "center" }}>
+                        <input
+                          type="text"
+                          placeholder="Reason if declining (optional)"
+                          value={declineReasons[action.id] ?? ""}
+                          onChange={(event) => setDeclineReasons((current) => ({ ...current, [action.id]: event.target.value }))}
+                          style={{ fontSize: "11px", padding: "6px 8px", borderRadius: "8px", border: "1px solid #d8dfe8", width: "150px" }}
+                        />
                         <button
                           type="button"
                           className="miniButton"
@@ -300,6 +325,44 @@ export default function GrantsPage() {
                 ))
               ) : (
                 <p>Nothing waiting on your confirmation right now.</p>
+              )}
+            </div>
+          </section>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">Proposals you've sent</span>
+            <div className="strategyList">
+              {initiatedJointActions.length ? (
+                initiatedJointActions.map((action) => (
+                  <article className="strategyItem" key={action.id} style={{ display: "block" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                      <div>
+                        <strong>To {action.target_display_name}:</strong>
+                        <small>{describeJointAction(action)}</small>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          padding: "4px 8px",
+                          borderRadius: "999px",
+                          flexShrink: 0,
+                          background: action.status === "confirmed" ? "#e3f6f0" : action.status === "declined" ? "#fdeaea" : "#f2f4f8",
+                          color: action.status === "confirmed" ? "#0f9f84" : action.status === "declined" ? "#d71920" : "#5b6b82",
+                        }}
+                      >
+                        {JOINT_ACTION_STATUS_LABELS[action.status] ?? action.status}
+                      </span>
+                    </div>
+                    {action.status === "declined" && action.decline_reason ? (
+                      <small style={{ display: "block", marginTop: "6px", color: "#d71920" }}>
+                        Their reason: &quot;{action.decline_reason}&quot;
+                      </small>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <p>You haven&apos;t proposed anything for joint confirmation yet.</p>
               )}
             </div>
           </section>

@@ -3237,7 +3237,9 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const guardianNudge = topCrossGoalAlert
     ? topCrossGoalAlert.alert_type === "joint_debate_pending"
       ? { kind: "jointDebatePending", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail }
-      : { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
+      : topCrossGoalAlert.alert_type === "joint_action_resolved"
+        ? { kind: "jointActionResolved", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail }
+        : { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
     : topOpenLoop
       ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
       : topDetectedNeed
@@ -3498,6 +3500,10 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                 goWithLoading(screens.JOINT_DEBATE_RESPONSE, "loading.mirror");
                 return;
               }
+              if (guardianNudge.kind === "jointActionResolved") {
+                window.location.assign("/grants");
+                return;
+              }
               setMirrorChatSeed(guardianNudge);
               goWithLoading(screens.MIRROR, "loading.mirror");
             }}
@@ -3510,6 +3516,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                 <AlertTriangle size={18} />
               ) : guardianNudge.kind === "jointDebatePending" ? (
                 <HeartHandshake size={18} />
+              ) : guardianNudge.kind === "jointActionResolved" ? (
+                guardianNudge.detail.outcome === "confirmed" ? <CheckCircle2 size={18} /> : <X size={18} />
               ) : (
                 <Sparkles size={18} />
               )}
@@ -3522,7 +3530,9 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                     ? t("mirrorChat.openLoopsLabel")
                     : guardianNudge.kind === "jointDebatePending"
                       ? t("jointDebateResponse.alertLabel")
-                      : t("guardianNudge.label")}
+                      : guardianNudge.kind === "jointActionResolved"
+                        ? t("jointActionResolved.alertLabel")
+                        : t("guardianNudge.label")}
               </small>
               <strong>
                 {guardianNudge.kind === "crossGoalRisk"
@@ -3536,7 +3546,14 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                       ? t("jointDebateResponse.alertTitle", {
                           name: guardianNudge.detail.initiatorDisplayName || t("jointDebateResponse.yourPartnerFallback"),
                         })
-                      : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
+                      : guardianNudge.kind === "jointActionResolved"
+                        ? t(
+                            guardianNudge.detail.outcome === "confirmed"
+                              ? "jointActionResolved.confirmedTitle"
+                              : "jointActionResolved.declinedTitle",
+                            { name: guardianNudge.detail.targetDisplayName || t("jointDebateResponse.yourPartnerFallback") }
+                          )
+                        : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
               </strong>
               <em>
                 {guardianNudge.kind === "crossGoalRisk"
@@ -3555,10 +3572,18 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                       : t("guardianAlert.detailUtilizationOnly")
                   : guardianNudge.kind === "jointDebatePending"
                     ? t("jointDebateResponse.alertDetail", { domain: t(`simulator.goals.${guardianNudge.detail.goalType}`) })
-                    : t("guardianNudge.detail")}
+                    : guardianNudge.kind === "jointActionResolved"
+                      ? guardianNudge.detail.outcome === "declined" && guardianNudge.detail.declineReason
+                        ? t("jointActionResolved.declinedDetailWithReason", { reason: guardianNudge.detail.declineReason })
+                        : t(
+                            guardianNudge.detail.outcome === "confirmed"
+                              ? "jointActionResolved.confirmedDetail"
+                              : "jointActionResolved.declinedDetail"
+                          )
+                      : t("guardianNudge.detail")}
               </em>
             </span>
-            {guardianNudge.kind === "crossGoalRisk" || guardianNudge.kind === "jointDebatePending" ? (
+            {guardianNudge.kind === "crossGoalRisk" || guardianNudge.kind === "jointDebatePending" || guardianNudge.kind === "jointActionResolved" ? (
               <button
                 type="button"
                 className="miniButton"

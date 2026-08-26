@@ -2516,6 +2516,14 @@
     },
     "yourPartnerFallback": "你的伙伴"
   },
+  "jointActionResolved": {
+    "alertLabel": "你的提案有回应了",
+    "confirmedTitle": "{name} 确认了你的提案",
+    "declinedTitle": "{name} 拒绝了你的提案",
+    "confirmedDetail": "变更已经生效——点击查看「共享权限」里的真实结果。",
+    "declinedDetail": "对方没有留下理由——点击到「共享权限」查看。",
+    "declinedDetailWithReason": "对方的理由：「{reason}」"
+  },
   "spendingRisk": {
     "title": "消费风险详情",
     "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",
