@@ -73,6 +73,7 @@ export async function POST(request) {
     currentSavings: String(availableSavingsNow),
     emergencyBufferMonths: assetContext.emergencyBufferMonths,
     hasActiveInsurance: assetContext.hasActiveInsurance,
+    liquidSavingsSourcedFromLedger: assetContext.liquidSavingsSourcedFromLedger,
   };
 
   const session = await getOrCreateSession(userId);
