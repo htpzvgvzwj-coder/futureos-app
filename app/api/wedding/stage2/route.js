@@ -25,6 +25,7 @@ import { computeMilestoneFeasibility } from "../../../../lib/wedding-finance.js"
 import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
+import { computeJointPlanEvidence } from "../../../../lib/joint-plan-evidence.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -151,6 +152,16 @@ export async function POST(request) {
     const grantor = await findActGrantor(userId, "wedding");
     if (grantor) {
       try {
+        // Real evidence for the confirming partner (app/grants/page.jsx) -
+        // the same feasibility/whole-picture numbers the initiator saw,
+        // not a blind Confirm/Decline on a one-line summary. See
+        // lib/joint-plan-evidence.js.
+        const jointEvidence = await computeJointPlanEvidence(userId, {
+          monthlyIncome: profile.monthlyIncome,
+          monthlyExpenses: profile.monthlyExpenses,
+          availableLiquidSavings: availableSavingsNow,
+          monthlyContribution: finalData.monthly_contribution,
+        });
         const action = await proposeJointAction({
           initiatorUserId: userId,
           targetUserId: grantor.grantor_user_id,
@@ -159,6 +170,7 @@ export async function POST(request) {
           payload: {
             kind: "savings_plan",
             ...finalData,
+            jointEvidence,
             // Carried through so the joint dispatcher can run the same
             // triggerCrossGoalCheck the direct-save path below runs - the
             // partner's later confirm has no request body of its own to

@@ -42,6 +42,40 @@ function describeJointAction(action) {
   return `${domainLabel} / ${action.action_type}`;
 }
 
+// The real evidence a confirming partner previously never saw - the exact
+// same feasibility/whole-picture numbers the initiator saw when they built
+// this plan (lib/joint-plan-evidence.js, computed with the same real math
+// Mirror uses), not a blind Confirm/Decline on a one-line summary. Only
+// present for savings_plan proposals - stage1 plan/budget proposals don't
+// carry a real monthly commitment yet to score.
+function JointEvidencePanel({ evidence }) {
+  const riskColor = evidence.riskLevel === "low" ? "#0f9f84" : evidence.riskLevel === "medium" ? "#b45309" : "#d71920";
+  const utilizationColor =
+    evidence.wholePicture.wholePictureUtilizationPercent > 80 ? "#d71920" : evidence.wholePicture.wholePictureUtilizationPercent > 60 ? "#b45309" : "#0f9f84";
+  const worseningImpacts = [...evidence.wholePicture.loanImpact, ...evidence.wholePicture.investmentImpact].filter((item) => item.delta <= -10);
+  return (
+    <div style={{ marginTop: "8px", padding: "10px", borderRadius: "10px", background: "#f7f9fc", display: "grid", gap: "6px" }}>
+      <span style={{ fontSize: "11px", fontWeight: 700, color: "#5b6b82" }}>Real evidence, not a blind confirm</span>
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: riskColor }}>
+          Feasibility: {evidence.feasibilityScore}/100 ({evidence.riskLevel} risk)
+        </span>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: utilizationColor }}>
+          Whole-picture utilization: {evidence.wholePicture.wholePictureUtilizationPercent}%
+        </span>
+      </div>
+      <small style={{ fontSize: "11px", color: "#5b6b82" }}>
+        {formatSgd(evidence.wholePicture.residualAfterAllCommitments)} left over each month after this plan and everything else already confirmed.
+      </small>
+      {worseningImpacts.length ? (
+        <small style={{ fontSize: "11px", color: "#d71920" }}>
+          Real impact on already-confirmed commitments: {worseningImpacts.map((item) => `${item.name ?? item.purpose} (${item.scoreBefore}→${item.scoreAfter})`).join(", ")}.
+        </small>
+      ) : null}
+    </div>
+  );
+}
+
 export default function GrantsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
@@ -204,29 +238,32 @@ export default function GrantsPage() {
             <div className="strategyList">
               {pendingJointActions.length ? (
                 pendingJointActions.map((action) => (
-                  <article className="strategyItem" key={action.id}>
-                    <div>
-                      <strong>{action.initiator_display_name} proposed:</strong>
-                      <small>{describeJointAction(action)}</small>
+                  <article className="strategyItem" key={action.id} style={{ display: "block" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                      <div>
+                        <strong>{action.initiator_display_name} proposed:</strong>
+                        <small>{describeJointAction(action)}</small>
+                      </div>
+                      <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          className="miniButton"
+                          disabled={jointActionBusyId === action.id}
+                          onClick={() => confirmJointAction(action.id)}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          type="button"
+                          className="miniButton danger"
+                          disabled={jointActionBusyId === action.id}
+                          onClick={() => declineJointAction(action.id)}
+                        >
+                          Decline
+                        </button>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        type="button"
-                        className="miniButton"
-                        disabled={jointActionBusyId === action.id}
-                        onClick={() => confirmJointAction(action.id)}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        type="button"
-                        className="miniButton danger"
-                        disabled={jointActionBusyId === action.id}
-                        onClick={() => declineJointAction(action.id)}
-                      >
-                        Decline
-                      </button>
-                    </div>
+                    {action.payload.jointEvidence ? <JointEvidencePanel evidence={action.payload.jointEvidence} /> : null}
                   </article>
                 ))
               ) : (

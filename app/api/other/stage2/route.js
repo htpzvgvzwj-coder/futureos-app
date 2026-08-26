@@ -25,6 +25,7 @@ import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 import { computeGoalFeasibility, computeSavingsPlanFeasibility } from "../../../../lib/other-finance.js";
 import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
+import { computeJointPlanEvidence } from "../../../../lib/joint-plan-evidence.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -162,6 +163,12 @@ export async function POST(request) {
     const grantor = await findActGrantor(userId, "other");
     if (grantor) {
       try {
+        const jointEvidence = await computeJointPlanEvidence(userId, {
+          monthlyIncome: profile.monthlyIncome,
+          monthlyExpenses: profile.monthlyExpenses,
+          availableLiquidSavings: assetContext.availableLiquidSavings,
+          monthlyContribution: finalData.monthly_contribution,
+        });
         const action = await proposeJointAction({
           initiatorUserId: userId,
           targetUserId: grantor.grantor_user_id,
@@ -170,6 +177,7 @@ export async function POST(request) {
           payload: {
             kind: "savings_plan",
             ...finalData,
+            jointEvidence,
             crossGoalCheckInputs: {
               monthlyIncome: profile.monthlyIncome,
               monthlyExpenses: profile.monthlyExpenses,
