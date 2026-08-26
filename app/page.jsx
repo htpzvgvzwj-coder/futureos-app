@@ -107,6 +107,7 @@ const screens = {
   HOME: "home",
   LIFE_GRAPH: "lifeGraph",
   MIRROR: "mirror",
+  JOINT_DEBATE_RESPONSE: "jointDebateResponse",
   GUARDIAN: "guardian",
   PROFILE: "profile",
   ASSET_PROFILE: "assetProfile",
@@ -3196,7 +3197,7 @@ function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
   );
 }
 
-function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, t }) {
+function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, setJointDebateViewId, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [noticeModal, setNoticeModal] = useState(null);
@@ -3234,7 +3235,9 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const [dismissingAlertId, setDismissingAlertId] = useState(null);
 
   const guardianNudge = topCrossGoalAlert
-    ? { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
+    ? topCrossGoalAlert.alert_type === "joint_debate_pending"
+      ? { kind: "jointDebatePending", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail }
+      : { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
     : topOpenLoop
       ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
       : topDetectedNeed
@@ -3490,6 +3493,11 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             className={guardianNudge.kind === "crossGoalRisk" && guardianNudge.severity === "atRisk" ? "futureAlertCard risk" : "futureAlertCard guardianNudgeCard"}
             data-testid="guardian-nudge-card"
             onClick={() => {
+              if (guardianNudge.kind === "jointDebatePending") {
+                setJointDebateViewId(guardianNudge.detail.debateId);
+                goWithLoading(screens.JOINT_DEBATE_RESPONSE, "loading.mirror");
+                return;
+              }
               setMirrorChatSeed(guardianNudge);
               goWithLoading(screens.MIRROR, "loading.mirror");
             }}
@@ -3498,7 +3506,13 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             transition={{ duration: 0.36, delay: 0.16, ease: "easeOut" }}
           >
             <span className="futureAlertIcon">
-              {guardianNudge.kind === "crossGoalRisk" ? <AlertTriangle size={18} /> : <Sparkles size={18} />}
+              {guardianNudge.kind === "crossGoalRisk" ? (
+                <AlertTriangle size={18} />
+              ) : guardianNudge.kind === "jointDebatePending" ? (
+                <HeartHandshake size={18} />
+              ) : (
+                <Sparkles size={18} />
+              )}
             </span>
             <span>
               <small>
@@ -3506,7 +3520,9 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                   ? t("guardianAlert.label")
                   : guardianNudge.kind === "openLoop"
                     ? t("mirrorChat.openLoopsLabel")
-                    : t("guardianNudge.label")}
+                    : guardianNudge.kind === "jointDebatePending"
+                      ? t("jointDebateResponse.alertLabel")
+                      : t("guardianNudge.label")}
               </small>
               <strong>
                 {guardianNudge.kind === "crossGoalRisk"
@@ -3516,7 +3532,11 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                         domain: t(`simulator.goals.${guardianNudge.domain}`),
                         loopType: t(`mirrorChat.openLoopTypes.${guardianNudge.type}`),
                       })
-                    : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
+                    : guardianNudge.kind === "jointDebatePending"
+                      ? t("jointDebateResponse.alertTitle", {
+                          name: guardianNudge.detail.initiatorDisplayName || t("jointDebateResponse.yourPartnerFallback"),
+                        })
+                      : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
               </strong>
               <em>
                 {guardianNudge.kind === "crossGoalRisk"
@@ -3533,10 +3553,12 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
                           after: guardianNudge.detail.worseningInvestments[0].scoreAfter,
                         })
                       : t("guardianAlert.detailUtilizationOnly")
-                  : t("guardianNudge.detail")}
+                  : guardianNudge.kind === "jointDebatePending"
+                    ? t("jointDebateResponse.alertDetail", { domain: t(`simulator.goals.${guardianNudge.detail.goalType}`) })
+                    : t("guardianNudge.detail")}
               </em>
             </span>
-            {guardianNudge.kind === "crossGoalRisk" ? (
+            {guardianNudge.kind === "crossGoalRisk" || guardianNudge.kind === "jointDebatePending" ? (
               <button
                 type="button"
                 className="miniButton"
@@ -4404,6 +4426,152 @@ function MirrorWhatIfExplorer({ debate, t }) {
         ) : null}
       </div>
     </section>
+  );
+}
+
+// Joint Debate v2's real second-side screen: what a partner actually lands
+// on after tapping the joint_debate_pending alert on their own Home. Reads
+// the real original debate (bull/bear/judge, unchanged - see app/api/mirror/
+// debate/[id]/route.js's real authorization: only the initiator or this
+// exact partner_id can fetch it), lets the partner submit their own real
+// typed response exactly once, then shows the real joint synthesis a
+// separate AI call produces from BOTH people's actual words - never a
+// silent restatement of the original debate with the partner's numbers
+// quietly folded in.
+function JointDebateResponseScreen({ t, setActiveScreen, debateId }) {
+  const [debate, setDebate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [rebuttalText, setRebuttalText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!debateId) {
+      setLoading(false);
+      setNotFound(true);
+      return;
+    }
+    setLoading(true);
+    fetch(`/api/mirror/debate/${debateId}`)
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((data) => {
+        if (!cancelled) setDebate(data.debate);
+      })
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debateId]);
+
+  const submitResponse = async () => {
+    if (!rebuttalText.trim()) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`/api/mirror/debate/${debateId}/partner-respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rebuttal: rebuttalText.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("jointDebateResponse.submitError"));
+        if (data.debate) setDebate(data.debate);
+        return;
+      }
+      setDebate(data.debate);
+    } catch {
+      setErrorMessage(t("jointDebateResponse.submitError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Screen>
+      <Header title={t("jointDebateResponse.title")} subtitle={t("jointDebateResponse.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : notFound || !debate ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{t("jointDebateResponse.notFound")}</p>
+        </section>
+      ) : (
+        <>
+          <section className="recommendationPanel">
+            <span className="sectionLabel">{t("jointDebateResponse.originalDebateTitle")}</span>
+            <p>{debate.situation || t(`simulator.goals.${debate.goal_type}`)}</p>
+          </section>
+
+          <DebateBeat delay={0} className="recommendationHero debateBullCase" icon={ThumbsUp}>
+            <span className="sectionLabel">{t("simulator.output.bullCase")}</span>
+            <p>{debate.bull_case}</p>
+          </DebateBeat>
+          <DebateBeat delay={0.1} className="recommendationHero debateBearCase" icon={ThumbsDown}>
+            <span className="sectionLabel">{t("simulator.output.bearCase")}</span>
+            <p>{debate.bear_case}</p>
+          </DebateBeat>
+          <DebateBeat delay={0.2} className="recommendationHero debateJudge" icon={ShieldCheck}>
+            <span className="sectionLabel">{t("simulator.output.judgeSynthesis")}</span>
+            <p>{debate.judge_synthesis}</p>
+          </DebateBeat>
+
+          {debate.partner_rebuttal ? (
+            <>
+              <section className="recommendationPanel">
+                <span className="sectionLabel">{t("jointDebateResponse.yourResponseLabel")}</span>
+                <p>{debate.partner_rebuttal}</p>
+              </section>
+              {debate.joint_synthesis ? (
+                <DebateBeat delay={0.3} className="recommendationHero debateJudge" icon={Sparkles}>
+                  <span className="sectionLabel">{t("jointDebateResponse.jointSynthesisTitle")}</span>
+                  <p>{debate.joint_synthesis}</p>
+                  <small>{t(`jointDebateResponse.alignment.${debate.joint_synthesis_alignment}`)}</small>
+                </DebateBeat>
+              ) : (
+                <section className="trustNote compactTrustNote">
+                  <Info size={17} />
+                  <p>{t("jointDebateResponse.synthesisPending")}</p>
+                </section>
+              )}
+            </>
+          ) : (
+            <div className="settingsGroup">
+              <span className="sectionLabel">{t("jointDebateResponse.responseLabel")}</span>
+              <textarea
+                className="aiTextInput"
+                rows={3}
+                maxLength={1000}
+                value={rebuttalText}
+                onChange={(event) => setRebuttalText(event.target.value)}
+                placeholder={t("jointDebateResponse.responsePlaceholder")}
+              />
+              <small>{t("jointDebateResponse.responseHint")}</small>
+              {errorMessage ? (
+                <section className="adviceOnlyPanel">
+                  <AlertTriangle size={18} />
+                  <p>{errorMessage}</p>
+                </section>
+              ) : null}
+              <button type="button" className="primaryButton" disabled={submitting || !rebuttalText.trim()} onClick={submitResponse}>
+                {submitting ? t("jointDebateResponse.submitting") : t("jointDebateResponse.submitButton")}
+                <Zap size={18} />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </Screen>
   );
 }
 
@@ -13449,6 +13617,7 @@ export default function App() {
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [loanPlannerInitialPurpose, setLoanPlannerInitialPurpose] = useState(null);
   const [mirrorChatSeed, setMirrorChatSeed] = useState(null);
+  const [jointDebateViewId, setJointDebateViewId] = useState(null);
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -13777,6 +13946,7 @@ export default function App() {
     setMemoryEvents,
     setLoanPlannerInitialPurpose,
     setMirrorChatSeed,
+    setJointDebateViewId,
   };
 
   const mirrorSimulatorScreen = (
@@ -13797,6 +13967,7 @@ export default function App() {
     ),
     [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
+    [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (

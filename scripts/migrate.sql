@@ -683,3 +683,25 @@ create index if not exists guardian_alerts_profile_status_idx
 -- mirror-outcome-resolver.js already runs for the AI's own accountability
 -- (resolved_outcome), never a separate/invented judgment of the text itself.
 alter table mirror_debates add column if not exists customer_rebuttal text;
+
+-- Joint Debate v2: the real second side of a joint dual-partner debate
+-- (lib/joint-debate-context.js). Previously the partner's real numbers were
+-- silently folded into the initiator's AI prompt with no real counterpart -
+-- the partner never saw the debate, was never notified, never acted. Now:
+-- partner_id is the real user found by getJointPartnerId at generation time
+-- (who gets notified and who is allowed to respond - checked server-side,
+-- never just "whoever guesses the debate id"); partner_rebuttal is the
+-- partner's own real, typed input, not borrowed data; joint_synthesis is a
+-- separate, later AI call that explicitly weighs both real people's actual
+-- words, persisted alongside (never overwriting) the original judgeSynthesis
+-- so the original debate's own accountability record stays intact.
+alter table mirror_debates add column if not exists partner_id uuid;
+alter table mirror_debates add column if not exists partner_rebuttal text;
+alter table mirror_debates add column if not exists partner_rebuttal_at timestamptz;
+alter table mirror_debates add column if not exists joint_synthesis text;
+alter table mirror_debates add column if not exists joint_synthesis_alignment text; -- aligned | diverged
+alter table mirror_debates add column if not exists joint_synthesis_at timestamptz;
+
+create index if not exists mirror_debates_partner_idx
+  on mirror_debates (partner_id, joint_synthesis_at)
+  where partner_id is not null;

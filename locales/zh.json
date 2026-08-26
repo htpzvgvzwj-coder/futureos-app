@@ -2493,6 +2493,29 @@
     "detail": "点击与 Future Self Guardian 聊聊——基于你的真实数据,不是猜测。",
     "cta": "跟 Guardian 聊聊"
   },
+  "jointDebateResponse": {
+    "alertLabel": "联合决策需要你的看法",
+    "alertTitle": "{name} 发起了一场涉及你数字的 Mirror 辩论",
+    "alertDetail": "一个关于 {domain} 的真实联合决策——在综合结论生成前，加入你自己真实的看法。",
+    "title": "联合决策",
+    "subtitle": "一场关于你们共同目标的真实辩论——先看看讨论了什么，再加入你自己真实的回应。",
+    "notFound": "这场辩论现在无法查看——可能是你已不再共同管理这个目标了。",
+    "originalDebateTitle": "考虑的情境",
+    "yourResponseLabel": "你的回应",
+    "responseLabel": "你真实的回应（不是猜测你会说什么——用你自己的话）",
+    "responsePlaceholder": "你自己真实的想法是什么？同意、不同意，还是介于两者之间——说具体点。",
+    "responseHint": "这只能提交一次，之后会真正被纳入原始辩论一起权衡——不会被悄悄丢弃。",
+    "submitButton": "提交我的回应",
+    "submitting": "提交中...",
+    "submitError": "现在提交不了，稍后再试一次。",
+    "jointSynthesisTitle": "联合综合结论——权衡双方真实立场",
+    "synthesisPending": "你的回应已保存，正在综合成联合结论，稍后回来看看。",
+    "alignment": {
+      "aligned": "你的回应和原始辩论的方向一致。",
+      "diverged": "你的回应真实地对原始辩论的方向提出了不同看法。"
+    },
+    "yourPartnerFallback": "你的伙伴"
+  },
   "spendingRisk": {
     "title": "消费风险详情",
     "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",

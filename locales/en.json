@@ -2749,6 +2749,29 @@
     "detailUtilizationOnly": "Tap to talk through your whole picture with Future Self Guardian.",
     "dismiss": "Dismiss"
   },
+  "jointDebateResponse": {
+    "alertLabel": "Joint decision needs your input",
+    "alertTitle": "{name} ran a Mirror debate involving your numbers",
+    "alertDetail": "A real joint decision on {domain} - add your own real take before it's synthesized.",
+    "title": "Joint Decision",
+    "subtitle": "A real debate on a goal you share - read what was argued, then add your own real response.",
+    "notFound": "This debate isn't available - it may have been for a goal you're no longer jointly managing.",
+    "originalDebateTitle": "The situation considered",
+    "yourResponseLabel": "Your response",
+    "responseLabel": "Your real response (not a guess at what you'd say - your own words)",
+    "responsePlaceholder": "What's your actual take on this? Agree, disagree, or something in between - be specific.",
+    "responseHint": "This is submitted once, then genuinely weighed alongside the original debate - not silently discarded.",
+    "submitButton": "Submit my response",
+    "submitting": "Submitting...",
+    "submitError": "Couldn't submit your response right now - try again in a moment.",
+    "jointSynthesisTitle": "Joint synthesis - weighing both real positions",
+    "synthesisPending": "Your response is saved. Weighing it into a joint synthesis now - check back in a moment.",
+    "alignment": {
+      "aligned": "Your response aligns with the original debate's direction.",
+      "diverged": "Your response genuinely pushes back on the original debate's direction."
+    },
+    "yourPartnerFallback": "Your partner"
+  },
   "spendingRisk": {
     "title": "Spending Risk Detail",
     "subtitle": "FutureOS detected a spending pattern that may affect Karina's future goals.",

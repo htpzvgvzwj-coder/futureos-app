@@ -4,12 +4,13 @@ import { FUTURE_MIRROR_DEBATE_TOOL } from "../../../../lib/mirror-tools.js";
 import { mirrorDebateSchema } from "../../../../lib/mirror-validation.js";
 import { computeGoalFeasibility } from "../../../../lib/mirror-finance.js";
 import { saveDebate, getMirrorHistoryContext } from "../../../../lib/mirror-store.js";
-import { getCurrentUserId } from "../../../../lib/auth.js";
+import { getCurrentUserId, getUserById } from "../../../../lib/auth.js";
 import { listAssets } from "../../../../lib/asset-store.js";
 import { computeInsuranceCoverage } from "../../../../lib/asset-finance.js";
 import { resolveAvailableLiquidSavings } from "../../../../lib/liquid-savings-context.js";
 import { getCrossGoalSnapshot, computeWholePictureImpact } from "../../../../lib/cross-goal-context.js";
 import { getJointPartnerId, getPartnerFeasibilityView } from "../../../../lib/joint-debate-context.js";
+import { createAlert } from "../../../../lib/guardian-alert-store.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -114,8 +115,28 @@ export async function POST(request) {
     riskLevel: computed.riskLevel,
     context: { inputs, computed, goalLabel, language, history, partnerComputed },
     aiProvider: result.provider,
+    partnerId: jointPartnerId,
     ...parsed.data,
   });
+
+  // Real second side of a joint debate: the partner gets a real,
+  // screen-independent notification (same guardian_alerts mechanism Home
+  // already surfaces cross-goal risk through), not silent use of their own
+  // numbers with no way for them to ever know a debate happened. Never
+  // fails the debate response itself if this side-effect has a bug.
+  if (jointPartnerId) {
+    try {
+      const initiator = await getUserById(userId);
+      await createAlert(jointPartnerId, {
+        alertType: "joint_debate_pending",
+        domain: goalType,
+        severity: "monitoring",
+        detail: { debateId: saved.id, goalType, goalLabel, initiatorDisplayName: initiator?.display_name ?? null },
+      });
+    } catch (error) {
+      console.error("mirror/debate: failed to create joint_debate_pending alert for partner (non-fatal)", error);
+    }
+  }
 
   return Response.json({
     debateId: saved.id,
@@ -125,6 +146,7 @@ export async function POST(request) {
     aiProvider: result.provider,
     history,
     partnerComputed,
+    jointPartnerId,
     ...parsed.data,
   });
 }
