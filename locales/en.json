@@ -1147,7 +1147,7 @@
   },
   "weddingPlanner": {
     "title": "Wedding Planner",
-    "subtitle": "Describe the wedding you want and get a market-grounded budget, tailored to you.",
+    "subtitle": "A wedding budget you can actually trust - grounded in real prices, not a generic template.",
     "success": "Wedding budget confirmed. Guardian will help you plan the savings next.",
     "inputLabel": "Tell us about your wedding",
     "inputPlaceholder": "e.g. A wedding at Marina Bay, around 150 guests, elegant but not extravagant, June next year",
@@ -1273,7 +1273,7 @@
   },
   "homePlanner": {
     "title": "Home Purchase Planner",
-    "subtitle": "Describe the home you want and get market-grounded pricing, with real MAS/IRAS figures calculated for you.",
+    "subtitle": "Know exactly what you can really afford - real MAS/IRAS numbers, not a rough guess.",
     "success": "Home purchase plan confirmed. Guardian will help you plan the down payment savings next.",
     "inputLabel": "Tell us about the home you want",
     "inputPlaceholder": "e.g. A 4-room BTO or resale flat in Punggol or Sengkang, just for the two of us, first-timer Singapore citizens",
@@ -1686,7 +1686,7 @@
   },
   "decodeDocument": {
     "entryTitle": "Decode a Document",
-    "entryBody": "Upload a loan agreement, insurance PDS, or tenancy agreement and get a plain-language read.",
+    "entryBody": "Never sign something you don't actually understand - a loan agreement, insurance PDS, or tenancy agreement, explained in plain language.",
     "title": "Decode This",
     "subtitle": "Upload a real document and FutureOS explains it in plain language.",
     "instructions": "Upload a PDF - a loan agreement, insurance PDS, tenancy agreement, or similar. Only the extracted text ever leaves your device; the file itself is never uploaded anywhere.",
@@ -1720,7 +1720,7 @@
   },
   "investmentPlanner": {
     "title": "Investment Planner",
-    "subtitle": "Real fund and stock recommendations, priced for how you'd actually buy them.",
+    "subtitle": "Investment picks priced for how you'd really buy them - not a brochure number.",
     "genericError": "Something went wrong on our end. Please try again.",
     "newFeatureBadge": "New",
     "historyTitle": "Conversation History",
@@ -1866,7 +1866,7 @@
   },
   "retirementPlanner": {
     "title": "Retirement Planner",
-    "subtitle": "Describe the retirement you want and see real CPF LIFE numbers calculated for you.",
+    "subtitle": "Know today whether your retirement actually adds up - real CPF LIFE numbers, not a guess you find out too late.",
     "success": "Retirement plan confirmed. Guardian will help you plan the savings next.",
     "inputLabel": "Tell us about the retirement you want",
     "inputPlaceholder": "e.g. I want to travel the world for a few years, then settle into a comfortable life in Singapore",

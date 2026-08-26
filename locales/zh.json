@@ -1102,7 +1102,7 @@
   },
   "weddingPlanner": {
     "title": "婚礼规划师",
-    "subtitle": "描述你想要的婚礼,获取贴合市场行情、量身定制的预算。",
+    "subtitle": "一份你能真正信任的婚礼预算——贴合真实市场行情，不是套模板算出来的。",
     "success": "婚礼预算已确认。Guardian 接下来会帮你规划储蓄方案。",
     "inputLabel": "说说你的婚礼想法",
     "inputPlaceholder": "例如：在滨海湾举办婚礼,大约150位宾客,优雅但不浮夸,明年6月",
@@ -1228,7 +1228,7 @@
   },
   "homePlanner": {
     "title": "购房规划师",
-    "subtitle": "描述你想买的房子,获取贴合市场行情的估价,首付、贷款、印花税等数字由系统按官方公式实时计算。",
+    "subtitle": "清楚知道自己真正负担得起多少——真实的 MAS/IRAS 数字，不是大概估一估。",
     "success": "购房方案已确认。Guardian 接下来会帮你规划首付储蓄方案。",
     "inputLabel": "说说你想买的房子",
     "inputPlaceholder": "例如：想在榜鹅或盛港买一套4房BTO或转售组屋,只有我们两个人住,首次购屋的新加坡公民",
@@ -1626,7 +1626,7 @@
   },
   "investmentPlanner": {
     "title": "投资规划师",
-    "subtitle": "真实的基金和股票推荐，并按你实际的购买方式计算数字。",
+    "subtitle": "投资建议按你实际的购买方式定价——不是宣传册上的数字。",
     "genericError": "系统出了点问题，请重试。",
     "newFeatureBadge": "新功能",
     "historyTitle": "对话记录",
@@ -1772,7 +1772,7 @@
   },
   "retirementPlanner": {
     "title": "退休规划师",
-    "subtitle": "描述你想要的退休生活，我们会算出真实的 CPF LIFE 数字给你。",
+    "subtitle": "今天就知道你的退休计划够不够——真实的 CPF LIFE 数字，而不是等到太晚才发现。",
     "success": "退休方案已确认。Guardian 接下来会帮你规划储蓄。",
     "inputLabel": "说说你想要的退休生活",
     "inputPlaceholder": "例如：想先环游世界几年，之后在新加坡过舒适的生活",

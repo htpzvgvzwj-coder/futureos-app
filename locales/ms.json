@@ -975,7 +975,7 @@
   },
   "weddingPlanner": {
     "title": "Perancang Perkahwinan",
-    "subtitle": "Terangkan perkahwinan yang anda inginkan dan dapatkan belanjawan berdasarkan harga pasaran semasa, disesuaikan untuk anda.",
+    "subtitle": "Belanjawan perkahwinan yang benar-benar boleh dipercayai - berdasarkan harga pasaran sebenar, bukan templat umum.",
     "success": "Belanjawan perkahwinan disahkan. Guardian akan membantu anda merancang simpanan seterusnya.",
     "inputLabel": "Ceritakan tentang perkahwinan anda",
     "inputPlaceholder": "cth: Perkahwinan di Marina Bay, dalam anggaran 150 tetamu, elegan tetapi tidak keterlaluan, Jun tahun depan",
@@ -1095,7 +1095,7 @@
   },
   "homePlanner": {
     "title": "Perancang Pembelian Rumah",
-    "subtitle": "Terangkan rumah yang anda mahu dan dapatkan harga berasaskan pasaran, dengan angka MAS/IRAS sebenar dikira untuk anda.",
+    "subtitle": "Tahu dengan tepat apa yang anda benar-benar mampu - angka MAS/IRAS sebenar, bukan anggaran kasar.",
     "success": "Pelan pembelian rumah disahkan. Guardian akan bantu anda merancang simpanan bayaran muka seterusnya.",
     "inputLabel": "Beritahu kami tentang rumah yang anda mahu",
     "inputPlaceholder": "cth. Flat BTO atau jualan semula 4 bilik di Punggol atau Sengkang, untuk kami berdua sahaja, warganegara Singapura kali pertama",
@@ -1250,7 +1250,7 @@
   },
   "investmentPlanner": {
     "title": "Perancang Pelaburan",
-    "subtitle": "Cadangan dana dan saham sebenar, dikira mengikut cara anda sebenarnya akan membelinya.",
+    "subtitle": "Cadangan pelaburan dihargakan mengikut cara anda benar-benar akan membelinya - bukan angka risalah.",
     "genericError": "Ada sesuatu yang tidak kena di pihak kami. Sila cuba lagi.",
     "newFeatureBadge": "Baharu",
     "historyTitle": "Sejarah Perbualan",
@@ -1407,7 +1407,7 @@
   },
   "retirementPlanner": {
     "title": "Perancang Persaraan",
-    "subtitle": "Terangkan persaraan yang anda mahu dan lihat angka CPF LIFE sebenar dikira untuk anda.",
+    "subtitle": "Tahu hari ini sama ada persaraan anda benar-benar mencukupi - angka CPF LIFE sebenar, bukan tekaan yang anda sedari terlalu lewat.",
     "success": "Pelan persaraan disahkan. Guardian akan bantu anda rancang simpanan seterusnya.",
     "inputLabel": "Ceritakan tentang persaraan yang anda mahu",
     "inputPlaceholder": "cth: Saya mahu mengembara dunia selama beberapa tahun, kemudian menetap dengan selesa di Singapura",
