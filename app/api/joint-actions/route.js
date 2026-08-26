@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getCurrentUserId } from "../../../lib/auth.js";
 import { proposeJointAction, listPendingJointActions } from "../../../lib/joint-action-store.js";
 import { query } from "../../../lib/db.js";
+import { computeGoalPauseFeasibilityCheck } from "../../../lib/joint-plan-evidence.js";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,16 @@ export async function POST(request) {
   if (targetUserId === userId) return Response.json({ error: "cannot_propose_to_self" }, { status: 400 });
 
   try {
+    // Real check on the initiator's own claim: is newMonthlyContribution
+    // actually realistic for the TARGET's real cashflow, not just typed
+    // confidently by the initiator? Computed from the target's own real
+    // stored profile (never the initiator's numbers) - see lib/joint-plan-
+    // evidence.js. null (not shown, never a guess) if the target has no
+    // real profile saved yet.
+    const feasibilityCheck = await computeGoalPauseFeasibilityCheck(targetUserId, {
+      domain: parsed.data.domain,
+      newMonthlyContribution: parsed.data.newMonthlyContribution,
+    });
     const action = await proposeJointAction({
       initiatorUserId: userId,
       targetUserId,
@@ -53,6 +64,7 @@ export async function POST(request) {
       payload: {
         newMonthlyContribution: parsed.data.newMonthlyContribution,
         explanation: parsed.data.explanation,
+        feasibilityCheck,
       },
     });
     return Response.json({ action });

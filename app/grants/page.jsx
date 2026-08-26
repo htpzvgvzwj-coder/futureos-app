@@ -76,6 +76,37 @@ function JointEvidencePanel({ evidence }) {
   );
 }
 
+// Real check on the initiator's own claim for a pause/reduce_goal_plan
+// proposal (lib/joint-plan-evidence.js's computeGoalPauseFeasibilityCheck) -
+// computed from the TARGET's own real stored profile, not the initiator's
+// assertion. Deliberately a distinct, simpler panel from JointEvidencePanel
+// above - this doesn't recompute loan/investment Future Score impacts, only
+// a real affordability check, so it's rendered honestly as that rather than
+// reshaped to look like the fuller whole-picture evidence.
+function PauseFeasibilityPanel({ check }) {
+  const riskColor = check.riskLevel === "low" ? "#0f9f84" : check.riskLevel === "medium" ? "#b45309" : "#d71920";
+  const utilizationColor = check.utilizationPercent > 80 ? "#d71920" : check.utilizationPercent > 60 ? "#b45309" : "#0f9f84";
+  return (
+    <div style={{ marginTop: "8px", padding: "10px", borderRadius: "10px", background: "#f7f9fc", display: "grid", gap: "6px" }}>
+      <span style={{ fontSize: "11px", fontWeight: 700, color: "#5b6b82" }}>
+        Real check against their own real cashflow, not just the claim above
+      </span>
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: riskColor }}>
+          Feasibility: {check.feasibilityScore}/100 ({check.riskLevel} risk)
+        </span>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: utilizationColor }}>
+          Utilization with all their commitments: {check.utilizationPercent}%
+        </span>
+      </div>
+      <small style={{ fontSize: "11px", color: "#5b6b82" }}>
+        Currently {formatSgd(check.oldMonthlyContribution)}/month, {formatSgd(check.otherCommitmentsMonthlyTotal)}/month already committed elsewhere,
+        real income {formatSgd(check.monthlyIncome)}/month.
+      </small>
+    </div>
+  );
+}
+
 export default function GrantsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
@@ -264,6 +295,7 @@ export default function GrantsPage() {
                       </div>
                     </div>
                     {action.payload.jointEvidence ? <JointEvidencePanel evidence={action.payload.jointEvidence} /> : null}
+                    {action.payload.feasibilityCheck ? <PauseFeasibilityPanel check={action.payload.feasibilityCheck} /> : null}
                   </article>
                 ))
               ) : (
