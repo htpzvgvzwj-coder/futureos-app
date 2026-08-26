@@ -4923,7 +4923,7 @@ function MirrorChatScreen({
   // fold.
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length]);
+  }, [messages.length, sending]);
 
   const sendMessage = async (text) => {
     setSending(true);
@@ -5053,6 +5053,15 @@ function MirrorChatScreen({
             </div>
           ))
         )}
+        {sending ? (
+          <div className="chatBubbleRow assistant">
+            <div className="chatBubble assistant chatTypingBubble" aria-label={t("mirrorChat.thinking")}>
+              <span className="chatTypingDot" />
+              <span className="chatTypingDot" />
+              <span className="chatTypingDot" />
+            </div>
+          </div>
+        ) : null}
         <div ref={logEndRef} />
       </div>
 
@@ -5072,7 +5081,7 @@ function MirrorChatScreen({
         />
       ) : null}
 
-      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending} errorMessage={errorMessage} />
+      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending || historyLoading} errorMessage={errorMessage} />
     </Screen>
   );
 }
