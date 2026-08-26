@@ -25,7 +25,13 @@ export async function POST(request) {
   const session = await getOrCreateSession(userId);
   const history = await getMessageHistory(session.id);
   const userContent = buildFollowUpUserContent(history, message);
-  const messages = [...history, { role: "user", content: userContent }];
+  // getMessageHistory's rows carry toolResults/context too (the app's own
+  // "why did I say that" persistence, read separately by
+  // /api/mirror/chat/history) - the Anthropic API rejects any message with
+  // extra top-level keys beyond role/content, so every real second turn in
+  // a Mirror conversation was failing with a 400 until this was stripped.
+  const apiHistory = history.map(({ role, content }) => ({ role, content }));
+  const messages = [...apiHistory, { role: "user", content: userContent }];
 
   const client = getAnthropicClient();
   let response;
