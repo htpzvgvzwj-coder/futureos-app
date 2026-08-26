@@ -36,7 +36,7 @@
     "title": "OCBC FutureOS",
     "subtitle": "Daripada Mengurus Wang kepada Mengurus Hasil Hidup",
     "futureHealthScore": "Skor Kesihatan Masa Depan",
-    "guardianStatus": "Future Self Guardian anda sedang memantau matlamat jangka panjang.",
+    "guardianStatus": "Matlamat jangka panjang anda, dilindungi semasa anda fokus pada hari ini.",
     "futureOsSummary": "Ringkasan FutureOS"
   },
   "goals": {
@@ -2186,15 +2186,15 @@
   "futureSystems": {
     "lifeGraph": {
       "title": "Life Graph",
-      "subtitle": "Memahami kehidupan, matlamat dan keperluan produk OCBC anda"
+      "subtitle": "Lihat dengan tepat kedudukan anda, sebelum membuat sebarang keputusan"
     },
     "futureMirror": {
       "title": "Future Mirror",
-      "subtitle": "Mensimulasikan bagaimana pilihan hari ini menjejaskan masa depan"
+      "subtitle": "Ketahui kos pilihan hari ini untuk masa depan anda, sebelum anda membuatnya"
     },
     "guardian": {
       "title": "Future Self Guardian",
-      "subtitle": "Melindungi matlamat jangka panjang anda dengan tindakan yang diluluskan"
+      "subtitle": "Matlamat anda, dilindungi walaupun anda tidak memerhatikannya"
     }
   },
   "accountDetails": {

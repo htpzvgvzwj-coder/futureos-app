@@ -37,7 +37,7 @@
     "title": "OCBC FutureOS",
     "subtitle": "从管理金钱，到管理人生结果",
     "futureHealthScore": "未来健康评分",
-    "guardianStatus": "你的未来自我守护者正在监测长期目标。",
+    "guardianStatus": "你的长期目标，在你专注当下时也被真正守护着。",
     "futureOsSummary": "FutureOS 摘要"
   },
   "goals": {
@@ -2590,23 +2590,23 @@
   "futureSystems": {
     "lifeGraph": {
       "title": "Life Graph",
-      "subtitle": "了解你的生活、目标及 OCBC 产品需求"
+      "subtitle": "在做任何决定之前，先看清自己现在真实的处境"
     },
     "futureMirror": {
       "title": "Future Mirror",
-      "subtitle": "模拟今天的选择如何影响明天"
+      "subtitle": "在做决定之前，先知道今天的选择明天要付出什么代价"
     },
     "guardian": {
       "title": "Future Self Guardian",
-      "subtitle": "通过已批准的行动保护你的长期目标"
+      "subtitle": "就算你没在盯着，你的目标也一直被真正守护着"
     },
     "relationshipLedger": {
       "title": "关系账本",
-      "subtitle": "两个分开的分数——你守住了什么、Guardian 守住了什么。真正的权益需要两边都达标。"
+      "subtitle": "你和 Guardian 之间的信任是真实可查的，不是空口承诺"
     },
     "lifeJourney": {
       "title": "人生阶段视图",
-      "subtitle": "同一批真实规划器，按人生阶段重新分组"
+      "subtitle": "此刻真正重要的事，全都在这一个地方"
     }
   },
   "accountDetails": {

@@ -36,29 +36,29 @@
     "title": "OCBC FutureOS",
     "subtitle": "From Managing Money to Managing Life Outcomes",
     "futureHealthScore": "Future Health Score",
-    "guardianStatus": "Your Future Self Guardian is monitoring your long-term goals.",
+    "guardianStatus": "Your long-term goals, protected while you focus on today.",
     "futureOsSummary": "FutureOS Summary"
   },
   "futureSystems": {
     "lifeGraph": {
       "title": "Life Graph",
-      "subtitle": "Understands your life, goals and OCBC product needs"
+      "subtitle": "See exactly where you stand, before you decide anything"
     },
     "futureMirror": {
       "title": "Future Mirror",
-      "subtitle": "Simulates how today's choices affect tomorrow"
+      "subtitle": "Know what today's choice costs you tomorrow, before you make it"
     },
     "guardian": {
       "title": "Future Self Guardian",
-      "subtitle": "Protects your long-term goals with approved actions"
+      "subtitle": "Your goals, protected even when you're not watching"
     },
     "relationshipLedger": {
       "title": "Relationship Ledger",
-      "subtitle": "Two scores, not one - what you've kept and what Guardian has kept"
+      "subtitle": "Proof the trust between you and Guardian is real, not assumed"
     },
     "lifeJourney": {
       "title": "Life Journey View",
-      "subtitle": "The same real planners, organized by what's happening in your life"
+      "subtitle": "Everything that matters right now, in one place"
     }
   },
   "goals": {
