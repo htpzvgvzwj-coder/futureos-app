@@ -288,39 +288,47 @@ export default function GrantsPage() {
               {pendingJointActions.length ? (
                 pendingJointActions.map((action) => (
                   <article className="strategyItem" key={action.id} style={{ display: "block" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
-                      <div>
-                        <strong>{action.initiator_display_name} proposed:</strong>
-                        <small>{describeJointAction(action)}</small>
-                      </div>
-                      <div style={{ display: "flex", gap: "6px", flexShrink: 0, alignItems: "center" }}>
-                        <input
-                          type="text"
-                          placeholder="Reason if declining (optional)"
-                          value={declineReasons[action.id] ?? ""}
-                          onChange={(event) => setDeclineReasons((current) => ({ ...current, [action.id]: event.target.value }))}
-                          style={{ fontSize: "11px", padding: "6px 8px", borderRadius: "8px", border: "1px solid #d8dfe8", width: "150px" }}
-                        />
-                        <button
-                          type="button"
-                          className="miniButton"
-                          disabled={jointActionBusyId === action.id}
-                          onClick={() => confirmJointAction(action.id)}
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          type="button"
-                          className="miniButton danger"
-                          disabled={jointActionBusyId === action.id}
-                          onClick={() => declineJointAction(action.id)}
-                        >
-                          Decline
-                        </button>
-                      </div>
+                    <div>
+                      <strong>{action.initiator_display_name} proposed:</strong>
+                      <small>{describeJointAction(action)}</small>
                     </div>
                     {action.payload.jointEvidence ? <JointEvidencePanel evidence={action.payload.jointEvidence} /> : null}
                     {action.payload.feasibilityCheck ? <PauseFeasibilityPanel check={action.payload.feasibilityCheck} /> : null}
+                    <input
+                      type="text"
+                      placeholder="Reason if declining (optional)"
+                      value={declineReasons[action.id] ?? ""}
+                      onChange={(event) => setDeclineReasons((current) => ({ ...current, [action.id]: event.target.value }))}
+                      style={{
+                        fontSize: "12px",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        border: "1px solid #d8dfe8",
+                        width: "100%",
+                        marginTop: "10px",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        className="miniButton"
+                        style={{ flex: 1 }}
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => confirmJointAction(action.id)}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        type="button"
+                        className="miniButton danger"
+                        style={{ flex: 1 }}
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => declineJointAction(action.id)}
+                      >
+                        Decline
+                      </button>
+                    </div>
                   </article>
                 ))
               ) : (
