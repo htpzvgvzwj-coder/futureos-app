@@ -2739,6 +2739,16 @@
       "document_review": "你解读过的一份文件",
       "income_entry": "记录的一笔收入",
       "mirror_debate": "你确认过的一次辩论"
+    },
+    "tools": {
+      "activityCheckNoHistory": "目前还没有真实的已确认记录可以对照。",
+      "activityCheckUnusual": "{amount} 对你来说不寻常——明显超过你真实记录里的最大值 {max}。",
+      "activityCheckNormal": "{amount} 符合你的真实记录（目前最大值：{max}）。",
+      "buyNowChip": "现在买：留存 {amount}",
+      "waitInsteadChip": "先等等：留存 {amount}",
+      "shadowNoHistory": "真实收入记录还不够，暂时无法核对。",
+      "shadowSummary": "按典型储蓄率你本可以有 {shadow}；你实际有 {actual}。",
+      "openScreen": "打开{screen}"
     }
   },
   "guardianNudge": {

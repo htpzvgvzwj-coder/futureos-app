@@ -2253,6 +2253,16 @@
       "document_review": "A document you decoded",
       "income_entry": "An income entry logged",
       "mirror_debate": "A debate you confirmed"
+    },
+    "tools": {
+      "activityCheckNoHistory": "No real confirmed history yet to check this against.",
+      "activityCheckUnusual": "{amount} is unusual for you - well above your real max of {max}.",
+      "activityCheckNormal": "{amount} is in line with your real history (max so far: {max}).",
+      "buyNowChip": "Buy now: {amount} saved",
+      "waitInsteadChip": "Wait instead: {amount} saved",
+      "shadowNoHistory": "Not enough real income history logged yet to check this.",
+      "shadowSummary": "At a typical savings rate you'd have {shadow}; you actually have {actual}.",
+      "openScreen": "Open {screen}"
     }
   },
   "simulator": {

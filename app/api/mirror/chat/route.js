@@ -1,7 +1,18 @@
 import { buildFollowUpUserContent, extractText, getAnthropicClient, WEDDING_MODEL } from "../../../../lib/anthropic-client.js";
 import { runChatTurnWithTools } from "../../../../lib/chat-tool-loop.js";
 import { buildMirrorChatSystemPrompt } from "../../../../lib/mirror-chat-prompts.js";
-import { RUN_DEBATE_TOOL, createRunDebateExecutor } from "../../../../lib/mirror-chat-tools.js";
+import {
+  RUN_DEBATE_TOOL,
+  createRunDebateExecutor,
+  CHECK_ACTIVITY_TOOL,
+  createCheckActivityExecutor,
+  COMPARE_FUTURES_TOOL,
+  createCompareFuturesExecutor,
+  CHECK_SHADOW_ACCOUNT_TOOL,
+  createCheckShadowAccountExecutor,
+  OPEN_SCREEN_TOOL,
+  createOpenScreenExecutor,
+} from "../../../../lib/mirror-chat-tools.js";
 import { appendMessages, getMessageHistory, getOrCreateSession } from "../../../../lib/mirror-chat-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 
@@ -45,11 +56,17 @@ export async function POST(request) {
         thinking: { type: "adaptive" },
         output_config: { effort: "medium" },
         system: buildMirrorChatSystemPrompt(language, { baseInputs }),
-        tools: [RUN_DEBATE_TOOL],
+        tools: [RUN_DEBATE_TOOL, CHECK_ACTIVITY_TOOL, COMPARE_FUTURES_TOOL, CHECK_SHADOW_ACCOUNT_TOOL, OPEN_SCREEN_TOOL],
         tool_choice: { type: "auto" },
         messages,
       },
-      { run_debate: createRunDebateExecutor({ userId, language, baseInputs }) }
+      {
+        run_debate: createRunDebateExecutor({ userId, language, baseInputs }),
+        check_activity: createCheckActivityExecutor({ userId, baseInputs }),
+        compare_futures: createCompareFuturesExecutor({ userId, baseInputs }),
+        check_shadow_account: createCheckShadowAccountExecutor({ userId, baseInputs }),
+        open_screen: createOpenScreenExecutor(),
+      }
     ));
   } catch (error) {
     console.error("mirror/chat call failed", error);
@@ -78,6 +95,10 @@ export async function POST(request) {
   return Response.json({
     reply,
     debate: toolResults.find((entry) => entry.name === "run_debate" && entry.result?.ok)?.result ?? null,
+    activityCheck: toolResults.find((entry) => entry.name === "check_activity" && entry.result?.ok)?.result ?? null,
+    futureComparison: toolResults.find((entry) => entry.name === "compare_futures" && entry.result?.ok)?.result ?? null,
+    shadowAccount: toolResults.find((entry) => entry.name === "check_shadow_account" && entry.result?.ok)?.result ?? null,
+    openScreen: toolResults.find((entry) => entry.name === "open_screen" && entry.result?.ok)?.result ?? null,
     context: { baseInputs, language },
   });
 }

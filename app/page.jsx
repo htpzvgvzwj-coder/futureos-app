@@ -4994,6 +4994,66 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
   );
 }
 
+// Deliberately NOT another copy of the standalone screens' verdict-card
+// template (.futureCompareGrid + .insightCard/.adviceOnlyPanel repeated
+// for every tool) - the chat's own reply already narrates each result in
+// its own voice, so these are just light real-number receipts, each
+// shaped differently, not a fourth identical card design.
+function ChatActivityCheckChip({ check, t }) {
+  if (!check.hasHistory) return <p className="weddingCarouselHint">{t("mirrorChat.tools.activityCheckNoHistory")}</p>;
+  return (
+    <p className="weddingCarouselHint">
+      {t(check.unusual ? "mirrorChat.tools.activityCheckUnusual" : "mirrorChat.tools.activityCheckNormal", {
+        amount: formatSgd(check.amount),
+        max: formatSgd(check.maxHistoricalAmount),
+      })}
+    </p>
+  );
+}
+
+function ChatFutureComparisonChip({ numbers, t }) {
+  return (
+    <div className="weddingStatChips">
+      <span className="statChip">{t("mirrorChat.tools.buyNowChip", { amount: formatSgd(numbers.buyNow.savingsAtHorizon) })}</span>
+      <span className="statChip">{t("mirrorChat.tools.waitInsteadChip", { amount: formatSgd(numbers.waitInstead.savingsAtHorizon) })}</span>
+    </div>
+  );
+}
+
+function ChatShadowAccountChip({ result, t }) {
+  if (!result.hasHistory) return <p className="weddingCarouselHint">{t("mirrorChat.tools.shadowNoHistory")}</p>;
+  return (
+    <p className="weddingCarouselHint">
+      {t("mirrorChat.tools.shadowSummary", { shadow: formatSgd(result.shadowBalance), actual: formatSgd(result.actualSavings) })}
+    </p>
+  );
+}
+
+const OPEN_SCREEN_TITLE_KEYS = {
+  familyCfo: "familyCfo.title",
+  goalMarketplace: "goalMarketplace.title",
+  personalEconomy: "personalEconomy.title",
+  dealFinder: "dealFinder.title",
+  smeCashflow: "smeCashflow.title",
+  familyTravel: "familyTravel.title",
+  shadowAccount: "shadowAccount.title",
+  activityCheck: "activityCheck.title",
+  futureComparison: "futureComparison.title",
+  assetProfile: "assetProfile.title",
+  strategicBalance: "lifeGraph.strategicBalance.title",
+};
+
+function ChatOpenScreenButton({ openScreen, t, setActiveScreen }) {
+  const titleKey = OPEN_SCREEN_TITLE_KEYS[openScreen.screen];
+  if (!titleKey) return null;
+  return (
+    <button type="button" className="secondaryButton" onClick={() => setActiveScreen(openScreen.screen)}>
+      {t("mirrorChat.tools.openScreen", { screen: t(titleKey) })}
+      <ChevronRight size={14} />
+    </button>
+  );
+}
+
 function MirrorChatScreen({
   setActiveScreen,
   simulatorInputs,
@@ -5080,7 +5140,19 @@ function MirrorChatScreen({
         setErrorMessage(t("mirrorChat.genericError"));
         return;
       }
-      setMessages((current) => [...current, { role: "assistant", text: data.reply, debate: data.debate, context: data.context }]);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text: data.reply,
+          debate: data.debate,
+          activityCheck: data.activityCheck,
+          futureComparison: data.futureComparison,
+          shadowAccount: data.shadowAccount,
+          openScreen: data.openScreen,
+          context: data.context,
+        },
+      ]);
     } catch {
       setErrorMessage(t("mirrorChat.genericError"));
     } finally {
@@ -5199,6 +5271,10 @@ function MirrorChatScreen({
                       t={t}
                     />
                   ) : null}
+                  {entry.activityCheck ? <ChatActivityCheckChip check={entry.activityCheck.check} t={t} /> : null}
+                  {entry.futureComparison ? <ChatFutureComparisonChip numbers={entry.futureComparison.numbers} t={t} /> : null}
+                  {entry.shadowAccount ? <ChatShadowAccountChip result={entry.shadowAccount.result} t={t} /> : null}
+                  {entry.openScreen ? <ChatOpenScreenButton openScreen={entry.openScreen} t={t} setActiveScreen={setActiveScreen} /> : null}
                 </div>
               ))
             )}
