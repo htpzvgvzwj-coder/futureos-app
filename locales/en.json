@@ -2838,6 +2838,20 @@
       "noteLabel": "Note (optional)",
       "submitting": "Saving...",
       "error": "Couldn't save that - please try again."
+    },
+    "expenseLog": {
+      "title": "Expense Log",
+      "description": "Log real monthly expenses if they vary - FutureOS uses a smoothed figure across the app instead of one static number, the same way it already does for income.",
+      "summaryTitle": "What FutureOS uses right now",
+      "effectiveLabel": "Effective monthly expenses",
+      "irregularNote": "Your expenses vary month to month - this is a {sampleSize}-month median (SGD {amount}), not a single number.",
+      "emptyState": "No months logged yet - FutureOS uses your Monthly Expenses field above until you log at least 3 real months.",
+      "addButton": "Log this month's expenses",
+      "monthLabel": "Month",
+      "amountLabel": "Amount (SGD)",
+      "noteLabel": "Note (optional)",
+      "submitting": "Saving...",
+      "error": "Couldn't save that - please try again."
     }
   },
   "homeBanking": {

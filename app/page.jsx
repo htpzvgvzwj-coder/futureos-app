@@ -85,6 +85,7 @@ import { computeShadowAccount } from "../lib/shadow-account-finance.js";
 import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
 import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
+import { computeSmoothedExpenses } from "../lib/expense-finance.js";
 import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -2388,6 +2389,9 @@ const defaultPreferences = {
   // means every one of the ~20 real getUserProfile() consumers picks up real
   // income history for free, since preferences already reaches all of them.
   incomeHistory: [],
+  // Client-side mirror of the real expense_entries DB table (lib/expense-
+  // store.js) - same reasoning as incomeHistory above.
+  expenseHistory: [],
   // Client-side mirror of the real `assets` DB table (lib/asset-store.js) -
   // same reasoning as incomeHistory above: the table is the source of truth,
   // refreshed on every auth-resolve, and living inside `preferences` means
@@ -2714,6 +2718,11 @@ const manualEntryProvider = {
     // the customer's own statedMonthlyIncome verbatim otherwise (zero
     // behavior change for a customer who never logs a single entry).
     const smoothed = computeSmoothedIncome(preferences?.incomeHistory, numberValue(merged.statedMonthlyIncome, 7500));
+    // Same real technique, mirrored for the expense side (lib/expense-
+    // finance.js) - every real consumer of profile.monthlyExpenses picks
+    // up the real smoothed figure for free once expense history exists,
+    // zero behavior change for a customer who never logs one.
+    const smoothedExpenses = computeSmoothedExpenses(preferences?.expenseHistory, numberValue(merged.monthlyExpenses, 3600));
     // Same technique as monthlyIncome smoothing above, applied to the Asset
     // Profile ledger (lib/asset-store.js, cached client-side as
     // preferences.assets): once the customer has logged at least one real
@@ -2742,6 +2751,9 @@ const manualEntryProvider = {
       monthlyIncome: String(smoothed.effectiveMonthlyIncome),
       isIncomeIrregular: smoothed.isIrregular,
       incomeSampleSize: smoothed.sampleSize,
+      monthlyExpenses: String(smoothedExpenses.effectiveMonthlyExpenses),
+      isExpensesIrregular: smoothedExpenses.isIrregular,
+      expenseSampleSize: smoothedExpenses.sampleSize,
       ...assetOverrides,
     };
   },
@@ -14468,6 +14480,61 @@ function IncomeLogEntryForm({ onAddEntry, submitting, t }) {
   );
 }
 
+// Mirrors IncomeLogEntryForm exactly, for the expense side (lib/expense-
+// store.js) - kept as its own component rather than a generalized
+// "amount entries" form, same mirrored-not-abstracted convention as
+// income-store.js/expense-store.js themselves.
+function ExpenseLogEntryForm({ onAddEntry, submitting, t }) {
+  const [entryMonth, setEntryMonth] = useState(currentMonthValue());
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const parsedAmount = Number(amount);
+    if (!entryMonth || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || submitting) return;
+    const ok = await onAddEntry({ entryMonth, amount: parsedAmount, note: note.trim() || undefined });
+    if (ok) {
+      setAmount("");
+      setNote("");
+    }
+  };
+
+  return (
+    <form className="settingsGroup" onSubmit={handleSubmit}>
+      <span className="sectionLabel">{t("settings.expenseLog.addButton")}</span>
+      <input
+        type="month"
+        className="aiTextInput"
+        value={entryMonth}
+        onChange={(event) => setEntryMonth(event.target.value)}
+        aria-label={t("settings.expenseLog.monthLabel")}
+      />
+      <input
+        type="number"
+        min="0"
+        step="10"
+        className="aiTextInput"
+        placeholder={t("settings.expenseLog.amountLabel")}
+        value={amount}
+        onChange={(event) => setAmount(event.target.value)}
+        aria-label={t("settings.expenseLog.amountLabel")}
+      />
+      <input
+        type="text"
+        className="aiTextInput"
+        placeholder={t("settings.expenseLog.noteLabel")}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        aria-label={t("settings.expenseLog.noteLabel")}
+      />
+      <button type="submit" className="secondaryButton" disabled={submitting}>
+        {submitting ? t("settings.expenseLog.submitting") : t("settings.expenseLog.addButton")}
+      </button>
+    </form>
+  );
+}
+
 function ProfileScreen({
   language,
   setLanguage,
@@ -14487,6 +14554,8 @@ function ProfileScreen({
   const [policyOpen, setPolicyOpen] = useState(false);
   const [incomeSubmitting, setIncomeSubmitting] = useState(false);
   const [incomeError, setIncomeError] = useState("");
+  const [expenseSubmitting, setExpenseSubmitting] = useState(false);
+  const [expenseError, setExpenseError] = useState("");
   const privacyScore = preferences.consentWithdrawn ? 38 : 92;
   const profile = getUserProfile(preferences);
   const notificationHistory = getNotificationHistory(profile, preferences, t);
@@ -14522,6 +14591,37 @@ function ProfileScreen({
       return false;
     } finally {
       setIncomeSubmitting(false);
+    }
+  }
+
+  // Mirrors handleAddIncomeEntry exactly, for the expense side.
+  async function handleAddExpenseEntry({ entryMonth, amount, note }) {
+    setExpenseSubmitting(true);
+    setExpenseError("");
+    try {
+      const response = await fetch("/api/expense/entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryMonth, amount, note }),
+      });
+      if (!response.ok) {
+        setExpenseError(t("settings.expenseLog.error"));
+        return false;
+      }
+      const { entry } = await response.json();
+      setPreferences((current) => {
+        const withoutSameMonth = (current.expenseHistory ?? []).filter((existing) => existing.entry_month !== entry.entry_month);
+        return {
+          ...current,
+          expenseHistory: [entry, ...withoutSameMonth].sort((a, b) => (a.entry_month < b.entry_month ? 1 : -1)),
+        };
+      });
+      return true;
+    } catch {
+      setExpenseError(t("settings.expenseLog.error"));
+      return false;
+    } finally {
+      setExpenseSubmitting(false);
     }
   }
 
@@ -14680,6 +14780,44 @@ function ProfileScreen({
         ) : null}
 
         <IncomeLogEntryForm onAddEntry={handleAddIncomeEntry} submitting={incomeSubmitting} t={t} />
+      </SettingsCard>
+
+      <SettingsCard icon={Banknote} title={t("settings.expenseLog.title")} description={t("settings.expenseLog.description")}>
+        <div className="recommendationPanel">
+          <span className="sectionLabel">{t("settings.expenseLog.summaryTitle")}</span>
+          <SummaryRow label={t("settings.expenseLog.effectiveLabel")} value={formatSgd(Math.round(Number(profile.monthlyExpenses) || 0))} />
+          {profile.isExpensesIrregular ? (
+            <p>
+              {t("settings.expenseLog.irregularNote", {
+                sampleSize: profile.expenseSampleSize,
+                amount: formatSgd(Math.round(Number(profile.monthlyExpenses) || 0)),
+              })}
+            </p>
+          ) : null}
+        </div>
+
+        {(preferences.expenseHistory ?? []).length ? (
+          <div className="weddingLineItems">
+            {(preferences.expenseHistory ?? []).map((entry) => (
+              <SummaryRow
+                key={entry.id ?? entry.entry_month}
+                label={entry.note ? `${entry.entry_month} — ${entry.note}` : entry.entry_month}
+                value={formatSgd(Math.round(Number(entry.amount)))}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>{t("settings.expenseLog.emptyState")}</p>
+        )}
+
+        {expenseError ? (
+          <section className="adviceOnlyPanel">
+            <AlertTriangle size={18} />
+            <p>{expenseError}</p>
+          </section>
+        ) : null}
+
+        <ExpenseLogEntryForm onAddEntry={handleAddExpenseEntry} submitting={expenseSubmitting} t={t} />
       </SettingsCard>
 
       <SettingsCard icon={Globe2} title={t("settings.language.title")} description={t("settings.language.description")}>
@@ -16009,6 +16147,18 @@ export default function App() {
     } catch {
       // Offline/unreachable - fall back to whatever was cached in preferences.
     }
+    // Same reasoning as fetchedIncomeHistory above, mirrored for the
+    // expense side (lib/expense-store.js).
+    let fetchedExpenseHistory = savedPreferences?.expenseHistory ?? [];
+    try {
+      const expenseResponse = await fetch("/api/expense/entries");
+      if (expenseResponse.ok) {
+        const { entries } = await expenseResponse.json();
+        if (Array.isArray(entries)) fetchedExpenseHistory = entries;
+      }
+    } catch {
+      // Offline/unreachable - fall back to whatever was cached in preferences.
+    }
     // Same reasoning as fetchedIncomeHistory above: the real `assets` table
     // (lib/asset-store.js) is the source of truth, not the generic
     // preferences blob.
@@ -16055,6 +16205,7 @@ export default function App() {
       rejectionCounts: savedPreferences?.rejectionCounts ?? {},
       dismissedActions: savedPreferences?.dismissedActions ?? [],
       incomeHistory: fetchedIncomeHistory,
+      expenseHistory: fetchedExpenseHistory,
       assets: fetchedAssets,
       mirrorOutcomeStats: fetchedMirrorOutcomeStats,
       investmentOutcomeStats: fetchedInvestmentOutcomeStats,

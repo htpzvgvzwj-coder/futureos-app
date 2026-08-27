@@ -549,6 +549,26 @@ create table if not exists income_entries (
 create index if not exists income_entries_profile_idx
   on income_entries (profile_key, entry_month desc);
 
+-- Mirrors income_entries exactly - the real missing half of "the bank
+-- shouldn't ask the customer for data it should already know". Once a
+-- customer logs real monthly expenses, every real consumer of
+-- profile.monthlyExpenses (getUserProfile's own smoothing, same real
+-- technique already applied to monthlyIncome) picks up the real smoothed
+-- figure for free, and a real expense trend (rising/falling, not a
+-- guess) becomes computable the same way income growth already is.
+create table if not exists expense_entries (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  entry_month   text not null, -- 'YYYY-MM'
+  amount        numeric not null,
+  note          text,
+  created_at    timestamptz not null default now(),
+  unique (profile_key, entry_month)
+);
+
+create index if not exists expense_entries_profile_idx
+  on expense_entries (profile_key, entry_month desc);
+
 -- AI confidence -> real human escalation: when Mirror's own Judge synthesis
 -- comes back with confidence "low" (the AI itself flagging genuine
 -- uncertainty, not a UI-only label), the customer can request a real
