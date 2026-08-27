@@ -1684,6 +1684,29 @@
       "transcribeError": "Couldn't transcribe that - please try again or type instead."
     }
   },
+  "futureComparison": {
+    "entryTitle": "Future Comparison",
+    "entryBody": "See two real futures side by side - buy it now, or wait.",
+    "title": "Future Comparison",
+    "subtitle": "Two real futures, computed from your real numbers.",
+    "descriptionLabel": "What are you considering?",
+    "descriptionPlaceholder": "e.g. A $1,200 laptop",
+    "amountLabel": "One-time cost (SGD)",
+    "recurringLabel": "Ongoing monthly cost, if any (SGD)",
+    "horizonLabel": "Compare at",
+    "horizonMonths": "{count}mo",
+    "compareButton": "Show me both futures",
+    "computing": "Computing...",
+    "genericError": "Something went wrong. Please try again.",
+    "compareAnother": "Compare another decision",
+    "buyNowLabel": "Buy it now",
+    "waitLabel": "Wait instead",
+    "savingsAtHorizon": "savings in {months} months",
+    "emergencyBufferValue": "{months} months buffer",
+    "keyConsiderationLabel": "Worth weighing",
+    "worseningGoals": "This would affect: {items}",
+    "mockedNote": "This explanation was generated locally - both futures above are still real."
+  },
   "decodeDocument": {
     "entryTitle": "Decode a Document",
     "entryBody": "Never sign something you don't actually understand - a loan agreement, insurance PDS, or tenancy agreement, explained in plain language.",

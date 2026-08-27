@@ -122,6 +122,7 @@ const screens = {
   NEED_OTHER: "needOther",
   RELATIONSHIP_LEDGER: "relationshipLedger",
   DECISION_VERDICT: "decisionVerdict",
+  FUTURE_COMPARISON: "futureComparison",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -4835,6 +4836,17 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
           <span>
             {t("decodeDocument.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("decodeDocument.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FUTURE_COMPARISON)}>
+          <ArrowLeftRight size={15} />
+          <span>
+            {t("futureComparison.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("futureComparison.entryBody")}</small>
           </span>
           <span className="weddingEntryTrailing">
             <ChevronRight size={14} />
@@ -11414,6 +11426,171 @@ function DecisionVerdictScreen({ t, setActiveScreen, language, profile }) {
   );
 }
 
+// "Future Comparison" ("Time Machine") - two real, already-computed futures
+// (buy now vs wait), never narrated fiction. See lib/future-comparison-finance.js.
+function FutureComparisonResultCard({ result, t, onCompareAnother }) {
+  const { comparison, narrative, keyConsideration, mocked } = result;
+  const waitingIsBetter = comparison.savingsDelta > 0;
+
+  return (
+    <>
+      <section className={waitingIsBetter ? "adviceOnlyPanel" : "insightCard"}>
+        {waitingIsBetter ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
+        <p>{narrative}</p>
+      </section>
+
+      <div className="futureCompareGrid">
+        <div className="futureCompareCard">
+          <span className="sectionLabel">{t("futureComparison.buyNowLabel")}</span>
+          <strong>{formatSgd(comparison.buyNow.savingsAtHorizon)}</strong>
+          <small>{t("futureComparison.savingsAtHorizon", { months: comparison.horizonMonths })}</small>
+          <p>{t("futureComparison.emergencyBufferValue", { months: comparison.buyNow.emergencyFundMonthsAtHorizon })}</p>
+        </div>
+        <div className="futureCompareCard highlight">
+          <span className="sectionLabel">{t("futureComparison.waitLabel")}</span>
+          <strong>{formatSgd(comparison.waitInstead.savingsAtHorizon)}</strong>
+          <small>{t("futureComparison.savingsAtHorizon", { months: comparison.horizonMonths })}</small>
+          <p>{t("futureComparison.emergencyBufferValue", { months: comparison.waitInstead.emergencyFundMonthsAtHorizon })}</p>
+        </div>
+      </div>
+
+      <div className="proofBlock">
+        <strong>{t("futureComparison.keyConsiderationLabel")}</strong>
+        <p>{keyConsideration}</p>
+      </div>
+
+      {comparison.worseningGoals.length ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>
+            {t("futureComparison.worseningGoals", {
+              items: comparison.worseningGoals.map((item) => `${item.name ?? item.purpose} (${item.scoreBefore} → ${item.scoreAfter})`).join(", "),
+            })}
+          </p>
+        </section>
+      ) : null}
+
+      {mocked ? <p className="weddingCarouselHint">{t("futureComparison.mockedNote")}</p> : null}
+      <button type="button" className="primaryButton" onClick={onCompareAnother}>
+        {t("futureComparison.compareAnother")}
+        <Zap size={18} />
+      </button>
+    </>
+  );
+}
+
+function FutureComparisonScreen({ t, setActiveScreen, language, profile }) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [recurringMonthly, setRecurringMonthly] = useState("");
+  const [horizonMonths, setHorizonMonths] = useState(3);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+
+  const submitComparison = async () => {
+    if (!description.trim() || !amount) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/decision/future-comparison", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: description.trim(),
+          amount: numberValue(amount, 0),
+          recurringMonthly: numberValue(recurringMonthly, 0),
+          horizonMonths,
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          monthlyExpenses: numberValue(profile.monthlyExpenses, 3500),
+          currentSavings: numberValue(profile.currentSavings, 20000),
+          language,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("futureComparison.genericError"));
+        return;
+      }
+      setResult(data);
+    } catch {
+      setErrorMessage(t("futureComparison.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const compareAnother = () => {
+    setResult(null);
+    setDescription("");
+    setAmount("");
+    setRecurringMonthly("");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("futureComparison.title")} subtitle={t("futureComparison.subtitle")} />
+      <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+
+      {result ? (
+        <FutureComparisonResultCard result={result} t={t} onCompareAnother={compareAnother} />
+      ) : (
+        <section className="settingsGroup">
+          <label className="textareaField">
+            <span className="sectionLabel">{t("futureComparison.descriptionLabel")}</span>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder={t("futureComparison.descriptionPlaceholder")}
+            />
+          </label>
+          <span className="sectionLabel">{t("futureComparison.amountLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            aria-label={t("futureComparison.amountLabel")}
+          />
+          <span className="sectionLabel">{t("futureComparison.recurringLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={recurringMonthly}
+            onChange={(event) => setRecurringMonthly(event.target.value)}
+            aria-label={t("futureComparison.recurringLabel")}
+          />
+          <span className="sectionLabel">{t("futureComparison.horizonLabel")}</span>
+          <div className="decisionButtonRow">
+            {[1, 3, 6, 12].map((months) => (
+              <button
+                key={months}
+                type="button"
+                className={horizonMonths === months ? "segmentButton active" : "segmentButton"}
+                onClick={() => setHorizonMonths(months)}
+              >
+                {t("futureComparison.horizonMonths", { count: months })}
+              </button>
+            ))}
+          </div>
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          <button type="button" className="primaryButton" disabled={submitting || !description.trim() || !amount} onClick={submitComparison}>
+            {submitting ? t("futureComparison.computing") : t("futureComparison.compareButton")}
+            <Zap size={18} />
+          </button>
+        </section>
+      )}
+    </Screen>
+  );
+}
+
 const DECODE_SEVERITY_ICONS = { low: Info, medium: AlertTriangle, high: AlertTriangle };
 
 function DecodeDocumentHistoryModal({ entries, loading, onClose, t }) {
@@ -14020,6 +14197,9 @@ export default function App() {
       <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
     [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.FUTURE_COMPARISON]: (
+      <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
+    ),
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,

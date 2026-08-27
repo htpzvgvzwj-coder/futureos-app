@@ -716,3 +716,25 @@ create index if not exists mirror_debates_partner_idx
 -- lib/joint-action-store.js), the same notification channel
 -- joint_debate_pending already established.
 alter table joint_actions add column if not exists decline_reason text;
+
+-- Future Comparison ("Time Machine") - two real, deterministic futures
+-- (buy this now vs wait) for a purchase decision, computed from the
+-- customer's real cashflow and every already-confirmed loan/investment on
+-- file (lib/future-comparison-finance.js). Same shape/role as
+-- decision_checks, no multi-turn lifecycle.
+create table if not exists future_comparisons (
+  id                uuid primary key default gen_random_uuid(),
+  profile_key       text not null,
+  description       text not null,
+  amount            numeric(12,2) not null,
+  recurring_monthly numeric(12,2) not null default 0,
+  horizon_months    integer not null,
+  numbers           jsonb not null,
+  narrative         text not null,
+  key_consideration text not null,
+  mocked            boolean not null default false,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists future_comparisons_profile_key_idx
+  on future_comparisons (profile_key, created_at desc);

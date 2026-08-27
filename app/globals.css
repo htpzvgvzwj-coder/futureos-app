@@ -3764,6 +3764,54 @@ nextjs-portal {
   word-break: break-all;
 }
 
+.futureCompareGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.futureCompareCard {
+  display: grid;
+  gap: 4px;
+  border-radius: 16px;
+  border: 1px solid rgba(20, 36, 58, 0.09);
+  background: #f7f9fc;
+  padding: 12px 13px;
+}
+
+.futureCompareCard.highlight {
+  border-color: rgba(15, 159, 132, 0.35);
+  background: rgba(15, 159, 132, 0.08);
+}
+
+.futureCompareCard strong {
+  color: var(--navy);
+  font-size: 19px;
+  line-height: 1.1;
+}
+
+.futureCompareCard small {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.futureCompareCard p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.stage.theme-dark .futureCompareCard {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stage.theme-dark .futureCompareCard.highlight {
+  background: rgba(47, 168, 138, 0.16);
+  border-color: rgba(47, 168, 138, 0.4);
+}
+
 .proofList {
   display: grid;
   gap: 7px;

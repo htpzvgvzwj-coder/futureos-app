@@ -1624,6 +1624,29 @@
       "reconsider": "建议重新考虑"
     }
   },
+  "futureComparison": {
+    "entryTitle": "未来对比",
+    "entryBody": "并排看两个真实的未来——现在买，还是再等等。",
+    "title": "未来对比",
+    "subtitle": "两个真实的未来，用你真实的数字算出来。",
+    "descriptionLabel": "你在考虑什么？",
+    "descriptionPlaceholder": "例如：一台 1200 新元的笔记本电脑",
+    "amountLabel": "一次性费用（新元）",
+    "recurringLabel": "额外的每月固定费用（如有，新元）",
+    "horizonLabel": "对比时间点",
+    "horizonMonths": "{count}个月",
+    "compareButton": "看两个未来",
+    "computing": "计算中……",
+    "genericError": "出了点问题，请再试一次。",
+    "compareAnother": "再对比一个决定",
+    "buyNowLabel": "现在买",
+    "waitLabel": "再等等",
+    "savingsAtHorizon": "{months} 个月后的储蓄",
+    "emergencyBufferValue": "{months} 个月缓冲",
+    "keyConsiderationLabel": "值得权衡的一点",
+    "worseningGoals": "会影响：{items}",
+    "mockedNote": "这份说明是本地生成的——上面两个未来依然是真实计算出来的。"
+  },
   "investmentPlanner": {
     "title": "投资规划师",
     "subtitle": "投资建议按你实际的购买方式定价——不是宣传册上的数字。",
