@@ -2065,16 +2065,17 @@
     }
   },
   "mirrorChat": {
-    "title": "Future Self Guardian",
+    "title": "Future Mirror",
     "subtitle": "Bincangkan satu keputusan sebenar - minta penilaian sebenar bila-bila masa anda bersedia.",
-    "emptyState": "Beritahu Future Self Guardian apa yang difikirkan - bajet perkahwinan, pembelian rumah, menunggu setahun, apa sahaja yang sebenar. Minta penilaian sebenar bila-bila masa anda mahu.",
-    "inputPlaceholder": "Hantar mesej kepada Future Self Guardian...",
-    "inputLabel": "Hantar mesej kepada Future Self Guardian",
+    "emptyState": "Beritahu Future Mirror apa yang difikirkan - bajet perkahwinan, pembelian rumah, menunggu setahun, apa sahaja yang sebenar. Minta penilaian sebenar bila-bila masa anda mahu.",
+    "inputPlaceholder": "Hantar mesej kepada Future Mirror...",
+    "inputLabel": "Hantar mesej kepada Future Mirror",
     "send": "Hantar",
     "thinking": "Sedang berfikir...",
     "genericError": "Sesuatu tidak kena. Sila cuba lagi.",
     "toolsMenuLabel": "Alat & pintasan",
     "toolsButtonLabel": "Alat",
+    "askButtonLabel": "Tanya Future Mirror",
     "quickPlannersLabel": "Atau terus ke perancang",
     "seedPrompt": "Saya tidak pasti nak mula dari mana - bolehkah kita bincang tentang {need}?",
     "seedPromptOpenLoop": "Bolehkah kita susulan perkara ini - {domain}: {loopType}?",
@@ -2105,7 +2106,7 @@
       "missing_checkin": "Belum daftar masuk bulan ini",
       "unresolved_debate": "Menunggu untuk lihat hasilnya"
     },
-    "memoryShelfLabel": "Apa yang Future Self Guardian ingat",
+    "memoryShelfLabel": "Apa yang Future Mirror ingat",
     "memoryTypes": {
       "confirmed_plan": "Pelan yang anda sahkan",
       "hardship_action": "Tindakan pemulihan yang dilaksanakan",
@@ -2119,7 +2120,7 @@
     "label": "Guardian perasan sesuatu",
     "title": "{need} mungkin patut dirancang",
     "openLoopTitle": "{domain}: {loopType}",
-    "detail": "Ketik untuk berbincang dengan Future Self Guardian - berdasarkan nombor sebenar anda, bukan tekaan.",
+    "detail": "Ketik untuk berbincang dengan Future Mirror - berdasarkan nombor sebenar anda, bukan tekaan.",
     "cta": "Bercakap dengan Guardian"
   },
   "spendingRisk": {

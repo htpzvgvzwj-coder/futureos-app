@@ -2041,16 +2041,17 @@
     }
   },
   "mirrorChat": {
-    "title": "Future Self Guardian",
+    "title": "Future Mirror",
     "subtitle": "Talk through a real decision - ask for a real assessment whenever you're ready.",
-    "emptyState": "Tell Future Self Guardian what's on your mind - a wedding budget, a home purchase, waiting a year, anything real. Ask for a real assessment whenever you want one.",
-    "inputPlaceholder": "Message Future Self Guardian...",
-    "inputLabel": "Message Future Self Guardian",
+    "emptyState": "Tell Future Mirror what's on your mind - a wedding budget, a home purchase, waiting a year, anything real. Ask for a real assessment whenever you want one.",
+    "inputPlaceholder": "Message Future Mirror...",
+    "inputLabel": "Message Future Mirror",
     "send": "Send",
     "thinking": "Thinking...",
     "genericError": "Something went wrong. Please try again.",
     "toolsMenuLabel": "Tools & shortcuts",
     "toolsButtonLabel": "Tools",
+    "askButtonLabel": "Ask Future Mirror",
     "quickPlannersLabel": "Or jump straight to a planner",
     "seedPrompt": "I'm not sure where to start - can we talk about {need}?",
     "seedPromptOpenLoop": "Can we follow up on this - {domain}: {loopType}?",
@@ -2082,7 +2083,7 @@
       "missing_checkin": "No check-in this month",
       "unresolved_debate": "Waiting to see if this played out"
     },
-    "memoryShelfLabel": "What Future Self Guardian remembers",
+    "memoryShelfLabel": "What Future Mirror remembers",
     "memoryTypes": {
       "confirmed_plan": "A plan you confirmed",
       "hardship_action": "A recovery action applied",
@@ -2846,7 +2847,7 @@
     "label": "Guardian noticed something",
     "title": "{need} might be worth planning",
     "openLoopTitle": "{domain}: {loopType}",
-    "detail": "Tap to talk it through with Future Self Guardian - grounded in your real numbers, not a guess.",
+    "detail": "Tap to talk it through with Future Mirror - grounded in your real numbers, not a guess.",
     "cta": "Talk to Guardian"
   },
   "guardianAlert": {
@@ -2854,7 +2855,7 @@
     "title": "Your total commitments are now at {utilization}% of income",
     "detailLoanImpact": "Your confirmed {purpose} loan's outlook would move from {before} to {after} if nothing changes.",
     "detailInvestmentImpact": "Your confirmed investment \"{name}\"'s outlook would move from {before} to {after} if nothing changes.",
-    "detailUtilizationOnly": "Tap to talk through your whole picture with Future Self Guardian.",
+    "detailUtilizationOnly": "Tap to talk through your whole picture with Future Mirror.",
     "dismiss": "Dismiss"
   },
   "jointDebateResponse": {

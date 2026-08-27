@@ -4796,12 +4796,12 @@ function MirrorChatInputCard({ t, onSubmit, submitting, errorMessage: sendErrorM
 // surface is just messages + a composer; secondary tools belong behind a
 // menu, not inline clutter. Nothing here was deleted, only moved - every
 // entry point below is unchanged.
-function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
+// Inline panel, not a modal - this is Mirror's default landing view (see
+// MirrorChatScreen's `view` state), swapped for the chat view via the
+// "Ask Future Mirror" / "Tools" toggle button in the header row.
+function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
   return (
-    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("mirrorChat.toolsMenuLabel")}>
-      <motion.div className="confirmModal" {...screenMotion}>
-        <strong>{t("mirrorChat.toolsMenuLabel")}</strong>
-
+    <div className="settingsGroup">
         <div className="settingsGroup">
           <span className="sectionLabel">{t("mirrorChat.quickPlannersLabel")}</span>
           <div className="checkboxGrid">
@@ -4929,12 +4929,7 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
             </div>
           </div>
         ) : null}
-
-        <button type="button" className="secondaryButton" onClick={onClose}>
-          {t("homeBanking.gotIt")}
-        </button>
-      </motion.div>
-    </section>
+    </div>
   );
 }
 
@@ -4956,7 +4951,9 @@ function MirrorChatScreen({
   const [openLoops, setOpenLoops] = useState([]);
   const [memories, setMemories] = useState([]);
   const [contextModalIndex, setContextModalIndex] = useState(null);
-  const [toolsOpen, setToolsOpen] = useState(false);
+  // Tools is the default landing view when Mirror opens; "Ask Future
+  // Mirror" (top right) swaps to the chat view, and "Tools" swaps back.
+  const [view, setView] = useState("tools");
   const logEndRef = useRef(null);
 
   const profile = getUserProfile(preferences);
@@ -5040,6 +5037,7 @@ function MirrorChatScreen({
     if (!mirrorChatSeed || historyLoading || seedConsumedRef.current) return;
     seedConsumedRef.current = true;
     onConsumeMirrorChatSeed();
+    setView("chat");
     if (messages.length === 0) {
       const seedText =
         mirrorChatSeed.kind === "crossGoalRisk"
@@ -5088,83 +5086,92 @@ function MirrorChatScreen({
       <div className="chatScreenHeaderRow">
         <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
         <h1>{t("mirrorChat.title")}</h1>
-        <button
-          type="button"
-          className="chatIconButton chatToolsButton"
-          onClick={() => setToolsOpen(true)}
-          aria-label={t("mirrorChat.toolsMenuLabel")}
-        >
-          <LayoutGrid size={16} />
-          {t("mirrorChat.toolsButtonLabel")}
-        </button>
-      </div>
-
-      {toolsOpen ? (
-        <ChatToolsModal t={t} setActiveScreen={setActiveScreen} onClose={() => setToolsOpen(false)} openLoops={openLoops} memories={memories} />
-      ) : null}
-
-      <div className="chatScreenLog">
-        {historyLoading ? (
-          <p>{t("loading.detail")}</p>
-        ) : messages.length === 0 ? (
-          <p className="chatEmptyState">{t("mirrorChat.emptyState")}</p>
+        {view === "tools" ? (
+          <button type="button" className="chatIconButton chatToolsButton" onClick={() => setView("chat")}>
+            <Bot size={16} />
+            {t("mirrorChat.askButtonLabel")}
+          </button>
         ) : (
-          messages.map((entry, index) => (
-            <div key={index}>
-              {entry.text ? (
-                <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"}>
-                  <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>
-                    {entry.text}
-                    {entry.role === "assistant" && entry.context ? (
-                      <button type="button" className="linkButton" onClick={() => setContextModalIndex(index)}>
-                        {t("mirrorChat.whyDidISayThat")}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
-              {entry.debate ? (
-                <MirrorDebateResultCard
-                  debate={entry.debate}
-                  confirmed={confirmedDebateIds.has(entry.debate.debateId)}
-                  onConfirm={(rebuttal) => confirmDebate(entry.debate.debateId, rebuttal)}
-                  escalated={escalatedDebateIds.has(entry.debate.debateId)}
-                  onEscalate={() => escalateDebate(entry.debate.debateId)}
-                  t={t}
-                />
-              ) : null}
-            </div>
-          ))
+          <button
+            type="button"
+            className="chatIconButton chatToolsButton"
+            onClick={() => setView("tools")}
+            aria-label={t("mirrorChat.toolsMenuLabel")}
+          >
+            <LayoutGrid size={16} />
+            {t("mirrorChat.toolsButtonLabel")}
+          </button>
         )}
-        {sending ? (
-          <div className="chatBubbleRow assistant">
-            <div className="chatBubble assistant chatTypingBubble" aria-label={t("mirrorChat.thinking")}>
-              <span className="chatTypingDot" />
-              <span className="chatTypingDot" />
-              <span className="chatTypingDot" />
-            </div>
-          </div>
-        ) : null}
-        <div ref={logEndRef} />
       </div>
 
-      {contextModalIndex !== null && messages[contextModalIndex]?.context ? (
-        <InfoModal
-          icon={Info}
-          title={t("mirrorChat.whyDidISayThatTitle")}
-          body={t("mirrorChat.whyDidISayThatBody")}
-          listTitle={t("mirrorChat.whyDidISayThatListTitle")}
-          listItems={[
-            t("mirrorChat.whyDidISayThatIncome", { amount: messages[contextModalIndex].context.baseInputs?.monthlyIncome }),
-            t("mirrorChat.whyDidISayThatExpenses", { amount: messages[contextModalIndex].context.baseInputs?.monthlyExpenses }),
-            t("mirrorChat.whyDidISayThatLanguage", { language: messages[contextModalIndex].context.language }),
-          ]}
-          onClose={() => setContextModalIndex(null)}
-          closeLabel={t("homeBanking.gotIt")}
-        />
-      ) : null}
+      {view === "tools" ? (
+        <MirrorToolsPanel t={t} setActiveScreen={setActiveScreen} openLoops={openLoops} memories={memories} />
+      ) : (
+        <>
+          <div className="chatScreenLog">
+            {historyLoading ? (
+              <p>{t("loading.detail")}</p>
+            ) : messages.length === 0 ? (
+              <p className="chatEmptyState">{t("mirrorChat.emptyState")}</p>
+            ) : (
+              messages.map((entry, index) => (
+                <div key={index}>
+                  {entry.text ? (
+                    <div className={entry.role === "user" ? "chatBubbleRow user" : "chatBubbleRow assistant"}>
+                      <div className={entry.role === "user" ? "chatBubble user" : "chatBubble assistant"}>
+                        {entry.text}
+                        {entry.role === "assistant" && entry.context ? (
+                          <button type="button" className="linkButton" onClick={() => setContextModalIndex(index)}>
+                            {t("mirrorChat.whyDidISayThat")}
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+                  {entry.debate ? (
+                    <MirrorDebateResultCard
+                      debate={entry.debate}
+                      confirmed={confirmedDebateIds.has(entry.debate.debateId)}
+                      onConfirm={(rebuttal) => confirmDebate(entry.debate.debateId, rebuttal)}
+                      escalated={escalatedDebateIds.has(entry.debate.debateId)}
+                      onEscalate={() => escalateDebate(entry.debate.debateId)}
+                      t={t}
+                    />
+                  ) : null}
+                </div>
+              ))
+            )}
+            {sending ? (
+              <div className="chatBubbleRow assistant">
+                <div className="chatBubble assistant chatTypingBubble" aria-label={t("mirrorChat.thinking")}>
+                  <span className="chatTypingDot" />
+                  <span className="chatTypingDot" />
+                  <span className="chatTypingDot" />
+                </div>
+              </div>
+            ) : null}
+            <div ref={logEndRef} />
+          </div>
 
-      <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending || historyLoading} errorMessage={errorMessage} />
+          {contextModalIndex !== null && messages[contextModalIndex]?.context ? (
+            <InfoModal
+              icon={Info}
+              title={t("mirrorChat.whyDidISayThatTitle")}
+              body={t("mirrorChat.whyDidISayThatBody")}
+              listTitle={t("mirrorChat.whyDidISayThatListTitle")}
+              listItems={[
+                t("mirrorChat.whyDidISayThatIncome", { amount: messages[contextModalIndex].context.baseInputs?.monthlyIncome }),
+                t("mirrorChat.whyDidISayThatExpenses", { amount: messages[contextModalIndex].context.baseInputs?.monthlyExpenses }),
+                t("mirrorChat.whyDidISayThatLanguage", { language: messages[contextModalIndex].context.language }),
+              ]}
+              onClose={() => setContextModalIndex(null)}
+              closeLabel={t("homeBanking.gotIt")}
+            />
+          ) : null}
+
+          <MirrorChatInputCard t={t} onSubmit={sendMessage} submitting={sending || historyLoading} errorMessage={errorMessage} />
+        </>
+      )}
     </Screen>
   );
 }

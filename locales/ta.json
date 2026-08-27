@@ -2060,16 +2060,17 @@
     }
   },
   "mirrorChat": {
-    "title": "Future Self Guardian",
+    "title": "Future Mirror",
     "subtitle": "ஒரு உண்மையான முடிவைப் பற்றி பேசுங்கள் - நீங்கள் தயாராக இருக்கும்போது உண்மையான மதிப்பீட்டைக் கேளுங்கள்.",
-    "emptyState": "உங்கள் மனதில் இருப்பதை Future Self Guardian இடம் சொல்லுங்கள் - திருமண பட்ஜெட், வீடு வாங்குதல், ஒரு வருடம் காத்திருத்தல், எதுவும் உண்மையானது. நீங்கள் விரும்பும்போது உண்மையான மதிப்பீட்டைக் கேளுங்கள்.",
-    "inputPlaceholder": "Future Self Guardian க்கு செய்தி அனுப்பவும்...",
-    "inputLabel": "Future Self Guardian க்கு செய்தி அனுப்பவும்",
+    "emptyState": "உங்கள் மனதில் இருப்பதை Future Mirror இடம் சொல்லுங்கள் - திருமண பட்ஜெட், வீடு வாங்குதல், ஒரு வருடம் காத்திருத்தல், எதுவும் உண்மையானது. நீங்கள் விரும்பும்போது உண்மையான மதிப்பீட்டைக் கேளுங்கள்.",
+    "inputPlaceholder": "Future Mirror க்கு செய்தி அனுப்பவும்...",
+    "inputLabel": "Future Mirror க்கு செய்தி அனுப்பவும்",
     "send": "அனுப்பு",
     "thinking": "யோசிக்கிறது...",
     "genericError": "ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.",
     "toolsMenuLabel": "கருவிகள் & குறுக்குவழிகள்",
     "toolsButtonLabel": "கருவிகள்",
+    "askButtonLabel": "Future Mirror இடம் கேளுங்கள்",
     "quickPlannersLabel": "அல்லது நேரடியாக ஒரு திட்டமிடுபவருக்குச் செல்லுங்கள்",
     "seedPrompt": "எங்கிருந்து தொடங்குவது என்று தெரியவில்லை - {need} பற்றி பேசலாமா?",
     "seedPromptOpenLoop": "இதைப் பின்தொடரலாமா - {domain}: {loopType}?",
@@ -2100,7 +2101,7 @@
       "missing_checkin": "இந்த மாதம் செக்-இன் இல்லை",
       "unresolved_debate": "இது எப்படி நடந்தது என்பதைப் பார்க்க காத்திருக்கிறது"
     },
-    "memoryShelfLabel": "Future Self Guardian நினைவில் வைத்திருப்பவை",
+    "memoryShelfLabel": "Future Mirror நினைவில் வைத்திருப்பவை",
     "memoryTypes": {
       "confirmed_plan": "நீங்கள் உறுதிப்படுத்திய ஒரு திட்டம்",
       "hardship_action": "பயன்படுத்தப்பட்ட ஒரு மீட்பு நடவடிக்கை",
@@ -2114,7 +2115,7 @@
     "label": "Guardian ஒன்றைக் கவனித்தது",
     "title": "{need} திட்டமிடுவது பயனுள்ளதாக இருக்கலாம்",
     "openLoopTitle": "{domain}: {loopType}",
-    "detail": "Future Self Guardian உடன் பேச தட்டவும் - உங்கள் உண்மையான எண்களின் அடிப்படையில், ஒரு யூகம் அல்ல.",
+    "detail": "Future Mirror உடன் பேச தட்டவும் - உங்கள் உண்மையான எண்களின் அடிப்படையில், ஒரு யூகம் அல்ல.",
     "cta": "Guardian உடன் பேசுங்கள்"
   },
   "spendingRisk": {
