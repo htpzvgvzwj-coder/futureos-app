@@ -27,7 +27,9 @@
     "protected": "已保护",
     "on": "开启",
     "perMonth": "{amount}/月",
-    "notAvailable": "暂无数据"
+    "notAvailable": "暂无数据",
+    "yes": "是",
+    "no": "否"
   },
   "customer": {
     "segment": "中层市场营销主管",
@@ -1233,6 +1235,32 @@
     "inputPlaceholder": "例如：想在榜鹅或盛港买一套4房BTO或转售组屋,只有我们两个人住,首次购屋的新加坡公民",
     "sendFirst": "获取方案",
     "emptyStateLabel": "开始规划你的购房计划",
+    "draft": {
+      "title": "你的真实起点",
+      "budgetRange": "根据你真实的收入、支出和已有承诺，安全的购房预算大约是 {low} 到 {high}。",
+      "readyNow": "你现在的储蓄已经足够支付真实首付（{amount}）。",
+      "readyBy": "按你真实的每月储蓄速度，大约到 {month} 就能备好真实首付（{amount}）。",
+      "notOnTrack": "按你目前真实的收入和支出，暂时还没有每月余力去储蓄 {amount} 的首付。",
+      "notEnoughIncome": "在个人资料中填写真实收入，才能在这里看到真实的预算区间。",
+      "basedOn": "基于你真实的收入、支出和已确认的承诺——不是猜的。",
+      "noProfileLabel": "先从你的真实数字开始",
+      "noProfileBody": "先在个人资料中填写真实的收入和支出，FutureOS 才能给出真实的预算区间，而不是让你自己去猜。",
+      "timelineQuestion": "你打算什么时候买？",
+      "timeline": {
+        "asap": "6个月内",
+        "oneYear": "一年内",
+        "twoYears": "1-2年",
+        "exploring": "先了解一下"
+      },
+      "propertyTypeQuestion": "想要哪种房子？",
+      "propertyType": {
+        "hdbNew": "新BTO",
+        "hdbResale": "转售组屋",
+        "private": "私人公寓"
+      },
+      "withPartnerQuestion": "和伴侣一起买吗？",
+      "startButton": "给我看真实方案"
+    },
     "planComparisonLabel": "方案对比",
     "propertyPrice": "预估价格",
     "propertyType": "房屋类型",

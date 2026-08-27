@@ -26,7 +26,9 @@
     "protected": "Protected",
     "on": "On",
     "perMonth": "{amount}/month",
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "yes": "Yes",
+    "no": "No"
   },
   "customer": {
     "segment": "Mid-Level Marketing Executive",
@@ -1294,6 +1296,32 @@
     "inputPlaceholder": "e.g. A 4-room BTO or resale flat in Punggol or Sengkang, just for the two of us, first-timer Singapore citizens",
     "sendFirst": "Get Plans",
     "emptyStateLabel": "Let's plan your home purchase",
+    "draft": {
+      "title": "Your real starting point",
+      "budgetRange": "Based on your real income, expenses, and existing commitments, a safe home budget is about {low} to {high}.",
+      "readyNow": "You already have enough saved for a real down payment ({amount}).",
+      "readyBy": "At your real monthly saving rate, you could be ready for a real down payment ({amount}) by {month}.",
+      "notOnTrack": "At your current real income and expenses, you don't have monthly room to save toward a {amount} down payment yet.",
+      "notEnoughIncome": "Enter your real income in your profile to see a real budget range here.",
+      "basedOn": "Based on your real income, expenses, and already-confirmed commitments - not a guess.",
+      "noProfileLabel": "Let's start with your real numbers",
+      "noProfileBody": "Enter your real income and expenses in your profile first, so FutureOS can show a real budget range instead of asking you to guess.",
+      "timelineQuestion": "When are you looking to buy?",
+      "timeline": {
+        "asap": "Within 6 months",
+        "oneYear": "Within a year",
+        "twoYears": "1-2 years",
+        "exploring": "Just exploring"
+      },
+      "propertyTypeQuestion": "What kind of home?",
+      "propertyType": {
+        "hdbNew": "New BTO",
+        "hdbResale": "Resale HDB",
+        "private": "Private condo"
+      },
+      "withPartnerQuestion": "Buying with a partner?",
+      "startButton": "Show me real plans"
+    },
     "planComparisonLabel": "Plan Options",
     "propertyPrice": "Estimated Price",
     "propertyType": "Property Type",

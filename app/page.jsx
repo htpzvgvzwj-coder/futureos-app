@@ -86,6 +86,7 @@ import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
 import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { computeSmoothedExpenses } from "../lib/expense-finance.js";
+import { computeHomeBudgetRange, computeDownPaymentReadiness } from "../lib/home-draft-finance.js";
 import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -8954,6 +8955,160 @@ function OtherNeedContent({
   );
 }
 
+// The real "zero input" entry point: instead of a blank "tell us about
+// the home you want" box, computes a real safe budget range and a real
+// down-payment readiness date from data the bank already has (real
+// income/expenses, via lib/home-draft-finance.js's real MAS/IRAS-grounded
+// math - the same calculateMaxLoan the confirm-time calculation uses),
+// then asks only the 3 things the bank genuinely can't know. Tapping
+// through them constructs a real starter message and submits straight
+// into the existing, unchanged AI planner - this replaces what produces
+// the FIRST message, not the planner itself.
+const HOME_DRAFT_TIMELINE_OPTIONS = [
+  { id: "asap", labelKey: "homePlanner.draft.timeline.asap", seedText: "within the next 6 months" },
+  { id: "oneYear", labelKey: "homePlanner.draft.timeline.oneYear", seedText: "within about a year" },
+  { id: "twoYears", labelKey: "homePlanner.draft.timeline.twoYears", seedText: "in 1-2 years" },
+  { id: "exploring", labelKey: "homePlanner.draft.timeline.exploring", seedText: "just exploring for now, no firm date" },
+];
+const HOME_DRAFT_PROPERTY_TYPE_OPTIONS = [
+  { id: "hdbNew", labelKey: "homePlanner.draft.propertyType.hdbNew", seedText: "a new BTO flat" },
+  { id: "hdbResale", labelKey: "homePlanner.draft.propertyType.hdbResale", seedText: "a resale HDB flat" },
+  { id: "private", labelKey: "homePlanner.draft.propertyType.private", seedText: "a private condo" },
+];
+
+function HomeRealDraft({ profile, t, onStartWithSeed, submitting }) {
+  const [committedMonthlyTotal, setCommittedMonthlyTotal] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [timeline, setTimeline] = useState(null);
+  const [propertyType, setPropertyType] = useState(null);
+  const [withPartner, setWithPartner] = useState(null);
+
+  const monthlyIncome = numberValue(profile.monthlyIncome, 0);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 0);
+  const currentSavings = numberValue(profile.currentSavings, 0);
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+
+  useEffect(() => {
+    if (!hasRealProfile) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setCommittedMonthlyTotal(data.committedMonthlyTotal ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setCommittedMonthlyTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRealProfile]);
+
+  if (!hasRealProfile) {
+    return (
+      <section className="weddingHero">
+        <span className="weddingHeroIcon">
+          <Building2 size={26} />
+        </span>
+        <strong>{t("homePlanner.draft.noProfileLabel")}</strong>
+        <p>{t("homePlanner.draft.noProfileBody")}</p>
+      </section>
+    );
+  }
+
+  if (loading || committedMonthlyTotal === null) {
+    return <p>{t("loading.detail")}</p>;
+  }
+
+  const budgetRange = computeHomeBudgetRange({ monthlyIncome, monthlyExpenses, committedMonthlyTotal });
+  const readiness = budgetRange
+    ? computeDownPaymentReadiness({ targetPrice: budgetRange.lowPrice, currentSavings, monthlyIncome, monthlyExpenses, committedMonthlyTotal })
+    : null;
+
+  const canStart = Boolean(timeline && propertyType && withPartner !== null);
+
+  const handleStart = () => {
+    if (!canStart) return;
+    const timelineText = HOME_DRAFT_TIMELINE_OPTIONS.find((option) => option.id === timeline)?.seedText;
+    const propertyText = HOME_DRAFT_PROPERTY_TYPE_OPTIONS.find((option) => option.id === propertyType)?.seedText;
+    const partnerText = withPartner ? "I'm buying together with my partner." : "I'm buying on my own.";
+    onStartWithSeed(`I'm looking to buy ${propertyText}, ${timelineText}. ${partnerText}`);
+  };
+
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("homePlanner.draft.title")}</span>
+      {budgetRange ? (
+        <>
+          <p>{t("homePlanner.draft.budgetRange", { low: formatSgd(budgetRange.lowPrice), high: formatSgd(budgetRange.highPrice) })}</p>
+          {readiness.readyNow ? (
+            <p>{t("homePlanner.draft.readyNow", { amount: formatSgd(readiness.downPaymentNeeded) })}</p>
+          ) : readiness.monthsToReady != null ? (
+            <p>{t("homePlanner.draft.readyBy", { month: readiness.readyMonth, amount: formatSgd(readiness.downPaymentNeeded) })}</p>
+          ) : (
+            <p>{t("homePlanner.draft.notOnTrack", { amount: formatSgd(readiness.downPaymentNeeded) })}</p>
+          )}
+          <small className="riskText">{t("homePlanner.draft.basedOn")}</small>
+        </>
+      ) : (
+        <p>{t("homePlanner.draft.notEnoughIncome")}</p>
+      )}
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("homePlanner.draft.timelineQuestion")}</span>
+        <div className="checkboxGrid">
+          {HOME_DRAFT_TIMELINE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={timeline === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setTimeline(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+
+        <span className="sectionLabel">{t("homePlanner.draft.propertyTypeQuestion")}</span>
+        <div className="checkboxGrid">
+          {HOME_DRAFT_PROPERTY_TYPE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={propertyType === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setPropertyType(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+
+        <span className="sectionLabel">{t("homePlanner.draft.withPartnerQuestion")}</span>
+        <div className="checkboxGrid">
+          <button type="button" className={withPartner === true ? "checkOption selected" : "checkOption"} onClick={() => setWithPartner(true)}>
+            <span>{t("common.yes")}</span>
+          </button>
+          <button type="button" className={withPartner === false ? "checkOption selected" : "checkOption"} onClick={() => setWithPartner(false)}>
+            <span>{t("common.no")}</span>
+          </button>
+        </div>
+      </div>
+
+      <button type="button" className="primaryButton" disabled={!canStart || submitting} onClick={handleStart}>
+        {submitting ? t("weddingPlanner.thinking") : t("homePlanner.draft.startButton")}
+        <Send size={18} />
+      </button>
+    </section>
+  );
+}
+
 function HomeNeedContent({
   success,
   setSuccess,
@@ -9377,13 +9532,7 @@ function HomeNeedContent({
               t={t}
             />
           ) : (
-            <section className="weddingHero">
-              <span className="weddingHeroBadge">{t("homePlanner.newFeatureBadge")}</span>
-              <span className="weddingHeroIcon">
-                <Building2 size={26} />
-              </span>
-              <strong>{t("homePlanner.emptyStateLabel")}</strong>
-            </section>
+            <HomeRealDraft profile={profile} t={t} onStartWithSeed={handleSubmit} submitting={submitting} />
           )}
           {errorMessage ? (
             <section className="adviceOnlyPanel">
@@ -9391,13 +9540,13 @@ function HomeNeedContent({
               <p>{errorMessage}</p>
             </section>
           ) : null}
-          {!selectedPlan ? (
+          {!selectedPlan && sessionData?.planOptions ? (
             <AiTextInputCard
               t={t}
               onSubmit={handleSubmit}
               submitting={submitting}
               placeholder={t("homePlanner.inputPlaceholder")}
-              submitLabelKey={sessionData?.planOptions ? "weddingPlanner.send" : "homePlanner.sendFirst"}
+              submitLabelKey="weddingPlanner.send"
               labelKey="homePlanner.inputLabel"
             />
           ) : null}
