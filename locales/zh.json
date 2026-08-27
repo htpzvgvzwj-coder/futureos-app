@@ -1707,6 +1707,25 @@
     "keyConsiderationLabel": "值得知道的一点",
     "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
   },
+  "personalEconomy": {
+    "title": "个人经济体",
+    "subtitle": "把你的真实数字，当作一个连贯的系统来看。",
+    "indicators": {
+      "grossOutput": { "label": "收入", "detail": "你每月真实赚到的钱" },
+      "consumption": { "label": "支出", "detail": "你每月真实花掉的钱" },
+      "tradeBalance": { "label": "月度盈余", "detail": "收入减去支出" },
+      "reserves": { "label": "净资产", "detail": "真实资产减去真实负债" },
+      "debtRatio": { "label": "承诺占比", "detail": "每月已承诺支出占收入的比例" },
+      "savingsRate": { "label": "储蓄率", "detail": "收入中留下来的比例" }
+    },
+    "netWorthTrendLabel": "净资产趋势",
+    "netWorthTrendDetail": "自你开始记录资产以来，{amount}（{percent}%）",
+    "netWorthTrendEmpty": "在资产台账中至少记录 2 项真实资产，才能看到真实趋势。",
+    "incomeGrowthLabel": "收入增长",
+    "incomeGrowthDetail": "过去 {months} 个真实记录月份，增长 {percent}%",
+    "incomeGrowthEmpty": "至少记录 3 个月的真实收入才能看到真实增长率。你目前有 {count} 个月的记录。",
+    "subsystemsLabel": "深入了解这些数字背后的真实系统"
+  },
   "goalMarketplace": {
     "title": "人生目标市集",
     "subtitle": "每一个真实的人生目标、它的真实进度，一键就能行动。",
@@ -2835,6 +2854,10 @@
     "goalMarketplace": {
       "title": "人生目标市集",
       "subtitle": "每一个真实的人生目标、它的真实进度，一键就能行动"
+    },
+    "personalEconomy": {
+      "title": "个人经济体",
+      "subtitle": "把你的真实数字，当作一个连贯的系统来看"
     }
   },
   "accountDetails": {

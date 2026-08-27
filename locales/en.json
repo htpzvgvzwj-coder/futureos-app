@@ -67,6 +67,10 @@
     "goalMarketplace": {
       "title": "Goal Marketplace",
       "subtitle": "Every real life goal, its real status, and one tap to act on it"
+    },
+    "personalEconomy": {
+      "title": "Personal Economy",
+      "subtitle": "Your real numbers, read as one connected system"
     }
   },
   "goals": {
@@ -1799,6 +1803,25 @@
     "send": "Send",
     "sendFirst": "Plan this trip",
     "inputLabel": "Describe your trip"
+  },
+  "personalEconomy": {
+    "title": "Personal Economy",
+    "subtitle": "Your real numbers, read as one connected system.",
+    "indicators": {
+      "grossOutput": { "label": "Income", "detail": "What you really earn each month" },
+      "consumption": { "label": "Spending", "detail": "What you really spend each month" },
+      "tradeBalance": { "label": "Monthly surplus", "detail": "Income minus spending" },
+      "reserves": { "label": "Net worth", "detail": "Real assets minus real debts" },
+      "debtRatio": { "label": "Commitment ratio", "detail": "Committed monthly cost vs income" },
+      "savingsRate": { "label": "Savings rate", "detail": "Share of income you keep" }
+    },
+    "netWorthTrendLabel": "Net worth trend",
+    "netWorthTrendDetail": "{amount} ({percent}%) since you started logging assets",
+    "netWorthTrendEmpty": "Log at least 2 real assets in Asset Profile to see a real trend here.",
+    "incomeGrowthLabel": "Income growth",
+    "incomeGrowthDetail": "{percent}% over your last {months} logged months",
+    "incomeGrowthEmpty": "Log at least 3 months of real income to see a real growth rate. You have {count} so far.",
+    "subsystemsLabel": "Explore the real systems behind these numbers"
   },
   "goalMarketplace": {
     "title": "Goal Marketplace",

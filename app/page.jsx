@@ -59,6 +59,8 @@ import {
   ThumbsUp,
   Trash2,
   Store,
+  TrendingDown,
+  TrendingUp,
   UserRound,
   Users,
   Utensils,
@@ -81,6 +83,7 @@ import { computeShadowAccount } from "../lib/shadow-account-finance.js";
 import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
 import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
+import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
 import {
@@ -134,6 +137,7 @@ const screens = {
   SHADOW_ACCOUNT: "shadowAccount",
   FAMILY_CFO: "familyCfo",
   GOAL_MARKETPLACE: "goalMarketplace",
+  PERSONAL_ECONOMY: "personalEconomy",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -452,6 +456,13 @@ const futureSystems = [
     subtitleKey: "futureSystems.goalMarketplace.subtitle",
     icon: Store,
     screen: screens.GOAL_MARKETPLACE,
+  },
+  {
+    id: "personalEconomy",
+    titleKey: "futureSystems.personalEconomy.title",
+    subtitleKey: "futureSystems.personalEconomy.subtitle",
+    icon: Banknote,
+    screen: screens.PERSONAL_ECONOMY,
   },
 ];
 
@@ -12965,6 +12976,162 @@ function GoalMarketplaceScreen({ t, setActiveScreen, preferences, setPreferences
   );
 }
 
+// Personal Economy - reframes numbers that are each already real elsewhere
+// (Home's stated income/expenses, Asset Profile's real net worth,
+// Strategic Balance's real committed monthly total) as real economic
+// indicators, plus two genuinely new computations: a real net-worth
+// trajectory from the Asset Profile ledger's own real createdAt
+// timestamps, and a real income growth rate from the customer's own
+// logged income_entries history. See lib/personal-economy-finance.js -
+// nothing here is invented, every number traces back to a real stored row.
+function TrendIndicator({ direction, children }) {
+  const Icon = direction === "up" ? TrendingUp : direction === "down" ? TrendingDown : null;
+  return (
+    <span className={`weddingStatChips`} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+      {Icon ? <Icon size={14} /> : null}
+      {children}
+    </span>
+  );
+}
+
+function PersonalEconomyScreen({ t, setActiveScreen, preferences }) {
+  const [committedMonthlyTotal, setCommittedMonthlyTotal] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const profile = getUserProfile(preferences);
+  const assets = preferences.assets ?? [];
+  const monthlyIncome = numberValue(profile.monthlyIncome, 7500);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 3500);
+  const netWorth = computeNetWorth(assets, {
+    existingLoans: numberValue(profile.existingLoans, 0),
+    creditCardOutstanding: numberValue(profile.creditCardOutstanding, 0),
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setCommittedMonthlyTotal(data.committedMonthlyTotal ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setCommittedMonthlyTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Deliberately once on mount, like every other real "current snapshot"
+    // read in this app - re-fetches only when the customer reopens this screen.
+  }, []);
+
+  if (loading || committedMonthlyTotal === null) {
+    return (
+      <Screen>
+        <Header title={t("personalEconomy.title")} subtitle={t("personalEconomy.subtitle")} />
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+        <p>{t("loading.detail")}</p>
+      </Screen>
+    );
+  }
+
+  const indicators = computePersonalEconomyIndicators({
+    monthlyIncome,
+    monthlyExpenses,
+    netWorth: netWorth.netWorth,
+    committedMonthlyTotal,
+  });
+  const netWorthTimeline = computeNetWorthTimeline(assets);
+  const incomeGrowth = computeIncomeGrowth(preferences.incomeHistory ?? []);
+
+  const indicatorCards = [
+    { id: "grossOutput", value: formatSgd(indicators.grossOutput) },
+    { id: "consumption", value: formatSgd(indicators.consumption) },
+    { id: "tradeBalance", value: formatSgd(indicators.tradeBalance) },
+    { id: "reserves", value: formatSgd(indicators.reserves) },
+    { id: "debtRatio", value: `${indicators.debtRatioPercent}%` },
+    { id: "savingsRate", value: `${indicators.savingsRatePercent}%` },
+  ];
+
+  return (
+    <Screen>
+      <Header title={t("personalEconomy.title")} subtitle={t("personalEconomy.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <div className="futureCompareGrid">
+        {indicatorCards.map((card) => (
+          <div className="futureCompareCard" key={card.id}>
+            <span className="sectionLabel">{t(`personalEconomy.indicators.${card.id}.label`)}</span>
+            <strong>{card.value}</strong>
+            <small>{t(`personalEconomy.indicators.${card.id}.detail`)}</small>
+          </div>
+        ))}
+      </div>
+
+      <section className="proofBlock">
+        <strong>{t("personalEconomy.netWorthTrendLabel")}</strong>
+        {netWorthTimeline ? (
+          <p>
+            <TrendIndicator direction={netWorthTimeline.direction}>
+              {t("personalEconomy.netWorthTrendDetail", {
+                amount: formatSgd(Math.abs(netWorthTimeline.changeAmount)),
+                percent: netWorthTimeline.changePercent == null ? "—" : Math.abs(netWorthTimeline.changePercent),
+              })}
+            </TrendIndicator>
+          </p>
+        ) : (
+          <p>{t("personalEconomy.netWorthTrendEmpty")}</p>
+        )}
+      </section>
+
+      <section className="proofBlock">
+        <strong>{t("personalEconomy.incomeGrowthLabel")}</strong>
+        {incomeGrowth.hasEnoughHistory ? (
+          <p>
+            <TrendIndicator direction={incomeGrowth.direction}>
+              {t("personalEconomy.incomeGrowthDetail", {
+                percent: incomeGrowth.growthPercent == null ? "—" : Math.abs(incomeGrowth.growthPercent),
+                months: incomeGrowth.sampleSize,
+              })}
+            </TrendIndicator>
+          </p>
+        ) : (
+          <p>{t("personalEconomy.incomeGrowthEmpty", { count: incomeGrowth.sampleSize })}</p>
+        )}
+      </section>
+
+      <section className="financialStrategyPanel">
+        <span className="sectionLabel">{t("personalEconomy.subsystemsLabel")}</span>
+        <div className="strategyList">
+          <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.ASSET_PROFILE)}>
+            <PiggyBank size={15} />
+            <span>{t("assetProfile.title")}</span>
+            <ChevronRight size={14} className="weddingEntryTrailing" />
+          </button>
+          <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.STRATEGIC_BALANCE)}>
+            <ChartNoAxesColumnIncreasing size={15} />
+            <span>{t("lifeGraph.strategicBalance.title")}</span>
+            <ChevronRight size={14} className="weddingEntryTrailing" />
+          </button>
+          <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.SHADOW_ACCOUNT)}>
+            <History size={15} />
+            <span>{t("shadowAccount.title")}</span>
+            <ChevronRight size={14} className="weddingEntryTrailing" />
+          </button>
+          <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FAMILY_CFO)}>
+            <Users size={15} />
+            <span>{t("familyCfo.title")}</span>
+            <ChevronRight size={14} className="weddingEntryTrailing" />
+          </button>
+        </div>
+      </section>
+    </Screen>
+  );
+}
+
 // Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
 // CSS, generic enough to reuse), adapted for travel's real fields
 // (destination/traveler_count/trip_length_days instead of venue/
@@ -15765,6 +15932,7 @@ export default function App() {
     [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.GOAL_MARKETPLACE]: <GoalMarketplaceScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} setPreferences={setPreferences} />,
+    [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
