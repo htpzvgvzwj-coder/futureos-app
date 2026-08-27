@@ -3270,6 +3270,148 @@ function SharedJourneySection({ memoryEvents, t, setActiveScreen }) {
   );
 }
 
+// Real, DB-backed events (lib/guardian-alert-store.js's guardian_alerts,
+// lib/mirror-open-loops.js's open loops) reshaped into the same "nudge"
+// object the Home alert card already used for just its single top pick -
+// factored out so the full notification center (every real open item, not
+// just the highest-priority one) and the top card share one real mapping,
+// not two copies of the same logic.
+function alertToNudge(alert) {
+  if (alert.alert_type === "joint_debate_pending") {
+    return { kind: "jointDebatePending", alertId: alert.id, domain: alert.domain, detail: alert.detail };
+  }
+  if (alert.alert_type === "joint_action_resolved") {
+    return { kind: "jointActionResolved", alertId: alert.id, domain: alert.domain, detail: alert.detail };
+  }
+  return { kind: "crossGoalRisk", alertId: alert.id, domain: alert.domain, detail: alert.detail, severity: alert.severity };
+}
+
+function openLoopToNudge(loop) {
+  return { kind: "openLoop", type: loop.type, domain: loop.domain };
+}
+
+// Same real label/title/detail text the Home alert card already computed
+// inline, now callable once per nudge instead of duplicated for a full
+// list. Returns null fields gracefully - callers decide fallbacks.
+function describeGuardianNudge(nudge, t) {
+  const Icon =
+    nudge.kind === "crossGoalRisk"
+      ? AlertTriangle
+      : nudge.kind === "jointDebatePending"
+        ? HeartHandshake
+        : nudge.kind === "jointActionResolved"
+          ? nudge.detail.outcome === "confirmed"
+            ? CheckCircle2
+            : X
+          : Sparkles;
+
+  const label =
+    nudge.kind === "crossGoalRisk"
+      ? t("guardianAlert.label")
+      : nudge.kind === "openLoop"
+        ? t("mirrorChat.openLoopsLabel")
+        : nudge.kind === "jointDebatePending"
+          ? t("jointDebateResponse.alertLabel")
+          : nudge.kind === "jointActionResolved"
+            ? t("jointActionResolved.alertLabel")
+            : t("guardianNudge.label");
+
+  const title =
+    nudge.kind === "crossGoalRisk"
+      ? t("guardianAlert.title", { utilization: nudge.detail.utilizationPercent })
+      : nudge.kind === "openLoop"
+        ? t("guardianNudge.openLoopTitle", { domain: t(`simulator.goals.${nudge.domain}`), loopType: t(`mirrorChat.openLoopTypes.${nudge.type}`) })
+        : nudge.kind === "jointDebatePending"
+          ? t("jointDebateResponse.alertTitle", { name: nudge.detail.initiatorDisplayName || t("jointDebateResponse.yourPartnerFallback") })
+          : nudge.kind === "jointActionResolved"
+            ? t(nudge.detail.outcome === "confirmed" ? "jointActionResolved.confirmedTitle" : "jointActionResolved.declinedTitle", {
+                name: nudge.detail.targetDisplayName || t("jointDebateResponse.yourPartnerFallback"),
+              })
+            : t("guardianNudge.title", { need: t(nudge.titleKey) });
+
+  const detail =
+    nudge.kind === "crossGoalRisk"
+      ? nudge.detail.worseningLoans?.length
+        ? t("guardianAlert.detailLoanImpact", {
+            purpose: t(`loanPlanner.purposes.${nudge.detail.worseningLoans[0].purpose}`),
+            before: nudge.detail.worseningLoans[0].scoreBefore,
+            after: nudge.detail.worseningLoans[0].scoreAfter,
+          })
+        : nudge.detail.worseningInvestments?.length
+          ? t("guardianAlert.detailInvestmentImpact", {
+              name: nudge.detail.worseningInvestments[0].name,
+              before: nudge.detail.worseningInvestments[0].scoreBefore,
+              after: nudge.detail.worseningInvestments[0].scoreAfter,
+            })
+          : t("guardianAlert.detailUtilizationOnly")
+      : nudge.kind === "jointDebatePending"
+        ? t("jointDebateResponse.alertDetail", { domain: t(`simulator.goals.${nudge.detail.goalType}`) })
+        : nudge.kind === "jointActionResolved"
+          ? nudge.detail.outcome === "declined" && nudge.detail.declineReason
+            ? t("jointActionResolved.declinedDetailWithReason", { reason: nudge.detail.declineReason })
+            : t(nudge.detail.outcome === "confirmed" ? "jointActionResolved.confirmedDetail" : "jointActionResolved.declinedDetail")
+          : t("guardianNudge.detail");
+
+  const dismissable = nudge.kind === "crossGoalRisk" || nudge.kind === "jointDebatePending" || nudge.kind === "jointActionResolved";
+
+  return { Icon, label, title, detail, dismissable };
+}
+
+function NotificationCenterModal({ nudges, spendingRiskEntry, dismissingAlertId, onNudgeClick, onDismiss, onClose, t }) {
+  return (
+    <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("homeBanking.notificationsTitle")}>
+      <motion.div className="confirmModal weddingHistoryModal" {...screenMotion}>
+        <Bell size={24} />
+        <strong>{t("homeBanking.notificationsTitle")}</strong>
+        <div className="strategyList">
+          {spendingRiskEntry ? (
+            <article className="strategyItem" onClick={spendingRiskEntry.onClick} style={{ cursor: "pointer" }}>
+              <span className="iconBubble">
+                <AlertTriangle size={16} />
+              </span>
+              <div>
+                <strong>{spendingRiskEntry.title}</strong>
+                <small>{spendingRiskEntry.detail}</small>
+              </div>
+              <ChevronRight size={15} />
+            </article>
+          ) : null}
+          {nudges.map((nudge, index) => {
+            const described = describeGuardianNudge(nudge, t);
+            const Icon = described.Icon;
+            return (
+              <article className="strategyItem" key={nudge.alertId ?? `${nudge.kind}-${index}`}>
+                <span className="iconBubble">
+                  <Icon size={16} />
+                </span>
+                <button type="button" className="linkButton" style={{ textAlign: "left", flex: 1 }} onClick={() => onNudgeClick(nudge)}>
+                  <strong style={{ display: "block" }}>{described.title}</strong>
+                  <small>{described.detail}</small>
+                </button>
+                {described.dismissable ? (
+                  <button
+                    type="button"
+                    className="chatIconButton"
+                    disabled={dismissingAlertId === nudge.alertId}
+                    onClick={(event) => onDismiss(event, nudge.alertId)}
+                    aria-label={t("guardianAlert.dismiss")}
+                  >
+                    <X size={14} />
+                  </button>
+                ) : null}
+              </article>
+            );
+          })}
+          {!spendingRiskEntry && !nudges.length ? <p>{t("settings.notifications.history.quiet.detail")}</p> : null}
+        </div>
+        <button type="button" className="secondaryButton" onClick={onClose}>
+          {t("homeBanking.gotIt")}
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
 function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, setJointDebateViewId, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
@@ -3291,6 +3433,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   // default" signal getAiConfidence already established for exactly this
   // purpose (see confidenceTrackedFields above), not inventing a new one.
   const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+  const spendingAlertsEnabled =
+    preferences.notifications?.spending && preferences.guardianPermissions?.spendingAlerts && !preferences.consentWithdrawn;
 
   // Same real "detected need" evidence already shown passively on the Life
   // Graph screen (a declared goal, or a health score below a real
@@ -3322,16 +3466,19 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const [dismissingAlertId, setDismissingAlertId] = useState(null);
 
   const guardianNudge = topCrossGoalAlert
-    ? topCrossGoalAlert.alert_type === "joint_debate_pending"
-      ? { kind: "jointDebatePending", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail }
-      : topCrossGoalAlert.alert_type === "joint_action_resolved"
-        ? { kind: "jointActionResolved", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail }
-        : { kind: "crossGoalRisk", alertId: topCrossGoalAlert.id, domain: topCrossGoalAlert.domain, detail: topCrossGoalAlert.detail, severity: topCrossGoalAlert.severity }
+    ? alertToNudge(topCrossGoalAlert)
     : topOpenLoop
-      ? { kind: "openLoop", type: topOpenLoop.type, domain: topOpenLoop.domain }
+      ? openLoopToNudge(topOpenLoop)
       : topDetectedNeed
         ? { kind: "detectedNeed", id: topDetectedNeed.id, titleKey: topDetectedNeed.titleKey }
         : null;
+
+  // Every real open item, not just the single highest-priority one - the
+  // real content of the notification center (see notificationsOpen below),
+  // replacing the old toggle-driven canned text that never reflected what
+  // was actually happening.
+  const allNudges = [...crossGoalAlerts.map(alertToNudge), ...openLoops.map(openLoopToNudge)];
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const dismissCrossGoalAlert = async (event, alertId) => {
     event.stopPropagation();
@@ -3342,6 +3489,22 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
     } finally {
       setDismissingAlertId(null);
     }
+  };
+
+  // Shared by the top alert card and every row in the full notification
+  // center - same real action per real event kind, not a second copy.
+  const handleNudgeClick = (nudge) => {
+    if (nudge.kind === "jointDebatePending") {
+      setJointDebateViewId(nudge.detail.debateId);
+      goWithLoading(screens.JOINT_DEBATE_RESPONSE, "loading.mirror");
+      return;
+    }
+    if (nudge.kind === "jointActionResolved") {
+      window.location.assign("/grants");
+      return;
+    }
+    setMirrorChatSeed(nudge);
+    goWithLoading(screens.MIRROR, "loading.mirror");
   };
 
   useEffect(() => {
@@ -3372,7 +3535,6 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
 
   const followThroughBand = followThrough?.band ?? "newRelationship";
   const followThroughScore = followThrough?.score ?? 0;
-  const notificationHistory = getNotificationHistory(profile, preferences, t);
   const futureHealth = healthScores.find((score) => score.id === "future")?.value ?? 86;
   const homeProgress = profile.goals.home ? 72 : 54;
   const emergencyProgress = healthScores.find((score) => score.id === "emergency")?.value ?? 80;
@@ -3488,14 +3650,7 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
               <button
                 type="button"
                 className="heroIconButton"
-                onClick={() =>
-                  setNoticeModal({
-                    icon: Bell,
-                    title: t("homeBanking.notificationsTitle"),
-                    listTitle: t("settings.notifications.history.title"),
-                    listItems: notificationHistory.map(({ title, detail }) => `${title}: ${detail}`),
-                  })
-                }
+                onClick={() => setNotificationsOpen(true)}
                 aria-label={t("homeBanking.notifications")}
               >
                 <Bell size={18} />
@@ -3578,115 +3733,45 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
           <ChevronRight size={17} />
         </motion.button>
 
-        {guardianNudge ? (
-          <motion.button
-            type="button"
-            className={guardianNudge.kind === "crossGoalRisk" && guardianNudge.severity === "atRisk" ? "futureAlertCard risk" : "futureAlertCard guardianNudgeCard"}
-            data-testid="guardian-nudge-card"
-            onClick={() => {
-              if (guardianNudge.kind === "jointDebatePending") {
-                setJointDebateViewId(guardianNudge.detail.debateId);
-                goWithLoading(screens.JOINT_DEBATE_RESPONSE, "loading.mirror");
-                return;
-              }
-              if (guardianNudge.kind === "jointActionResolved") {
-                window.location.assign("/grants");
-                return;
-              }
-              setMirrorChatSeed(guardianNudge);
-              goWithLoading(screens.MIRROR, "loading.mirror");
-            }}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.16, ease: "easeOut" }}
-          >
-            <span className="futureAlertIcon">
-              {guardianNudge.kind === "crossGoalRisk" ? (
-                <AlertTriangle size={18} />
-              ) : guardianNudge.kind === "jointDebatePending" ? (
-                <HeartHandshake size={18} />
-              ) : guardianNudge.kind === "jointActionResolved" ? (
-                guardianNudge.detail.outcome === "confirmed" ? <CheckCircle2 size={18} /> : <X size={18} />
-              ) : (
-                <Sparkles size={18} />
-              )}
-            </span>
-            <span>
-              <small>
-                {guardianNudge.kind === "crossGoalRisk"
-                  ? t("guardianAlert.label")
-                  : guardianNudge.kind === "openLoop"
-                    ? t("mirrorChat.openLoopsLabel")
-                    : guardianNudge.kind === "jointDebatePending"
-                      ? t("jointDebateResponse.alertLabel")
-                      : guardianNudge.kind === "jointActionResolved"
-                        ? t("jointActionResolved.alertLabel")
-                        : t("guardianNudge.label")}
-              </small>
-              <strong>
-                {guardianNudge.kind === "crossGoalRisk"
-                  ? t("guardianAlert.title", { utilization: guardianNudge.detail.utilizationPercent })
-                  : guardianNudge.kind === "openLoop"
-                    ? t("guardianNudge.openLoopTitle", {
-                        domain: t(`simulator.goals.${guardianNudge.domain}`),
-                        loopType: t(`mirrorChat.openLoopTypes.${guardianNudge.type}`),
-                      })
-                    : guardianNudge.kind === "jointDebatePending"
-                      ? t("jointDebateResponse.alertTitle", {
-                          name: guardianNudge.detail.initiatorDisplayName || t("jointDebateResponse.yourPartnerFallback"),
-                        })
-                      : guardianNudge.kind === "jointActionResolved"
-                        ? t(
-                            guardianNudge.detail.outcome === "confirmed"
-                              ? "jointActionResolved.confirmedTitle"
-                              : "jointActionResolved.declinedTitle",
-                            { name: guardianNudge.detail.targetDisplayName || t("jointDebateResponse.yourPartnerFallback") }
-                          )
-                        : t("guardianNudge.title", { need: t(guardianNudge.titleKey) })}
-              </strong>
-              <em>
-                {guardianNudge.kind === "crossGoalRisk"
-                  ? guardianNudge.detail.worseningLoans?.length
-                    ? t("guardianAlert.detailLoanImpact", {
-                        purpose: t(`loanPlanner.purposes.${guardianNudge.detail.worseningLoans[0].purpose}`),
-                        before: guardianNudge.detail.worseningLoans[0].scoreBefore,
-                        after: guardianNudge.detail.worseningLoans[0].scoreAfter,
-                      })
-                    : guardianNudge.detail.worseningInvestments?.length
-                      ? t("guardianAlert.detailInvestmentImpact", {
-                          name: guardianNudge.detail.worseningInvestments[0].name,
-                          before: guardianNudge.detail.worseningInvestments[0].scoreBefore,
-                          after: guardianNudge.detail.worseningInvestments[0].scoreAfter,
-                        })
-                      : t("guardianAlert.detailUtilizationOnly")
-                  : guardianNudge.kind === "jointDebatePending"
-                    ? t("jointDebateResponse.alertDetail", { domain: t(`simulator.goals.${guardianNudge.detail.goalType}`) })
-                    : guardianNudge.kind === "jointActionResolved"
-                      ? guardianNudge.detail.outcome === "declined" && guardianNudge.detail.declineReason
-                        ? t("jointActionResolved.declinedDetailWithReason", { reason: guardianNudge.detail.declineReason })
-                        : t(
-                            guardianNudge.detail.outcome === "confirmed"
-                              ? "jointActionResolved.confirmedDetail"
-                              : "jointActionResolved.declinedDetail"
-                          )
-                      : t("guardianNudge.detail")}
-              </em>
-            </span>
-            {guardianNudge.kind === "crossGoalRisk" || guardianNudge.kind === "jointDebatePending" || guardianNudge.kind === "jointActionResolved" ? (
-              <button
-                type="button"
-                className="miniButton"
-                disabled={dismissingAlertId === guardianNudge.alertId}
-                onClick={(event) => dismissCrossGoalAlert(event, guardianNudge.alertId)}
-                aria-label={t("guardianAlert.dismiss")}
-              >
-                <X size={14} />
-              </button>
-            ) : (
-              <ChevronRight size={17} />
-            )}
-          </motion.button>
-        ) : null}
+        {guardianNudge
+          ? (() => {
+              const described = describeGuardianNudge(guardianNudge, t);
+              const NudgeIcon = described.Icon;
+              return (
+                <motion.button
+                  type="button"
+                  className={guardianNudge.kind === "crossGoalRisk" && guardianNudge.severity === "atRisk" ? "futureAlertCard risk" : "futureAlertCard guardianNudgeCard"}
+                  data-testid="guardian-nudge-card"
+                  onClick={() => handleNudgeClick(guardianNudge)}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.36, delay: 0.16, ease: "easeOut" }}
+                >
+                  <span className="futureAlertIcon">
+                    <NudgeIcon size={18} />
+                  </span>
+                  <span>
+                    <small>{described.label}</small>
+                    <strong>{described.title}</strong>
+                    <em>{described.detail}</em>
+                  </span>
+                  {described.dismissable ? (
+                    <button
+                      type="button"
+                      className="miniButton"
+                      disabled={dismissingAlertId === guardianNudge.alertId}
+                      onClick={(event) => dismissCrossGoalAlert(event, guardianNudge.alertId)}
+                      aria-label={t("guardianAlert.dismiss")}
+                    >
+                      <X size={14} />
+                    </button>
+                  ) : (
+                    <ChevronRight size={17} />
+                  )}
+                </motion.button>
+              );
+            })()
+          : null}
 
         <SharedJourneySection memoryEvents={memoryEvents} t={t} setActiveScreen={setActiveScreen} />
 
@@ -3817,6 +3902,36 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
           listItems={noticeModal.listItems}
           onClose={() => setNoticeModal(null)}
           closeLabel={t("homeBanking.gotIt")}
+        />
+      ) : null}
+
+      {notificationsOpen ? (
+        <NotificationCenterModal
+          nudges={allNudges}
+          spendingRiskEntry={
+            hasRealProfile && spendingAlertsEnabled && spendingRisk.hasRisk
+              ? {
+                  title: t("settings.notifications.history.overBudget.title"),
+                  detail: t("settings.notifications.history.overBudget.detail", {
+                    amount: formatSgd(spendingRisk.overBudgetAmount),
+                    spending: formatSgd(spendingRisk.expenses),
+                    budget: formatSgd(spendingRisk.safeBudget),
+                  }),
+                  onClick: () => {
+                    setNotificationsOpen(false);
+                    setActiveScreen(screens.SPENDING_RISK);
+                  },
+                }
+              : null
+          }
+          dismissingAlertId={dismissingAlertId}
+          onNudgeClick={(nudge) => {
+            setNotificationsOpen(false);
+            handleNudgeClick(nudge);
+          }}
+          onDismiss={dismissCrossGoalAlert}
+          onClose={() => setNotificationsOpen(false)}
+          t={t}
         />
       ) : null}
     </Screen>
