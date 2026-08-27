@@ -1689,6 +1689,74 @@
     "keyConsiderationLabel": "值得知道的一点",
     "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
   },
+  "familyCfo": {
+    "title": "家庭财务中心",
+    "subtitle": "你家庭的真实财务全貌，以及共同决策，都在这一个地方。",
+    "backToOverview": "返回家庭财务中心",
+    "viewingAs": "正在查看 {name} 的真实数据（只读）",
+    "familyPictureLabel": "家庭承诺占比",
+    "familyPictureDetail": "收入 {income}，已承诺 {committed}，每月剩余 {residual}",
+    "familyPictureEmpty": "还没有家庭成员分享真实财务数据",
+    "excludedNote": "暂未计入（尚未填写真实资料）：{names}",
+    "membersLabel": "家庭成员",
+    "noMembers": "还没有人和你分享访问权限。",
+    "scopeAll": "全部",
+    "accessLevel": {
+      "view": "仅查看",
+      "view_and_act": "查看并共同决策"
+    },
+    "memberIncome": "收入 {amount}",
+    "memberCommitted": "已承诺 {amount}",
+    "viewBalance": "查看真实财务全貌",
+    "memberNoRealProfile": "还没有填写真实财务数据。",
+    "memberScopedOnly": "只分享了某个特定目标——没有完整数据的查看权限。",
+    "memberFiguresUnavailable": "目前无法加载TA的数据。",
+    "decisionsLabel": "等你确认",
+    "noDecisions": "目前没有需要你确认的事项。",
+    "proposedBy": "{name} 提议：",
+    "realEvidenceLabel": "真实证据，不是盲目确认",
+    "feasibilityScore": "可行性 {score}/100",
+    "wholePictureUtilization": "全局资金占用率 {percent}%",
+    "residualAfterAll": "算上这项和所有其他已确认承诺后，每月还剩 {amount}",
+    "worseningImpact": "对已确认承诺的真实影响：{items}",
+    "realCheckLabel": "对照TA自己真实现金流的真实检查",
+    "pauseCheckDetail": "目前每月 {current}，其他地方已承诺每月 {committed}，真实月收入 {income}",
+    "declineReasonPlaceholder": "拒绝原因（可选）",
+    "confirm": "确认",
+    "decline": "拒绝",
+    "sentLabel": "你发出的提议",
+    "sentTo": "发给 {name}：",
+    "status": {
+      "pending": "等待回应",
+      "confirmed": "已确认",
+      "declined": "已拒绝",
+      "active": "生效中",
+      "revoked": "已撤销"
+    },
+    "theirReason": "TA的理由：“{reason}”",
+    "inviteTitle": "与家庭成员分享访问权限",
+    "emailLabel": "对方邮箱",
+    "scopeLabel": "对方能看到什么",
+    "accessLevelLabel": "访问级别",
+    "sending": "发送中……",
+    "sendInvite": "发送邀请",
+    "errorGranteeNotFound": "没有找到使用该邮箱的 FutureOS 账户。",
+    "errorCannotGrantSelf": "不能给自己分享访问权限。",
+    "genericError": "出了点问题，请再试一次。",
+    "accessGivenLabel": "你给出的访问权限",
+    "noAccessGiven": "你还没有和任何人分享访问权限。",
+    "revoke": "撤销",
+    "accessReceivedLabel": "别人分享给你的访问权限",
+    "noAccessReceived": "还没有人和你分享访问权限。",
+    "accept": "接受",
+    "describe": {
+      "weddingBudget": "{domain}预算：{amount}，婚礼日期 {date}",
+      "travelPlan": "{domain}：{amount} 前往 {destination}，出发日期 {date}",
+      "genericPlan": "{domain}计划已确认，等待你共同决策。",
+      "savingsPlan": "{domain}储蓄计划：每月 {amount}，{start} 到 {end}",
+      "pauseReduce": "{domain}：月供改为 {amount} —— {reason}"
+    }
+  },
   "shadowAccount": {
     "entryTitle": "影子账户",
     "entryBody": "按典型储蓄率计算，你的真实收入记录本可以变成多少——对比你实际拥有的金额。",
@@ -2711,6 +2779,10 @@
     "lifeJourney": {
       "title": "人生阶段视图",
       "subtitle": "此刻真正重要的事，全都在这一个地方"
+    },
+    "familyCfo": {
+      "title": "家庭财务中心",
+      "subtitle": "你家庭的真实财务全貌，以及共同决策，都在这一个地方"
     }
   },
   "accountDetails": {

@@ -59,6 +59,10 @@
     "lifeJourney": {
       "title": "Life Journey View",
       "subtitle": "Everything that matters right now, in one place"
+    },
+    "familyCfo": {
+      "title": "Family CFO",
+      "subtitle": "Your family's real financial picture, and shared decisions, in one place"
     }
   },
   "goals": {
@@ -1774,6 +1778,74 @@
     "sendFirst": "Plan this trip",
     "inputLabel": "Describe your trip"
   },
+  "familyCfo": {
+    "title": "Family CFO",
+    "subtitle": "Your family's real financial picture, and shared decisions, in one place.",
+    "backToOverview": "Back to Family CFO",
+    "viewingAs": "Viewing {name}'s real data (read-only)",
+    "familyPictureLabel": "Family commitment",
+    "familyPictureDetail": "{income} income, {committed} committed, {residual} left over each month",
+    "familyPictureEmpty": "No family member has shared real financial data yet",
+    "excludedNote": "Not counted yet (no real profile entered): {names}",
+    "membersLabel": "Family members",
+    "noMembers": "No one has shared access with you yet.",
+    "scopeAll": "Everything",
+    "accessLevel": {
+      "view": "View only",
+      "view_and_act": "View and jointly decide"
+    },
+    "memberIncome": "Income {amount}",
+    "memberCommitted": "Committed {amount}",
+    "viewBalance": "View real financial picture",
+    "memberNoRealProfile": "Hasn't entered real financial data yet.",
+    "memberScopedOnly": "Shared a specific goal only - no full picture access.",
+    "memberFiguresUnavailable": "Couldn't load their data right now.",
+    "decisionsLabel": "Waiting on you",
+    "noDecisions": "Nothing waiting on your confirmation right now.",
+    "proposedBy": "{name} proposed:",
+    "realEvidenceLabel": "Real evidence, not a blind confirm",
+    "feasibilityScore": "Feasibility {score}/100",
+    "wholePictureUtilization": "Whole-picture utilization {percent}%",
+    "residualAfterAll": "{amount} left over each month after this and everything else already confirmed",
+    "worseningImpact": "Real impact on already-confirmed commitments: {items}",
+    "realCheckLabel": "Real check against their own real cashflow",
+    "pauseCheckDetail": "Currently {current}/month, {committed}/month already committed elsewhere, real income {income}/month",
+    "declineReasonPlaceholder": "Reason if declining (optional)",
+    "confirm": "Confirm",
+    "decline": "Decline",
+    "sentLabel": "Proposals you've sent",
+    "sentTo": "To {name}:",
+    "status": {
+      "pending": "Waiting for a response",
+      "confirmed": "Confirmed",
+      "declined": "Declined",
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "theirReason": "Their reason: \"{reason}\"",
+    "inviteTitle": "Share access with a family member",
+    "emailLabel": "Their email",
+    "scopeLabel": "What they share with you",
+    "accessLevelLabel": "Access level",
+    "sending": "Sending...",
+    "sendInvite": "Send invite",
+    "errorGranteeNotFound": "No FutureOS account with that email.",
+    "errorCannotGrantSelf": "You can't share access with yourself.",
+    "genericError": "Something went wrong. Please try again.",
+    "accessGivenLabel": "Access you've given",
+    "noAccessGiven": "You haven't shared access with anyone yet.",
+    "revoke": "Revoke",
+    "accessReceivedLabel": "Access shared with you",
+    "noAccessReceived": "No one has shared access with you yet.",
+    "accept": "Accept",
+    "describe": {
+      "weddingBudget": "{domain} budget: {amount} for a wedding on {date}",
+      "travelPlan": "{domain}: {amount} to {destination}, starting {date}",
+      "genericPlan": "{domain} plan confirmed and proposed for your joint decision.",
+      "savingsPlan": "{domain} savings plan: {amount}/month, {start} to {end}",
+      "pauseReduce": "{domain}: change monthly contribution to {amount} - {reason}"
+    }
+  },
   "shadowAccount": {
     "entryTitle": "Shadow Account",
     "entryBody": "What your real income history would have become at a typical savings rate - versus what you actually have.",
@@ -2629,7 +2701,7 @@
     "account": {
       "title": "Account",
       "description": "You're signed in to this FutureOS account.",
-      "sharedAccess": "Shared access",
+      "sharedAccess": "Family CFO",
       "logOut": "Log out"
     },
     "profile": {

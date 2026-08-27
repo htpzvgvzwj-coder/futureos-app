@@ -59,6 +59,7 @@ import {
   ThumbsUp,
   Trash2,
   UserRound,
+  Users,
   Utensils,
   Volume2,
   Wallet,
@@ -76,6 +77,7 @@ import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
 import { computePeerBenchmark, getTypicalSavingsRatePercent } from "../lib/peer-benchmark.js";
 import { computeShadowAccount } from "../lib/shadow-account-finance.js";
+import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -128,6 +130,7 @@ const screens = {
   ACTIVITY_CHECK: "activityCheck",
   FAMILY_TRAVEL: "familyTravel",
   SHADOW_ACCOUNT: "shadowAccount",
+  FAMILY_CFO: "familyCfo",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -149,6 +152,9 @@ const languageOptions = [
   { id: "ms", labelKey: "language.malay" },
   { id: "ta", labelKey: "language.tamil" },
 ];
+
+// Mirrors app/api/grants/route.js's createGrantSchema.scope enum exactly.
+const GRANT_SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment", "travel"];
 
 const navItems = [
   { id: screens.HOME, labelKey: "nav.home", icon: Home },
@@ -430,6 +436,13 @@ const futureSystems = [
     icon: Sparkles,
     screen: screens.LIFE_JOURNEY,
   },
+  {
+    id: "familyCfo",
+    titleKey: "futureSystems.familyCfo.title",
+    subtitleKey: "futureSystems.familyCfo.subtitle",
+    icon: Users,
+    screen: screens.FAMILY_CFO,
+  },
 ];
 
 // Life-transition view (人生转折点视图): the SAME dedicated planners already built, just grouped
@@ -592,6 +605,7 @@ function StrategicBalanceAccordionItem({
   rebalancing,
   onSlide,
   onGoToPlanner,
+  readOnly = false,
   t,
 }) {
   const Icon = STRATEGIC_CATEGORY_ICONS[category.id];
@@ -659,32 +673,34 @@ function StrategicBalanceAccordionItem({
                     </p>
                   </div>
                 ))}
-                <div className="rebalanceSlider">
-                  <span className="sectionLabel">{t("lifeGraph.strategicBalance.tryAdjusting")}</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max={sliderMax}
-                    step="50"
-                    value={sliderValue}
-                    onChange={(event) => onSlide(Number(event.target.value))}
-                    aria-label={t("lifeGraph.strategicBalance.tryAdjusting")}
-                  />
-                  <p className="numeric">{t("common.perMonth", { amount: formatSgd(sliderValue) })}</p>
-                  {rebalancing ? <p>{t("loading.detail")}</p> : null}
-                  {rebalance ? (
-                    <div className="rebalanceResult">
-                      <SummaryRow label={t("lifeGraph.strategicBalance.newUtilization")} value={`${rebalance.utilization.utilizationPercent}%`} />
-                      {rebalance.loans.map((loan) => (
-                        <SummaryRow
-                          key={loan.purpose}
-                          label={`${t(`loanPlanner.purposes.${loan.purpose}`)} ${t("loanPlanner.futureScore")}`}
-                          value={`${loan.previousFutureScore} → ${loan.newFutureScore}`}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
+                {readOnly ? null : (
+                  <div className="rebalanceSlider">
+                    <span className="sectionLabel">{t("lifeGraph.strategicBalance.tryAdjusting")}</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={sliderMax}
+                      step="50"
+                      value={sliderValue}
+                      onChange={(event) => onSlide(Number(event.target.value))}
+                      aria-label={t("lifeGraph.strategicBalance.tryAdjusting")}
+                    />
+                    <p className="numeric">{t("common.perMonth", { amount: formatSgd(sliderValue) })}</p>
+                    {rebalancing ? <p>{t("loading.detail")}</p> : null}
+                    {rebalance ? (
+                      <div className="rebalanceResult">
+                        <SummaryRow label={t("lifeGraph.strategicBalance.newUtilization")} value={`${rebalance.utilization.utilizationPercent}%`} />
+                        {rebalance.loans.map((loan) => (
+                          <SummaryRow
+                            key={loan.purpose}
+                            label={`${t(`loanPlanner.purposes.${loan.purpose}`)} ${t("loanPlanner.futureScore")}`}
+                            value={`${loan.previousFutureScore} → ${loan.newFutureScore}`}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </>
             ) : (
               <p>{t("lifeGraph.strategicBalance.notPlannedDetail.investment")}</p>
@@ -739,9 +755,11 @@ function StrategicBalanceAccordionItem({
             </>
           ) : null}
 
-          <button type="button" className="primaryButton" onClick={onGoToPlanner}>
-            {t("lifeGraph.strategicBalance.nextStep")}
-          </button>
+          {readOnly ? null : (
+            <button type="button" className="primaryButton" onClick={onGoToPlanner}>
+              {t("lifeGraph.strategicBalance.nextStep")}
+            </button>
+          )}
         </div>
       ) : null}
     </div>
@@ -12009,6 +12027,563 @@ function ShadowAccountScreen({ preferences, t, setActiveScreen }) {
   );
 }
 
+// Family CFO - the real payoff of the access-grant system (lib/access-
+// grant-store.js) and the "view as" backend (lib/auth.js's
+// resolveEffectiveProfileKey/asUser=, already wired into 15 real routes)
+// that existed but had no real frontend before this: a family member who
+// granted "all"-scope view access can actually be seen here - their real
+// committed monthly total, real income, real loan/investment/savings
+// breakdown - not just an access-grant record sitting in a settings list.
+// Replaces /grants as the real entry point (that route now redirects here).
+
+const JOINT_RISK_TO_BAND = { low: "healthy", medium: "tight", high: "at_risk" };
+
+function describeJointAction(action, t) {
+  const domainLabel = t(`simulator.goals.${action.domain}`) || action.domain;
+  if (action.action_type.startsWith("confirm_") && action.action_type.endsWith("_plan")) {
+    if (action.payload.kind === "budget") {
+      return t("familyCfo.describe.weddingBudget", { domain: domainLabel, amount: formatSgd(action.payload.total_budget), date: action.payload.wedding_date });
+    }
+    if (action.payload.kind === "plan" && action.domain === "travel") {
+      return t("familyCfo.describe.travelPlan", {
+        domain: domainLabel,
+        amount: formatSgd(action.payload.total_budget),
+        destination: action.payload.destination,
+        date: action.payload.travel_date,
+      });
+    }
+    if (action.payload.kind === "plan") {
+      return t("familyCfo.describe.genericPlan", { domain: domainLabel });
+    }
+    if (action.payload.kind === "savings_plan") {
+      return t("familyCfo.describe.savingsPlan", {
+        domain: domainLabel,
+        amount: formatSgd(action.payload.monthly_contribution),
+        start: action.payload.start_month,
+        end: action.payload.target_complete_month,
+      });
+    }
+  }
+  if (action.action_type === "pause_goal_plan" || action.action_type === "reduce_goal_plan") {
+    return t("familyCfo.describe.pauseReduce", { domain: domainLabel, amount: formatSgd(action.payload.newMonthlyContribution), reason: action.payload.explanation });
+  }
+  return `${domainLabel} / ${action.action_type}`;
+}
+
+// Real evidence a confirming partner would otherwise never see - the same
+// feasibility/whole-picture numbers the initiator saw (lib/joint-plan-
+// evidence.js), not a blind confirm/decline on a one-line summary.
+function JointEvidencePanel({ evidence, t }) {
+  const worseningImpacts = [...evidence.wholePicture.loanImpact, ...evidence.wholePicture.investmentImpact].filter((item) => item.delta <= -10);
+  return (
+    <div className="proofBlock">
+      <small>{t("familyCfo.realEvidenceLabel")}</small>
+      <div className="weddingStatChips">
+        <b className={`statePill state-${JOINT_RISK_TO_BAND[evidence.riskLevel]}`}>
+          {t("familyCfo.feasibilityScore", { score: evidence.feasibilityScore })}
+        </b>
+        <span className="statChip">{t("familyCfo.wholePictureUtilization", { percent: evidence.wholePicture.wholePictureUtilizationPercent })}</span>
+      </div>
+      <small>{t("familyCfo.residualAfterAll", { amount: formatSgd(evidence.wholePicture.residualAfterAllCommitments) })}</small>
+      {worseningImpacts.length ? (
+        <small className="riskText">
+          {t("familyCfo.worseningImpact", { items: worseningImpacts.map((item) => `${item.name ?? item.purpose} (${item.scoreBefore}→${item.scoreAfter})`).join(", ") })}
+        </small>
+      ) : null}
+    </div>
+  );
+}
+
+function PauseFeasibilityPanel({ check, t }) {
+  return (
+    <div className="proofBlock">
+      <small>{t("familyCfo.realCheckLabel")}</small>
+      <div className="weddingStatChips">
+        <b className={`statePill state-${JOINT_RISK_TO_BAND[check.riskLevel]}`}>{t("familyCfo.feasibilityScore", { score: check.feasibilityScore })}</b>
+        <span className="statChip">{t("familyCfo.wholePictureUtilization", { percent: check.utilizationPercent })}</span>
+      </div>
+      <small>
+        {t("familyCfo.pauseCheckDetail", {
+          current: formatSgd(check.oldMonthlyContribution),
+          committed: formatSgd(check.otherCommitmentsMonthlyTotal),
+          income: formatSgd(check.monthlyIncome),
+        })}
+      </small>
+    </div>
+  );
+}
+
+// Read-only reuse of Strategic Balance's own real category breakdown
+// (buildStrategicCategories/StrategicBalanceAccordionItem, unchanged) -
+// same real numbers the member sees for themselves, with readOnly
+// suppressing the rebalance slider and the "go to planner" action, since
+// neither belongs to a viewer looking at someone else's real data.
+function FamilyMemberBalanceView({ member, t, onBack }) {
+  const [openCategory, setOpenCategory] = useState(null);
+  const categories = buildStrategicCategories(member.snapshot, member.healthScores, member.profile, t);
+
+  return (
+    <>
+      <button type="button" className="secondaryButton" onClick={onBack}>
+        {t("familyCfo.backToOverview")}
+      </button>
+      <div className={`utilizationHero band-${member.snapshot.utilization.healthLabel}`}>
+        <div className="utilizationRing">
+          <strong className="numeric">{member.snapshot.utilization.utilizationPercent}%</strong>
+        </div>
+        <div>
+          <span className="utilizationLabel">{t(`lifeGraph.strategicBalance.healthLabel.${member.snapshot.utilization.healthLabel}`)}</span>
+          <small>{t("familyCfo.viewingAs", { name: member.displayName })}</small>
+        </div>
+      </div>
+      <div className="strategicCategoryList">
+        {STRATEGIC_CATEGORY_IDS.map((id) => (
+          <StrategicBalanceAccordionItem
+            key={id}
+            category={categories[id]}
+            expanded={openCategory === id}
+            onToggle={() => setOpenCategory((current) => (current === id ? null : id))}
+            snapshot={member.snapshot}
+            profile={member.profile}
+            readOnly
+            t={t}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function FamilyMemberCard({ grant, figures, t, onViewBalance }) {
+  return (
+    <article className="strategyItem" style={{ display: "block" }}>
+      <div className="weddingStatChips" style={{ marginBottom: "4px" }}>
+        <strong>{grant.grantor_display_name}</strong>
+        <span className="statChip">{grant.scope === "all" ? t("familyCfo.scopeAll") : grant.scope}</span>
+        <span className="statChip">{t(`familyCfo.accessLevel.${grant.access_level}`)}</span>
+      </div>
+      {figures?.status === "loading" ? (
+        <small>{t("loading.detail")}</small>
+      ) : figures?.status === "ready" && figures.hasRealProfile ? (
+        <>
+          <div className="weddingStatChips">
+            <span className="statChip">{t("familyCfo.memberIncome", { amount: formatSgd(figures.monthlyIncome) })}</span>
+            <span className="statChip">{t("familyCfo.memberCommitted", { amount: formatSgd(figures.committedMonthlyTotal) })}</span>
+            <b className={`statePill state-${figures.healthLabel}`}>{figures.utilizationPercent}%</b>
+          </div>
+          <button type="button" className="miniButton" style={{ marginTop: "8px" }} onClick={onViewBalance}>
+            {t("familyCfo.viewBalance")}
+          </button>
+        </>
+      ) : figures?.status === "ready" ? (
+        <small>{t("familyCfo.memberNoRealProfile")}</small>
+      ) : grant.scope !== "all" ? (
+        <small>{t("familyCfo.memberScopedOnly")}</small>
+      ) : (
+        <small>{t("familyCfo.memberFiguresUnavailable")}</small>
+      )}
+    </article>
+  );
+}
+
+function FamilyCfoScreen({ t, setActiveScreen }) {
+  const [loading, setLoading] = useState(true);
+  const [given, setGiven] = useState([]);
+  const [received, setReceived] = useState([]);
+  const [pendingJointActions, setPendingJointActions] = useState([]);
+  const [initiatedJointActions, setInitiatedJointActions] = useState([]);
+  const [memberFigures, setMemberFigures] = useState({});
+  const [viewingGrantId, setViewingGrantId] = useState(null);
+  const [granteeEmail, setGranteeEmail] = useState("");
+  const [scope, setScope] = useState("all");
+  const [accessLevel, setAccessLevel] = useState("view");
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [jointActionBusyId, setJointActionBusyId] = useState(null);
+  const [declineReasons, setDeclineReasons] = useState({});
+
+  const fetchMemberFigures = async (grant) => {
+    try {
+      const prefsResponse = await fetch(`/api/preferences?asUser=${grant.grantor_user_id}`);
+      if (!prefsResponse.ok) return { status: "unavailable" };
+      const { data } = await prefsResponse.json();
+      const memberProfile = getUserProfile(data ?? {});
+      const hasRealProfile = String(memberProfile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+      if (!hasRealProfile) return { status: "ready", hasRealProfile: false };
+
+      const monthlyIncome = numberValue(memberProfile.monthlyIncome, 7500);
+      const monthlyExpenses = numberValue(memberProfile.monthlyExpenses, 3500);
+      const sbParams = new URLSearchParams({
+        monthlyIncome: String(monthlyIncome),
+        monthlyExpenses: String(monthlyExpenses),
+        asUser: grant.grantor_user_id,
+      });
+      const sbResponse = await fetch(`/api/strategic-balance/snapshot?${sbParams.toString()}`);
+      if (!sbResponse.ok) return { status: "unavailable" };
+      const snapshot = await sbResponse.json();
+      return {
+        status: "ready",
+        hasRealProfile: true,
+        monthlyIncome,
+        monthlyExpenses,
+        committedMonthlyTotal: snapshot.committedMonthlyTotal,
+        healthLabel: snapshot.utilization.healthLabel,
+        utilizationPercent: snapshot.utilization.utilizationPercent,
+        profile: memberProfile,
+        snapshot,
+        healthScores: getHealthScores(memberProfile),
+      };
+    } catch {
+      return { status: "unavailable" };
+    }
+  };
+
+  const loadAll = () => {
+    setLoading(true);
+    Promise.all([
+      fetch("/api/grants").then((response) => (response.ok ? response.json() : { given: [], received: [] })),
+      fetch("/api/joint-actions").then((response) => (response.ok ? response.json() : { pending: [] })),
+      fetch("/api/joint-actions/mine").then((response) => (response.ok ? response.json() : { proposed: [] })),
+    ])
+      .then(([grantsData, pendingData, initiatedData]) => {
+        setGiven(grantsData.given ?? []);
+        setReceived(grantsData.received ?? []);
+        setPendingJointActions(pendingData.pending ?? []);
+        setInitiatedJointActions(initiatedData.proposed ?? []);
+
+        const viewableGrants = (grantsData.received ?? []).filter((grant) => grant.status === "active" && grant.scope === "all");
+        viewableGrants.forEach((grant) => {
+          setMemberFigures((current) => ({ ...current, [grant.id]: { status: "loading" } }));
+          fetchMemberFigures(grant).then((result) => {
+            setMemberFigures((current) => ({ ...current, [grant.id]: result }));
+          });
+        });
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
+  const familyPicture = useMemo(() => {
+    const members = received
+      .filter((grant) => grant.status === "active" && grant.scope === "all")
+      .map((grant) => {
+        const figures = memberFigures[grant.id];
+        return {
+          userId: grant.grantor_user_id,
+          displayName: grant.grantor_display_name,
+          hasRealProfile: figures?.status === "ready" && figures.hasRealProfile,
+          monthlyIncome: figures?.monthlyIncome ?? 0,
+          monthlyExpenses: figures?.monthlyExpenses ?? 0,
+          committedMonthlyTotal: figures?.committedMonthlyTotal ?? 0,
+        };
+      });
+    return computeFamilyPicture(members);
+  }, [received, memberFigures]);
+
+  const createGrant = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setFormError("");
+    try {
+      const response = await fetch("/api/grants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ granteeEmail, scope, accessLevel }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setFormError(
+          data.error === "grantee_not_found"
+            ? t("familyCfo.errorGranteeNotFound")
+            : data.error === "cannot_grant_self"
+              ? t("familyCfo.errorCannotGrantSelf")
+              : t("familyCfo.genericError")
+        );
+        return;
+      }
+      setGranteeEmail("");
+      loadAll();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const respondToGrant = async (id, decision) => {
+    await fetch(`/api/grants/${id}/respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision }),
+    });
+    loadAll();
+  };
+
+  const revokeGrant = async (id) => {
+    await fetch(`/api/grants/${id}/revoke`, { method: "POST" });
+    loadAll();
+  };
+
+  const confirmJointAction = async (id) => {
+    setJointActionBusyId(id);
+    try {
+      await fetch(`/api/joint-actions/${id}/confirm`, { method: "POST" });
+      loadAll();
+    } finally {
+      setJointActionBusyId(null);
+    }
+  };
+
+  const declineJointAction = async (id) => {
+    setJointActionBusyId(id);
+    try {
+      await fetch(`/api/joint-actions/${id}/decline`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: declineReasons[id]?.trim() || undefined }),
+      });
+      loadAll();
+    } finally {
+      setJointActionBusyId(null);
+    }
+  };
+
+  const viewingMember = viewingGrantId
+    ? (() => {
+        const grant = received.find((item) => item.id === viewingGrantId);
+        const figures = memberFigures[viewingGrantId];
+        if (!grant || figures?.status !== "ready" || !figures.hasRealProfile) return null;
+        return { displayName: grant.grantor_display_name, ...figures };
+      })()
+    : null;
+
+  if (viewingMember) {
+    return (
+      <Screen>
+        <Header title={t("familyCfo.title")} subtitle={t("familyCfo.subtitle")} />
+        <FamilyMemberBalanceView member={viewingMember} t={t} onBack={() => setViewingGrantId(null)} />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen>
+      <Header title={t("familyCfo.title")} subtitle={t("familyCfo.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <>
+          <div className={`utilizationHero band-${familyPicture.hasAnyRealData ? familyPicture.healthLabel : "notPlanned"}`}>
+            <div className="utilizationRing">
+              <strong className="numeric">{familyPicture.hasAnyRealData ? `${familyPicture.utilizationPercent}%` : "—"}</strong>
+            </div>
+            <div>
+              <span className="utilizationLabel">{t("familyCfo.familyPictureLabel")}</span>
+              {familyPicture.hasAnyRealData ? (
+                <small className="utilizationTrend">
+                  {t("familyCfo.familyPictureDetail", {
+                    income: formatSgd(familyPicture.totalMonthlyIncome),
+                    committed: formatSgd(familyPicture.totalCommittedMonthly),
+                    residual: formatSgd(familyPicture.residualMonthly),
+                  })}
+                </small>
+              ) : (
+                <small className="utilizationTrend">{t("familyCfo.familyPictureEmpty")}</small>
+              )}
+            </div>
+          </div>
+          {familyPicture.excludedMemberNames.length ? (
+            <p className="weddingCarouselHint">{t("familyCfo.excludedNote", { names: familyPicture.excludedMemberNames.join(", ") })}</p>
+          ) : null}
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("familyCfo.membersLabel")}</span>
+            <div className="strategyList">
+              {received.length ? (
+                received.map((grant) => (
+                  <FamilyMemberCard
+                    key={grant.id}
+                    grant={grant}
+                    figures={memberFigures[grant.id]}
+                    t={t}
+                    onViewBalance={() => setViewingGrantId(grant.id)}
+                  />
+                ))
+              ) : (
+                <p>{t("familyCfo.noMembers")}</p>
+              )}
+            </div>
+          </section>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("familyCfo.decisionsLabel")}</span>
+            <div className="strategyList">
+              {pendingJointActions.length ? (
+                pendingJointActions.map((action) => (
+                  <article className="strategyItem" key={action.id} style={{ display: "block" }}>
+                    <div>
+                      <strong>{t("familyCfo.proposedBy", { name: action.initiator_display_name })}</strong>
+                      <small>{describeJointAction(action, t)}</small>
+                    </div>
+                    {action.payload.jointEvidence ? <JointEvidencePanel evidence={action.payload.jointEvidence} t={t} /> : null}
+                    {action.payload.feasibilityCheck ? <PauseFeasibilityPanel check={action.payload.feasibilityCheck} t={t} /> : null}
+                    <input
+                      type="text"
+                      className="aiTextInput"
+                      placeholder={t("familyCfo.declineReasonPlaceholder")}
+                      value={declineReasons[action.id] ?? ""}
+                      onChange={(event) => setDeclineReasons((current) => ({ ...current, [action.id]: event.target.value }))}
+                      style={{ marginTop: "10px" }}
+                    />
+                    <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        className="miniButton"
+                        style={{ flex: 1 }}
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => confirmJointAction(action.id)}
+                      >
+                        {t("familyCfo.confirm")}
+                      </button>
+                      <button
+                        type="button"
+                        className="miniButton danger"
+                        style={{ flex: 1 }}
+                        disabled={jointActionBusyId === action.id}
+                        onClick={() => declineJointAction(action.id)}
+                      >
+                        {t("familyCfo.decline")}
+                      </button>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>{t("familyCfo.noDecisions")}</p>
+              )}
+            </div>
+          </section>
+
+          {initiatedJointActions.length ? (
+            <section className="financialStrategyPanel">
+              <span className="sectionLabel">{t("familyCfo.sentLabel")}</span>
+              <div className="strategyList">
+                {initiatedJointActions.map((action) => (
+                  <article className="strategyItem" key={action.id} style={{ display: "block" }}>
+                    <div className="weddingStatChips">
+                      <strong>{t("familyCfo.sentTo", { name: action.target_display_name })}</strong>
+                      <b className={`statePill state-${action.status === "confirmed" ? "healthy" : action.status === "declined" ? "at_risk" : "tight"}`}>
+                        {t(`familyCfo.status.${action.status}`)}
+                      </b>
+                    </div>
+                    <small>{describeJointAction(action, t)}</small>
+                    {action.status === "declined" && action.decline_reason ? (
+                      <small className="riskText">{t("familyCfo.theirReason", { reason: action.decline_reason })}</small>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("familyCfo.inviteTitle")}</span>
+            <form onSubmit={createGrant} className="settingsGroup">
+              <label className="textareaField">
+                <span className="sectionLabel">{t("familyCfo.emailLabel")}</span>
+                <input type="email" className="aiTextInput" value={granteeEmail} onChange={(event) => setGranteeEmail(event.target.value)} required />
+              </label>
+              <label className="textareaField">
+                <span className="sectionLabel">{t("familyCfo.scopeLabel")}</span>
+                <select className="aiTextInput" value={scope} onChange={(event) => setScope(event.target.value)}>
+                  {GRANT_SCOPE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option === "all" ? t("familyCfo.scopeAll") : option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="textareaField">
+                <span className="sectionLabel">{t("familyCfo.accessLevelLabel")}</span>
+                <select className="aiTextInput" value={accessLevel} onChange={(event) => setAccessLevel(event.target.value)}>
+                  <option value="view">{t("familyCfo.accessLevel.view")}</option>
+                  <option value="view_and_act">{t("familyCfo.accessLevel.view_and_act")}</option>
+                </select>
+              </label>
+              {formError ? (
+                <section className="adviceOnlyPanel">
+                  <AlertTriangle size={18} />
+                  <p>{formError}</p>
+                </section>
+              ) : null}
+              <button type="submit" className="primaryButton" disabled={submitting}>
+                {submitting ? t("familyCfo.sending") : t("familyCfo.sendInvite")}
+              </button>
+            </form>
+          </section>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("familyCfo.accessGivenLabel")}</span>
+            <div className="strategyList">
+              {given.length ? (
+                given.map((grant) => (
+                  <article className="strategyItem" key={grant.id}>
+                    <div>
+                      <strong>{grant.grantee_display_name}</strong>
+                      <small>
+                        {grant.grantee_email} · {grant.scope === "all" ? t("familyCfo.scopeAll") : grant.scope} · {t(`familyCfo.status.${grant.status}`)}
+                      </small>
+                    </div>
+                    {grant.status === "active" ? (
+                      <button type="button" className="miniButton danger" onClick={() => revokeGrant(grant.id)}>
+                        {t("familyCfo.revoke")}
+                      </button>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <p>{t("familyCfo.noAccessGiven")}</p>
+              )}
+            </div>
+          </section>
+
+          <section className="financialStrategyPanel">
+            <span className="sectionLabel">{t("familyCfo.accessReceivedLabel")}</span>
+            <div className="strategyList">
+              {received.length ? (
+                received.map((grant) => (
+                  <article className="strategyItem" key={grant.id}>
+                    <div>
+                      <strong>{grant.grantor_display_name}</strong>
+                      <small>
+                        {grant.grantor_email} · {grant.scope === "all" ? t("familyCfo.scopeAll") : grant.scope} · {t(`familyCfo.status.${grant.status}`)}
+                      </small>
+                    </div>
+                    {grant.status === "pending" ? (
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button type="button" className="miniButton" onClick={() => respondToGrant(grant.id, "accept")}>
+                          {t("familyCfo.accept")}
+                        </button>
+                        <button type="button" className="miniButton danger" onClick={() => respondToGrant(grant.id, "decline")}>
+                          {t("familyCfo.decline")}
+                        </button>
+                      </div>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <p>{t("familyCfo.noAccessReceived")}</p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+    </Screen>
+  );
+}
+
 // Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
 // CSS, generic enough to reuse), adapted for travel's real fields
 // (destination/traveler_count/trip_length_days instead of venue/
@@ -13510,7 +14085,7 @@ function ProfileScreen({
       <SettingsCard icon={LogOut} title={t("settings.account.title")} description={t("settings.account.description")}>
         <div className="settingsActions">
           <button type="button" className="miniButton" onClick={() => window.location.assign("/grants")}>
-            <UserRound size={15} />
+            <Users size={15} />
             {t("settings.account.sharedAccess")}
           </button>
           <button
@@ -14431,7 +15006,14 @@ export default function App() {
   // name to the server on every fresh signup/login before a second,
   // correct PUT landed moments later.
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
-  const [activeScreen, setActiveScreen] = useState(screens.HOME);
+  // Only recognizes ?screen=familyCfo today - the one real deep link this
+  // app has, used by /grants redirecting into the SPA (see app/grants/
+  // page.jsx). Not a general-purpose deep-linking system.
+  const [activeScreen, setActiveScreen] = useState(() => {
+    if (typeof window === "undefined") return screens.HOME;
+    const requested = new URLSearchParams(window.location.search).get("screen");
+    return requested === "familyCfo" ? screens.FAMILY_CFO : screens.HOME;
+  });
   const [loadingCopyKey, setLoadingCopyKey] = useState("loading.default");
   const [language, setLanguage] = useState("en");
   const [successStates, setSuccessStates] = useState({});
@@ -14810,6 +15392,7 @@ export default function App() {
     ),
     [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
+    [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
