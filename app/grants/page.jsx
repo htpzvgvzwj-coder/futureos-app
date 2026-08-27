@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment"];
+const SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment", "travel"];
 const ACCESS_LEVEL_OPTIONS = [
   { value: "view", label: "View only" },
   { value: "view_and_act", label: "View and jointly decide (e.g. confirm a wedding, home, retirement, or other goal plan together)" },
@@ -14,7 +14,7 @@ function formatSgd(value) {
   return Number.isFinite(n) ? `SGD ${n.toLocaleString("en-SG")}` : "SGD 0";
 }
 
-const DOMAIN_LABELS = { wedding: "Wedding", home: "Home", retirement: "Retirement", other: "Other goal" };
+const DOMAIN_LABELS = { wedding: "Wedding", home: "Home", retirement: "Retirement", other: "Other goal", travel: "Family Travel" };
 
 // Plain-language summary of a pending joint action's payload - shapes vary
 // by action_type (see lib/goal-plan-actions.js for the full domain
@@ -28,6 +28,9 @@ function describeJointAction(action) {
   if (action.action_type.startsWith("confirm_") && action.action_type.endsWith("_plan")) {
     if (action.payload.kind === "budget") {
       return `${domainLabel} budget: ${formatSgd(action.payload.total_budget)} for a wedding on ${action.payload.wedding_date}`;
+    }
+    if (action.payload.kind === "plan" && action.domain === "travel") {
+      return `${domainLabel}: ${formatSgd(action.payload.total_budget)} to ${action.payload.destination}, starting ${action.payload.travel_date}`;
     }
     if (action.payload.kind === "plan") {
       return `${domainLabel} plan confirmed and proposed for your joint decision.`;

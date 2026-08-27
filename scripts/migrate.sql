@@ -739,6 +739,43 @@ create table if not exists future_comparisons (
 create index if not exists future_comparisons_profile_key_idx
   on future_comparisons (profile_key, created_at desc);
 
+-- Family Travel - mirrors wedding_sessions/messages/artifacts exactly
+-- (including the stage column, always "stage1" for now) so the shared
+-- joint-action dispatcher (lib/goal-plan-actions.js) works with travel
+-- with zero special-casing.
+create table if not exists travel_sessions (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  stage1_status text not null default 'in_progress', -- in_progress | confirmed
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create unique index if not exists travel_sessions_profile_key_idx
+  on travel_sessions (profile_key);
+
+create table if not exists travel_messages (
+  id         bigserial primary key,
+  session_id uuid not null references travel_sessions(id),
+  stage      text not null,
+  seq        integer not null,
+  role       text not null,
+  content    jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists travel_artifacts (
+  id            bigserial primary key,
+  session_id    uuid not null references travel_sessions(id),
+  stage         text not null,
+  artifact_type text not null, -- plan_options | confirmed_budget
+  payload       jsonb not null,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists travel_messages_session_stage_seq_idx
+  on travel_messages (session_id, stage, seq);
+
 -- SME Cash Flow Copilot - the business owner's own real recurring income/
 -- expense events (lib/sme-cashflow-finance.js does a real day-by-day
 -- simulation over these, never invented). One profile per customer,

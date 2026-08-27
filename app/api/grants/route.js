@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 
 const createGrantSchema = z.object({
   granteeEmail: z.string().email(),
-  scope: z.enum(["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment"]),
+  scope: z.enum(["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment", "travel"]),
   accessLevel: z.enum(["view", "view_and_act"]),
   expiresAt: z.string().datetime().nullable().optional(),
 });

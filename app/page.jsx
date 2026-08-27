@@ -125,6 +125,7 @@ const screens = {
   FUTURE_COMPARISON: "futureComparison",
   SME_CASHFLOW: "smeCashflow",
   ACTIVITY_CHECK: "activityCheck",
+  FAMILY_TRAVEL: "familyTravel",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -4871,6 +4872,17 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
           <span>
             {t("activityCheck.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("activityCheck.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FAMILY_TRAVEL)}>
+          <Globe2 size={15} />
+          <span>
+            {t("familyTravel.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("familyTravel.entryBody")}</small>
           </span>
           <span className="weddingEntryTrailing">
             <ChevronRight size={14} />
@@ -11925,6 +11937,192 @@ function ActivityCheckScreen({ t, setActiveScreen, language, profile }) {
   );
 }
 
+// Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
+// CSS, generic enough to reuse), adapted for travel's real fields
+// (destination/traveler_count/trip_length_days instead of venue/
+// photography/attire tiers).
+function TravelPlanCards({ plans, researchNotes, onSelectPlan, t }) {
+  const medianCost = [...plans].map((plan) => plan.total_cost).sort((a, b) => a - b)[Math.floor((plans.length - 1) / 2)];
+  return (
+    <section className="weddingPlanCarouselWrap">
+      <span className="sectionLabel">{t("familyTravel.planComparisonLabel")}</span>
+      <div className="weddingPlanCarousel">
+        {plans.map((plan, index) => {
+          const recommended = plan.total_cost === medianCost;
+          return (
+            <article className={`weddingPlanTile accent-${index % 3}${recommended ? " recommended" : ""}`} key={plan.id}>
+              {recommended ? <span className="miniBadge">{t("status.recommended")}</span> : null}
+              <h3>{plan.name}</h3>
+              <p className="weddingPlanSummary">{plan.summary}</p>
+              <div className="weddingTotalCost">
+                <small>{t("familyTravel.totalCost")}</small>
+                <strong>{formatSgd(Math.round(plan.total_cost))}</strong>
+              </div>
+              <div className="weddingStatChips">
+                <span className="statChip">{plan.destination}</span>
+                <span className="statChip">{t("familyTravel.travelerCount", { count: plan.traveler_count })}</span>
+                <span className="statChip">{t("familyTravel.tripLength", { days: plan.trip_length_days })}</span>
+              </div>
+              <button type="button" className="primaryButton" onClick={() => onSelectPlan(plan.id)}>
+                {t("familyTravel.selectPlan")}
+              </button>
+            </article>
+          );
+        })}
+      </div>
+      {plans.length > 1 ? <p className="weddingCarouselHint">{t("weddingPlanner.swipeHint")}</p> : null}
+      {researchNotes ? (
+        <section className="insightCard">
+          <Bot size={20} />
+          <p>{researchNotes}</p>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+function TravelItineraryList({ itinerary, t }) {
+  if (!itinerary?.length) return null;
+  return (
+    <div className="settingsGroup">
+      <span className="sectionLabel">{t("familyTravel.itineraryLabel")}</span>
+      {itinerary.map((day, index) => (
+        <div className="proofBlock" key={index}>
+          <strong>
+            {t("familyTravel.dayLabel", { day: day.day_number })}
+            {day.is_photo_spot ? " 📍" : ""}
+          </strong>
+          <p>
+            {day.label} — {day.location}
+          </p>
+          {day.notes ? <small>{day.notes}</small> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TravelConfirmedCard({ budget, t }) {
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("familyTravel.confirmedLabel")}</span>
+      <h3>{budget.destination}</h3>
+      <p>{budget.confirmation_note}</p>
+      <div className="weddingStatChips">
+        <span className="statChip">{formatSgd(Math.round(budget.total_budget))}</span>
+        <span className="statChip">{t("familyTravel.travelerCount", { count: budget.traveler_count })}</span>
+        <span className="statChip">{t("familyTravel.tripLength", { days: budget.trip_length_days })}</span>
+        <span className="statChip">{budget.travel_date}</span>
+      </div>
+      <TravelItineraryList itinerary={budget.itinerary} t={t} />
+    </section>
+  );
+}
+
+function FamilyTravelScreen({ t, setActiveScreen, language }) {
+  const [sessionData, setSessionData] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (message) => {
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/travel/stage1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent: sessionData?.planOptions || sessionData?.confirmedBudget ? "refine" : "generate",
+          message,
+          language,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("familyTravel.genericError"));
+        return;
+      }
+      if (data.status === "pending_partner_confirmation") {
+        setSessionData((current) => ({ ...current, pendingPartnerConfirmation: true }));
+        return;
+      }
+      if (data.type === "propose_travel_plans") {
+        setSessionData((current) => ({ ...current, planOptions: data.data, confirmedBudget: null }));
+      } else if (data.type === "confirm_travel_plan") {
+        setSessionData((current) => ({ ...current, confirmedBudget: data.data, planOptions: null }));
+      }
+    } catch {
+      setErrorMessage(t("familyTravel.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const planAnother = () => setSessionData(null);
+
+  const handleSelectPlan = (planId) => {
+    const plan = sessionData?.planOptions?.plans.find((p) => p.id === planId);
+    if (!plan) return;
+    handleSubmit(`I'd like to confirm the "${plan.name}" plan as my final travel plan.`);
+  };
+
+  return (
+    <Screen>
+      <Header title={t("familyTravel.title")} subtitle={t("familyTravel.subtitle")} />
+      <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+
+      {sessionData?.pendingPartnerConfirmation ? (
+        <section className="needHeroCard">
+          <Bot size={20} />
+          <span className="sectionLabel">{t("familyTravel.pendingTitle")}</span>
+          <p>{t("familyTravel.pendingBody")}</p>
+        </section>
+      ) : sessionData?.confirmedBudget ? (
+        <>
+          <TravelConfirmedCard budget={sessionData.confirmedBudget} t={t} />
+          <button type="button" className="secondaryButton" onClick={planAnother}>
+            {t("familyTravel.planAnother")}
+          </button>
+        </>
+      ) : (
+        <>
+          {sessionData?.planOptions ? (
+            <TravelPlanCards
+              plans={sessionData.planOptions.plans}
+              researchNotes={sessionData.planOptions.research_notes}
+              onSelectPlan={handleSelectPlan}
+              t={t}
+            />
+          ) : (
+            <section className="weddingHero">
+              <span className="weddingHeroBadge">{t("familyTravel.newFeatureBadge")}</span>
+              <span className="weddingHeroIcon">
+                <Globe2 size={26} />
+              </span>
+              <strong>{t("familyTravel.emptyStateLabel")}</strong>
+              <p>{t("familyTravel.emptyStateBody")}</p>
+            </section>
+          )}
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          <AiTextInputCard
+            t={t}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+            placeholder={t("familyTravel.inputPlaceholder")}
+            submitLabelKey={sessionData?.planOptions ? "familyTravel.send" : "familyTravel.sendFirst"}
+            labelKey="familyTravel.inputLabel"
+          />
+        </>
+      )}
+    </Screen>
+  );
+}
+
 const DECODE_SEVERITY_ICONS = { low: Info, medium: AlertTriangle, high: AlertTriangle };
 
 function DecodeDocumentHistoryModal({ entries, loading, onClose, t }) {
@@ -14538,6 +14736,7 @@ export default function App() {
     [screens.ACTIVITY_CHECK]: (
       <ActivityCheckScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
+    [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
