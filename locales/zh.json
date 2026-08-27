@@ -1691,6 +1691,20 @@
     "keyConsiderationLabel": "值得知道的一点",
     "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
   },
+  "shadowAccount": {
+    "entryTitle": "影子账户",
+    "entryBody": "按典型储蓄率计算，你的真实收入记录本可以变成多少——对比你实际拥有的金额。",
+    "title": "影子账户",
+    "subtitle": "你的真实收入记录，按典型储蓄率计算。",
+    "shadowBalanceLabel": "影子余额",
+    "guidelineNote": "按 {rate}% 的参考储蓄率，基于 {months} 个真实记录月份",
+    "actualBalanceLabel": "你的实际储蓄",
+    "aheadNote": "你比影子余额多出 {amount}。",
+    "behindNote": "你比影子余额少了 {amount}。",
+    "emptyStateLabel": "收入记录还不够",
+    "emptyStateBody": "至少记录 3 个月的真实收入才能看到这项对比。你目前有 {count} 个月的记录。",
+    "logIncomeButton": "记录我的收入"
+  },
   "familyTravel": {
     "entryTitle": "家庭旅行",
     "entryBody": "规划一份真实的旅行预算和逐日行程，价格来自真实数据来源。",

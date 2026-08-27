@@ -1776,6 +1776,20 @@
     "sendFirst": "Plan this trip",
     "inputLabel": "Describe your trip"
   },
+  "shadowAccount": {
+    "entryTitle": "Shadow Account",
+    "entryBody": "What your real income history would have become at a typical savings rate - versus what you actually have.",
+    "title": "Shadow Account",
+    "subtitle": "Your real income history, at a typical savings rate.",
+    "shadowBalanceLabel": "Shadow balance",
+    "guidelineNote": "at a {rate}% guideline rate, over {months} real logged months",
+    "actualBalanceLabel": "Your actual savings",
+    "aheadNote": "You're {amount} ahead of the shadow balance.",
+    "behindNote": "You're {amount} behind the shadow balance.",
+    "emptyStateLabel": "Not enough income history yet",
+    "emptyStateBody": "Log at least 3 months of real income to see this comparison. You have {count} so far.",
+    "logIncomeButton": "Log my income"
+  },
   "decodeDocument": {
     "entryTitle": "Decode a Document",
     "entryBody": "Never sign something you don't actually understand - a loan agreement, insurance PDS, or tenancy agreement, explained in plain language.",

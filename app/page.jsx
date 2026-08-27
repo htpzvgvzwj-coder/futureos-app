@@ -74,7 +74,8 @@ import { projectPurchaseMode, scoreInvestmentCandidate } from "../lib/investment
 import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } from "../lib/investment-catalog.js";
 import { computeUtilization } from "../lib/strategic-balance-finance.js";
 import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMANCE_THRESHOLD_PERCENT, FEE_CREDIT_PERCENT_OF_SHORTFALL } from "../lib/accuracy-guarantee-finance.js";
-import { computePeerBenchmark } from "../lib/peer-benchmark.js";
+import { computePeerBenchmark, getTypicalSavingsRatePercent } from "../lib/peer-benchmark.js";
+import { computeShadowAccount } from "../lib/shadow-account-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -126,6 +127,7 @@ const screens = {
   SME_CASHFLOW: "smeCashflow",
   ACTIVITY_CHECK: "activityCheck",
   FAMILY_TRAVEL: "familyTravel",
+  SHADOW_ACCOUNT: "shadowAccount",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -4883,6 +4885,17 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
           <span>
             {t("familyTravel.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("familyTravel.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.SHADOW_ACCOUNT)}>
+          <History size={15} />
+          <span>
+            {t("shadowAccount.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("shadowAccount.entryBody")}</small>
           </span>
           <span className="weddingEntryTrailing">
             <ChevronRight size={14} />
@@ -11937,6 +11950,61 @@ function ActivityCheckScreen({ t, setActiveScreen, language, profile }) {
   );
 }
 
+// Shadow Account - fully client-side, same shape as PeerBenchmarkScreen:
+// preferences.incomeHistory is already real, already loaded at app init
+// (see the initial-load effect that fetches /api/income/entries), so no
+// new API route is needed - computeShadowAccount and
+// getTypicalSavingsRatePercent are both pure and importable directly.
+function ShadowAccountScreen({ preferences, t, setActiveScreen }) {
+  const profile = getUserProfile(preferences);
+  const monthlyIncome = getProfileAmount(profile, "monthlyIncome", 7500);
+  const currentSavings = getProfileAmount(profile, "currentSavings", 0);
+  const guidelineRatePercent = getTypicalSavingsRatePercent(monthlyIncome);
+  const result = computeShadowAccount(preferences.incomeHistory ?? [], { currentSavings, guidelineRatePercent });
+
+  return (
+    <Screen>
+      <Header title={t("shadowAccount.title")} subtitle={t("shadowAccount.subtitle")} />
+      <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+
+      {result.hasHistory ? (
+        <>
+          <div className="futureCompareGrid">
+            <div className="futureCompareCard">
+              <span className="sectionLabel">{t("shadowAccount.shadowBalanceLabel")}</span>
+              <strong>{formatSgd(result.shadowBalance)}</strong>
+              <small>{t("shadowAccount.guidelineNote", { rate: result.guidelineRatePercent, months: result.sampleSize })}</small>
+            </div>
+            <div className="futureCompareCard">
+              <span className="sectionLabel">{t("shadowAccount.actualBalanceLabel")}</span>
+              <strong>{formatSgd(result.actualSavings)}</strong>
+            </div>
+          </div>
+          <section className={result.aheadOfShadow ? "insightCard" : "adviceOnlyPanel"}>
+            {result.aheadOfShadow ? <ShieldCheck size={20} /> : <AlertTriangle size={20} />}
+            <p>
+              {result.aheadOfShadow
+                ? t("shadowAccount.aheadNote", { amount: formatSgd(Math.abs(result.gap)) })
+                : t("shadowAccount.behindNote", { amount: formatSgd(Math.abs(result.gap)) })}
+            </p>
+          </section>
+        </>
+      ) : (
+        <section className="weddingHero">
+          <span className="weddingHeroIcon">
+            <History size={26} />
+          </span>
+          <strong>{t("shadowAccount.emptyStateLabel")}</strong>
+          <p>{t("shadowAccount.emptyStateBody", { count: result.sampleSize })}</p>
+          <button type="button" className="primaryButton" onClick={() => setActiveScreen(screens.PROFILE)}>
+            {t("shadowAccount.logIncomeButton")}
+          </button>
+        </section>
+      )}
+    </Screen>
+  );
+}
+
 // Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
 // CSS, generic enough to reuse), adapted for travel's real fields
 // (destination/traveler_count/trip_length_days instead of venue/
@@ -14737,6 +14805,7 @@ export default function App() {
       <ActivityCheckScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
     [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
