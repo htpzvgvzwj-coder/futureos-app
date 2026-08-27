@@ -7701,7 +7701,6 @@ function WeddingNeedContent({
                 <HeartHandshake size={26} />
               </span>
               <strong>{t("weddingPlanner.emptyStateLabel")}</strong>
-              <p>{t("weddingPlanner.emptyStateBody")}</p>
             </section>
           )}
           {errorMessage ? (
@@ -9083,7 +9082,6 @@ function HomeNeedContent({
                 <Building2 size={26} />
               </span>
               <strong>{t("homePlanner.emptyStateLabel")}</strong>
-              <p>{t("homePlanner.emptyStateBody")}</p>
             </section>
           )}
           {errorMessage ? (
@@ -9525,7 +9523,6 @@ function RetirementNeedContent({
                 <Landmark size={26} />
               </span>
               <strong>{t("retirementPlanner.emptyStateLabel")}</strong>
-              <p>{t("retirementPlanner.emptyStateBody")}</p>
             </section>
           )}
           {errorMessage ? (
