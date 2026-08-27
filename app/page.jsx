@@ -6784,6 +6784,8 @@ function NeedDetailScreen({
   language,
   t,
   setLoanPlannerInitialPurpose,
+  otherGoalSeed,
+  onConsumeOtherGoalSeed,
 }) {
   const success = Boolean(successStates[type]);
   const setSuccess = () => setSuccessStates((current) => ({ ...current, [type]: true }));
@@ -6875,6 +6877,8 @@ function NeedDetailScreen({
         preferences={preferences}
         simulatorInputs={simulatorInputs}
         simulatorActionStates={simulatorActionStates}
+        initialGoalSeed={otherGoalSeed}
+        onConsumeGoalSeed={onConsumeOtherGoalSeed}
       />
     ),
   }[type];
@@ -7068,8 +7072,16 @@ function PlanEditorPanel({
   );
 }
 
-function AiTextInputCard({ t, onSubmit, submitting, placeholder, submitLabelKey = "weddingPlanner.send", labelKey = "weddingPlanner.inputLabel" }) {
-  const [value, setValue] = useState("");
+function AiTextInputCard({
+  t,
+  onSubmit,
+  submitting,
+  placeholder,
+  submitLabelKey = "weddingPlanner.send",
+  labelKey = "weddingPlanner.inputLabel",
+  initialValue = "",
+}) {
+  const [value, setValue] = useState(initialValue);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -8459,7 +8471,19 @@ function RetirementCpfInputStep({ profile, simulatorInputs, onSubmit, t }) {
 // preferences.customGoals and simulatorInputs.custom* the same shape the old standalone Custom Goal
 // modal used, so Strategic Balance, the Follow-Through Score, and Mirror's own reasoning all keep
 // working against this richer planner without any changes on their end.
-function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, setPreferences, setSimulatorInputs, setMemoryEvents, profile }) {
+function OtherNeedContent({
+  success,
+  setSuccess,
+  t,
+  setActiveScreen,
+  language,
+  setPreferences,
+  setSimulatorInputs,
+  setMemoryEvents,
+  profile,
+  initialGoalSeed,
+  onConsumeGoalSeed,
+}) {
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -8472,6 +8496,14 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
   const [checkinError, setCheckinError] = useState("");
   const [exploringPlan, setExploringPlan] = useState(false);
   const [exploringSavings, setExploringSavings] = useState(false);
+
+  // Consume the seed once - AiTextInputCard only reads initialValue on its
+  // own first mount, so this just clears the app-level state (see App())
+  // so a later, unrelated visit to this screen doesn't see a stale kids-
+  // goal starter text reappear.
+  useEffect(() => {
+    if (initialGoalSeed) onConsumeGoalSeed?.();
+  }, []);
 
   const openHistory = () => {
     setHistoryOpen(true);
@@ -8720,6 +8752,7 @@ function OtherNeedContent({ success, setSuccess, t, setActiveScreen, language, s
                 placeholder={t("otherPlanner.inputPlaceholder")}
                 submitLabelKey={sessionData?.planOptions ? "otherPlanner.refine" : "otherPlanner.send"}
                 labelKey="otherPlanner.inputLabel"
+                initialValue={initialGoalSeed ?? ""}
               />
 
               {sessionData?.planOptions ? (
@@ -12998,7 +13031,7 @@ function GoalMarketplaceCard({ id, t, status, onExplore, onToggle, canToggle, se
   );
 }
 
-function GoalMarketplaceScreen({ t, setActiveScreen, preferences, setPreferences }) {
+function GoalMarketplaceScreen({ t, setActiveScreen, preferences, setPreferences, setOtherGoalSeed }) {
   const [snapshot, setSnapshot] = useState(null);
   const [smeProfileExists, setSmeProfileExists] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13155,6 +13188,22 @@ function GoalMarketplaceScreen({ t, setActiveScreen, preferences, setPreferences
           />
         ))}
       </div>
+
+      <section className="financialStrategyPanel">
+        <span className="sectionLabel">{t("goalMarketplace.familyKids.label")}</span>
+        <p className="weddingCarouselHint">{t("goalMarketplace.familyKids.detail")}</p>
+        <button
+          type="button"
+          className="primaryButton"
+          onClick={() => {
+            setOtherGoalSeed(t("goalMarketplace.familyKids.starterMessage"));
+            setActiveScreen(screens.NEED_OTHER);
+          }}
+        >
+          {t("goalMarketplace.familyKids.action")}
+          <ChevronRight size={16} />
+        </button>
+      </section>
 
       <section className="financialStrategyPanel">
         <span className="sectionLabel">{t("goalMarketplace.customLabel")}</span>
@@ -15887,6 +15936,11 @@ export default function App() {
   const [memoryEvents, setMemoryEvents] = useState(defaultGuardianMemoryEvents);
   const [loanPlannerInitialPurpose, setLoanPlannerInitialPurpose] = useState(null);
   const [mirrorChatSeed, setMirrorChatSeed] = useState(null);
+  // A real, editable starter message for the Other-goal planner (e.g. from
+  // Goal Marketplace's "Family & Kids" quick start) - unlike
+  // mirrorChatSeed, this pre-fills the input for the customer to review
+  // and edit, never auto-submits on its own.
+  const [otherGoalSeed, setOtherGoalSeed] = useState(null);
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
   const preferencesSyncTimer = useRef(null);
 
@@ -16253,7 +16307,15 @@ export default function App() {
     [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
-    [screens.GOAL_MARKETPLACE]: <GoalMarketplaceScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} setPreferences={setPreferences} />,
+    [screens.GOAL_MARKETPLACE]: (
+      <GoalMarketplaceScreen
+        t={t}
+        setActiveScreen={setActiveScreen}
+        preferences={preferences}
+        setPreferences={setPreferences}
+        setOtherGoalSeed={setOtherGoalSeed}
+      />
+    ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
@@ -16287,7 +16349,9 @@ export default function App() {
     [screens.NEED_WEDDING]: <NeedDetailScreen {...shared} type="wedding" />,
     [screens.NEED_HOME]: <NeedDetailScreen {...shared} type="home" />,
     [screens.NEED_RETIREMENT]: <NeedDetailScreen {...shared} type="retirement" />,
-    [screens.NEED_OTHER]: <NeedDetailScreen {...shared} type="other" />,
+    [screens.NEED_OTHER]: (
+      <NeedDetailScreen {...shared} type="other" otherGoalSeed={otherGoalSeed} onConsumeOtherGoalSeed={() => setOtherGoalSeed(null)} />
+    ),
     [screens.NEED_LOAN]: (
       <LoanPlannerContent
         success={Boolean(successStates.loan)}

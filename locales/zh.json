@@ -1768,7 +1768,13 @@
     },
     "customLabel": "你的自定义目标",
     "noCustomGoals": "还没有自定义目标。",
-    "addCustomGoal": "添加自定义目标"
+    "addCustomGoal": "添加自定义目标",
+    "familyKids": {
+      "label": "家庭与孩子",
+      "detail": "为孩子的教育基金、零用钱或压岁钱做一份真实的储蓄计划——和其他目标用的是同一套真实规划器，也有真实的打卡追踪。",
+      "action": "开始孩子的储蓄目标",
+      "starterMessage": "我想为孩子开始一个真实的储蓄目标——"
+    }
   },
   "familyCfo": {
     "title": "家庭财务中心",

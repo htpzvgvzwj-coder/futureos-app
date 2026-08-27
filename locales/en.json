@@ -1869,7 +1869,13 @@
     },
     "customLabel": "Your custom goals",
     "noCustomGoals": "No custom goals yet.",
-    "addCustomGoal": "Add a custom goal"
+    "addCustomGoal": "Add a custom goal",
+    "familyKids": {
+      "label": "Family & Kids",
+      "detail": "A real savings plan for a child's education fund, allowance, or gift money - same real planner as any other goal, with real check-in tracking.",
+      "action": "Start a child's savings goal",
+      "starterMessage": "I want to start a real savings goal for my child - "
+    }
   },
   "familyCfo": {
     "title": "Family CFO",
