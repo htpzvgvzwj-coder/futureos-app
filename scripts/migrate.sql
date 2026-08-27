@@ -738,3 +738,18 @@ create table if not exists future_comparisons (
 
 create index if not exists future_comparisons_profile_key_idx
   on future_comparisons (profile_key, created_at desc);
+
+-- SME Cash Flow Copilot - the business owner's own real recurring income/
+-- expense events (lib/sme-cashflow-finance.js does a real day-by-day
+-- simulation over these, never invented). One profile per customer,
+-- updated in place - not a session/history lifecycle.
+create table if not exists sme_cashflow_profiles (
+  profile_key       text primary key,
+  business_name     text not null,
+  starting_cash     numeric(12,2) not null,
+  events            jsonb not null,
+  narrative         text not null,
+  key_consideration text not null,
+  mocked            boolean not null default false,
+  updated_at        timestamptz not null default now()
+);

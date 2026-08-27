@@ -123,6 +123,7 @@ const screens = {
   RELATIONSHIP_LEDGER: "relationshipLedger",
   DECISION_VERDICT: "decisionVerdict",
   FUTURE_COMPARISON: "futureComparison",
+  SME_CASHFLOW: "smeCashflow",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -4847,6 +4848,17 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
           <span>
             {t("futureComparison.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("futureComparison.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.SME_CASHFLOW)}>
+          <BriefcaseBusiness size={15} />
+          <span>
+            {t("smeCashflow.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("smeCashflow.entryBody")}</small>
           </span>
           <span className="weddingEntryTrailing">
             <ChevronRight size={14} />
@@ -11591,6 +11603,201 @@ function FutureComparisonScreen({ t, setActiveScreen, language, profile }) {
   );
 }
 
+// SME Cash Flow Copilot - real day-by-day forecast from the owner's own
+// entered events. See lib/sme-cashflow-finance.js.
+function SmeCashflowScreen({ t, setActiveScreen, language }) {
+  const [businessName, setBusinessName] = useState("");
+  const [startingCash, setStartingCash] = useState("");
+  const [events, setEvents] = useState([{ label: "", amount: "", dayOfMonth: "1" }]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/sme/cashflow")
+      .then((response) => response.json())
+      .then((data) => {
+        if (cancelled || !data.profile) return;
+        setBusinessName(data.profile.businessName);
+        setStartingCash(String(data.profile.startingCash));
+        setEvents(data.profile.events.map((event) => ({ label: event.label, amount: String(event.amount), dayOfMonth: String(event.dayOfMonth) })));
+        setResult({ forecast: data.forecast, narrative: data.narrative, keyConsideration: data.keyConsideration, mocked: data.mocked });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const updateEvent = (index, field, value) => {
+    setEvents((current) => current.map((event, i) => (i === index ? { ...event, [field]: value } : event)));
+  };
+
+  const addEvent = () => setEvents((current) => [...current, { label: "", amount: "", dayOfMonth: "1" }]);
+  const removeEvent = (index) => setEvents((current) => current.filter((_, i) => i !== index));
+
+  const submitForecast = async () => {
+    const cleanEvents = events
+      .filter((event) => event.label.trim() && event.amount !== "")
+      .map((event) => ({ label: event.label.trim(), amount: numberValue(event.amount, 0), dayOfMonth: Math.min(30, Math.max(1, numberValue(event.dayOfMonth, 1))) }));
+    if (!businessName.trim() || !startingCash || !cleanEvents.length) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/sme/cashflow", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: businessName.trim(),
+          startingCash: numberValue(startingCash, 0),
+          events: cleanEvents,
+          horizonDays: 30,
+          language,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("smeCashflow.genericError"));
+        return;
+      }
+      setResult({ forecast: data.forecast, narrative: data.narrative, keyConsideration: data.keyConsideration, mocked: data.mocked });
+    } catch {
+      setErrorMessage(t("smeCashflow.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Screen>
+      <Header title={t("smeCashflow.title")} subtitle={t("smeCashflow.subtitle")} />
+      <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+
+      {loading ? (
+        <p>{t("loading.detail")}</p>
+      ) : (
+        <>
+          {result ? (
+            <section className={result.forecast.hasGap ? "adviceOnlyPanel" : "insightCard"}>
+              {result.forecast.hasGap ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
+              <p>{result.narrative}</p>
+            </section>
+          ) : null}
+          {result ? (
+            <>
+              <div className="futureCompareGrid">
+                <div className="futureCompareCard">
+                  <span className="sectionLabel">{t("smeCashflow.lowestPointLabel")}</span>
+                  <strong>{formatSgd(result.forecast.minBalance)}</strong>
+                  <small>
+                    {result.forecast.hasGap
+                      ? t("smeCashflow.gapDayValue", { day: result.forecast.firstGapDay })
+                      : t("smeCashflow.noGap")}
+                  </small>
+                </div>
+                <div className="futureCompareCard highlight">
+                  <span className="sectionLabel">{t("smeCashflow.endingBalanceLabel")}</span>
+                  <strong>{formatSgd(result.forecast.endingBalance)}</strong>
+                  <small>{t("smeCashflow.horizonValue", { days: result.forecast.horizonDays })}</small>
+                </div>
+              </div>
+              <div className="proofBlock">
+                <strong>{t("smeCashflow.keyConsiderationLabel")}</strong>
+                <p>{result.keyConsideration}</p>
+              </div>
+              {result.mocked ? <p className="weddingCarouselHint">{t("smeCashflow.mockedNote")}</p> : null}
+            </>
+          ) : null}
+
+          <div className="settingsGroup">
+            <span className="sectionLabel">{t("smeCashflow.businessNameLabel")}</span>
+            <input
+              type="text"
+              className="aiTextInput"
+              value={businessName}
+              onChange={(event) => setBusinessName(event.target.value)}
+              placeholder={t("smeCashflow.businessNamePlaceholder")}
+              aria-label={t("smeCashflow.businessNameLabel")}
+            />
+            <span className="sectionLabel">{t("smeCashflow.startingCashLabel")}</span>
+            <input
+              type="number"
+              min="0"
+              className="aiTextInput"
+              value={startingCash}
+              onChange={(event) => setStartingCash(event.target.value)}
+              aria-label={t("smeCashflow.startingCashLabel")}
+            />
+
+            <span className="sectionLabel">{t("smeCashflow.eventsLabel")}</span>
+            {events.map((event, index) => (
+              <div key={index} className="decisionButtonRow">
+                <input
+                  type="text"
+                  className="aiTextInput"
+                  style={{ flex: 2 }}
+                  value={event.label}
+                  onChange={(e) => updateEvent(index, "label", e.target.value)}
+                  placeholder={t("smeCashflow.eventLabelPlaceholder")}
+                  aria-label={t("smeCashflow.eventLabelPlaceholder")}
+                />
+                <input
+                  type="number"
+                  className="aiTextInput"
+                  style={{ flex: 1 }}
+                  value={event.amount}
+                  onChange={(e) => updateEvent(index, "amount", e.target.value)}
+                  placeholder={t("smeCashflow.eventAmountPlaceholder")}
+                  aria-label={t("smeCashflow.eventAmountPlaceholder")}
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  className="aiTextInput"
+                  style={{ flex: 1 }}
+                  value={event.dayOfMonth}
+                  onChange={(e) => updateEvent(index, "dayOfMonth", e.target.value)}
+                  placeholder={t("smeCashflow.eventDayPlaceholder")}
+                  aria-label={t("smeCashflow.eventDayPlaceholder")}
+                />
+                <button type="button" className="chatIconButton" onClick={() => removeEvent(index)} aria-label={t("smeCashflow.removeEvent")}>
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+            <button type="button" className="secondaryButton" onClick={addEvent}>
+              <Plus size={16} />
+              {t("smeCashflow.addEvent")}
+            </button>
+
+            {errorMessage ? (
+              <section className="adviceOnlyPanel">
+                <AlertTriangle size={18} />
+                <p>{errorMessage}</p>
+              </section>
+            ) : null}
+            <button
+              type="button"
+              className="primaryButton"
+              disabled={submitting || !businessName.trim() || !startingCash}
+              onClick={submitForecast}
+            >
+              {submitting ? t("smeCashflow.computing") : t("smeCashflow.forecastButton")}
+              <Zap size={18} />
+            </button>
+          </div>
+        </>
+      )}
+    </Screen>
+  );
+}
+
 const DECODE_SEVERITY_ICONS = { low: Info, medium: AlertTriangle, high: AlertTriangle };
 
 function DecodeDocumentHistoryModal({ entries, loading, onClose, t }) {
@@ -14200,6 +14407,7 @@ export default function App() {
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
+    [screens.SME_CASHFLOW]: <SmeCashflowScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
