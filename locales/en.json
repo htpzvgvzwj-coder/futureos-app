@@ -71,6 +71,10 @@
     "personalEconomy": {
       "title": "Personal Economy",
       "subtitle": "Your real numbers, read as one connected system"
+    },
+    "dealFinder": {
+      "title": "Deal Finder",
+      "subtitle": "Real prices, found on the real web, for you to act on"
     }
   },
   "goals": {
@@ -1803,6 +1807,20 @@
     "send": "Send",
     "sendFirst": "Plan this trip",
     "inputLabel": "Describe your trip"
+  },
+  "dealFinder": {
+    "title": "Deal Finder",
+    "subtitle": "Real prices, found on the real web, for you to act on.",
+    "disclaimer": "This finds and compares real current prices for you - it never negotiates, reserves, or buys anything. You take it from here.",
+    "queryLabel": "What are you looking to buy or book?",
+    "queryPlaceholder": "e.g. A robot vacuum under SGD 400, or a 2-bedroom moving service in Singapore",
+    "searchButton": "Find real options",
+    "searching": "Searching the real web...",
+    "genericError": "Something went wrong. Please try again.",
+    "sourceLabel": "Source: {source}",
+    "researchNotesLabel": "Worth knowing",
+    "mockedNote": "This explanation was generated locally - no live web search was performed this time.",
+    "searchAgain": "Search again"
   },
   "personalEconomy": {
     "title": "Personal Economy",

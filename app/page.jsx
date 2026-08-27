@@ -58,6 +58,7 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash2,
+  Search,
   Store,
   TrendingDown,
   TrendingUp,
@@ -138,6 +139,7 @@ const screens = {
   FAMILY_CFO: "familyCfo",
   GOAL_MARKETPLACE: "goalMarketplace",
   PERSONAL_ECONOMY: "personalEconomy",
+  DEAL_FINDER: "dealFinder",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -463,6 +465,13 @@ const futureSystems = [
     subtitleKey: "futureSystems.personalEconomy.subtitle",
     icon: Banknote,
     screen: screens.PERSONAL_ECONOMY,
+  },
+  {
+    id: "dealFinder",
+    titleKey: "futureSystems.dealFinder.title",
+    subtitleKey: "futureSystems.dealFinder.subtitle",
+    icon: Search,
+    screen: screens.DEAL_FINDER,
   },
 ];
 
@@ -13132,6 +13141,115 @@ function PersonalEconomyScreen({ t, setActiveScreen, preferences }) {
   );
 }
 
+// Deal Finder - the one honest slice of "Agent-to-Agent Commerce" this app
+// can deliver without either fabricating a fake negotiation result or
+// standing up a real external merchant/payment integration (neither
+// exists here - QuickActionScreen's PayNow/Scan&Pay/FX screens are
+// explicitly named mockScreens with hardcoded fake data, confirmed while
+// scoping this feature). This is real web research, not agent
+// negotiation: real web_search, real vendor names, real sources - the
+// customer still has to go act on it themselves. See
+// lib/deal-finder-prompts.js's system prompt for the same honesty
+// boundary stated to the model itself.
+function DealFinderScreen({ t, setActiveScreen, language }) {
+  const [query, setQuery] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+
+  const submitSearch = async () => {
+    if (!query.trim()) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/deal-finder/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query.trim(), language }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("dealFinder.genericError"));
+        return;
+      }
+      setResult({ ...data.result, mocked: data.mocked });
+    } catch {
+      setErrorMessage(t("dealFinder.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const searchAgain = () => {
+    setResult(null);
+    setQuery("");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("dealFinder.title")} subtitle={t("dealFinder.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <section className="trustNote compactTrustNote">
+        <Info size={17} />
+        <p>{t("dealFinder.disclaimer")}</p>
+      </section>
+
+      {result ? (
+        <>
+          <p className="weddingCarouselHint">{result.query_summary}</p>
+          <div className="strategyList">
+            {result.options.map((option, index) => (
+              <article className="strategyItem" key={index} style={{ display: "block" }}>
+                <div className="weddingStatChips" style={{ marginBottom: "4px" }}>
+                  <strong>{option.name}</strong>
+                  <b className="statePill state-healthy">{formatSgd(option.price)}</b>
+                </div>
+                <small>
+                  {option.vendor} · {option.unit}
+                </small>
+                <p>{option.notes}</p>
+                <small className="riskText">{t("dealFinder.sourceLabel", { source: option.source })}</small>
+              </article>
+            ))}
+          </div>
+          <p className="proofBlock">
+            <strong>{t("dealFinder.researchNotesLabel")}</strong>
+            <span>{result.research_notes}</span>
+          </p>
+          {result.mocked ? <p className="weddingCarouselHint">{t("dealFinder.mockedNote")}</p> : null}
+          <button type="button" className="primaryButton" onClick={searchAgain}>
+            {t("dealFinder.searchAgain")}
+            <Search size={18} />
+          </button>
+        </>
+      ) : (
+        <section className="settingsGroup">
+          <span className="sectionLabel">{t("dealFinder.queryLabel")}</span>
+          <textarea
+            className="aiTextInput"
+            rows={3}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("dealFinder.queryPlaceholder")}
+            aria-label={t("dealFinder.queryLabel")}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          <button type="button" className="primaryButton" disabled={submitting || !query.trim()} onClick={submitSearch}>
+            {submitting ? t("dealFinder.searching") : t("dealFinder.searchButton")}
+            <Search size={18} />
+          </button>
+        </section>
+      )}
+    </Screen>
+  );
+}
+
 // Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
 // CSS, generic enough to reuse), adapted for travel's real fields
 // (destination/traveler_count/trip_length_days instead of venue/
@@ -15933,6 +16051,7 @@ export default function App() {
     [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.GOAL_MARKETPLACE]: <GoalMarketplaceScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} setPreferences={setPreferences} />,
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
+    [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,

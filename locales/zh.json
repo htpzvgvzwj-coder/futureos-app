@@ -1707,6 +1707,20 @@
     "keyConsiderationLabel": "值得知道的一点",
     "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
   },
+  "dealFinder": {
+    "title": "真实比价",
+    "subtitle": "在真实网络上找到真实价格，交给你来行动。",
+    "disclaimer": "这里只会帮你找到并对比真实的当前价格——不会替你谈判、预订或购买任何东西，接下来要你自己行动。",
+    "queryLabel": "你想买什么或预订什么？",
+    "queryPlaceholder": "例如：预算400新元以内的扫地机器人，或新加坡的两房搬家服务",
+    "searchButton": "查找真实选项",
+    "searching": "正在搜索真实网络……",
+    "genericError": "出了点问题，请再试一次。",
+    "sourceLabel": "来源：{source}",
+    "researchNotesLabel": "值得知道的一点",
+    "mockedNote": "这份说明是本地生成的——这次没有进行真实的网络搜索。",
+    "searchAgain": "再搜一次"
+  },
   "personalEconomy": {
     "title": "个人经济体",
     "subtitle": "把你的真实数字，当作一个连贯的系统来看。",
@@ -2858,6 +2872,10 @@
     "personalEconomy": {
       "title": "个人经济体",
       "subtitle": "把你的真实数字，当作一个连贯的系统来看"
+    },
+    "dealFinder": {
+      "title": "真实比价",
+      "subtitle": "在真实网络上找到真实价格，交给你来行动"
     }
   },
   "accountDetails": {
