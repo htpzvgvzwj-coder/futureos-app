@@ -2407,6 +2407,11 @@
       "dark": "深色模式",
       "system": "跟随系统"
     },
+    "accessibility": {
+      "title": "无障碍",
+      "description": "把文字和按钮放大，看得更清楚、点得更准。",
+      "simpleMode": "简化模式——更大的文字和按钮"
+    },
     "notifications": {
       "title": "通知设置",
       "description": "选择你希望接收的 FutureOS 通知。",

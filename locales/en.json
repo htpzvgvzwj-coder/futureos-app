@@ -2647,6 +2647,11 @@
       "dark": "Dark Mode",
       "system": "System Default"
     },
+    "accessibility": {
+      "title": "Accessibility",
+      "description": "Make text and buttons bigger and easier to see and tap.",
+      "simpleMode": "Simple Mode - larger text and buttons"
+    },
     "notifications": {
       "title": "Notification Settings",
       "description": "Choose which FutureOS notifications you receive.",

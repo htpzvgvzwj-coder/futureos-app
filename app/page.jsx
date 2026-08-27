@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Accessibility,
   AlertTriangle,
   ArrowLeftRight,
   Award,
@@ -2340,6 +2341,9 @@ const defaultPreferences = {
   customGoals: [],
   futurePlanProducts: [],
   theme: "light",
+  accessibility: {
+    simpleMode: false,
+  },
   notifications: {
     futureRisk: true,
     spending: true,
@@ -3093,11 +3097,11 @@ function ProgressRing({ value, size = 92, stroke = 9, color = "#d71920" }) {
   );
 }
 
-function PhoneShell({ children, activeScreen, setActiveScreen, language, setLanguage, theme, t, hideNav = false }) {
+function PhoneShell({ children, activeScreen, setActiveScreen, language, setLanguage, theme, simpleMode = false, t, hideNav = false }) {
   const navScreen = getNavScreen(activeScreen);
 
   return (
-    <main className={`stage theme-${theme}`}>
+    <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
       <section className={`phone screen-${navScreen}`} aria-label={t("app.prototypeLabel")}>
         <div className="statusBar">
           <span>9:41</span>
@@ -14656,6 +14660,15 @@ function ProfileScreen({
         />
       </SettingsCard>
 
+      <SettingsCard icon={Accessibility} title={t("settings.accessibility.title")} description={t("settings.accessibility.description")}>
+        <ToggleRow
+          icon={Accessibility}
+          label={t("settings.accessibility.simpleMode")}
+          checked={Boolean(preferences.accessibility?.simpleMode)}
+          onChange={() => updateNested("accessibility", "simpleMode", !preferences.accessibility?.simpleMode)}
+        />
+      </SettingsCard>
+
       <SettingsCard icon={Bell} title={t("settings.notifications.title")} description={t("settings.notifications.description")}>
         {notificationOptions.map((option) => (
           <ToggleRow
@@ -16341,6 +16354,7 @@ export default function App() {
       language={language}
       setLanguage={setLanguage}
       theme={effectiveTheme}
+      simpleMode={Boolean(preferences.accessibility?.simpleMode)}
       t={t}
     >
       <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>

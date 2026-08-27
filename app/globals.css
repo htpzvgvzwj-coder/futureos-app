@@ -65,6 +65,16 @@ nextjs-portal {
   box-shadow: var(--shadow);
 }
 
+/* Simple Mode (Settings > Accessibility) - every font-size in this
+   stylesheet is a hardcoded px value (no rem scale to multiply from a
+   single root variable), so `zoom` on the whole phone frame is the one
+   real, working way to make every real screen's text and tap targets
+   genuinely bigger at once, not just a subset a rem-based approach would
+   have reached. */
+.stage.simple-mode .phone {
+  zoom: 1.2;
+}
+
 .phone::before {
   content: "";
   position: absolute;
