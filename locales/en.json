@@ -1732,7 +1732,25 @@
     "endingBalanceLabel": "Ending balance",
     "horizonValue": "after {days} days",
     "keyConsiderationLabel": "Worth doing",
-    "mockedNote": "This explanation was generated locally - the forecast above is still real."
+    "mockedNote": "This explanation was generated locally - the forecast above is still real.",
+    "personalBuffer": {
+      "canCover": "Covering this {gap} gap from your own savings is safe - your personal runway would go from {before} to {after} months.",
+      "cannotSafelyCover": "Covering this {gap} gap from your own savings isn't safe - your personal runway would drop from {before} to {after} months.",
+      "noRealPersonalData": "Enter your real income and expenses in your profile to see whether you could safely cover this from personal savings."
+    },
+    "checkins": {
+      "title": "Forecast accuracy",
+      "accuracySummary": "Off by {amount} on average, across {count} real check-ins.",
+      "entryDetail": "Predicted {predicted}, actual {actual}",
+      "empty": "Log a real cash balance on a real date to start tracking how accurate this forecast actually is.",
+      "dateLabel": "Date",
+      "actualPlaceholder": "Actual cash balance (SGD)",
+      "notePlaceholder": "Note (optional)",
+      "logButton": "Log check-in",
+      "logging": "Logging...",
+      "outsideWindow": "That date falls outside your current {days}-day forecast - run a fresh forecast first.",
+      "genericError": "Something went wrong. Please try again."
+    }
   },
   "activityCheck": {
     "entryTitle": "Activity Check",

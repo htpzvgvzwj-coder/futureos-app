@@ -790,3 +790,23 @@ create table if not exists sme_cashflow_profiles (
   mocked            boolean not null default false,
   updated_at        timestamptz not null default now()
 );
+
+-- SME Copilot v2: a real check-in loop, same shape as wedding/home/
+-- retirement's savings checkins - the owner logs a real observed cash
+-- balance on a real date, the server looks up what the forecast (saved
+-- at the time) predicted for that same day, and stores both so accuracy
+-- can be tracked over time without recomputing against events that may
+-- have since changed.
+create table if not exists sme_cashflow_checkins (
+  id                bigserial primary key,
+  profile_key       text not null,
+  checkin_date      date not null,
+  forecast_day      integer not null,
+  predicted_balance numeric(12,2) not null,
+  actual_balance    numeric(12,2) not null,
+  note              text,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists sme_cashflow_checkins_profile_idx
+  on sme_cashflow_checkins (profile_key, checkin_date);

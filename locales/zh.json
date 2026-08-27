@@ -1668,7 +1668,25 @@
     "endingBalanceLabel": "期末余额",
     "horizonValue": "{days} 天后",
     "keyConsiderationLabel": "值得做的事",
-    "mockedNote": "这份说明是本地生成的——上面的预测依然是真实计算出来的。"
+    "mockedNote": "这份说明是本地生成的——上面的预测依然是真实计算出来的。",
+    "personalBuffer": {
+      "canCover": "从你自己的储蓄中填补这 {gap} 的缺口是安全的——你的个人资金可支撑月数会从 {before} 个月变为 {after} 个月。",
+      "cannotSafelyCover": "从你自己的储蓄中填补这 {gap} 的缺口并不安全——你的个人资金可支撑月数会从 {before} 个月降到 {after} 个月。",
+      "noRealPersonalData": "在你的个人资料中填写真实收入和支出，才能判断能否安全地用个人储蓄填补这个缺口。"
+    },
+    "checkins": {
+      "title": "预测准确度",
+      "accuracySummary": "基于 {count} 次真实打卡，平均误差 {amount}。",
+      "entryDetail": "预测 {predicted}，实际 {actual}",
+      "empty": "记录一次真实日期的真实现金余额，开始追踪这份预测到底有多准。",
+      "dateLabel": "日期",
+      "actualPlaceholder": "实际现金余额（新元）",
+      "notePlaceholder": "备注（可选）",
+      "logButton": "记录打卡",
+      "logging": "记录中……",
+      "outsideWindow": "这个日期不在你当前 {days} 天预测范围内——请先重新跑一次预测。",
+      "genericError": "出了点问题，请再试一次。"
+    }
   },
   "activityCheck": {
     "entryTitle": "异常检查",

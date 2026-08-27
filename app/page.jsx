@@ -78,6 +78,7 @@ import { computeExpectedValueAtElapsed, computeAccuracyGuarantee, UNDERPERFORMAN
 import { computePeerBenchmark, getTypicalSavingsRatePercent } from "../lib/peer-benchmark.js";
 import { computeShadowAccount } from "../lib/shadow-account-finance.js";
 import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
+import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -11664,7 +11665,7 @@ function FutureComparisonScreen({ t, setActiveScreen, language, profile }) {
 
 // SME Cash Flow Copilot - real day-by-day forecast from the owner's own
 // entered events. See lib/sme-cashflow-finance.js.
-function SmeCashflowScreen({ t, setActiveScreen, language }) {
+function SmeCashflowScreen({ t, setActiveScreen, language, preferences }) {
   const [businessName, setBusinessName] = useState("");
   const [startingCash, setStartingCash] = useState("");
   const [events, setEvents] = useState([{ label: "", amount: "", dayOfMonth: "1" }]);
@@ -11672,26 +11673,70 @@ function SmeCashflowScreen({ t, setActiveScreen, language }) {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [result, setResult] = useState(null);
+  const [checkinAccuracy, setCheckinAccuracy] = useState({ hasCheckins: false, count: 0 });
+  const [checkinDate, setCheckinDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [checkinActual, setCheckinActual] = useState("");
+  const [checkinNote, setCheckinNote] = useState("");
+  const [checkinSubmitting, setCheckinSubmitting] = useState(false);
+  const [checkinError, setCheckinError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadProfile = (onDone) => {
     fetch("/api/sme/cashflow")
       .then((response) => response.json())
       .then((data) => {
-        if (cancelled || !data.profile) return;
+        if (!data.profile) return;
         setBusinessName(data.profile.businessName);
         setStartingCash(String(data.profile.startingCash));
         setEvents(data.profile.events.map((event) => ({ label: event.label, amount: String(event.amount), dayOfMonth: String(event.dayOfMonth) })));
         setResult({ forecast: data.forecast, narrative: data.narrative, keyConsideration: data.keyConsideration, mocked: data.mocked });
+        setCheckinAccuracy(data.checkinAccuracy ?? { hasCheckins: false, count: 0 });
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .finally(() => onDone?.());
+  };
+
+  useEffect(() => {
+    loadProfile(() => setLoading(false));
   }, []);
+
+  const submitCheckin = async () => {
+    if (!checkinDate || checkinActual === "") return;
+    setCheckinSubmitting(true);
+    setCheckinError("");
+    try {
+      const response = await fetch("/api/sme/cashflow/checkins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkinDate, actualBalance: numberValue(checkinActual, 0), note: checkinNote.trim() || undefined }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setCheckinError(
+          data.error === "outside_forecast_window"
+            ? t("smeCashflow.checkins.outsideWindow", { days: data.detail?.horizonDays ?? 30 })
+            : t("smeCashflow.checkins.genericError")
+        );
+        return;
+      }
+      setCheckinActual("");
+      setCheckinNote("");
+      loadProfile();
+    } catch {
+      setCheckinError(t("smeCashflow.checkins.genericError"));
+    } finally {
+      setCheckinSubmitting(false);
+    }
+  };
+
+  const personalProfile = getUserProfile(preferences);
+  const personalBufferImpact =
+    result?.forecast?.hasGap && Math.min(0, result.forecast.minBalance) < 0
+      ? computePersonalBufferImpact({
+          gapAmount: Math.abs(Math.min(0, result.forecast.minBalance)),
+          personalCurrentSavings: numberValue(personalProfile.currentSavings, 0),
+          personalMonthlyExpenses: numberValue(personalProfile.monthlyExpenses, 0),
+        })
+      : null;
 
   const updateEvent = (index, field, value) => {
     setEvents((current) => current.map((event, i) => (i === index ? { ...event, [field]: value } : event)));
@@ -11770,6 +11815,87 @@ function SmeCashflowScreen({ t, setActiveScreen, language }) {
                 <p>{result.keyConsideration}</p>
               </div>
               {result.mocked ? <p className="weddingCarouselHint">{t("smeCashflow.mockedNote")}</p> : null}
+
+              {personalBufferImpact ? (
+                <section className={personalBufferImpact.canSafelyCover ? "insightCard" : "adviceOnlyPanel"}>
+                  {personalBufferImpact.canSafelyCover ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+                  <p>
+                    {t(
+                      personalBufferImpact.canSafelyCover
+                        ? "smeCashflow.personalBuffer.canCover"
+                        : "smeCashflow.personalBuffer.cannotSafelyCover",
+                      {
+                        gap: formatSgd(personalBufferImpact.gapAmount),
+                        before: personalBufferImpact.monthsCoveredBefore,
+                        after: personalBufferImpact.monthsCoveredAfter,
+                      }
+                    )}
+                  </p>
+                </section>
+              ) : result.forecast.hasGap ? (
+                <p className="weddingCarouselHint">{t("smeCashflow.personalBuffer.noRealPersonalData")}</p>
+              ) : null}
+
+              <section className="financialStrategyPanel">
+                <span className="sectionLabel">{t("smeCashflow.checkins.title")}</span>
+                {checkinAccuracy.hasCheckins ? (
+                  <>
+                    <p className="weddingCarouselHint">{t("smeCashflow.checkins.accuracySummary", { amount: formatSgd(checkinAccuracy.avgAbsVariance), count: checkinAccuracy.count })}</p>
+                    <div className="strategyList">
+                      {checkinAccuracy.entries.map((entry) => (
+                        <article className="strategyItem" key={entry.id}>
+                          <div>
+                            <strong>{entry.checkinDate}</strong>
+                            <small>{t("smeCashflow.checkins.entryDetail", { predicted: formatSgd(entry.predictedBalance), actual: formatSgd(entry.actualBalance) })}</small>
+                          </div>
+                          <b className={entry.variance >= 0 ? "statePill state-healthy" : "statePill state-tight"}>
+                            {entry.variance >= 0 ? "+" : ""}
+                            {formatSgd(entry.variance)}
+                          </b>
+                        </article>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p>{t("smeCashflow.checkins.empty")}</p>
+                )}
+                <div className="decisionButtonRow">
+                  <input
+                    type="date"
+                    className="aiTextInput"
+                    style={{ flex: 1 }}
+                    value={checkinDate}
+                    onChange={(event) => setCheckinDate(event.target.value)}
+                    aria-label={t("smeCashflow.checkins.dateLabel")}
+                  />
+                  <input
+                    type="number"
+                    className="aiTextInput"
+                    style={{ flex: 1 }}
+                    value={checkinActual}
+                    onChange={(event) => setCheckinActual(event.target.value)}
+                    placeholder={t("smeCashflow.checkins.actualPlaceholder")}
+                    aria-label={t("smeCashflow.checkins.actualPlaceholder")}
+                  />
+                </div>
+                <input
+                  type="text"
+                  className="aiTextInput"
+                  value={checkinNote}
+                  onChange={(event) => setCheckinNote(event.target.value)}
+                  placeholder={t("smeCashflow.checkins.notePlaceholder")}
+                  aria-label={t("smeCashflow.checkins.notePlaceholder")}
+                />
+                {checkinError ? (
+                  <section className="adviceOnlyPanel">
+                    <AlertTriangle size={18} />
+                    <p>{checkinError}</p>
+                  </section>
+                ) : null}
+                <button type="button" className="secondaryButton" disabled={checkinSubmitting || checkinActual === ""} onClick={submitCheckin}>
+                  {checkinSubmitting ? t("smeCashflow.checkins.logging") : t("smeCashflow.checkins.logButton")}
+                </button>
+              </section>
             </>
           ) : null}
 
@@ -15386,7 +15512,7 @@ export default function App() {
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
-    [screens.SME_CASHFLOW]: <SmeCashflowScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.SME_CASHFLOW]: <SmeCashflowScreen t={t} setActiveScreen={setActiveScreen} language={language} preferences={preferences} />,
     [screens.ACTIVITY_CHECK]: (
       <ActivityCheckScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

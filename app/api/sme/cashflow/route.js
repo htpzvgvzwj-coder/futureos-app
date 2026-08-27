@@ -2,9 +2,9 @@ import { runToolTurnWithFallback } from "../../../../lib/ai-fallback.js";
 import { buildCashflowSystemPrompt } from "../../../../lib/sme-cashflow-prompts.js";
 import { NARRATE_CASHFLOW_TOOL } from "../../../../lib/sme-cashflow-tools.js";
 import { smeCashflowRequestSchema, narrateCashflowSchema } from "../../../../lib/sme-cashflow-validation.js";
-import { computeCashFlowForecast } from "../../../../lib/sme-cashflow-finance.js";
+import { computeCashFlowForecast, computeCheckinAccuracy } from "../../../../lib/sme-cashflow-finance.js";
 import { buildMockCashflowNarration } from "../../../../lib/sme-cashflow-mock.js";
-import { getProfile, saveProfile } from "../../../../lib/sme-cashflow-store.js";
+import { getProfile, saveProfile, getCheckins } from "../../../../lib/sme-cashflow-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
@@ -26,6 +26,7 @@ export async function GET(request) {
     events: profile.events,
     horizonDays: 30,
   });
+  const checkins = await getCheckins(userId);
 
   return Response.json({
     profile: {
@@ -38,6 +39,7 @@ export async function GET(request) {
     narrative: profile.narrative,
     keyConsideration: profile.keyConsideration,
     mocked: profile.mocked,
+    checkinAccuracy: computeCheckinAccuracy(checkins),
   });
 }
 
