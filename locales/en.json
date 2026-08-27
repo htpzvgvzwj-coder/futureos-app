@@ -1732,6 +1732,25 @@
     "keyConsiderationLabel": "Worth doing",
     "mockedNote": "This explanation was generated locally - the forecast above is still real."
   },
+  "activityCheck": {
+    "entryTitle": "Activity Check",
+    "entryBody": "Is this unusual for you? A real check against your own history, before you confirm.",
+    "title": "Activity Check",
+    "subtitle": "Checked against your own real history - never a guess.",
+    "descriptionLabel": "What are you about to do?",
+    "descriptionPlaceholder": "e.g. Transfer $8,000 to a new payee",
+    "amountLabel": "Amount (SGD)",
+    "checkButton": "Check against my history",
+    "checking": "Checking...",
+    "genericError": "Something went wrong. Please try again.",
+    "checkAnother": "Check another",
+    "thisAmountLabel": "This amount",
+    "largestBeforeLabel": "Largest before",
+    "basedOn": "based on {count} real confirmed action(s)",
+    "noHistory": "You don't have any real confirmed history yet, so there's nothing to compare this against.",
+    "keyConsiderationLabel": "Worth knowing",
+    "mockedNote": "This explanation was generated locally - the check above is still real."
+  },
   "decodeDocument": {
     "entryTitle": "Decode a Document",
     "entryBody": "Never sign something you don't actually understand - a loan agreement, insurance PDS, or tenancy agreement, explained in plain language.",

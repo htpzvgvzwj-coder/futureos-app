@@ -1672,6 +1672,25 @@
     "keyConsiderationLabel": "值得做的事",
     "mockedNote": "这份说明是本地生成的——上面的预测依然是真实计算出来的。"
   },
+  "activityCheck": {
+    "entryTitle": "异常检查",
+    "entryBody": "这对你来说正常吗？确认之前，先对照你自己的真实记录查一查。",
+    "title": "异常检查",
+    "subtitle": "对照你自己的真实记录——从不猜测。",
+    "descriptionLabel": "你打算做什么？",
+    "descriptionPlaceholder": "例如：给一个新收款人转 8000 新元",
+    "amountLabel": "金额（新元）",
+    "checkButton": "对照我的记录查一查",
+    "checking": "检查中……",
+    "genericError": "出了点问题，请再试一次。",
+    "checkAnother": "再查一次",
+    "thisAmountLabel": "这笔金额",
+    "largestBeforeLabel": "之前最大的一笔",
+    "basedOn": "基于 {count} 笔真实已确认的记录",
+    "noHistory": "你还没有真实的已确认记录，暂时没有可以对照的对象。",
+    "keyConsiderationLabel": "值得知道的一点",
+    "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
+  },
   "investmentPlanner": {
     "title": "投资规划师",
     "subtitle": "投资建议按你实际的购买方式定价——不是宣传册上的数字。",

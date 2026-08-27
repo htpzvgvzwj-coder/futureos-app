@@ -124,6 +124,7 @@ const screens = {
   DECISION_VERDICT: "decisionVerdict",
   FUTURE_COMPARISON: "futureComparison",
   SME_CASHFLOW: "smeCashflow",
+  ACTIVITY_CHECK: "activityCheck",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -4859,6 +4860,17 @@ function ChatToolsModal({ t, setActiveScreen, onClose, openLoops, memories }) {
           <span>
             {t("smeCashflow.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("smeCashflow.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <ChevronRight size={14} />
+          </span>
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.ACTIVITY_CHECK)}>
+          <ShieldCheck size={15} />
+          <span>
+            {t("activityCheck.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("activityCheck.entryBody")}</small>
           </span>
           <span className="weddingEntryTrailing">
             <ChevronRight size={14} />
@@ -11798,6 +11810,121 @@ function SmeCashflowScreen({ t, setActiveScreen, language }) {
   );
 }
 
+// Real "is this unusual for you" check - compared against the customer's
+// own real confirmed history, never a population-level fraud model. See
+// lib/activity-check-finance.js.
+function ActivityCheckScreen({ t, setActiveScreen, language, profile }) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+
+  const submitCheck = async () => {
+    if (!description.trim() || !amount) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/decision/activity-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: description.trim(),
+          amount: numberValue(amount, 0),
+          monthlyIncome: numberValue(profile.monthlyIncome, 7500),
+          language,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(t("activityCheck.genericError"));
+        return;
+      }
+      setResult(data);
+    } catch {
+      setErrorMessage(t("activityCheck.genericError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const checkAnother = () => {
+    setResult(null);
+    setDescription("");
+    setAmount("");
+  };
+
+  return (
+    <Screen>
+      <Header title={t("activityCheck.title")} subtitle={t("activityCheck.subtitle")} />
+      <BackMirrorButton setActiveScreen={setActiveScreen} t={t} />
+
+      {result ? (
+        <>
+          <section className={result.check.unusual ? "adviceOnlyPanel" : "insightCard"}>
+            {result.check.unusual ? <AlertTriangle size={20} /> : <ShieldCheck size={20} />}
+            <p>{result.narrative}</p>
+          </section>
+          {result.check.hasHistory ? (
+            <div className="futureCompareGrid">
+              <div className="futureCompareCard">
+                <span className="sectionLabel">{t("activityCheck.thisAmountLabel")}</span>
+                <strong>{formatSgd(result.check.amount)}</strong>
+              </div>
+              <div className="futureCompareCard">
+                <span className="sectionLabel">{t("activityCheck.largestBeforeLabel")}</span>
+                <strong>{formatSgd(result.check.maxHistoricalAmount)}</strong>
+                <small>{t("activityCheck.basedOn", { count: result.check.historicalActionCount })}</small>
+              </div>
+            </div>
+          ) : (
+            <p className="weddingCarouselHint">{t("activityCheck.noHistory")}</p>
+          )}
+          <div className="proofBlock">
+            <strong>{t("activityCheck.keyConsiderationLabel")}</strong>
+            <p>{result.keyConsideration}</p>
+          </div>
+          {result.mocked ? <p className="weddingCarouselHint">{t("activityCheck.mockedNote")}</p> : null}
+          <button type="button" className="primaryButton" onClick={checkAnother}>
+            {t("activityCheck.checkAnother")}
+            <Zap size={18} />
+          </button>
+        </>
+      ) : (
+        <section className="settingsGroup">
+          <label className="textareaField">
+            <span className="sectionLabel">{t("activityCheck.descriptionLabel")}</span>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder={t("activityCheck.descriptionPlaceholder")}
+            />
+          </label>
+          <span className="sectionLabel">{t("activityCheck.amountLabel")}</span>
+          <input
+            type="number"
+            min="0"
+            className="aiTextInput"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            aria-label={t("activityCheck.amountLabel")}
+          />
+          {errorMessage ? (
+            <section className="adviceOnlyPanel">
+              <AlertTriangle size={18} />
+              <p>{errorMessage}</p>
+            </section>
+          ) : null}
+          <button type="button" className="primaryButton" disabled={submitting || !description.trim() || !amount} onClick={submitCheck}>
+            {submitting ? t("activityCheck.checking") : t("activityCheck.checkButton")}
+            <ShieldCheck size={18} />
+          </button>
+        </section>
+      )}
+    </Screen>
+  );
+}
+
 const DECODE_SEVERITY_ICONS = { low: Info, medium: AlertTriangle, high: AlertTriangle };
 
 function DecodeDocumentHistoryModal({ entries, loading, onClose, t }) {
@@ -14408,6 +14535,9 @@ export default function App() {
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
     [screens.SME_CASHFLOW]: <SmeCashflowScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.ACTIVITY_CHECK]: (
+      <ActivityCheckScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
+    ),
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
