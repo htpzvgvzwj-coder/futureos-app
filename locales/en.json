@@ -63,6 +63,10 @@
     "familyCfo": {
       "title": "Family CFO",
       "subtitle": "Your family's real financial picture, and shared decisions, in one place"
+    },
+    "goalMarketplace": {
+      "title": "Goal Marketplace",
+      "subtitle": "Every real life goal, its real status, and one tap to act on it"
     }
   },
   "goals": {
@@ -1795,6 +1799,36 @@
     "send": "Send",
     "sendFirst": "Plan this trip",
     "inputLabel": "Describe your trip"
+  },
+  "goalMarketplace": {
+    "title": "Goal Marketplace",
+    "subtitle": "Every real life goal, its real status, and one tap to act on it.",
+    "status": {
+      "confirmed": "Confirmed",
+      "inProgress": "In progress",
+      "explore": "Not started"
+    },
+    "action": {
+      "view": "View plan",
+      "continue": "Continue planning",
+      "explore": "Explore"
+    },
+    "select": "Add to my goals",
+    "deselect": "Remove from my goals",
+    "detail": {
+      "confirmedSavings": "Confirmed - {amount}/month",
+      "confirmedLoan": "Confirmed - {amount}/month",
+      "confirmedInvestments": "{count} real confirmed investment(s)",
+      "selectedNotStarted": "On your radar - no real plan started yet",
+      "notSelected": "Not one of your selected goals yet",
+      "loanExplore": "A personal or renovation loan, sized to what you're taking on",
+      "healthScore": "Real health score: {score}/100",
+      "businessConfirmed": "Real cash flow forecast on file",
+      "businessExplore": "A real 30-day cash flow forecast for a side business or small business"
+    },
+    "customLabel": "Your custom goals",
+    "noCustomGoals": "No custom goals yet.",
+    "addCustomGoal": "Add a custom goal"
   },
   "familyCfo": {
     "title": "Family CFO",

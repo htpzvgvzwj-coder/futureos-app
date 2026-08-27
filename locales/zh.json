@@ -1707,6 +1707,36 @@
     "keyConsiderationLabel": "值得知道的一点",
     "mockedNote": "这份说明是本地生成的——上面的检查依然是真实的。"
   },
+  "goalMarketplace": {
+    "title": "人生目标市集",
+    "subtitle": "每一个真实的人生目标、它的真实进度，一键就能行动。",
+    "status": {
+      "confirmed": "已确认",
+      "inProgress": "进行中",
+      "explore": "尚未开始"
+    },
+    "action": {
+      "view": "查看计划",
+      "continue": "继续规划",
+      "explore": "去探索"
+    },
+    "select": "加入我的目标",
+    "deselect": "从我的目标中移除",
+    "detail": {
+      "confirmedSavings": "已确认——每月 {amount}",
+      "confirmedLoan": "已确认——每月 {amount}",
+      "confirmedInvestments": "{count} 项真实已确认投资",
+      "selectedNotStarted": "已列入你的目标——还没有真实计划",
+      "notSelected": "还不是你选择的目标之一",
+      "loanExplore": "个人贷款或装修贷款，按你的真实需求计算",
+      "healthScore": "真实健康评分：{score}/100",
+      "businessConfirmed": "已有真实现金流预测记录",
+      "businessExplore": "为副业或小生意做一份真实的30天现金流预测"
+    },
+    "customLabel": "你的自定义目标",
+    "noCustomGoals": "还没有自定义目标。",
+    "addCustomGoal": "添加自定义目标"
+  },
   "familyCfo": {
     "title": "家庭财务中心",
     "subtitle": "你家庭的真实财务全貌，以及共同决策，都在这一个地方。",
@@ -2801,6 +2831,10 @@
     "familyCfo": {
       "title": "家庭财务中心",
       "subtitle": "你家庭的真实财务全貌，以及共同决策，都在这一个地方"
+    },
+    "goalMarketplace": {
+      "title": "人生目标市集",
+      "subtitle": "每一个真实的人生目标、它的真实进度，一键就能行动"
     }
   },
   "accountDetails": {

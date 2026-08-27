@@ -58,6 +58,7 @@ import {
   ThumbsDown,
   ThumbsUp,
   Trash2,
+  Store,
   UserRound,
   Users,
   Utensils,
@@ -132,6 +133,7 @@ const screens = {
   FAMILY_TRAVEL: "familyTravel",
   SHADOW_ACCOUNT: "shadowAccount",
   FAMILY_CFO: "familyCfo",
+  GOAL_MARKETPLACE: "goalMarketplace",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CROSS_BANK_DATA: "crossBankData",
@@ -443,6 +445,13 @@ const futureSystems = [
     subtitleKey: "futureSystems.familyCfo.subtitle",
     icon: Users,
     screen: screens.FAMILY_CFO,
+  },
+  {
+    id: "goalMarketplace",
+    titleKey: "futureSystems.goalMarketplace.title",
+    subtitleKey: "futureSystems.goalMarketplace.subtitle",
+    icon: Store,
+    screen: screens.GOAL_MARKETPLACE,
   },
 ];
 
@@ -2617,6 +2626,19 @@ function mergeDefaults(defaults, stored) {
     }),
     {}
   );
+}
+
+// Standalone (was previously a ProfileScreen-local closure) so Goal
+// Marketplace can toggle the same real profile.goals signal the settings
+// checkbox grid always has, instead of duplicating the merge logic.
+function toggleProfileGoal(setPreferences, goal) {
+  setPreferences((current) => {
+    // Raw stored profile, not getUserProfile(current) - see updateProfileField.
+    const currentProfile = mergeDefaults(defaultProfile, current.profile);
+    const nextGoals = { ...currentProfile.goals, [goal]: !currentProfile.goals?.[goal] };
+    if (!Object.values(nextGoals).some(Boolean)) nextGoals[goal] = true;
+    return { ...current, profile: { ...currentProfile, goals: nextGoals } };
+  });
 }
 
 function applyProfileMigration(preferences, storedPreferences) {
@@ -12710,6 +12732,239 @@ function FamilyCfoScreen({ t, setActiveScreen }) {
   );
 }
 
+// Goal Marketplace - the real fix for a gap this session's own review
+// surfaced: selecting a goal (profileGoalOptions' checkbox grid, buried in
+// Profile settings) only ever flipped a silent profile.goals[id] flag - it
+// never took the customer anywhere. Separately, the only real "goal ->
+// planner" doorway (DEDICATED_GOAL_SCREENS) lived as a small icon row
+// inside Mirror's tools panel, with no sense of real status. This screen
+// unifies both into one real, status-aware experience: the same real
+// confirmed-plan data Strategic Balance/Family CFO already read
+// (lib/strategic-balance-context.js's getStrategicBalanceSnapshot, via the
+// existing /api/strategic-balance/snapshot route - no new backend), plus
+// the real SME Cash Flow Copilot profile-existence check, assembled into
+// one browse-and-act view instead of a settings toggle disconnected from
+// a separate tools list.
+const GOAL_MARKETPLACE_ICONS = {
+  wedding: HeartHandshake,
+  home: Building2,
+  loan: CircleDollarSign,
+  retirement: Landmark,
+  emergency: LockKeyhole,
+  investment: LineChart,
+  family: ShieldCheck,
+  business: BriefcaseBusiness,
+  custom: Target,
+};
+
+function GoalMarketplaceCard({ id, t, status, onExplore, onToggle, canToggle, selected }) {
+  const Icon = GOAL_MARKETPLACE_ICONS[id];
+  return (
+    <article className="strategyItem" style={{ display: "block" }}>
+      <div className="weddingStatChips" style={{ marginBottom: "4px" }}>
+        <span className="iconBubble">
+          <Icon size={16} />
+        </span>
+        <strong>{t(`simulator.goals.${id}`)}</strong>
+        <b className={`statePill state-${status.band}`}>{t(`goalMarketplace.status.${status.kind}`)}</b>
+      </div>
+      <small>{status.detail}</small>
+      <div className="decisionButtonRow" style={{ marginTop: "8px" }}>
+        <button type="button" className="primaryButton" style={{ flex: 1 }} onClick={onExplore}>
+          {t(`goalMarketplace.action.${status.kind === "confirmed" ? "view" : status.kind === "inProgress" ? "continue" : "explore"}`)}
+        </button>
+        {canToggle ? (
+          <button type="button" className="secondaryButton" onClick={onToggle}>
+            {selected ? t("goalMarketplace.deselect") : t("goalMarketplace.select")}
+          </button>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function GoalMarketplaceScreen({ t, setActiveScreen, preferences, setPreferences }) {
+  const [snapshot, setSnapshot] = useState(null);
+  const [smeProfileExists, setSmeProfileExists] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const profile = getUserProfile(preferences);
+  const customGoals = getCustomGoals(preferences);
+  const healthScores = getHealthScores(profile);
+  const selectedGoalIds = getProfileGoalIds(profile, customGoals);
+
+  useEffect(() => {
+    let cancelled = false;
+    const monthlyIncome = numberValue(profile.monthlyIncome, 7500);
+    const monthlyExpenses = numberValue(profile.monthlyExpenses, 3500);
+    Promise.all([
+      fetch(`/api/strategic-balance/snapshot?${new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) })}`).then((response) =>
+        response.json()
+      ),
+      fetch("/api/sme/cashflow").then((response) => response.json()),
+    ])
+      .then(([snapshotData, smeData]) => {
+        if (cancelled) return;
+        setSnapshot(snapshotData);
+        setSmeProfileExists(Boolean(smeData.profile));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading || !snapshot) {
+    return (
+      <Screen>
+        <Header title={t("goalMarketplace.title")} subtitle={t("goalMarketplace.subtitle")} />
+        <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+        <p>{t("loading.detail")}</p>
+      </Screen>
+    );
+  }
+
+  const weddingSavings = snapshot.savings.find((plan) => plan.domain === "wedding");
+  const homeSavings = snapshot.savings.find((plan) => plan.domain === "home");
+  const homeLoan = snapshot.loans.find((loan) => loan.purpose === "home");
+  const retirementSavings = snapshot.savings.find((plan) => plan.domain === "retirement");
+  const personalLoan = snapshot.loans.find((loan) => loan.purpose === "renovation" || loan.purpose === "personal");
+  const emergencyScore = healthScores.find((score) => score.id === "emergency")?.value ?? 50;
+  const insuranceScore = healthScores.find((score) => score.id === "insurance")?.value ?? 50;
+
+  const cards = [
+    {
+      id: "wedding",
+      status: weddingSavings
+        ? { kind: "confirmed", band: "healthy", detail: t("goalMarketplace.detail.confirmedSavings", { amount: formatSgd(weddingSavings.monthlyContribution) }) }
+        : selectedGoalIds.includes("wedding")
+          ? { kind: "inProgress", band: "tight", detail: t("goalMarketplace.detail.selectedNotStarted") }
+          : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.notSelected") },
+      screen: screens.NEED_WEDDING,
+      canToggle: true,
+      selected: selectedGoalIds.includes("wedding"),
+    },
+    {
+      id: "home",
+      status:
+        homeSavings || homeLoan
+          ? {
+              kind: "confirmed",
+              band: "healthy",
+              detail: homeLoan
+                ? t("goalMarketplace.detail.confirmedLoan", { amount: formatSgd(homeLoan.monthlyInstallment) })
+                : t("goalMarketplace.detail.confirmedSavings", { amount: formatSgd(homeSavings.monthlyContribution) }),
+            }
+          : selectedGoalIds.includes("home")
+            ? { kind: "inProgress", band: "tight", detail: t("goalMarketplace.detail.selectedNotStarted") }
+            : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.notSelected") },
+      screen: screens.NEED_HOME,
+      canToggle: true,
+      selected: selectedGoalIds.includes("home"),
+    },
+    {
+      id: "loan",
+      status: personalLoan
+        ? { kind: "confirmed", band: "healthy", detail: t("goalMarketplace.detail.confirmedLoan", { amount: formatSgd(personalLoan.monthlyInstallment) }) }
+        : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.loanExplore") },
+      screen: screens.NEED_LOAN,
+      canToggle: false,
+    },
+    {
+      id: "retirement",
+      status: retirementSavings
+        ? { kind: "confirmed", band: "healthy", detail: t("goalMarketplace.detail.confirmedSavings", { amount: formatSgd(retirementSavings.monthlyContribution) }) }
+        : selectedGoalIds.includes("retirement")
+          ? { kind: "inProgress", band: "tight", detail: t("goalMarketplace.detail.selectedNotStarted") }
+          : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.notSelected") },
+      screen: screens.NEED_RETIREMENT,
+      canToggle: true,
+      selected: selectedGoalIds.includes("retirement"),
+    },
+    {
+      id: "investment",
+      status: snapshot.investments.length
+        ? { kind: "confirmed", band: "healthy", detail: t("goalMarketplace.detail.confirmedInvestments", { count: snapshot.investments.length }) }
+        : selectedGoalIds.includes("investment")
+          ? { kind: "inProgress", band: "tight", detail: t("goalMarketplace.detail.selectedNotStarted") }
+          : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.notSelected") },
+      screen: screens.NEED_INVESTMENT,
+      canToggle: true,
+      selected: selectedGoalIds.includes("investment"),
+    },
+    {
+      id: "emergency",
+      status: { kind: emergencyScore >= 70 ? "confirmed" : "inProgress", band: scoreBand(emergencyScore), detail: t("goalMarketplace.detail.healthScore", { score: emergencyScore }) },
+      screen: screens.NEED_EMERGENCY,
+      canToggle: false,
+    },
+    {
+      id: "family",
+      status: { kind: insuranceScore >= 70 ? "confirmed" : "inProgress", band: scoreBand(insuranceScore), detail: t("goalMarketplace.detail.healthScore", { score: insuranceScore }) },
+      screen: screens.NEED_INSURANCE,
+      canToggle: true,
+      selected: selectedGoalIds.includes("family"),
+    },
+    {
+      id: "business",
+      status: smeProfileExists
+        ? { kind: "confirmed", band: "healthy", detail: t("goalMarketplace.detail.businessConfirmed") }
+        : selectedGoalIds.includes("business")
+          ? { kind: "inProgress", band: "tight", detail: t("goalMarketplace.detail.selectedNotStarted") }
+          : { kind: "explore", band: "notPlanned", detail: t("goalMarketplace.detail.businessExplore") },
+      screen: screens.SME_CASHFLOW,
+      canToggle: true,
+      selected: selectedGoalIds.includes("business"),
+    },
+  ];
+
+  return (
+    <Screen>
+      <Header title={t("goalMarketplace.title")} subtitle={t("goalMarketplace.subtitle")} />
+      <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <div className="strategyList">
+        {cards.map((card) => (
+          <GoalMarketplaceCard
+            key={card.id}
+            id={card.id}
+            t={t}
+            status={card.status}
+            canToggle={card.canToggle}
+            selected={card.selected}
+            onExplore={() => setActiveScreen(card.screen)}
+            onToggle={() => toggleProfileGoal(setPreferences, card.id)}
+          />
+        ))}
+      </div>
+
+      <section className="financialStrategyPanel">
+        <span className="sectionLabel">{t("goalMarketplace.customLabel")}</span>
+        <div className="strategyList">
+          {customGoals.length ? (
+            customGoals.map((goal, index) => (
+              <article className="strategyItem" key={index}>
+                <div>
+                  <strong>{goal.name}</strong>
+                  <small>{goal.monthlyContribution ? t("goalMarketplace.detail.confirmedSavings", { amount: formatSgd(goal.monthlyContribution) }) : t("goalMarketplace.detail.selectedNotStarted")}</small>
+                </div>
+              </article>
+            ))
+          ) : (
+            <p>{t("goalMarketplace.noCustomGoals")}</p>
+          )}
+        </div>
+        <button type="button" className="secondaryButton" onClick={() => setActiveScreen(screens.NEED_OTHER)}>
+          {t("goalMarketplace.addCustomGoal")}
+        </button>
+      </section>
+    </Screen>
+  );
+}
+
 // Family Travel - mirrors WeddingPlanCards' shape (same .weddingPlanCarousel*
 // CSS, generic enough to reuse), adapted for travel's real fields
 // (destination/traveler_count/trip_length_days instead of venue/
@@ -13756,16 +14011,6 @@ function ProfileScreen({
     }));
   }
 
-  function toggleProfileGoal(goal) {
-    setPreferences((current) => {
-      // Raw stored profile, not getUserProfile(current) - see updateProfileField.
-      const currentProfile = mergeDefaults(defaultProfile, current.profile);
-      const nextGoals = { ...currentProfile.goals, [goal]: !currentProfile.goals?.[goal] };
-      if (!Object.values(nextGoals).some(Boolean)) nextGoals[goal] = true;
-      return { ...current, profile: { ...currentProfile, goals: nextGoals } };
-    });
-  }
-
   function updateNested(section, key, value) {
     setPreferences((current) => ({
       ...current,
@@ -13859,7 +14104,7 @@ function ProfileScreen({
                 type="button"
                 className={profile.goals?.[id] ? "checkOption selected" : "checkOption"}
                 key={id}
-                onClick={() => toggleProfileGoal(id)}
+                onClick={() => toggleProfileGoal(setPreferences, id)}
               >
                 <Icon size={15} />
                 <span>{t(labelKey)}</span>
@@ -15519,6 +15764,7 @@ export default function App() {
     [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
+    [screens.GOAL_MARKETPLACE]: <GoalMarketplaceScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} setPreferences={setPreferences} />,
     [screens.MIRROR]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
