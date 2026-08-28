@@ -75,7 +75,7 @@ import {
 import { computeHomeFinancials } from "../lib/home-finance.js";
 import { recomputeVenueForGuestCount } from "../lib/wedding-finance.js";
 import { computeRetirementFinancials } from "../lib/retirement-finance.js";
-import { computeAllLoanArchetypes, applyLoanModifiers, LOAN_ARCHETYPE_KEYS, LOAN_MODIFIER_KEYS } from "../lib/loan-finance.js";
+import { computeAllLoanArchetypes, applyLoanModifiers, computeLoanAffordabilityPreview, LOAN_ARCHETYPE_KEYS, LOAN_MODIFIER_KEYS } from "../lib/loan-finance.js";
 import { projectPurchaseMode, scoreInvestmentCandidate } from "../lib/investment-finance.js";
 import { RISK_BANDS, HOLDINGS_CATEGORIES, PURCHASE_MODES, INVESTMENT_CATALOG } from "../lib/investment-catalog.js";
 import { computeUtilization } from "../lib/strategic-balance-finance.js";
@@ -10758,6 +10758,18 @@ function LoanPlannerContent({
         setPrincipalBasis(contextJson.price);
         setPropertyType(contextJson.propertyType);
         setOtherGoalsMonthlyOutflow(contextJson.otherGoalsMonthlyOutflow);
+      } else {
+        // renovation/personal have no principal to pre-fill (genuinely
+        // unknown - only the customer knows how much they need), but real
+        // cross-goal commitments ARE known, so fetch them early to ground
+        // the affordability preview shown before the amount ask, instead
+        // of leaving that ask completely blank.
+        const contextResponse = await fetch(`/api/loan/sizing-context?purpose=${purpose}`);
+        if (cancelled) return;
+        if (contextResponse.ok) {
+          const contextJson = await contextResponse.json();
+          setOtherGoalsMonthlyOutflow(contextJson.otherGoalsMonthlyOutflow ?? 0);
+        }
       }
 
       setLoading(false);
@@ -11014,16 +11026,42 @@ function LoanPlannerContent({
           />
         </>
       ) : (
-        <AiTextInputCard
-          t={t}
-          onSubmit={submitSizing}
-          submitting={submitting}
-          placeholder={t(`loanPlanner.sizingPlaceholders.${purpose}`)}
-          submitLabelKey="weddingPlanner.sendFirst"
-          labelKey="loanPlanner.sizingInputLabel"
-        />
+        <>
+          <LoanAffordabilityPreview
+            purpose={purpose}
+            monthlyIncome={numberValue(profile.monthlyIncome, 7500)}
+            otherGoalsMonthlyOutflow={otherGoalsMonthlyOutflow}
+            t={t}
+          />
+          <AiTextInputCard
+            t={t}
+            onSubmit={submitSizing}
+            submitting={submitting}
+            placeholder={t(`loanPlanner.sizingPlaceholders.${purpose}`)}
+            submitLabelKey="weddingPlanner.sendFirst"
+            labelKey="loanPlanner.sizingInputLabel"
+          />
+        </>
       )}
     </Screen>
+  );
+}
+
+function LoanAffordabilityPreview({ purpose, monthlyIncome, otherGoalsMonthlyOutflow, t }) {
+  const preview = computeLoanAffordabilityPreview({ purposeKey: purpose, monthlyIncome, otherGoalsMonthlyOutflow });
+  return (
+    <section className="trustNote compactTrustNote">
+      <Info size={17} />
+      <p>
+        {preview.maxLoanAmount > 0
+          ? t("loanPlanner.affordabilityPreview.body", {
+              amount: formatSgd(preview.maxLoanAmount),
+              years: preview.tenureYears,
+              monthly: formatSgd(preview.monthlyCeiling),
+            })
+          : t("loanPlanner.affordabilityPreview.noRoom")}
+      </p>
+    </section>
   );
 }
 

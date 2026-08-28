@@ -1425,6 +1425,10 @@
       "renovation": "e.g. Renovating a 4-room resale flat, full reno including kitchen and bathrooms",
       "personal": "e.g. I need about SGD 15,000 to consolidate some credit card debt"
     },
+    "affordabilityPreview": {
+      "body": "Based on your real income and already-confirmed commitments, you could realistically service up to about {amount} over {years} years (about {monthly}/month) - use this as a guide for the amount you tell us below.",
+      "noRoom": "Based on your real income and already-confirmed commitments, you don't have monthly room to service a new loan right now - tell us your need below and we'll show you exactly where that stands."
+    },
     "estimatedAmount": "Estimated Amount",
     "selectThisAmount": "Select This Amount",
     "selected": "Selected",
