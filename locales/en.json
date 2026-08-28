@@ -2031,6 +2031,13 @@
     "success": "Investment pick confirmed.",
     "thinking": "Thinking...",
     "availableCashflowNote": "After your other confirmed goals, you have about {amount}/month available to invest.",
+    "readiness": {
+      "readyToInvest": "Based on your real numbers, this looks like a reasonable time to invest - you have a real emergency buffer and about {amount}/month real spare cashflow.",
+      "buildBufferFirst": "Based on your real numbers, building your emergency fund up first is worth prioritising over investing right now.",
+      "payDownDebtFirst": "You have a real {debt} credit card balance outstanding - paying that down first usually beats investing, since its interest rate is almost certainly higher than real market returns.",
+      "noRoomYet": "Your real income and expenses don't leave monthly room to invest right now - that's worth knowing before picking anything.",
+      "emergencyFundStatus": "Real emergency fund: {months} of {target} months covered."
+    },
     "riskLabel": "Risk Preference",
     "riskOptions": {
       "conservative": { "label": "Conservative", "description": "Lower expected growth, lower volatility - capital preservation first." },

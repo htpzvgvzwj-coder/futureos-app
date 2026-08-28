@@ -1921,6 +1921,13 @@
     "success": "投资选择已确认。",
     "thinking": "思考中...",
     "availableCashflowNote": "在扣除你已确认的其他目标后，你每月大约还有 {amount} 可用于投资。",
+    "readiness": {
+      "readyToInvest": "根据你的真实数字，现在投资是合理的时机——你有真实的应急储备，每月大约还有 {amount} 真实的余力。",
+      "buildBufferFirst": "根据你的真实数字，现在更值得优先把应急资金补足，而不是先投资。",
+      "payDownDebtFirst": "你有 {debt} 真实的信用卡欠款——通常先还清这笔钱比投资更划算，因为它的利率几乎肯定比真实市场回报更高。",
+      "noRoomYet": "按你真实的收入和支出，目前每月没有余力投资——这一点值得在选任何产品之前先知道。",
+      "emergencyFundStatus": "真实应急资金：已覆盖 {target} 个月中的 {months} 个月。"
+    },
     "riskLabel": "风险偏好",
     "riskOptions": {
       "conservative": { "label": "保守型", "description": "预期增长较低，波动也较低——优先保本。" },

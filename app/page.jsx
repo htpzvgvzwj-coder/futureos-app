@@ -87,6 +87,7 @@ import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { computeSmoothedExpenses } from "../lib/expense-finance.js";
 import { computeHomeBudgetRange, computeDownPaymentReadiness } from "../lib/home-draft-finance.js";
+import { computeInvestmentReadiness } from "../lib/investment-readiness-finance.js";
 import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -11262,6 +11263,24 @@ function AccuracyGuaranteeExplorer({ pick, t }) {
   );
 }
 
+// The real gate before any product is shown - per the user's own spec:
+// "don't show investment products first, first judge whether this money
+// is suitable to invest right now." Never blocks the form below (the
+// customer still decides), just tells them the real answer to the actual
+// question they have before asking them to configure anything.
+function InvestmentReadinessPanel({ readiness, t }) {
+  const isReady = readiness.readiness === "readyToInvest";
+  return (
+    <section className={isReady ? "insightCard" : "adviceOnlyPanel"}>
+      {isReady ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+      <p>{t(`investmentPlanner.readiness.${readiness.readiness}`, { amount: formatSgd(readiness.availableMonthlyCashflow), debt: formatSgd(readiness.creditCardOutstanding) })}</p>
+      <small className="riskText">
+        {t("investmentPlanner.readiness.emergencyFundStatus", { months: readiness.emergencyFundMonths, target: readiness.emergencyFundTarget })}
+      </small>
+    </section>
+  );
+}
+
 function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, language, profile, setMemoryEvents }) {
   const [stage, setStage] = useState("intake");
   const [loading, setLoading] = useState(true);
@@ -11593,25 +11612,36 @@ function InvestmentPlannerContent({ success, setSuccess, t, setActiveScreen, lan
           </button>
         </>
       ) : (
-        <InvestmentIntakeForm
-          riskPreference={riskPreference}
-          setRiskPreference={setRiskPreference}
-          goalCategory={goalCategory}
-          setGoalCategory={setGoalCategory}
-          horizonYears={horizonYears}
-          setHorizonYears={setHorizonYears}
-          customTargetAmount={customTargetAmount}
-          setCustomTargetAmount={setCustomTargetAmount}
-          holdingsCategories={holdingsCategories}
-          onToggleHolding={toggleHoldingCategory}
-          purchaseMode={purchaseMode}
-          setPurchaseMode={setPurchaseMode}
-          availableMonthlyCashflow={availableMonthlyCashflow}
-          hasRetirementGoal={Boolean(profile.goals?.retirement)}
-          onSubmit={submitIntake}
-          submitting={submitting}
-          t={t}
-        />
+        <>
+          <InvestmentReadinessPanel
+            readiness={computeInvestmentReadiness({
+              currentSavings: numberValue(profile.currentSavings, 0),
+              monthlyExpenses: numberValue(profile.monthlyExpenses, 0),
+              creditCardOutstanding: numberValue(profile.creditCardOutstanding, 0),
+              availableMonthlyCashflow,
+            })}
+            t={t}
+          />
+          <InvestmentIntakeForm
+            riskPreference={riskPreference}
+            setRiskPreference={setRiskPreference}
+            goalCategory={goalCategory}
+            setGoalCategory={setGoalCategory}
+            horizonYears={horizonYears}
+            setHorizonYears={setHorizonYears}
+            customTargetAmount={customTargetAmount}
+            setCustomTargetAmount={setCustomTargetAmount}
+            holdingsCategories={holdingsCategories}
+            onToggleHolding={toggleHoldingCategory}
+            purchaseMode={purchaseMode}
+            setPurchaseMode={setPurchaseMode}
+            availableMonthlyCashflow={availableMonthlyCashflow}
+            hasRetirementGoal={Boolean(profile.goals?.retirement)}
+            onSubmit={submitIntake}
+            submitting={submitting}
+            t={t}
+          />
+        </>
       )}
     </Screen>
   );
