@@ -2198,6 +2198,28 @@
     "inputPlaceholder": "e.g. I want to travel the world for a few years, then settle into a comfortable life in Singapore",
     "sendFirst": "Get Plans",
     "emptyStateLabel": "Let's plan your retirement",
+    "draft": {
+      "title": "Your real starting point",
+      "projection": "At age {age}, based on your real income and CPF contributions, your projected CPF LIFE Standard Plan payout is about {amount}/month.",
+      "basedOn": "Based on your real age, income, and CPF contribution history - not a guess. Enter your real CPF balances for a more precise number.",
+      "enterRealBalances": "Enter my real CPF balances",
+      "noProfileLabel": "Let's start with your real numbers",
+      "noProfileBody": "Enter your real age and income in your profile first, so FutureOS can show a real projected CPF LIFE payout instead of asking you to guess.",
+      "ageQuestion": "When are you looking to retire?",
+      "age": {
+        "age60": "Age 60",
+        "age62": "Age 62",
+        "age65": "Age 65",
+        "age68": "Age 68"
+      },
+      "lifestyleQuestion": "What kind of retirement lifestyle?",
+      "lifestyle": {
+        "modest": "Modest, just the basics",
+        "comfortable": "Comfortable, about like now",
+        "premium": "Premium, travel and indulgences"
+      },
+      "startButton": "Show me real plans"
+    },
     "planComparisonLabel": "Plan Options",
     "targetMonthlyIncome": "Target Monthly Income",
     "genericError": "Something went wrong on our end. Please try again.",

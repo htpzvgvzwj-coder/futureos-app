@@ -2088,6 +2088,28 @@
     "inputPlaceholder": "例如：想先环游世界几年，之后在新加坡过舒适的生活",
     "sendFirst": "获取方案",
     "emptyStateLabel": "开始规划你的退休生活",
+    "draft": {
+      "title": "你的真实起点",
+      "projection": "在 {age} 岁退休，根据你真实的收入和公积金缴纳记录，你预计的 CPF LIFE 标准计划月领取额约为 {amount}。",
+      "basedOn": "基于你真实的年龄、收入和公积金缴纳记录——不是猜的。填写真实公积金余额可获得更精确的数字。",
+      "enterRealBalances": "填写我真实的公积金余额",
+      "noProfileLabel": "先从你的真实数字开始",
+      "noProfileBody": "先在个人资料中填写真实的年龄和收入，FutureOS 才能给出真实的 CPF LIFE 预计领取额，而不是让你自己去猜。",
+      "ageQuestion": "你打算什么时候退休？",
+      "age": {
+        "age60": "60岁",
+        "age62": "62岁",
+        "age65": "65岁",
+        "age68": "68岁"
+      },
+      "lifestyleQuestion": "想要哪种退休生活？",
+      "lifestyle": {
+        "modest": "简朴，够用就好",
+        "comfortable": "舒适，和现在差不多",
+        "premium": "优渥，有旅行和享受"
+      },
+      "startButton": "给我看真实方案"
+    },
     "planComparisonLabel": "方案选项",
     "targetMonthlyIncome": "目标月收入",
     "genericError": "出了点问题，请再试一次。",

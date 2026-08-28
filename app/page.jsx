@@ -7708,6 +7708,117 @@ function WeddingRealDraft({ profile, t, onStartWithSeed, submitting }) {
   );
 }
 
+// Fourth pilot of the zero-input draft pattern. Unlike Wedding/Home, this
+// one has a genuinely real, fully computed number available with ZERO
+// input at all: CPF LIFE math (lib/retirement-finance.js) only needs real
+// age + real income, both already on file, plus a default retirement age
+// (65) and a deterministic CPF-balance estimate (estimateCurrentCpfBalances)
+// when the customer hasn't entered real balances - so the projected
+// payout below updates live as the customer taps a retirement-age tier,
+// before they've answered anything. The one thing this app genuinely
+// cannot know is the lifestyle they want in retirement (there's no real
+// Singapore benchmark for "a comfortable retirement costs X" the way
+// there's no benchmark for wedding cost) - that's the one real ask, same
+// honesty as WeddingRealDraft.
+const RETIREMENT_DRAFT_AGE_OPTIONS = [
+  { id: "age60", labelKey: "retirementPlanner.draft.age.age60", age: 60, seedText: "retire at age 60" },
+  { id: "age62", labelKey: "retirementPlanner.draft.age.age62", age: 62, seedText: "retire at age 62" },
+  { id: "age65", labelKey: "retirementPlanner.draft.age.age65", age: 65, seedText: "retire at age 65" },
+  { id: "age68", labelKey: "retirementPlanner.draft.age.age68", age: 68, seedText: "retire at age 68" },
+];
+const RETIREMENT_DRAFT_LIFESTYLE_OPTIONS = [
+  { id: "modest", labelKey: "retirementPlanner.draft.lifestyle.modest", seedText: "living a modest, basic-needs lifestyle" },
+  { id: "comfortable", labelKey: "retirementPlanner.draft.lifestyle.comfortable", seedText: "living comfortably, about like now" },
+  { id: "premium", labelKey: "retirementPlanner.draft.lifestyle.premium", seedText: "a premium lifestyle with travel and indulgences" },
+];
+
+function RetirementRealDraft({ profile, t, onStartWithSeed, submitting, onOpenCpfInput }) {
+  const [ageTier, setAgeTier] = useState(null);
+  const [lifestyle, setLifestyle] = useState(null);
+
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+
+  if (!hasRealProfile) {
+    return (
+      <section className="weddingHero">
+        <span className="weddingHeroIcon">
+          <Landmark size={26} />
+        </span>
+        <strong>{t("retirementPlanner.draft.noProfileLabel")}</strong>
+        <p>{t("retirementPlanner.draft.noProfileBody")}</p>
+      </section>
+    );
+  }
+
+  const currentAge = numberValue(profile.age, 27);
+  const monthlyIncome = numberValue(profile.monthlyIncome, 0);
+  const selectedAge = RETIREMENT_DRAFT_AGE_OPTIONS.find((option) => option.id === ageTier);
+  const previewRetirementAge = selectedAge?.age ?? 65;
+  const preview = computeRetirementFinancials({
+    targetMonthlyIncome: 0,
+    currentAge,
+    retirementAge: previewRetirementAge,
+    monthlyIncome,
+    cpfLifePlan: "standard",
+    payoutAge: 65,
+  });
+
+  const canStart = Boolean(ageTier && lifestyle);
+
+  const handleStart = () => {
+    if (!canStart) return;
+    const ageText = selectedAge?.seedText;
+    const lifestyleText = RETIREMENT_DRAFT_LIFESTYLE_OPTIONS.find((option) => option.id === lifestyle)?.seedText;
+    onStartWithSeed(`I'd like to ${ageText}, ${lifestyleText}.`);
+  };
+
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("retirementPlanner.draft.title")}</span>
+      <p>{t("retirementPlanner.draft.projection", { age: previewRetirementAge, amount: formatSgd(preview.cpf_life_payout) })}</p>
+      <small className="riskText">{t("retirementPlanner.draft.basedOn")}</small>
+      <button type="button" className="linkButton" onClick={onOpenCpfInput}>
+        {t("retirementPlanner.draft.enterRealBalances")}
+      </button>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("retirementPlanner.draft.ageQuestion")}</span>
+        <div className="checkboxGrid">
+          {RETIREMENT_DRAFT_AGE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={ageTier === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setAgeTier(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+
+        <span className="sectionLabel">{t("retirementPlanner.draft.lifestyleQuestion")}</span>
+        <div className="checkboxGrid">
+          {RETIREMENT_DRAFT_LIFESTYLE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={lifestyle === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setLifestyle(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button type="button" className="primaryButton" disabled={!canStart || submitting} onClick={handleStart}>
+        {submitting ? t("weddingPlanner.thinking") : t("retirementPlanner.draft.startButton")}
+        <Send size={18} />
+      </button>
+    </section>
+  );
+}
+
 function WeddingNeedContent({
   success,
   setSuccess,
@@ -9968,7 +10079,15 @@ function RetirementNeedContent({
     }
   };
 
-  const needsCpfInputStep = !retirementProfileInput && !sessionData?.confirmedPlan && !sessionData?.planOptions;
+  // Real CPF balances are optional precision, not a required first step -
+  // the real draft below already computes a real payout preview from
+  // deterministic defaults (see RetirementRealDraft) without asking
+  // anything, so this form is opt-in via its own "enter real balances" link.
+  const [showCpfInputStep, setShowCpfInputStep] = useState(false);
+  const handleCpfInputSubmit = (value) => {
+    setRetirementProfileInput(value);
+    setShowCpfInputStep(false);
+  };
 
   return (
     <Screen>
@@ -9992,11 +10111,11 @@ function RetirementNeedContent({
       <SuccessBanner show={success} text={t("retirementPlanner.success")} />
       {loading ? (
         <p>{t("loading.detail")}</p>
-      ) : needsCpfInputStep ? (
+      ) : showCpfInputStep ? (
         <RetirementCpfInputStep
           profile={profile}
           simulatorInputs={simulatorInputs}
-          onSubmit={setRetirementProfileInput}
+          onSubmit={handleCpfInputSubmit}
           t={t}
         />
       ) : adjustPlanTarget ? (
@@ -10099,13 +10218,13 @@ function RetirementNeedContent({
               t={t}
             />
           ) : (
-            <section className="weddingHero">
-              <span className="weddingHeroBadge">{t("retirementPlanner.newFeatureBadge")}</span>
-              <span className="weddingHeroIcon">
-                <Landmark size={26} />
-              </span>
-              <strong>{t("retirementPlanner.emptyStateLabel")}</strong>
-            </section>
+            <RetirementRealDraft
+              profile={profile}
+              t={t}
+              onStartWithSeed={handleSubmit}
+              submitting={submitting}
+              onOpenCpfInput={() => setShowCpfInputStep(true)}
+            />
           )}
           {errorMessage ? (
             <section className="adviceOnlyPanel">
@@ -10113,7 +10232,7 @@ function RetirementNeedContent({
               <p>{errorMessage}</p>
             </section>
           ) : null}
-          {!selectedPlan ? (
+          {!selectedPlan && sessionData?.planOptions ? (
             <AiTextInputCard
               t={t}
               onSubmit={handleSubmit}
