@@ -1286,6 +1286,22 @@
         "progress": "Progress payment",
         "balance": "Balance"
       }
+    },
+    "draft": {
+      "title": "Your real starting point",
+      "capacity": "Based on your real income, expenses, and already-confirmed commitments, you have about {amount} a month of real room to save toward a wedding.",
+      "noCapacity": "At your current real income and expenses, you don't have monthly room to save toward a wedding yet.",
+      "projection": "At that rate, you could have about {amount} saved by your chosen date.",
+      "basedOn": "Based on your real income, expenses, and already-confirmed commitments - not a guess.",
+      "noProfileLabel": "Let's start with your real numbers",
+      "noProfileBody": "Enter your real income and expenses in your profile first, so FutureOS can show your real savings capacity instead of asking you to guess.",
+      "scaleQuestion": "Roughly what scale?",
+      "scale": {
+        "intimate": "Intimate (under 50 guests)",
+        "moderate": "Moderate (50-150 guests)",
+        "grand": "Grand (150+ guests)"
+      },
+      "startButton": "Show me real plans"
     }
   },
   "homePlanner": {

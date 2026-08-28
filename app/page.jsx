@@ -88,6 +88,7 @@ import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { computeSmoothedExpenses } from "../lib/expense-finance.js";
 import { computeHomeBudgetRange, computeDownPaymentReadiness } from "../lib/home-draft-finance.js";
 import { computeInvestmentReadiness } from "../lib/investment-readiness-finance.js";
+import { computeWeddingSavingsCapacity, computeProjectedWeddingSavings } from "../lib/wedding-draft-finance.js";
 import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
 import { extractPdfText } from "../lib/pdf-extract-client.js";
 import { ASSET_CATEGORIES, ASSET_SUBTYPES, STAGES, FIELD_ENUMS, isNonMonetaryCategory } from "../lib/asset-taxonomy.js";
@@ -7571,6 +7572,142 @@ function ConversationHistoryModal({ entries, loading, onClose, t, titleKey, empt
   );
 }
 
+// Third pilot of the zero-input draft pattern. Unlike Home, a wedding has
+// no regulatory ceiling to derive a real "safe budget" from - there is no
+// verified real Singapore benchmark this app can honestly cite for what a
+// wedding "should" cost. So this shows what IS real and computable
+// without asking anything (a real monthly savings capacity, from real
+// income/expenses/already-confirmed commitments), then asks only the 2
+// things the bank genuinely can't know: timeline and rough scale. See
+// lib/wedding-draft-finance.js.
+const WEDDING_DRAFT_TIMELINE_OPTIONS = [
+  { id: "asap", labelKey: "homePlanner.draft.timeline.asap", months: 6, seedText: "within the next 6 months" },
+  { id: "oneYear", labelKey: "homePlanner.draft.timeline.oneYear", months: 12, seedText: "within about a year" },
+  { id: "twoYears", labelKey: "homePlanner.draft.timeline.twoYears", months: 18, seedText: "in 1-2 years" },
+  { id: "exploring", labelKey: "homePlanner.draft.timeline.exploring", months: null, seedText: "just exploring for now, no firm date" },
+];
+const WEDDING_DRAFT_SCALE_OPTIONS = [
+  { id: "intimate", labelKey: "weddingPlanner.draft.scale.intimate", seedText: "an intimate wedding, under 50 guests" },
+  { id: "moderate", labelKey: "weddingPlanner.draft.scale.moderate", seedText: "a moderate wedding, 50-150 guests" },
+  { id: "grand", labelKey: "weddingPlanner.draft.scale.grand", seedText: "a grand wedding, 150+ guests" },
+];
+
+function WeddingRealDraft({ profile, t, onStartWithSeed, submitting }) {
+  const [committedMonthlyTotal, setCommittedMonthlyTotal] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [timeline, setTimeline] = useState(null);
+  const [scale, setScale] = useState(null);
+
+  const monthlyIncome = numberValue(profile.monthlyIncome, 0);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 0);
+  const currentSavings = numberValue(profile.currentSavings, 0);
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+
+  useEffect(() => {
+    if (!hasRealProfile) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setCommittedMonthlyTotal(data.committedMonthlyTotal ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setCommittedMonthlyTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRealProfile]);
+
+  if (!hasRealProfile) {
+    return (
+      <section className="weddingHero">
+        <span className="weddingHeroIcon">
+          <HeartHandshake size={26} />
+        </span>
+        <strong>{t("weddingPlanner.draft.noProfileLabel")}</strong>
+        <p>{t("weddingPlanner.draft.noProfileBody")}</p>
+      </section>
+    );
+  }
+
+  if (loading || committedMonthlyTotal === null) {
+    return <p>{t("loading.detail")}</p>;
+  }
+
+  const capacity = computeWeddingSavingsCapacity({ monthlyIncome, monthlyExpenses, committedMonthlyTotal });
+  const selectedTimeline = WEDDING_DRAFT_TIMELINE_OPTIONS.find((option) => option.id === timeline);
+  const projection = selectedTimeline
+    ? computeProjectedWeddingSavings({ currentSavings, monthlyCapacity: capacity.monthlyCapacity, timelineMonths: selectedTimeline.months })
+    : null;
+
+  const canStart = Boolean(timeline && scale);
+
+  const handleStart = () => {
+    if (!canStart) return;
+    const timelineText = selectedTimeline?.seedText;
+    const scaleText = WEDDING_DRAFT_SCALE_OPTIONS.find((option) => option.id === scale)?.seedText;
+    onStartWithSeed(`We're planning ${scaleText}, ${timelineText}.`);
+  };
+
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("weddingPlanner.draft.title")}</span>
+      {capacity.hasCapacity ? (
+        <p>{t("weddingPlanner.draft.capacity", { amount: formatSgd(capacity.monthlyCapacity) })}</p>
+      ) : (
+        <p>{t("weddingPlanner.draft.noCapacity")}</p>
+      )}
+      {projection ? (
+        <p>{t("weddingPlanner.draft.projection", { amount: formatSgd(projection.projectedSavings) })}</p>
+      ) : null}
+      <small className="riskText">{t("weddingPlanner.draft.basedOn")}</small>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("homePlanner.draft.timelineQuestion")}</span>
+        <div className="checkboxGrid">
+          {WEDDING_DRAFT_TIMELINE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={timeline === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setTimeline(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+
+        <span className="sectionLabel">{t("weddingPlanner.draft.scaleQuestion")}</span>
+        <div className="checkboxGrid">
+          {WEDDING_DRAFT_SCALE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={scale === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setScale(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button type="button" className="primaryButton" disabled={!canStart || submitting} onClick={handleStart}>
+        {submitting ? t("weddingPlanner.thinking") : t("weddingPlanner.draft.startButton")}
+        <Send size={18} />
+      </button>
+    </section>
+  );
+}
+
 function WeddingNeedContent({
   success,
   setSuccess,
@@ -7977,13 +8114,7 @@ function WeddingNeedContent({
               t={t}
             />
           ) : (
-            <section className="weddingHero">
-              <span className="weddingHeroBadge">{t("weddingPlanner.newFeatureBadge")}</span>
-              <span className="weddingHeroIcon">
-                <HeartHandshake size={26} />
-              </span>
-              <strong>{t("weddingPlanner.emptyStateLabel")}</strong>
-            </section>
+            <WeddingRealDraft profile={profile} t={t} onStartWithSeed={handleSubmit} submitting={submitting} />
           )}
           {errorMessage ? (
             <section className="adviceOnlyPanel">
@@ -7991,7 +8122,7 @@ function WeddingNeedContent({
               <p>{errorMessage}</p>
             </section>
           ) : null}
-          {!selectedPlan ? (
+          {!selectedPlan && sessionData?.planOptions ? (
             <AiTextInputCard
               t={t}
               onSubmit={handleSubmit}

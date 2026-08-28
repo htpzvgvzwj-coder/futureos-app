@@ -1225,6 +1225,22 @@
         "progress": "中期付款",
         "balance": "尾款"
       }
+    },
+    "draft": {
+      "title": "你的真实起点",
+      "capacity": "根据你真实的收入、支出和已确认的承诺，你每月大约有 {amount} 的真实余力可以用来储蓄婚礼基金。",
+      "noCapacity": "按你目前真实的收入和支出，暂时还没有每月余力去储蓄婚礼基金。",
+      "projection": "按这个速度，到你选定的日期，大约能储蓄到 {amount}。",
+      "basedOn": "基于你真实的收入、支出和已确认的承诺——不是猜的。",
+      "noProfileLabel": "先从你的真实数字开始",
+      "noProfileBody": "先在个人资料中填写真实的收入和支出，FutureOS 才能给出真实的储蓄余力，而不是让你自己去猜。",
+      "scaleQuestion": "大概什么规模？",
+      "scale": {
+        "intimate": "小型（50人以下）",
+        "moderate": "中型（50-150人）",
+        "grand": "大型（150人以上）"
+      },
+      "startButton": "给我看真实方案"
     }
   },
   "homePlanner": {
