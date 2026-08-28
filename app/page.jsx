@@ -14017,7 +14017,145 @@ function TravelConfirmedCard({ budget, t }) {
   );
 }
 
-function FamilyTravelScreen({ t, setActiveScreen, language }) {
+// Fifth pilot of the zero-input draft pattern. Travel has no benchmark to
+// derive a real budget from either (like Wedding) - so the real,
+// zero-input part is the same real discretionary monthly capacity math
+// (income minus expenses minus every already-confirmed commitment),
+// literally reused from lib/wedding-draft-finance.js since the formula
+// itself is generic, not wedding-specific, matching this codebase's
+// standing preference to reuse existing real math over writing a
+// near-duplicate. The one real ask is trip scope/distance and timing -
+// genuinely unknown, and directly maps to what the AI needs (see
+// lib/travel-prompts.js).
+const FAMILY_TRAVEL_DRAFT_TIMELINE_OPTIONS = [
+  { id: "asap", labelKey: "homePlanner.draft.timeline.asap", months: 6, seedText: "in the next few months" },
+  { id: "oneYear", labelKey: "homePlanner.draft.timeline.oneYear", months: 12, seedText: "sometime in the next year" },
+  { id: "twoYears", labelKey: "homePlanner.draft.timeline.twoYears", months: 18, seedText: "in 1-2 years" },
+  { id: "exploring", labelKey: "homePlanner.draft.timeline.exploring", months: null, seedText: "just exploring for now, no firm date" },
+];
+const FAMILY_TRAVEL_DRAFT_SCOPE_OPTIONS = [
+  { id: "domestic", labelKey: "familyTravel.draft.scope.domestic", seedText: "a short regional trip nearby" },
+  { id: "regional", labelKey: "familyTravel.draft.scope.regional", seedText: "a trip within Southeast Asia" },
+  { id: "longHaul", labelKey: "familyTravel.draft.scope.longHaul", seedText: "a long-haul international trip" },
+];
+
+function FamilyTravelRealDraft({ profile, t, onStartWithSeed, submitting }) {
+  const [committedMonthlyTotal, setCommittedMonthlyTotal] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [timeline, setTimeline] = useState(null);
+  const [scope, setScope] = useState(null);
+
+  const monthlyIncome = numberValue(profile.monthlyIncome, 0);
+  const monthlyExpenses = numberValue(profile.monthlyExpenses, 0);
+  const currentSavings = numberValue(profile.currentSavings, 0);
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+
+  useEffect(() => {
+    if (!hasRealProfile) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    const params = new URLSearchParams({ monthlyIncome: String(monthlyIncome), monthlyExpenses: String(monthlyExpenses) });
+    fetch(`/api/strategic-balance/snapshot?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setCommittedMonthlyTotal(data.committedMonthlyTotal ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setCommittedMonthlyTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRealProfile]);
+
+  if (!hasRealProfile) {
+    return (
+      <section className="weddingHero">
+        <span className="weddingHeroIcon">
+          <Globe2 size={26} />
+        </span>
+        <strong>{t("familyTravel.draft.noProfileLabel")}</strong>
+        <p>{t("familyTravel.draft.noProfileBody")}</p>
+      </section>
+    );
+  }
+
+  if (loading || committedMonthlyTotal === null) {
+    return <p>{t("loading.detail")}</p>;
+  }
+
+  const capacity = computeWeddingSavingsCapacity({ monthlyIncome, monthlyExpenses, committedMonthlyTotal });
+  const selectedTimeline = FAMILY_TRAVEL_DRAFT_TIMELINE_OPTIONS.find((option) => option.id === timeline);
+  const projection = selectedTimeline
+    ? computeProjectedWeddingSavings({ currentSavings, monthlyCapacity: capacity.monthlyCapacity, timelineMonths: selectedTimeline.months })
+    : null;
+
+  const canStart = Boolean(timeline && scope);
+
+  const handleStart = () => {
+    if (!canStart) return;
+    const timelineText = selectedTimeline?.seedText;
+    const scopeText = FAMILY_TRAVEL_DRAFT_SCOPE_OPTIONS.find((option) => option.id === scope)?.seedText;
+    onStartWithSeed(`We're planning ${scopeText}, ${timelineText}.`);
+  };
+
+  return (
+    <section className="recommendationPanel">
+      <span className="sectionLabel">{t("familyTravel.draft.title")}</span>
+      {capacity.hasCapacity ? (
+        <p>{t("familyTravel.draft.capacity", { amount: formatSgd(capacity.monthlyCapacity) })}</p>
+      ) : (
+        <p>{t("familyTravel.draft.noCapacity")}</p>
+      )}
+      {projection ? (
+        <p>{t("familyTravel.draft.projection", { amount: formatSgd(projection.projectedSavings) })}</p>
+      ) : null}
+      <small className="riskText">{t("familyTravel.draft.basedOn")}</small>
+
+      <div className="settingsGroup">
+        <span className="sectionLabel">{t("homePlanner.draft.timelineQuestion")}</span>
+        <div className="checkboxGrid">
+          {FAMILY_TRAVEL_DRAFT_TIMELINE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={timeline === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setTimeline(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+
+        <span className="sectionLabel">{t("familyTravel.draft.scopeQuestion")}</span>
+        <div className="checkboxGrid">
+          {FAMILY_TRAVEL_DRAFT_SCOPE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.id}
+              className={scope === option.id ? "checkOption selected" : "checkOption"}
+              onClick={() => setScope(option.id)}
+            >
+              <span>{t(option.labelKey)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button type="button" className="primaryButton" disabled={!canStart || submitting} onClick={handleStart}>
+        {submitting ? t("weddingPlanner.thinking") : t("familyTravel.draft.startButton")}
+        <Send size={18} />
+      </button>
+    </section>
+  );
+}
+
+function FamilyTravelScreen({ t, setActiveScreen, language, profile }) {
   const [sessionData, setSessionData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -14092,14 +14230,7 @@ function FamilyTravelScreen({ t, setActiveScreen, language }) {
               t={t}
             />
           ) : (
-            <section className="weddingHero">
-              <span className="weddingHeroBadge">{t("familyTravel.newFeatureBadge")}</span>
-              <span className="weddingHeroIcon">
-                <Globe2 size={26} />
-              </span>
-              <strong>{t("familyTravel.emptyStateLabel")}</strong>
-              <p>{t("familyTravel.emptyStateBody")}</p>
-            </section>
+            <FamilyTravelRealDraft profile={profile} t={t} onStartWithSeed={handleSubmit} submitting={submitting} />
           )}
           {errorMessage ? (
             <section className="adviceOnlyPanel">
@@ -14107,14 +14238,16 @@ function FamilyTravelScreen({ t, setActiveScreen, language }) {
               <p>{errorMessage}</p>
             </section>
           ) : null}
-          <AiTextInputCard
-            t={t}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-            placeholder={t("familyTravel.inputPlaceholder")}
-            submitLabelKey={sessionData?.planOptions ? "familyTravel.send" : "familyTravel.sendFirst"}
-            labelKey="familyTravel.inputLabel"
-          />
+          {sessionData?.planOptions ? (
+            <AiTextInputCard
+              t={t}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+              placeholder={t("familyTravel.inputPlaceholder")}
+              submitLabelKey="familyTravel.send"
+              labelKey="familyTravel.inputLabel"
+            />
+          ) : null}
         </>
       )}
     </Screen>
@@ -16884,7 +17017,9 @@ export default function App() {
     [screens.ACTIVITY_CHECK]: (
       <ActivityCheckScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
-    [screens.FAMILY_TRAVEL]: <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.FAMILY_TRAVEL]: (
+      <FamilyTravelScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
+    ),
     [screens.SHADOW_ACCOUNT]: <ShadowAccountScreen preferences={preferences} t={t} setActiveScreen={setActiveScreen} />,
     [screens.FAMILY_CFO]: <FamilyCfoScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.GOAL_MARKETPLACE]: (

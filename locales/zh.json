@@ -1925,7 +1925,23 @@
     "inputPlaceholder": "例如：一家四口（2 大人 2 小孩）去巴厘岛玩 5 天，中等预算",
     "send": "发送",
     "sendFirst": "规划这次旅行",
-    "inputLabel": "描述你的旅行"
+    "inputLabel": "描述你的旅行",
+    "draft": {
+      "title": "你的真实起点",
+      "capacity": "根据你真实的收入、支出和已确认的承诺，你每月大约有 {amount} 的真实余力可以用来储蓄旅行基金。",
+      "noCapacity": "按你目前真实的收入和支出，暂时还没有每月余力去储蓄旅行基金。",
+      "projection": "按这个速度，到你选定的日期，大约能储蓄到 {amount}。",
+      "basedOn": "基于你真实的收入、支出和已确认的承诺——不是猜的。",
+      "noProfileLabel": "先从你的真实数字开始",
+      "noProfileBody": "先在个人资料中填写真实的收入和支出，FutureOS 才能给出真实的储蓄余力，而不是让你自己去猜。",
+      "scopeQuestion": "打算去多远？",
+      "scope": {
+        "domestic": "短程周边旅行",
+        "regional": "东南亚范围内",
+        "longHaul": "长途国际旅行"
+      },
+      "startButton": "给我看真实方案"
+    }
   },
   "investmentPlanner": {
     "title": "投资规划师",

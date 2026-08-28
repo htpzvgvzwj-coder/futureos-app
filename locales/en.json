@@ -1850,7 +1850,23 @@
     "inputPlaceholder": "e.g. A 5-day family trip to Bali for 2 adults and 2 kids, mid-range budget",
     "send": "Send",
     "sendFirst": "Plan this trip",
-    "inputLabel": "Describe your trip"
+    "inputLabel": "Describe your trip",
+    "draft": {
+      "title": "Your real starting point",
+      "capacity": "Based on your real income, expenses, and already-confirmed commitments, you have about {amount} a month of real room to save toward a trip.",
+      "noCapacity": "At your current real income and expenses, you don't have monthly room to save toward a trip yet.",
+      "projection": "At that rate, you could have about {amount} saved by your chosen date.",
+      "basedOn": "Based on your real income, expenses, and already-confirmed commitments - not a guess.",
+      "noProfileLabel": "Let's start with your real numbers",
+      "noProfileBody": "Enter your real income and expenses in your profile first, so FutureOS can show your real savings capacity instead of asking you to guess.",
+      "scopeQuestion": "How far are you looking to go?",
+      "scope": {
+        "domestic": "Short regional trip",
+        "regional": "Within Southeast Asia",
+        "longHaul": "Long-haul international"
+      },
+      "startButton": "Show me real plans"
+    }
   },
   "dealFinder": {
     "title": "Deal Finder",
