@@ -86,7 +86,7 @@ import { computeFamilyPicture } from "../lib/family-cfo-finance.js";
 import { computePersonalBufferImpact } from "../lib/sme-cashflow-finance.js";
 import { computeSmoothedIncome } from "../lib/income-finance.js";
 import { computeSmoothedExpenses } from "../lib/expense-finance.js";
-import { computeHomeBudgetRange, computeDownPaymentReadiness } from "../lib/home-draft-finance.js";
+import { computeHomeBudgetRange, computeDownPaymentReadiness, computeReadyDateForMonthlyAmount } from "../lib/home-draft-finance.js";
 import { computeInvestmentReadiness } from "../lib/investment-readiness-finance.js";
 import { computeWeddingSavingsCapacity, computeProjectedWeddingSavings } from "../lib/wedding-draft-finance.js";
 import { computeNetWorthTimeline, computeIncomeGrowth, computePersonalEconomyIndicators } from "../lib/personal-economy-finance.js";
@@ -3431,7 +3431,121 @@ function NotificationCenterModal({ nudges, spendingRiskEntry, dismissingAlertId,
   );
 }
 
-function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, setJointDebateViewId, t }) {
+// First real implementation of the "Moment" pattern: a real, server-
+// detected change (a confirmed home savings plan falling behind its real
+// logged check-ins) surfaced with one focus - a real draggable timeline,
+// one real cause, one decision. Deliberately NOT a new screen or nav
+// entry - lives at the top of the existing Home dashboard so the pattern
+// can be proven end-to-end (detect -> display -> drag -> real backend
+// update) before any navigation changes. See lib/moment-engine.js.
+function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
+  const [amount, setAmount] = useState(moment.data.originalMonthlyContribution);
+  const [expanded, setExpanded] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [resolved, setResolved] = useState(false);
+
+  if (resolved) return null;
+
+  const preview = computeReadyDateForMonthlyAmount({
+    downPaymentNeeded: moment.data.downPaymentNeeded,
+    currentSavings: moment.data.currentSavings,
+    monthlyAmount: amount,
+  });
+
+  const handleAdopt = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      const message = `Please update my confirmed home down payment savings plan to a new monthly contribution of SGD ${Math.round(
+        amount
+      )}, keeping everything else about the plan the same. Confirm this as the final updated plan.`;
+      const response = await fetch("/api/home/stage2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent: "refine", message, language, profile }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.type !== "finalize_home_savings_plan") {
+        setError(t("todayMoment.homeGoalShift.adoptError"));
+        return;
+      }
+      setResolved(true);
+      onResolved?.();
+    } catch {
+      setError(t("todayMoment.homeGoalShift.adoptError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleKeep = () => {
+    setResolved(true);
+    onResolved?.();
+  };
+
+  return (
+    <motion.section
+      className="recommendationPanel momentCard"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.36, ease: "easeOut" }}
+    >
+      <span className="sectionLabel">{t("todayMoment.homeGoalShift.title")}</span>
+      <strong>{t("todayMoment.homeGoalShift.headline", { months: moment.data.delayMonths ?? 0 })}</strong>
+
+      <div className="momentSliderBlock">
+        <input
+          type="range"
+          className="wideSlider"
+          min={moment.data.sliderMin}
+          max={moment.data.sliderMax}
+          step="10"
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))}
+          aria-label={t("todayMoment.homeGoalShift.sliderLabel")}
+        />
+        <div className="momentSliderReadout">
+          <span>{t("common.perMonth", { amount: formatSgd(amount) })}</span>
+          <span>
+            {preview.readyNow
+              ? t("todayMoment.homeGoalShift.readyNow")
+              : preview.readyMonth
+                ? t("todayMoment.homeGoalShift.readyBy", { month: preview.readyMonth })
+                : t("todayMoment.homeGoalShift.notOnTrack")}
+          </span>
+        </div>
+      </div>
+
+      {error ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{error}</p>
+        </section>
+      ) : null}
+
+      <button type="button" className="primaryButton" onClick={handleAdopt} disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("todayMoment.homeGoalShift.adopt")}
+        <Check size={18} />
+      </button>
+      <button type="button" className="secondaryButton" onClick={handleKeep} disabled={submitting}>
+        {t("todayMoment.homeGoalShift.keep")}
+      </button>
+      <button type="button" className="linkButton" onClick={() => setExpanded((current) => !current)}>
+        {t("todayMoment.homeGoalShift.why")}
+      </button>
+      {expanded ? (
+        <p className="riskText">
+          {moment.reasonCode === "expense_increase"
+            ? t("todayMoment.homeGoalShift.reasonExpenseIncrease", { amount: formatSgd(moment.reasonParams.changeAmount) })
+            : t("todayMoment.homeGoalShift.reasonBehindPace")}
+        </p>
+      ) : null}
+    </motion.section>
+  );
+}
+
+function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preferences, setPreferences, memoryEvents, setMirrorChatSeed, setJointDebateViewId, language, t }) {
   const [customiseOpen, setCustomiseOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [noticeModal, setNoticeModal] = useState(null);
@@ -3483,6 +3597,25 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const [crossGoalAlerts, setCrossGoalAlerts] = useState([]);
   const topCrossGoalAlert = crossGoalAlerts[0] ?? null;
   const [dismissingAlertId, setDismissingAlertId] = useState(null);
+
+  // Real Moments (lib/moment-engine.js) - outranks every other nudge below
+  // since it's a fully-computed real change with a real decision attached,
+  // not just a pointer into a chat conversation.
+  const [moments, setMoments] = useState([]);
+  const topMoment = moments[0] ?? null;
+  useEffect(() => {
+    if (!hasRealProfile) return;
+    let cancelled = false;
+    fetch("/api/moments")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setMoments(data.moments ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRealProfile]);
 
   const guardianNudge = topCrossGoalAlert
     ? alertToNudge(topCrossGoalAlert)
@@ -3699,6 +3832,17 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             <h1>{t("homeBanking.welcome", { name: displayName })}</h1>
           </motion.div>
         </section>
+
+        {topMoment?.id === "home-goal-shift" ? (
+          <HomeGoalShiftMomentCard
+            key={topMoment.id}
+            moment={topMoment}
+            profile={profile}
+            language={language}
+            t={t}
+            onResolved={() => setMoments((current) => current.slice(1))}
+          />
+        ) : null}
 
         <motion.section
           className="quickActionCard"

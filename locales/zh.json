@@ -2673,6 +2673,22 @@
       "savedHint": "名称会立即显示在首页。"
     }
   },
+  "todayMoment": {
+    "homeGoalShift": {
+      "title": "你的购房储蓄进度慢了",
+      "headline": "按目前进度，你的购房计划大约会比原计划晚 {months} 个月完成。",
+      "sliderLabel": "调整每月储蓄金额",
+      "readyNow": "你的储蓄已经足够。",
+      "readyBy": "按这个节奏，{month} 就能准备好。",
+      "notOnTrack": "按这个节奏还不足以得出一个真实的准备好日期。",
+      "adopt": "采用这个节奏",
+      "keep": "保持现有计划",
+      "why": "为什么会这样？",
+      "reasonExpenseIncrease": "同一时期，你真实记录的支出平均每月上升了约 {amount}。",
+      "reasonBehindPace": "在你已记录的月份里，实际储蓄一直低于你确认的每月储蓄金额。",
+      "adoptError": "更新计划时出了点问题，请再试一次，或直接打开购房规划师。"
+    }
+  },
   "homeBanking": {
     "heroLabel": "OCBC 数字银行",
     "scan": "扫描",

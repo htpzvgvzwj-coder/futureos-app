@@ -2947,6 +2947,22 @@
       "error": "Couldn't save that - please try again."
     }
   },
+  "todayMoment": {
+    "homeGoalShift": {
+      "title": "Your home savings pace has slipped",
+      "headline": "Your home purchase plan is on track to complete about {months} months later than planned.",
+      "sliderLabel": "Adjust monthly contribution",
+      "readyNow": "You already have enough saved.",
+      "readyBy": "Ready by {month} at this pace.",
+      "notOnTrack": "Not enough at this pace to reach a real ready date.",
+      "adopt": "Adopt this pace",
+      "keep": "Keep current plan",
+      "why": "Why did this happen?",
+      "reasonExpenseIncrease": "Over the same period, your real logged expenses rose by about {amount}/month.",
+      "reasonBehindPace": "You've been saving less than your confirmed monthly contribution in the months you've logged.",
+      "adoptError": "Something went wrong updating your plan. Please try again, or open Home Purchase Planner directly."
+    }
+  },
   "homeBanking": {
     "heroLabel": "OCBC home banking dashboard",
     "scan": "Scan",
