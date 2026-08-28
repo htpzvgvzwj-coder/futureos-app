@@ -830,3 +830,29 @@ create table if not exists sme_cashflow_checkins (
 
 create index if not exists sme_cashflow_checkins_profile_idx
   on sme_cashflow_checkins (profile_key, checkin_date);
+
+-- Home Goal Shift V2: a real, structured, revocable commitment - replaces
+-- the AI-text "adopt this pace" submission for the Moment's primary
+-- action. Distinct from home_artifacts' confirmed_savings_plan (which
+-- stays the source of truth every existing consumer - Strategic Balance,
+-- Loan Planner, simulatorInputs - already reads unchanged): this table
+-- adds the structured fields those consumers don't need but Guardian's
+-- pause/revoke/execution-status view does. One active commitment per
+-- profile+domain at a time - a new commitment or a revoke supersedes the
+-- previous one rather than mutating it in place, so the history stays a
+-- real audit trail.
+create table if not exists goal_commitments (
+  id                              uuid primary key default gen_random_uuid(),
+  profile_key                     text not null,
+  domain                          text not null, -- 'home' (only domain today)
+  monthly_contribution            numeric(12,2) not null,
+  effective_month                 text not null, -- 'YYYY-MM'
+  pause_if_emergency_months_below numeric(4,1) not null,
+  source_moment                   jsonb not null, -- the real Moment snapshot that led to this decision, for later prediction-vs-actual comparison
+  status                          text not null default 'active', -- active | revoked
+  created_at                      timestamptz not null default now(),
+  revoked_at                      timestamptz
+);
+
+create index if not exists goal_commitments_profile_domain_idx
+  on goal_commitments (profile_key, domain, status, created_at desc);

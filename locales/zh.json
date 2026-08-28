@@ -2676,17 +2676,36 @@
   "todayMoment": {
     "homeGoalShift": {
       "title": "你的购房储蓄进度慢了",
-      "headline": "按目前进度，你的购房计划大约会比原计划晚 {months} 个月完成。",
+      "headline": "你的家会晚大约 {months} 个月准备好。",
+      "todayLabel": "今天",
       "sliderLabel": "调整每月储蓄金额",
       "readyNow": "你的储蓄已经足够。",
       "readyBy": "按这个节奏，{month} 就能准备好。",
       "notOnTrack": "按这个节奏还不足以得出一个真实的准备好日期。",
-      "adopt": "采用这个节奏",
+      "tradeoff": "{amount}/月 可恢复原日期，但未来 {horizon} 个月里，应急缓冲的增长会少约 {months} 个月。",
+      "adopt": "采用 {amount}/月 的新节奏",
       "keep": "保持现有计划",
       "why": "为什么会这样？",
       "reasonExpenseIncrease": "同一时期，你真实记录的支出平均每月上升了约 {amount}。",
       "reasonBehindPace": "在你已记录的月份里，实际储蓄一直低于你确认的每月储蓄金额。",
       "adoptError": "更新计划时出了点问题，请再试一次，或直接打开购房规划师。"
+    },
+    "homeGoalRecovery": {
+      "headline": "你在购房储蓄节奏上追回了 {months} 个月。",
+      "stillGap": "距离原定日期还差大约 {months} 个月。",
+      "onTrack": "你已经回到原定日期。",
+      "acknowledge": "知道了"
+    },
+    "execution": {
+      "state": {
+        "active": "Guardian 正在跟踪这项承诺",
+        "paused": "Guardian 已暂停这项承诺"
+      },
+      "summary": "每月 {amount} 用于购房，从 {month} 开始。",
+      "pauseCondition": "如果你的应急缓冲降到 {threshold} 个月以下，Guardian 会自动暂停这项承诺。",
+      "pausedDetail": "你的应急缓冲目前是 {current} 个月，低于 {threshold} 个月的下限——这项承诺已暂停，直到恢复为止。",
+      "revoke": "取消这项承诺",
+      "revokeError": "取消时出了点问题，请再试一次。"
     }
   },
   "homeBanking": {

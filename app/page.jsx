@@ -3431,47 +3431,44 @@ function NotificationCenterModal({ nudges, spendingRiskEntry, dismissingAlertId,
   );
 }
 
-// First real implementation of the "Moment" pattern: a real, server-
-// detected change (a confirmed home savings plan falling behind its real
-// logged check-ins) surfaced with one focus - a real draggable timeline,
-// one real cause, one decision. Deliberately NOT a new screen or nav
-// entry - lives at the top of the existing Home dashboard so the pattern
-// can be proven end-to-end (detect -> display -> drag -> real backend
-// update) before any navigation changes. See lib/moment-engine.js.
-function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
-  const [amount, setAmount] = useState(moment.data.originalMonthlyContribution);
+// Home Goal Shift V2 - one focus, one living visual, one variable, one
+// real decision. Replaces the earlier generic slider+card treatment: the
+// timeline fill IS the result (not a text readout beside a slider), the
+// cross-goal tradeoff is real (a genuine emergency-buffer cost, not a
+// generic warning), and "adopt" writes a real structured commitment
+// (app/api/home/goal-commitment) instead of sending AI text - see
+// lib/moment-engine.js for the real detection math this renders.
+function HomeGoalShiftMomentCard({ moment, language, t, onAdopted, onDismissed }) {
+  const data = moment.data;
+  const [amount, setAmount] = useState(data.catchUpAmount ?? data.originalMonthlyContribution);
   const [expanded, setExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [resolved, setResolved] = useState(false);
 
-  if (resolved) return null;
-
-  const preview = computeReadyDateForMonthlyAmount({
-    downPaymentNeeded: moment.data.downPaymentNeeded,
-    currentSavings: moment.data.currentSavings,
-    monthlyAmount: amount,
-  });
+  const preview = computeReadyDateForMonthlyAmount({ downPaymentNeeded: data.downPaymentNeeded, currentSavings: data.currentSavings, monthlyAmount: amount });
+  // Timeline span = months-to-ready at the slowest pace on the slider - so
+  // the fill always lands within 0-100% regardless of where the customer
+  // drags, and "further right" always means "sooner", never a fixed date
+  // scale that could run off the end.
+  const readyAtSlowestPace = computeReadyDateForMonthlyAmount({ downPaymentNeeded: data.downPaymentNeeded, currentSavings: data.currentSavings, monthlyAmount: data.sliderMin });
+  const spanMonths = Math.max(1, readyAtSlowestPace.monthsToReady ?? 1);
+  const fillPercent = preview.monthsToReady == null ? 6 : Math.max(6, Math.min(100, Math.round((1 - preview.monthsToReady / spanMonths) * 100)));
 
   const handleAdopt = async () => {
     setSubmitting(true);
     setError("");
     try {
-      const message = `Please update my confirmed home down payment savings plan to a new monthly contribution of SGD ${Math.round(
-        amount
-      )}, keeping everything else about the plan the same. Confirm this as the final updated plan.`;
-      const response = await fetch("/api/home/stage2", {
+      const response = await fetch("/api/home/goal-commitment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: "refine", message, language, profile }),
+        body: JSON.stringify({ monthlyContribution: amount, language }),
       });
-      const data = await response.json();
-      if (!response.ok || data.type !== "finalize_home_savings_plan") {
+      const result = await response.json();
+      if (!response.ok) {
         setError(t("todayMoment.homeGoalShift.adoptError"));
         return;
       }
-      setResolved(true);
-      onResolved?.();
+      onAdopted?.(result);
     } catch {
       setError(t("todayMoment.homeGoalShift.adoptError"));
     } finally {
@@ -3479,34 +3476,19 @@ function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
     }
   };
 
-  const handleKeep = () => {
-    setResolved(true);
-    onResolved?.();
-  };
-
   return (
-    <motion.section
-      className="recommendationPanel momentCard"
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.36, ease: "easeOut" }}
-    >
-      <span className="sectionLabel">{t("todayMoment.homeGoalShift.title")}</span>
-      <strong>{t("todayMoment.homeGoalShift.headline", { months: moment.data.delayMonths ?? 0 })}</strong>
+    <motion.section className="momentFocus" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.36, ease: "easeOut" }}>
+      <strong className="momentHeadline">{t("todayMoment.homeGoalShift.headline", { months: data.delayMonths ?? 0 })}</strong>
 
-      <div className="momentSliderBlock">
-        <input
-          type="range"
-          className="wideSlider"
-          min={moment.data.sliderMin}
-          max={moment.data.sliderMax}
-          step="10"
-          value={amount}
-          onChange={(event) => setAmount(Number(event.target.value))}
-          aria-label={t("todayMoment.homeGoalShift.sliderLabel")}
-        />
-        <div className="momentSliderReadout">
-          <span>{t("common.perMonth", { amount: formatSgd(amount) })}</span>
+      <div className="momentTimeline">
+        <div className="momentTimelineTrack">
+          <motion.div className="momentTimelineFill" animate={{ width: `${fillPercent}%` }} transition={{ duration: 0.25, ease: "easeOut" }} />
+          <motion.div className="momentTimelineMarker" animate={{ left: `${fillPercent}%` }} transition={{ duration: 0.25, ease: "easeOut" }}>
+            <Home size={16} />
+          </motion.div>
+        </div>
+        <div className="momentTimelineLabels">
+          <span>{t("todayMoment.homeGoalShift.todayLabel")}</span>
           <span>
             {preview.readyNow
               ? t("todayMoment.homeGoalShift.readyNow")
@@ -3515,7 +3497,30 @@ function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
                 : t("todayMoment.homeGoalShift.notOnTrack")}
           </span>
         </div>
+        <input
+          type="range"
+          className="wideSlider"
+          min={data.sliderMin}
+          max={data.sliderMax}
+          step="10"
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))}
+          aria-label={t("todayMoment.homeGoalShift.sliderLabel")}
+        />
+        <div className="momentSliderReadout">
+          <span>{t("common.perMonth", { amount: formatSgd(amount) })}</span>
+        </div>
       </div>
+
+      {data.bufferImpactMonths != null && data.bufferImpactMonths > 0 ? (
+        <p className="momentTradeoff">
+          {t("todayMoment.homeGoalShift.tradeoff", {
+            amount: formatSgd(data.catchUpAmount),
+            months: data.bufferImpactMonths,
+            horizon: data.bufferImpactHorizonMonths,
+          })}
+        </p>
+      ) : null}
 
       {error ? (
         <section className="adviceOnlyPanel">
@@ -3525,10 +3530,10 @@ function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
       ) : null}
 
       <button type="button" className="primaryButton" onClick={handleAdopt} disabled={submitting}>
-        {submitting ? t("weddingPlanner.thinking") : t("todayMoment.homeGoalShift.adopt")}
+        {submitting ? t("weddingPlanner.thinking") : t("todayMoment.homeGoalShift.adopt", { amount: formatSgd(amount) })}
         <Check size={18} />
       </button>
-      <button type="button" className="secondaryButton" onClick={handleKeep} disabled={submitting}>
+      <button type="button" className="linkButton" onClick={onDismissed} disabled={submitting}>
         {t("todayMoment.homeGoalShift.keep")}
       </button>
       <button type="button" className="linkButton" onClick={() => setExpanded((current) => !current)}>
@@ -3541,6 +3546,83 @@ function HomeGoalShiftMomentCard({ moment, profile, language, t, onResolved }) {
             : t("todayMoment.homeGoalShift.reasonBehindPace")}
         </p>
       ) : null}
+    </motion.section>
+  );
+}
+
+// Phase 3: the real result closing the loop, not a generic notification -
+// only ever rendered when computeHomeGoalRecoveryMoment found real logged
+// check-ins actually matching or beating the committed pace.
+function HomeGoalRecoveryMomentCard({ moment, t, onDismissed }) {
+  return (
+    <motion.section className="momentFocus momentFocusPositive" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.36, ease: "easeOut" }}>
+      <strong className="momentHeadline">{t("todayMoment.homeGoalRecovery.headline", { months: moment.data.recoveredMonths })}</strong>
+      <p>
+        {moment.data.remainingGapMonths > 0
+          ? t("todayMoment.homeGoalRecovery.stillGap", { months: moment.data.remainingGapMonths })
+          : t("todayMoment.homeGoalRecovery.onTrack")}
+      </p>
+      <button type="button" className="linkButton" onClick={onDismissed}>
+        {t("todayMoment.homeGoalRecovery.acknowledge")}
+      </button>
+    </motion.section>
+  );
+}
+
+// Phase 2: "确认后界面直接转成执行状态" - persistent, not a one-time
+// confirmation toast. Shown whenever a real active goal_commitment exists
+// (see lib/goal-commitment-store.js), independent of whether a new Moment
+// is also present. Every field is real: executionState is derived live
+// against the customer's current real emergency buffer
+// (lib/goal-commitment-finance.js), never a stored flag that could drift.
+function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleRevoke = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/home/goal-commitment/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: commitment.id }),
+      });
+      if (!response.ok) {
+        setError(t("todayMoment.execution.revokeError"));
+        return;
+      }
+      onRevoked?.();
+    } catch {
+      setError(t("todayMoment.execution.revokeError"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.section className="momentFocus momentFocusQuiet" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+      <span className={commitment.executionState === "paused" ? "statChip warning" : "statChip"}>
+        {t(`todayMoment.execution.state.${commitment.executionState}`)}
+      </span>
+      <p>{t("todayMoment.execution.summary", { amount: formatSgd(Number(commitment.monthly_contribution)), month: commitment.effective_month })}</p>
+      <p className="riskText">
+        {commitment.executionState === "paused"
+          ? t("todayMoment.execution.pausedDetail", {
+              threshold: Number(commitment.pause_if_emergency_months_below),
+              current: commitment.emergencyBufferMonths,
+            })
+          : t("todayMoment.execution.pauseCondition", { threshold: Number(commitment.pause_if_emergency_months_below) })}
+      </p>
+      {error ? (
+        <section className="adviceOnlyPanel">
+          <AlertTriangle size={18} />
+          <p>{error}</p>
+        </section>
+      ) : null}
+      <button type="button" className="linkButton" onClick={handleRevoke} disabled={submitting}>
+        {submitting ? t("weddingPlanner.thinking") : t("todayMoment.execution.revoke")}
+      </button>
     </motion.section>
   );
 }
@@ -3600,22 +3682,33 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
 
   // Real Moments (lib/moment-engine.js) - outranks every other nudge below
   // since it's a fully-computed real change with a real decision attached,
-  // not just a pointer into a chat conversation.
-  const [moments, setMoments] = useState([]);
-  const topMoment = moments[0] ?? null;
+  // not just a pointer into a chat conversation. momentsFetchNonce forces a
+  // refetch after adopting/revoking a commitment, since that changes both
+  // which Moment (if any) should show next AND the persistent execution
+  // status card.
+  const [momentsPayload, setMomentsPayload] = useState(null);
+  const [dismissedMomentIds, setDismissedMomentIds] = useState([]);
+  const [momentsFetchNonce, setMomentsFetchNonce] = useState(0);
+  const refetchMoments = () => setMomentsFetchNonce((current) => current + 1);
+  const visibleMoments = (momentsPayload?.moments ?? []).filter((moment) => !dismissedMomentIds.includes(moment.id));
+  const topMoment = visibleMoments[0] ?? null;
+  const activeCommitment = momentsPayload?.commitment ?? null;
   useEffect(() => {
     if (!hasRealProfile) return;
     let cancelled = false;
     fetch("/api/moments")
       .then((response) => response.json())
       .then((data) => {
-        if (!cancelled) setMoments(data.moments ?? []);
+        if (!cancelled) {
+          setMomentsPayload(data);
+          setDismissedMomentIds([]);
+        }
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [hasRealProfile]);
+  }, [hasRealProfile, momentsFetchNonce]);
 
   const guardianNudge = topCrossGoalAlert
     ? alertToNudge(topCrossGoalAlert)
@@ -3837,12 +3930,21 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
           <HomeGoalShiftMomentCard
             key={topMoment.id}
             moment={topMoment}
-            profile={profile}
             language={language}
             t={t}
-            onResolved={() => setMoments((current) => current.slice(1))}
+            onAdopted={refetchMoments}
+            onDismissed={() => setDismissedMomentIds((current) => [...current, topMoment.id])}
+          />
+        ) : topMoment?.id === "home-goal-recovery" ? (
+          <HomeGoalRecoveryMomentCard
+            key={topMoment.id}
+            moment={topMoment}
+            t={t}
+            onDismissed={() => setDismissedMomentIds((current) => [...current, topMoment.id])}
           />
         ) : null}
+
+        {activeCommitment ? <GuardianExecutionStatusCard commitment={activeCommitment} t={t} onRevoked={refetchMoments} /> : null}
 
         <motion.section
           className="quickActionCard"

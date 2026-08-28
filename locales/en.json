@@ -2950,17 +2950,36 @@
   "todayMoment": {
     "homeGoalShift": {
       "title": "Your home savings pace has slipped",
-      "headline": "Your home purchase plan is on track to complete about {months} months later than planned.",
+      "headline": "Your home will be ready about {months} months later than planned.",
+      "todayLabel": "Today",
       "sliderLabel": "Adjust monthly contribution",
       "readyNow": "You already have enough saved.",
       "readyBy": "Ready by {month} at this pace.",
       "notOnTrack": "Not enough at this pace to reach a real ready date.",
-      "adopt": "Adopt this pace",
+      "tradeoff": "{amount}/month recovers your original date, but your emergency buffer would grow about {months} fewer months over the next {horizon}.",
+      "adopt": "Adopt {amount}/month",
       "keep": "Keep current plan",
       "why": "Why did this happen?",
       "reasonExpenseIncrease": "Over the same period, your real logged expenses rose by about {amount}/month.",
       "reasonBehindPace": "You've been saving less than your confirmed monthly contribution in the months you've logged.",
       "adoptError": "Something went wrong updating your plan. Please try again, or open Home Purchase Planner directly."
+    },
+    "homeGoalRecovery": {
+      "headline": "You caught up {months} months on your home savings pace.",
+      "stillGap": "Still about {months} months short of your original date.",
+      "onTrack": "You're back on your original date.",
+      "acknowledge": "Got it"
+    },
+    "execution": {
+      "state": {
+        "active": "Guardian is tracking this commitment",
+        "paused": "Guardian has paused this commitment"
+      },
+      "summary": "{amount}/month toward your home, starting {month}.",
+      "pauseCondition": "Guardian will automatically pause this if your emergency buffer drops below {threshold} months.",
+      "pausedDetail": "Your emergency buffer is {current} months, below the {threshold}-month floor - this commitment is paused until it recovers.",
+      "revoke": "Cancel this commitment",
+      "revokeError": "Something went wrong cancelling this. Please try again."
     }
   },
   "homeBanking": {

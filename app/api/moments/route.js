@@ -7,6 +7,8 @@ import { computeSmoothedExpenses } from "../../../lib/expense-finance.js";
 import { resolveAssetPromptContext } from "../../../lib/liquid-savings-context.js";
 import { getOrCreateSession, getLatestArtifact, getSavingsCheckins } from "../../../lib/home-store.js";
 import { computeMoments } from "../../../lib/moment-engine.js";
+import { getActiveCommitment } from "../../../lib/goal-commitment-store.js";
+import { evaluateCommitmentExecutionState } from "../../../lib/goal-commitment-finance.js";
 
 export const runtime = "nodejs";
 
@@ -42,10 +44,11 @@ export async function GET(request) {
   const assetContext = await resolveAssetPromptContext(userId, statedSavings, smoothedExpenses.effectiveMonthlyExpenses, "flexible");
 
   const homeSession = await getOrCreateSession(userId);
-  const [confirmedPlan, confirmedSavingsPlan, savingsCheckins] = await Promise.all([
+  const [confirmedPlan, confirmedSavingsPlan, savingsCheckins, commitment] = await Promise.all([
     getLatestArtifact(homeSession.id, "stage1", "confirmed_plan"),
     getLatestArtifact(homeSession.id, "stage2", "confirmed_savings_plan"),
     getSavingsCheckins(homeSession.id),
+    getActiveCommitment(userId, "home"),
   ]);
 
   const moments = computeMoments({
@@ -55,6 +58,8 @@ export async function GET(request) {
       savingsCheckins,
       currentSavings: assetContext.availableLiquidSavings,
       expenseHistory,
+      monthlyExpenses: smoothedExpenses.effectiveMonthlyExpenses,
+      commitment,
     },
   });
 
@@ -65,5 +70,12 @@ export async function GET(request) {
       monthlyExpenses: smoothedExpenses.effectiveMonthlyExpenses,
       currentSavings: assetContext.availableLiquidSavings,
     },
+    commitment: commitment
+      ? {
+          ...commitment,
+          executionState: evaluateCommitmentExecutionState({ commitment, emergencyBufferMonths: assetContext.emergencyBufferMonths }),
+          emergencyBufferMonths: assetContext.emergencyBufferMonths,
+        }
+      : null,
   });
 }
