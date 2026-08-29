@@ -39,6 +39,18 @@ export async function GET(request) {
   const realityFeasibility = context.adapter.feasibility(context.realityPlanData);
   const projector = context.adapter.projector(context.realityPlanData);
 
+  // Ready-month for a given planData + monthly amount - the canvas places
+  // every path's end node on the time axis with this. Real projector math,
+  // never a guess; null when the amount can't reach a date.
+  const readyMonthFor = (planData, monthlyAmount) => {
+    const months = context.adapter.projector(planData)(monthlyAmount);
+    if (months == null) return { monthsToReady: null, readyMonth: null };
+    const d = new Date();
+    d.setMonth(d.getMonth() + months);
+    return { monthsToReady: months, readyMonth: d.toISOString().slice(0, 7) };
+  };
+  const realityReady = readyMonthFor(context.realityPlanData, context.realityPlanData.monthly_contribution || 0);
+
   // Catch-up: reality vs the committed monthly amount.
   let catchUp = null;
   if (context.confirmedSavingsPlan) {
@@ -67,19 +79,27 @@ export async function GET(request) {
     realityPath: {
       data: context.realityPlanData,
       feasibility: realityFeasibility,
+      monthlyContribution: context.realityPlanData.monthly_contribution || 0,
+      ...realityReady,
     },
-    possiblePaths: branches.map((b) => ({
-      id: b.id,
-      label: b.label,
-      status: b.status,
-      baseVersion: b.base_version,
-      delta: b.delta,
-      feasibility: b.feasibility,
-    })),
+    possiblePaths: branches.map((b) => {
+      const monthly = Number(b.data?.monthly_contribution) || context.realityPlanData.monthly_contribution || 0;
+      return {
+        id: b.id,
+        label: b.label,
+        status: b.status,
+        baseVersion: b.base_version,
+        delta: b.delta,
+        feasibility: b.feasibility,
+        monthlyContribution: monthly,
+        ...readyMonthFor(b.data ?? context.realityPlanData, monthly),
+      };
+    }),
     committedPath: context.confirmedSavingsPlan
       ? {
           monthlyContribution: Number(context.confirmedSavingsPlan.monthly_contribution) || 0,
           targetMonth: context.confirmedSavingsPlan.target_complete_month ?? null,
+          ...readyMonthFor(context.realityPlanData, Number(context.confirmedSavingsPlan.monthly_contribution) || 0),
         }
       : null,
     pins: constraints.map((c) => ({

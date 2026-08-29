@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
+import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -149,6 +150,7 @@ const screens = {
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CHANGE_LEDGER: "changeLedger",
+  FUTURE_FIELD: "futureField",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3189,6 +3191,7 @@ function getNavScreen(activeScreen) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
+  if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
   return activeScreen;
 }
 
@@ -5309,6 +5312,18 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
               ))}
           </div>
         </div>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FUTURE_FIELD)}>
+          <LineChart size={15} />
+          <span>
+            {t("futureField.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("futureField.entryBody")}</small>
+          </span>
+          <span className="weddingEntryTrailing">
+            <b className="miniBadge">{t("futureField.newFeatureBadge")}</b>
+            <ChevronRight size={14} />
+          </span>
+        </button>
 
         <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.DECISION_VERDICT)}>
           <Zap size={15} />
@@ -17339,6 +17354,9 @@ export default function App() {
     ),
     [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.CHANGE_LEDGER]: <ChangeLedgerScreen t={t} setActiveScreen={setActiveScreen} backTo={screens.LIFE_GRAPH} />,
+    [screens.FUTURE_FIELD]: (
+      <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
+    ),
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

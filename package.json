@@ -11,6 +11,8 @@
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint app --max-warnings=0",
     "test": "node --test \"tests/**/*.test.mjs\"",
+    "smoke:change-ledger": "node --env-file=.env _smoke_change_ledger.mjs",
+    "smoke:future-field": "node --env-file=.env _smoke_future_field.mjs",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs",
     "postinstall": "node scripts/copy-pdf-worker.mjs"
