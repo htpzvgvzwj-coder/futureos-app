@@ -104,7 +104,18 @@ export async function POST(request) {
     }),
   );
 
-  return Response.json({ branch: { id: branch.id, label, delta: peeled.delta, feasibility: peeled.feasibility }, ledgerEventId: ledger?.event?.id ?? null });
+  // Real cross-goal projection for the branch just created - so the UI can
+  // show "Home earlier / Emergency unchanged" immediately without a
+  // full reload.
+  const projectedImpacts =
+    typeof context.adapter.projectImpacts === "function"
+      ? context.adapter.projectImpacts(peeled.data, context.realityPlanData, context.projectionContext ?? {})
+      : null;
+
+  return Response.json({
+    branch: { id: branch.id, label, delta: peeled.delta, feasibility: peeled.feasibility, projectedImpacts },
+    ledgerEventId: ledger?.event?.id ?? null,
+  });
 }
 
 export async function GET(request) {

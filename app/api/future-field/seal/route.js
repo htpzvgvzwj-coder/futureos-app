@@ -64,6 +64,12 @@ export async function POST(request) {
   });
   const constraintCheck = checkConstraints(pins, metrics);
 
+  // A plan whose budget does not cover its core cost cannot be Sealed - it
+  // stays in Exploring / Needs Changes until the customer cuts guests,
+  // changes the venue, adjusts items, or raises the budget.
+  const sealFeasibility = context.adapter.feasibility(branch?.data ?? context.realityPlanData);
+  const budgetBelowCore = sealFeasibility?.sealable === false;
+
   const readyMonth = (() => {
     if (projectedMonths == null) return null;
     const d = new Date();
@@ -85,10 +91,30 @@ export async function POST(request) {
   });
 
   if (mode === "preview") {
-    return Response.json({ preview });
+    return Response.json({
+      preview: {
+        ...preview,
+        sealable: !budgetBelowCore && constraintCheck.ok,
+        budgetGap: sealFeasibility?.budgetGap ?? 0,
+        unresolvedItems: sealFeasibility?.unresolvedItems ?? [],
+      },
+    });
   }
 
   // confirm --------------------------------------------------------------
+  if (budgetBelowCore) {
+    return Response.json(
+      {
+        error: "budget_below_core",
+        budgetGap: sealFeasibility.budgetGap,
+        computedCoreTotal: sealFeasibility.computedCoreTotal,
+        userBudgetCeiling: sealFeasibility.userBudgetCeiling,
+        unresolvedItems: sealFeasibility.unresolvedItems,
+        preview,
+      },
+      { status: 422 },
+    );
+  }
   if (!constraintCheck.ok) {
     return Response.json({ error: "violates_pins", violations: constraintCheck.violations, preview }, { status: 422 });
   }

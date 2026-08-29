@@ -6092,3 +6092,168 @@ nextjs-portal {
   border-radius: 10px;
   padding: 8px 10px;
 }
+
+/* ============================================================
+   Wedding Living Plan
+   ============================================================ */
+.wlpScreen {
+  padding: 16px 14px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wlpHeader h1 {
+  margin: 4px 0 2px;
+  font-size: 1.28rem;
+}
+.wlpHeader p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.wlpGuardian {
+  border: 1px solid #bfe8de;
+  background: #e6f6f2;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.wlpGuardian strong { color: var(--success); }
+.wlpNeedsChanges {
+  border: 1px solid #f3c9cc;
+  background: #fdeced;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.wlpNeedsChanges strong { color: var(--ocbc-red); }
+.wlpTabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.wlpTab {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.wlpTabActive {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.wlpBody { display: flex; flex-direction: column; gap: 12px; }
+.wlpView {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(20, 36, 58, 0.06);
+}
+.wlpView h3 { margin: 0; font-size: 1rem; }
+.wlpView h4 { margin: 0 0 6px; font-size: 0.9rem; }
+.wlpMuted { margin: 0; color: var(--muted); font-size: 0.82rem; }
+.wlpWarn { color: var(--ocbc-red); }
+.wlpUp { color: var(--ocbc-red); font-weight: 600; }
+.wlpDown { color: var(--success); font-weight: 600; }
+.wlpEmpty { color: var(--muted); padding: 24px 4px; }
+.wlpProvenance { margin: 4px 0 0; font-size: 0.76rem; color: var(--muted); font-style: italic; }
+.wlpEstimate, .wlpView .wlpProvenance { font-style: italic; }
+
+/* Guest Orbit */
+.wlpOrbitRings { display: flex; flex-direction: column; gap: 10px; }
+.wlpOrbitRing {
+  display: grid;
+  grid-template-columns: 92px 1fr 56px;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+}
+.wlpOrbitNum {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 6px;
+  width: 100%;
+}
+.wlpOrbitTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  font-size: 0.9rem;
+}
+.wlpAppliedImpact {
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+.wlpAppliedImpact ul { margin: 6px 0 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+
+/* Budget River */
+.wlpRiverInflow { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.wlpRiverInflow > div { display: flex; justify-content: space-between; font-size: 0.82rem; }
+.wlpRiverInflow dt { color: var(--muted); }
+.wlpRiverInflow dd { margin: 0; font-weight: 600; }
+.wlpRiverFlow { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.wlpRiverFlow li {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 8px;
+  font-size: 0.83rem;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+.wlpRiverWhen { color: var(--muted); }
+.wlpRiverAmt { font-weight: 600; }
+.wlpRiverPeak { margin: 4px 0 0; font-size: 0.84rem; font-weight: 600; color: var(--navy-2); }
+.wlpRiverGap { border: 1px solid #f3c9cc; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.wlpRiverGap ul { margin: 0; padding-left: 16px; font-size: 0.82rem; }
+.wlpRiverGap label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; }
+.wlpRiverGap input { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+
+/* Wedding Mirror */
+.wlpMirrorPick { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.83rem; }
+.wlpMirrorPick legend { font-weight: 600; padding: 0 4px; }
+.wlpMirrorTable { display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
+.wlpMirrorRow { display: grid; grid-template-columns: 96px repeat(3, 1fr); gap: 6px; font-size: 0.8rem; align-items: center; }
+.wlpMirrorHead { font-weight: 700; color: var(--navy-2); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.wlpMirrorRow > span[role="cell"], .wlpMirrorRow > span[role="rowheader"] { padding: 5px 4px; }
+.wlpMirrorRow > span[role="rowheader"] { color: var(--muted); }
+.wlpMirrorSeal { display: flex; flex-direction: column; gap: 6px; }
+.wlpMirrorMsg { margin: 0; font-size: 0.83rem; color: var(--navy-2); }
+
+/* Change Replay */
+.wlpReplayPick { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; }
+.wlpReplayPick select { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.wlpReplaySteps { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; overflow-x: auto; }
+.wlpReplaySteps li button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.74rem;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.wlpReplayStepActive button { background: var(--navy); color: #fff; border-color: var(--navy); }
+.wlpReplayStepDone button { color: var(--success); border-color: #bfe8de; }
+.wlpReplayPanel { background: var(--soft); border-radius: 12px; padding: 12px; }
+.wlpReplayPanel ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; }
+.wlpReplayNav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+.ffEmbedded { padding: 0; box-shadow: none; }
+
+@media (max-width: 360px) {
+  .wlpOrbitRing { grid-template-columns: 78px 1fr 48px; }
+  .wlpMirrorRow { grid-template-columns: 80px repeat(3, 1fr); }
+}

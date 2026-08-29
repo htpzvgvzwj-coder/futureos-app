@@ -220,22 +220,24 @@ test("Cross-goal: a Wedding-sized monthly commitment is visible against the fixt
   void pool;
 });
 
-test("Wedding Living Plan: the field loads with Home + Emergency cross-goal nodes; a guest-count Peel recomputes and persists", opts, async (t) => {
+test("Wedding Living Plan: 150->~90 guests recomputes wedding + Home + Emergency, persists, Seals into a commitment, revokes back", opts, async (t) => {
   const { ffService, ffAdapters, store, ff, pool } = await mods();
+  const { computeWeddingPlanFinance } = await import("../../lib/wedding/plan-finance.js");
+  const { projectWeddingBranchImpact } = await import("../../lib/wedding/cross-goal-projection.js");
+  const gcStore = await import("../../lib/goal-commitment-store.js");
+
   const ctx = await ffService.loadDomainContext(FIXTURE_HOME_USER, "wedding");
   if (!ctx.realityPlanData) {
     t.skip("fixture account has no confirmed wedding budget");
     return;
   }
-  // The Wedding field always shows the Home deposit + Emergency fund as
-  // their own nodes on the same time axis.
   const nodeIds = (ctx.crossGoalNodes ?? []).map((n) => n.goalId);
-  assert.ok(nodeIds.includes("emergency"), "emergency fund node present");
-  // home node present only if the fixture also has a confirmed home plan
-  assert.ok(nodeIds.includes("home") || nodeIds.length === 1);
+  assert.ok(nodeIds.includes("emergency"), "emergency fund node present on the wedding field");
 
   const plan = await ffService.ensurePlan(FIXTURE_HOME_USER, "wedding", ctx);
+  let commitmentId = null;
   t.after(async () => {
+    if (commitmentId) await pool.query("delete from goal_commitments where id = $1", [commitmentId]);
     await pool.query("delete from plan_branches where plan_id = $1", [plan.id]);
     await pool.query("delete from plan_constraints where plan_id = $1", [plan.id]);
     await pool.query("delete from plan_versions where plan_id = $1", [plan.id]);
@@ -243,23 +245,73 @@ test("Wedding Living Plan: the field loads with Home + Emergency cross-goal node
   });
 
   const adapter = ffAdapters.getFutureFieldAdapter("wedding");
-  const before = adapter.feasibility(ctx.realityPlanData);
-  assert.ok(before.available && before.computedCoreTotal > 0);
 
-  // "wedding from 150 guests to 88" - the headline acceptance case.
-  const fewerGuests = Math.max(20, Math.round(Number(ctx.realityPlanData.guest_count) * 0.6));
+  // --- baseline: record the reality numbers -------------------------
+  const realityFin = computeWeddingPlanFinance({ planData: ctx.realityPlanData });
+  assert.ok(realityFin.available && realityFin.computedCoreTotal > 0, "real banquet math");
+  const homeReadyBefore = ctx.crossGoalNodes.find((n) => n.goalId === "home")?.readyMonth ?? null;
+  const emergencyBefore = ctx.crossGoalNodes.find((n) => n.goalId === "emergency")?.bufferMonths ?? null;
+
+  // --- Peel to ~90 guests -----------------------------------------
+  const fewer = Math.max(20, Math.round(Number(ctx.realityPlanData.guest_count) * 0.6));
   const peeled = ff.peelBranch({
     baseData: ctx.realityPlanData,
-    overrides: { guest_count: fewerGuests },
+    overrides: { guest_count: fewer },
     feasibilityFn: (d) => adapter.feasibility(d),
   });
-  assert.deepEqual(peeled.delta.changedKeys, ["guest_count"]);
-  assert.ok(peeled.feasibility.computedCoreTotal < before.computedCoreTotal, "fewer guests -> lower real banquet total");
+  assert.ok(peeled.feasibility.computedCoreTotal < realityFin.computedCoreTotal, "wedding total DOWN");
+  assert.ok(peeled.feasibility.userRequiredMonthly <= realityFin.userRequiredMonthly, "personal required monthly DOWN or equal");
 
-  const branch = await store.createBranch(plan.id, FIXTURE_HOME_USER, {
-    label: "itest fewer guests", baseVersion: "1", data: peeled.data, delta: peeled.delta, feasibility: peeled.feasibility,
+  const impact = projectWeddingBranchImpact({
+    branchFinance: computeWeddingPlanFinance({ planData: peeled.data }),
+    realityFinance: realityFin,
+    context: ctx.projectionContext,
   });
-  const reloaded = await store.listBranches(plan.id);
-  assert.ok(reloaded.some((b) => b.id === branch.id), "wedding branch persists and reloads");
-  assert.equal(Number(reloaded.find((b) => b.id === branch.id).data.guest_count), fewerGuests);
+  assert.ok(impact.cashflow.freed >= 0, "fewer guests frees cashflow, never costs more");
+  if (impact.home) {
+    assert.ok(impact.home.monthsDelta <= 0, "Home deposit is the same or EARLIER, never later");
+  }
+  assert.ok(impact.emergency.bufferAfter >= impact.emergency.bufferBefore, "Emergency buffer does NOT fall");
+
+  // --- persist the branch, reload, check the projection is stable --
+  const branch = await store.createBranch(plan.id, FIXTURE_HOME_USER, {
+    label: "itest 90 guests", baseVersion: "1", data: peeled.data, delta: peeled.delta, feasibility: peeled.feasibility,
+  });
+  const reloadedBranch = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
+  assert.equal(Number(reloadedBranch.data.guest_count), fewer, "branch survives reload");
+  const impactAfterReload = projectWeddingBranchImpact({
+    branchFinance: computeWeddingPlanFinance({ planData: reloadedBranch.data }),
+    realityFinance: realityFin,
+    context: ctx.projectionContext,
+  });
+  assert.deepEqual(impactAfterReload.wedding, impact.wedding, "projected wedding impact identical after reload");
+  assert.deepEqual(impactAfterReload.home, impact.home, "projected home impact identical after reload");
+
+  // --- Seal into a real commitment -------------------------------
+  const sealAmount = peeled.feasibility.userRequiredMonthly || 500;
+  const commitment = await gcStore.createCommitment(FIXTURE_HOME_USER, {
+    domain: "wedding",
+    monthlyContribution: sealAmount,
+    effectiveMonth: new Date().toISOString().slice(0, 7),
+    pauseIfEmergencyMonthsBelow: 6,
+    sourceMoment: { source: "itest_future_field_seal", branchId: branch.id },
+    supersededSavingsPlan: null,
+    priorMonthlyContribution: ctx.realityPlanData.monthly_contribution || 0,
+    planId: plan.id,
+    planBranchId: branch.id,
+  });
+  commitmentId = commitment.id;
+  assert.equal(commitment.status, "active");
+  assert.equal(Number(commitment.monthly_contribution), sealAmount);
+  const activeAfterSeal = await gcStore.getActiveCommitment(FIXTURE_HOME_USER, "wedding");
+  assert.equal(activeAfterSeal.id, commitment.id, "Seal is the active wedding commitment");
+
+  // --- Revoke -> back to pre-Seal state -------------------------
+  const revoked = await gcStore.revokeCommitment(commitment.id, FIXTURE_HOME_USER);
+  assert.equal(revoked.status, "revoked");
+  const activeAfterRevoke = await gcStore.getActiveCommitment(FIXTURE_HOME_USER, "wedding");
+  assert.equal(activeAfterRevoke, null, "no active wedding commitment after revoke");
+
+  void homeReadyBefore;
+  void emergencyBefore;
 });

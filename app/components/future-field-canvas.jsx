@@ -335,6 +335,7 @@ export function FutureFieldCanvas({
   backTo = "mirror",
   titleKey = "futureField.title",
   subtitleKey = "futureField.subtitle",
+  embedded = false,
 }) {
   const locale = language === "zh" ? "zh-CN" : "en-SG";
   const peelFields = peelFieldsFor(domain);
@@ -548,14 +549,18 @@ export function FutureFieldCanvas({
   const pinMeta = PIN_KINDS.find((p) => p.kind === pinKind);
 
   return (
-    <section className="screen ffScreen">
-      <button type="button" className="linkButton" onClick={() => setActiveScreen(backTo)}>
-        <ArrowLeft size={16} aria-hidden /> {t("changeLedger.back")}
-      </button>
-      <header className="ffHeader">
-        <h1>{t(titleKey)}</h1>
-        <p>{t(subtitleKey)}</p>
-      </header>
+    <section className={embedded ? "ffScreen ffEmbedded" : "screen ffScreen"}>
+      {embedded ? null : (
+        <>
+          <button type="button" className="linkButton" onClick={() => setActiveScreen(backTo)}>
+            <ArrowLeft size={16} aria-hidden /> {t("changeLedger.back")}
+          </button>
+          <header className="ffHeader">
+            <h1>{t(titleKey)}</h1>
+            <p>{t(subtitleKey)}</p>
+          </header>
+        </>
+      )}
 
       <p className="ffLiveRegion" role="status" aria-live="polite">
         {announce}

@@ -84,6 +84,13 @@ export async function GET(request) {
     },
     possiblePaths: branches.map((b) => {
       const monthly = Number(b.data?.monthly_contribution) || context.realityPlanData.monthly_contribution || 0;
+      // Real per-branch cross-goal projection (Home + Emergency + Cashflow
+      // before/after). Only domains whose adapter implements projectImpacts
+      // return this; others get null (honest).
+      const projectedImpacts =
+        typeof context.adapter.projectImpacts === "function"
+          ? context.adapter.projectImpacts(b.data ?? context.realityPlanData, context.realityPlanData, context.projectionContext ?? {})
+          : null;
       return {
         id: b.id,
         label: b.label,
@@ -92,6 +99,7 @@ export async function GET(request) {
         delta: b.delta,
         feasibility: b.feasibility,
         monthlyContribution: monthly,
+        projectedImpacts,
         ...readyMonthFor(b.data ?? context.realityPlanData, monthly),
       };
     }),
