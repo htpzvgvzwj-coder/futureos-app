@@ -4021,12 +4021,31 @@
       "accelerates_a_goal": "You've pushed freed money toward one goal repeatedly. Make it a plan?",
       "protects_the_emergency_floor": "You keep protecting the emergency floor. Pin it so every plan respects it?",
       "chooses_safety_under_pressure": "Under pressure you've chosen safety a few times. Keep as an observation?"
-    }
+    },
+    "dismiss": "Dismiss",
+    "askWhy": "Ask why"
   },
   "shadowGuardian": {
     "entry": {
       "needsAChoice": "If you keep the current commitments, a month ahead may need a choice. Want a look first?",
       "allClear": "Rehearsed against the current commitments - nothing needs a decision."
+    },
+    "title": "Shadow Guardian",
+    "entryPrompt": "Rehearse the current commitments against a change - want a look?",
+    "rescuesLabel": "Options (not a recommendation)",
+    "openMirror": "Look at the options in Mirror",
+    "assumptionsLabel": "Assumptions · confidence: {level}",
+    "dismiss": "Not now",
+    "finding": {
+      "cashflow": "Free cashflow would go from {before} to {after} a month.",
+      "floor": "Emergency buffer would go from {before} to {after} months - below the {floor}-month floor.",
+      "milestone": "A payment milestone could fall short at its due date."
+    },
+    "rescue": {
+      "keep_plan_watch": "Keep every plan as-is and watch",
+      "adjust_one_variable": "Adjust one variable in a plan",
+      "use_available_future": "Cover it from an Available Future",
+      "pause_or_defer_a_commitment": "Pause or defer one commitment"
     }
   },
   "memoryLens": {
@@ -4039,6 +4058,35 @@
       "estimate": "Estimate",
       "inference": "Inference",
       "unknown": "Unknown"
+    },
+    "title": "Memory Lens",
+    "subtitle": "Why your life is the shape it is now - the real chain, step by step.",
+    "loadError": "Couldn't build the Memory Lens. Try again shortly.",
+    "pickGoal": "Look at",
+    "noImpact": "This step didn't move a tracked number.",
+    "before": "Before",
+    "after": "After",
+    "thinEvidence": "The record here is thin - treat this step as context, not proof.",
+    "versionTrail": "Plan version history",
+    "goal": {
+      "wedding": "Wedding",
+      "home": "Home",
+      "emergency": "Emergency fund",
+      "retirement": "Retirement",
+      "loan": "Loan",
+      "travel": "Travel",
+      "family": "Family",
+      "investment": "Investment"
     }
+  },
+  "futureHandoff": {
+    "title": "Future Handoff",
+    "help": "A commitment ended - the monthly it used is released. You decide where it goes.",
+    "released": "Your {domain} commitment released {amount}/month from {from}.",
+    "unallocated": "{amount}/month still unallocated.",
+    "overAllocated": "That's more than was released.",
+    "confirm": "Confirm this handoff",
+    "confirmed": "Handoff confirmed. {unallocated}/month still available.",
+    "error": "Couldn't confirm the handoff. Try again."
   }
 }
