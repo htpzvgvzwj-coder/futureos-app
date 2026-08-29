@@ -9,10 +9,12 @@ import {
 } from "../../../../lib/plan-runtime/index.js";
 import { createCommitment } from "../../../../lib/goal-commitment-store.js";
 import * as homeStore from "../../../../lib/home-store.js";
+import * as weddingStore from "../../../../lib/wedding-store.js";
 import { EMERGENCY_FUND_MONTHS_TARGET } from "../../../../lib/investment-readiness-finance.js";
 import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
 import { buildBranchSealedEvent } from "../../../../lib/change-ledger/producers/future-field.js";
 import { buildHomeCommitmentCreatedEvent } from "../../../../lib/change-ledger/producers/home.js";
+import { buildSavingsPlanConfirmedEvent } from "../../../../lib/change-ledger/producers/goal-plan.js";
 
 export const runtime = "nodejs";
 
@@ -131,11 +133,13 @@ export async function POST(request) {
     reconfirmAfterDays: 180,
   });
 
-  // Keep the confirmed_savings_plan artifact (home) in sync for downstream
-  // consumers, exactly like the Moment-driven route.
-  if (domain === "home") {
-    const session = await homeStore.getOrCreateSession(userId);
-    await homeStore.saveArtifact(
+  // Keep the confirmed_savings_plan artifact in sync for downstream
+  // consumers (Strategic Balance, cross-goal), exactly like the Moment-
+  // driven route. Same shape for home and wedding.
+  const domainStore = domain === "wedding" ? weddingStore : domain === "home" ? homeStore : null;
+  if (domainStore) {
+    const session = await domainStore.getOrCreateSession(userId);
+    await domainStore.saveArtifact(
       session.id,
       "stage2",
       "confirmed_savings_plan",
@@ -147,7 +151,7 @@ export async function POST(request) {
         notes: "Sealed from Future Field.",
       }),
     );
-    await homeStore.updateSessionStatus(session.id, { stage2Status: "confirmed" });
+    await domainStore.updateSessionStatus(session.id, { stage2Status: "confirmed" });
   }
 
   if (branch) {
@@ -159,19 +163,27 @@ export async function POST(request) {
     buildBranchSealedEvent({ profileKey: userId, domain, planId: plan.id, branchId: branch?.id ?? null, monthlyAmount, sealPreview: preview }),
   );
   const commitmentLedger = await recordEventSafe(
-    buildHomeCommitmentCreatedEvent({
-      profileKey: userId,
-      commitmentId: commitment.id,
-      priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
-      newMonthlyContribution: monthlyAmount,
-      effectiveMonth,
-      readyMonthBefore: null,
-      readyMonthAfter: readyMonth,
-      monthsDelta: delayMonths,
-      reasonCode: "future_field_seal",
-      reasonParams: {},
-      emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
-    }),
+    domain === "home"
+      ? buildHomeCommitmentCreatedEvent({
+          profileKey: userId,
+          commitmentId: commitment.id,
+          priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
+          newMonthlyContribution: monthlyAmount,
+          effectiveMonth,
+          readyMonthBefore: null,
+          readyMonthAfter: readyMonth,
+          monthsDelta: delayMonths,
+          reasonCode: "future_field_seal",
+          reasonParams: {},
+          emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
+        })
+      : buildSavingsPlanConfirmedEvent({
+          profileKey: userId,
+          domain,
+          monthlyContribution: monthlyAmount,
+          priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
+          targetCompleteMonth: readyMonth,
+        }),
   );
 
   return Response.json({

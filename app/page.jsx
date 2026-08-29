@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
+import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -151,6 +152,7 @@ const screens = {
   STRATEGIC_BALANCE: "strategicBalance",
   CHANGE_LEDGER: "changeLedger",
   FUTURE_FIELD: "futureField",
+  WEDDING_LIVING_PLAN: "weddingLivingPlan",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3192,6 +3194,7 @@ function getNavScreen(activeScreen) {
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
+  if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
   return activeScreen;
 }
 
@@ -5313,16 +5316,22 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
           </div>
         </div>
 
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)}>
+          <HeartHandshake size={15} />
+          <span>
+            {t("weddingLivingPlan.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("weddingLivingPlan.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
         <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FUTURE_FIELD)}>
           <LineChart size={15} />
           <span>
             {t("futureField.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("futureField.entryBody")}</small>
           </span>
-          <span className="weddingEntryTrailing">
-            <b className="miniBadge">{t("futureField.newFeatureBadge")}</b>
-            <ChevronRight size={14} />
-          </span>
+          <ChevronRight size={14} />
         </button>
 
         <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.DECISION_VERDICT)}>
@@ -17357,6 +17366,7 @@ export default function App() {
     [screens.FUTURE_FIELD]: (
       <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
     ),
+    [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

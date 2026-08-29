@@ -21,6 +21,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { GoalChangeHistory } from "./change-ledger-screen.jsx";
 
 // ---- time helpers (YYYY-MM) ------------------------------------------------
 function nowMonth() {
@@ -58,11 +59,30 @@ const PIN_KINDS = [
   { kind: "no_balance_share", needsValue: false },
 ];
 
-const PEEL_FIELDS = [
-  { field: "estimated_price", kind: "money" },
-  { field: "target_complete_month", kind: "month" },
-  { field: "monthly_contribution", kind: "money" },
-];
+// Per-domain: which plan variables the customer can Peel a branch on, and
+// how each is edited. `kind` -> input control. `options` -> a <select>.
+const PEEL_FIELDS = {
+  home: [
+    { field: "estimated_price", kind: "money" },
+    { field: "target_complete_month", kind: "month" },
+    { field: "monthly_contribution", kind: "money" },
+  ],
+  wedding: [
+    { field: "wedding_date", kind: "month" },
+    { field: "guest_count", kind: "count" },
+    { field: "venue_tier", kind: "select", options: ["budget", "mid_range", "premium"] },
+    { field: "venue_type", kind: "select", options: ["community", "restaurant", "hotel", "outdoor"] },
+    { field: "total_budget", kind: "money" },
+    { field: "monthly_contribution", kind: "money" },
+    { field: "partner_contribution", kind: "money" },
+  ],
+};
+function peelFieldsFor(domain) {
+  return PEEL_FIELDS[domain] ?? PEEL_FIELDS.home;
+}
+function peelInputType(kind) {
+  return kind === "month" ? "month" : kind === "select" ? "select" : "number";
+}
 
 // ---- SVG time field ------------------------------------------------------
 function TimeField({ field, selectedBranchId, onSelectBranch, onBendMonth, t, locale }) {
@@ -245,6 +265,30 @@ function TimeField({ field, selectedBranchId, onSelectBranch, onBendMonth, t, lo
         </g>
       ) : null}
 
+      {/* Cross-goal nodes - Home deposit + Emergency fund on the same field */}
+      {(field.crossGoalNodes ?? []).map((n, i) => {
+        const y = padT + 128 + i * 18;
+        if (y > H - padB - 4) return null;
+        if (n.goalId === "emergency") {
+          return (
+            <text key={n.goalId} x={x(start) + 4} y={y} className={`ffNodeLabel ffCross-${n.safe ? "ok" : "risk"}`}>
+              {t("futureField.node.emergency")}: {n.bufferMonths}mo {n.safe ? "✓" : t("futureField.belowFloor", { floor: n.floorMonths })}
+            </text>
+          );
+        }
+        const end = n.readyMonth ?? addMonths(start, spanMonths);
+        return (
+          <g key={n.goalId}>
+            <line x1={x(start)} y1={y} x2={x(end)} y2={y} className="ffCrossGoal" />
+            <circle cx={x(end)} cy={y} r={4} className="ffNode ffNodeCross" />
+            <text x={x(end)} y={y - 6} className="ffNodeLabel" textAnchor="middle">
+              {t("futureField.node.home")}
+              {n.readyMonth ? ` · ${fmtMonth(n.readyMonth, locale)}` : ""}
+            </text>
+          </g>
+        );
+      })}
+
       {/* Possible paths (branches) */}
       {(field.possiblePaths ?? []).map((b, i) => {
         const y = lanes.branchBase + i * 20;
@@ -283,8 +327,17 @@ function TimeField({ field, selectedBranchId, onSelectBranch, onBendMonth, t, lo
 }
 
 // ---- panel --------------------------------------------------------------
-export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain = "home", backTo = "mirror" }) {
+export function FutureFieldCanvas({
+  t,
+  setActiveScreen,
+  language = "en",
+  domain = "home",
+  backTo = "mirror",
+  titleKey = "futureField.title",
+  subtitleKey = "futureField.subtitle",
+}) {
   const locale = language === "zh" ? "zh-CN" : "en-SG";
+  const peelFields = peelFieldsFor(domain);
   const [field, setField] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -292,9 +345,10 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
   const [selectedBranchId, setSelectedBranchId] = useState(null);
 
   // Peel form
-  const [peelField, setPeelField] = useState("estimated_price");
+  const [peelField, setPeelField] = useState(peelFields[0].field);
   const [peelValue, setPeelValue] = useState("");
   const [peelLabel, setPeelLabel] = useState("");
+  const peelFieldMeta = peelFields.find((f) => f.field === peelField) ?? peelFields[0];
 
   // Bend
   const [bendMonth, setBendMonth] = useState("");
@@ -360,7 +414,8 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
   const doPeel = async (e) => {
     e?.preventDefault?.();
     if (peelValue === "") return;
-    const overrides = { [peelField]: peelField === "target_complete_month" ? peelValue : Number(peelValue) };
+    const raw = peelFieldMeta.kind === "month" || peelFieldMeta.kind === "select" ? peelValue : Number(peelValue);
+    const overrides = { [peelField]: raw };
     const { ok, data } = await post(`/api/future-field/branch?action=peel&domain=${domain}`, {
       overrides,
       label: peelLabel || t("futureField.defaultBranchLabel"),
@@ -478,9 +533,13 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
         <header className="ffHeader">
           <h1>{t("futureField.title")}</h1>
         </header>
-        <p className="ffEmpty">{t("futureField.noRealityPath")}</p>
-        <button type="button" className="primaryButton" onClick={() => setActiveScreen("needHome")}>
-          {t("futureField.goConfirmPlan")}
+        <p className="ffEmpty">{t(domain === "wedding" ? "futureField.noRealityPathWedding" : "futureField.noRealityPath")}</p>
+        <button
+          type="button"
+          className="primaryButton"
+          onClick={() => setActiveScreen(domain === "wedding" ? "needWedding" : "needHome")}
+        >
+          {t(domain === "wedding" ? "futureField.goConfirmPlanWedding" : "futureField.goConfirmPlan")}
         </button>
       </section>
     );
@@ -494,8 +553,8 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
         <ArrowLeft size={16} aria-hidden /> {t("changeLedger.back")}
       </button>
       <header className="ffHeader">
-        <h1>{t("futureField.title")}</h1>
-        <p>{t("futureField.subtitle")}</p>
+        <h1>{t(titleKey)}</h1>
+        <p>{t(subtitleKey)}</p>
       </header>
 
       <p className="ffLiveRegion" role="status" aria-live="polite">
@@ -522,6 +581,35 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
 
       {error ? <p className="ffError">{error}</p> : null}
 
+      {/* Cross-goal impact - the other real goals this plan competes with */}
+      {(field.crossGoalNodes ?? []).length ? (
+        <section className="ffAction ffCrossCard">
+          <h2>{t("futureField.crossTitle")}</h2>
+          <ul className="ffCrossList">
+            {field.crossGoalNodes.map((n) => (
+              <li key={n.goalId}>
+                {n.goalId === "home" ? (
+                  <span>
+                    {t("futureField.node.home")}: {sgd(n.monthlyContribution)}/mo
+                    {n.readyMonth ? ` · ${t("futureField.ready")} ${fmtMonth(n.readyMonth, locale)}` : ""}
+                  </span>
+                ) : (
+                  <span className={n.safe ? "" : "ffWarn"}>
+                    {t("futureField.node.emergency")}: {n.bufferMonths} {t("futureField.months")}
+                    {n.safe ? ` · ${t("futureField.aboveFloor")}` : ` · ${t("futureField.belowFloor", { floor: n.floorMonths })}`}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {field.context?.availableMonthlyCashflow != null ? (
+            <p className="ffMuted">
+              {t("futureField.roomLeft", { amount: sgd(field.context.availableMonthlyCashflow) })}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
       {/* Catch-up */}
       {field.catchUp ? (
         <section className="ffAction ffCatchUpCard">
@@ -541,8 +629,14 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
         <p className="ffMuted">{t("futureField.peelHelp")}</p>
         <label>
           {t("futureField.peelFieldLabel")}
-          <select value={peelField} onChange={(e) => setPeelField(e.target.value)}>
-            {PEEL_FIELDS.map((f) => (
+          <select
+            value={peelField}
+            onChange={(e) => {
+              setPeelField(e.target.value);
+              setPeelValue("");
+            }}
+          >
+            {peelFields.map((f) => (
               <option key={f.field} value={f.field}>
                 {t(`futureField.peelField.${f.field}`)}
               </option>
@@ -551,12 +645,23 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
         </label>
         <label>
           {t("futureField.peelValueLabel")}
-          <input
-            type={peelField === "target_complete_month" ? "month" : "number"}
-            value={peelValue}
-            onChange={(e) => setPeelValue(e.target.value)}
-            required
-          />
+          {peelFieldMeta.kind === "select" ? (
+            <select value={peelValue} onChange={(e) => setPeelValue(e.target.value)} required>
+              <option value="">—</option>
+              {peelFieldMeta.options.map((o) => (
+                <option key={o} value={o}>
+                  {t(`futureField.opt.${peelField}.${o}`) === `futureField.opt.${peelField}.${o}` ? o : t(`futureField.opt.${peelField}.${o}`)}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={peelInputType(peelFieldMeta.kind)}
+              value={peelValue}
+              onChange={(e) => setPeelValue(e.target.value)}
+              required
+            />
+          )}
         </label>
         <label>
           {t("futureField.peelLabelLabel")}
@@ -691,6 +796,9 @@ export function FutureFieldCanvas({ t, setActiveScreen, language = "en", domain 
           </form>
         )}
       </section>
+
+      {/* Change Replay - what has changed for this plan, from the real Ledger */}
+      <GoalChangeHistory goalId={domain} t={t} setActiveScreen={setActiveScreen} />
     </section>
   );
 }

@@ -6,7 +6,20 @@ import { buildBranchCreatedEvent, buildBranchMergedEvent } from "../../../../lib
 
 export const runtime = "nodejs";
 
-const ALLOWED_OVERRIDES = new Set(["estimated_price", "target_complete_month", "monthly_contribution", "property_type", "down_payment_needed"]);
+const ALLOWED_OVERRIDES = {
+  home: new Set(["estimated_price", "target_complete_month", "monthly_contribution", "property_type", "down_payment_needed"]),
+  wedding: new Set([
+    "wedding_date",
+    "guest_count",
+    "venue_tier",
+    "venue_type",
+    "photography_tier",
+    "attire_tier",
+    "total_budget",
+    "monthly_contribution",
+    "partner_contribution",
+  ]),
+};
 
 // Peel: create a possible future off the reality path. Also handles
 // ?action=compare and ?action=merge on the same resource.
@@ -60,12 +73,13 @@ export async function POST(request) {
   }
 
   // peel
+  const allowed = ALLOWED_OVERRIDES[domain] ?? ALLOWED_OVERRIDES.home;
   const overrides = {};
   for (const [k, v] of Object.entries(body.overrides ?? {})) {
-    if (ALLOWED_OVERRIDES.has(k)) overrides[k] = v;
+    if (allowed.has(k)) overrides[k] = v;
   }
   if (Object.keys(overrides).length === 0) {
-    return Response.json({ error: "no_valid_overrides", allowed: [...ALLOWED_OVERRIDES] }, { status: 422 });
+    return Response.json({ error: "no_valid_overrides", allowed: [...allowed] }, { status: 422 });
   }
   const label = String(body.label ?? "").slice(0, 80) || "Possible future";
 

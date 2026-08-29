@@ -3666,27 +3666,6 @@
     },
     "back": "Back"
   },
-  "demoScenario": {
-    "title": "Demo Scenario",
-    "badge": "Demo data",
-    "notice": "Everything in this walkthrough is clearly-labelled fixture data written to your account so the Change Ledger and planners populate for real. It is never treated as a real customer record and can be reset.",
-    "run": "Run this step",
-    "reset": "Reset demo data",
-    "done": "Done",
-    "next": "Next step",
-    "openLedger": "Open in Change Ledger",
-    "steps": {
-      "wedding_plan_created": "Create a wedding plan",
-      "date_and_guests_changed": "Move the date earlier and add guests",
-      "quote_to_plan": "Import a real venue quote (Quote-to-Plan)",
-      "impact_on_home_and_emergency": "See the impact on Home and Emergency",
-      "shadow_guardian": "Run Shadow Guardian",
-      "seal_commitment": "Seal the commitment",
-      "guardian_pause": "Guardian pauses the contribution",
-      "plan_rescue": "Adopt a Plan Rescue",
-      "wedding_handover": "Wedding completes - Plan Handover"
-    }
-  },
   "futureField": {
     "title": "Future Field",
     "subtitle": "See, split, and commit to your future - money, time and goals on one field.",
@@ -3728,9 +3707,12 @@
     "peelLabelLabel": "Name this future (optional)",
     "peelCta": "Create branch",
     "peelField": {
-      "estimated_price": "Property price",
-      "target_complete_month": "Target date",
-      "monthly_contribution": "Monthly amount"
+      "wedding_date": "Wedding date",
+      "guest_count": "Guest count",
+      "venue_tier": "Venue tier",
+      "venue_type": "Venue type",
+      "total_budget": "Total budget",
+      "partner_contribution": "Partner contribution"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3789,6 +3771,38 @@
       "invalid_amount": "Enter a valid amount.",
       "unknown_pin_kind": "Unknown pin type.",
       "value_required_for_this_pin": "This pin needs a value."
+    },
+    "noRealityPathWedding": "You do not have a confirmed wedding budget yet. Set one up first, then the Wedding Living Plan opens.",
+    "goConfirmPlanWedding": "Open Wedding Planner",
+    "crossTitle": "What this competes with",
+    "roomLeft": "About {amount}/month of real room after every other confirmed commitment.",
+    "ready": "ready",
+    "months": "months",
+    "aboveFloor": "above the safe floor",
+    "belowFloor": "below the {floor}-month floor",
+    "node": {
+      "home": "Home deposit",
+      "emergency": "Emergency fund",
+      "wedding": "Wedding"
+    },
+    "opt": {
+      "venue_tier": {
+        "budget": "Budget",
+        "mid_range": "Mid-range",
+        "premium": "Premium"
+      },
+      "venue_type": {
+        "community": "Community / void deck",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel banquet",
+        "outdoor": "Outdoor"
+      }
     }
+  },
+  "weddingLivingPlan": {
+    "title": "Wedding Living Plan",
+    "subtitle": "Your wedding, your home deposit and your safety net on one timeline. Change one, see the rest move.",
+    "entryTitle": "Wedding Living Plan",
+    "entryBody": "See your wedding against your home deposit and emergency fund. Move the date, guests or budget and watch the rest recalculate."
   }
 }

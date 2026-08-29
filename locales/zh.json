@@ -3484,27 +3484,6 @@
     },
     "back": "返回"
   },
-  "demoScenario": {
-    "title": "演示资料",
-    "badge": "演示数据",
-    "notice": "本演示中的所有内容都是带明确标注的演示数据，会写入你的账户以便变化账本和规划师真实填充。它绝不会被当作真实客户记录，并且可以重置。",
-    "run": "运行此步骤",
-    "reset": "重置演示数据",
-    "done": "已完成",
-    "next": "下一步",
-    "openLedger": "在变化账本中打开",
-    "steps": {
-      "wedding_plan_created": "创建婚礼计划",
-      "date_and_guests_changed": "把日期提前并增加宾客",
-      "quote_to_plan": "导入真实场地报价（Quote-to-Plan）",
-      "impact_on_home_and_emergency": "查看对买房和应急的影响",
-      "shadow_guardian": "运行影子 Guardian",
-      "seal_commitment": "封存承诺",
-      "guardian_pause": "Guardian 暂停储蓄",
-      "plan_rescue": "采纳 Plan Rescue 方案",
-      "wedding_handover": "婚礼完成——Plan Handover"
-    }
-  },
   "futureField": {
     "title": "未来场",
     "subtitle": "在同一个时间场里看见、分裂并承诺你的未来——钱、时间和目标。",
@@ -3546,9 +3525,12 @@
     "peelLabelLabel": "给这个未来命名（可选）",
     "peelCta": "创建分支",
     "peelField": {
-      "estimated_price": "房产价格",
-      "target_complete_month": "目标日期",
-      "monthly_contribution": "每月金额"
+      "wedding_date": "婚礼日期",
+      "guest_count": "宾客人数",
+      "venue_tier": "场地档次",
+      "venue_type": "场地类型",
+      "total_budget": "总预算",
+      "partner_contribution": "伴侣承担"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3607,6 +3589,38 @@
       "invalid_amount": "请输入有效金额。",
       "unknown_pin_kind": "未知的固定条件类型。",
       "value_required_for_this_pin": "此固定条件需要一个数值。"
+    },
+    "noRealityPathWedding": "你还没有已确认的婚礼预算。先设置一个，婚礼生活计划就会打开。",
+    "goConfirmPlanWedding": "打开婚礼规划师",
+    "crossTitle": "这会与什么争夺资金",
+    "roomLeft": "在扣除其他所有已确认承诺后，每月约有 {amount} 的真实空间。",
+    "ready": "完成",
+    "months": "个月",
+    "aboveFloor": "高于安全底线",
+    "belowFloor": "低于 {floor} 个月的底线",
+    "node": {
+      "home": "购房首付",
+      "emergency": "应急金",
+      "wedding": "婚礼"
+    },
+    "opt": {
+      "venue_tier": {
+        "budget": "经济",
+        "mid_range": "中档",
+        "premium": "高端"
+      },
+      "venue_type": {
+        "community": "社区 / 组屋楼下",
+        "restaurant": "餐厅",
+        "hotel": "酒店宴会",
+        "outdoor": "户外"
+      }
     }
+  },
+  "weddingLivingPlan": {
+    "title": "婚礼生活计划",
+    "subtitle": "把婚礼、购房首付和你的安全底线放在同一条时间线上。改动一处，其余随之移动。",
+    "entryTitle": "婚礼生活计划",
+    "entryBody": "在购房首付和应急金的背景下看你的婚礼。改动日期、人数或预算，其余会立即重新计算。"
   }
 }

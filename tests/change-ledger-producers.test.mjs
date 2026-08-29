@@ -178,8 +178,6 @@ test("every event message_key used by the new producers resolves in EN and ZH", 
     "changeLedger.event.plan_handover.wedding_to_honeymoon",
     "changeLedger.event.plan_safe_balance_changed.headline",
     "changeLedger.pinKind.emergency_floor_months",
-    "demoScenario.steps.wedding_plan_created",
-    "demoScenario.steps.wedding_handover",
   ];
   for (const k of keys) {
     assert.notEqual(makeT(en)(k), k, `missing EN ${k}`);

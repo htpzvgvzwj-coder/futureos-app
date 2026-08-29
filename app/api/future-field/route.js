@@ -110,12 +110,17 @@ export async function GET(request) {
       scope: c.scope,
     })),
     catchUp,
+    // Other real goals sharing this time field - Home deposit and the
+    // Emergency fund floor. Rendered as their own nodes so a change here is
+    // seen moving them.
+    crossGoalNodes: context.crossGoalNodes ?? [],
     context: {
       monthlyIncome: context.monthlyIncome,
       monthlyExpenses: context.monthlyExpenses,
       availableMonthlyCashflow: context.availableMonthlyCashflow,
       emergencyBufferMonths: context.emergencyBufferMonths,
       availableLiquidSavings: context.availableLiquidSavings,
+      committedMonthlyTotal: context.committedMonthlyTotal,
     },
   });
 }
