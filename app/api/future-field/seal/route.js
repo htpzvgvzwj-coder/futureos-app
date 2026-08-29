@@ -129,6 +129,11 @@ export async function POST(request) {
   }
 
   const effectiveMonth = nextMonthKey();
+  // The customer's allocation of any freed cashflow travels WITH the seal.
+  // Guardian only ever tracks legs the customer explicitly set; an
+  // unallocated remainder is never quietly pushed into another goal.
+  const sealAllocation = branch?.data?.allocation ?? null;
+  const sealAllocationGoalId = branch?.data?.allocationGoalId ?? "home";
   let commitment;
   try {
     commitment = await createCommitment(userId, {
@@ -136,7 +141,13 @@ export async function POST(request) {
       monthlyContribution: monthlyAmount,
       effectiveMonth,
       pauseIfEmergencyMonthsBelow: EMERGENCY_FUND_MONTHS_TARGET,
-      sourceMoment: { source: "future_field_seal", branchId: branch?.id ?? null, delayMonths },
+      sourceMoment: {
+        source: "future_field_seal",
+        branchId: branch?.id ?? null,
+        delayMonths,
+        allocation: sealAllocation,
+        allocationGoalId: sealAllocationGoalId,
+      },
       supersededSavingsPlan: context.confirmedSavingsPlan,
       priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
       planId: plan.id,
@@ -155,7 +166,24 @@ export async function POST(request) {
     canMoveMoney: false, // no real bank-transfer integration exists
     canReschedule: false,
     canNotify: true,
-    pauseConditions: [{ kind: "emergency_floor_months", operator: "lt", value: EMERGENCY_FUND_MONTHS_TARGET }],
+    // pause_conditions is the only structured jsonb on guardian_policies -
+    // the confirmed allocation legs ride along here so Guardian tracks
+    // exactly what the customer set (never the flexible / unallocated
+    // remainder). The commitment's source_moment.allocation is the
+    // canonical copy.
+    pauseConditions: [
+      { kind: "emergency_floor_months", operator: "lt", value: EMERGENCY_FUND_MONTHS_TARGET },
+      ...(sealAllocation
+        ? [
+            {
+              kind: "tracked_allocation",
+              goalId: sealAllocationGoalId,
+              goalMonthly: Number(sealAllocation.goalMonthly) || 0,
+              emergencyMonthly: Number(sealAllocation.emergencyMonthly) || 0,
+            },
+          ]
+        : []),
+    ],
     reconfirmAfterDays: 180,
   });
 

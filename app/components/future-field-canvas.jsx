@@ -86,6 +86,11 @@ function peelInputType(kind) {
 
 // ---- SVG time field ------------------------------------------------------
 function TimeField({ field, selectedBranchId, onSelectBranch, onBendMonth, t, locale }) {
+  // The projection of the currently-selected branch (if any). Home /
+  // Emergency nodes move by its ALLOCATED layer; its AVAILABLE layer is
+  // drawn as a faint "possible" ghost that is never shown as fact.
+  const selectedProj =
+    (field.possiblePaths ?? []).find((b) => b.id === selectedBranchId)?.projectedImpacts ?? null;
   const W = 340;
   const H = 210;
   const padL = 14;
@@ -265,26 +270,55 @@ function TimeField({ field, selectedBranchId, onSelectBranch, onBendMonth, t, lo
         </g>
       ) : null}
 
-      {/* Cross-goal nodes - Home deposit + Emergency fund on the same field */}
+      {/* Cross-goal nodes - Home deposit + Emergency fund on the same field.
+          When a branch is selected they move by its projection: solid =
+          allocated (a real choice), dashed ghost = available-but-unclaimed. */}
       {(field.crossGoalNodes ?? []).map((n, i) => {
         const y = padT + 128 + i * 18;
         if (y > H - padB - 4) return null;
+
         if (n.goalId === "emergency") {
+          const alloc = selectedProj?.allocatedImpact?.emergency ?? null;
+          const avail = selectedProj?.availableImpact ?? null;
+          const shownBuffer = alloc ? alloc.bufferAfter : n.bufferMonths;
+          const safe = shownBuffer >= (n.floorMonths ?? 6);
           return (
-            <text key={n.goalId} x={x(start) + 4} y={y} className={`ffNodeLabel ffCross-${n.safe ? "ok" : "risk"}`}>
-              {t("futureField.node.emergency")}: {n.bufferMonths}mo {n.safe ? "✓" : t("futureField.belowFloor", { floor: n.floorMonths })}
-            </text>
+            <g key={n.goalId}>
+              <text x={x(start) + 4} y={y} className={`ffNodeLabel ffCross-${safe ? "ok" : "risk"}`}>
+                {t("futureField.node.emergency")}: {shownBuffer}mo{" "}
+                {alloc ? `(${t("futureField.possible")})` : safe ? "✓" : t("futureField.belowFloor", { floor: n.floorMonths })}
+              </text>
+              {!alloc && avail?.maxEmergencyBufferAfter && avail.maxEmergencyBufferAfter > n.bufferMonths ? (
+                <text x={x(start) + 4} y={y + 10} className="ffNodeLabel ffGhost">
+                  {t("futureField.node.emergency")} → {avail.maxEmergencyBufferAfter}mo {t("futureField.possibleIfAllocated")}
+                </text>
+              ) : null}
+            </g>
           );
         }
-        const end = n.readyMonth ?? addMonths(start, spanMonths);
+
+        // home node
+        const allocHome = selectedProj?.allocatedImpact?.home ?? null;
+        const availHome = selectedProj?.availableImpact ?? null;
+        const shownMonth = allocHome?.readyMonthAfter ?? n.readyMonth;
+        const end = shownMonth ? x(shownMonth) : x(addMonths(start, spanMonths));
         return (
           <g key={n.goalId}>
-            <line x1={x(start)} y1={y} x2={x(end)} y2={y} className="ffCrossGoal" />
-            <circle cx={x(end)} cy={y} r={4} className="ffNode ffNodeCross" />
-            <text x={x(end)} y={y - 6} className="ffNodeLabel" textAnchor="middle">
+            <line x1={x(start)} y1={y} x2={end} y2={y} className={allocHome ? "ffCrossGoal ffCrossGoalMoved" : "ffCrossGoal"} />
+            <circle cx={end} cy={y} r={4} className="ffNode ffNodeCross" style={reduceMotion ? undefined : { transition: "cx 0.25s ease" }} />
+            <text x={end} y={y - 6} className="ffNodeLabel" textAnchor="middle">
               {t("futureField.node.home")}
-              {n.readyMonth ? ` · ${fmtMonth(n.readyMonth, locale)}` : ""}
+              {shownMonth ? ` · ${fmtMonth(shownMonth, locale)}` : ""}
+              {allocHome ? ` (${t("futureField.possible")})` : ""}
             </text>
+            {!allocHome && availHome?.maxHomeReadyMonth && availHome.maxHomeReadyMonth !== n.readyMonth ? (
+              <>
+                <circle cx={x(availHome.maxHomeReadyMonth)} cy={y} r={3} className="ffNode ffGhostNode" />
+                <text x={x(availHome.maxHomeReadyMonth)} y={y + 10} className="ffNodeLabel ffGhost" textAnchor="middle">
+                  {t("futureField.possibleIfAllocated")}
+                </text>
+              </>
+            ) : null}
           </g>
         );
       })}
@@ -336,14 +370,33 @@ export function FutureFieldCanvas({
   titleKey = "futureField.title",
   subtitleKey = "futureField.subtitle",
   embedded = false,
+  // Single-state-source mode: when the parent owns the field (e.g.
+  // WeddingLivingPlan via useWeddingField), it passes these in and this
+  // component does NOT fetch or keep a second copy.
+  externalField = undefined,
+  externalError = undefined,
+  externalBusy = undefined,
+  externalReload = undefined,
+  selectedBranchId: externalSelectedBranchId = undefined,
+  setSelectedBranchId: externalSetSelectedBranchId = undefined,
 }) {
+  const controlled = externalField !== undefined;
   const locale = language === "zh" ? "zh-CN" : "en-SG";
   const peelFields = peelFieldsFor(domain);
-  const [field, setField] = useState(null);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [internalField, setInternalField] = useState(null);
+  const [internalError, setInternalError] = useState("");
+  const [internalBusy, setInternalBusy] = useState(false);
   const [announce, setAnnounce] = useState("");
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [internalSelectedBranchId, setInternalSelectedBranchId] = useState(null);
+
+  const field = controlled ? externalField : internalField;
+  const setField = controlled ? () => {} : setInternalField;
+  const error = controlled ? externalError ?? "" : internalError;
+  const setError = controlled ? () => {} : setInternalError;
+  const busy = controlled ? Boolean(externalBusy) : internalBusy;
+  const setBusy = controlled ? () => {} : setInternalBusy;
+  const selectedBranchId = controlled ? externalSelectedBranchId ?? null : internalSelectedBranchId;
+  const setSelectedBranchId = controlled ? externalSetSelectedBranchId ?? (() => {}) : setInternalSelectedBranchId;
 
   // Peel form
   const [peelField, setPeelField] = useState(peelFields[0].field);
@@ -366,6 +419,14 @@ export function FutureFieldCanvas({
   const [sealDone, setSealDone] = useState(null);
 
   const load = useCallback(async () => {
+    if (controlled) {
+      const data = externalReload ? await externalReload() : field;
+      if (data?.hasRealityPath) {
+        setBendMonth((cur) => cur || data.realityPath.readyMonth || "");
+        setSealAmount((cur) => cur || String(data.realityPath.monthlyContribution || ""));
+      }
+      return;
+    }
     setError("");
     try {
       const res = await fetch(`/api/future-field?domain=${encodeURIComponent(domain)}`);
@@ -382,11 +443,20 @@ export function FutureFieldCanvas({
     } catch {
       setError(t("futureField.loadError"));
     }
-  }, [domain, t]);
+  }, [domain, t, controlled]);
 
   useEffect(() => {
+    // Controlled mode: the parent already fetched; just seed the local
+    // form defaults once the field arrives.
+    if (controlled) {
+      if (field?.hasRealityPath) {
+        setBendMonth((cur) => cur || field.realityPath.readyMonth || "");
+        setSealAmount((cur) => cur || String(field.realityPath.monthlyContribution || ""));
+      }
+      return;
+    }
     load();
-  }, [load]);
+  }, [load, controlled, field?.hasRealityPath]);
 
   const post = async (url, body, opts = {}) => {
     setBusy(true);

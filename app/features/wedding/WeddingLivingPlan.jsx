@@ -13,7 +13,7 @@
 // lens. Guardian = the in-place execution state after Seal (no jump to a
 // separate screen). History = Change Replay.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { FutureFieldCanvas } from "../../components/future-field-canvas.jsx";
 import { useWeddingField } from "./useWeddingField.js";
@@ -21,6 +21,7 @@ import { GuestOrbit } from "./GuestOrbit.jsx";
 import { BudgetRiver } from "./BudgetRiver.jsx";
 import { WeddingMirror } from "./WeddingMirror.jsx";
 import { WeddingChangeReplay } from "./WeddingChangeReplay.jsx";
+import { ReleasedFuture } from "./ReleasedFuture.jsx";
 
 const VIEWS = ["field", "guests", "budget", "compare", "history"];
 
@@ -32,6 +33,13 @@ export function WeddingLivingPlan({ t, setActiveScreen, language = "en" }) {
   const { field, error, busy, reload, call, peel } = useWeddingField();
   const [view, setView] = useState("field");
   const [sealed, setSealed] = useState(null);
+  // Single source of truth for which branch is selected - shared by the
+  // Future Field canvas AND the Released Future panel below it.
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const selectedBranch = useMemo(
+    () => (field?.possiblePaths ?? []).find((b) => b.id === selectedBranchId) ?? null,
+    [field, selectedBranchId],
+  );
 
   if (field && field.hasRealityPath === false) {
     return (
@@ -101,16 +109,25 @@ export function WeddingLivingPlan({ t, setActiveScreen, language = "en" }) {
       {field ? (
         <div className="wlpBody">
           {view === "field" ? (
-            <FutureFieldCanvas
-              t={t}
-              setActiveScreen={setActiveScreen}
-              language={language}
-              domain="wedding"
-              backTo="mirror"
-              titleKey="weddingLivingPlan.fieldTitle"
-              subtitleKey="weddingLivingPlan.fieldSubtitle"
-              embedded
-            />
+            <>
+              <FutureFieldCanvas
+                t={t}
+                setActiveScreen={setActiveScreen}
+                language={language}
+                domain="wedding"
+                backTo="mirror"
+                titleKey="weddingLivingPlan.fieldTitle"
+                subtitleKey="weddingLivingPlan.fieldSubtitle"
+                embedded
+                externalField={field}
+                externalError={error}
+                externalBusy={busy}
+                externalReload={reload}
+                selectedBranchId={selectedBranchId}
+                setSelectedBranchId={setSelectedBranchId}
+              />
+              <ReleasedFuture selectedBranch={selectedBranch} t={t} call={call} reload={reload} busy={busy} />
+            </>
           ) : null}
           {view === "guests" ? <GuestOrbit field={field} t={t} peel={peel} busy={busy} /> : null}
           {view === "budget" ? <BudgetRiver field={field} t={t} peel={peel} busy={busy} /> : null}

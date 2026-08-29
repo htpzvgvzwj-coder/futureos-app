@@ -3463,6 +3463,9 @@
         "loan_freed_cashflow": "贷款结清。每月释放出的 {residual} 新元现金流可重新分配。",
         "retirement_to_income": "退休开始。你的计划移交给未来收入管理。",
         "travel_leftover": "旅行完成。剩余 {residual} 新元未使用资金可重新分配。"
+      },
+      "allocation_set": {
+        "headline": "你分配了释放出的现金流：{home} 给购房、{emergency} 给应急、{flexible} 保留为自由现金（新元/月）。"
       }
     },
     "uncertainty": {
@@ -3480,7 +3483,8 @@
       "constraint_shapes_future_plans_not_a_current_delta": "固定条件会约束此后的每一个计划——它不是一次性的变更。",
       "policy_change_no_direct_financial_delta": "这更改的是一项权限，而非金额。",
       "seal_amount_not_set": "本次封存未设置每月金额。",
-      "handover_residual_not_computed": "剩余金额尚未计算。"
+      "handover_residual_not_computed": "剩余金额尚未计算。",
+      "allocation_kept_flexible_no_goal_moved": "保留为自由现金——没有其他目标移动。"
     },
     "back": "返回"
   },
@@ -3588,7 +3592,10 @@
       "active_commitment_exists": "此目标已有一个生效中的承诺，请先取消。",
       "invalid_amount": "请输入有效金额。",
       "unknown_pin_kind": "未知的固定条件类型。",
-      "value_required_for_this_pin": "此固定条件需要一个数值。"
+      "value_required_for_this_pin": "此固定条件需要一个数值。",
+      "nothing_freed": "该分支不会释放任何现金流。",
+      "over_allocated": "拆分金额超过了释放出的金额，请调低其中一项。",
+      "branch_not_found": "该分支已不存在。"
     },
     "noRealityPathWedding": "你还没有已确认的婚礼预算。先设置一个，婚礼生活计划就会打开。",
     "goConfirmPlanWedding": "打开婚礼规划师",
@@ -3615,7 +3622,8 @@
         "hotel": "酒店宴会",
         "outdoor": "户外"
       }
-    }
+    },
+    "possibleIfAllocated": "若你分配释放出的现金流，则可能"
   },
   "weddingLivingPlan": {
     "title": "婚礼生活计划",
@@ -3732,7 +3740,9 @@
         "recalc": "重新计算",
         "crossGoal": "跨目标移动",
         "guardian": "Guardian 的响应",
-        "current": "当前状态"
+        "current": "当前状态",
+        "released": "被释放的未来",
+        "allocation": "你的分配"
       },
       "field": {
         "monthlyContribution": "每月储蓄金额",
@@ -3749,7 +3759,38 @@
       "guardianTracking": "Guardian 正在跟踪此项。",
       "notExecuted": "已安排，未执行——未发生真实银行转账。",
       "prev": "上一步",
-      "next": "下一步"
+      "next": "下一步",
+      "releasedAmount": "这个决定每月释放了 {amount} 的新选择权。",
+      "noRelease": "此变化没有释放现金流。",
+      "noAllocation": "此变化不涉及分配。"
+    },
+    "allocation": {
+      "target": {
+        "home": "加到购房",
+        "emergency": "重建应急金",
+        "flexible": "保留为自由现金"
+      }
+    },
+    "released": {
+      "title": "被释放的未来",
+      "selectFirst": "在场中选择一个分支。如果它释放了现金流，你将在这里决定这笔钱的用途。",
+      "nothingFreed": "该分支不会释放每月现金流。",
+      "pressure": "该分支每月约多花 {amount}，而非省钱——没有可分配的释放资金。",
+      "lede": "这个选择每月创造了 {amount} 的新选择权。",
+      "notCommitted": "它尚未被分配。在你放置之前，这笔钱一直保持可用——系统绝不替你转移。",
+      "unallocated": "仍有 {amount}/月未分配（可用）。",
+      "overAllocated": "你拆分的金额超过了释放出的 {amount}/月。",
+      "availHome": "最多可让购房首付提前约 {months} 个月。",
+      "availEmergency": "最多可把应急缓冲重建到约 {months} 个月。",
+      "apply": "应用此分配",
+      "applied": "分配已保存。仍有 {unallocated}/月可用。",
+      "applyError": "无法保存分配，请重试。",
+      "resultTitle": "按此分配",
+      "homeEarlier": "购房首付约提前 {months} 个月（约 {month}）。",
+      "homeLater": "购房首付约推后 {months} 个月。",
+      "emergencyUp": "应急缓冲：{before} → {after} 个月。",
+      "flexibleUp": "每月多出 {amount} 自由现金流。",
+      "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。"
     }
   }
 }

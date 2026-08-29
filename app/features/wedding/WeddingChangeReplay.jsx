@@ -14,7 +14,7 @@ function sgd(n) {
   return `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 }
 
-const STEP_KEYS = ["before", "action", "recalc", "crossGoal", "guardian", "current"];
+const STEP_KEYS = ["before", "action", "released", "allocation", "crossGoal", "guardian", "current"];
 
 export function WeddingChangeReplay({ t, setActiveScreen }) {
   const [events, setEvents] = useState(null);
@@ -60,14 +60,26 @@ export function WeddingChangeReplay({ t, setActiveScreen }) {
           : [<li key="none">{t("weddingLivingPlan.replay.noBefore")}</li>];
       case "action":
         return [<li key="a">{view?.headline}</li>, <li key="who" className="wlpMuted">{t(`changeLedger.actor.${event.actor}`)}</li>];
-      case "recalc":
+      case "released":
+        if (event.action_type === "allocation_set" && event.cause?.freedCashflow != null) {
+          return [<li key="r">{t("weddingLivingPlan.replay.releasedAmount", { amount: sgd(event.cause.freedCashflow) })}</li>];
+        }
         return weddingImpacts.length
           ? weddingImpacts.map((i, idx) => (
               <li key={idx}>
                 {t(`changeLedger.metric.${i.metric}`)}: {i.before == null ? "—" : i.unit?.includes("sgd") ? sgd(i.before) : i.before} → {i.after == null ? "—" : i.unit?.includes("sgd") ? sgd(i.after) : i.after}
               </li>
             ))
-          : [<li key="none">{after.monthlyContribution != null ? `${sgd(after.monthlyContribution)}/mo` : t("weddingLivingPlan.replay.noRecalc")}</li>];
+          : [<li key="none">{t("weddingLivingPlan.replay.noRelease")}</li>];
+      case "allocation":
+        if (event.action_type === "allocation_set") {
+          return [
+            <li key="h">{t("weddingLivingPlan.allocation.target.home")}: {sgd(after.goalMonthly ?? 0)}/mo</li>,
+            <li key="e">{t("weddingLivingPlan.allocation.target.emergency")}: {sgd(after.emergencyMonthly ?? 0)}/mo</li>,
+            <li key="f">{t("weddingLivingPlan.allocation.target.flexible")}: {sgd(after.flexibleMonthly ?? 0)}/mo</li>,
+          ];
+        }
+        return [<li key="none">{t("weddingLivingPlan.replay.noAllocation")}</li>];
       case "crossGoal":
         return crossImpacts.length
           ? crossImpacts.map((i, idx) => (

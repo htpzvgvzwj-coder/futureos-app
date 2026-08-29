@@ -22,58 +22,81 @@ const context = {
   home: { monthlyContribution: 900, downPaymentNeeded: 150000, currentSavings: 40000 },
 };
 
-function project(branchOverrides) {
+function project(branchOverrides, allocation = null) {
   const branchData = { ...reality, ...branchOverrides };
   return projectWeddingBranchImpact({
     branchFinance: computeWeddingPlanFinance({ planData: branchData }),
     realityFinance: computeWeddingPlanFinance({ planData: reality }),
     context,
+    allocation,
   });
 }
 
-test("150 -> 90 guests: wedding total down, cashflow freed, Home deposit earlier, Emergency not worse", () => {
-  const impact = project({ guest_count: 90 });
-
-  assert.ok(impact.wedding.totalAfter < impact.wedding.totalBefore, "real banquet total drops");
-  assert.ok(impact.wedding.userMonthlyAfter < impact.wedding.userMonthlyBefore, "user's required monthly drops");
-  assert.ok(impact.cashflow.freed > 0, "cashflow is freed");
-  assert.ok(impact.cashflow.after > impact.cashflow.before);
-
-  assert.ok(impact.home, "home node is projected");
-  assert.ok(impact.home.monthsDelta <= 0, "home deposit is the same or earlier, never later");
-  assert.equal(impact.home.direction === "later", false);
-
-  assert.ok(impact.emergency.bufferAfter >= impact.emergency.bufferBefore, "emergency buffer does not fall");
-  assert.ok(impact.affectedCommitments.some((c) => c.goal === "home") || impact.home.monthsDelta === 0);
+test("150 -> 90 frees cashflow; with NO allocation the Home deposit is NOT moved", () => {
+  const p = project({ guest_count: 90 });
+  assert.equal(p.mode, "freed");
+  assert.ok(p.freedCashflow > 0, "money is freed");
+  assert.equal(p.allocatedImpact, null, "nothing allocated -> no allocatedImpact");
+  // availableImpact shows what COULD happen, framed as a possibility
+  assert.ok(p.availableImpact.maxHomeMonthsEarlier > 0, "could bring home earlier");
+  assert.equal(p.availableImpact.note, "possible_not_committed");
+  assert.equal(p.availableImpact.unallocated, p.freedCashflow, "all of it is still available");
+  // the "current" home/emergency layer is unchanged
+  assert.equal(p.emergency.direction, "flat");
 });
 
-test("bigger wedding (200 guests) pushes Home later and can pressure Emergency", () => {
-  const impact = project({ guest_count: 200, total_budget: 90000 });
-  assert.ok(impact.wedding.userMonthlyAfter > impact.wedding.userMonthlyBefore);
-  assert.ok(impact.cashflow.freed < 0, "this branch costs more, not less");
-  assert.ok(impact.home.monthsDelta >= 0, "home deposit is the same or later");
+test("allocate ALL freed cashflow to Home -> Home deposit moves earlier, Emergency unchanged", () => {
+  const freed = project({ guest_count: 90 }).freedCashflow;
+  const p = project({ guest_count: 90 }, { goalMonthly: freed, emergencyMonthly: 0, flexibleMonthly: 0 });
+  assert.ok(p.allocatedImpact, "allocatedImpact present once allocated");
+  assert.ok(p.allocatedImpact.home.monthsDelta < 0, "home ready date earlier");
+  assert.equal(p.allocatedImpact.emergency.direction, "flat", "emergency untouched");
+  assert.equal(p.allocatedImpact.flexible.added, 0);
 });
 
-test("partner contribution reduces the user's cross-goal footprint", () => {
-  const solo = project({ guest_count: 150 });
-  const shared = project({ guest_count: 150, partner_contribution: 500 });
-  assert.ok(shared.wedding.userMonthlyAfter < solo.wedding.userMonthlyAfter);
-  assert.ok(shared.cashflow.after >= solo.cashflow.after);
+test("allocate ALL freed cashflow to Emergency -> buffer rises, Home unchanged", () => {
+  const freed = project({ guest_count: 90 }).freedCashflow;
+  const p = project({ guest_count: 90 }, { goalMonthly: 0, emergencyMonthly: freed, flexibleMonthly: 0 });
+  assert.equal(p.allocatedImpact.home.monthsDelta, 0, "home unchanged");
+  assert.ok(p.allocatedImpact.emergency.bufferAfter > p.allocatedImpact.emergency.bufferBefore, "buffer rises");
+  assert.equal(p.allocatedImpact.emergency.direction, "up");
 });
 
-test("projection returns confidence + assumptions, never a bare number", () => {
-  const impact = project({ guest_count: 100 });
-  assert.ok(["low", "medium", "high"].includes(impact.confidence));
-  assert.ok(Array.isArray(impact.assumptions) && impact.assumptions.length >= 2);
+test("Split allocation only moves the legs the customer set", () => {
+  const freed = project({ guest_count: 90 }).freedCashflow;
+  const half = Math.floor(freed / 2);
+  const p = project({ guest_count: 90 }, { goalMonthly: half, emergencyMonthly: 0, flexibleMonthly: freed - half });
+  assert.ok(p.allocatedImpact.home.monthsDelta < 0, "home leg moved");
+  assert.equal(p.allocatedImpact.emergency.direction, "flat", "emergency leg not set -> not moved");
+  assert.ok(p.allocatedImpact.flexible.added > 0, "flexible leg added");
 });
 
-test("no income data -> lower confidence, cashflow before/after null, no invented figures", () => {
-  const impact = projectWeddingBranchImpact({
+test("a costlier branch (200 guests) returns pressure, no allocation layer", () => {
+  const p = project({ guest_count: 200, total_budget: 90000 });
+  assert.equal(p.mode, "pressure");
+  assert.ok(p.pressure.extraMonthlyNeeded > 0);
+  assert.equal(p.availableImpact, null);
+  assert.equal(p.allocatedImpact, null);
+});
+
+test("partner contribution reduces the freed amount's origin but Allocation still governs where it goes", () => {
+  const solo = project({ guest_count: 90 });
+  const shared = project({ guest_count: 90, partner_contribution: 300 });
+  assert.ok(shared.wedding.userMonthlyAfter <= solo.wedding.userMonthlyAfter);
+  assert.equal(shared.allocatedImpact, null, "still nothing auto-allocated");
+});
+
+test("no income -> lower confidence, cashflow before/after null", () => {
+  const p = projectWeddingBranchImpact({
     branchFinance: computeWeddingPlanFinance({ planData: { ...reality, guest_count: 90 } }),
     realityFinance: computeWeddingPlanFinance({ planData: reality }),
     context: { ...context, monthlyIncome: 0 },
   });
-  assert.equal(impact.cashflow.before, null);
-  assert.equal(impact.cashflow.after, null);
-  assert.equal(impact.confidence, "low");
+  assert.equal(p.cashflow.before, null);
+  assert.equal(p.confidence, "low");
+});
+
+test("assumptions spell out that freed cashflow is NOT moved automatically", () => {
+  const p = project({ guest_count: 90 });
+  assert.ok(p.assumptions.some((a) => /not moved anywhere until you allocate/i.test(a)));
 });
