@@ -6257,3 +6257,23 @@ nextjs-portal {
   .wlpOrbitRing { grid-template-columns: 78px 1fr 48px; }
   .wlpMirrorRow { grid-template-columns: 80px repeat(3, 1fr); }
 }
+
+/* Future Field - allocation / released-future visuals */
+.ffGhost { fill: var(--muted); opacity: 0.75; font-style: italic; }
+.ffGhostNode { fill: #fff; stroke: #9aa7bd; stroke-dasharray: 2 2; }
+.ffCrossGoalMoved { stroke: var(--navy-2); opacity: 0.9; stroke-dasharray: 3 2; }
+
+/* Released Future panel */
+.wlpReleased { border-left: 4px solid var(--navy); }
+.wlpReleasedLede { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.wlpReleasedTaps { display: flex; gap: 6px; flex-wrap: wrap; }
+.wlpReleasedTaps .secondaryButton { flex: 1 1 auto; min-width: 96px; }
+.wlpReleasedSplit { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.wlpReleasedSplit label { display: flex; flex-direction: column; gap: 4px; font-size: 0.76rem; color: var(--navy-2); font-weight: 600; }
+.wlpReleasedSplit input { border: 1px solid var(--line); border-radius: 8px; padding: 7px 6px; width: 100%; }
+.wlpReleasedAvailable { margin: 4px 0; padding-left: 16px; font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+.wlpReleasedResult { background: var(--soft); border-radius: 12px; padding: 10px 12px; font-size: 0.85rem; }
+.wlpReleasedResult ul { margin: 6px 0 4px; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+@media (max-width: 360px) {
+  .wlpReleasedSplit { grid-template-columns: 1fr; }
+}

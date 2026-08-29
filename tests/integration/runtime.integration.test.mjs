@@ -262,39 +262,80 @@ test("Wedding Living Plan: 150->~90 guests recomputes wedding + Home + Emergency
   assert.ok(peeled.feasibility.computedCoreTotal < realityFin.computedCoreTotal, "wedding total DOWN");
   assert.ok(peeled.feasibility.userRequiredMonthly <= realityFin.userRequiredMonthly, "personal required monthly DOWN or equal");
 
-  const impact = projectWeddingBranchImpact({
-    branchFinance: computeWeddingPlanFinance({ planData: peeled.data }),
-    realityFinance: realityFin,
+  // Project against a controlled savings figure so fewer guests
+  // deterministically frees a positive amount (the fixture account's real
+  // savings may already cover the whole wedding, which is a valid but
+  // uninteresting "neutral" case for this assertion).
+  // total_budget=null so the plan total tracks the computed core cost
+  // (a fixed ceiling above core would mean fewer guests frees nothing -
+  // itself correct, but not what this assertion is about).
+  const realityData = { ...ctx.realityPlanData, current_savings: 8000, total_budget: null };
+  const branchData = { ...peeled.data, current_savings: 8000, total_budget: null };
+  const realityFinCtl = computeWeddingPlanFinance({ planData: realityData });
+
+  // No allocation yet -> the freed money is Available, nothing moved.
+  const noAlloc = projectWeddingBranchImpact({
+    branchFinance: computeWeddingPlanFinance({ planData: branchData }),
+    realityFinance: realityFinCtl,
     context: ctx.projectionContext,
   });
-  assert.ok(impact.cashflow.freed >= 0, "fewer guests frees cashflow, never costs more");
-  if (impact.home) {
-    assert.ok(impact.home.monthsDelta <= 0, "Home deposit is the same or EARLIER, never later");
-  }
-  assert.ok(impact.emergency.bufferAfter >= impact.emergency.bufferBefore, "Emergency buffer does NOT fall");
+  assert.equal(noAlloc.mode, "freed", "fewer guests frees cashflow");
+  assert.ok(noAlloc.freedCashflow > 0);
+  assert.equal(noAlloc.allocatedImpact, null, "NO allocation -> Home is NOT auto-accelerated");
+  assert.equal(noAlloc.emergency.direction, "flat", "NO allocation -> Emergency unchanged");
+  assert.ok(noAlloc.availableImpact.maxHomeMonthsEarlier >= 0, "shows what the freed money COULD do");
 
-  // --- persist the branch, reload, check the projection is stable --
+  // Allocate all of it to Home -> now (and only now) Home moves earlier.
+  const toHome = { goalMonthly: noAlloc.freedCashflow, emergencyMonthly: 0, flexibleMonthly: 0 };
+  const allocHome = projectWeddingBranchImpact({
+    branchFinance: computeWeddingPlanFinance({ planData: { ...branchData, allocation: toHome } }),
+    realityFinance: realityFinCtl,
+    context: ctx.projectionContext,
+    allocation: toHome,
+  });
+  assert.ok(allocHome.allocatedImpact, "allocatedImpact appears once allocated");
+  if (allocHome.allocatedImpact.home.monthsToReadyBefore != null) {
+    assert.ok(allocHome.allocatedImpact.home.monthsDelta <= 0, "Home deposit the same or EARLIER");
+  }
+  assert.equal(allocHome.allocatedImpact.emergency.direction, "flat", "Emergency untouched by a home-only allocation");
+
+  // Allocate all of it to Emergency -> buffer rises, Home unchanged.
+  const toEmg = { goalMonthly: 0, emergencyMonthly: noAlloc.freedCashflow, flexibleMonthly: 0 };
+  const allocEmg = projectWeddingBranchImpact({
+    branchFinance: computeWeddingPlanFinance({ planData: { ...branchData, allocation: toEmg } }),
+    realityFinance: realityFinCtl,
+    context: ctx.projectionContext,
+    allocation: toEmg,
+  });
+  assert.ok(allocEmg.allocatedImpact.emergency.bufferAfter >= allocEmg.allocatedImpact.emergency.bufferBefore, "Emergency buffer does NOT fall");
+  assert.equal(allocEmg.allocatedImpact.home?.monthsDelta ?? 0, 0, "Home unchanged by an emergency-only allocation");
+
+  // --- persist the branch WITH its allocation, reload, projection stable
   const branch = await store.createBranch(plan.id, FIXTURE_HOME_USER, {
-    label: "itest 90 guests", baseVersion: "1", data: peeled.data, delta: peeled.delta, feasibility: peeled.feasibility,
+    label: "itest 90 guests", baseVersion: "1",
+    data: { ...branchData, allocation: toHome, allocationGoalId: "home" },
+    delta: peeled.delta, feasibility: peeled.feasibility,
   });
   const reloadedBranch = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
   assert.equal(Number(reloadedBranch.data.guest_count), fewer, "branch survives reload");
+  assert.deepEqual(reloadedBranch.data.allocation, toHome, "allocation persists on the branch after reload");
   const impactAfterReload = projectWeddingBranchImpact({
     branchFinance: computeWeddingPlanFinance({ planData: reloadedBranch.data }),
-    realityFinance: realityFin,
+    realityFinance: realityFinCtl,
     context: ctx.projectionContext,
+    allocation: reloadedBranch.data.allocation,
   });
-  assert.deepEqual(impactAfterReload.wedding, impact.wedding, "projected wedding impact identical after reload");
-  assert.deepEqual(impactAfterReload.home, impact.home, "projected home impact identical after reload");
+  assert.deepEqual(impactAfterReload.wedding, allocHome.wedding, "projected wedding impact identical after reload");
+  assert.deepEqual(impactAfterReload.allocatedImpact.home, allocHome.allocatedImpact.home, "projected home impact identical after reload");
 
-  // --- Seal into a real commitment -------------------------------
+  // --- Seal into a real commitment - the confirmed allocation rides along
   const sealAmount = peeled.feasibility.userRequiredMonthly || 500;
   const commitment = await gcStore.createCommitment(FIXTURE_HOME_USER, {
     domain: "wedding",
     monthlyContribution: sealAmount,
     effectiveMonth: new Date().toISOString().slice(0, 7),
     pauseIfEmergencyMonthsBelow: 6,
-    sourceMoment: { source: "itest_future_field_seal", branchId: branch.id },
+    sourceMoment: { source: "itest_future_field_seal", branchId: branch.id, allocation: reloadedBranch.data.allocation, allocationGoalId: "home" },
     supersededSavingsPlan: null,
     priorMonthlyContribution: ctx.realityPlanData.monthly_contribution || 0,
     planId: plan.id,
@@ -302,7 +343,7 @@ test("Wedding Living Plan: 150->~90 guests recomputes wedding + Home + Emergency
   });
   commitmentId = commitment.id;
   assert.equal(commitment.status, "active");
-  assert.equal(Number(commitment.monthly_contribution), sealAmount);
+  assert.deepEqual(commitment.source_moment.allocation, toHome, "Guardian's commitment carries the confirmed allocation");
   const activeAfterSeal = await gcStore.getActiveCommitment(FIXTURE_HOME_USER, "wedding");
   assert.equal(activeAfterSeal.id, commitment.id, "Seal is the active wedding commitment");
 

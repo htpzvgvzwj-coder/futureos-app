@@ -3645,6 +3645,9 @@
         "loan_freed_cashflow": "Loan cleared. {residual} SGD/month of freed cash flow is ready to reallocate.",
         "retirement_to_income": "Retirement began. Your plan hands over to future income management.",
         "travel_leftover": "Trip completed. {residual} SGD of unused funds is ready to reallocate."
+      },
+      "allocation_set": {
+        "headline": "You allocated the freed cashflow: {home} to Home, {emergency} to Emergency, {flexible} kept flexible (SGD/month)."
       }
     },
     "uncertainty": {
@@ -3662,7 +3665,8 @@
       "constraint_shapes_future_plans_not_a_current_delta": "A pin shapes every future plan from now on - it is not a one-time change.",
       "policy_change_no_direct_financial_delta": "This changed a permission, not an amount.",
       "seal_amount_not_set": "No monthly amount was set for this seal.",
-      "handover_residual_not_computed": "The leftover amount has not been computed yet."
+      "handover_residual_not_computed": "The leftover amount has not been computed yet.",
+      "allocation_kept_flexible_no_goal_moved": "Kept flexible - no other goal moved."
     },
     "back": "Back"
   },
@@ -3770,7 +3774,10 @@
       "active_commitment_exists": "You already have an active commitment for this goal. Cancel it first.",
       "invalid_amount": "Enter a valid amount.",
       "unknown_pin_kind": "Unknown pin type.",
-      "value_required_for_this_pin": "This pin needs a value."
+      "value_required_for_this_pin": "This pin needs a value.",
+      "nothing_freed": "This branch doesn't free any cashflow.",
+      "over_allocated": "That splits more than was freed. Lower one of the amounts.",
+      "branch_not_found": "That branch no longer exists."
     },
     "noRealityPathWedding": "You do not have a confirmed wedding budget yet. Set one up first, then the Wedding Living Plan opens.",
     "goConfirmPlanWedding": "Open Wedding Planner",
@@ -3797,7 +3804,8 @@
         "hotel": "Hotel banquet",
         "outdoor": "Outdoor"
       }
-    }
+    },
+    "possibleIfAllocated": "possible if you allocate the freed cashflow"
   },
   "weddingLivingPlan": {
     "title": "Wedding Living Plan",
@@ -3914,7 +3922,9 @@
         "recalc": "Recalculation",
         "crossGoal": "Cross-goal movement",
         "guardian": "Guardian response",
-        "current": "Current state"
+        "current": "Current state",
+        "released": "Released future",
+        "allocation": "Your allocation"
       },
       "field": {
         "monthlyContribution": "Monthly contribution",
@@ -3931,7 +3941,38 @@
       "guardianTracking": "Guardian is tracking this.",
       "notExecuted": "Arranged, not executed - no real bank transfer happened.",
       "prev": "Back",
-      "next": "Next"
+      "next": "Next",
+      "releasedAmount": "This decision released {amount}/month of new choice.",
+      "noRelease": "This change did not release cashflow.",
+      "noAllocation": "No allocation was part of this change."
+    },
+    "allocation": {
+      "target": {
+        "home": "Add to Home",
+        "emergency": "Rebuild Emergency",
+        "flexible": "Keep Flexible"
+      }
+    },
+    "released": {
+      "title": "Released Future",
+      "selectFirst": "Select a branch on the field. If it frees cashflow, you'll decide what it's for here.",
+      "nothingFreed": "This branch doesn't free monthly cashflow.",
+      "pressure": "This branch costs about {amount}/month more, not less - there's nothing freed to allocate.",
+      "lede": "This choice creates {amount}/month of new room.",
+      "notCommitted": "It isn't allocated yet. This money stays available until you place it - it is never moved for you.",
+      "unallocated": "{amount}/month still unallocated (available).",
+      "overAllocated": "You've split more than the {amount}/month that was freed.",
+      "availHome": "Could bring the home deposit up to {months} month(s) earlier.",
+      "availEmergency": "Could rebuild the emergency buffer to about {months} months.",
+      "apply": "Apply this allocation",
+      "applied": "Allocation saved. {unallocated}/month still available.",
+      "applyError": "Could not save the allocation. Try again.",
+      "resultTitle": "With this allocation",
+      "homeEarlier": "Home deposit about {months} month(s) earlier (around {month}).",
+      "homeLater": "Home deposit about {months} month(s) later.",
+      "emergencyUp": "Emergency buffer {before} to {after} months.",
+      "flexibleUp": "{amount}/month more free cashflow.",
+      "stillPossible": "Still a possible future - it becomes real when you Seal."
     }
   }
 }

@@ -2,7 +2,12 @@ import { getCurrentUserId } from "../../../../lib/auth.js";
 import { loadDomainContext, ensurePlan } from "../../../../lib/future-field/service.js";
 import { planStore, peelBranch, compareBranches, mergeBranches } from "../../../../lib/plan-runtime/index.js";
 import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
-import { buildBranchCreatedEvent, buildBranchMergedEvent } from "../../../../lib/change-ledger/producers/future-field.js";
+import {
+  buildBranchCreatedEvent,
+  buildBranchMergedEvent,
+  buildAllocationSetEvent,
+} from "../../../../lib/change-ledger/producers/future-field.js";
+import { validateAllocation } from "../../../../lib/living-plan/allocation.js";
 
 export const runtime = "nodejs";
 
@@ -51,6 +56,43 @@ export async function POST(request) {
       },
     );
     return Response.json({ compare: table });
+  }
+
+  // Allocate a freed amount across { goal, emergency, flexible }. Updates
+  // the branch's own data.allocation, records it to the Change Ledger, and
+  // returns the recomputed projection so the field can move.
+  if (action === "allocate") {
+    const branch = await planStore.getBranch(body.branchId, userId);
+    if (!branch) return Response.json({ error: "branch_not_found" }, { status: 404 });
+
+    const projBefore = context.adapter.projectImpacts(branch.data, context.realityPlanData, context.projectionContext ?? {}, null);
+    const freed = projBefore?.freedCashflow ?? 0;
+    const check = validateAllocation({ freedCashflow: freed, allocation: body.allocation });
+    if (!check.ok) {
+      return Response.json({ error: check.error, freedCashflow: freed }, { status: 422 });
+    }
+
+    const nextData = { ...branch.data, allocation: check.allocation, allocationGoalId: body.goalId ?? "home" };
+    await planStore.updateBranch(body.branchId, userId, { data: nextData });
+    const projAfter = context.adapter.projectImpacts(nextData, context.realityPlanData, context.projectionContext ?? {}, check.allocation);
+
+    const ledger = await recordEventSafe(
+      buildAllocationSetEvent({
+        profileKey: userId,
+        domain,
+        planId: plan.id,
+        branchId: body.branchId,
+        freedCashflow: freed,
+        allocation: check.allocation,
+        allocatedImpact: projAfter?.allocatedImpact ?? null,
+      }),
+    );
+
+    return Response.json({
+      branch: { id: branch.id, label: branch.label, allocation: check.allocation, projectedImpacts: projAfter },
+      unallocated: check.unallocated,
+      ledgerEventId: ledger?.event?.id ?? null,
+    });
   }
 
   if (action === "merge") {
