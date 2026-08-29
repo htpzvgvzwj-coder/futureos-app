@@ -9,6 +9,9 @@ import { getOrCreateSession, getLatestArtifact, getSavingsCheckins } from "../..
 import { computeMoments } from "../../../lib/moment-engine.js";
 import { getActiveCommitment } from "../../../lib/goal-commitment-store.js";
 import { evaluateCommitmentExecutionState } from "../../../lib/goal-commitment-finance.js";
+import { recordEventSafe } from "../../../lib/change-ledger/store.js";
+import { buildHomeCommitmentPausedEvent } from "../../../lib/change-ledger/producers/home.js";
+import { EMERGENCY_FUND_MONTHS_TARGET } from "../../../lib/investment-readiness-finance.js";
 
 export const runtime = "nodejs";
 
@@ -63,6 +66,28 @@ export async function GET(request) {
     },
   });
 
+  const executionState = commitment
+    ? evaluateCommitmentExecutionState({ commitment, emergencyBufferMonths: assetContext.emergencyBufferMonths })
+    : null;
+
+  // Guardian pause is derived live, not a user action - so this read is
+  // where it first becomes a real fact. Record it to the Change Ledger the
+  // first time we see the flip (the producer's dedupe_key makes this
+  // idempotent, so polling this route doesn't spam the ledger). A
+  // "resumed" counterpart event is a follow-up (needs its own dedupe once
+  // pause/resume can cycle).
+  if (commitment && executionState === "paused") {
+    await recordEventSafe(
+      buildHomeCommitmentPausedEvent({
+        profileKey: userId,
+        commitmentId: commitment.id,
+        monthlyContribution: Number(commitment.monthly_contribution),
+        emergencyBufferMonths: assetContext.emergencyBufferMonths,
+        emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
+      }),
+    );
+  }
+
   return Response.json({
     moments,
     context: {
@@ -73,7 +98,7 @@ export async function GET(request) {
     commitment: commitment
       ? {
           ...commitment,
-          executionState: evaluateCommitmentExecutionState({ commitment, emergencyBufferMonths: assetContext.emergencyBufferMonths }),
+          executionState,
           emergencyBufferMonths: assetContext.emergencyBufferMonths,
         }
       : null,

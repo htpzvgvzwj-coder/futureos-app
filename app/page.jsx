@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -147,6 +148,7 @@ const screens = {
   DEAL_FINDER: "dealFinder",
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
+  CHANGE_LEDGER: "changeLedger",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3183,7 +3185,7 @@ function getNavScreen(activeScreen) {
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
   }
-  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.STRATEGIC_BALANCE].includes(activeScreen)) {
+  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.STRATEGIC_BALANCE, screens.CHANGE_LEDGER].includes(activeScreen)) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
@@ -3465,7 +3467,9 @@ function HomeGoalShiftMomentCard({ moment, language, t, onAdopted, onDismissed }
       });
       const result = await response.json();
       if (!response.ok) {
-        setError(t("todayMoment.homeGoalShift.adoptError"));
+        const key = `todayMoment.homeGoalShift.error_${result?.error}`;
+        const mapped = t(key);
+        setError(mapped === key ? t("todayMoment.homeGoalShift.adoptError") : mapped);
         return;
       }
       onAdopted?.(result);
@@ -3592,7 +3596,8 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
         setError(t("todayMoment.execution.revokeError"));
         return;
       }
-      onRevoked?.();
+      const result = await response.json().catch(() => null);
+      onRevoked?.(result);
     } catch {
       setError(t("todayMoment.execution.revokeError"));
     } finally {
@@ -3689,7 +3694,20 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
   const [momentsPayload, setMomentsPayload] = useState(null);
   const [dismissedMomentIds, setDismissedMomentIds] = useState([]);
   const [momentsFetchNonce, setMomentsFetchNonce] = useState(0);
-  const refetchMoments = () => setMomentsFetchNonce((current) => current + 1);
+  // Impact Receipt: the compact "here is what actually changed" card shown
+  // right after adopt/revoke, sourced from the real Change Ledger event the
+  // action produced (never fabricated client-side).
+  const [receiptEvent, setReceiptEvent] = useState(null);
+  const refetchMoments = (result) => {
+    setMomentsFetchNonce((current) => current + 1);
+    const ledgerEventId = result?.ledgerEventId ?? (Array.isArray(result?.ledgerEventIds) ? result.ledgerEventIds[0] : null);
+    if (ledgerEventId) {
+      fetch(`/api/change-ledger/${ledgerEventId}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d?.event && setReceiptEvent(d.event))
+        .catch(() => {});
+    }
+  };
   const visibleMoments = (momentsPayload?.moments ?? []).filter((moment) => !dismissedMomentIds.includes(moment.id));
   const topMoment = visibleMoments[0] ?? null;
   const activeCommitment = momentsPayload?.commitment ?? null;
@@ -3941,6 +3959,17 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             moment={topMoment}
             t={t}
             onDismissed={() => setDismissedMomentIds((current) => [...current, topMoment.id])}
+          />
+        ) : null}
+
+        {receiptEvent ? (
+          <ImpactReceipt
+            event={receiptEvent}
+            t={t}
+            onViewFull={() => {
+              setReceiptEvent(null);
+              setActiveScreen(screens.CHANGE_LEDGER);
+            }}
           />
         ) : null}
 
@@ -4526,6 +4555,21 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         <span>
           <strong>{t("lifeGraph.strategicBalance.title")}</strong>
           <small>{t("lifeGraph.strategicBalance.subtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
+      </button>
+
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.CHANGE_LEDGER)}
+      >
+        <span className="iconBubble">
+          <History size={16} />
+        </span>
+        <span>
+          <strong>{t("changeLedger.title")}</strong>
+          <small>{t("changeLedger.subtitle")}</small>
         </span>
         <ChevronRight size={15} />
       </button>
@@ -17294,6 +17338,7 @@ export default function App() {
       <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
     [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.CHANGE_LEDGER]: <ChangeLedgerScreen t={t} setActiveScreen={setActiveScreen} backTo={screens.LIFE_GRAPH} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

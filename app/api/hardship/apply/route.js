@@ -7,6 +7,7 @@ import {
   updateSessionStatus,
 } from "../../../../lib/hardship-store.js";
 import { getCurrentUserId } from "../../../../lib/auth.js";
+import { recordRescueAdopted } from "../../../../lib/change-ledger/record-guardian.js";
 
 export const runtime = "nodejs";
 const VALID_DECISIONS = new Set(["approve", "edit", "reject"]);
@@ -170,6 +171,24 @@ export async function POST(request) {
   });
 
   await updateSessionStatus(session.id, { stage2Status: "applied" });
+
+  // Change Ledger: one event per action that actually applied (rejected /
+  // failed actions produce no state change, so no event). status "active" -
+  // a drawdown or plan pause really happened.
+  for (const row of results) {
+    if (row.status !== "applied" && row.status !== "pending_review") continue;
+    await recordRescueAdopted({
+      profileKey: userId,
+      actionType: row.action_type,
+      targetDomain: row.target_domain,
+      amount: row.amount ?? null,
+      proposedAmount: row.proposed_amount ?? null,
+      decisionType: row.decision_type,
+      explanation: row.explanation,
+      hardshipSessionId: session.id,
+      rowId: row.id,
+    });
+  }
 
   return Response.json({ results });
 }

@@ -856,3 +856,238 @@ create table if not exists goal_commitments (
 
 create index if not exists goal_commitments_profile_domain_idx
   on goal_commitments (profile_key, domain, status, created_at desc);
+
+-- Plan Runtime (commitment slice): revoke-consistency + duplicate-guard.
+--
+-- superseded_savings_plan is the confirmed_savings_plan payload that was in
+-- force BEFORE this commitment adjusted it, captured verbatim at create
+-- time. A revoke restores it exactly (lib/plan-runtime/commitment.js
+-- buildRevertSavingsPlanPayload), so cancelling a commitment actually
+-- propagates back through every downstream consumer instead of leaving
+-- Guardian's adjusted amount stuck in Strategic Balance / Loan Planner /
+-- hardship / follow-through. prior_monthly_contribution is the same fact as
+-- a plain number, for quick audit reads.
+alter table goal_commitments add column if not exists superseded_savings_plan jsonb;
+alter table goal_commitments add column if not exists prior_monthly_contribution numeric(12,2);
+
+-- One active commitment per (profile, domain). A rapid double-submit, or a
+-- second "adopt" before the first is revoked, must not leave two active
+-- rows: revoke targets a single id, and getActiveCommitment / every
+-- cross-goal read only sees the latest, so an older active row would linger
+-- as an unrevoked, uncounted audit-trail liability. The insert path catches
+-- the unique violation and returns a real 409 instead.
+create unique index if not exists goal_commitments_one_active_per_domain
+  on goal_commitments (profile_key, domain)
+  where status = 'active';
+
+-- Change Ledger: FutureOS's central, append-only causal record - "what
+-- actually changed, why, and what it touched" for every meaningful action,
+-- across every feature. NOT a dev log, notification feed, or click trail
+-- (technical audit logging, if ever needed, stays a separate table). One
+-- row per real state change; rows are never updated or deleted - a later
+-- revoke/override writes a NEW row that points at the old one via
+-- supersedes_event_id.
+--
+-- Every numeric field in cause/before/after/impact_set comes from a real
+-- deterministic calculation at write time (lib/change-ledger + the calling
+-- route), never from an AI. Snapshots are frozen: a later recomputation
+-- must not be able to rewrite what a past event recorded.
+create table if not exists change_ledger_events (
+  id                  uuid primary key default gen_random_uuid(),
+  profile_key         text not null,
+  occurred_at         timestamptz not null default now(),
+  actor               text not null,           -- user | guardian | system | partner
+  source_feature      text not null,           -- wedding | home | mirror | life_graph | guardian | quote_to_plan | emergency | investment | ...
+  action_type         text not null,           -- stable slug, see lib/change-ledger/events.js
+  status              text not null,           -- projected | simulated | scheduled | active | paused | revoked | completed | observed
+  plan_id             text,
+  plan_branch_id      text,
+  commitment_id       uuid,
+  related_goal_ids    text[] not null default '{}',
+  visibility          text not null default 'private', -- private | shared | system
+  cause               jsonb not null default '{}',   -- the real datum / quote / rule / risk / user action that triggered this
+  before_snapshot     jsonb not null default '{}',   -- minimal, explainable prior state
+  after_snapshot      jsonb not null default '{}',   -- minimal, explainable new state
+  impact_set          jsonb not null default '[]',   -- [{ goalId, metric, before, after, unit, ... }] - real computed deltas only
+  evidence_refs       jsonb not null default '[]',   -- [{ kind, ref, sourceUpdatedAt }] - files, quotes, real data, provenance
+  confidence          text,                    -- low | medium | high (null when not meaningful)
+  uncertainty_note    text,                    -- honest reason an impact could NOT be quantified
+  supersedes_event_id uuid references change_ledger_events(id),
+  message_key         text not null,           -- i18n template key resolved by lib/change-ledger/format.js
+  message_params      jsonb not null default '{}',
+  dedupe_key          text,                    -- caller-supplied idempotency key; unique per profile when present
+  created_at          timestamptz not null default now()
+);
+
+create index if not exists change_ledger_events_profile_time_idx
+  on change_ledger_events (profile_key, occurred_at desc);
+
+create index if not exists change_ledger_events_profile_feature_idx
+  on change_ledger_events (profile_key, source_feature, occurred_at desc);
+
+create index if not exists change_ledger_events_supersedes_idx
+  on change_ledger_events (supersedes_event_id)
+  where supersedes_event_id is not null;
+
+-- Idempotency: a retried request / double-submit carrying the same
+-- dedupe_key must not create a second ledger row. Partial so rows without a
+-- key (legitimately distinct events) are unconstrained.
+create unique index if not exists change_ledger_events_dedupe_idx
+  on change_ledger_events (profile_key, dedupe_key)
+  where dedupe_key is not null;
+
+-- ============================================================================
+-- Plan Runtime: the unified, auditable plan kernel.
+--
+-- Every goal in FutureOS (home / wedding / retirement / ...) gets ONE plan
+-- row, which owns an append-only chain of immutable versions, a set of
+-- branches (Future Field "Peel"), a set of constraints (Pins), and a set of
+-- evidence entries (Evidence Radar / Quote-to-Plan). goal_commitments (added
+-- earlier) stays as the sealed-commitment record and now also points back at
+-- its plan. State always comes from lib/plan-runtime/state-machine.js's
+-- PLAN_STATES; transitions are validated there before any write here.
+--
+-- Numbers in every snapshot/data/impact column are produced by a real
+-- deterministic calculation at write time, never by an AI. Versions and
+-- snapshots are frozen - a later recompute must never rewrite recorded
+-- history.
+-- ============================================================================
+
+create table if not exists plans (
+  id              uuid primary key default gen_random_uuid(),
+  profile_key     text not null,
+  domain          text not null,
+  goal_key        text not null,
+  title           text not null default '',
+  state           text not null default 'draft',
+  current_version text not null default '0',
+  visibility      text not null default 'private',
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+create unique index if not exists plans_profile_domain_goal_idx
+  on plans (profile_key, domain, goal_key);
+create index if not exists plans_profile_state_idx
+  on plans (profile_key, state);
+
+create table if not exists plan_versions (
+  id                 uuid primary key default gen_random_uuid(),
+  plan_id            uuid not null references plans(id),
+  profile_key        text not null,
+  version            text not null,
+  supersedes_version text,
+  actor              text not null,
+  state_at_version   text not null,
+  data               jsonb not null default '{}',
+  cause              jsonb not null default '{}',
+  evidence           jsonb not null default '[]',
+  confidence         text,
+  evidence_maturity_percent integer,
+  uncertainty_note   text,
+  ledger_event_id    uuid,
+  created_at         timestamptz not null default now()
+);
+
+create unique index if not exists plan_versions_plan_version_idx
+  on plan_versions (plan_id, version);
+create index if not exists plan_versions_profile_idx
+  on plan_versions (profile_key, created_at desc);
+
+create table if not exists plan_branches (
+  id                uuid primary key default gen_random_uuid(),
+  plan_id           uuid not null references plans(id),
+  profile_key       text not null,
+  label             text not null,
+  base_version      text not null,
+  data              jsonb not null default '{}',
+  delta             jsonb not null default '{}',
+  feasibility       jsonb not null default '{}',
+  status            text not null default 'open',
+  sealed_commitment_id uuid,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+create index if not exists plan_branches_plan_idx
+  on plan_branches (plan_id, status);
+
+create table if not exists plan_constraints (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  plan_id       uuid references plans(id),
+  kind          text not null,
+  operator      text not null,
+  value         numeric,
+  value_text    text,
+  scope         text not null default 'domain',
+  active        boolean not null default true,
+  cause         jsonb not null default '{}',
+  created_at    timestamptz not null default now(),
+  released_at   timestamptz
+);
+
+create index if not exists plan_constraints_profile_active_idx
+  on plan_constraints (profile_key, active);
+
+create table if not exists plan_evidence (
+  id             uuid primary key default gen_random_uuid(),
+  plan_id        uuid not null references plans(id),
+  profile_key    text not null,
+  field          text not null,
+  label          text not null default '',
+  truthfulness   text not null default 'estimate',
+  value          jsonb,
+  range_low      numeric,
+  range_high     numeric,
+  required       boolean not null default false,
+  impact_weight  integer not null default 0,
+  source_kind    text,
+  source_ref     text,
+  source_updated_at timestamptz,
+  valid_until    timestamptz,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+
+create unique index if not exists plan_evidence_plan_field_idx
+  on plan_evidence (plan_id, field);
+
+create table if not exists plan_transitions (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  from_plan_id     uuid not null references plans(id),
+  to_plan_id       uuid references plans(id),
+  transition_type  text not null,
+  residual_amount  numeric,
+  data             jsonb not null default '{}',
+  status           text not null default 'proposed',
+  ledger_event_id  uuid,
+  created_at       timestamptz not null default now(),
+  responded_at     timestamptz
+);
+
+create index if not exists plan_transitions_profile_idx
+  on plan_transitions (profile_key, created_at desc);
+
+create table if not exists guardian_policies (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  plan_id          uuid references plans(id),
+  commitment_id    uuid,
+  can_move_money   boolean not null default false,
+  can_reschedule   boolean not null default false,
+  can_notify       boolean not null default true,
+  pause_conditions jsonb not null default '[]',
+  reconfirm_after_days integer,
+  active           boolean not null default true,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  revoked_at       timestamptz
+);
+
+create index if not exists guardian_policies_profile_active_idx
+  on guardian_policies (profile_key, active);
+
+alter table goal_commitments add column if not exists plan_id uuid;
+alter table goal_commitments add column if not exists plan_branch_id uuid;
