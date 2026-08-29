@@ -9,6 +9,7 @@ import {
   ACTION_TYPES,
 } from "../lib/change-ledger/events.js";
 import { formatEvent, formatImpactReceipt } from "../lib/change-ledger/format.js";
+import { uuidOrNull } from "../lib/change-ledger/store.js";
 import {
   buildHomeCommitmentCreatedEvent,
   buildHomeCommitmentRevokedEvent,
@@ -27,6 +28,14 @@ function makeT(dict) {
   };
 }
 const t = makeT(en);
+
+test("uuidOrNull keeps a real uuid and drops anything else (regression: non-uuid id aborted the whole ledger write)", () => {
+  assert.equal(uuidOrNull("2f1c8b0e-9a3d-4c7e-8b1a-1d2e3f4a5b6c"), "2f1c8b0e-9a3d-4c7e-8b1a-1d2e3f4a5b6c");
+  assert.equal(uuidOrNull(null), null);
+  assert.equal(uuidOrNull(undefined), null);
+  assert.equal(uuidOrNull("smoke-commit-1"), null);
+  assert.equal(uuidOrNull(12345), null);
+});
 
 test("isActualStatus separates the truthfulness ladder correctly", () => {
   for (const s of ["projected", "simulated", "scheduled"]) assert.equal(isActualStatus(s), false);
