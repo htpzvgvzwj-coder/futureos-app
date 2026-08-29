@@ -3666,27 +3666,6 @@
     },
     "back": "Back"
   },
-  "demoScenario": {
-    "title": "Demo Scenario",
-    "badge": "Demo data",
-    "notice": "Everything in this walkthrough is clearly-labelled fixture data written to your account so the Change Ledger and planners populate for real. It is never treated as a real customer record and can be reset.",
-    "run": "Run this step",
-    "reset": "Reset demo data",
-    "done": "Done",
-    "next": "Next step",
-    "openLedger": "Open in Change Ledger",
-    "steps": {
-      "wedding_plan_created": "Create a wedding plan",
-      "date_and_guests_changed": "Move the date earlier and add guests",
-      "quote_to_plan": "Import a real venue quote (Quote-to-Plan)",
-      "impact_on_home_and_emergency": "See the impact on Home and Emergency",
-      "shadow_guardian": "Run Shadow Guardian",
-      "seal_commitment": "Seal the commitment",
-      "guardian_pause": "Guardian pauses the contribution",
-      "plan_rescue": "Adopt a Plan Rescue",
-      "wedding_handover": "Wedding completes - Plan Handover"
-    }
-  },
   "futureField": {
     "title": "Future Field",
     "subtitle": "See, split, and commit to your future - money, time and goals on one field.",
@@ -3728,9 +3707,12 @@
     "peelLabelLabel": "Name this future (optional)",
     "peelCta": "Create branch",
     "peelField": {
-      "estimated_price": "Property price",
-      "target_complete_month": "Target date",
-      "monthly_contribution": "Monthly amount"
+      "wedding_date": "Wedding date",
+      "guest_count": "Guest count",
+      "venue_tier": "Venue tier",
+      "venue_type": "Venue type",
+      "total_budget": "Total budget",
+      "partner_contribution": "Partner contribution"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3789,6 +3771,167 @@
       "invalid_amount": "Enter a valid amount.",
       "unknown_pin_kind": "Unknown pin type.",
       "value_required_for_this_pin": "This pin needs a value."
+    },
+    "noRealityPathWedding": "You do not have a confirmed wedding budget yet. Set one up first, then the Wedding Living Plan opens.",
+    "goConfirmPlanWedding": "Open Wedding Planner",
+    "crossTitle": "What this competes with",
+    "roomLeft": "About {amount}/month of real room after every other confirmed commitment.",
+    "ready": "ready",
+    "months": "months",
+    "aboveFloor": "above the safe floor",
+    "belowFloor": "below the {floor}-month floor",
+    "node": {
+      "home": "Home deposit",
+      "emergency": "Emergency fund",
+      "wedding": "Wedding"
+    },
+    "opt": {
+      "venue_tier": {
+        "budget": "Budget",
+        "mid_range": "Mid-range",
+        "premium": "Premium"
+      },
+      "venue_type": {
+        "community": "Community / void deck",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel banquet",
+        "outdoor": "Outdoor"
+      }
+    }
+  },
+  "weddingLivingPlan": {
+    "title": "Wedding Living Plan",
+    "subtitle": "Your wedding, your home deposit and your safety net on one timeline.",
+    "fieldTitle": "Wedding on the time field",
+    "fieldSubtitle": "Move the date, budget or monthly amount and watch Home and Emergency move with it.",
+    "entryTitle": "Wedding Living Plan",
+    "entryBody": "One plan seen as a time field, guest circles, a budget river and a comparison of futures.",
+    "estimateNote": "Costs are Singapore reference-rate estimates, not vendor quotes. Upload a real quote to firm one up.",
+    "tab": {
+      "field": "Field",
+      "guests": "Guests",
+      "budget": "Budget",
+      "compare": "Compare",
+      "history": "History"
+    },
+    "guardian": {
+      "active": "Guardian is following this plan",
+      "detail": "It tracks your saving pace, warns before a deposit is due short, and pauses if your emergency buffer drops below 6 months. It never moves money on its own."
+    },
+    "needsChanges": {
+      "title": "This plan needs changes before it can be sealed",
+      "detail": "Your budget is about {gap} short of the core cost ({core}). Cut guests, change the venue, adjust items, or raise the budget."
+    },
+    "guestOrbit": {
+      "title": "Guest Orbit",
+      "help": "Adjust a circle. The total, the per-head cost and the effect on Home and Emergency all recompute.",
+      "circle": {
+        "core": "Must be there",
+        "family": "Family",
+        "friends": "Friends",
+        "optional": "Optional",
+        "travel": "Travelling in",
+        "special": "Special arrangements"
+      },
+      "exactCount": "Exact count for {circle}",
+      "total": "{count} guests",
+      "estVenueChange": "estimated venue change",
+      "apply": "Apply as a branch",
+      "appliedTo": "Branch created at {count} guests",
+      "branchLabel": "{count} guests"
+    },
+    "impact": {
+      "wedding": "Wedding total: {before} to {after}",
+      "cashflow": "{freed}/month {dir}",
+      "freed": "freed",
+      "needed": "needed",
+      "home": "Home deposit about {months} month(s) {dir}",
+      "emergency": "Emergency buffer: {before} to {after} months",
+      "pending": "Impact is being recomputed.",
+      "confidence": "Confidence: {level}",
+      "dir": {
+        "earlier": "earlier",
+        "later": "later",
+        "flat": "unchanged",
+        "unknown": "unknown"
+      }
+    },
+    "budgetRiver": {
+      "title": "Budget River",
+      "help": "Money in over time, payments out, and where the pressure peaks.",
+      "currentSavings": "Earmarked savings",
+      "yourMonthly": "Your monthly",
+      "partnerMonthly": "Partner monthly",
+      "requiredMonthly": "Your required monthly",
+      "milestone": {
+        "deposit": "Deposit (secures the date)",
+        "progress": "Progress payment",
+        "balance": "Balance (before the day)"
+      },
+      "peakShort": "Tightest month is {month}: about {amount} short at that point.",
+      "peakOk": "No shortfall at any payment - tightest month is {month}.",
+      "belowCore": "Budget is {amount} below the core cost of {core}. The biggest items:",
+      "raiseTo": "Raise the budget to",
+      "raiseCta": "Try this as a branch",
+      "raiseBranchLabel": "Higher budget",
+      "covered": "Your budget covers the core cost."
+    },
+    "mirror": {
+      "title": "Wedding Mirror",
+      "help": "Compare the current plan with up to two branches. Only what differs is shown.",
+      "currentPlan": "Current plan",
+      "noBranches": "Create a branch in Guests or Budget first, then compare here.",
+      "pick": "Pick up to two branches",
+      "identical": "These branches don't differ on any tracked dimension yet.",
+      "noChange": "no change",
+      "homeEarlier": "{months} mo earlier",
+      "homeLater": "{months} mo later",
+      "buffer": "{months} mo buffer",
+      "unresolvedCount": "{count} to resolve",
+      "none": "none",
+      "dim": {
+        "guests": "Guests",
+        "total": "Wedding total",
+        "personalMonthly": "Your monthly",
+        "partnerMonthly": "Partner monthly",
+        "homeImpact": "Home deposit",
+        "emergency": "Emergency buffer",
+        "unresolved": "Unresolved"
+      },
+      "sealThis": "Seal \"{label}\"",
+      "cannotSeal": "\"{label}\" can't be sealed yet",
+      "sealed": "Sealed. Guardian is now following this plan.",
+      "sealBlocked": "Could not seal - please review and try again.",
+      "sealBlockedBudget": "Can't seal: the budget is below the core cost."
+    },
+    "replay": {
+      "title": "Change Replay",
+      "empty": "No wedding changes recorded yet.",
+      "pick": "Pick a change to replay",
+      "step": {
+        "before": "Before",
+        "action": "What you did",
+        "recalc": "Recalculation",
+        "crossGoal": "Cross-goal movement",
+        "guardian": "Guardian response",
+        "current": "Current state"
+      },
+      "field": {
+        "monthlyContribution": "Monthly contribution",
+        "guest_count": "Guest count",
+        "budget": "Budget",
+        "effectiveMonth": "From"
+      },
+      "noBefore": "No prior state was recorded for this change.",
+      "noRecalc": "No wedding figure changed directly.",
+      "noCross": "No other goal moved.",
+      "guardianPaused": "Guardian paused this contribution.",
+      "guardianScheduled": "Guardian scheduled this - arranged, no bank transfer yet.",
+      "guardianRevoked": "Guardian stopped following this - the change no longer applies.",
+      "guardianTracking": "Guardian is tracking this.",
+      "notExecuted": "Arranged, not executed - no real bank transfer happened.",
+      "prev": "Back",
+      "next": "Next"
     }
   }
 }

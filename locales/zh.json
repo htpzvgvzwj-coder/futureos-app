@@ -3484,27 +3484,6 @@
     },
     "back": "返回"
   },
-  "demoScenario": {
-    "title": "演示资料",
-    "badge": "演示数据",
-    "notice": "本演示中的所有内容都是带明确标注的演示数据，会写入你的账户以便变化账本和规划师真实填充。它绝不会被当作真实客户记录，并且可以重置。",
-    "run": "运行此步骤",
-    "reset": "重置演示数据",
-    "done": "已完成",
-    "next": "下一步",
-    "openLedger": "在变化账本中打开",
-    "steps": {
-      "wedding_plan_created": "创建婚礼计划",
-      "date_and_guests_changed": "把日期提前并增加宾客",
-      "quote_to_plan": "导入真实场地报价（Quote-to-Plan）",
-      "impact_on_home_and_emergency": "查看对买房和应急的影响",
-      "shadow_guardian": "运行影子 Guardian",
-      "seal_commitment": "封存承诺",
-      "guardian_pause": "Guardian 暂停储蓄",
-      "plan_rescue": "采纳 Plan Rescue 方案",
-      "wedding_handover": "婚礼完成——Plan Handover"
-    }
-  },
   "futureField": {
     "title": "未来场",
     "subtitle": "在同一个时间场里看见、分裂并承诺你的未来——钱、时间和目标。",
@@ -3546,9 +3525,12 @@
     "peelLabelLabel": "给这个未来命名（可选）",
     "peelCta": "创建分支",
     "peelField": {
-      "estimated_price": "房产价格",
-      "target_complete_month": "目标日期",
-      "monthly_contribution": "每月金额"
+      "wedding_date": "婚礼日期",
+      "guest_count": "宾客人数",
+      "venue_tier": "场地档次",
+      "venue_type": "场地类型",
+      "total_budget": "总预算",
+      "partner_contribution": "伴侣承担"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3607,6 +3589,167 @@
       "invalid_amount": "请输入有效金额。",
       "unknown_pin_kind": "未知的固定条件类型。",
       "value_required_for_this_pin": "此固定条件需要一个数值。"
+    },
+    "noRealityPathWedding": "你还没有已确认的婚礼预算。先设置一个，婚礼生活计划就会打开。",
+    "goConfirmPlanWedding": "打开婚礼规划师",
+    "crossTitle": "这会与什么争夺资金",
+    "roomLeft": "在扣除其他所有已确认承诺后，每月约有 {amount} 的真实空间。",
+    "ready": "完成",
+    "months": "个月",
+    "aboveFloor": "高于安全底线",
+    "belowFloor": "低于 {floor} 个月的底线",
+    "node": {
+      "home": "购房首付",
+      "emergency": "应急金",
+      "wedding": "婚礼"
+    },
+    "opt": {
+      "venue_tier": {
+        "budget": "经济",
+        "mid_range": "中档",
+        "premium": "高端"
+      },
+      "venue_type": {
+        "community": "社区 / 组屋楼下",
+        "restaurant": "餐厅",
+        "hotel": "酒店宴会",
+        "outdoor": "户外"
+      }
+    }
+  },
+  "weddingLivingPlan": {
+    "title": "婚礼生活计划",
+    "subtitle": "把婚礼、购房首付和你的安全底线放在同一条时间线上。",
+    "fieldTitle": "时间场中的婚礼",
+    "fieldSubtitle": "改动日期、预算或每月金额，购房和应急会随之移动。",
+    "entryTitle": "婚礼生活计划",
+    "entryBody": "同一个计划的多个视角：时间场、宾客圈层、预算之河、未来对比。",
+    "estimateNote": "费用为新加坡参考费率估算，非商家报价。上传真实报价可将其确定下来。",
+    "tab": {
+      "field": "场",
+      "guests": "宾客",
+      "budget": "预算",
+      "compare": "对比",
+      "history": "历史"
+    },
+    "guardian": {
+      "active": "Guardian 正在跟进此计划",
+      "detail": "它跟踪你的储蓄节奏、在订金到期前资金不足时提醒，并在应急缓冲低于 6 个月时暂停。它绝不自行转移资金。"
+    },
+    "needsChanges": {
+      "title": "此计划在封存前需要调整",
+      "detail": "你的预算比核心成本（{core}）约低 {gap}。请减少宾客、更换场地、调整项目或提高预算。"
+    },
+    "guestOrbit": {
+      "title": "宾客圈层",
+      "help": "调整一个圈层。总人数、人均成本以及对购房和应急的影响都会重新计算。",
+      "circle": {
+        "core": "必到",
+        "family": "家人",
+        "friends": "朋友",
+        "optional": "可选",
+        "travel": "需要旅行前来",
+        "special": "特殊安排"
+      },
+      "exactCount": "{circle}的精确人数",
+      "total": "{count} 位宾客",
+      "estVenueChange": "预计场地费用变化",
+      "apply": "应用为分支",
+      "appliedTo": "已按 {count} 位宾客创建分支",
+      "branchLabel": "{count} 位宾客"
+    },
+    "impact": {
+      "wedding": "婚礼总额：{before} → {after}",
+      "cashflow": "每月 {freed} {dir}",
+      "freed": "被释放",
+      "needed": "被占用",
+      "home": "购房首付约 {months} 个月{dir}",
+      "emergency": "应急缓冲：{before} → {after} 个月",
+      "pending": "影响正在重新计算。",
+      "confidence": "置信度：{level}",
+      "dir": {
+        "earlier": "提前",
+        "later": "推后",
+        "flat": "不变",
+        "unknown": "未知"
+      }
+    },
+    "budgetRiver": {
+      "title": "预算之河",
+      "help": "随时间流入的资金、流出的付款，以及压力最大的时点。",
+      "currentSavings": "已预留储蓄",
+      "yourMonthly": "你的每月",
+      "partnerMonthly": "伴侣每月",
+      "requiredMonthly": "你所需的每月金额",
+      "milestone": {
+        "deposit": "订金（锁定日期）",
+        "progress": "进度款",
+        "balance": "尾款（婚礼前）"
+      },
+      "peakShort": "最紧张的月份是 {month}：届时约差 {amount}。",
+      "peakOk": "任何一笔付款都不缺口——最紧张的月份是 {month}。",
+      "belowCore": "预算比 {core} 的核心成本低 {amount}。最大的项目：",
+      "raiseTo": "把预算提高到",
+      "raiseCta": "作为分支尝试",
+      "raiseBranchLabel": "更高预算",
+      "covered": "你的预算已覆盖核心成本。"
+    },
+    "mirror": {
+      "title": "婚礼 Mirror",
+      "help": "把当前计划与最多两个分支对比。只显示不同之处。",
+      "currentPlan": "当前计划",
+      "noBranches": "先在“宾客”或“预算”中创建分支，再来这里对比。",
+      "pick": "最多选两个分支",
+      "identical": "这些分支在任何已跟踪维度上尚无差异。",
+      "noChange": "无变化",
+      "homeEarlier": "提前 {months} 个月",
+      "homeLater": "推后 {months} 个月",
+      "buffer": "缓冲 {months} 个月",
+      "unresolvedCount": "{count} 项待解决",
+      "none": "无",
+      "dim": {
+        "guests": "宾客",
+        "total": "婚礼总额",
+        "personalMonthly": "你的每月",
+        "partnerMonthly": "伴侣每月",
+        "homeImpact": "购房首付",
+        "emergency": "应急缓冲",
+        "unresolved": "未解决"
+      },
+      "sealThis": "封存“{label}”",
+      "cannotSeal": "“{label}”暂时无法封存",
+      "sealed": "已封存。Guardian 现在正在跟进此计划。",
+      "sealBlocked": "无法封存——请检查后重试。",
+      "sealBlockedBudget": "无法封存：预算低于核心成本。"
+    },
+    "replay": {
+      "title": "变化回放",
+      "empty": "尚无记录的婚礼变化。",
+      "pick": "选择一次变化进行回放",
+      "step": {
+        "before": "变化前",
+        "action": "你做了什么",
+        "recalc": "重新计算",
+        "crossGoal": "跨目标移动",
+        "guardian": "Guardian 的响应",
+        "current": "当前状态"
+      },
+      "field": {
+        "monthlyContribution": "每月储蓄金额",
+        "guest_count": "宾客人数",
+        "budget": "预算",
+        "effectiveMonth": "自"
+      },
+      "noBefore": "此变化未记录先前状态。",
+      "noRecalc": "没有婚礼数字被直接改变。",
+      "noCross": "没有其他目标移动。",
+      "guardianPaused": "Guardian 暂停了此储蓄。",
+      "guardianScheduled": "Guardian 已排定——已安排，尚无银行转账。",
+      "guardianRevoked": "Guardian 已停止跟进——此变化不再适用。",
+      "guardianTracking": "Guardian 正在跟踪此项。",
+      "notExecuted": "已安排，未执行——未发生真实银行转账。",
+      "prev": "上一步",
+      "next": "下一步"
     }
   }
 }

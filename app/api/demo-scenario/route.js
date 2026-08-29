@@ -3,16 +3,28 @@ import { getDemoState, runDemoStep, resetDemo } from "../../../lib/demo-scenario
 
 export const runtime = "nodejs";
 
-// A clearly-labelled, controllable product-demo path. Every record it
-// creates carries demo_scenario / cause.demo = true and is filterable and
-// resettable - it is NEVER disguised as real customer data.
+// Development-only walkthrough fixture. Not a user-facing feature: it is
+// gated to non-production builds with an explicit FUTUREOS_DEV_FIXTURES
+// flag, and every row it writes carries cause.demo = true so it can be
+// filtered and reset. There is no UI entry point to it.
+const ENABLED = process.env.NODE_ENV !== "production" && process.env.FUTUREOS_DEV_FIXTURES === "1";
+
+function guard() {
+  if (!ENABLED) return Response.json({ error: "not_found" }, { status: 404 });
+  return null;
+}
+
 export async function GET(request) {
+  const blocked = guard();
+  if (blocked) return blocked;
   const userId = await getCurrentUserId(request);
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
   return Response.json(await getDemoState(userId));
 }
 
 export async function POST(request) {
+  const blocked = guard();
+  if (blocked) return blocked;
   const userId = await getCurrentUserId(request);
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
 

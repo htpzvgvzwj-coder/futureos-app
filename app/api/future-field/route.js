@@ -84,6 +84,13 @@ export async function GET(request) {
     },
     possiblePaths: branches.map((b) => {
       const monthly = Number(b.data?.monthly_contribution) || context.realityPlanData.monthly_contribution || 0;
+      // Real per-branch cross-goal projection (Home + Emergency + Cashflow
+      // before/after). Only domains whose adapter implements projectImpacts
+      // return this; others get null (honest).
+      const projectedImpacts =
+        typeof context.adapter.projectImpacts === "function"
+          ? context.adapter.projectImpacts(b.data ?? context.realityPlanData, context.realityPlanData, context.projectionContext ?? {})
+          : null;
       return {
         id: b.id,
         label: b.label,
@@ -92,6 +99,7 @@ export async function GET(request) {
         delta: b.delta,
         feasibility: b.feasibility,
         monthlyContribution: monthly,
+        projectedImpacts,
         ...readyMonthFor(b.data ?? context.realityPlanData, monthly),
       };
     }),
@@ -110,12 +118,17 @@ export async function GET(request) {
       scope: c.scope,
     })),
     catchUp,
+    // Other real goals sharing this time field - Home deposit and the
+    // Emergency fund floor. Rendered as their own nodes so a change here is
+    // seen moving them.
+    crossGoalNodes: context.crossGoalNodes ?? [],
     context: {
       monthlyIncome: context.monthlyIncome,
       monthlyExpenses: context.monthlyExpenses,
       availableMonthlyCashflow: context.availableMonthlyCashflow,
       emergencyBufferMonths: context.emergencyBufferMonths,
       availableLiquidSavings: context.availableLiquidSavings,
+      committedMonthlyTotal: context.committedMonthlyTotal,
     },
   });
 }
