@@ -3534,7 +3534,9 @@
       "venue_tier": "场地档次",
       "venue_type": "场地类型",
       "total_budget": "总预算",
-      "partner_contribution": "伴侣承担"
+      "partner_contribution": "伴侣承担",
+      "target_months": "目标覆盖（月）",
+      "floor_months": "安全底线（月）"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3791,6 +3793,70 @@
       "emergencyUp": "应急缓冲：{before} → {after} 个月。",
       "flexibleUp": "每月多出 {amount} 自由现金流。",
       "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。"
+    }
+  },
+  "promiseWeight": {
+    "title": "承诺重量",
+    "commitments": "{count} 份承诺",
+    "status": {
+      "calm": "平稳",
+      "tightening": "趋紧",
+      "needs_a_decision": "需要决定"
+    },
+    "pressureWindow": "最紧张的月份是 {month}——届时有 {count} 份承诺在拉动你的现金流。",
+    "headline": {
+      "calm": "你已封存的承诺都舒适地落在每月现金流之内。",
+      "tightening": "未来某个月接近你的每月现金流上限。",
+      "needs_a_decision": "未来某个月的需求超过了你每月现金流能覆盖的范围。"
+    }
+  },
+  "turningPoint": {
+    "state": {
+      "approaching": "临近",
+      "open": "待决",
+      "sealed": "已封存"
+    },
+    "why": {
+      "payment_due_underfunded": "一笔 {amount} 的付款将于 {month} 到期，资金尚未就位。",
+      "budget_below_core": "预算比计划的实际成本低 {amount}。",
+      "emergency_floor_near": "你的应急缓冲（{buffer} 个月）接近 {floor} 个月的底线。",
+      "fragment_expiring": "如果不放置，一笔释放出的现金流选择将在 {days} 天后过期。",
+      "commitment_completing": "一份承诺即将完成，将释放约每月 {amount}。"
+    },
+    "wait": {
+      "payment_due_underfunded": "如果拖延，这笔付款可能错过或从储蓄中扣。",
+      "budget_below_core": "在解决之前，该计划无法封存。",
+      "emergency_floor_near": "如果拖延，另一个计划可能把缓冲拉到底线以下。",
+      "fragment_expiring": "如果拖延，这个选择会退回普通现金流，什么都没决定。",
+      "commitment_completing": "如果拖延，释放出的钱只是停在现金流里，没有方向。"
+    }
+  },
+  "decisionEcho": {
+    "confidence": "置信度：{level}",
+    "prompt": {
+      "keeps_freed_cash_flexible": "最近你几次把释放出的钱保留为自由现金。这是暂时选择，还是你想保护的一种空间？",
+      "rebuilds_safety_first": "你几次把释放出的钱用于安全底线。是否值得固定为一条规则？",
+      "accelerates_a_goal": "你多次把释放出的钱推向同一个目标。要把它变成一个计划吗？",
+      "protects_the_emergency_floor": "你一直在保护应急底线。要不要固定它，让每个计划都遵守？",
+      "chooses_safety_under_pressure": "在压力下你几次选择了安全。先作为一个观察保留？"
+    }
+  },
+  "shadowGuardian": {
+    "entry": {
+      "needsAChoice": "如果维持当前承诺，未来某个月可能需要一个选择。想先看看吗？",
+      "allClear": "已对当前承诺做过预演——没有需要决定的事。"
+    }
+  },
+  "memoryLens": {
+    "unknown": {
+      "noRecord": "目前记录的历史还不足以解释这一点。"
+    },
+    "node": {
+      "fact": "事实",
+      "user_choice": "你的选择",
+      "estimate": "估算",
+      "inference": "推断",
+      "unknown": "未知"
     }
   }
 }

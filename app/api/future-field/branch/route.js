@@ -24,6 +24,7 @@ const ALLOWED_OVERRIDES = {
     "monthly_contribution",
     "partner_contribution",
   ]),
+  emergency: new Set(["target_months", "floor_months", "monthly_contribution"]),
 };
 
 // Peel: create a possible future off the reality path. Also handles

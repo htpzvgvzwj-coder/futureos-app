@@ -1,0 +1,64 @@
+"use client";
+
+// Today status line - Promise Weight (one calm word), the next Turning
+// Point, and any Decision Echo. No fear, no red panic, no urgency copy.
+// Data: GET /api/living-plan/status (all computed from real sealed
+// commitments + real cashflow + the Change Ledger).
+
+import { useEffect, useState } from "react";
+
+const STATUS_CLASS = { calm: "lpsCalm", tightening: "lpsTightening", needs_a_decision: "lpsDecision" };
+
+export function LivingPlanStatus({ t, setActiveScreen }) {
+  const [data, setData] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/living-plan/status")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => alive && setData(d))
+      .catch(() => alive && setFailed(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (failed || !data) return null;
+  const pw = data.promiseWeight;
+  if (!pw || pw.activeCommitmentCount === 0) return null;
+
+  return (
+    <section className={`lpsCard ${STATUS_CLASS[pw.status] ?? ""}`} aria-label={t("promiseWeight.title")}>
+      <div className="lpsRow">
+        <span className="lpsChip">{t(`promiseWeight.status.${pw.status}`)}</span>
+        <span className="lpsCount">{t("promiseWeight.commitments", { count: pw.activeCommitmentCount })}</span>
+      </div>
+      {pw.pressureWindow ? (
+        <p className="lpsLine">
+          {t("promiseWeight.pressureWindow", {
+            month: pw.pressureWindow.month,
+            count: pw.pressureWindow.driverCommitments.length,
+          })}
+        </p>
+      ) : (
+        <p className="lpsLine">{t(pw.headlineKey)}</p>
+      )}
+      {data.nextTurningPoint ? (
+        <button
+          type="button"
+          className="lpsTurning"
+          onClick={() => setActiveScreen && setActiveScreen("mirror")}
+        >
+          {t(data.nextTurningPoint.whyNowKey, data.nextTurningPoint.whyNowParams)}
+          <small>{t(`turningPoint.state.${data.nextTurningPoint.state}`)}</small>
+        </button>
+      ) : null}
+      {data.decisionEchoes?.length ? (
+        <p className="lpsEcho">
+          {t(data.decisionEchoes[0].promptKey)} <em>({t("decisionEcho.confidence", { level: data.decisionEchoes[0].confidence })})</em>
+        </p>
+      ) : null}
+    </section>
+  );
+}

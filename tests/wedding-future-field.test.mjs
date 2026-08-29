@@ -81,8 +81,9 @@ test("Pin: min_core_guests is checked against the real guest count", () => {
 });
 
 test("Living Plan registry: wedding + home are registered, the rest are honest stubs", () => {
-  assert.deepEqual(registeredLivingPlanDomains().sort(), ["home", "wedding"]);
+  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "wedding"]);
   assert.equal(isLivingPlan("wedding"), true);
+  assert.equal(isLivingPlan("emergency"), true);
   assert.equal(isLivingPlan("investment"), false);
   assert.equal(getLivingPlanSpec("travel").registered, false);
   assert.equal(getLivingPlanSpec("travel").reason, "not_a_living_plan_yet");
