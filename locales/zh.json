@@ -3839,12 +3839,31 @@
       "accelerates_a_goal": "你多次把释放出的钱推向同一个目标。要把它变成一个计划吗？",
       "protects_the_emergency_floor": "你一直在保护应急底线。要不要固定它，让每个计划都遵守？",
       "chooses_safety_under_pressure": "在压力下你几次选择了安全。先作为一个观察保留？"
-    }
+    },
+    "dismiss": "忽略",
+    "askWhy": "问为什么"
   },
   "shadowGuardian": {
     "entry": {
       "needsAChoice": "如果维持当前承诺，未来某个月可能需要一个选择。想先看看吗？",
       "allClear": "已对当前承诺做过预演——没有需要决定的事。"
+    },
+    "title": "影子 Guardian",
+    "entryPrompt": "对照一个变化预演当前承诺——想看看吗？",
+    "rescuesLabel": "选项（并非建议）",
+    "openMirror": "在 Mirror 中查看选项",
+    "assumptionsLabel": "假设 · 置信度：{level}",
+    "dismiss": "暂不",
+    "finding": {
+      "cashflow": "每月自由现金流将从 {before} 变为 {after}。",
+      "floor": "应急缓冲将从 {before} 变为 {after} 个月——低于 {floor} 个月的底线。",
+      "milestone": "某个付款节点在到期时可能资金不足。"
+    },
+    "rescue": {
+      "keep_plan_watch": "所有计划保持不变并观察",
+      "adjust_one_variable": "调整某个计划中的一个变量",
+      "use_available_future": "用一笔被释放的未来来覆盖",
+      "pause_or_defer_a_commitment": "暂停或延后一份承诺"
     }
   },
   "memoryLens": {
@@ -3857,6 +3876,35 @@
       "estimate": "估算",
       "inference": "推断",
       "unknown": "未知"
+    },
+    "title": "记忆之镜",
+    "subtitle": "你的人生为什么是现在这个样子——真实的因果链，一步一步。",
+    "loadError": "无法构建记忆之镜，请稍后重试。",
+    "pickGoal": "查看",
+    "noImpact": "此步骤没有改变任何被跟踪的数字。",
+    "before": "变化前",
+    "after": "变化后",
+    "thinEvidence": "此处记录较少——把这一步当作背景，而非证据。",
+    "versionTrail": "计划版本历史",
+    "goal": {
+      "wedding": "婚礼",
+      "home": "购房",
+      "emergency": "应急金",
+      "retirement": "退休",
+      "loan": "贷款",
+      "travel": "旅行",
+      "family": "家庭",
+      "investment": "投资"
     }
+  },
+  "futureHandoff": {
+    "title": "未来接力",
+    "help": "一份承诺已结束——它占用的每月金额被释放。由你决定去向。",
+    "released": "你的{domain}承诺自 {from} 释放了每月 {amount}。",
+    "unallocated": "仍有 {amount}/月未分配。",
+    "overAllocated": "超过了释放出的金额。",
+    "confirm": "确认此接力",
+    "confirmed": "接力已确认。仍有 {unallocated}/月可用。",
+    "error": "无法确认接力，请重试。"
   }
 }

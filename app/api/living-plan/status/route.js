@@ -81,7 +81,10 @@ export async function GET(request) {
     },
   });
 
-  const { echoes } = detectDecisionEchoes({ events: ledgerEvents });
+  const { echoes } = detectDecisionEchoes({
+    events: ledgerEvents,
+    dismissed: new Set(preferences?.dismissedEchoes ?? []),
+  });
 
   return Response.json({
     promiseWeight: {

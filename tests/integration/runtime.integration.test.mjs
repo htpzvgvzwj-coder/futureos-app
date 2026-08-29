@@ -388,3 +388,47 @@ test("Living Plan status: Promise Weight + Turning Points compute from the fixtu
   assert.ok(Array.isArray(tp.points));
   void pool;
 });
+
+test("Behaviour UIs: Memory Lens builds a real causal chain; Shadow Guardian previews; Handoff lists revoked commitments", opts, async () => {
+  const { pool } = await mods();
+  const { listEvents } = await import("../../lib/change-ledger/store.js");
+  const { planStore } = await import("../../lib/plan-runtime/index.js");
+  const { buildMemoryLens } = await import("../../lib/living-plan/memory-lens.js");
+  const { buildShadowPreview } = await import("../../lib/guardian/shadow-guardian.js");
+  const { buildHandoffCandidate } = await import("../../lib/living-plan/future-handoff.js");
+  const { getStrategicBalanceSnapshot } = await import("../../lib/strategic-balance-context.js");
+
+  // Memory Lens over the fixture's real wedding ledger events
+  const events = await listEvents(FIXTURE_HOME_USER, { filter: "all", limit: 250 });
+  const plan = await planStore.getPlan(FIXTURE_HOME_USER, { domain: "wedding", goalKey: "wedding" });
+  const versions = plan ? await planStore.listPlanVersions(plan.id) : [];
+  const lens = buildMemoryLens({ goalId: "wedding", events, planVersions: versions });
+  assert.ok(Array.isArray(lens.chain));
+  assert.ok(["fact", "user_choice", "estimate", "inference", "unknown"].every((k) => typeof lens.tally[k] === "number" || lens.tally[k] === undefined));
+  if (!lens.hasEnoughEvidence) assert.equal(lens.unknownReasonKey, "memoryLens.unknown.noRecord");
+
+  // Shadow Guardian preview over the fixture's real sealed commitments
+  const strategic = await getStrategicBalanceSnapshot(FIXTURE_HOME_USER);
+  const commitments = strategic.savings.map((s) => ({ id: `savings:${s.domain}`, domain: s.domain, monthlyContribution: Number(s.monthlyContribution) || 0 }));
+  const preview = buildShadowPreview({
+    trigger: { kind: "expense_shock", detail: { extraMonthlyExpense: 2000 } },
+    commitments,
+    context: { monthlyFreeCashflow: 1000, emergencyBufferMonths: 6.1, monthlyExpenses: 4000, emergencyFloorMonths: 6 },
+  });
+  assert.equal(preview.state, "preview_ready");
+  assert.ok(Array.isArray(preview.assumptions) && preview.assumptions.length >= 1);
+  assert.ok(["low", "medium", "high"].includes(preview.confidence));
+
+  // Handoff candidates from any revoked commitments (may be empty - still valid)
+  const { rows } = await pool.query(
+    `select id, domain, monthly_contribution, effective_month from goal_commitments where profile_key = $1 and status = 'revoked' limit 5`,
+    [FIXTURE_HOME_USER],
+  );
+  const candidates = rows
+    .map((r) => buildHandoffCandidate({ commitment: { id: r.id, domain: r.domain, monthly_contribution: r.monthly_contribution, status: "active", effectiveMonth: r.effective_month }, reason: "revoked" }))
+    .filter(Boolean);
+  for (const c of candidates) {
+    assert.ok(c.releasedMonthly > 0);
+    assert.equal(c.unallocatedMonthly, c.releasedMonthly, "nothing allocated until the customer confirms");
+  }
+});

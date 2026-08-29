@@ -7,6 +7,9 @@ import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-sc
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
 import { LivingPlanStatus } from "./components/living-plan-status.jsx";
+import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
+import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
+import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -152,6 +155,7 @@ const screens = {
   DECODE_DOCUMENT: "decodeDocument",
   STRATEGIC_BALANCE: "strategicBalance",
   CHANGE_LEDGER: "changeLedger",
+  MEMORY_LENS: "memoryLens",
   FUTURE_FIELD: "futureField",
   WEDDING_LIVING_PLAN: "weddingLivingPlan",
   CROSS_BANK_DATA: "crossBankData",
@@ -3190,7 +3194,7 @@ function getNavScreen(activeScreen) {
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
   }
-  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.STRATEGIC_BALANCE, screens.CHANGE_LEDGER].includes(activeScreen)) {
+  if ([screens.NEED_EMERGENCY, screens.NEED_INSURANCE, screens.STRATEGIC_BALANCE, screens.CHANGE_LEDGER, screens.MEMORY_LENS].includes(activeScreen)) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
@@ -4579,6 +4583,21 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         <span>
           <strong>{t("changeLedger.title")}</strong>
           <small>{t("changeLedger.subtitle")}</small>
+        </span>
+        <ChevronRight size={15} />
+      </button>
+
+      <button
+        type="button"
+        className="strategicBalanceEntry"
+        onClick={() => setActiveScreen(screens.MEMORY_LENS)}
+      >
+        <span className="iconBubble">
+          <History size={16} />
+        </span>
+        <span>
+          <strong>{t("memoryLens.title")}</strong>
+          <small>{t("memoryLens.subtitle")}</small>
         </span>
         <ChevronRight size={15} />
       </button>
@@ -6986,6 +7005,9 @@ function FutureSelfGuardian({
     <Screen>
       <Header title={t("guardian.title")} subtitle={t("guardian.hub.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
+
+      <ShadowGuardianPanel t={t} setActiveScreen={setActiveScreen} />
+      <FutureHandoffPanel t={t} />
 
       {hardshipTriggered ? (
         <motion.button
@@ -17366,6 +17388,7 @@ export default function App() {
     ),
     [screens.DECODE_DOCUMENT]: <DecodeDocumentScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.CHANGE_LEDGER]: <ChangeLedgerScreen t={t} setActiveScreen={setActiveScreen} backTo={screens.LIFE_GRAPH} />,
+    [screens.MEMORY_LENS]: <MemoryLensScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_FIELD]: (
       <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
     ),

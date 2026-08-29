@@ -5,24 +5,38 @@
 // Data: GET /api/living-plan/status (all computed from real sealed
 // commitments + real cashflow + the Change Ledger).
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const STATUS_CLASS = { calm: "lpsCalm", tightening: "lpsTightening", needs_a_decision: "lpsDecision" };
 
 export function LivingPlanStatus({ t, setActiveScreen }) {
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState(false);
+  const [echoHidden, setEchoHidden] = useState(false);
 
-  useEffect(() => {
-    let alive = true;
+  const load = useCallback(() => {
     fetch("/api/living-plan/status")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => alive && setData(d))
-      .catch(() => alive && setFailed(true));
-    return () => {
-      alive = false;
-    };
+      .then((d) => setData(d))
+      .catch(() => setFailed(true));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const dismissEcho = async (pattern) => {
+    setEchoHidden(true);
+    try {
+      await fetch("/api/living-plan/echo/dismiss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pattern }),
+      });
+    } catch {
+      /* dismissed locally regardless */
+    }
+  };
 
   if (failed || !data) return null;
   const pw = data.promiseWeight;
@@ -54,10 +68,20 @@ export function LivingPlanStatus({ t, setActiveScreen }) {
           <small>{t(`turningPoint.state.${data.nextTurningPoint.state}`)}</small>
         </button>
       ) : null}
-      {data.decisionEchoes?.length ? (
-        <p className="lpsEcho">
-          {t(data.decisionEchoes[0].promptKey)} <em>({t("decisionEcho.confidence", { level: data.decisionEchoes[0].confidence })})</em>
-        </p>
+      {data.decisionEchoes?.length && !echoHidden ? (
+        <div className="lpsEcho">
+          <p>
+            {t(data.decisionEchoes[0].promptKey)} <em>({t("decisionEcho.confidence", { level: data.decisionEchoes[0].confidence })})</em>
+          </p>
+          <div className="lpsEchoActions">
+            <button type="button" className="linkButton" onClick={() => dismissEcho(data.decisionEchoes[0].pattern)}>
+              {t("decisionEcho.dismiss")}
+            </button>
+            <button type="button" className="linkButton" onClick={() => setActiveScreen && setActiveScreen("changeLedger")}>
+              {t("decisionEcho.askWhy")}
+            </button>
+          </div>
+        </div>
       ) : null}
     </section>
   );
