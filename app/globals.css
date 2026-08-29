@@ -6277,3 +6277,16 @@ nextjs-portal {
 @media (max-width: 360px) {
   .wlpReleasedSplit { grid-template-columns: 1fr; }
 }
+
+/* Living Plan status (Today) */
+.lpsCard { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 12px 14px; display: flex; flex-direction: column; gap: 7px; box-shadow: 0 8px 24px rgba(20,36,58,0.05); }
+.lpsRow { display: flex; align-items: center; gap: 8px; }
+.lpsChip { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--soft); color: var(--muted); }
+.lpsCalm .lpsChip { color: var(--success); background: #e6f6f2; }
+.lpsTightening .lpsChip { color: #8a5a00; background: #fdf4e3; }
+.lpsDecision .lpsChip { color: var(--ocbc-red); background: #fdeced; }
+.lpsCount { font-size: 0.78rem; color: var(--muted); }
+.lpsLine { margin: 0; font-size: 0.86rem; }
+.lpsTurning { text-align: left; background: none; border: none; border-top: 1px solid var(--line); padding: 7px 0 0; display: flex; flex-direction: column; gap: 2px; font-size: 0.84rem; color: var(--navy-2); }
+.lpsTurning small { color: var(--muted); font-weight: 600; }
+.lpsEcho { margin: 0; font-size: 0.8rem; color: var(--muted); }

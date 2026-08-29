@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
+import { LivingPlanStatus } from "./components/living-plan-status.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -3949,6 +3950,8 @@ function HomeDashboard({ goWithLoading, setActiveScreen, displayName, preference
             <h1>{t("homeBanking.welcome", { name: displayName })}</h1>
           </motion.div>
         </section>
+
+        <LivingPlanStatus t={t} setActiveScreen={setActiveScreen} />
 
         {topMoment?.id === "home-goal-shift" ? (
           <HomeGoalShiftMomentCard

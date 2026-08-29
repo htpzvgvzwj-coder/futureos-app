@@ -76,6 +76,11 @@ const PEEL_FIELDS = {
     { field: "monthly_contribution", kind: "money" },
     { field: "partner_contribution", kind: "money" },
   ],
+  emergency: [
+    { field: "target_months", kind: "count" },
+    { field: "floor_months", kind: "count" },
+    { field: "monthly_contribution", kind: "money" },
+  ],
 };
 function peelFieldsFor(domain) {
   return PEEL_FIELDS[domain] ?? PEEL_FIELDS.home;

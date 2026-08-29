@@ -3716,7 +3716,9 @@
       "venue_tier": "Venue tier",
       "venue_type": "Venue type",
       "total_budget": "Total budget",
-      "partner_contribution": "Partner contribution"
+      "partner_contribution": "Partner contribution",
+      "target_months": "Target coverage (months)",
+      "floor_months": "Safety floor (months)"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3973,6 +3975,70 @@
       "emergencyUp": "Emergency buffer {before} to {after} months.",
       "flexibleUp": "{amount}/month more free cashflow.",
       "stillPossible": "Still a possible future - it becomes real when you Seal."
+    }
+  },
+  "promiseWeight": {
+    "title": "Promise weight",
+    "commitments": "{count} commitment(s)",
+    "status": {
+      "calm": "Calm",
+      "tightening": "Tightening",
+      "needs_a_decision": "Needs a decision"
+    },
+    "pressureWindow": "Tightest month is {month} - {count} commitment(s) pulling on your cashflow then.",
+    "headline": {
+      "calm": "Your sealed commitments sit comfortably within your monthly cashflow.",
+      "tightening": "One month ahead gets close to your monthly cashflow.",
+      "needs_a_decision": "A month ahead needs more than your monthly cashflow can cover."
+    }
+  },
+  "turningPoint": {
+    "state": {
+      "approaching": "Approaching",
+      "open": "Open",
+      "sealed": "Sealed"
+    },
+    "why": {
+      "payment_due_underfunded": "A {amount} payment is due {month} and the funds aren't in place yet.",
+      "budget_below_core": "The budget is {amount} below what the plan actually costs.",
+      "emergency_floor_near": "Your emergency buffer ({buffer} mo) is close to the {floor}-month floor.",
+      "fragment_expiring": "A freed-cashflow choice expires in {days} days if you don't place it.",
+      "commitment_completing": "A commitment completes soon, freeing about {amount}/month."
+    },
+    "wait": {
+      "payment_due_underfunded": "If you wait, the payment could be missed or pulled from savings.",
+      "budget_below_core": "Until this is resolved the plan can't be sealed.",
+      "emergency_floor_near": "If you wait, another plan could take the buffer below the floor.",
+      "fragment_expiring": "If you wait, the choice returns to plain cashflow with nothing decided.",
+      "commitment_completing": "If you wait, the freed money just sits as cashflow with no direction."
+    }
+  },
+  "decisionEcho": {
+    "confidence": "confidence: {level}",
+    "prompt": {
+      "keeps_freed_cash_flexible": "You've kept freed cash flexible a few times lately. A short-term choice, or a space you want to protect?",
+      "rebuilds_safety_first": "You've put freed money toward safety a few times. Worth pinning as a rule?",
+      "accelerates_a_goal": "You've pushed freed money toward one goal repeatedly. Make it a plan?",
+      "protects_the_emergency_floor": "You keep protecting the emergency floor. Pin it so every plan respects it?",
+      "chooses_safety_under_pressure": "Under pressure you've chosen safety a few times. Keep as an observation?"
+    }
+  },
+  "shadowGuardian": {
+    "entry": {
+      "needsAChoice": "If you keep the current commitments, a month ahead may need a choice. Want a look first?",
+      "allClear": "Rehearsed against the current commitments - nothing needs a decision."
+    }
+  },
+  "memoryLens": {
+    "unknown": {
+      "noRecord": "There isn't enough recorded history to explain this yet."
+    },
+    "node": {
+      "fact": "Fact",
+      "user_choice": "Your choice",
+      "estimate": "Estimate",
+      "inference": "Inference",
+      "unknown": "Unknown"
     }
   }
 }

@@ -356,3 +356,35 @@ test("Wedding Living Plan: 150->~90 guests recomputes wedding + Home + Emergency
   void homeReadyBefore;
   void emergencyBefore;
 });
+
+test("Living Plan status: Promise Weight + Turning Points compute from the fixture's real sealed commitments", opts, async () => {
+  const { pool } = await mods();
+  const { getStrategicBalanceSnapshot } = await import("../../lib/strategic-balance-context.js");
+  const { resolveAssetPromptContext } = await import("../../lib/liquid-savings-context.js");
+  const { computePromiseWeight } = await import("../../lib/living-plan/promise-weight.js");
+  const { deriveTurningPoints } = await import("../../lib/living-plan/turning-point.js");
+  const { getPreferences } = await import("../../lib/preferences-store.js");
+
+  const prefs = await getPreferences(FIXTURE_HOME_USER);
+  const expenses = Number(prefs?.profile?.monthlyExpenses) || 0;
+  const income = Number(prefs?.profile?.statedMonthlyIncome) || 0;
+  const strategic = await getStrategicBalanceSnapshot(FIXTURE_HOME_USER);
+  const asset = await resolveAssetPromptContext(FIXTURE_HOME_USER, Number(prefs?.profile?.currentSavings) || 0, expenses, "flexible");
+
+  const commitments = [
+    ...strategic.savings.map((s) => ({ id: `savings:${s.domain}`, domain: s.domain, label: s.domain, monthlyAmount: Number(s.monthlyContribution) || 0 })),
+    ...strategic.loans.map((l) => ({ id: `loan:${l.purpose}`, domain: "loan", label: l.purpose, monthlyAmount: Number(l.monthlyInstallment) || 0 })),
+  ].filter((c) => c.monthlyAmount > 0);
+
+  const pw = computePromiseWeight({
+    commitments,
+    context: { monthlyFreeCashflow: income > 0 ? income - expenses : 0, monthlyExpenses: expenses },
+  });
+  assert.ok(["calm", "tightening", "needs_a_decision"].includes(pw.status), "a real status word");
+  assert.equal(pw.activeCommitmentCount, new Set(commitments.map((c) => c.id)).size);
+  assert.equal(pw.months.length, 18);
+
+  const tp = deriveTurningPoints({ sources: { emergencyFloor: { bufferMonths: asset.emergencyBufferMonths, floorMonths: 6 } } });
+  assert.ok(Array.isArray(tp.points));
+  void pool;
+});
