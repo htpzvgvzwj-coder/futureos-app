@@ -26,6 +26,7 @@ import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 import { computeJointPlanEvidence } from "../../../../lib/joint-plan-evidence.js";
+import { recordSavingsPlanConfirmed } from "../../../../lib/change-ledger/record-goal-plan.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -197,6 +198,10 @@ export async function POST(request) {
   }
 
   const artifactType = toolUse.name === "propose_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
+  const priorSavingsPlan =
+    artifactType === "confirmed_savings_plan"
+      ? await getLatestArtifact(session.id, "stage2", "confirmed_savings_plan")
+      : null;
   await saveArtifact(session.id, "stage2", artifactType, finalData);
 
   if (toolUse.name === "finalize_savings_plan") {
@@ -209,6 +214,18 @@ export async function POST(request) {
       monthlyIncome: profile.monthlyIncome,
       monthlyExpenses: profile.monthlyExpenses,
       currentSavings: availableSavingsNow,
+    });
+    await recordSavingsPlanConfirmed({
+      profileKey: userId,
+      domain: "wedding",
+      monthlyContribution: finalData.monthly_contribution,
+      priorMonthlyContribution: priorSavingsPlan?.monthly_contribution ?? null,
+      targetCompleteMonth: finalData.target_complete_month ?? null,
+      crossGoalInputs: {
+        monthlyIncome: profile.monthlyIncome,
+        monthlyExpenses: profile.monthlyExpenses,
+        currentSavings: availableSavingsNow,
+      },
     });
   } else {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });

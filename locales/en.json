@@ -1890,12 +1890,30 @@
     "title": "Personal Economy",
     "subtitle": "Your real numbers, read as one connected system.",
     "indicators": {
-      "grossOutput": { "label": "Income", "detail": "What you really earn each month" },
-      "consumption": { "label": "Spending", "detail": "What you really spend each month" },
-      "tradeBalance": { "label": "Monthly surplus", "detail": "Income minus spending" },
-      "reserves": { "label": "Net worth", "detail": "Real assets minus real debts" },
-      "debtRatio": { "label": "Commitment ratio", "detail": "Committed monthly cost vs income" },
-      "savingsRate": { "label": "Savings rate", "detail": "Share of income you keep" }
+      "grossOutput": {
+        "label": "Income",
+        "detail": "What you really earn each month"
+      },
+      "consumption": {
+        "label": "Spending",
+        "detail": "What you really spend each month"
+      },
+      "tradeBalance": {
+        "label": "Monthly surplus",
+        "detail": "Income minus spending"
+      },
+      "reserves": {
+        "label": "Net worth",
+        "detail": "Real assets minus real debts"
+      },
+      "debtRatio": {
+        "label": "Commitment ratio",
+        "detail": "Committed monthly cost vs income"
+      },
+      "savingsRate": {
+        "label": "Savings rate",
+        "detail": "Share of income you keep"
+      }
     },
     "netWorthTrendLabel": "Net worth trend",
     "netWorthTrendDetail": "{amount} ({percent}%) since you started logging assets",
@@ -2076,15 +2094,33 @@
     },
     "riskLabel": "Risk Preference",
     "riskOptions": {
-      "conservative": { "label": "Conservative", "description": "Lower expected growth, lower volatility - capital preservation first." },
-      "balanced": { "label": "Balanced", "description": "A mix of growth and stability - suits most people." },
-      "growth": { "label": "Growth", "description": "Higher expected growth, higher volatility - for longer time horizons." }
+      "conservative": {
+        "label": "Conservative",
+        "description": "Lower expected growth, lower volatility - capital preservation first."
+      },
+      "balanced": {
+        "label": "Balanced",
+        "description": "A mix of growth and stability - suits most people."
+      },
+      "growth": {
+        "label": "Growth",
+        "description": "Higher expected growth, higher volatility - for longer time horizons."
+      }
     },
     "goalCategoryLabel": "What's this investment for?",
     "goalCategories": {
-      "retirementGap": { "label": "Retirement Gap", "description": "Help close the gap between your target retirement income and CPF LIFE." },
-      "generalWealthBuilding": { "label": "General Wealth Building", "description": "No specific goal - build a durable investing habit over time." },
-      "customTarget": { "label": "Custom Target", "description": "You have a specific amount and timeframe in mind." }
+      "retirementGap": {
+        "label": "Retirement Gap",
+        "description": "Help close the gap between your target retirement income and CPF LIFE."
+      },
+      "generalWealthBuilding": {
+        "label": "General Wealth Building",
+        "description": "No specific goal - build a durable investing habit over time."
+      },
+      "customTarget": {
+        "label": "Custom Target",
+        "description": "You have a specific amount and timeframe in mind."
+      }
     },
     "horizonYearsLabel": "Investment Horizon (years)",
     "customTargetAmountLabel": "Target Amount (SGD)",
@@ -2098,10 +2134,22 @@
     },
     "purchaseModeLabel": "How do you want to buy?",
     "purchaseModes": {
-      "monthlyRsp": { "label": "Monthly RSP", "description": "A fixed amount on a fixed date each month - like OCBC BCIP, averages out your cost." },
-      "lumpSum": { "label": "Lump Sum", "description": "Invest a larger amount all at once, not spread over time." },
-      "dailyMicroDca": { "label": "Daily Micro-Investing", "description": "A small fixed amount every trading day - higher-frequency cost averaging, needs a fractional-share broker." },
-      "valueAveraging": { "label": "Value Averaging", "description": "Top up toward a target growth path each month - contributions start higher and taper over time." }
+      "monthlyRsp": {
+        "label": "Monthly RSP",
+        "description": "A fixed amount on a fixed date each month - like OCBC BCIP, averages out your cost."
+      },
+      "lumpSum": {
+        "label": "Lump Sum",
+        "description": "Invest a larger amount all at once, not spread over time."
+      },
+      "dailyMicroDca": {
+        "label": "Daily Micro-Investing",
+        "description": "A small fixed amount every trading day - higher-frequency cost averaging, needs a fractional-share broker."
+      },
+      "valueAveraging": {
+        "label": "Value Averaging",
+        "description": "Top up toward a target growth path each month - contributions start higher and taper over time."
+      }
     },
     "valueAveragingDisclaimer": "This projection assumes a constant expected return with no market ups and downs. Value averaging's real-world edge - buying more when prices dip - isn't captured here; what you'll see is a genuinely different, front-loaded contribution schedule, not a different end result from market timing.",
     "submitIntake": "Show My Recommendations",
@@ -2962,7 +3010,12 @@
       "why": "Why did this happen?",
       "reasonExpenseIncrease": "Over the same period, your real logged expenses rose by about {amount}/month.",
       "reasonBehindPace": "You've been saving less than your confirmed monthly contribution in the months you've logged.",
-      "adoptError": "Something went wrong updating your plan. Please try again, or open Home Purchase Planner directly."
+      "adoptError": "Something went wrong updating your plan. Please try again, or open Home Purchase Planner directly.",
+      "error_invalid_amount": "That contribution amount isn't valid. Move the slider and try again.",
+      "error_amount_out_of_range": "That amount is outside the range this pace change supports. Move the slider back into range.",
+      "error_amount_exceeds_cashflow": "That amount is more than your real monthly room after every other confirmed commitment. Lower it and try again.",
+      "error_active_commitment_exists": "You already have an active Guardian commitment for your home plan. Cancel it first, then set a new one.",
+      "error_no_active_moment": "This pace change is no longer current - your latest figures don't show the same slip. Reopen Home Purchase Planner to review."
     },
     "homeGoalRecovery": {
       "headline": "You caught up {months} months on your home savings pace.",
@@ -3447,6 +3500,191 @@
       "cashName": "Existing savings",
       "investmentName": "Existing investments",
       "insuranceName": "Existing insurance coverage"
+    }
+  },
+  "changeLedger": {
+    "title": "Changes",
+    "subtitle": "What actually changed, why, and what it touched.",
+    "entry": "Change history",
+    "goalSectionTitle": "What has changed for this goal",
+    "deltaTitle": "Since you last opened FutureOS",
+    "deltaEmpty": "Nothing has changed since your last visit.",
+    "empty": "No changes recorded yet. As you and Guardian act on your plans, each real change will appear here with its cause and impact.",
+    "viewFull": "View full change",
+    "noLongerInEffect": "This change is no longer in effect.",
+    "supersededNotice": "Cancelled on {date} - see the later entry.",
+    "causeTitle": "What triggered this",
+    "evidenceTitle": "Evidence",
+    "impactTitle": "What it affected",
+    "sourceEventLink": "Where this change came from",
+    "filter": {
+      "all": "All",
+      "mine": "My decisions",
+      "guardian": "Guardian",
+      "plan": "Plans",
+      "quotes": "Quotes & documents",
+      "shared": "Shared goals",
+      "outcomes": "Completed outcomes"
+    },
+    "actor": {
+      "user": "You",
+      "guardian": "Guardian",
+      "system": "System",
+      "partner": "Your co-planner"
+    },
+    "status": {
+      "projected": "Projected - not confirmed yet",
+      "simulated": "Simulated - Shadow Guardian dry run",
+      "scheduled": "Scheduled - arranged, no bank action yet",
+      "active": "Active - really running now",
+      "paused": "Paused - really held right now",
+      "revoked": "Revoked - no longer in effect",
+      "completed": "Completed",
+      "observed": "Outcome - measured against the plan"
+    },
+    "metric": {
+      "monthlyContribution": "monthly contribution",
+      "targetDate": "target date",
+      "emergencyBuffer": "emergency buffer",
+      "planSafeBalance": "plan-safe balance",
+      "monthlyCashflow": "monthly cashflow",
+      "planBudget": "plan budget",
+      "branchFeasibility": "branch feasibility"
+    },
+    "pinKind": {
+      "emergency_floor_months": "emergency fund never below {value} months",
+      "max_monthly_contribution": "monthly contribution capped at {value} SGD",
+      "max_delay_months": "goal not delayed more than {value} months",
+      "min_core_guests": "at least {value} core guests kept",
+      "min_photo_quality": "photography quality not reduced",
+      "no_balance_share": "personal balance not shared with a partner",
+      "no_guardian_auto_move": "Guardian must not move money automatically"
+    },
+    "impact": {
+      "monthlyChange": "{metric}: {before} to {after} SGD/month",
+      "genericChange": "{metric}: {before} to {after}",
+      "budgetChange": "{metric}: {before} to {after} SGD",
+      "scoreChange": "{goal} Future Score: {before} to {after}",
+      "dateLater": "target date about {months} month(s) later",
+      "dateEarlier": "target date about {months} month(s) earlier",
+      "dateUnchanged": "target date unchanged",
+      "bufferChange": "emergency buffer: {before} to {after} months"
+    },
+    "event": {
+      "commitment_created": {
+        "headline": "You set a Guardian commitment of {amount} SGD/month toward your home, starting {month}.",
+        "detail": "Monthly contribution moves from {before} to {after} SGD."
+      },
+      "commitment_revoked": {
+        "headline": "You cancelled the Guardian pace adjustment on your home plan.",
+        "detail": "Monthly contribution restored to {restored} SGD - the plan confirmed before the adjustment."
+      },
+      "commitment_paused": {
+        "headline": "Guardian paused your home contribution.",
+        "detail": "Your emergency buffer is {current} months, below the {threshold}-month floor. Guardian is not moving this money until it recovers."
+      },
+      "commitment_resumed": {
+        "headline": "Guardian resumed your home contribution.",
+        "detail": null
+      },
+      "plan_updated": {
+        "wedding": "You confirmed a wedding plan with a budget of about {budget} SGD.",
+        "home": "You confirmed a home plan with a target price of about {budget} SGD.",
+        "retirement": "You confirmed a retirement plan.",
+        "other": "You confirmed a savings goal plan of about {budget} SGD.",
+        "travel": "You confirmed a travel plan with a budget of about {budget} SGD."
+      },
+      "savings_plan_confirmed": {
+        "headline": "You confirmed a {domain} savings plan of {amount} SGD/month."
+      },
+      "joint_declined": {
+        "headline": "Your co-planner declined the proposed {domain} change."
+      },
+      "quote_imported": {
+        "headline": "You imported a real quote for {label}: {quoted} SGD."
+      },
+      "rescue_adopted": {
+        "pause_goal_plan": "You paused a {domain} savings plan to protect your buffer.",
+        "drawdown_emergency_fund": "You drew {amount} SGD from your emergency fund.",
+        "invest_excess": "You moved {amount} SGD of excess cash into investment.",
+        "other_ocbc_support": "You accepted a bank support measure."
+      },
+      "shadow": {
+        "start": "Shadow Guardian started a dry run - no real money moves.",
+        "finding": "Shadow Guardian ran {cycles} income cycle(s): at {tested} SGD/month you would dip below safe balance once; a stable amount is {stable} SGD.",
+        "end": "Shadow Guardian dry run ended."
+      },
+      "guardian_policy_changed": {
+        "headline": "You changed what Guardian is allowed to do for this plan."
+      },
+      "plan_safe_balance_changed": {
+        "headline": "A confirmed change rippled across your other goals - here is the real before/after."
+      },
+      "branch_created": {
+        "headline": "You peeled off a possible future: \"{label}\"."
+      },
+      "branch_merged": {
+        "headline": "You merged branches into a new plan version."
+      },
+      "branch_sealed": {
+        "headline": "You sealed a future branch as a commitment of {amount} SGD/month."
+      },
+      "pin_set": {
+        "generic": "You pinned: {kind}."
+      },
+      "pin_changed": {
+        "generic": "You changed a pin: {kind}."
+      },
+      "pin_release": {
+        "generic": "You released a pin: {kind}."
+      },
+      "plan_handover": {
+        "wedding_to_honeymoon": "Wedding plan completed. {residual} SGD is waiting for you to allocate to a honeymoon, emergency fund, or home plan.",
+        "home_to_mortgage": "Home purchase completed. Your plan hands over to mortgage and renovation.",
+        "emergency_to_recovery": "Your emergency fund was used. A recovery plan is ready.",
+        "loan_freed_cashflow": "Loan cleared. {residual} SGD/month of freed cash flow is ready to reallocate.",
+        "retirement_to_income": "Retirement began. Your plan hands over to future income management.",
+        "travel_leftover": "Trip completed. {residual} SGD of unused funds is ready to reallocate."
+      }
+    },
+    "uncertainty": {
+      "no_evidence_yet": "No evidence recorded for this plan yet.",
+      "key_evidence_missing": "A required fact is still missing, so the full impact can not be confirmed yet.",
+      "mostly_estimates": "This still rests mostly on estimates.",
+      "plan_budget_not_yet_quantified": "The plan budget is not quantified yet.",
+      "budget_impact_pending": "The quote is in, but a required detail is still missing, so the full budget impact can not be confirmed yet.",
+      "quote_amount_not_extracted": "A quoted amount could not be read from the document.",
+      "joint_action_declined_no_state_change": "The proposal was declined - nothing changed.",
+      "rescue_action_not_monetary": "This recovery action has no dollar amount.",
+      "shadow_run_no_amount_delta": "The dry run did not change any amount.",
+      "branch_delta_not_numeric": "This branch changed non-numeric fields only.",
+      "merge_result_pending_recompute": "The merged plan is being recomputed.",
+      "constraint_shapes_future_plans_not_a_current_delta": "A pin shapes every future plan from now on - it is not a one-time change.",
+      "policy_change_no_direct_financial_delta": "This changed a permission, not an amount.",
+      "seal_amount_not_set": "No monthly amount was set for this seal.",
+      "handover_residual_not_computed": "The leftover amount has not been computed yet."
+    },
+    "back": "Back"
+  },
+  "demoScenario": {
+    "title": "Demo Scenario",
+    "badge": "Demo data",
+    "notice": "Everything in this walkthrough is clearly-labelled fixture data written to your account so the Change Ledger and planners populate for real. It is never treated as a real customer record and can be reset.",
+    "run": "Run this step",
+    "reset": "Reset demo data",
+    "done": "Done",
+    "next": "Next step",
+    "openLedger": "Open in Change Ledger",
+    "steps": {
+      "wedding_plan_created": "Create a wedding plan",
+      "date_and_guests_changed": "Move the date earlier and add guests",
+      "quote_to_plan": "Import a real venue quote (Quote-to-Plan)",
+      "impact_on_home_and_emergency": "See the impact on Home and Emergency",
+      "shadow_guardian": "Run Shadow Guardian",
+      "seal_commitment": "Seal the commitment",
+      "guardian_pause": "Guardian pauses the contribution",
+      "plan_rescue": "Adopt a Plan Rescue",
+      "wedding_handover": "Wedding completes - Plan Handover"
     }
   }
 }

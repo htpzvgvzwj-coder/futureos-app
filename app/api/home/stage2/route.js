@@ -26,6 +26,7 @@ import { triggerCrossGoalCheck } from "../../../../lib/guardian-alert-store.js";
 import { findActGrantor } from "../../../../lib/access-grant-store.js";
 import { proposeJointAction } from "../../../../lib/joint-action-store.js";
 import { computeJointPlanEvidence } from "../../../../lib/joint-plan-evidence.js";
+import { recordSavingsPlanConfirmed } from "../../../../lib/change-ledger/record-goal-plan.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -183,6 +184,10 @@ export async function POST(request) {
   }
 
   const artifactType = toolUse.name === "propose_home_savings_plan" ? "savings_plan_options" : "confirmed_savings_plan";
+  const priorSavingsPlan =
+    artifactType === "confirmed_savings_plan"
+      ? await getLatestArtifact(session.id, "stage2", "confirmed_savings_plan")
+      : null;
   await saveArtifact(session.id, "stage2", artifactType, parsed.data);
 
   if (toolUse.name === "finalize_home_savings_plan") {
@@ -191,6 +196,20 @@ export async function POST(request) {
       monthlyIncome: profile.monthlyIncome,
       monthlyExpenses: profile.monthlyExpenses,
       currentSavings: assetContext.availableLiquidSavings,
+    });
+    // Change Ledger: the causal record of this confirmed monthly commitment,
+    // with real recomputed cross-goal Future Scores attached. Never throws.
+    await recordSavingsPlanConfirmed({
+      profileKey: userId,
+      domain: "home",
+      monthlyContribution: parsed.data.monthly_contribution,
+      priorMonthlyContribution: priorSavingsPlan?.monthly_contribution ?? null,
+      targetCompleteMonth: parsed.data.target_complete_month ?? null,
+      crossGoalInputs: {
+        monthlyIncome: profile.monthlyIncome,
+        monthlyExpenses: profile.monthlyExpenses,
+        currentSavings: assetContext.availableLiquidSavings,
+      },
     });
   } else {
     await updateSessionStatus(session.id, { stage2Status: "in_progress" });

@@ -5572,3 +5572,230 @@ nextjs-portal {
     min-height: auto;
   }
 }
+
+/* ============================================================
+   Change Ledger - causal timeline, entry detail, Impact Receipt
+   ============================================================ */
+.clScreen {
+  padding: 18px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.clBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+.clHeader h1 {
+  margin: 0 0 4px;
+  font-size: 1.32rem;
+}
+.clHeader p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.clFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.clFilterChip {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+.clFilterChipActive {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.clTimeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.clEntry {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(20, 36, 58, 0.06);
+}
+.clEntryStruck .clEntryHeadline {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.clEntryHead {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0;
+}
+.clEntryWhen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.clEntryActor {
+  font-size: 0.72rem;
+  color: var(--navy-2);
+  font-weight: 600;
+}
+.clEntryHeadline {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.clEntryMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.clStruckNote {
+  font-size: 0.72rem;
+  color: var(--ocbc-red);
+}
+.clTruth {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--soft);
+}
+.clTruthProjected,
+.clTruthSimulated {
+  color: var(--navy-2);
+  background: #eef2fb;
+  border-color: #d7e0f2;
+}
+.clTruthScheduled {
+  color: #8a5a00;
+  background: #fdf4e3;
+  border-color: #f0dcb4;
+}
+.clTruthActive,
+.clTruthCompleted,
+.clTruthObserved {
+  color: var(--success);
+  background: #e6f6f2;
+  border-color: #bfe8de;
+}
+.clTruthPaused {
+  color: #8a5a00;
+  background: #fdf1e3;
+  border-color: #f0cfb4;
+}
+.clTruthRevoked {
+  color: var(--ocbc-red);
+  background: #fdeced;
+  border-color: #f3c9cc;
+}
+.clEntryDetail {
+  overflow: hidden;
+}
+.clDetailText {
+  margin: 10px 0 6px;
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+.clReplay {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.clReplayRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.84rem;
+}
+.clReplayRow-up { color: var(--success); }
+.clReplayRow-down { color: var(--ocbc-red); }
+.clReplayRow-flat { color: var(--muted); }
+.clUncertain {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.clRaw {
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+.clRaw summary {
+  cursor: pointer;
+  color: var(--navy-2);
+}
+.clRaw pre {
+  overflow-x: auto;
+  background: var(--soft);
+  padding: 8px;
+  border-radius: 8px;
+}
+.clEmpty,
+.clLoading {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 20px 4px;
+}
+.clReceipt {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--navy);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.clReceiptHeadline {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.clReceiptImpacts {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.84rem;
+}
+.clGoalHistory {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.clGoalHistory h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+.clTimelineCompact .clEntry {
+  box-shadow: none;
+  padding: 10px 12px;
+}

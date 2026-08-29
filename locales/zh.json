@@ -1773,12 +1773,30 @@
     "title": "个人经济体",
     "subtitle": "把你的真实数字，当作一个连贯的系统来看。",
     "indicators": {
-      "grossOutput": { "label": "收入", "detail": "你每月真实赚到的钱" },
-      "consumption": { "label": "支出", "detail": "你每月真实花掉的钱" },
-      "tradeBalance": { "label": "月度盈余", "detail": "收入减去支出" },
-      "reserves": { "label": "净资产", "detail": "真实资产减去真实负债" },
-      "debtRatio": { "label": "承诺占比", "detail": "每月已承诺支出占收入的比例" },
-      "savingsRate": { "label": "储蓄率", "detail": "收入中留下来的比例" }
+      "grossOutput": {
+        "label": "收入",
+        "detail": "你每月真实赚到的钱"
+      },
+      "consumption": {
+        "label": "支出",
+        "detail": "你每月真实花掉的钱"
+      },
+      "tradeBalance": {
+        "label": "月度盈余",
+        "detail": "收入减去支出"
+      },
+      "reserves": {
+        "label": "净资产",
+        "detail": "真实资产减去真实负债"
+      },
+      "debtRatio": {
+        "label": "承诺占比",
+        "detail": "每月已承诺支出占收入的比例"
+      },
+      "savingsRate": {
+        "label": "储蓄率",
+        "detail": "收入中留下来的比例"
+      }
     },
     "netWorthTrendLabel": "净资产趋势",
     "netWorthTrendDetail": "自你开始记录资产以来，{amount}（{percent}%）",
@@ -1966,15 +1984,33 @@
     },
     "riskLabel": "风险偏好",
     "riskOptions": {
-      "conservative": { "label": "保守型", "description": "预期增长较低，波动也较低——优先保本。" },
-      "balanced": { "label": "平衡型", "description": "兼顾增长与稳定——适合大多数人。" },
-      "growth": { "label": "进取型", "description": "预期增长较高，波动也较高——适合较长的投资期限。" }
+      "conservative": {
+        "label": "保守型",
+        "description": "预期增长较低，波动也较低——优先保本。"
+      },
+      "balanced": {
+        "label": "平衡型",
+        "description": "兼顾增长与稳定——适合大多数人。"
+      },
+      "growth": {
+        "label": "进取型",
+        "description": "预期增长较高，波动也较高——适合较长的投资期限。"
+      }
     },
     "goalCategoryLabel": "这笔投资是为了什么？",
     "goalCategories": {
-      "retirementGap": { "label": "退休缺口", "description": "帮助弥补你的退休目标收入与 CPF LIFE 之间的差距。" },
-      "generalWealthBuilding": { "label": "长期财富积累", "description": "没有特定目标——随着时间建立稳定的投资习惯。" },
-      "customTarget": { "label": "自定义目标", "description": "你已经有明确的目标金额和时间。" }
+      "retirementGap": {
+        "label": "退休缺口",
+        "description": "帮助弥补你的退休目标收入与 CPF LIFE 之间的差距。"
+      },
+      "generalWealthBuilding": {
+        "label": "长期财富积累",
+        "description": "没有特定目标——随着时间建立稳定的投资习惯。"
+      },
+      "customTarget": {
+        "label": "自定义目标",
+        "description": "你已经有明确的目标金额和时间。"
+      }
     },
     "horizonYearsLabel": "投资年限（年）",
     "customTargetAmountLabel": "目标金额（新元）",
@@ -1988,10 +2024,22 @@
     },
     "purchaseModeLabel": "你想怎么买？",
     "purchaseModes": {
-      "monthlyRsp": { "label": "每月定期定额", "description": "每月固定日期投入固定金额——类似 OCBC BCIP，可以摊平成本。" },
-      "lumpSum": { "label": "一次性大额买入", "description": "一次性投入较大金额，不分批。" },
-      "dailyMicroDca": { "label": "每日小额投资", "description": "每个交易日投入固定小额——更高频率地摊平成本，需要支持碎股交易的券商。" },
-      "valueAveraging": { "label": "价值平均法", "description": "每月按目标增长曲线补足差额——投入金额一开始较高，之后逐渐减少。" }
+      "monthlyRsp": {
+        "label": "每月定期定额",
+        "description": "每月固定日期投入固定金额——类似 OCBC BCIP，可以摊平成本。"
+      },
+      "lumpSum": {
+        "label": "一次性大额买入",
+        "description": "一次性投入较大金额，不分批。"
+      },
+      "dailyMicroDca": {
+        "label": "每日小额投资",
+        "description": "每个交易日投入固定小额——更高频率地摊平成本，需要支持碎股交易的券商。"
+      },
+      "valueAveraging": {
+        "label": "价值平均法",
+        "description": "每月按目标增长曲线补足差额——投入金额一开始较高，之后逐渐减少。"
+      }
     },
     "valueAveragingDisclaimer": "此预测假设回报率恒定，不考虑市场涨跌。价值平均法在现实中\"逢低多买\"的优势在这里并未体现；你看到的是一个真实不同的、前期投入较多的供款安排，而不是靠择时带来不同的最终结果。",
     "submitIntake": "查看我的推荐",
@@ -2688,7 +2736,12 @@
       "why": "为什么会这样？",
       "reasonExpenseIncrease": "同一时期，你真实记录的支出平均每月上升了约 {amount}。",
       "reasonBehindPace": "在你已记录的月份里，实际储蓄一直低于你确认的每月储蓄金额。",
-      "adoptError": "更新计划时出了点问题，请再试一次，或直接打开购房规划师。"
+      "adoptError": "更新计划时出了点问题，请再试一次，或直接打开购房规划师。",
+      "error_invalid_amount": "该储蓄金额无效，请拖动滑块后重试。",
+      "error_amount_out_of_range": "该金额超出了本次节奏调整支持的范围，请把滑块调回范围内。",
+      "error_amount_exceeds_cashflow": "在扣除其他所有已确认承诺后，该金额超过了你每月真实可用的空间，请调低后重试。",
+      "error_active_commitment_exists": "你的购房计划已有一个生效中的 Guardian 承诺，请先取消，再设置新的。",
+      "error_no_active_moment": "该节奏调整已不是当前状态——你最新的数据没有显示同样的偏离。请重新打开购房规划师查看。"
     },
     "homeGoalRecovery": {
       "headline": "你在购房储蓄节奏上追回了 {months} 个月。",
@@ -3265,6 +3318,191 @@
       "cashName": "原有储蓄",
       "investmentName": "原有投资",
       "insuranceName": "原有保险保额"
+    }
+  },
+  "changeLedger": {
+    "title": "变化",
+    "subtitle": "到底发生了什么变化、为什么，以及影响了哪里。",
+    "entry": "变化历史",
+    "goalSectionTitle": "这个目标发生过哪些变化",
+    "deltaTitle": "自上次打开 FutureOS 以来",
+    "deltaEmpty": "自上次访问以来没有任何变化。",
+    "empty": "尚无记录的变化。当你和 Guardian 对计划采取行动后，每一次真实变化都会带着原因和影响出现在这里。",
+    "viewFull": "查看完整变化",
+    "noLongerInEffect": "此变化已不再生效。",
+    "supersededNotice": "已于 {date} 取消——见后续记录。",
+    "causeTitle": "触发原因",
+    "evidenceTitle": "证据",
+    "impactTitle": "影响范围",
+    "sourceEventLink": "此变化的来源",
+    "filter": {
+      "all": "全部",
+      "mine": "我的决定",
+      "guardian": "Guardian",
+      "plan": "计划",
+      "quotes": "报价与文件",
+      "shared": "共享目标",
+      "outcomes": "已完成结果"
+    },
+    "actor": {
+      "user": "你",
+      "guardian": "Guardian",
+      "system": "系统",
+      "partner": "你的共同规划伙伴"
+    },
+    "status": {
+      "projected": "预测——尚未确认",
+      "simulated": "模拟——影子 Guardian 试运行",
+      "scheduled": "已安排——已排定，尚无银行动作",
+      "active": "生效中——正在真实执行",
+      "paused": "已暂停——当前真实处于暂停",
+      "revoked": "已撤销——不再生效",
+      "completed": "已完成",
+      "observed": "结果——与计划的对比"
+    },
+    "metric": {
+      "monthlyContribution": "每月储蓄金额",
+      "targetDate": "目标日期",
+      "emergencyBuffer": "应急缓冲",
+      "planSafeBalance": "计划安全余额",
+      "monthlyCashflow": "每月现金流",
+      "planBudget": "计划预算",
+      "branchFeasibility": "分支可行性"
+    },
+    "pinKind": {
+      "emergency_floor_months": "应急金不得低于 {value} 个月",
+      "max_monthly_contribution": "每月储蓄上限 {value} 新元",
+      "max_delay_months": "目标延期不超过 {value} 个月",
+      "min_core_guests": "至少保留 {value} 位核心宾客",
+      "min_photo_quality": "不降低摄影质量",
+      "no_balance_share": "不向伴侣共享个人余额",
+      "no_guardian_auto_move": "Guardian 不得自动转移资金"
+    },
+    "impact": {
+      "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
+      "genericChange": "{metric}：从 {before} 变为 {after}",
+      "budgetChange": "{metric}：从 {before} 新元变为 {after} 新元",
+      "scoreChange": "{goal} 未来分数：从 {before} 变为 {after}",
+      "dateLater": "目标日期预计后移约 {months} 个月",
+      "dateEarlier": "目标日期预计提前约 {months} 个月",
+      "dateUnchanged": "目标日期不变",
+      "bufferChange": "应急缓冲：从 {before} 个月变为 {after} 个月"
+    },
+    "event": {
+      "commitment_created": {
+        "headline": "你设置了一个 Guardian 承诺：每月 {amount} 新元用于买房，自 {month} 起。",
+        "detail": "每月储蓄金额从 {before} 新元变为 {after} 新元。"
+      },
+      "commitment_revoked": {
+        "headline": "你取消了买房计划上的 Guardian 节奏调整。",
+        "detail": "每月储蓄金额恢复为 {restored} 新元——即调整前确认的计划。"
+      },
+      "commitment_paused": {
+        "headline": "Guardian 暂停了你的买房储蓄。",
+        "detail": "你的应急缓冲为 {current} 个月，低于 {threshold} 个月的底线。在恢复之前，Guardian 不会转移这笔资金。"
+      },
+      "commitment_resumed": {
+        "headline": "Guardian 恢复了你的买房储蓄。",
+        "detail": null
+      },
+      "plan_updated": {
+        "wedding": "你确认了一个婚礼计划，预算约 {budget} 新元。",
+        "home": "你确认了一个购房计划，目标价格约 {budget} 新元。",
+        "retirement": "你确认了一个退休计划。",
+        "other": "你确认了一个储蓄目标计划，约 {budget} 新元。",
+        "travel": "你确认了一个旅行计划，预算约 {budget} 新元。"
+      },
+      "savings_plan_confirmed": {
+        "headline": "你确认了一个{domain}储蓄计划：每月 {amount} 新元。"
+      },
+      "joint_declined": {
+        "headline": "你的共同规划伙伴拒绝了提议的{domain}变更。"
+      },
+      "quote_imported": {
+        "headline": "你导入了一份 {label} 的真实报价：{quoted} 新元。"
+      },
+      "rescue_adopted": {
+        "pause_goal_plan": "你暂停了一个{domain}储蓄计划以保护应急缓冲。",
+        "drawdown_emergency_fund": "你从应急金中提取了 {amount} 新元。",
+        "invest_excess": "你把 {amount} 新元的多余现金转入了投资。",
+        "other_ocbc_support": "你接受了一项银行支持措施。"
+      },
+      "shadow": {
+        "start": "影子 Guardian 开始试运行——不移动任何真实资金。",
+        "finding": "影子 Guardian 试运行了 {cycles} 个收入周期：若每月 {tested} 新元，你有一次会低于安全余额；稳定金额为 {stable} 新元。",
+        "end": "影子 Guardian 试运行结束。"
+      },
+      "guardian_policy_changed": {
+        "headline": "你更改了 Guardian 在此计划上被允许执行的操作。"
+      },
+      "plan_safe_balance_changed": {
+        "headline": "一次已确认的变更波及了你的其他目标——以下是真实的前后对比。"
+      },
+      "branch_created": {
+        "headline": "你撕出了一条可能的未来：“{label}”。"
+      },
+      "branch_merged": {
+        "headline": "你把多个分支合并为一个新的计划版本。"
+      },
+      "branch_sealed": {
+        "headline": "你把一条未来分支封存为承诺：每月 {amount} 新元。"
+      },
+      "pin_set": {
+        "generic": "你固定了：{kind}。"
+      },
+      "pin_changed": {
+        "generic": "你修改了一条固定条件：{kind}。"
+      },
+      "pin_release": {
+        "generic": "你解除了一条固定条件：{kind}。"
+      },
+      "plan_handover": {
+        "wedding_to_honeymoon": "婚礼计划完成。剩余 {residual} 新元已等待你分配到蜜月、应急金或买房计划。",
+        "home_to_mortgage": "购房完成。你的计划移交给房贷与装修。",
+        "emergency_to_recovery": "你的应急金已被使用。恢复计划已就绪。",
+        "loan_freed_cashflow": "贷款结清。每月释放出的 {residual} 新元现金流可重新分配。",
+        "retirement_to_income": "退休开始。你的计划移交给未来收入管理。",
+        "travel_leftover": "旅行完成。剩余 {residual} 新元未使用资金可重新分配。"
+      }
+    },
+    "uncertainty": {
+      "no_evidence_yet": "该计划尚无记录的证据。",
+      "key_evidence_missing": "仍缺少一项必要信息，因此暂时无法确认完整影响。",
+      "mostly_estimates": "目前仍主要基于估算。",
+      "plan_budget_not_yet_quantified": "计划预算尚未量化。",
+      "budget_impact_pending": "报价已导入，但仍缺少一项必要细节，暂时无法确认对预算的完整影响。",
+      "quote_amount_not_extracted": "无法从文件中读取报价金额。",
+      "joint_action_declined_no_state_change": "该提议被拒绝——没有任何变化。",
+      "rescue_action_not_monetary": "此恢复动作没有金额。",
+      "shadow_run_no_amount_delta": "本次试运行未改变任何金额。",
+      "branch_delta_not_numeric": "此分支仅改变了非数值字段。",
+      "merge_result_pending_recompute": "合并后的计划正在重新计算。",
+      "constraint_shapes_future_plans_not_a_current_delta": "固定条件会约束此后的每一个计划——它不是一次性的变更。",
+      "policy_change_no_direct_financial_delta": "这更改的是一项权限，而非金额。",
+      "seal_amount_not_set": "本次封存未设置每月金额。",
+      "handover_residual_not_computed": "剩余金额尚未计算。"
+    },
+    "back": "返回"
+  },
+  "demoScenario": {
+    "title": "演示资料",
+    "badge": "演示数据",
+    "notice": "本演示中的所有内容都是带明确标注的演示数据，会写入你的账户以便变化账本和规划师真实填充。它绝不会被当作真实客户记录，并且可以重置。",
+    "run": "运行此步骤",
+    "reset": "重置演示数据",
+    "done": "已完成",
+    "next": "下一步",
+    "openLedger": "在变化账本中打开",
+    "steps": {
+      "wedding_plan_created": "创建婚礼计划",
+      "date_and_guests_changed": "把日期提前并增加宾客",
+      "quote_to_plan": "导入真实场地报价（Quote-to-Plan）",
+      "impact_on_home_and_emergency": "查看对买房和应急的影响",
+      "shadow_guardian": "运行影子 Guardian",
+      "seal_commitment": "封存承诺",
+      "guardian_pause": "Guardian 暂停储蓄",
+      "plan_rescue": "采纳 Plan Rescue 方案",
+      "wedding_handover": "婚礼完成——Plan Handover"
     }
   }
 }
