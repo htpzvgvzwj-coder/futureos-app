@@ -86,3 +86,48 @@ export function LivingPlanStatus({ t, setActiveScreen }) {
     </section>
   );
 }
+
+// Guardian "Needs your decision" - only the things that actually need the
+// customer to decide, confirm, or handle. Pulls the next Turning Point
+// from the same real status endpoint.
+export function GuardianDecisions({ t, setActiveScreen }) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/living-plan/status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => alive && setData(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const tp = data?.nextTurningPoint ?? null;
+  const counts = data?.turningPointCounts ?? { open: 0, approaching: 0 };
+  if (!tp && counts.open === 0 && counts.approaching === 0) {
+    return (
+      <section className="gdCard gdClear" role="status">
+        <strong>{t("guardianDecisions.clear")}</strong>
+      </section>
+    );
+  }
+
+  return (
+    <section className="gdCard" role="status" aria-label={t("guardianDecisions.label")}>
+      <span className="gdChip">{t(`turningPoint.state.${tp?.state ?? "open"}`)}</span>
+      {tp ? (
+        <>
+          <p className="gdWhy">{t(tp.whyNowKey, tp.whyNowParams)}</p>
+          <p className="gdWait">{t(tp.ifYouWaitKey)}</p>
+        </>
+      ) : null}
+      {counts.approaching > 0 ? (
+        <p className="gdMore">{t("guardianDecisions.more", { count: counts.approaching })}</p>
+      ) : null}
+      <button type="button" className="linkButton" onClick={() => setActiveScreen && setActiveScreen("mirror")}>
+        {t("guardianDecisions.review")}
+      </button>
+    </section>
+  );
+}

@@ -15,7 +15,10 @@
     "lifeGraph": "Life Graph",
     "mirror": "Mirror",
     "guardian": "Guardian",
-    "profile": "Profile"
+    "profile": "Profile",
+    "today": "Today",
+    "life": "Life",
+    "explore": "Explore"
   },
   "common": {
     "secure": "Secure",
@@ -4235,5 +4238,42 @@
     "bothConfirm": "This change needs both partners to confirm.",
     "privacyNote": "Each partner's private affordability and balances are never shared - only the band and the agreed contribution.",
     "noData": "Set a shared monthly contribution and shared items on your profile to see this."
+  },
+  "today": {
+    "bankNow": {
+      "label": "Bank now",
+      "available": "Available",
+      "cardDue": "Card payment due - {amount}",
+      "clear": "Nothing needs handling this week."
+    },
+    "plans": {
+      "label": "Your plans",
+      "exploreAll": "Explore all"
+    },
+    "latestChange": {
+      "label": "Latest change"
+    },
+    "everything": "Everything on your accounts"
+  },
+  "life": {
+    "map": {
+      "label": "Your life map",
+      "intro": "Where each part of your life stands, and how they pull on each other. Tap a node."
+    },
+    "node": {
+      "income": "Income",
+      "safety": "Safety",
+      "home": "Home",
+      "relationships": "Relationships",
+      "freedom": "Freedom",
+      "future": "Future",
+      "notYet": "Not set up"
+    }
+  },
+  "guardianDecisions": {
+    "label": "Needs your decision",
+    "clear": "Nothing needs a decision from you right now.",
+    "more": "{count} more coming up.",
+    "review": "Review in Explore"
   }
 }

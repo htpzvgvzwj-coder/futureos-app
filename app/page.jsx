@@ -4,9 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
+import { formatEvent } from "../lib/change-ledger/format.js";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
-import { LivingPlanStatus } from "./components/living-plan-status.jsx";
+import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
 import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
 import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
@@ -133,6 +134,7 @@ function storageKey(base) {
 
 const screens = {
   HOME: "home",
+  HOME_FULL: "homeFull",
   LIFE_GRAPH: "lifeGraph",
   MIRROR: "mirror",
   JOINT_DEBATE_RESPONSE: "jointDebateResponse",
@@ -193,12 +195,14 @@ const languageOptions = [
 // Mirrors app/api/grants/route.js's createGrantSchema.scope enum exactly.
 const GRANT_SCOPE_OPTIONS = ["all", "wedding", "home", "retirement", "other", "hardship", "loan", "investment", "travel"];
 
+// Four-entry information architecture: Today (where you stand), Life (the
+// causal map), Explore (create/compare futures), Guardian (what needs your
+// decision). Profile lives in the Today header, not the nav.
 const navItems = [
-  { id: screens.HOME, labelKey: "nav.home", icon: Home },
-  { id: screens.LIFE_GRAPH, labelKey: "nav.lifeGraph", icon: ChartNoAxesColumnIncreasing },
-  { id: screens.MIRROR, labelKey: "nav.mirror", icon: LineChart },
+  { id: screens.HOME, labelKey: "nav.today", icon: Home },
+  { id: screens.LIFE_GRAPH, labelKey: "nav.life", icon: ChartNoAxesColumnIncreasing },
+  { id: screens.MIRROR, labelKey: "nav.explore", icon: LineChart },
   { id: screens.GUARDIAN, labelKey: "nav.guardian", icon: ShieldCheck },
-  { id: screens.PROFILE, labelKey: "nav.profile", icon: UserRound },
 ];
 
 const detectedNeedDefinitions = [
@@ -3201,7 +3205,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 }
 
 function getNavScreen(activeScreen) {
-  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX].includes(activeScreen)) return screens.HOME;
+  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -3658,6 +3662,107 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
         {submitting ? t("weddingPlanner.thinking") : t("todayMoment.execution.revoke")}
       </button>
     </motion.section>
+  );
+}
+
+// Today - not a dashboard. Where the customer is standing right now, in
+// three layers: Bank Now (balance + one thing to handle + Pay/Transfer/
+// Scan), the Active Living Plan (its current tension + next step, via
+// LivingPlanStatus), and Latest Change (one line -> Change Replay).
+// "Everything on your accounts" opens the full account view.
+function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
+  const profile = getUserProfile(preferences);
+  const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
+  const balance = getProfileAmount(profile, "currentSavings", 85000);
+  const cardOutstanding = getProfileAmount(profile, "creditCardOutstanding", 0);
+
+  const [latestChange, setLatestChange] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/change-ledger?filter=all")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive || !d?.events?.length) return;
+        setLatestChange(formatEvent(d.events[0], t));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [t]);
+
+  const bankTask = cardOutstanding > 0
+    ? { label: t("today.bankNow.cardDue", { amount: formatSgd(cardOutstanding) }), onClick: () => setActiveScreen(screens.ACCOUNT_DETAIL) }
+    : null;
+
+  const plans = [
+    { id: "wedding", screen: screens.WEDDING_LIVING_PLAN, icon: HeartHandshake },
+    { id: "home", screen: screens.FUTURE_FIELD, icon: Building2 },
+    { id: "emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
+  ];
+
+  return (
+    <Screen>
+      <section className="todayScreen">
+        <header className="todayHead">
+          <div>
+            <span className="todayEyebrow">{t("homeBanking.today")}</span>
+            <h1>{t("homeBanking.welcome", { name: displayName })}</h1>
+          </div>
+          <button type="button" className="todayProfileBtn" onClick={() => setActiveScreen(screens.PROFILE)} aria-label={t("nav.profile")}>
+            <UserRound size={18} />
+          </button>
+        </header>
+
+        {/* A. Bank Now */}
+        <section className="todayBankNow" aria-label={t("today.bankNow.label")}>
+          <button type="button" className="todayBalance" onClick={() => setActiveScreen(screens.ACCOUNT_DETAIL)}>
+            <span>{t("today.bankNow.available")}</span>
+            <strong>{formatSgd(balance)}</strong>
+          </button>
+          {bankTask ? (
+            <button type="button" className="todayBankTask" onClick={bankTask.onClick}>
+              <AlertTriangle size={15} /> {bankTask.label}
+            </button>
+          ) : (
+            <p className="todayBankClear">{t("today.bankNow.clear")}</p>
+          )}
+          <div className="todayActions">
+            <button type="button" onClick={() => setActiveScreen(screens.PAYNOW)}><CircleDollarSign size={18} /><span>{t("homeBanking.quickActions.paynow")}</span></button>
+            <button type="button" onClick={() => setActiveScreen(screens.FX)}><ArrowLeftRight size={18} /><span>{t("homeBanking.quickActions.fx")}</span></button>
+            <button type="button" onClick={() => setActiveScreen(screens.SCAN_PAY)}><QrCode size={18} /><span>{t("homeBanking.quickActions.scanPay")}</span></button>
+          </div>
+        </section>
+
+        {/* B. Active Living Plan - its current tension + next step */}
+        {hasRealProfile ? <LivingPlanStatus t={t} setActiveScreen={setActiveScreen} /> : null}
+
+        <nav className="todayPlans" aria-label={t("today.plans.label")}>
+          {plans.map(({ id, screen, icon: Icon }) => (
+            <button key={id} type="button" onClick={() => setActiveScreen(screen)}>
+              <Icon size={16} />
+              <span>{t(`memoryLens.goal.${id}`)}</span>
+            </button>
+          ))}
+          <button type="button" className="todayPlansExplore" onClick={() => setActiveScreen(screens.MIRROR)}>
+            {t("today.plans.exploreAll")} <ChevronRight size={14} />
+          </button>
+        </nav>
+
+        {/* C. Latest Change - one line -> replay */}
+        {latestChange ? (
+          <button type="button" className="todayLatestChange" onClick={() => setActiveScreen(screens.CHANGE_LEDGER)}>
+            <span className="todayChangeLabel">{t("today.latestChange.label")}</span>
+            <span className="todayChangeLine">{latestChange.headline}</span>
+            <ChevronRight size={15} />
+          </button>
+        ) : null}
+
+        <button type="button" className="linkButton todayEverything" onClick={() => setActiveScreen(screens.HOME_FULL)}>
+          {t("today.everything")} <ChevronRight size={14} />
+        </button>
+      </section>
+    </Screen>
   );
 }
 
@@ -4451,6 +4556,20 @@ function AccountDetailScreen({ activeAccountId, setActiveScreen, preferences, t 
   );
 }
 
+// The six life nodes - a causal map, not a data list. Each reads from real
+// health scores / profile and links to where the customer can act on it.
+function getLifeNodes(profile, healthScores, selectedGoalIds) {
+  const score = (id) => healthScores.find((s) => s.id === id)?.value ?? null;
+  return [
+    { id: "income", value: score("stability") ?? score("savings"), screen: screens.PROFILE },
+    { id: "safety", value: score("emergency"), screen: screens.NEED_EMERGENCY },
+    { id: "home", value: selectedGoalIds.includes("home") ? score("savings") : null, screen: screens.FUTURE_FIELD },
+    { id: "relationships", value: selectedGoalIds.includes("family") || selectedGoalIds.includes("wedding") ? score("future") : null, screen: screens.FAMILY_CONSTELLATION },
+    { id: "freedom", value: score("investment"), screen: screens.CAPITAL_PATHS },
+    { id: "future", value: score("future"), screen: screens.FUTURE_LIFE_TIMELINE },
+  ];
+}
+
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
@@ -4460,6 +4579,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
+  const lifeNodes = getLifeNodes(profile, healthScores, selectedGoalIds);
 
   return (
     <Screen>
@@ -4475,6 +4595,18 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
           <ChartNoAxesColumnIncreasing size={16} />
         </button>
       </div>
+
+      <section className="lifeNodeMap" aria-label={t("life.map.label")}>
+        <p className="lifeNodeIntro">{t("life.map.intro")}</p>
+        <div className="lifeNodeGrid">
+          {lifeNodes.map((n) => (
+            <button key={n.id} type="button" className={`lifeNode lifeNode-${n.value == null ? "unknown" : n.value >= 70 ? "ok" : n.value >= 50 ? "watch" : "attention"}`} onClick={() => setActiveScreen(n.screen)}>
+              <strong>{t(`life.node.${n.id}`)}</strong>
+              <span>{n.value == null ? t("life.node.notYet") : `${n.value}/100`}</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {healthAnalysisOpen ? (
         <section className="modalBackdrop" role="dialog" aria-modal="true" aria-label={t("lifeGraph.health.title")}>
@@ -7078,6 +7210,7 @@ function FutureSelfGuardian({
       <Header title={t("guardian.title")} subtitle={t("guardian.hub.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
+      <GuardianDecisions t={t} setActiveScreen={setActiveScreen} />
       <ShadowGuardianPanel t={t} setActiveScreen={setActiveScreen} />
       <FutureHandoffPanel t={t} />
 
@@ -17452,7 +17585,8 @@ export default function App() {
   );
 
   const currentScreen = {
-    [screens.HOME]: <HomeDashboard {...shared} />,
+    [screens.HOME]: <TodayScreen {...shared} />,
+    [screens.HOME_FULL]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.DECISION_VERDICT]: (
