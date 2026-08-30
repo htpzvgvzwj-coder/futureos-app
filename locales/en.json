@@ -3730,7 +3730,16 @@
       "trip_month": "Trip month",
       "monthly_commitment": "Monthly commitment",
       "target_pool": "Target pool",
-      "horizon_years": "Horizon (years)"
+      "horizon_years": "Horizon (years)",
+      "monthly_premium_now": "Monthly premium",
+      "income_protection_months": "Income cover (months)",
+      "existing_income_protection": "Existing income protection",
+      "existing_life_cover": "Existing life cover",
+      "existing_ci_cover": "Existing CI cover",
+      "home_loan_outstanding": "Home loan outstanding",
+      "dependents": "Dependents",
+      "shared_monthly_contribution": "Shared monthly",
+      "partner_share_ratio": "Your share (%)"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3778,7 +3787,7 @@
       "scheduled_no_bank_transfer": "Scheduled - arranged, no bank transfer yet."
     },
     "err": {
-      "no_reality_path": "Nothing confirmed to branch from yet.",
+      "no_reality_path": "Nothing set up to branch from yet.",
       "no_valid_overrides": "Pick something to change.",
       "outcome_not_supported": "That outcome cannot be moved yet.",
       "target_in_the_past": "Pick a future date.",
@@ -4182,5 +4191,49 @@
       "debt": "High-cost debt outstanding - clear it before adding more here.",
       "noRoom": "No monthly room to invest right now."
     }
+  },
+  "protectionEnvelope": {
+    "title": "Protection Envelope",
+    "subtitle": "If reality changes, which life commitments lose protection - and what is simply unknown.",
+    "entryTitle": "Protection Envelope",
+    "entryBody": "See income, home loan, family and care - what is covered, what has a gap, what is unknown.",
+    "fieldTitle": "Your protection on the time field",
+    "fieldSubtitle": "Add cover to close a known gap (costs premium), or trim it to free cashflow.",
+    "whatIsCovered": "What is covered",
+    "node": {
+      "income": "Income",
+      "home_loan": "Home loan",
+      "family": "Family / dependents",
+      "care": "Critical illness / care"
+    },
+    "status": {
+      "covered": "Covered",
+      "partial": "Coverage not confirmed",
+      "unknown": "Unknown - not enough info"
+    },
+    "gap": "Gap of {amount}",
+    "summary": "{known} known gap(s), {unknown} unknown. About {premium}/mo would close the known gaps.",
+    "noData": "Add your expenses and any coverage details on your profile to see this.",
+    "estimateNote": "Gaps use your stated coverage - unknowns are shown as unknown. Premium is a reference estimate, not a quote. No underwriting."
+  },
+  "familyConstellation": {
+    "title": "Family Constellation",
+    "subtitle": "A shared future with boundaries - the agreed contribution is visible, private balances never are.",
+    "entryTitle": "Family Constellation",
+    "entryBody": "The shared monthly, its split, and where a change needs both of you.",
+    "fieldTitle": "Your family plan on the time field",
+    "fieldSubtitle": "Move the shared contribution - a change to it or a Must-Keep item needs both partners.",
+    "theShared": "The shared plan",
+    "sharedMonthly": "Shared monthly",
+    "yourShare": "Your share",
+    "partnerShare": "Partner share",
+    "committed": "Committed to items",
+    "jointBand": "Jointly workable band: {low}-{high}/mo.",
+    "noBand": "No overlapping affordable band yet - talk it through.",
+    "conflicts": "{count} conflict point(s)",
+    "blindMergePrompt": "Each of you sets a private range and Must Keep / Flexible / Undecided first, then the workable band shows.",
+    "bothConfirm": "This change needs both partners to confirm.",
+    "privacyNote": "Each partner's private affordability and balances are never shared - only the band and the agreed contribution.",
+    "noData": "Set a shared monthly contribution and shared items on your profile to see this."
   }
 }

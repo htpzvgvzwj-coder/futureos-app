@@ -80,17 +80,16 @@ test("Pin: min_core_guests is checked against the real guest count", () => {
   assert.ok(!res.violations.some((v) => v.kind === "min_core_guests"), "150 >= 100 core guests is fine");
 });
 
-test("Living Plan registry: 5 domains registered, the rest are honest stubs", () => {
-  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "investment", "loan", "retirement", "travel", "wedding"]);
-  assert.equal(isLivingPlan("wedding"), true);
-  assert.equal(isLivingPlan("emergency"), true);
-  assert.equal(isLivingPlan("loan"), true);
-  assert.equal(isLivingPlan("retirement"), true);
-  assert.equal(isLivingPlan("travel"), true);
-  assert.equal(isLivingPlan("investment"), true);
-  assert.equal(isLivingPlan("insurance"), false);
-  assert.equal(getLivingPlanSpec("insurance").registered, false);
-  assert.equal(getLivingPlanSpec("insurance").reason, "not_a_living_plan_yet");
+test("Living Plan registry: all 9 domains are registered Living Plans", () => {
+  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "family", "home", "insurance", "investment", "loan", "retirement", "travel", "wedding"]);
+  for (const d of ["wedding", "home", "emergency", "loan", "retirement", "travel", "investment", "insurance", "family"]) {
+    assert.equal(isLivingPlan(d), true, `${d} is a Living Plan`);
+    const spec = getLivingPlanSpec(d);
+    assert.ok(spec.futureFieldDomain === d, `${d} has a Future Field adapter`);
+    assert.ok(Array.isArray(spec.variables) && spec.variables.length >= 2);
+    assert.ok(Array.isArray(spec.behaviours) && spec.behaviours.length >= 1);
+  }
+  assert.equal(getLivingPlanSpec("family").privacy, "individual_balances_never_shared");
   const w = getLivingPlanSpec("wedding");
   assert.ok(w.variables.some((v) => v.key === "guest_count"));
   assert.ok(w.impacts.includes("home") && w.impacts.includes("emergency"));

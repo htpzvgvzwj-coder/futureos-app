@@ -103,6 +103,17 @@ const PEEL_FIELDS = {
     { field: "target_pool", kind: "money" },
     { field: "horizon_years", kind: "count" },
   ],
+  insurance: [
+    { field: "monthly_premium_now", kind: "money" },
+    { field: "income_protection_months", kind: "count" },
+    { field: "existing_income_protection", kind: "money" },
+    { field: "existing_life_cover", kind: "money" },
+    { field: "existing_ci_cover", kind: "money" },
+  ],
+  family: [
+    { field: "shared_monthly_contribution", kind: "money" },
+    { field: "partner_share_ratio", kind: "count" },
+  ],
 };
 function peelFieldsFor(domain) {
   return PEEL_FIELDS[domain] ?? PEEL_FIELDS.home;
