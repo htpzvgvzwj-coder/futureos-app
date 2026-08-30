@@ -1,24 +1,24 @@
 "use client";
 
-// LivingSceneProvider - the shared spine every Studio scene mounts inside.
+// LivingSceneProvider - the shared runtime every Studio scene mounts inside.
 //
-// It owns ONE state object for a domain and exposes it through context:
-//   reality        - the confirmed plan + real feasibility (from /api/future-field)
-//   context        - real cashflow / buffer / committed totals
-//   branchVars     - the customer's live overrides (what they are dragging)
-//   projection     - the live self-outcome + cross-goal node deltas + freed / pressure
-//   allocation     - { goalMonthly, emergencyMonthly, flexibleMonthly } the customer set
-//   pins           - structured constraints
-//   sealed / commitment / guardianState
-//   phase          - the single spine phase that is live right now
+// It owns ONE state object for a domain and exposes it through context. It
+// renders no visual. The PRIMARY PRODUCT RULE governs it: the runtime may
+// calculate / monitor / prepare / remember implicitly, but it must never
+// implicitly make a decision, seal a commitment, move or allocate money,
+// run Shadow Guardian, or hide an assumption.
 //
-// It does NOT render a visual. Each scene renders its own native surface and
-// reads/writes this state. Numbers come from the same pure lib math the
-// server adapters use (projectFn is supplied by the scene) and, on release,
-// from the real /api/future-field endpoints - never invented here.
+// Persistence split:
+//   - sessionStorage: ONLY the unsaved UI draft (branch vars the customer is
+//     dragging, a not-yet-confirmed allocation, a turning-point ack).
+//   - server (/api/future-field): the source of truth for confirmed state -
+//     whether this plan is already sealed (plan state past "draft"), its
+//     committed path, its branches. A fresh provider mount (reload / new
+//     tab) recovers the committed state from there, never from the draft.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { derivePhase, mergeReached } from "../../../lib/living-scene/spine.js";
+import { derivePhase } from "../../../lib/living-scene/spine.js";
+import { commitmentGateOpen, allocationGoalId, allocationSettled as computeAllocationSettled } from "../../../lib/living-scene/gates.js";
 import { normalizeAllocation, allocationSum, isAllocationSet } from "../../../lib/living-plan/allocation.js";
 
 const LivingSceneContext = createContext(null);
@@ -29,16 +29,19 @@ export function useLivingScene() {
   return ctx;
 }
 
-function storageKey(domain) {
-  return `livingScene:${domain}`;
-}
+// Plan-runtime states that mean "this scene has already been sealed" - the
+// seal/confirm route transitions the plan to "scheduled", so anything at or
+// past that is a confirmed commitment. "draft" / "shadow" / "proposed" are
+// NOT sealed.
+const SEALED_PLAN_STATES = new Set(["scheduled", "active", "paused", "needs_approval", "rescued", "completed", "handed_over"]);
 
-// Per-viewer convenience only: remember the customer's in-progress branch /
-// allocation / acknowledgements so a refresh does not throw the exploration
-// away. Wrapped in try/catch - never required for the scene to work.
-function loadPersisted(domain) {
+function draftKey(domain) {
+  return `livingScene:draft:${domain}`;
+}
+// The draft is a per-viewer convenience only. Never authoritative.
+function loadDraft(domain) {
   try {
-    const raw = sessionStorage.getItem(storageKey(domain));
+    const raw = sessionStorage.getItem(draftKey(domain));
     if (!raw) return null;
     const p = JSON.parse(raw);
     return p && typeof p === "object" ? p : null;
@@ -46,17 +49,17 @@ function loadPersisted(domain) {
     return null;
   }
 }
-function persist(domain, patch) {
+function persistDraft(domain, patch) {
   try {
-    const prev = loadPersisted(domain) ?? {};
-    sessionStorage.setItem(storageKey(domain), JSON.stringify({ ...prev, ...patch }));
+    const prev = loadDraft(domain) ?? {};
+    sessionStorage.setItem(draftKey(domain), JSON.stringify({ ...prev, ...patch }));
   } catch {
     /* private mode / disabled storage - fine */
   }
 }
-function clearPersisted(domain) {
+function clearDraft(domain) {
   try {
-    sessionStorage.removeItem(storageKey(domain));
+    sessionStorage.removeItem(draftKey(domain));
   } catch {
     /* fine */
   }
@@ -70,15 +73,16 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   const [branchVars, setBranchVars] = useState({});
   const [allocation, setAllocationState] = useState(normalizeAllocation(null));
   const [allocationTouched, setAllocationTouched] = useState(false);
+  const [allocationTarget, setAllocationTarget] = useState(null); // explicit goal id, or null = flexible
   const [turningPointAck, setTurningPointAck] = useState(false);
-  const [reached, setReached] = useState(["reality"]);
   const [serverBranch, setServerBranch] = useState(null); // { id, delta, feasibility, projectedImpacts }
-  const [sealState, setSealState] = useState({ sealed: false, commitment: null, preview: null, error: null, busy: false });
+  const [sealState, setSealState] = useState({ sealed: false, source: null, commitment: null, preview: null, error: null, busy: false });
   const [guardianStandDown, setGuardianStandDown] = useState(false);
+  const [shadowPreview, setShadowPreview] = useState({ status: "idle", data: null }); // idle | running | ready | error
   const peelTimer = useRef(null);
   const branchVarsRef = useRef({});
 
-  // ---- load the real field ------------------------------------------------
+  // ---- load the real field (source of truth for confirmed state) --------
   useEffect(() => {
     let alive = true;
     setLoadState("loading");
@@ -88,6 +92,18 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
         if (!alive) return;
         setField(d);
         setLoadState(d?.hasRealityPath ? "ready" : "no-reality");
+        // Recover confirmed state from the server, not from the draft.
+        const serverSealed = SEALED_PLAN_STATES.has(String(d?.state)) || Boolean(d?.committedPath);
+        if (serverSealed) {
+          setSealState({
+            sealed: true,
+            source: "server",
+            commitment: d?.committedPath ?? null,
+            preview: null,
+            error: null,
+            busy: false,
+          });
+        }
       })
       .catch(() => alive && setLoadState("error"));
     return () => {
@@ -95,22 +111,18 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     };
   }, [domain]);
 
-  // ---- restore in-progress exploration ---------------------------------
-  // Setters are stable and loadPersisted is module scope, so [loadState,
-  // domain] is the complete dependency set. (No react-hooks lint plugin is
-  // configured, so there is no disable directive to add - and an unknown
-  // rule in a disable comment is itself a lint error here.)
+  // ---- restore the UNSAVED DRAFT only (never "sealed") ------------------
   useEffect(() => {
     if (loadState !== "ready") return;
-    const p = loadPersisted(domain);
+    const p = loadDraft(domain);
     if (!p) return;
     if (p.branchVars && typeof p.branchVars === "object") setBranchVars(p.branchVars);
     if (p.allocation) {
       setAllocationState(normalizeAllocation(p.allocation));
       setAllocationTouched(Boolean(p.allocationTouched));
     }
+    if (typeof p.allocationTarget === "string") setAllocationTarget(p.allocationTarget);
     if (p.turningPointAck) setTurningPointAck(true);
-    if (Array.isArray(p.reached)) setReached(p.reached);
   }, [loadState, domain]);
 
   branchVarsRef.current = branchVars;
@@ -135,7 +147,11 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   const branchDirty = Object.keys(branchVars).length > 0;
   const freedCashflow = Math.max(0, Math.round(Number(projection.freedCashflow) || 0));
   const addedPressure = Math.max(0, Math.round(Number(projection.addedPressure) || 0));
-  const allocationOverspent = allocationSum(allocation) > freedCashflow + 0.5 && freedCashflow > 0;
+  const allocSum = allocationSum(allocation);
+  const allocationOverspent = allocSum > freedCashflow + 0.5 && freedCashflow > 0;
+  // The "goal" leg needs an explicit target; without one the money is not
+  // allocated to anything - it stays flexible.
+  const needsTarget = allocation.goalMonthly > 0 && !allocationTarget;
 
   const turningPoint = useMemo(() => {
     if (!branchDirty || typeof turningPointFor !== "function") return null;
@@ -146,29 +162,30 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     }
   }, [branchDirty, turningPointFor, projection, branchVars, realityData, sceneContext]);
 
+  const resourceQuestion = freedCashflow > 0 || addedPressure > 0;
+  const allocationSettled = computeAllocationSettled({
+    resourceQuestion,
+    allocationTouched,
+    overspent: allocationOverspent,
+    allocation,
+    allocationTarget,
+  });
+
   const phase = useMemo(
     () =>
       derivePhase({
         branchDirty,
         freedCashflow,
         addedPressure,
-        allocationSet: freedCashflow > 0 || addedPressure > 0 ? allocationTouched && !allocationOverspent : true,
+        allocationSet: allocationSettled,
         turningPoint,
         turningPointAcknowledged: turningPointAck,
         sealed: sealState.sealed,
         guardianActive: sealState.sealed && !guardianStandDown,
         revoked: false,
       }),
-    [branchDirty, freedCashflow, addedPressure, allocationTouched, allocationOverspent, turningPoint, turningPointAck, sealState.sealed, guardianStandDown],
+    [branchDirty, freedCashflow, addedPressure, allocationSettled, turningPoint, turningPointAck, sealState.sealed, guardianStandDown],
   );
-
-  useEffect(() => {
-    setReached((prev) => {
-      const next = mergeReached(prev, phase);
-      if (next.length !== prev.length) persist(domain, { reached: next });
-      return next;
-    });
-  }, [phase, domain]);
 
   // ---- actions -------------------------------------------------------
   const peelToServer = useCallback(
@@ -193,10 +210,9 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     (key, value) => {
       setBranchVars((prev) => {
         const next = { ...prev, [key]: value };
-        persist(domain, { branchVars: next });
+        persistDraft(domain, { branchVars: next });
         return next;
       });
-      // debounced authoritative peel so the server projection catches up
       if (peelTimer.current) clearTimeout(peelTimer.current);
       peelTimer.current = setTimeout(() => {
         const cur = branchVarsRef.current;
@@ -210,29 +226,46 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     setBranchVars({});
     setAllocationState(normalizeAllocation(null));
     setAllocationTouched(false);
+    setAllocationTarget(null);
     setTurningPointAck(false);
     setServerBranch(null);
-    setReached(["reality"]);
-    clearPersisted(domain);
+    clearDraft(domain);
   }, [domain]);
 
+  // setAllocation(nextAllocation, targetGoalId|null). A "goal" leg with no
+  // explicit target is rejected - it must not silently route anywhere.
   const setAllocation = useCallback(
-    (next) => {
+    (next, target = null) => {
       const norm = normalizeAllocation(next);
       setAllocationState(norm);
       setAllocationTouched(true);
-      persist(domain, { allocation: norm, allocationTouched: true });
+      const t = norm.goalMonthly > 0 ? (target || null) : null;
+      setAllocationTarget(t);
+      persistDraft(domain, { allocation: norm, allocationTouched: true, allocationTarget: t });
     },
     [domain],
   );
 
   const acknowledgeTurningPoint = useCallback(() => {
     setTurningPointAck(true);
-    persist(domain, { turningPointAck: true });
+    persistDraft(domain, { turningPointAck: true });
   }, [domain]);
+
+  // Commitment review may not even render until every gate is clear.
+  const branchSealable = serverBranch ? serverBranch.feasibility?.sealable !== false : false;
+  const canReviewCommitment = commitmentGateOpen({
+    branchDirty,
+    sealed: sealState.sealed,
+    allocationSettled,
+    turningPoint,
+    turningPointAck,
+    serverBranchId: serverBranch?.id ?? null,
+    branchSealable,
+  });
 
   const seal = useCallback(
     async (monthlyAmount) => {
+      if (!canReviewCommitment) return { ok: false, error: "not_ready" };
       setSealState((s) => ({ ...s, busy: true, error: null }));
       try {
         const preRes = await fetch(`/api/future-field/seal`, {
@@ -245,25 +278,30 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
           setSealState((s) => ({ ...s, busy: false, preview: pre?.preview ?? null, error: pre?.error ?? "not_sealable" }));
           return { ok: false, preview: pre?.preview ?? null };
         }
+        setSealState((s) => ({ ...s, busy: false, preview: pre.preview }));
         return { ok: true, preview: pre.preview };
       } catch {
         setSealState((s) => ({ ...s, busy: false, error: "network" }));
         return { ok: false };
       }
     },
-    [domain, serverBranch],
+    [domain, serverBranch, canReviewCommitment],
   );
 
   const confirmSeal = useCallback(
     async (monthlyAmount) => {
+      if (!canReviewCommitment) return { ok: false, error: "not_ready" };
       setSealState((s) => ({ ...s, busy: true, error: null }));
       try {
-        // allocation rides with the branch, exactly like WeddingLivingPlan
-        if (serverBranch?.id && isAllocationSet(allocation)) {
+        // The allocation rides with the branch ONLY when the customer set one.
+        // The "goal" leg carries the customer's explicit target - never a
+        // hardcoded default. An unset / flexible allocation is not routed.
+        const { goalId, valid } = allocationGoalId({ allocation, allocationTarget });
+        if (serverBranch?.id && isAllocationSet(allocation) && valid) {
           await fetch(`/api/future-field/branch?action=allocate&domain=${encodeURIComponent(domain)}`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ branchId: serverBranch.id, allocation, goalId: "home" }),
+            body: JSON.stringify({ branchId: serverBranch.id, allocation, goalId }),
           });
         }
         const res = await fetch(`/api/future-field/seal`, {
@@ -276,18 +314,39 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
           setSealState((s) => ({ ...s, busy: false, error: d?.error ?? "seal_failed", preview: d?.preview ?? s.preview }));
           return { ok: false, error: d?.error ?? "seal_failed" };
         }
-        setSealState({ sealed: true, commitment: d.commitment ?? null, preview: d.preview ?? null, error: null, busy: false });
-        persist(domain, { sealed: true });
+        // Confirmed. Clear the draft - the server is now the source of truth.
+        clearDraft(domain);
+        setSealState({ sealed: true, source: "confirm", commitment: d.commitment ?? null, preview: d.preview ?? null, error: null, busy: false });
         return { ok: true, commitment: d.commitment ?? null };
       } catch {
         setSealState((s) => ({ ...s, busy: false, error: "network" }));
         return { ok: false, error: "network" };
       }
     },
-    [domain, serverBranch, allocation],
+    [domain, serverBranch, allocation, allocationTarget, needsTarget, canReviewCommitment],
   );
 
   const standDownGuardian = useCallback(() => setGuardianStandDown(true), []);
+
+  // Shadow Guardian is NEVER run implicitly. This is the only path to it,
+  // and it is called only from an explicit "Stress-test this plan" action.
+  // It never mutates the plan - it returns a preview the customer reads.
+  const stressTest = useCallback(async (trigger = null) => {
+    setShadowPreview({ status: "running", data: null });
+    try {
+      const res = await fetch("/api/living-plan/shadow-preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(trigger ? { trigger } : {}),
+      });
+      const d = res.ok ? await res.json() : null;
+      setShadowPreview({ status: d ? "ready" : "error", data: d?.preview ?? null });
+      return d?.preview ?? null;
+    } catch {
+      setShadowPreview({ status: "error", data: null });
+      return null;
+    }
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -310,23 +369,28 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       allocation,
       allocationTouched,
       allocationOverspent,
+      allocationTarget,
+      needsAllocationTarget: needsTarget,
       setAllocation,
       turningPoint,
       turningPointAck,
       acknowledgeTurningPoint,
       phase,
-      reached,
+      canReviewCommitment,
       seal,
       confirmSeal,
       sealState,
       standDownGuardian,
       guardianStandDown,
+      stressTest,
+      shadowPreview,
       pins: field?.pins ?? [],
     }),
     [
       domain, loadState, field, reality, realityData, sceneContext, crossGoalNodes, branchVars, branchDirty, setVar, resetBranch,
-      projection, serverBranch, freedCashflow, addedPressure, allocation, allocationTouched, allocationOverspent, setAllocation,
-      turningPoint, turningPointAck, acknowledgeTurningPoint, phase, reached, seal, confirmSeal, sealState, standDownGuardian, guardianStandDown,
+      projection, serverBranch, freedCashflow, addedPressure, allocation, allocationTouched, allocationOverspent, allocationTarget,
+      needsTarget, setAllocation, turningPoint, turningPointAck, acknowledgeTurningPoint, phase, canReviewCommitment, seal, confirmSeal,
+      sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview,
     ],
   );
 

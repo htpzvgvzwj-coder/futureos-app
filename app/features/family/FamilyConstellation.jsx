@@ -142,9 +142,9 @@ function FamilyConstellationInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "retirement" }, { id: "emergency" }]}
+        realitySummary={t("familyConstellation.summaryLine", { shared: `${sgd(reality.shared_monthly_contribution || 0)}/mo`, items: items.length })}
         sealMonthlyAmount={shared}
-        sealDisabled={!bothConfirmed || (preview && !preview.feasibleBandExists)}
         formatSelf={(v) => `${sgd(v)}/mo`}
         realityRows={[
           { id: "shared", label: t("familyConstellation.reality.shared"), value: `${sgd(reality.shared_monthly_contribution || 0)}/mo`, provenance: t("familyConstellation.reality.agreed") },

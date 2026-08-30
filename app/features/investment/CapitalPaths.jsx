@@ -10,7 +10,7 @@
 // Liquidity Gate sets how long the money must stay available, so near-term
 // and long-term goals visibly pull against each other.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
 import { DragTrack } from "../../components/living-scene/DragTrack.jsx";
@@ -88,16 +88,9 @@ export function projectCapital({ branchVars, reality, context }) {
   };
 }
 
-function capitalEcho({ branchVars, reality, context }) {
-  const pool = capitalPool(reality, context);
-  const jobs = branchVars.jobs;
-  if (!jobs) return null;
-  const liquid = CAPITAL_JOBS.filter((j) => j.liquid).reduce((s, j) => s + (Number(jobs[j.id]) || 0), 0);
-  if (pool > 0 && liquid / pool >= 0.7) {
-    return { id: "inv-liquidity", whyNowKey: "capitalPaths.echo.liquidity", ifYouWaitKey: "capitalPaths.echo.liquidityWait" };
-  }
-  return null;
-}
+// A high liquidity split on ONE visit is a current trade-off, not a
+// Decision Echo. A real Echo (>=3 similar user-confirmed Ledger actions)
+// is surfaced from /api/living-plan/status, so this scene declares none.
 
 function yr(v) {
   return v == null ? "—" : `${v}y`;
@@ -105,6 +98,7 @@ function yr(v) {
 
 function CapitalPathsInner({ t, setActiveScreen }) {
   const s = useLivingScene();
+  const [openJob, setOpenJob] = useState(null);
   const reality = s.realityData;
   const feas = s.reality?.feasibility ?? null;
 
@@ -146,9 +140,9 @@ function CapitalPathsInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "emergency" }, { id: "retirement" }]}
+        realitySummary={t("capitalPaths.summaryLine", { pool: `${sgd(pool)}/mo`, invest: `${sgd(feas.monthlyCommitment)}/mo` })}
         sealMonthlyAmount={commitment}
-        sealDisabled={over}
         formatSelf={yr}
         realityRows={[
           { id: "pool", label: t("capitalPaths.reality.pool"), value: `${sgd(pool)}/mo`, provenance: t("capitalPaths.reality.fromCashflow") },
@@ -164,14 +158,18 @@ function CapitalPathsInner({ t, setActiveScreen }) {
 
           <div className="cpJobs">
             {CAPITAL_JOBS.map((j) => (
-              <label key={j.id} className={`cpJob ${j.liquid ? "is-liquid" : "is-locked"}`}>
-                <span>
-                  {t(`capitalPaths.job.${j.id}`)}
-                  <em>{j.liquid ? t("capitalPaths.liquid") : t("capitalPaths.locked")}</em>
-                </span>
-                <DragTrack min={0} max={Math.max(pool, 1)} step={10} value={Math.min(Number(jobs[j.id]) || 0, pool)} onChange={(v) => setJob(j.id, v)} ariaLabel={t(`capitalPaths.job.${j.id}`)} />
-                <b>{sgd(jobs[j.id] || 0)}</b>
-              </label>
+              <div key={j.id} className={`cpJob ${j.liquid ? "is-liquid" : "is-locked"} ${openJob === j.id ? "is-open" : ""}`}>
+                <button type="button" className="cpJobHead" aria-expanded={openJob === j.id} onClick={() => setOpenJob(openJob === j.id ? null : j.id)}>
+                  <span>
+                    {t(`capitalPaths.job.${j.id}`)}
+                    <em>{j.liquid ? t("capitalPaths.liquid") : t("capitalPaths.locked")}</em>
+                  </span>
+                  <b>{sgd(jobs[j.id] || 0)}</b>
+                </button>
+                {openJob === j.id ? (
+                  <DragTrack min={0} max={Math.max(pool, 1)} step={10} value={Math.min(Number(jobs[j.id]) || 0, pool)} onChange={(v) => setJob(j.id, v)} ariaLabel={t(`capitalPaths.job.${j.id}`)} />
+                ) : null}
+              </div>
             ))}
           </div>
 
@@ -191,7 +189,7 @@ function CapitalPathsInner({ t, setActiveScreen }) {
 
 export function CapitalPaths({ t, setActiveScreen }) {
   return (
-    <LivingSceneProvider domain="investment" projectFn={projectCapital} turningPointFor={capitalEcho}>
+    <LivingSceneProvider domain="investment" projectFn={projectCapital} turningPointFor={null}>
       <CapitalPathsInner t={t} setActiveScreen={setActiveScreen} />
     </LivingSceneProvider>
   );

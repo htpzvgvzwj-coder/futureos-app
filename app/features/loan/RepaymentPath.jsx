@@ -11,7 +11,7 @@
 // The three Mirror paths (Clear Faster / Preserve Breathing Room / Balanced)
 // are one tap each. Everything below the path is the shared spine.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { monthsToPayoff } from "../../../lib/living-plan/monthly-shift-projection.js";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
@@ -130,7 +130,8 @@ function RepaymentPathInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "emergency" }, { id: "retirement" }]}
+        realitySummary={t("repaymentPath.summaryLine", { amount: `${sgd(installment)}/mo`, debtFree: monthsToYears(monthsNow) })}
         sealMonthlyAmount={installment + extra}
         realityRows={[
           { id: "principal", label: t("repaymentPath.reality.principal"), value: sgd(feas.principal), provenance: t("repaymentPath.reality.fromLoan") },
@@ -158,6 +159,7 @@ function RepaymentPathInner({ t, setActiveScreen }) {
 }
 
 function ScenePath({ t, headroom, extra, onExtra, monthsNow, monthsAfter, roomAfter, weightPct, installment }) {
+  const [compareOpen, setCompareOpen] = useState(false);
   return (
     <div className="rpPath">
       <div className="rpReadouts">
@@ -192,11 +194,16 @@ function ScenePath({ t, headroom, extra, onExtra, monthsNow, monthsAfter, roomAf
         </div>
       ) : null}
 
-      <div className="rpMirror">
-        <button type="button" onClick={() => onExtra(0)}>{t("repaymentPath.mirror.breathingRoom")}</button>
-        <button type="button" onClick={() => onExtra(Math.round(headroom / 2 / 10) * 10)}>{t("repaymentPath.mirror.balanced")}</button>
-        <button type="button" onClick={() => onExtra(headroom)}>{t("repaymentPath.mirror.clearFaster")}</button>
-      </div>
+      <button type="button" className="lsGhostBtn rpCompareToggle" aria-expanded={compareOpen} onClick={() => setCompareOpen((o) => !o)}>
+        {t("repaymentPath.compare")}
+      </button>
+      {compareOpen ? (
+        <div className="rpMirror">
+          <button type="button" onClick={() => onExtra(0)}>{t("repaymentPath.mirror.breathingRoom")}</button>
+          <button type="button" onClick={() => onExtra(Math.round(headroom / 2 / 10) * 10)}>{t("repaymentPath.mirror.balanced")}</button>
+          <button type="button" onClick={() => onExtra(headroom)}>{t("repaymentPath.mirror.clearFaster")}</button>
+        </div>
+      ) : null}
     </div>
   );
 }

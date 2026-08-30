@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
 import { formatEvent } from "../lib/change-ledger/format.js";
+import { nodeEvents } from "../lib/life/node-evidence.js";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
 import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
@@ -3227,53 +3228,124 @@ function getNavScreen(activeScreen) {
   return activeScreen;
 }
 
-// Explore is a Life Field, not a tools list. One question, seven parts of a
-// life. Tapping a node goes straight into that Studio's current reality
-// scene - never a feature menu.
-const EXPLORE_FIELD_NODES = [
-  { id: "home", screen: screens.FUTURE_FIELD, tone: "home" },
-  { id: "relationship", screen: screens.WEDDING_LIVING_PLAN, tone: "rel" },
-  { id: "safety", screen: screens.NEED_EMERGENCY, tone: "safety" },
-  { id: "freedom", screen: screens.CAPITAL_PATHS, tone: "freedom" },
-  { id: "family", screen: screens.FAMILY_CONSTELLATION, tone: "family" },
-  { id: "experience", screen: screens.TRIP_ORBIT, tone: "exp" },
-  { id: "future", screen: screens.FUTURE_LIFE_TIMELINE, tone: "future" },
+// Explore is intent-first, not a feature menu:
+//   1. Continue your active future  (only when one exists)
+//   2. one personalised current tension, from real status data
+//   3. one input: "What do you want to change?" -> routes to the Studio
+// "All life areas" is a secondary, closed drawer - never the first screen.
+const EXPLORE_INTENTS = [
+  { id: "debt", screen: screens.REPAYMENT_PATH },
+  { id: "home", screen: screens.FUTURE_FIELD },
+  { id: "retire", screen: screens.FUTURE_LIFE_TIMELINE },
+  { id: "trip", screen: screens.TRIP_ORBIT },
+  { id: "grow", screen: screens.CAPITAL_PATHS },
+  { id: "protect", screen: screens.PROTECTION_ENVELOPE },
+  { id: "partner", screen: screens.FAMILY_CONSTELLATION },
+  { id: "wedding", screen: screens.WEDDING_LIVING_PLAN },
+  { id: "safety", screen: screens.NEED_EMERGENCY },
 ];
-const EXPLORE_FIELD_MORE = [
+const EXPLORE_ALL_AREAS = [
+  { id: "home", screen: screens.FUTURE_FIELD },
+  { id: "relationship", screen: screens.WEDDING_LIVING_PLAN },
+  { id: "safety", screen: screens.NEED_EMERGENCY },
+  { id: "freedom", screen: screens.CAPITAL_PATHS },
+  { id: "family", screen: screens.FAMILY_CONSTELLATION },
+  { id: "experience", screen: screens.TRIP_ORBIT },
+  { id: "future", screen: screens.FUTURE_LIFE_TIMELINE },
   { id: "debt", screen: screens.REPAYMENT_PATH },
   { id: "protection", screen: screens.PROTECTION_ENVELOPE },
 ];
+const EXPLORE_DRAFT_SCREEN = {
+  loan: screens.REPAYMENT_PATH,
+  retirement: screens.FUTURE_LIFE_TIMELINE,
+  travel: screens.TRIP_ORBIT,
+  investment: screens.CAPITAL_PATHS,
+  insurance: screens.PROTECTION_ENVELOPE,
+  family: screens.FAMILY_CONSTELLATION,
+};
 
-function ExploreLifeField({ setActiveScreen, t }) {
+function readActiveDraftDomain() {
+  try {
+    for (let i = 0; i < window.sessionStorage.length; i++) {
+      const k = window.sessionStorage.key(i);
+      const m = k && k.match(/^livingScene:draft:(\w+)$/);
+      if (m) return m[1];
+    }
+  } catch {
+    /* storage blocked - fine */
+  }
+  return null;
+}
+
+function ExploreMoment({ setActiveScreen, t }) {
+  const [status, setStatus] = useState(null);
+  const [intent, setIntent] = useState("");
+  const activeDraft = readActiveDraftDomain();
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/living-plan/status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => alive && setStatus(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const tp = status?.nextTurningPoint ?? null;
+  const pw = status?.promiseWeight ?? null;
+  const tension = tp?.whyNowKey
+    ? t(tp.whyNowKey, tp.whyNowParams)
+    : pw && pw.status && pw.status !== "calm"
+      ? t(`explore.tension.${pw.status}`)
+      : null;
+
+  const go = () => {
+    const m = EXPLORE_INTENTS.find((x) => x.id === intent);
+    if (m) setActiveScreen(m.screen);
+  };
+
   return (
-    <Screen className="exploreField">
-      <header className="exploreFieldHead">
+    <Screen className="exploreMoment">
+      <header className="exploreMomentHead">
         <p className="exploreFieldEyebrow">{t("explore.eyebrow")}</p>
-        <h1>{t("explore.question")}</h1>
-        <p className="exploreFieldSub">{t("explore.sub")}</p>
       </header>
 
-      <div className="exploreFieldGrid">
-        {EXPLORE_FIELD_NODES.map((n) => (
-          <button key={n.id} type="button" className={`exploreFieldNode exploreFieldNode-${n.tone}`} onClick={() => setActiveScreen(n.screen)}>
-            <span className="exploreFieldNodeName">{t(`explore.node.${n.id}`)}</span>
-            <span className="exploreFieldNodeHint">{t(`explore.node.${n.id}.hint`)}</span>
-          </button>
-        ))}
-      </div>
+      {activeDraft && EXPLORE_DRAFT_SCREEN[activeDraft] ? (
+        <button type="button" className="exploreContinue" onClick={() => setActiveScreen(EXPLORE_DRAFT_SCREEN[activeDraft])}>
+          <span className="exploreContinueLabel">{t("explore.continue")}</span>
+          <span className="exploreContinueName">{t(`livingScene.node.${activeDraft === "loan" ? "breathingRoom" : activeDraft}`) || activeDraft}</span>
+        </button>
+      ) : null}
 
-      <div className="exploreFieldMore">
-        <span>{t("explore.also")}</span>
-        {EXPLORE_FIELD_MORE.map((n) => (
-          <button key={n.id} type="button" className="exploreFieldMoreBtn" onClick={() => setActiveScreen(n.screen)}>
-            {t(`explore.node.${n.id}`)}
-          </button>
-        ))}
+      {tension ? <p className="exploreTension">{tension}</p> : null}
+
+      <div className="exploreIntent">
+        <label htmlFor="exploreIntentSelect">{t("explore.question")}</label>
+        <select id="exploreIntentSelect" value={intent} onChange={(e) => setIntent(e.target.value)}>
+          <option value="">{t("explore.pick")}</option>
+          {EXPLORE_INTENTS.map((x) => (
+            <option key={x.id} value={x.id}>{t(`explore.intent.${x.id}`)}</option>
+          ))}
+        </select>
+        <button type="button" className="lsPrimaryBtn" disabled={!intent} onClick={go}>{t("explore.goIntent")}</button>
       </div>
 
       <button type="button" className="linkButton exploreFieldTalk" onClick={() => setActiveScreen(screens.EXPLORE_CHAT)}>
         {t("explore.talkItThrough")}
       </button>
+
+      <details className="exploreAllAreas">
+        <summary>{t("explore.allAreas")}</summary>
+        <div className="exploreAllGrid">
+          {EXPLORE_ALL_AREAS.map((n) => (
+            <button key={n.id} type="button" className="exploreFieldMoreBtn" onClick={() => setActiveScreen(n.screen)}>
+              {t(`explore.node.${n.id}`)}
+            </button>
+          ))}
+        </div>
+      </details>
     </Screen>
   );
 }
@@ -4641,19 +4713,21 @@ const LIFE_NODE_RELATED = {
   freedom: [screens.CAPITAL_PATHS, screens.REPAYMENT_PATH],
   future: [screens.FUTURE_LIFE_TIMELINE, screens.NEED_RETIREMENT],
 };
-
 function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
   const [events, setEvents] = useState([]);
   useEffect(() => {
     let alive = true;
     fetch("/api/change-ledger?filter=all")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => alive && setEvents(Array.isArray(d?.events) ? d.events.slice(0, 3) : []))
+      .then((d) => {
+        if (!alive) return;
+        setEvents(nodeEvents(d?.events, node.id, 3));
+      })
       .catch(() => {});
     return () => {
       alive = false;
     };
-  }, []);
+  }, [node.id]);
 
   const fields = LIFE_NODE_FIELDS[node.id] ?? [];
   const confirmed = [];
@@ -4688,6 +4762,13 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
         </div>
       </dl>
 
+      <p className="lifeEvidenceData">
+        {t("life.evidence.dataUsed")}: {fields.map((k) => t(`life.field.${k}`)).join(", ") || t("life.evidence.none")}
+      </p>
+      <p className="lifeEvidenceData">
+        {t("life.evidence.goalsAffected")}: {(LIFE_NODE_RELATED[node.id] ?? [node.screen]).map((sc) => t(`life.related.${sc}`)).join(", ")}
+      </p>
+
       <div className="lifeEvidenceChanges">
         <p>{t("life.evidence.recentChanges")}</p>
         {events.length ? (
@@ -4697,16 +4778,14 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
             ))}
           </ul>
         ) : (
-          <p className="lifeEvidenceEmpty">{t("life.evidence.noChanges")}</p>
+          <p className="lifeEvidenceEmpty">{t("life.evidence.noNodeChanges")}</p>
         )}
       </div>
 
       <div className="lifeEvidenceRelated">
-        {(LIFE_NODE_RELATED[node.id] ?? [node.screen]).map((sc) => (
-          <button key={sc} type="button" className="lifeEvidenceGo" onClick={() => setActiveScreen(sc)}>
-            {t(`life.related.${sc}`)}
-          </button>
-        ))}
+        <button type="button" className="lsPrimaryBtn" onClick={() => setActiveScreen(node.screen)}>
+          {t("life.evidence.nextAction")}
+        </button>
         <button type="button" className="linkButton" onClick={() => setActiveScreen(screens.MEMORY_LENS)}>
           {t("life.evidence.memoryLens")}
         </button>
@@ -4715,16 +4794,14 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
   );
 }
 
-function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
+function LifeGraph({ setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
   const [openNodeId, setOpenNodeId] = useState(null);
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
-  const detectedStage = getDetectedLifeStage(profile, customGoals, t);
   const healthScores = getHealthScores(profile);
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
-  const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
   const lifeNodes = getLifeNodes(profile, healthScores, selectedGoalIds);
   const openNode = lifeNodes.find((n) => n.id === openNodeId) ?? null;
 
@@ -4811,154 +4888,13 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
         />
       ) : null}
 
-      <section className="agentReasoningPanel futureAnalystPanel">
-        <div className="panelHead">
-          <span className="sectionLabel">{t("lifeGraph.futureAnalyst.title")}</span>
-          <Bot size={17} />
-        </div>
-        <SummaryRow label={t("lifeGraph.futureAnalyst.profileSignal")} value={detectedStage} />
-        <SummaryRow label={t("lifeGraph.futureAnalyst.goalSignal")} value={selectedGoalIds.map((goalId) => getProfileGoalLabel(goalId, customGoals, t)).join(", ")} />
-        <SummaryRow label={t("lifeGraph.futureAnalyst.riskSignal")} value={t("lifeGraph.futureAnalyst.riskValue")} />
-        <SummaryRow label={t("lifeGraph.futureAnalyst.nextSignal")} value={t("lifeGraph.futureAnalyst.nextValue")} />
-      </section>
-
-      <button type="button" className="profileQuickAction" onClick={() => setActiveScreen(screens.ASSET_PROFILE)}>
-        <Wallet size={18} />
-        <span>
-          <strong>{t("lifeGraph.assetProfile.title")}</strong>
-          <small>
-            {formatSgd(
-              computeNetWorth(preferences.assets, {
-                existingLoans: numberValue(profile.existingLoans, 0),
-                creditCardOutstanding: numberValue(profile.creditCardOutstanding, 0),
-              }).netWorth
-            )}
-          </small>
-        </span>
-        <ChevronRight size={16} />
-      </button>
-
-      <section className="detectedNeeds">
-        <span className="sectionLabel">{t("lifeGraph.detectedNeeds")}</span>
-        {detectedNeeds.length ? (
-          <div>
-            {detectedNeeds.map(({ id, titleKey, screen, icon: Icon }) => (
-              <button
-                type="button"
-                className="needChip"
-                key={id}
-                data-testid={`need-${id}`}
-                onClick={() => setActiveScreen(screen)}
-              >
-                <Icon size={15} />
-                <span>{t(titleKey)}</span>
-                <ChevronRight size={15} />
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="noDetectedNeeds">{t("lifeGraph.noDetectedNeeds")}</p>
-        )}
-      </section>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.STRATEGIC_BALANCE)}
-      >
-        <span className="iconBubble">
-          <ChartNoAxesColumnIncreasing size={16} />
-        </span>
-        <span>
-          <strong>{t("lifeGraph.strategicBalance.title")}</strong>
-          <small>{t("lifeGraph.strategicBalance.subtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.CHANGE_LEDGER)}
-      >
-        <span className="iconBubble">
-          <History size={16} />
-        </span>
-        <span>
-          <strong>{t("changeLedger.title")}</strong>
-          <small>{t("changeLedger.subtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.MEMORY_LENS)}
-      >
-        <span className="iconBubble">
-          <History size={16} />
-        </span>
-        <span>
-          <strong>{t("memoryLens.title")}</strong>
-          <small>{t("memoryLens.subtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.CROSS_BANK_DATA)}
-      >
-        <span className="iconBubble">
-          <ArrowLeftRight size={16} />
-        </span>
-        <span>
-          <strong>{t("lifeGraph.crossBankData.title")}</strong>
-          <small>{t("lifeGraph.crossBankData.entrySubtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.PRODUCT_FIT)}
-      >
-        <span className="iconBubble">
-          <Landmark size={16} />
-        </span>
-        <span>
-          <strong>{t("lifeGraph.productFit.title")}</strong>
-          <small>{t("lifeGraph.productFit.entrySubtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="strategicBalanceEntry"
-        onClick={() => setActiveScreen(screens.PEER_BENCHMARK)}
-      >
-        <span className="iconBubble">
-          <UserRound size={16} />
-        </span>
-        <span>
-          <strong>{t("lifeGraph.peerBenchmark.title")}</strong>
-          <small>{t("lifeGraph.peerBenchmark.entrySubtitle")}</small>
-        </span>
-        <ChevronRight size={15} />
-      </button>
-
-      <button
-        type="button"
-        className="primaryButton"
-        onClick={() => goWithLoading(screens.MIRROR, "loading.mirror")}
-      >
-        {t("lifeGraph.openMirror")}
-        <ChevronRight size={18} />
-      </button>
+      {/* Part 4: the default Life screen is ONLY the living Life Field.
+          Future Analyst, Asset Profile, Detected Needs, Strategic Balance,
+          Change Ledger, Memory Lens, Cross-bank Data, Product Fit and Peer
+          Benchmark are no longer permanent entries here - they are reached
+          contextually through a selected node's Evidence drawer, or through
+          Profile / Data settings and the Memory drawer. Their engines and
+          routes are untouched. */}
     </Screen>
   );
 }
@@ -5890,6 +5826,7 @@ function MirrorChatScreen({
   t,
   mirrorChatSeed,
   onConsumeMirrorChatSeed,
+  initialView = "tools",
 }) {
   const [messages, setMessages] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -5900,9 +5837,9 @@ function MirrorChatScreen({
   const [openLoops, setOpenLoops] = useState([]);
   const [memories, setMemories] = useState([]);
   const [contextModalIndex, setContextModalIndex] = useState(null);
-  // Tools is the default landing view when Mirror opens; "Ask Future
-  // Mirror" (top right) swaps to the chat view, and "Tools" swaps back.
-  const [view, setView] = useState("tools");
+  // "Talk it through" from Explore opens straight in chat (initialView =
+  // "chat"); the standalone Mirror entry still lands on tools.
+  const [view, setView] = useState(initialView === "chat" ? "chat" : "tools");
   const logEndRef = useRef(null);
 
   const profile = getUserProfile(preferences);
@@ -7364,8 +7301,14 @@ function FutureSelfGuardian({
       <Header title={t("guardian.title")} subtitle={t("guardian.hub.subtitle")} />
       <BackHomeButton setActiveScreen={setActiveScreen} t={t} />
 
+      {/* Part 5: the default page is one decision that needs the customer
+          now, or a calm "nothing needs a decision" state. Future Handoff
+          shows only when it has a real candidate; Hardship only when
+          triggered; Shadow Guardian only from inside the secondary drawer
+          on an explicit request. The six-stat dashboard and ten-card grid
+          move into "Trust, history & controls". No engine or route
+          removed. */}
       <GuardianDecisions t={t} setActiveScreen={setActiveScreen} />
-      <ShadowGuardianPanel t={t} setActiveScreen={setActiveScreen} />
       <FutureHandoffPanel t={t} />
 
       {hardshipTriggered ? (
@@ -7391,6 +7334,11 @@ function FutureSelfGuardian({
           <ChevronRight size={17} />
         </motion.button>
       ) : null}
+
+      <details className="guardianTrustControls">
+      <summary>{t("guardian.trustControls")}</summary>
+
+      <ShadowGuardianPanel t={t} setActiveScreen={setActiveScreen} />
 
       <section className="guardianHubStatus">
         <div className="panelHead">
@@ -7476,6 +7424,7 @@ function FutureSelfGuardian({
           </motion.button>
         ))}
       </section>
+      </details>
       {protectedScoreModal}
       {guardianStateInfoModal}
       {confidenceInfoModal}
@@ -17729,12 +17678,13 @@ export default function App() {
     setJointDebateViewId,
   };
 
-  const mirrorSimulatorScreen = (
+  const exploreChatScreen = (
     <MirrorChatScreen
       {...shared}
       simulatorInputs={simulatorInputs}
       mirrorChatSeed={mirrorChatSeed}
       onConsumeMirrorChatSeed={() => setMirrorChatSeed(null)}
+      initialView="chat"
     />
   );
 
@@ -17782,8 +17732,8 @@ export default function App() {
     ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.MIRROR]: <ExploreLifeField setActiveScreen={setActiveScreen} t={t} />,
-    [screens.EXPLORE_CHAT]: mirrorSimulatorScreen,
+    [screens.MIRROR]: <ExploreMoment setActiveScreen={setActiveScreen} t={t} />,
+    [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,

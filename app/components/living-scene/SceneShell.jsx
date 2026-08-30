@@ -1,53 +1,54 @@
 "use client";
 
-// SceneShell - the shared frame every Studio scene renders inside.
+// SceneShell - the shared frame. Its whole job is Part 1:
 //
-// The scene passes its own native direct-manipulation surface as children.
-// SceneShell adds the spine layers BELOW it, each appearing only once its
-// phase is relevant (never all at once), and the LivingSpine strip at the
-// foot. This is what makes the seven behaviours one spine instead of seven
-// panels.
+//   1. a compact RealitySummary
+//   2. the Studio's native scene (children)
+//   3. exactly ONE active MomentOutlet
+//   4. optional CLOSED Evidence and Memory drawers
+//
+// No cumulative "reached" layers. No seven-dot tracker. No "Step N". The
+// phase machine is internal architecture, not customer navigation.
 
+import { useState } from "react";
 import { useLivingScene } from "./LivingSceneProvider.jsx";
-import { LivingSpine } from "./LivingSpine.jsx";
-import { RealityLayer } from "./RealityLayer.jsx";
-import { PossibilityLayer } from "./PossibilityLayer.jsx";
-import { AllocationLayer } from "./AllocationLayer.jsx";
-import { CommitmentLayer } from "./CommitmentLayer.jsx";
-import { GuardianLayer } from "./GuardianLayer.jsx";
-import { MemoryLayer } from "./MemoryLayer.jsx";
-import { phaseReached } from "../../../lib/living-scene/spine.js";
+import { RealitySummary } from "./RealitySummary.jsx";
+import { MomentOutlet } from "./MomentOutlet.jsx";
+import { EvidenceDrawer, MemoryDrawer } from "./SceneDrawers.jsx";
 
 export function SceneShell({
   t,
   setActiveScreen,
+  realitySummary = null,
   realityRows = [],
   realityUnknowns = [],
   realityNote = null,
   sealMonthlyAmount = 0,
-  sealDisabled = false,
-  goalLabel = null,
+  goalOptions = [],
   formatSelf,
   children,
 }) {
   const s = useLivingScene();
-  const reached = s.reached;
-  const sealed = s.sealState.sealed;
-  const commitReady = phaseReached(reached, "possible") && s.phase !== "turning_point" && !sealed;
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const showMemoryDrawer = s.branchDirty || s.sealState.sealed;
 
   return (
     <div className="lsScene">
-      <RealityLayer t={t} rows={realityRows} unknowns={realityUnknowns} note={realityNote} />
+      <RealitySummary t={t} summary={realitySummary} rows={realityRows} onOpenEvidence={() => setEvidenceOpen(true)} />
 
       <div className="lsSceneSurface">{children}</div>
 
-      {phaseReached(reached, "possible") ? <PossibilityLayer t={t} formatSelf={formatSelf} /> : null}
-      {phaseReached(reached, "allocation") ? <AllocationLayer t={t} goalLabel={goalLabel} /> : null}
-      {commitReady || sealed ? <CommitmentLayer t={t} monthlyAmount={sealMonthlyAmount} disabled={sealDisabled} /> : null}
-      {sealed ? <GuardianLayer t={t} /> : null}
-      {sealed ? <MemoryLayer t={t} setActiveScreen={setActiveScreen} /> : null}
+      <MomentOutlet t={t} sealMonthlyAmount={sealMonthlyAmount} goalOptions={goalOptions} formatSelf={formatSelf} />
 
-      <LivingSpine t={t} />
+      <EvidenceDrawer
+        t={t}
+        open={evidenceOpen}
+        onToggle={setEvidenceOpen}
+        rows={realityRows}
+        unknowns={realityUnknowns}
+        note={realityNote}
+      />
+      {showMemoryDrawer ? <MemoryDrawer t={t} setActiveScreen={setActiveScreen} /> : null}
     </div>
   );
 }
