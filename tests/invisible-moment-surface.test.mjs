@@ -132,7 +132,7 @@ test("Explore 'Talk it through' opens MirrorChatScreen directly in chat view", (
   assert.ok(/initialView === "chat" \? "chat" : "tools"/.test(page), "chat view honoured");
   assert.ok(/exploreChatScreen[\s\S]{0,200}initialView="chat"/.test(page), "EXPLORE_CHAT passes initialView=\"chat\"");
   assert.ok(!/\bExploreLifeField\b/.test(page), "old 7-node ExploreLifeField grid is gone");
-  assert.ok(/function ExploreMoment/.test(page), "intent-first ExploreMoment is the Explore screen");
+  assert.ok(/<ExploreScreen /.test(page), "the intent-first ExploreScreen feature is the Explore screen");
 });
 
 // ---- Part 4: Life evidence is node-specific --------------------

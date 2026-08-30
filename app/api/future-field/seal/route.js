@@ -7,14 +7,11 @@ import {
   validateCommitmentAmount,
   buildAdjustedSavingsPlanPayload,
 } from "../../../../lib/plan-runtime/index.js";
-import { createCommitment } from "../../../../lib/goal-commitment-store.js";
+import { sealAtomic, validateSealAllocation, resolveAllowedTargets, findSealByIdempotencyKey } from "../../../../lib/plan-runtime/atomic-seal.js";
+import { query } from "../../../../lib/db.js";
 import * as homeStore from "../../../../lib/home-store.js";
 import * as weddingStore from "../../../../lib/wedding-store.js";
 import { EMERGENCY_FUND_MONTHS_TARGET } from "../../../../lib/investment-readiness-finance.js";
-import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
-import { buildBranchSealedEvent } from "../../../../lib/change-ledger/producers/future-field.js";
-import { buildHomeCommitmentCreatedEvent } from "../../../../lib/change-ledger/producers/home.js";
-import { buildSavingsPlanConfirmedEvent } from "../../../../lib/change-ledger/producers/goal-plan.js";
 
 export const runtime = "nodejs";
 
@@ -129,120 +126,93 @@ export async function POST(request) {
   }
 
   const effectiveMonth = nextMonthKey();
-  // The customer's allocation of any freed cashflow travels WITH the seal.
-  // Guardian only ever tracks legs the customer explicitly set; an
-  // unallocated remainder is never quietly pushed into another goal.
-  const sealAllocation = branch?.data?.allocation ?? null;
-  const sealAllocationGoalId = branch?.data?.allocationGoalId ?? "home";
-  let commitment;
+
+  // Part 0.1: allocation + Seal are ONE atomic operation. The client sends
+  // the allocation, its explicit target goal and an idempotency key with
+  // the confirm request - not as a separate /allocate call.
+  const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.slice(0, 120) : null;
+  const existing = await findSealByIdempotencyKey(userId, idempotencyKey);
+  if (existing) {
+    return Response.json({ commitment: existing, preview, idempotent: true });
+  }
+
+  // Allowed allocation targets = the customer's real active goal domains + emergency.
+  const { rows: planRows } = await query(`select distinct domain from plans where profile_key = $1`, [userId]);
+  const allowedTargets = resolveAllowedTargets(planRows.map((r) => r.domain));
+
+  const allocationInput = body.allocation ?? branch?.data?.allocation ?? null;
+  const targetInput = body.allocationTargetGoalId ?? branch?.data?.allocationGoalId ?? null;
+  const allocCheck = validateSealAllocation({
+    allocation: allocationInput,
+    allocationTargetGoalId: targetInput,
+    freedCashflow: Number(body.freedCashflow) || 0,
+    addedPressure: Number(body.addedPressure) || 0,
+    allowedTargets,
+  });
+  if (!allocCheck.ok) {
+    return Response.json({ error: allocCheck.error, allowedTargets: allocCheck.allowedTargets ?? allowedTargets }, { status: 422 });
+  }
+
+  let sealResult;
   try {
-    commitment = await createCommitment(userId, {
+    sealResult = await sealAtomic({
+      profileKey: userId,
       domain,
-      monthlyContribution: monthlyAmount,
-      effectiveMonth,
-      pauseIfEmergencyMonthsBelow: EMERGENCY_FUND_MONTHS_TARGET,
-      sourceMoment: {
-        source: "future_field_seal",
-        branchId: branch?.id ?? null,
-        delayMonths,
-        allocation: sealAllocation,
-        allocationGoalId: sealAllocationGoalId,
-      },
-      supersededSavingsPlan: context.confirmedSavingsPlan,
-      priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
       planId: plan.id,
-      planBranchId: branch?.id ?? null,
+      branchId: branch?.id ?? null,
+      branchData: branch?.data ?? null,
+      monthlyAmount,
+      effectiveMonth,
+      readyMonth,
+      delayMonths,
+      priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
+      supersededSavingsPlan: context.confirmedSavingsPlan,
+      emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
+      allocation: allocCheck.allocation,
+      targetGoalId: allocCheck.targetGoalId,
+      sealPreview: preview,
+      idempotencyKey,
     });
   } catch (error) {
     if (error?.code === "ACTIVE_COMMITMENT_EXISTS") {
       return Response.json({ error: "active_commitment_exists" }, { status: 409 });
     }
+    if (error?.code === "BRANCH_NOT_FOUND" || error?.code === "BRANCH_PLAN_MISMATCH") {
+      return Response.json({ error: error.code.toLowerCase() }, { status: 409 });
+    }
     throw error;
   }
 
-  await planStore.upsertGuardianPolicy(userId, {
-    planId: plan.id,
-    commitmentId: commitment.id,
-    canMoveMoney: false, // no real bank-transfer integration exists
-    canReschedule: false,
-    canNotify: true,
-    // pause_conditions is the only structured jsonb on guardian_policies -
-    // the confirmed allocation legs ride along here so Guardian tracks
-    // exactly what the customer set (never the flexible / unallocated
-    // remainder). The commitment's source_moment.allocation is the
-    // canonical copy.
-    pauseConditions: [
-      { kind: "emergency_floor_months", operator: "lt", value: EMERGENCY_FUND_MONTHS_TARGET },
-      ...(sealAllocation
-        ? [
-            {
-              kind: "tracked_allocation",
-              goalId: sealAllocationGoalId,
-              goalMonthly: Number(sealAllocation.goalMonthly) || 0,
-              emergencyMonthly: Number(sealAllocation.emergencyMonthly) || 0,
-            },
-          ]
-        : []),
-    ],
-    reconfirmAfterDays: 180,
-  });
-
-  // Keep the confirmed_savings_plan artifact in sync for downstream
-  // consumers (Strategic Balance, cross-goal), exactly like the Moment-
-  // driven route. Same shape for home and wedding.
+  // Downstream cache sync (confirmed_savings_plan artifact) - NOT part of
+  // the atomic core: it is a revocable projection Strategic Balance reads,
+  // and a failure here must not undo a real sealed commitment.
   const domainStore = domain === "wedding" ? weddingStore : domain === "home" ? homeStore : null;
   if (domainStore) {
-    const session = await domainStore.getOrCreateSession(userId);
-    await domainStore.saveArtifact(
-      session.id,
-      "stage2",
-      "confirmed_savings_plan",
-      buildAdjustedSavingsPlanPayload({
-        priorPlan: context.confirmedSavingsPlan,
-        monthlyContribution: monthlyAmount,
-        effectiveMonth,
-        readyMonth,
-        notes: "Sealed from Future Field.",
-      }),
-    );
-    await domainStore.updateSessionStatus(session.id, { stage2Status: "confirmed" });
-  }
-
-  if (branch) {
-    await planStore.updateBranch(branch.id, userId, { status: "sealed", sealedCommitmentId: commitment.id });
-  }
-  await planStore.transitionPlan(plan.id, userId, "scheduled", "user").catch(() => {});
-
-  const sealedLedger = await recordEventSafe(
-    buildBranchSealedEvent({ profileKey: userId, domain, planId: plan.id, branchId: branch?.id ?? null, monthlyAmount, sealPreview: preview }),
-  );
-  const commitmentLedger = await recordEventSafe(
-    domain === "home"
-      ? buildHomeCommitmentCreatedEvent({
-          profileKey: userId,
-          commitmentId: commitment.id,
-          priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
-          newMonthlyContribution: monthlyAmount,
-          effectiveMonth,
-          readyMonthBefore: null,
-          readyMonthAfter: readyMonth,
-          monthsDelta: delayMonths,
-          reasonCode: "future_field_seal",
-          reasonParams: {},
-          emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
-        })
-      : buildSavingsPlanConfirmedEvent({
-          profileKey: userId,
-          domain,
+    try {
+      const session = await domainStore.getOrCreateSession(userId);
+      await domainStore.saveArtifact(
+        session.id,
+        "stage2",
+        "confirmed_savings_plan",
+        buildAdjustedSavingsPlanPayload({
+          priorPlan: context.confirmedSavingsPlan,
           monthlyContribution: monthlyAmount,
-          priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
-          targetCompleteMonth: readyMonth,
+          effectiveMonth,
+          readyMonth,
+          notes: "Sealed from the Life Thread.",
         }),
-  );
+      );
+      await domainStore.updateSessionStatus(session.id, { stage2Status: "confirmed" });
+    } catch (error) {
+      console.error("[seal] downstream artifact sync failed (commitment already sealed):", error?.message);
+    }
+  }
 
   return Response.json({
-    commitment,
+    commitment: sealResult.commitment,
+    allocation: sealResult.allocation,
+    allocationTargetGoalId: sealResult.targetGoalId,
     preview,
-    ledgerEventIds: [sealedLedger?.event?.id ?? null, commitmentLedger?.event?.id ?? null].filter(Boolean),
+    ledgerEventIds: sealResult.ledgerEventIds,
   });
 }

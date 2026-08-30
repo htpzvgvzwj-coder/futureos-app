@@ -17,6 +17,7 @@
 //     tab) recovers the committed state from there, never from the draft.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useLifeThread } from "../life-thread/LifeThreadProvider.jsx";
 import { derivePhase } from "../../../lib/living-scene/spine.js";
 import { commitmentGateOpen, allocationGoalId, allocationSettled as computeAllocationSettled } from "../../../lib/living-scene/gates.js";
 import { normalizeAllocation, allocationSum, isAllocationSet } from "../../../lib/living-plan/allocation.js";
@@ -29,11 +30,9 @@ export function useLivingScene() {
   return ctx;
 }
 
-// Plan-runtime states that mean "this scene has already been sealed" - the
-// seal/confirm route transitions the plan to "scheduled", so anything at or
-// past that is a confirmed commitment. "draft" / "shadow" / "proposed" are
-// NOT sealed.
-const SEALED_PLAN_STATES = new Set(["scheduled", "active", "paused", "needs_approval", "rescued", "completed", "handed_over"]);
+// Part 0.3: recovery is by commitment IDENTITY, not a generic plan state.
+// /api/future-field returns `sceneSeal` which is only { sealed: true } when
+// an active commitment for the SAME (domain, plan) exists.
 
 function draftKey(domain) {
   return `livingScene:draft:${domain}`;
@@ -68,6 +67,7 @@ function clearDraft(domain) {
 const EMPTY_PROJECTION = { selfOutcome: null, nodes: [], freedCashflow: 0, addedPressure: 0, mode: "neutral" };
 
 export function LivingSceneProvider({ domain, projectFn, turningPointFor = null, children }) {
+  const { invalidate: invalidateLifeThread } = useLifeThread();
   const [field, setField] = useState(null); // raw /api/future-field response
   const [loadState, setLoadState] = useState("loading"); // loading | ready | no-reality | error
   const [branchVars, setBranchVars] = useState({});
@@ -75,8 +75,8 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   const [allocationTouched, setAllocationTouched] = useState(false);
   const [allocationTarget, setAllocationTarget] = useState(null); // explicit goal id, or null = flexible
   const [turningPointAck, setTurningPointAck] = useState(false);
-  const [serverBranch, setServerBranch] = useState(null); // { id, delta, feasibility, projectedImpacts }
-  const [sealState, setSealState] = useState({ sealed: false, source: null, commitment: null, preview: null, error: null, busy: false });
+  const [serverBranch, setServerBranch] = useState(null); // { id, delta, feasibility, sealableVerdict, projectedImpacts }
+  const [sealState, setSealState] = useState({ sealed: false, source: null, commitment: null, guardianPolicy: null, preview: null, error: null, busy: false });
   const [guardianStandDown, setGuardianStandDown] = useState(false);
   const [shadowPreview, setShadowPreview] = useState({ status: "idle", data: null }); // idle | running | ready | error
   const peelTimer = useRef(null);
@@ -92,17 +92,39 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
         if (!alive) return;
         setField(d);
         setLoadState(d?.hasRealityPath ? "ready" : "no-reality");
-        // Recover confirmed state from the server, not from the draft.
-        const serverSealed = SEALED_PLAN_STATES.has(String(d?.state)) || Boolean(d?.committedPath);
-        if (serverSealed) {
+        // Part 0.3: recover confirmed state ONLY from an identity-matched
+        // commitment for this (domain, plan). Restore the confirmed
+        // allocation + Guardian policy; clear any incompatible session
+        // draft so the sealed state shows consistently.
+        const seal = d?.sceneSeal;
+        if (seal?.sealed && seal.identityMatches) {
+          clearDraft(domain);
+          setBranchVars({});
           setSealState({
             sealed: true,
             source: "server",
-            commitment: d?.committedPath ?? null,
+            commitment: {
+              id: seal.commitmentId,
+              domain: seal.domain,
+              plan_id: seal.planId,
+              monthly_contribution: seal.monthlyContribution,
+              effective_month: seal.effectiveMonth,
+            },
+            guardianPolicy: seal.guardianPolicy ?? null,
             preview: null,
             error: null,
             busy: false,
           });
+          if (seal.allocation) {
+            setAllocationState(normalizeAllocation(seal.allocation));
+            setAllocationTouched(true);
+            setAllocationTarget(seal.allocationTargetGoalId ?? null);
+          }
+          // restore confirmed branch vars from the sealed branch's delta
+          const sealedBranch = (d.possiblePaths ?? []).find((b) => b.id === seal.branchId);
+          if (sealedBranch?.delta?.after && typeof sealedBranch.delta.after === "object") {
+            setBranchVars({ ...sealedBranch.delta.after });
+          }
         }
       })
       .catch(() => alive && setLoadState("error"));
@@ -198,12 +220,15 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
         });
         if (!res.ok) return;
         const d = await res.json();
-        if (d?.branch) setServerBranch(d.branch);
+        if (d?.branch) {
+          setServerBranch(d.branch);
+          invalidateLifeThread(); // a server branch now exists - refresh the Life Thread
+        }
       } catch {
         /* offline / auth - the pure projection still stands */
       }
     },
-    [domain],
+    [domain, invalidateLifeThread],
   );
 
   const setVar = useCallback(
@@ -252,7 +277,9 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   }, [domain]);
 
   // Commitment review may not even render until every gate is clear.
-  const branchSealable = serverBranch ? serverBranch.feasibility?.sealable !== false : false;
+  // Part 0.4: sealability is an EXPLICIT server verdict - a missing verdict
+  // is treated as NOT sealable, never as true.
+  const branchSealable = serverBranch?.sealableVerdict?.sealable === true;
   const canReviewCommitment = commitmentGateOpen({
     branchDirty,
     sealed: sealState.sealed,
@@ -293,37 +320,56 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       if (!canReviewCommitment) return { ok: false, error: "not_ready" };
       setSealState((s) => ({ ...s, busy: true, error: null }));
       try {
-        // The allocation rides with the branch ONLY when the customer set one.
-        // The "goal" leg carries the customer's explicit target - never a
-        // hardcoded default. An unset / flexible allocation is not routed.
+        // Part 0.1: ONE atomic request. Allocation + explicit target + the
+        // freed / pressure figures + a deterministic idempotency key all go
+        // with the confirm - the server does allocation-persist + commitment
+        // + Guardian policy + Ledger events in one transaction.
         const { goalId, valid } = allocationGoalId({ allocation, allocationTarget });
-        if (serverBranch?.id && isAllocationSet(allocation) && valid) {
-          await fetch(`/api/future-field/branch?action=allocate&domain=${encodeURIComponent(domain)}`, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ branchId: serverBranch.id, allocation, goalId }),
-          });
-        }
+        const useAllocation = isAllocationSet(allocation) && valid;
+        const idempotencyKey = [
+          domain,
+          serverBranch?.id ?? "reality",
+          Math.round(monthlyAmount),
+          useAllocation ? `${goalId}:${Math.round(allocationSum(allocation))}` : "noalloc",
+        ].join("|");
         const res = await fetch(`/api/future-field/seal`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ domain, branchId: serverBranch?.id ?? null, monthlyAmount, mode: "confirm" }),
+          body: JSON.stringify({
+            domain,
+            branchId: serverBranch?.id ?? null,
+            monthlyAmount,
+            mode: "confirm",
+            allocation: useAllocation ? allocation : null,
+            allocationTargetGoalId: useAllocation ? goalId : null,
+            freedCashflow,
+            addedPressure,
+            idempotencyKey,
+          }),
         });
         const d = await res.json();
         if (!res.ok) {
           setSealState((s) => ({ ...s, busy: false, error: d?.error ?? "seal_failed", preview: d?.preview ?? s.preview }));
           return { ok: false, error: d?.error ?? "seal_failed" };
         }
-        // Confirmed. Clear the draft - the server is now the source of truth.
         clearDraft(domain);
-        setSealState({ sealed: true, source: "confirm", commitment: d.commitment ?? null, preview: d.preview ?? null, error: null, busy: false });
+        setSealState({
+          sealed: true,
+          source: "confirm",
+          commitment: d.commitment ?? null,
+          guardianPolicy: null,
+          preview: d.preview ?? null,
+          error: null,
+          busy: false,
+        });
+        invalidateLifeThread(); // one canonical snapshot for all four entrances
         return { ok: true, commitment: d.commitment ?? null };
       } catch {
         setSealState((s) => ({ ...s, busy: false, error: "network" }));
         return { ok: false, error: "network" };
       }
     },
-    [domain, serverBranch, allocation, allocationTarget, needsTarget, canReviewCommitment],
+    [domain, serverBranch, allocation, allocationTarget, freedCashflow, addedPressure, canReviewCommitment, invalidateLifeThread],
   );
 
   const standDownGuardian = useCallback(() => setGuardianStandDown(true), []);
