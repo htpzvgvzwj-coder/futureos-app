@@ -16,7 +16,10 @@
     "lifeGraph": "生活图谱",
     "mirror": "未来镜",
     "guardian": "守护者",
-    "profile": "个人"
+    "profile": "个人",
+    "today": "今日",
+    "life": "人生",
+    "explore": "探索"
   },
   "common": {
     "secure": "安全",
@@ -4053,5 +4056,42 @@
     "bothConfirm": "此更改需要双方确认。",
     "privacyNote": "双方的私密承受力和余额永不共享——只共享区间和已约定的贡献。",
     "noData": "在个人资料中设置共同每月贡献和共同项目即可查看。"
+  },
+  "today": {
+    "bankNow": {
+      "label": "此刻银行",
+      "available": "可用",
+      "cardDue": "信用卡待还——{amount}",
+      "clear": "本周没有需要处理的银行事项。"
+    },
+    "plans": {
+      "label": "你的计划",
+      "exploreAll": "探索全部"
+    },
+    "latestChange": {
+      "label": "最近变化"
+    },
+    "everything": "查看全部账户"
+  },
+  "life": {
+    "map": {
+      "label": "你的人生地图",
+      "intro": "你人生各部分所处的位置，以及它们如何相互牵动。点一个节点。"
+    },
+    "node": {
+      "income": "收入",
+      "safety": "安全",
+      "home": "住房",
+      "relationships": "关系",
+      "freedom": "自由",
+      "future": "未来",
+      "notYet": "尚未设置"
+    }
+  },
+  "guardianDecisions": {
+    "label": "需要你决定",
+    "clear": "目前没有需要你决定的事。",
+    "more": "还有 {count} 项即将到来。",
+    "review": "在探索中查看"
   }
 }
