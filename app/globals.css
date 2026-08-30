@@ -6768,3 +6768,48 @@ nextjs-portal {
 .exploreNoMatch { margin: 0; font-size: 0.82rem; color: var(--muted); }
 .fhSplit select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 0.8rem; margin: 0 4px; }
 .fhTaps .secondaryButton.is-on { border-color: var(--navy); background: var(--soft); }
+
+/* Home Horizon (Living Thread commit 2) */
+.hhScene { display: flex; flex-direction: column; gap: 12px; }
+.hhSurface { display: flex; flex-direction: column; gap: 10px; }
+.hhField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; touch-action: none; background: var(--surface); }
+.hhField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.hhSky { fill: rgba(20,36,58,0.04); }
+.hhGround { fill: rgba(20,36,58,0.12); }
+.hhHorizonLine { stroke: var(--navy-2); stroke-width: 1.5; }
+.hhRail { stroke: var(--success); stroke-width: 2; stroke-dasharray: 5 4; }
+.hhRail.is-crossed { stroke: var(--ocbc-red); stroke-dasharray: 2 3; }
+.hhRailLabel { font-size: 8px; fill: var(--muted); }
+.hhUpfront { fill: rgba(215,25,32,0.18); }
+.hhSafeShadow { opacity: 0.55; }
+.hhSafeLink { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 2; }
+.hhSafeHouse { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.hhKnot { cursor: grab; }
+.hhKnot:focus-visible { outline: none; }
+.hhStem { stroke: var(--navy-2); stroke-width: 1; }
+.hhRoof { fill: var(--navy); }
+.hhBody { fill: var(--navy); }
+.hhReadouts { display: flex; gap: 8px; }
+.hhReadout { flex: 1; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.hhReadout span { font-size: 0.7rem; color: var(--muted); }
+.hhReadout b { font-size: 1rem; }
+.hhReadout.is-worse b { color: var(--ocbc-red); }
+.hhRateWeather { border: 1px dashed var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; font-size: 0.78rem; }
+.hhRateWeather b { font-size: 0.9rem; }
+.hhRateWeather em { font-size: 0.68rem; color: var(--muted); font-style: normal; }
+.hhSafeReadout { margin: 0; font-size: 0.8rem; color: var(--navy-2); }
+.hhSteppers { display: flex; gap: 8px; }
+.hhSteppers .toStepper { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.hhStackBtn { align-self: flex-start; }
+.hhStackSheet { border: 1px solid var(--line); border-radius: 12px; background: var(--soft); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.hhStackSheet h4 { margin: 0; font-size: 0.86rem; }
+.hhStackSheet dl { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hhStackSheet dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 0.8rem; }
+.hhStackSheet dd { margin: 0; display: flex; flex-direction: column; align-items: flex-end; }
+.hhProv { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.hhProv-bank_confirmed { color: var(--success); }
+.hhProv-user_confirmed { color: var(--navy-2); }
+.hhProv-unknown { color: #b45309; }
+.hhStackTotal { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 700; }
+.hhAfterlife { margin: 0; font-size: 0.8rem; }
+@media (max-width: 360px) { .hhReadouts, .hhSteppers { flex-direction: column; } }

@@ -3562,7 +3562,13 @@
       "min_core_guests": "at least {value} core guests kept",
       "min_photo_quality": "photography quality not reduced",
       "no_balance_share": "personal balance not shared with a partner",
-      "no_guardian_auto_move": "Guardian must not move money automatically"
+      "no_guardian_auto_move": "Guardian must not move money automatically",
+      "minimum_emergency_months": "minimum emergency months",
+      "maximum_monthly_repayment": "maximum monthly repayment",
+      "minimum_renovation_reserve": "minimum renovation reserve",
+      "latest_purchase_month": "latest purchase month",
+      "no_partner_share": "no partner share",
+      "minimum_post_purchase_cash": "minimum cash left after buying"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -4538,7 +4544,8 @@
       "repaymentPath": "Repayment Path",
       "futureLifeTimeline": "Future Life",
       "needRetirement": "Retirement planner",
-      "profile": "Profile"
+      "profile": "Profile",
+      "homeHorizon": "Home Horizon"
     }
   },
   "guardianDecisions": {
@@ -4749,6 +4756,92 @@
       "wedding": "it's about the wedding plan",
       "home": "it's about a home deposit and timing",
       "emergency": "it's about your safety buffer"
+    }
+  },
+  "homeHorizon": {
+    "loading": "Loading your home plan…",
+    "title": "Home Horizon",
+    "subtitle": "Not how much you can borrow - the life you have left after you buy.",
+    "noPlan": "Confirm a home price and a target month to see your Horizon.",
+    "summaryLine": "Home · {price} · {month}",
+    "monthsAway": "{n} mo away",
+    "months": "{n} mo",
+    "estimateNote": "Fees and rates are Singapore reference estimates, not quotes or an approval. CPF and partner money are only counted once confirmed.",
+    "field": {
+      "label": "Home Horizon - drag the house: left/right for the month, up/down for the price",
+      "knot": "Home Knot: {price}, {month}",
+      "emergencyRail": "Emergency floor - {months} months"
+    },
+    "row": {
+      "upfront": "Upfront cash needed",
+      "monthly": "Monthly repayment",
+      "ready": "Deposit ready",
+      "rules": "TDSR/MSR/LTV rules"
+    },
+    "rules": {
+      "within": "Within the rules",
+      "over": "Over the {factor} ceiling"
+    },
+    "prov": {
+      "estimate": "reference estimate",
+      "amortization": "reducing-balance amortization",
+      "savingsPace": "your savings pace",
+      "rulesAsOf": "MAS/IRAS rules as of {date}",
+      "system_estimate": "estimate",
+      "user_confirmed": "you confirmed",
+      "bank_confirmed": "from your bank data",
+      "unknown": "not known"
+    },
+    "read": {
+      "buffer": "Emergency buffer after buying",
+      "breathing": "Monthly breathing room"
+    },
+    "rateWeather": {
+      "label": "If the {rate}% assumption moves",
+      "note": "a range from the assumption alone - not a forecast"
+    },
+    "safePrice": "Safe price for {month}: {price}",
+    "aboveSafe": "{amount} above the safe price",
+    "lowerPrice": "Lower the price",
+    "raisePrice": "Raise the price",
+    "earlier": "Earlier month",
+    "later": "Later month",
+    "openStack": "Open the upfront stack",
+    "stack": {
+      "title": "Upfront stack",
+      "downPayment": "Down payment",
+      "buyerStampDuty": "Buyer's stamp duty",
+      "additionalBSD": "Additional buyer's stamp duty",
+      "legalFees": "Legal fees",
+      "valuationFee": "Valuation",
+      "mortgageStamp": "Mortgage stamp",
+      "renovationReserve": "Renovation reserve",
+      "cpfApplied": "CPF applied",
+      "partnerApplied": "Partner contribution",
+      "total": "Upfront cash needed",
+      "unknown": "not set"
+    },
+    "afterlife": {
+      "title": "The life you have left",
+      "body": "After buying: {buffer} emergency buffer, {breathing}/mo breathing room. Your other goals stay as ghosts until you place any freed or added amount."
+    },
+    "mirror": {
+      "safePrice": "Match the safe price",
+      "wait12": "Wait 12 months",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "current_savings": "Current savings",
+      "cpf_available": "CPF available",
+      "partner_contribution": "Partner contribution",
+      "renovation_reserve": "Renovation reserve"
+    },
+    "tp": {
+      "belowFloor": "This purchase would drop your emergency buffer below your floor.",
+      "belowFloorWait": "waiting a few months, or a lower price, keeps the floor intact",
+      "overCeiling": "The loan exceeds the {factor} regulatory ceiling.",
+      "emergencyNearRail": "Your buffer after buying would be {months} months - close to your rail.",
+      "depositReady": "Your deposit is fully saved for this price and month."
     }
   }
 }

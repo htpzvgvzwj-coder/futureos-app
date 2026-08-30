@@ -8,6 +8,7 @@ import { formatEvent } from "../lib/change-ledger/format.js";
 import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
+import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
 import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
@@ -169,6 +170,7 @@ const screens = {
   CHANGE_LEDGER: "changeLedger",
   MEMORY_LENS: "memoryLens",
   FUTURE_FIELD: "futureField",
+  HOME_HORIZON: "homeHorizon",
   WEDDING_LIVING_PLAN: "weddingLivingPlan",
   REPAYMENT_PATH: "repaymentPath",
   FUTURE_LIFE_TIMELINE: "futureLifeTimeline",
@@ -3220,6 +3222,7 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.LOADING) return screens.MIRROR;
   if (activeScreen === screens.EXPLORE_CHAT) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
+  if (activeScreen === screens.HOME_HORIZON) return screens.MIRROR;
   if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
   if (activeScreen === screens.REPAYMENT_PATH) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_LIFE_TIMELINE) return screens.MIRROR;
@@ -3715,7 +3718,7 @@ function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
 
   const plans = [
     { id: "wedding", screen: screens.WEDDING_LIVING_PLAN, icon: HeartHandshake },
-    { id: "home", screen: screens.FUTURE_FIELD, icon: Building2 },
+    { id: "home", screen: screens.HOME_HORIZON, icon: Building2 },
     { id: "emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
   ];
 
@@ -4581,7 +4584,7 @@ function getLifeNodes(profile, healthScores, selectedGoalIds) {
   return [
     { id: "income", value: score("stability") ?? score("savings"), screen: screens.PROFILE },
     { id: "safety", value: score("emergency"), screen: screens.NEED_EMERGENCY },
-    { id: "home", value: selectedGoalIds.includes("home") ? score("savings") : null, screen: screens.FUTURE_FIELD },
+    { id: "home", value: selectedGoalIds.includes("home") ? score("savings") : null, screen: screens.HOME_HORIZON },
     { id: "relationships", value: selectedGoalIds.includes("family") || selectedGoalIds.includes("wedding") ? score("future") : null, screen: screens.FAMILY_CONSTELLATION },
     { id: "freedom", value: score("investment"), screen: screens.CAPITAL_PATHS },
     { id: "future", value: score("future"), screen: screens.FUTURE_LIFE_TIMELINE },
@@ -4601,7 +4604,7 @@ const LIFE_NODE_FIELDS = {
 const LIFE_NODE_RELATED = {
   income: [screens.PROFILE, screens.PERSONAL_ECONOMY],
   safety: [screens.NEED_EMERGENCY, screens.STRATEGIC_BALANCE],
-  home: [screens.FUTURE_FIELD, screens.NEED_HOME],
+  home: [screens.HOME_HORIZON, screens.NEED_HOME],
   relationships: [screens.FAMILY_CONSTELLATION, screens.WEDDING_LIVING_PLAN],
   freedom: [screens.CAPITAL_PATHS, screens.REPAYMENT_PATH],
   future: [screens.FUTURE_LIFE_TIMELINE, screens.NEED_RETIREMENT],
@@ -17595,6 +17598,7 @@ export default function App() {
     [screens.FUTURE_FIELD]: (
       <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
     ),
+    [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
     [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.REPAYMENT_PATH]: <RepaymentPath t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,

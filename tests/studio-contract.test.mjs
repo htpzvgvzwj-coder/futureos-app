@@ -129,11 +129,12 @@ test("every registered Studio declares all eleven contract slots (null allowed, 
   }
 });
 
-test("Home and Emergency honestly declare no native scene yet (Horizon / Runway not built)", () => {
-  assert.equal(getStudioContract("home").nativeScene, null);
+test("Emergency still declares no native scene (Runway not built); Home now has Home Horizon", () => {
   assert.equal(getStudioContract("emergency").nativeScene, null);
-  // the seven PR#11 scenes are wired
-  for (const d of ["loan", "retirement", "travel", "investment", "insurance", "family", "wedding"]) {
+  // Home Horizon landed in Living Thread commit 2
+  assert.equal(getStudioContract("home").nativeScene, "features/home/HomeHorizon");
+  assert.ok(getStudioContract("home").crossGoalProjector);
+  for (const d of ["loan", "retirement", "travel", "investment", "insurance", "family", "wedding", "home"]) {
     assert.ok(getStudioContract(d).nativeScene, `${d} has a native scene wired`);
   }
 });
@@ -143,5 +144,8 @@ test("wiredContractSlots reports only the non-null slots", () => {
   assert.ok(loan.includes("financeProjector") && loan.includes("crossGoalProjector") && loan.includes("turningPointRules"));
   assert.ok(!loan.includes("replayMapper"), "loan replayMapper is not built yet");
   const home = wiredContractSlots("home");
-  assert.ok(!home.includes("nativeScene") && !home.includes("crossGoalProjector"));
+  assert.ok(home.includes("nativeScene") && home.includes("crossGoalProjector") && home.includes("turningPointRules") && home.includes("provenanceRules"));
+  assert.ok(!home.includes("replayMapper"), "home ThreadMemoryScrubber mapping is commit 12");
+  const emergency = wiredContractSlots("emergency");
+  assert.ok(!emergency.includes("nativeScene"));
 });

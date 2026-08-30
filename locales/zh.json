@@ -3380,7 +3380,13 @@
       "min_core_guests": "至少保留 {value} 位核心宾客",
       "min_photo_quality": "不降低摄影质量",
       "no_balance_share": "不向伴侣共享个人余额",
-      "no_guardian_auto_move": "Guardian 不得自动转移资金"
+      "no_guardian_auto_move": "Guardian 不得自动转移资金",
+      "minimum_emergency_months": "最低应急月数",
+      "maximum_monthly_repayment": "每月还款上限",
+      "minimum_renovation_reserve": "最低装修储备",
+      "latest_purchase_month": "最晚购房月份",
+      "no_partner_share": "不使用伴侣出资",
+      "minimum_post_purchase_cash": "买房后最低现金留存"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4356,7 +4362,8 @@
       "repaymentPath": "还款路径",
       "futureLifeTimeline": "未来生活",
       "needRetirement": "退休规划",
-      "profile": "资料"
+      "profile": "资料",
+      "homeHorizon": "住房地平线"
     }
   },
   "guardianDecisions": {
@@ -4567,6 +4574,92 @@
       "wedding": "这关乎婚礼计划",
       "home": "这关乎购房首付与时间",
       "emergency": "这关乎你的安全缓冲"
+    }
+  },
+  "homeHorizon": {
+    "loading": "正在加载你的购房计划…",
+    "title": "住房地平线",
+    "subtitle": "不是你能借多少，而是买下之后，你还剩怎样的人生。",
+    "noPlan": "确认房价与目标月份，即可看到你的地平线。",
+    "summaryLine": "住房 · {price} · {month}",
+    "monthsAway": "还有 {n} 个月",
+    "months": "{n} 个月",
+    "estimateNote": "费用与利率为新加坡参考估算，不是报价或批核。公积金与伴侣资金只有在确认后才计入。",
+    "field": {
+      "label": "住房地平线——拖动房子：左右改月份，上下改房价",
+      "knot": "住房结点：{price}，{month}",
+      "emergencyRail": "应急下限——{months} 个月"
+    },
+    "row": {
+      "upfront": "所需首期现金",
+      "monthly": "每月还款",
+      "ready": "首付到位",
+      "rules": "TDSR/MSR/LTV 规则"
+    },
+    "rules": {
+      "within": "在规则之内",
+      "over": "超出 {factor} 上限"
+    },
+    "prov": {
+      "estimate": "参考估算",
+      "amortization": "递减余额摊还",
+      "savingsPace": "你的储蓄节奏",
+      "rulesAsOf": "MAS/IRAS 规则截至 {date}",
+      "system_estimate": "估算",
+      "user_confirmed": "你已确认",
+      "bank_confirmed": "来自银行数据",
+      "unknown": "未知"
+    },
+    "read": {
+      "buffer": "买房后的应急缓冲",
+      "breathing": "每月喘息空间"
+    },
+    "rateWeather": {
+      "label": "若 {rate}% 的假设变动",
+      "note": "仅由假设推出的区间——不是预测"
+    },
+    "safePrice": "{month} 的安全房价：{price}",
+    "aboveSafe": "高于安全房价 {amount}",
+    "lowerPrice": "降低房价",
+    "raisePrice": "提高房价",
+    "earlier": "更早的月份",
+    "later": "更晚的月份",
+    "openStack": "打开首期明细",
+    "stack": {
+      "title": "首期明细",
+      "downPayment": "首付",
+      "buyerStampDuty": "买方印花税",
+      "additionalBSD": "额外买方印花税",
+      "legalFees": "律师费",
+      "valuationFee": "估价费",
+      "mortgageStamp": "按揭印花税",
+      "renovationReserve": "装修储备",
+      "cpfApplied": "已计入的公积金",
+      "partnerApplied": "伴侣出资",
+      "total": "所需首期现金",
+      "unknown": "未设置"
+    },
+    "afterlife": {
+      "title": "你还剩下的人生",
+      "body": "买房后：应急缓冲 {buffer}，每月喘息空间 {breathing}。在你安放任何释放或新增金额之前，其他目标都保持为虚影。"
+    },
+    "mirror": {
+      "safePrice": "对齐安全房价",
+      "wait12": "等待 12 个月",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "current_savings": "当前储蓄",
+      "cpf_available": "可用公积金",
+      "partner_contribution": "伴侣出资",
+      "renovation_reserve": "装修储备"
+    },
+    "tp": {
+      "belowFloor": "这次购房会让你的应急缓冲跌破下限。",
+      "belowFloorWait": "多等几个月，或选择更低的房价，能保住下限",
+      "overCeiling": "贷款超过 {factor} 监管上限。",
+      "emergencyNearRail": "买房后你的缓冲约为 {months} 个月——接近你的边界。",
+      "depositReady": "按此房价与月份，你的首付已全部存够。"
     }
   }
 }

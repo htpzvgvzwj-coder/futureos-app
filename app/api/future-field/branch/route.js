@@ -12,7 +12,19 @@ import { validateAllocation } from "../../../../lib/living-plan/allocation.js";
 export const runtime = "nodejs";
 
 const ALLOWED_OVERRIDES = {
-  home: new Set(["estimated_price", "target_complete_month", "monthly_contribution", "property_type", "down_payment_needed"]),
+  home: new Set([
+    "estimated_price",
+    "target_complete_month",
+    "monthly_contribution",
+    "property_type",
+    "down_payment_needed",
+    "down_payment_ratio",
+    "loan_tenure",
+    "rate_assumption",
+    "renovation_reserve",
+    "keep_emergency_months",
+    "partner_contribution",
+  ]),
   wedding: new Set([
     "wedding_date",
     "guest_count",

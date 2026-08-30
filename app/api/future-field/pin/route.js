@@ -15,6 +15,13 @@ const PIN_KINDS = {
   min_photo_quality: "flag",
   no_balance_share: "flag",
   no_guardian_auto_move: "flag",
+  // Home Horizon domain pins (Living Thread commit 2).
+  minimum_emergency_months: "gte",
+  maximum_monthly_repayment: "lte",
+  minimum_renovation_reserve: "gte",
+  latest_purchase_month: "lte", // value + metric are YYYYMM integers
+  no_partner_share: "flag",
+  minimum_post_purchase_cash: "gte",
 };
 
 export async function GET(request) {
