@@ -990,7 +990,8 @@
       },
       "body": "{confirmed} of {total} key profile fields are customer-confirmed rather than assumed defaults, combined with Guardian's current reputation.",
       "method": "Calculated from how much of the profile is customer-confirmed versus still an assumed default, weighted against Guardian Reputation Score."
-    }
+    },
+    "trustControls": "Trust, history & controls"
   },
   "profile": {
     "age": "Age",
@@ -4168,7 +4169,9 @@
       "overcommitWait": "waiting keeps the choice open, but the debt runs longer",
       "halfIncome": "This puts {pct}% of your income into repayments.",
       "halfIncomeWait": "a lighter pace now keeps room for a shock later"
-    }
+    },
+    "summaryLine": "Loan · {amount} · debt-free {debtFree}",
+    "compare": "Compare paths"
   },
   "futureLifeTimeline": {
     "title": "Future Life Timeline",
@@ -4233,7 +4236,11 @@
     "echo": {
       "protectNearTerm": "You keep pulling room back to the near term. Pin a top-up ceiling instead of deciding it each time?",
       "protectNearTermWait": "without a Pin this comes up again every visit"
-    }
+    },
+    "summaryLine": "Retirement · {gap} gap · {topup} top-up",
+    "dayStep": "{n} of {of}",
+    "back": "Back",
+    "skip": "Skip"
   },
   "tripOrbit": {
     "title": "Trip Orbit",
@@ -4265,7 +4272,8 @@
       "nights": "Nights",
       "comfort": "Comfort",
       "date": "Date",
-      "budget": "Budget"
+      "budget": "Budget",
+      "destination": "Destination"
     },
     "fewer": "Fewer",
     "more": "More",
@@ -4287,7 +4295,8 @@
       "keepExperience": "Keep the experience",
       "shiftWindow": "Shift the window",
       "preserveCommitments": "Preserve other commitments"
-    }
+    },
+    "summaryLine": "Trip · {cost} · {month}"
   },
   "capitalPaths": {
     "title": "Capital Paths",
@@ -4341,7 +4350,8 @@
     "echo": {
       "liquidity": "You keep most capital liquid. Pin a liquidity floor instead of trimming the long-term leg?",
       "liquidityWait": "without a Pin the long-term leg keeps getting squeezed"
-    }
+    },
+    "summaryLine": "Capital · {pool} · {invest} invested"
   },
   "protectionEnvelope": {
     "title": "Protection Envelope",
@@ -4387,7 +4397,8 @@
     "turningPoint": {
       "newResponsibility": "You've added a new responsibility. Which cover needs re-confirming?",
       "newResponsibilityWait": "an uncovered new liability is the gap that bites hardest"
-    }
+    },
+    "summaryLine": "Protection · {premium} · {gaps} gaps, {unknown} unknown"
   },
   "familyConstellation": {
     "title": "Family Constellation",
@@ -4450,7 +4461,8 @@
     "partnerBConfirms": "Partner B confirms",
     "splitRatio": "Split (Partner A / Partner B)",
     "bothConfirmedOk": "Both confirmed — this can become a shared commitment.",
-    "needsBoth": "Needs both partners before anything is committed or applied elsewhere."
+    "needsBoth": "Needs both partners before anything is committed or applied elsewhere.",
+    "summaryLine": "Family · {shared} shared · {items} goals"
   },
   "today": {
     "bankNow": {
@@ -4491,7 +4503,11 @@
       "none": "—",
       "recentChanges": "Last changes",
       "noChanges": "No recorded changes yet.",
-      "memoryLens": "Open Memory Lens"
+      "memoryLens": "Open Memory Lens",
+      "dataUsed": "Data used",
+      "goalsAffected": "Goals affected",
+      "nextAction": "Open this area",
+      "noNodeChanges": "No changes recorded for this part yet."
     },
     "field": {
       "statedMonthlyIncome": "Monthly income",
@@ -4543,7 +4559,9 @@
     "reality": {
       "title": "What the system knows",
       "hint": "Move something above to see what it changes.",
-      "unknownHead": "Not known — shown as unknown, never counted as a gap:"
+      "unknownHead": "Not known — shown as unknown, never counted as a gap:",
+      "details": "Details",
+      "evidenceTitle": "What the system knows"
     },
     "possible": {
       "title": "What could change",
@@ -4564,7 +4582,9 @@
       "noAutoMove": "Freed room is never routed automatically.",
       "fromFlexible": "From flexible cashflow",
       "slowAnother": "Slow {goal}",
-      "anotherGoal": "another goal"
+      "anotherGoal": "another goal",
+      "accelerateWhich": "Send it toward",
+      "pickTarget": "Pick where this goes - nothing moves until you do."
     },
     "turningPoint": {
       "acknowledge": "I've seen this",
@@ -4585,7 +4605,9 @@
       "confirm": "Confirm and seal",
       "notYet": "Not yet",
       "notSealable": "This can't be sealed yet — the plan doesn't cover its core cost.",
-      "sealError": "Couldn't seal that. Try again."
+      "sealError": "Couldn't seal that. Try again.",
+      "seePreview": "See what you'd be committing to",
+      "sealedHead": "Committed"
     },
     "guardian": {
       "title": "What Guardian is protecting",
@@ -4596,7 +4618,9 @@
       "neverMoves": "Never moves money — there is no bank-transfer integration",
       "wouldNeedChoice": "A modest shock would need a choice from you — worth a plan B.",
       "rehearsedClear": "Rehearsed against a modest shock — your commitments still hold.",
-      "rehearsing": "Rehearsing a modest shock…"
+      "rehearsing": "Rehearsing a modest shock…",
+      "stressTest": "Stress-test this plan",
+      "stressError": "Couldn't run that - try again."
     },
     "memory": {
       "title": "Why today looks like this",
@@ -4610,7 +4634,8 @@
         "estimate": "Estimate",
         "inference": "Inference",
         "unknown": "Unknown"
-      }
+      },
+      "drawerTitle": "History · why is this like this?"
     },
     "promiseWeight": {
       "calm": "This fits alongside your other commitments.",
@@ -4672,6 +4697,25 @@
       "protection": "Protection"
     },
     "also": "Also",
-    "talkItThrough": "Talk it through instead"
+    "talkItThrough": "Talk it through instead",
+    "continue": "Continue your active future",
+    "pick": "Choose one…",
+    "goIntent": "Go",
+    "allAreas": "All life areas",
+    "intent": {
+      "debt": "Pay off debt faster",
+      "home": "Buy a home",
+      "retire": "Retire the way I want",
+      "trip": "Take a trip",
+      "grow": "Grow my savings",
+      "protect": "Protect my income or family",
+      "partner": "Plan with my partner",
+      "wedding": "Get married",
+      "safety": "Build a safety buffer"
+    },
+    "tension": {
+      "tightening": "Your commitments are tightening this month.",
+      "needs_a_decision": "A commitment needs a decision from you."
+    }
   }
 }

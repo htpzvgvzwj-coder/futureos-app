@@ -944,7 +944,8 @@
       },
       "body": "{total} 项关键资料字段中有 {confirmed} 项已由客户确认,而非沿用假设默认值,并结合 Guardian 目前的信誉计算得出。",
       "method": "根据资料中有多少是客户确认的(而非仍为假设默认值)计算得出,并结合 Guardian 信誉评分加权。"
-    }
+    },
+    "trustControls": "信任、历史与控制"
   },
   "profile": {
     "combinedIncome": "合计月收入",
@@ -3986,7 +3987,9 @@
       "overcommitWait": "等待可保留选择权，但债务会拖得更久",
       "halfIncome": "这会把收入的 {pct}% 投入还款。",
       "halfIncomeWait": "现在放缓一点，能为冲击留出空间"
-    }
+    },
+    "summaryLine": "贷款 · {amount} · {debtFree} 还清",
+    "compare": "比较路径"
   },
   "futureLifeTimeline": {
     "title": "未来人生时间线",
@@ -4051,7 +4054,11 @@
     "echo": {
       "protectNearTerm": "你一再把空间拉回近期。要不要用一个 Pin 固定补充上限，而不是每次都重新决定？",
       "protectNearTermWait": "没有 Pin，这个问题每次都会再出现"
-    }
+    },
+    "summaryLine": "退休 · 缺口 {gap} · 补充 {topup}",
+    "dayStep": "{n} / {of}",
+    "back": "返回",
+    "skip": "跳过"
   },
   "tripOrbit": {
     "title": "旅程轨道",
@@ -4083,7 +4090,8 @@
       "nights": "晚数",
       "comfort": "舒适度",
       "date": "日期",
-      "budget": "预算"
+      "budget": "预算",
+      "destination": "目的地"
     },
     "fewer": "减少",
     "more": "增加",
@@ -4105,7 +4113,8 @@
       "keepExperience": "保留体验",
       "shiftWindow": "调整窗口",
       "preserveCommitments": "保住其他承诺"
-    }
+    },
+    "summaryLine": "旅行 · {cost} · {month}"
   },
   "capitalPaths": {
     "title": "资本路径",
@@ -4159,7 +4168,8 @@
     "echo": {
       "liquidity": "你把大部分资本保持流动。要不要用 Pin 固定一个流动性下限，而不是压缩长期部分？",
       "liquidityWait": "没有 Pin，长期部分会不断被挤压"
-    }
+    },
+    "summaryLine": "资本 · {pool} · 已投资 {invest}"
   },
   "protectionEnvelope": {
     "title": "保障边界",
@@ -4205,7 +4215,8 @@
     "turningPoint": {
       "newResponsibility": "你新增了一项责任。哪一项保障需要重新确认？",
       "newResponsibilityWait": "未被保障的新负债，往往是最伤的缺口"
-    }
+    },
+    "summaryLine": "保障 · {premium} · {gaps} 个缺口，{unknown} 个未知"
   },
   "familyConstellation": {
     "title": "家庭星座",
@@ -4268,7 +4279,8 @@
     "partnerBConfirms": "伴侣 B 确认",
     "splitRatio": "分摊（伴侣 A / 伴侣 B）",
     "bothConfirmedOk": "双方已确认——这可以成为一项共同承诺。",
-    "needsBoth": "在任何内容被确认或应用到别处之前，都需要双方同意。"
+    "needsBoth": "在任何内容被确认或应用到别处之前，都需要双方同意。",
+    "summaryLine": "家庭 · 共同 {shared} · {items} 个目标"
   },
   "today": {
     "bankNow": {
@@ -4309,7 +4321,11 @@
       "none": "—",
       "recentChanges": "最近的变化",
       "noChanges": "暂无记录的变化。",
-      "memoryLens": "打开 Memory Lens"
+      "memoryLens": "打开 Memory Lens",
+      "dataUsed": "使用的数据",
+      "goalsAffected": "受影响的目标",
+      "nextAction": "打开这个领域",
+      "noNodeChanges": "这一部分暂无记录的变化。"
     },
     "field": {
       "statedMonthlyIncome": "月收入",
@@ -4361,7 +4377,9 @@
     "reality": {
       "title": "系统已知",
       "hint": "在上方移动某项，看看它会改变什么。",
-      "unknownHead": "未知——显示为未知，绝不计入缺口："
+      "unknownHead": "未知——显示为未知，绝不计入缺口：",
+      "details": "详情",
+      "evidenceTitle": "系统已知"
     },
     "possible": {
       "title": "可能的变化",
@@ -4382,7 +4400,9 @@
       "noAutoMove": "释放的资源绝不自动分配。",
       "fromFlexible": "来自灵活现金流",
       "slowAnother": "放慢{goal}",
-      "anotherGoal": "另一个目标"
+      "anotherGoal": "另一个目标",
+      "accelerateWhich": "把它投向",
+      "pickTarget": "选择去向——在你选择前不会有任何变动。"
     },
     "turningPoint": {
       "acknowledge": "我已了解",
@@ -4403,7 +4423,9 @@
       "confirm": "确认并封存",
       "notYet": "暂不",
       "notSealable": "暂时无法封存——计划未覆盖其核心成本。",
-      "sealError": "封存失败，请重试。"
+      "sealError": "封存失败，请重试。",
+      "seePreview": "查看你将要确认的内容",
+      "sealedHead": "已确认"
     },
     "guardian": {
       "title": "守护者正在守护的",
@@ -4414,7 +4436,9 @@
       "neverMoves": "绝不划转资金——没有银行转账集成",
       "wouldNeedChoice": "一次中等冲击就需要你做选择——值得准备 B 计划。",
       "rehearsedClear": "已对中等冲击预演——你的承诺仍然成立。",
-      "rehearsing": "正在预演中等冲击……"
+      "rehearsing": "正在预演中等冲击……",
+      "stressTest": "压力测试这个计划",
+      "stressError": "无法运行，请重试。"
     },
     "memory": {
       "title": "今天为何如此",
@@ -4428,7 +4452,8 @@
         "estimate": "估算",
         "inference": "推断",
         "unknown": "未知"
-      }
+      },
+      "drawerTitle": "历史 · 为什么会是这样？"
     },
     "promiseWeight": {
       "calm": "这能与你的其他承诺并存。",
@@ -4490,6 +4515,25 @@
       "protection": "保障"
     },
     "also": "还有",
-    "talkItThrough": "改为聊一聊"
+    "talkItThrough": "改为聊一聊",
+    "continue": "继续你正在进行的未来",
+    "pick": "选择一项…",
+    "goIntent": "前往",
+    "allAreas": "所有人生领域",
+    "intent": {
+      "debt": "更快还清债务",
+      "home": "买房",
+      "retire": "按我想要的方式退休",
+      "trip": "去旅行",
+      "grow": "增加储蓄",
+      "protect": "保障我的收入或家庭",
+      "partner": "和伴侣一起规划",
+      "wedding": "结婚",
+      "safety": "建立安全缓冲"
+    },
+    "tension": {
+      "tightening": "本月你的承诺正在收紧。",
+      "needs_a_decision": "有一项承诺需要你做决定。"
+    }
   }
 }

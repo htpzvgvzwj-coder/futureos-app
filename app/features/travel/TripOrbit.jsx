@@ -9,7 +9,7 @@
 // Future the customer places. Guardian here only ever watches payment
 // windows; it never books anything.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { computeTravelPlanFinance } from "../../../lib/travel/plan-finance.js";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
@@ -71,6 +71,7 @@ function shiftMonth(m, by) {
 
 function TripOrbitInner({ t, setActiveScreen }) {
   const s = useLivingScene();
+  const [openNode, setOpenNode] = useState(null);
   const reality = s.realityData;
   const feas = s.reality?.feasibility ?? null;
 
@@ -107,9 +108,9 @@ function TripOrbitInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "emergency" }, { id: "retirement" }]}
+        realitySummary={t("tripOrbit.summaryLine", { cost: sgd(feas.computedCoreTotal), month: reality.trip_month || "—" })}
         sealMonthlyAmount={requiredMonthly || monthly}
-        sealDisabled={proj ? proj.sealableAfter === false : feas.sealable === false}
         formatSelf={(v) => sgd(v)}
         realityRows={[
           { id: "shape", label: t("tripOrbit.reality.shape"), value: t("tripOrbit.reality.shapeValue", { people: reality.travellers, nights: reality.nights }), provenance: t("tripOrbit.reality.fromPlan") },
@@ -119,75 +120,78 @@ function TripOrbitInner({ t, setActiveScreen }) {
         realityNote={t("tripOrbit.estimateNote")}
       >
         <div className="toScene">
-          <div className="toOrbit">
-            <div className="toCentre">
-              <span>{t("tripOrbit.window")}</span>
-              <b>{sgd(planTotal)}</b>
-              <em>{perTraveller ? t("tripOrbit.perTraveller", { amount: sgd(perTraveller) }) : ""}</em>
-            </div>
-            <div className="toNode toNode-people">
-              <span>{t("tripOrbit.node.people")}</span>
-              <div className="toStepper">
-                <button type="button" onClick={() => set("travellers", Math.max(1, Number(m.travellers) - 1))} aria-label={t("tripOrbit.fewer")}>−</button>
-                <b>{m.travellers}</b>
-                <button type="button" onClick={() => set("travellers", Number(m.travellers) + 1)} aria-label={t("tripOrbit.more")}>+</button>
-              </div>
-            </div>
-            <div className="toNode toNode-nights">
-              <span>{t("tripOrbit.node.nights")}</span>
-              <div className="toStepper">
-                <button type="button" onClick={() => set("nights", Math.max(1, Number(m.nights) - 1))} aria-label={t("tripOrbit.fewer")}>−</button>
-                <b>{m.nights}</b>
-                <button type="button" onClick={() => set("nights", Number(m.nights) + 1)} aria-label={t("tripOrbit.more")}>+</button>
-              </div>
-            </div>
-            <div className="toNode toNode-comfort">
-              <span>{t("tripOrbit.node.comfort")}</span>
-              <div className="toSeg">
-                {COMFORT.map((c) => (
-                  <button key={c} type="button" className={m.comfort_tier === c ? "is-on" : ""} onClick={() => set("comfort_tier", c)}>
-                    {t(`tripOrbit.comfort.${c}`)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="toNode toNode-date">
-              <span>{t("tripOrbit.node.date")}</span>
-              <div className="toStepper">
-                <button type="button" onClick={() => set("trip_month", shiftMonth(m.trip_month, -1))} aria-label={t("tripOrbit.earlier")}>−</button>
-                <b>{m.trip_month || "—"}</b>
-                <button type="button" onClick={() => set("trip_month", shiftMonth(m.trip_month, 1))} aria-label={t("tripOrbit.later")}>+</button>
-              </div>
-            </div>
+          <div className="toCentre">
+            <span>{t("tripOrbit.window")}</span>
+            <b>{sgd(planTotal)}</b>
+            <em>{perTraveller ? t("tripOrbit.perTraveller", { amount: sgd(perTraveller) }) : ""}</em>
           </div>
 
-          <div className="toDest">
-            {DEST.map((d) => (
-              <button key={d} type="button" className={m.destination_type === d ? "is-on" : ""} onClick={() => set("destination_type", d)}>
-                {t(`tripOrbit.dest.${d}`)}
+          <div className="toNodeRing">
+            {["people", "nights", "comfort", "date", "destination", "budget"].map((nodeId) => (
+              <button
+                key={nodeId}
+                type="button"
+                className={`toNodeChip ${openNode === nodeId ? "is-open" : ""}`}
+                aria-expanded={openNode === nodeId}
+                onClick={() => setOpenNode(openNode === nodeId ? null : nodeId)}
+              >
+                <span>{t(`tripOrbit.node.${nodeId}`)}</span>
+                <b>
+                  {nodeId === "people" ? m.travellers
+                    : nodeId === "nights" ? m.nights
+                    : nodeId === "comfort" ? t(`tripOrbit.comfort.${m.comfort_tier || "mid"}`)
+                    : nodeId === "date" ? (m.trip_month || "—")
+                    : nodeId === "destination" ? t(`tripOrbit.dest.${m.destination_type || "regional"}`)
+                    : sgd(budgetCeil)}
+                </b>
               </button>
             ))}
           </div>
 
-          <label className="toSlider">
-            <span>{t("tripOrbit.node.budget")}</span>
-            <DragTrack min={feas.computedCoreTotal} max={Math.max(feas.computedCoreTotal * 2, budgetCeil)} step={100} value={budgetCeil} onChange={(v) => set("total_budget", v)} ariaLabel={t("tripOrbit.node.budget")} />
-            <b>{sgd(budgetCeil)}</b>
-          </label>
+          {openNode === "people" ? (
+            <div className="toNodeCtl toStepper">
+              <button type="button" onClick={() => set("travellers", Math.max(1, Number(m.travellers) - 1))} aria-label={t("tripOrbit.fewer")}>−</button>
+              <b>{m.travellers}</b>
+              <button type="button" onClick={() => set("travellers", Number(m.travellers) + 1)} aria-label={t("tripOrbit.more")}>+</button>
+            </div>
+          ) : null}
+          {openNode === "nights" ? (
+            <div className="toNodeCtl toStepper">
+              <button type="button" onClick={() => set("nights", Math.max(1, Number(m.nights) - 1))} aria-label={t("tripOrbit.fewer")}>−</button>
+              <b>{m.nights}</b>
+              <button type="button" onClick={() => set("nights", Number(m.nights) + 1)} aria-label={t("tripOrbit.more")}>+</button>
+            </div>
+          ) : null}
+          {openNode === "comfort" ? (
+            <div className="toNodeCtl toSeg">
+              {COMFORT.map((c) => (
+                <button key={c} type="button" className={m.comfort_tier === c ? "is-on" : ""} onClick={() => set("comfort_tier", c)}>{t(`tripOrbit.comfort.${c}`)}</button>
+              ))}
+            </div>
+          ) : null}
+          {openNode === "date" ? (
+            <div className="toNodeCtl toStepper">
+              <button type="button" onClick={() => set("trip_month", shiftMonth(m.trip_month, -1))} aria-label={t("tripOrbit.earlier")}>−</button>
+              <b>{m.trip_month || "—"}</b>
+              <button type="button" onClick={() => set("trip_month", shiftMonth(m.trip_month, 1))} aria-label={t("tripOrbit.later")}>+</button>
+            </div>
+          ) : null}
+          {openNode === "destination" ? (
+            <div className="toNodeCtl toSeg">
+              {DEST.map((d) => (
+                <button key={d} type="button" className={m.destination_type === d ? "is-on" : ""} onClick={() => set("destination_type", d)}>{t(`tripOrbit.dest.${d}`)}</button>
+              ))}
+            </div>
+          ) : null}
+          {openNode === "budget" ? (
+            <label className="toNodeCtl toSlider">
+              <span>{t("tripOrbit.node.budget")}</span>
+              <DragTrack min={feas.computedCoreTotal} max={Math.max(feas.computedCoreTotal * 2, budgetCeil)} step={100} value={budgetCeil} onChange={(v) => set("total_budget", v)} ariaLabel={t("tripOrbit.node.budget")} />
+              <b>{sgd(budgetCeil)}</b>
+            </label>
+          ) : null}
           {budgetGap > 0 ? <p className="wlpWarn">{t("tripOrbit.belowCost", { amount: sgd(budgetGap) })}</p> : null}
-
-          <label className="toSlider">
-            <span>{t("tripOrbit.monthly")}</span>
-            <DragTrack min={0} max={Math.max(requiredMonthly ? requiredMonthly * 2 : 1000, monthly * 2, 500)} step={10} value={monthly} onChange={(v) => set("monthly_contribution", v)} ariaLabel={t("tripOrbit.monthly")} />
-            <b>{sgd(monthly)}/mo</b>
-          </label>
           {requiredMonthly ? <p className="wlpMuted">{t("tripOrbit.needMonthly", { amount: sgd(requiredMonthly) })}</p> : null}
-
-          <div className="rpMirror">
-            <button type="button" onClick={() => s.resetBranch()}>{t("tripOrbit.mirror.keepExperience")}</button>
-            <button type="button" onClick={() => set("trip_month", shiftMonth(reality.trip_month, 6))}>{t("tripOrbit.mirror.shiftWindow")}</button>
-            <button type="button" onClick={() => { set("comfort_tier", "budget"); set("nights", Math.max(1, Number(reality.nights) - 2)); }}>{t("tripOrbit.mirror.preserveCommitments")}</button>
-          </div>
         </div>
       </SceneShell>
     </section>

@@ -12,7 +12,7 @@
 // -> Future Life on one draggable axis: pulling monthly room toward the
 // near term compresses Future Life; pushing it forward releases it.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
 import { DragTrack } from "../../components/living-scene/DragTrack.jsx";
@@ -107,20 +107,10 @@ export function projectFutureLife({ branchVars, reality }) {
   };
 }
 
-function retirementEcho({ branchVars, reality }) {
-  // Decision Echo: the customer keeps protecting near-term room (contribution
-  // pinned low). Offer to make it a Pin rather than fighting it each visit.
-  const base = Number(reality.monthly_contribution) || 0;
-  const c = Number(branchVars.monthly_contribution ?? base);
-  if (branchVars.monthly_contribution != null && c <= Math.max(0, base * 0.4)) {
-    return {
-      id: "ret-protect-nearterm",
-      whyNowKey: "futureLifeTimeline.echo.protectNearTerm",
-      ifYouWaitKey: "futureLifeTimeline.echo.protectNearTermWait",
-    };
-  }
-  return null;
-}
+// NOTE: a single low-contribution slider position is NOT a Decision Echo -
+// it is one current trade-off. A real Echo needs >=3 similar user-confirmed
+// Ledger actions and is surfaced from /api/living-plan/status, not from
+// this scene. So this scene declares no synthetic turning point.
 
 function yr(v) {
   return v == null ? "—" : `${v}y`;
@@ -128,6 +118,7 @@ function yr(v) {
 
 function FutureLifeInner({ t, setActiveScreen }) {
   const s = useLivingScene();
+  const [dayStep, setDayStep] = useState(0);
   const reality = s.realityData;
   const feas = s.reality?.feasibility ?? null;
 
@@ -154,6 +145,7 @@ function FutureLifeInner({ t, setActiveScreen }) {
     const has = (choices.keep ?? []).includes(id);
     s.setVar("futureDay", { ...choices, keep: has ? choices.keep.filter((k) => k !== id) : [...(choices.keep ?? []), id] });
   };
+  const DAY_STEPS = ["place", "time", "care", "radius", "keep"];
 
   const baseContribution = Number(reality.monthly_contribution) || 0;
   const contribution = Math.max(0, Math.round(Number(s.branchVars.monthly_contribution ?? baseContribution)));
@@ -173,7 +165,8 @@ function FutureLifeInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "emergency" }]}
+        realitySummary={t("futureLifeTimeline.summaryLine", { gap: `${sgd(feas.gapMonthly || 0)}/mo`, topup: `${sgd(baseContribution)}/mo` })}
         sealMonthlyAmount={contribution}
         formatSelf={yr}
         realityRows={[
@@ -186,29 +179,41 @@ function FutureLifeInner({ t, setActiveScreen }) {
         <div className="flScene">
           <div className="flDay">
             <h3>{t("futureLifeTimeline.futureDay")}</h3>
-            {["place", "time", "care", "radius"].map((group) => (
-              <div key={group} className="flDayGroup">
-                <span className="flDayLabel">{t(`futureLifeTimeline.day.${group}`)}</span>
-                <div className="flDayOpts">
-                  {FUTURE_DAY[group].map((o) => (
-                    <button key={o.id} type="button" className={choices[group] === o.id ? "is-on" : ""} onClick={() => setChoice(group, o.id)}>
-                      {t(`futureLifeTimeline.day.${group}.${o.id}`)}
-                      <em>{o.delta === 0 ? "±0" : o.delta > 0 ? `+${sgd(o.delta)}` : `−${sgd(-o.delta)}`}</em>
-                    </button>
-                  ))}
+            <p className="flDayProgress">{t("futureLifeTimeline.dayStep", { n: Math.min(dayStep + 1, DAY_STEPS.length), of: DAY_STEPS.length })}</p>
+            {(() => {
+              const group = DAY_STEPS[Math.min(dayStep, DAY_STEPS.length - 1)];
+              if (group === "keep") {
+                return (
+                  <div className="flDayGroup">
+                    <span className="flDayLabel">{t("futureLifeTimeline.day.keep")}</span>
+                    <div className="flDayOpts">
+                      {KEEP_DAILY.map((o) => (
+                        <button key={o.id} type="button" className={(choices.keep ?? []).includes(o.id) ? "is-on" : ""} onClick={() => toggleKeep(o.id)}>
+                          {t(`futureLifeTimeline.day.keep.${o.id}`)}
+                          <em>+{sgd(o.delta)}</em>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div className="flDayGroup">
+                  <span className="flDayLabel">{t(`futureLifeTimeline.day.${group}`)}</span>
+                  <div className="flDayOpts">
+                    {FUTURE_DAY[group].map((o) => (
+                      <button key={o.id} type="button" className={choices[group] === o.id ? "is-on" : ""} onClick={() => { setChoice(group, o.id); if (dayStep < DAY_STEPS.length - 1) setDayStep(dayStep + 1); }}>
+                        {t(`futureLifeTimeline.day.${group}.${o.id}`)}
+                        <em>{o.delta === 0 ? "±0" : o.delta > 0 ? `+${sgd(o.delta)}` : `−${sgd(-o.delta)}`}</em>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-            <div className="flDayGroup">
-              <span className="flDayLabel">{t("futureLifeTimeline.day.keep")}</span>
-              <div className="flDayOpts">
-                {KEEP_DAILY.map((o) => (
-                  <button key={o.id} type="button" className={(choices.keep ?? []).includes(o.id) ? "is-on" : ""} onClick={() => toggleKeep(o.id)}>
-                    {t(`futureLifeTimeline.day.keep.${o.id}`)}
-                    <em>+{sgd(o.delta)}</em>
-                  </button>
-                ))}
-              </div>
+              );
+            })()}
+            <div className="flDayNav">
+              {dayStep > 0 ? <button type="button" className="lsGhostBtn" onClick={() => setDayStep(dayStep - 1)}>{t("futureLifeTimeline.back")}</button> : null}
+              {dayStep < DAY_STEPS.length - 1 ? <button type="button" className="lsGhostBtn" onClick={() => setDayStep(dayStep + 1)}>{t("futureLifeTimeline.skip")}</button> : null}
             </div>
             <p className="flAssumption">{t("futureLifeTimeline.assumption", { target: `${sgd(targetAfter)}/mo`, gap: `${sgd(gapAfter)}/mo` })}</p>
           </div>
@@ -243,7 +248,7 @@ function FutureLifeInner({ t, setActiveScreen }) {
 
 export function FutureLifeTimeline({ t, setActiveScreen }) {
   return (
-    <LivingSceneProvider domain="retirement" projectFn={projectFutureLife} turningPointFor={retirementEcho}>
+    <LivingSceneProvider domain="retirement" projectFn={projectFutureLife} turningPointFor={null}>
       <FutureLifeInner t={t} setActiveScreen={setActiveScreen} />
     </LivingSceneProvider>
   );

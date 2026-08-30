@@ -120,7 +120,8 @@ function ProtectionEnvelopeInner({ t, setActiveScreen }) {
       <SceneShell
         t={t}
         setActiveScreen={setActiveScreen}
-        goalLabel={t("livingScene.node.home")}
+        goalOptions={[{ id: "home" }, { id: "emergency" }]}
+        realitySummary={t("protectionEnvelope.summaryLine", { premium: `${sgd(premBefore)}/mo`, gaps: feas.knownGapCount, unknown: feas.unknownCount })}
         sealMonthlyAmount={Math.max(premAfter, premBefore)}
         formatSelf={(v) => sgd(v)}
         realityRows={[
@@ -178,12 +179,14 @@ function ProtectionEnvelopeInner({ t, setActiveScreen }) {
             </div>
           ) : null}
 
-          <label className="peSlider">
-            <span>{t("protectionEnvelope.totalPremium")}</span>
-            <DragTrack min={0} max={Math.max(premBefore * 3, premAfter * 1.5, 300)} step={5} value={Math.round(premAfter)} onChange={(v) => s.setVar("monthly_premium_now", v)} ariaLabel={t("protectionEnvelope.totalPremium")} />
-            <b>{sgd(premAfter)}/mo</b>
-          </label>
-          {s.projection?.impliedExtra > 0 ? <p className="wlpMuted">{t("protectionEnvelope.impliedExtra", { amount: sgd(s.projection.impliedExtra) })}</p> : null}
+          {open ? (
+            <label className="peSlider">
+              <span>{t("protectionEnvelope.totalPremium")}</span>
+              <DragTrack min={0} max={Math.max(premBefore * 3, premAfter * 1.5, 300)} step={5} value={Math.round(premAfter)} onChange={(v) => s.setVar("monthly_premium_now", v)} ariaLabel={t("protectionEnvelope.totalPremium")} />
+              <b>{sgd(premAfter)}/mo</b>
+            </label>
+          ) : null}
+          {open && s.projection?.impliedExtra > 0 ? <p className="wlpMuted">{t("protectionEnvelope.impliedExtra", { amount: sgd(s.projection.impliedExtra) })}</p> : null}
           <p className="wlpProvenance">{t("protectionEnvelope.noSaleNote")}</p>
         </div>
       </SceneShell>
