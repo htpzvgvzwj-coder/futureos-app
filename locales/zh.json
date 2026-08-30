@@ -3536,7 +3536,11 @@
       "total_budget": "总预算",
       "partner_contribution": "伴侣承担",
       "target_months": "目标覆盖（月）",
-      "floor_months": "安全底线（月）"
+      "floor_months": "安全底线（月）",
+      "extra_repayment": "额外还款",
+      "monthly_installment": "每月月供",
+      "monthly_contribution": "每月金额",
+      "target_monthly_income": "目标每月收入"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3584,7 +3588,7 @@
       "scheduled_no_bank_transfer": "已安排——已排定，尚无银行转账。"
     },
     "err": {
-      "no_reality_path": "没有可供分支的已确认计划。",
+      "no_reality_path": "尚无可供分支的已确认内容。",
       "no_valid_overrides": "请选择要改变的内容。",
       "outcome_not_supported": "该结果暂时无法移动。",
       "target_in_the_past": "请选择未来的日期。",
@@ -3597,7 +3601,8 @@
       "value_required_for_this_pin": "此固定条件需要一个数值。",
       "nothing_freed": "该分支不会释放任何现金流。",
       "over_allocated": "拆分金额超过了释放出的金额，请调低其中一项。",
-      "branch_not_found": "该分支已不存在。"
+      "branch_not_found": "该分支已不存在。",
+      "no_loan": "没有可供分支的已确认贷款。"
     },
     "noRealityPathWedding": "你还没有已确认的婚礼预算。先设置一个，婚礼生活计划就会打开。",
     "goConfirmPlanWedding": "打开婚礼规划师",
@@ -3906,5 +3911,37 @@
     "confirm": "确认此接力",
     "confirmed": "接力已确认。仍有 {unallocated}/月可用。",
     "error": "无法确认接力，请重试。"
+  },
+  "repaymentPath": {
+    "title": "还款之路",
+    "subtitle": "债务是压在每月自由度上的重量——不是一张还款表。",
+    "entryTitle": "还款之路",
+    "entryBody": "移动额外还款，看提前还清的月数与它占用的现金流之间的取舍。",
+    "fieldTitle": "时间场中的贷款",
+    "fieldSubtitle": "多还以更快结束，或少还以释放由你自己分配的现金流。",
+    "weightVsFreedom": "债务重量 vs 每月自由度",
+    "debtWeight": "月供收入比",
+    "monthlyFreedom": "每月自由度",
+    "debtFreeIn": "结清于",
+    "futureScore": "未来分数",
+    "months": "{months} 个月",
+    "noLoan": "你还没有已确认的贷款。",
+    "estimateNote": "结清月数是按已确认利率的等额本息估算，非银行对账单。"
+  },
+  "futureLifeTimeline": {
+    "title": "未来人生时间线",
+    "subtitle": "近期目标与你的长期人生在争夺同一份每月空间。",
+    "entryTitle": "未来人生时间线",
+    "entryBody": "移动每月补充额，看补齐缺口的年数与它当下的代价。",
+    "fieldTitle": "时间场中的退休",
+    "fieldSubtitle": "多补以更快补齐缺口，或少补以释放当下的现金流。",
+    "theGap": "每月收入缺口",
+    "monthlyGap": "每月缺口",
+    "targetIncome": "目标每月收入",
+    "monthlyTopUp": "每月补充",
+    "closeGapIn": "补齐缺口于",
+    "years": "{years} 年",
+    "noPlan": "你还没有已确认的退休计划。",
+    "estimateNote": "补齐年数是按 25 年退休期、不假设投资回报的估算。"
   }
 }

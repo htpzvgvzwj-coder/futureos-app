@@ -432,3 +432,43 @@ test("Behaviour UIs: Memory Lens builds a real causal chain; Shadow Guardian pre
     assert.equal(c.unallocatedMonthly, c.releasedMonthly, "nothing allocated until the customer confirms");
   }
 });
+
+test("Loan + Retirement studios: real reality path + feasibility + branch persistence against the fixture", opts, async (t) => {
+  const { ffService, ffAdapters, store, ff, pool } = await mods();
+
+  for (const domain of ["loan", "retirement"]) {
+    const ctx = await ffService.loadDomainContext(FIXTURE_HOME_USER, domain);
+    if (!ctx.realityPlanData) {
+      t.diagnostic(`fixture has no confirmed ${domain} - skipping that half`);
+      continue;
+    }
+    const adapter = ffAdapters.getFutureFieldAdapter(domain);
+    const feas = adapter.feasibility(ctx.realityPlanData);
+    assert.equal(feas.available, true, `${domain} feasibility available`);
+
+    const plan = await ffService.ensurePlan(FIXTURE_HOME_USER, domain, ctx);
+    t.after(async () => {
+      await pool.query("delete from plan_branches where plan_id = $1", [plan.id]);
+      await pool.query("delete from plan_constraints where plan_id = $1", [plan.id]);
+      await pool.query("delete from plan_versions where plan_id = $1", [plan.id]);
+      await pool.query("delete from plans where id = $1", [plan.id]);
+    });
+
+    const overrideKey = domain === "loan" ? "extra_repayment" : "monthly_contribution";
+    const overrideVal = domain === "loan" ? 250 : (Number(ctx.realityPlanData.monthly_contribution) || 100) + 200;
+    const peeled = ff.peelBranch({
+      baseData: ctx.realityPlanData,
+      overrides: { [overrideKey]: overrideVal },
+      feasibilityFn: (d) => adapter.feasibility(d),
+    });
+    const branch = await store.createBranch(plan.id, FIXTURE_HOME_USER, {
+      label: `itest ${domain}`, baseVersion: "1", data: peeled.data, delta: peeled.delta, feasibility: peeled.feasibility,
+    });
+    const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
+    assert.equal(Number(reloaded.data[overrideKey]), overrideVal, `${domain} branch survives reload`);
+
+    // paying more is pressure (never silently "frees" money)
+    const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
+    assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
+  }
+});

@@ -10,6 +10,8 @@ import { LivingPlanStatus } from "./components/living-plan-status.jsx";
 import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
 import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
+import { RepaymentPath } from "./features/loan/RepaymentPath.jsx";
+import { FutureLifeTimeline } from "./features/retirement/FutureLifeTimeline.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -158,6 +160,8 @@ const screens = {
   MEMORY_LENS: "memoryLens",
   FUTURE_FIELD: "futureField",
   WEDDING_LIVING_PLAN: "weddingLivingPlan",
+  REPAYMENT_PATH: "repaymentPath",
+  FUTURE_LIFE_TIMELINE: "futureLifeTimeline",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3200,6 +3204,8 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.LOADING) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
   if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
+  if (activeScreen === screens.REPAYMENT_PATH) return screens.MIRROR;
+  if (activeScreen === screens.FUTURE_LIFE_TIMELINE) return screens.MIRROR;
   return activeScreen;
 }
 
@@ -5352,6 +5358,24 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
           <span>
             {t("futureField.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("futureField.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.REPAYMENT_PATH)}>
+          <HandCoins size={15} />
+          <span>
+            {t("repaymentPath.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("repaymentPath.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FUTURE_LIFE_TIMELINE)}>
+          <Landmark size={15} />
+          <span>
+            {t("futureLifeTimeline.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("futureLifeTimeline.entryBody")}</small>
           </span>
           <ChevronRight size={14} />
         </button>
@@ -17393,6 +17417,8 @@ export default function App() {
       <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
     ),
     [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.REPAYMENT_PATH]: <RepaymentPath t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

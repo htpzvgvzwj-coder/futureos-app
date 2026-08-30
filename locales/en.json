@@ -3718,7 +3718,11 @@
       "total_budget": "Total budget",
       "partner_contribution": "Partner contribution",
       "target_months": "Target coverage (months)",
-      "floor_months": "Safety floor (months)"
+      "floor_months": "Safety floor (months)",
+      "extra_repayment": "Extra repayment",
+      "monthly_installment": "Monthly installment",
+      "monthly_contribution": "Monthly amount",
+      "target_monthly_income": "Target monthly income"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3766,7 +3770,7 @@
       "scheduled_no_bank_transfer": "Scheduled - arranged, no bank transfer yet."
     },
     "err": {
-      "no_reality_path": "No confirmed plan to branch from.",
+      "no_reality_path": "Nothing confirmed to branch from yet.",
       "no_valid_overrides": "Pick something to change.",
       "outcome_not_supported": "That outcome cannot be moved yet.",
       "target_in_the_past": "Pick a future date.",
@@ -3779,7 +3783,8 @@
       "value_required_for_this_pin": "This pin needs a value.",
       "nothing_freed": "This branch doesn't free any cashflow.",
       "over_allocated": "That splits more than was freed. Lower one of the amounts.",
-      "branch_not_found": "That branch no longer exists."
+      "branch_not_found": "That branch no longer exists.",
+      "no_loan": "No confirmed loan to branch from."
     },
     "noRealityPathWedding": "You do not have a confirmed wedding budget yet. Set one up first, then the Wedding Living Plan opens.",
     "goConfirmPlanWedding": "Open Wedding Planner",
@@ -4088,5 +4093,37 @@
     "confirm": "Confirm this handoff",
     "confirmed": "Handoff confirmed. {unallocated}/month still available.",
     "error": "Couldn't confirm the handoff. Try again."
+  },
+  "repaymentPath": {
+    "title": "Repayment Path",
+    "subtitle": "Debt as a weight on your monthly freedom - not a repayment table.",
+    "entryTitle": "Repayment Path",
+    "entryBody": "Move the extra repayment and see months-to-debt-free against the cashflow it costs.",
+    "fieldTitle": "Your loan on the time field",
+    "fieldSubtitle": "Pay more to finish sooner, or less to free cashflow you place yourself.",
+    "weightVsFreedom": "Debt weight vs monthly freedom",
+    "debtWeight": "Repayment-to-income",
+    "monthlyFreedom": "Monthly freedom",
+    "debtFreeIn": "Debt-free in",
+    "futureScore": "Future Score",
+    "months": "{months} months",
+    "noLoan": "You have no confirmed loan yet.",
+    "estimateNote": "Months-to-debt-free is a reducing-balance estimate at the confirmed rate, not a bank statement."
+  },
+  "futureLifeTimeline": {
+    "title": "Future Life Timeline",
+    "subtitle": "Near-term goals and your long-term life competing for the same monthly room.",
+    "entryTitle": "Future Life Timeline",
+    "entryBody": "Move the monthly top-up and see years-to-close-the-gap against what it costs now.",
+    "fieldTitle": "Retirement on the time field",
+    "fieldSubtitle": "Top up more to close the gap sooner, or less to free cashflow now.",
+    "theGap": "The monthly income gap",
+    "monthlyGap": "Monthly gap",
+    "targetIncome": "Target monthly income",
+    "monthlyTopUp": "Monthly top-up",
+    "closeGapIn": "Close the gap in",
+    "years": "{years} years",
+    "noPlan": "You have no confirmed retirement plan yet.",
+    "estimateNote": "Years-to-close is an estimate over a 25-year retirement horizon with no investment return assumed."
   }
 }
