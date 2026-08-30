@@ -12,6 +12,8 @@ import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
 import { RepaymentPath } from "./features/loan/RepaymentPath.jsx";
 import { FutureLifeTimeline } from "./features/retirement/FutureLifeTimeline.jsx";
+import { TripOrbit } from "./features/travel/TripOrbit.jsx";
+import { CapitalPaths } from "./features/investment/CapitalPaths.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -162,6 +164,8 @@ const screens = {
   WEDDING_LIVING_PLAN: "weddingLivingPlan",
   REPAYMENT_PATH: "repaymentPath",
   FUTURE_LIFE_TIMELINE: "futureLifeTimeline",
+  TRIP_ORBIT: "tripOrbit",
+  CAPITAL_PATHS: "capitalPaths",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3206,6 +3210,8 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
   if (activeScreen === screens.REPAYMENT_PATH) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_LIFE_TIMELINE) return screens.MIRROR;
+  if (activeScreen === screens.TRIP_ORBIT) return screens.MIRROR;
+  if (activeScreen === screens.CAPITAL_PATHS) return screens.MIRROR;
   return activeScreen;
 }
 
@@ -5376,6 +5382,24 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
           <span>
             {t("futureLifeTimeline.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("futureLifeTimeline.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.TRIP_ORBIT)}>
+          <Globe2 size={15} />
+          <span>
+            {t("tripOrbit.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("tripOrbit.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.CAPITAL_PATHS)}>
+          <LineChart size={15} />
+          <span>
+            {t("capitalPaths.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("capitalPaths.entryBody")}</small>
           </span>
           <ChevronRight size={14} />
         </button>
@@ -17419,6 +17443,8 @@ export default function App() {
     [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.REPAYMENT_PATH]: <RepaymentPath t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.TRIP_ORBIT]: <TripOrbit t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.CAPITAL_PATHS]: <CapitalPaths t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

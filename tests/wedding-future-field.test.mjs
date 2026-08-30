@@ -81,14 +81,16 @@ test("Pin: min_core_guests is checked against the real guest count", () => {
 });
 
 test("Living Plan registry: 5 domains registered, the rest are honest stubs", () => {
-  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "loan", "retirement", "wedding"]);
+  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "investment", "loan", "retirement", "travel", "wedding"]);
   assert.equal(isLivingPlan("wedding"), true);
   assert.equal(isLivingPlan("emergency"), true);
   assert.equal(isLivingPlan("loan"), true);
   assert.equal(isLivingPlan("retirement"), true);
-  assert.equal(isLivingPlan("investment"), false);
-  assert.equal(getLivingPlanSpec("travel").registered, false);
-  assert.equal(getLivingPlanSpec("travel").reason, "not_a_living_plan_yet");
+  assert.equal(isLivingPlan("travel"), true);
+  assert.equal(isLivingPlan("investment"), true);
+  assert.equal(isLivingPlan("insurance"), false);
+  assert.equal(getLivingPlanSpec("insurance").registered, false);
+  assert.equal(getLivingPlanSpec("insurance").reason, "not_a_living_plan_yet");
   const w = getLivingPlanSpec("wedding");
   assert.ok(w.variables.some((v) => v.key === "guest_count"));
   assert.ok(w.impacts.includes("home") && w.impacts.includes("emergency"));
