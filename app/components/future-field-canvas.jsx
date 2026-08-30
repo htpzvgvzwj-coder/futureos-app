@@ -81,6 +81,14 @@ const PEEL_FIELDS = {
     { field: "floor_months", kind: "count" },
     { field: "monthly_contribution", kind: "money" },
   ],
+  loan: [
+    { field: "extra_repayment", kind: "money" },
+    { field: "monthly_installment", kind: "money" },
+  ],
+  retirement: [
+    { field: "monthly_contribution", kind: "money" },
+    { field: "target_monthly_income", kind: "money" },
+  ],
 };
 function peelFieldsFor(domain) {
   return PEEL_FIELDS[domain] ?? PEEL_FIELDS.home;

@@ -80,10 +80,12 @@ test("Pin: min_core_guests is checked against the real guest count", () => {
   assert.ok(!res.violations.some((v) => v.kind === "min_core_guests"), "150 >= 100 core guests is fine");
 });
 
-test("Living Plan registry: wedding + home are registered, the rest are honest stubs", () => {
-  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "wedding"]);
+test("Living Plan registry: 5 domains registered, the rest are honest stubs", () => {
+  assert.deepEqual(registeredLivingPlanDomains().sort(), ["emergency", "home", "loan", "retirement", "wedding"]);
   assert.equal(isLivingPlan("wedding"), true);
   assert.equal(isLivingPlan("emergency"), true);
+  assert.equal(isLivingPlan("loan"), true);
+  assert.equal(isLivingPlan("retirement"), true);
   assert.equal(isLivingPlan("investment"), false);
   assert.equal(getLivingPlanSpec("travel").registered, false);
   assert.equal(getLivingPlanSpec("travel").reason, "not_a_living_plan_yet");
