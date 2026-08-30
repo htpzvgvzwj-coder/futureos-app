@@ -49,20 +49,26 @@ test("travel: a fixed budget below the real cost is NOT sealable; the gap + item
   assert.ok(f.unresolvedItems.length >= 1);
 });
 
-test("travel: fewer nights lowers the real cost; the branch frees cashflow (allocatable), nothing auto-routed", () => {
+test("travel: fewer nights lowers the real cost; the unified impactSet frees monthly pace, ghost until allocated", () => {
   const big = travel.feasibility(tripReality).computedCoreTotal;
   const branch = { ...tripReality, nights: 4 };
   assert.ok(travel.feasibility(branch).computedCoreTotal < big);
-  const proj = travel.projectImpacts(branch, tripReality, ctx);
-  assert.ok(["freed", "neutral"].includes(proj.mode));
-  if (proj.mode === "freed") assert.equal(proj.allocatedImpact, null);
+  // Living Thread commit 6: projectImpacts returns the studio-contract
+  // impactSet (Calendar Orbit), not the old monthly-shift shape.
+  const impact = travel.projectImpacts(branch, tripReality, ctx);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(impact.resourceDelta.freedMonthly >= 0);
+  assert.ok(impact.resourceDelta.tripCostRangeAfter && impact.resourceDelta.tripCostRangeAfter.low != null, "trip cost is a range");
+  assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 });
 
-test("travel: a bigger trip is pressure (costs more per month), not a free lunch", () => {
+test("travel: a bigger trip is monthly PRESSURE with named sources, not a free lunch", () => {
   const branch = { ...tripReality, travellers: 4, nights: 14, comfort_tier: "premium" };
-  const proj = travel.projectImpacts(branch, tripReality, ctx);
-  assert.equal(proj.mode, "pressure");
-  assert.ok(proj.pressure.extraMonthlyNeeded > 0);
+  const impact = travel.projectImpacts(branch, tripReality, ctx);
+  assert.ok(impact.resourceDelta.addedPressureMonthly > 0);
+  assert.equal(impact.resourceDelta.freedMonthly, 0);
+  assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(impact.allocationRequired, true);
 });
 
 test("travel provenance: reference estimates, never 'quote'", () => {

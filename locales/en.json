@@ -3582,7 +3582,9 @@
       "maximum_monthly_contribution": "maximum monthly contribution",
       "protected_future_day_choices": "protected Future Day choices",
       "no_assumed_inheritance": "no assumed inheritance",
-      "no_unconfirmed_partner_assets": "no unconfirmed partner assets"
+      "no_unconfirmed_partner_assets": "no unconfirmed partner assets",
+      "latest_trip_month": "latest trip month",
+      "no_trip_funding_below_emergency_floor": "no trip funding below the emergency floor"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -5075,6 +5077,90 @@
       "liquidityConflictWait": "a smaller contribution, or a later retirement age, keeps it affordable",
       "belowBreathing": "This contribution takes your current monthly room below your floor.",
       "gapThreshold": "Your contribution is below the middle of the range needed for this Future Day (~{needLow}/mo)."
+    }
+  },
+  "calendarOrbit": {
+    "loading": "Loading your trip…",
+    "title": "Calendar Orbit",
+    "subtitle": "A trip is a point on the year, not a budget row. Move it around the orbit and watch the pace change.",
+    "noPlan": "Add a trip shape - people and nights - to open the Calendar Orbit.",
+    "summaryLine": "Trip · {cost} · {month}",
+    "estimateNote": "Reference-rate estimate from Singapore (as of 2026-07), not a fare or hotel quote. Seasonality is a transparent multiplier. Unknown savings or income stay unknown - the funding pace is not computed.",
+    "perTraveller": "{amount} / traveller",
+    "showControls": "Trip details",
+    "hideControls": "Hide trip details",
+    "fewer": "Fewer",
+    "more": "More",
+    "belowCost": "Your budget is {amount} under the reference cost - not sealable until that closes.",
+    "decisionEcho": "You've shaped a few similar trips lately - Guardian noticed. It won't act on it.",
+    "row": {
+      "shape": "Trip shape",
+      "shapeValue": "{people} people · {nights} nights",
+      "cost": "Reference cost",
+      "season": "Season",
+      "pace": "Monthly pace needed"
+    },
+    "prov": {
+      "fromPlan": "from your plan",
+      "referenceRate": "reference rate, a range",
+      "transparent": "shown, not buried",
+      "backwards": "worked back from the trip month"
+    },
+    "unknown": {
+      "trip_month": "Trip month",
+      "current_savings": "Earmarked savings",
+      "monthly_income": "Monthly income"
+    },
+    "season": {
+      "peak": "Peak",
+      "shoulder": "Shoulder",
+      "off": "Off-peak"
+    },
+    "seasonNote": {
+      "peak": "Peak season - the high end of the band carries a ×{mult} multiplier, shown here.",
+      "shoulder": "Shoulder season - a small ×{mult} on the high end, shown here.",
+      "off": ""
+    },
+    "pace": {
+      "ahead": "Ahead of pace - {have}/mo against {need}/mo needed.",
+      "on_track": "On track - {have}/mo covers the {need}/mo needed.",
+      "short": "Behind - {have}/mo against {need}/mo needed by the balance date.",
+      "unknown": "Funding pace unknown until earmarked savings are confirmed."
+    },
+    "field": {
+      "label": "Calendar Orbit - drag the trip knob around the ring for the month, the radial handle for nights",
+      "now": "Now",
+      "nights": "Nights: {n}",
+      "tripMonth": "Trip month"
+    },
+    "node": {
+      "comfort": "Comfort",
+      "destination": "Destination",
+      "people": "Travellers",
+      "monthly": "Monthly contribution",
+      "budget": "Budget ceiling"
+    },
+    "comfort": {
+      "budget": "Budget",
+      "mid": "Mid",
+      "premium": "Premium"
+    },
+    "dest": {
+      "domestic": "Domestic",
+      "regional": "Regional",
+      "longhaul": "Long-haul"
+    },
+    "mirror": {
+      "later": "Trip later",
+      "sooner": "Trip sooner",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "liquidityConflict": "This monthly contribution is more than your cashflow can cover.",
+      "liquidityConflictWait": "a smaller contribution, or a later trip month, keeps it affordable",
+      "belowBreathing": "This contribution takes your current monthly room below your floor.",
+      "pastLatest": "This trip month is past the month you pinned as the latest.",
+      "behindPace": "At this contribution you won't have the balance ready in time (need ~{need}/mo)."
     }
   }
 }

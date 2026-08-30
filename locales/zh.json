@@ -3400,7 +3400,9 @@
       "maximum_monthly_contribution": "每月供款上限",
       "protected_future_day_choices": "受保护的未来之日选择",
       "no_assumed_inheritance": "不假设遗产",
-      "no_unconfirmed_partner_assets": "不计入未确认的伴侣资产"
+      "no_unconfirmed_partner_assets": "不计入未确认的伴侣资产",
+      "latest_trip_month": "最晚旅行月份",
+      "no_trip_funding_below_emergency_floor": "旅行供款不得低于应急下限"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4893,6 +4895,90 @@
       "liquidityConflictWait": "更小的供款，或更晚的退休年龄，能让它可负担",
       "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
       "gapThreshold": "你的供款低于此未来之日所需区间的中位（约 {needLow}/月）。"
+    }
+  },
+  "calendarOrbit": {
+    "loading": "正在加载你的行程…",
+    "title": "日历轨道",
+    "subtitle": "旅行是一年中的一个点，不是预算里的一行。沿轨道移动它，看节奏如何变化。",
+    "noPlan": "填入行程轮廓——人数与晚数——即可打开日历轨道。",
+    "summaryLine": "旅行 · {cost} · {month}",
+    "estimateNote": "来自新加坡的参考费率估算（截至 2026-07），不是机票或酒店报价。季节性是一个透明的乘数。未知的储蓄或收入保持未知——不计算供款节奏。",
+    "perTraveller": "每人 {amount}",
+    "showControls": "行程细节",
+    "hideControls": "隐藏行程细节",
+    "fewer": "减少",
+    "more": "增加",
+    "belowCost": "你的预算比参考成本低 {amount}——在补齐之前无法封存。",
+    "decisionEcho": "你最近规划了几次类似的行程——守护者注意到了。它不会据此行动。",
+    "row": {
+      "shape": "行程轮廓",
+      "shapeValue": "{people} 人 · {nights} 晚",
+      "cost": "参考成本",
+      "season": "季节",
+      "pace": "所需每月节奏"
+    },
+    "prov": {
+      "fromPlan": "来自你的计划",
+      "referenceRate": "参考费率，一个区间",
+      "transparent": "公开显示，不隐藏",
+      "backwards": "从旅行月份倒推"
+    },
+    "unknown": {
+      "trip_month": "旅行月份",
+      "current_savings": "预留储蓄",
+      "monthly_income": "每月收入"
+    },
+    "season": {
+      "peak": "旺季",
+      "shoulder": "平季",
+      "off": "淡季"
+    },
+    "seasonNote": {
+      "peak": "旺季——区间高端带有 ×{mult} 乘数，在此显示。",
+      "shoulder": "平季——高端有一个小的 ×{mult}，在此显示。",
+      "off": ""
+    },
+    "pace": {
+      "ahead": "领先节奏——每月 {have}，所需每月 {need}。",
+      "on_track": "按计划——每月 {have} 覆盖所需的每月 {need}。",
+      "short": "落后——每月 {have}，尾款到期前需要每月 {need}。",
+      "unknown": "在确认预留储蓄之前，供款节奏未知。"
+    },
+    "field": {
+      "label": "日历轨道——绕环拖动旅行旋钮以调整月份，拖动径向手柄以调整晚数",
+      "now": "现在",
+      "nights": "晚数：{n}",
+      "tripMonth": "旅行月份"
+    },
+    "node": {
+      "comfort": "舒适度",
+      "destination": "目的地",
+      "people": "旅客",
+      "monthly": "每月供款",
+      "budget": "预算上限"
+    },
+    "comfort": {
+      "budget": "经济",
+      "mid": "中等",
+      "premium": "高级"
+    },
+    "dest": {
+      "domestic": "境内",
+      "regional": "周边",
+      "longhaul": "长途"
+    },
+    "mirror": {
+      "later": "推迟旅行",
+      "sooner": "提前旅行",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "liquidityConflict": "这笔每月供款超过了你的现金流所能承担的。",
+      "liquidityConflictWait": "更小的供款，或更晚的旅行月份，能让它可负担",
+      "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
+      "pastLatest": "这个旅行月份已超过你固定的最晚月份。",
+      "behindPace": "按此供款，你无法及时备好尾款（约需每月 {need}）。"
     }
   }
 }

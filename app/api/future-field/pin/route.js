@@ -39,6 +39,9 @@ const PIN_KINDS = {
   protected_future_day_choices: "flag",
   no_assumed_inheritance: "flag",
   no_unconfirmed_partner_assets: "flag",
+  // Calendar Orbit domain pins (Living Thread commit 6).
+  latest_trip_month: "lte", // value + metric are YYYYMM integers
+  no_trip_funding_below_emergency_floor: "flag",
 };
 
 export async function GET(request) {

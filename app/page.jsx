@@ -18,7 +18,7 @@ import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
 import { DebtGravity } from "./features/loan/DebtGravity.jsx";
 import { FutureDayLoom } from "./features/retirement/FutureDayLoom.jsx";
-import { TripOrbit } from "./features/travel/TripOrbit.jsx";
+import { CalendarOrbit } from "./features/travel/CalendarOrbit.jsx";
 import { CapitalPaths } from "./features/investment/CapitalPaths.jsx";
 import { ProtectionEnvelope } from "./features/insurance/ProtectionEnvelope.jsx";
 import { FamilyConstellation } from "./features/family/FamilyConstellation.jsx";
@@ -17606,7 +17606,7 @@ export default function App() {
     [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.REPAYMENT_PATH]: <DebtGravity t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_LIFE_TIMELINE]: <FutureDayLoom t={t} setActiveScreen={setActiveScreen} />,
-    [screens.TRIP_ORBIT]: <TripOrbit t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.TRIP_ORBIT]: <CalendarOrbit t={t} setActiveScreen={setActiveScreen} />,
     [screens.CAPITAL_PATHS]: <CapitalPaths t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.PROTECTION_ENVELOPE]: <ProtectionEnvelope t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FAMILY_CONSTELLATION]: <FamilyConstellation t={t} setActiveScreen={setActiveScreen} language={language} />,

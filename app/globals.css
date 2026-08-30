@@ -6936,3 +6936,48 @@ nextjs-portal {
 .lmEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
 @media (max-width: 360px) { .lmDayParts li { flex-direction: column; gap: 1px; } }
 @media (prefers-reduced-motion: reduce) { .lmSeam, .lmSeamKnot, .lmBandFill { transition: none !important; } }
+
+/* Calendar Orbit (Living Thread commit 6) */
+.coScene { display: flex; flex-direction: column; gap: 12px; }
+.coSurface { display: flex; flex-direction: column; gap: 10px; }
+.coField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.coField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.coRing { fill: none; stroke: rgba(20,36,58,0.16); stroke-width: 1.5; }
+.coTick { fill: var(--navy-2); }
+.coTickPeak { fill: var(--ocbc-red); }
+.coTickNow { fill: var(--navy); }
+.coSmall { font-size: 8px; fill: var(--muted); }
+.coFundTrack { fill: none; stroke: var(--line); stroke-width: 5; stroke-linecap: round; }
+.coFundFill { fill: none; stroke-width: 5; stroke-linecap: round; }
+.coFundFill.is-onpace { stroke: var(--success); }
+.coFundFill.is-short { stroke: #b45309; }
+.coFundFill.is-unknown { stroke: var(--muted); stroke-dasharray: 3 3; }
+.coNow { fill: var(--navy); }
+.coDeposit { fill: var(--navy-2); }
+.coBalance { fill: var(--navy); }
+.coSpoke { stroke: rgba(20,36,58,0.25); stroke-width: 1; stroke-dasharray: 2 2; }
+.coNights { cursor: grab; }
+.coNights:focus-visible { outline: none; }
+.coNightsKnot { fill: var(--surface); stroke: var(--navy-2); stroke-width: 2; }
+.coNights:focus-visible .coNightsKnot { stroke: var(--teal); stroke-width: 3; }
+.coTrip { cursor: grab; }
+.coTrip:focus-visible { outline: none; }
+.coTripKnot { fill: var(--navy); }
+.coTrip:focus-visible .coTripKnot { stroke: var(--teal); stroke-width: 3; }
+.coTripLabel { font-size: 9px; fill: #fff; font-weight: 700; }
+.coCentreValue { font-size: 15px; fill: var(--navy); font-weight: 700; }
+.coCentreSub { font-size: 8px; fill: var(--muted); }
+.coPace { margin: 0; font-size: 0.86rem; border-left: 3px solid var(--line); padding-left: 10px; }
+.coPace.co-on_track, .coPace.co-ahead { border-left-color: var(--success); color: var(--success); }
+.coPace.co-short { border-left-color: #b45309; color: #b45309; }
+.coPace.co-unknown { border-left-color: var(--muted); color: var(--muted); }
+.coSeasonNote { margin: 0; font-size: 0.76rem; color: var(--muted); }
+.coEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
+.coControls { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--soft); }
+.coCtlRow { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.82rem; }
+.coCtlRow .toSeg { display: flex; gap: 4px; }
+.coCtlRow .toSeg button { border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font-size: 0.76rem; background: var(--surface); }
+.coCtlRow .toSeg button.is-on { border-color: var(--navy); background: rgba(20,36,58,0.06); }
+.coCtlRow .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+@media (max-width: 360px) { .coCtlRow { flex-direction: column; align-items: stretch; gap: 4px; } }
+@media (prefers-reduced-motion: reduce) { .coTrip, .coTripKnot, .coNightsKnot, .coFundFill { transition: none !important; } }
