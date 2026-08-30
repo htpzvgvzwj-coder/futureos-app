@@ -4139,7 +4139,36 @@
     "futureScore": "Future Score",
     "months": "{months} months",
     "noLoan": "You have no confirmed loan yet.",
-    "estimateNote": "Months-to-debt-free is a reducing-balance estimate at the confirmed rate, not a bank statement."
+    "estimateNote": "Months-to-debt-free is a reducing-balance estimate at the confirmed rate, not a bank statement.",
+    "loading": "Loading your loan…",
+    "reality": {
+      "principal": "Outstanding",
+      "installment": "Contractual instalment",
+      "rate": "Rate",
+      "debtFreeNow": "Debt-free (today's pace)",
+      "fromLoan": "from your confirmed loan",
+      "amortization": "reducing-balance amortization"
+    },
+    "soonerBy": "{n} months sooner",
+    "laterBy": "{n} months later",
+    "dragLabel": "Monthly repayment — drag between breathing room and clearing faster",
+    "pole": {
+      "breathingRoom": "Breathing room",
+      "debtWeight": "Debt weight"
+    },
+    "extraNow": "Extra {amount}/mo · total {total}/mo",
+    "weightOfIncome": "{pct}% of income goes to this loan",
+    "mirror": {
+      "breathingRoom": "Preserve breathing room",
+      "balanced": "Balanced path",
+      "clearFaster": "Clear faster"
+    },
+    "turningPoint": {
+      "overcommit": "This takes you {amount}/mo below zero free cashflow.",
+      "overcommitWait": "waiting keeps the choice open, but the debt runs longer",
+      "halfIncome": "This puts {pct}% of your income into repayments.",
+      "halfIncomeWait": "a lighter pace now keeps room for a shock later"
+    }
   },
   "futureLifeTimeline": {
     "title": "Future Life Timeline",
@@ -4155,7 +4184,56 @@
     "closeGapIn": "Close the gap in",
     "years": "{years} years",
     "noPlan": "You have no confirmed retirement plan yet.",
-    "estimateNote": "Years-to-close is an estimate over a 25-year retirement horizon with no investment return assumed."
+    "estimateNote": "Years-to-close is an estimate over a 25-year retirement horizon with no investment return assumed.",
+    "loading": "Loading your retirement plan…",
+    "reality": {
+      "target": "Target monthly life",
+      "gap": "Monthly gap vs CPF LIFE",
+      "topup": "Monthly top-up",
+      "fromPlan": "from your confirmed plan",
+      "cpfLife": "CPF LIFE payout estimate"
+    },
+    "futureDay": "Build a Future Day",
+    "day": {
+      "place": "Where you live",
+      "place.city": "City",
+      "place.town": "Town",
+      "place.lowerCost": "Lower-cost place",
+      "time": "Your time",
+      "time.fullStop": "Fully stopped work",
+      "time.partTime": "Part-time",
+      "time.keepWorking": "Keep working",
+      "care": "Caring for someone",
+      "care.caring": "Yes",
+      "care.notCaring": "No",
+      "radius": "How wide your life ranges",
+      "radius.local": "Local",
+      "radius.regional": "Regional",
+      "radius.global": "Global",
+      "keep": "Daily things you keep",
+      "keep.diningOut": "Dining out",
+      "keep.car": "A car",
+      "keep.yearlyTravel": "A yearly trip"
+    },
+    "assumption": "That works out to {target} target, {gap} gap. These are transparent assumptions — your CPF LIFE estimate is held constant.",
+    "axis": "Now → Future Life",
+    "stop": {
+      "now": "Now",
+      "weddingHome": "Wedding / Home",
+      "family": "Family",
+      "career": "Career flexibility",
+      "futureLife": "Future Life"
+    },
+    "dragLabel": "Monthly room — drag between near-term goals and Future Life",
+    "pole": {
+      "nearTerm": "Near-term",
+      "futureLife": "Future Life"
+    },
+    "readout": "Top-up {topup} · gap closes in {years}",
+    "echo": {
+      "protectNearTerm": "You keep pulling room back to the near term. Pin a top-up ceiling instead of deciding it each time?",
+      "protectNearTermWait": "without a Pin this comes up again every visit"
+    }
   },
   "tripOrbit": {
     "title": "Trip Orbit",
@@ -4166,12 +4244,50 @@
     "fieldSubtitle": "Scale it down to free cashflow you place yourself, or keep it and adjust elsewhere.",
     "theWindow": "The trip window",
     "tripCost": "Trip cost",
-    "perTraveller": "Per traveller",
+    "perTraveller": "{amount} per traveller",
     "monthlyNeeded": "Monthly needed",
     "readyBy": "Funded by",
     "belowCost": "Your budget is {amount} below the real cost - cut nights, travellers, or comfort, or raise it.",
     "noPlan": "You have no confirmed trip yet.",
-    "estimateNote": "Reference-rate estimate, not a fare or hotel quote. Date and destination move this a lot."
+    "estimateNote": "Reference-rate estimate, not a fare or hotel quote. Date and destination move this a lot.",
+    "loading": "Loading your trip…",
+    "reality": {
+      "shape": "Trip shape",
+      "shapeValue": "{people} people · {nights} nights",
+      "cost": "Reference cost",
+      "month": "Trip month",
+      "fromPlan": "from your confirmed plan",
+      "referenceRate": "Singapore reference-rate estimate"
+    },
+    "window": "Trip Window",
+    "node": {
+      "people": "People",
+      "nights": "Nights",
+      "comfort": "Comfort",
+      "date": "Date",
+      "budget": "Budget"
+    },
+    "fewer": "Fewer",
+    "more": "More",
+    "earlier": "Earlier",
+    "later": "Later",
+    "comfort": {
+      "budget": "Budget",
+      "mid": "Mid",
+      "premium": "Premium"
+    },
+    "dest": {
+      "domestic": "Domestic",
+      "regional": "Regional",
+      "longhaul": "Long-haul"
+    },
+    "monthly": "Monthly saving",
+    "needMonthly": "Need about {amount}/mo to be ready",
+    "mirror": {
+      "keepExperience": "Keep the experience",
+      "shiftWindow": "Shift the window",
+      "preserveCommitments": "Preserve other commitments"
+    }
   },
   "capitalPaths": {
     "title": "Capital Paths",
@@ -4185,7 +4301,7 @@
     "horizon": "Horizon",
     "contributedBy": "Contributed by horizon",
     "yearsToTarget": "Years to target",
-    "years": "years",
+    "years": "{n} years",
     "noPlan": "You have no confirmed recurring investment yet.",
     "estimateNote": "Contributed amount only - no investment return is assumed here.",
     "readiness": {
@@ -4193,6 +4309,38 @@
       "buffer": "Emergency buffer is only {months} months - build it before adding more here.",
       "debt": "High-cost debt outstanding - clear it before adding more here.",
       "noRoom": "No monthly room to invest right now."
+    },
+    "loading": "Loading your investing plan…",
+    "reality": {
+      "pool": "Monthly capital",
+      "investing": "Investing now",
+      "readiness": "Readiness",
+      "fromCashflow": "from your real cashflow",
+      "fromPlan": "from your confirmed plan",
+      "gate": "investment readiness gate"
+    },
+    "over": "{amount}/mo over your available capital",
+    "unassigned": "{amount}/mo not yet given a job",
+    "job": {
+      "safety": "Safety",
+      "wedding": "Wedding",
+      "home": "Home",
+      "flexible": "Flexible",
+      "retirement": "Retirement",
+      "longTerm": "Long-term capital"
+    },
+    "liquid": "stays liquid",
+    "locked": "held for the horizon",
+    "liquidityGate": "Liquidity Gate — how long this money must stay available",
+    "gate": {
+      "soon": "Needed soon",
+      "longterm": "Long-term"
+    },
+    "possibleAllocation": "Possible: {liquid} liquid, {invest}/mo invested",
+    "noReturnNote": "No investment return assumed — contributed amount only. Nothing is traded here; Seal records the intent.",
+    "echo": {
+      "liquidity": "You keep most capital liquid. Pin a liquidity floor instead of trimming the long-term leg?",
+      "liquidityWait": "without a Pin the long-term leg keeps getting squeezed"
     }
   },
   "protectionEnvelope": {
@@ -4217,7 +4365,29 @@
     "gap": "Gap of {amount}",
     "summary": "{known} known gap(s), {unknown} unknown. About {premium}/mo would close the known gaps.",
     "noData": "Add your expenses and any coverage details on your profile to see this.",
-    "estimateNote": "Gaps use your stated coverage - unknowns are shown as unknown. Premium is a reference estimate, not a quote. No underwriting."
+    "estimateNote": "Gaps use your stated coverage - unknowns are shown as unknown. Premium is a reference estimate, not a quote. No underwriting.",
+    "loading": "Loading your protection picture…",
+    "reality": {
+      "premium": "Premium now",
+      "knownGaps": "Known gaps",
+      "unknowns": "Unknowns",
+      "declared": "from what you've declared",
+      "fromDeclared": "from your declared coverage",
+      "notCounted": "not counted as gaps"
+    },
+    "panel": {
+      "needHave": "Needs {need} protected · you hold {have}",
+      "unknownHelp": "Add this figure on your profile and it stops being unknown.",
+      "confirmCover": "Confirm cover you already hold",
+      "premiumToProtect": "About {amount}/mo would protect this"
+    },
+    "totalPremium": "Total monthly protection spend",
+    "impliedExtra": "Closing these gaps adds about {amount}/mo",
+    "noSaleNote": "Nothing is sold here. No underwriting, no quote — reference premium rates only.",
+    "turningPoint": {
+      "newResponsibility": "You've added a new responsibility. Which cover needs re-confirming?",
+      "newResponsibilityWait": "an uncovered new liability is the gap that bites hardest"
+    }
   },
   "familyConstellation": {
     "title": "Family Constellation",
@@ -4237,7 +4407,50 @@
     "blindMergePrompt": "Each of you sets a private range and Must Keep / Flexible / Undecided first, then the workable band shows.",
     "bothConfirm": "This change needs both partners to confirm.",
     "privacyNote": "Each partner's private affordability and balances are never shared - only the band and the agreed contribution.",
-    "noData": "Set a shared monthly contribution and shared items on your profile to see this."
+    "noData": "Set a shared monthly contribution and shared items on your profile to see this.",
+    "loading": "Loading your family plan…",
+    "reality": {
+      "shared": "Shared monthly",
+      "split": "Split",
+      "items": "Shared goals",
+      "agreed": "agreed between partners",
+      "sharedGoals": "shared goals"
+    },
+    "noItems": "Add a shared goal to run a Blind Merge.",
+    "step": {
+      "A": "Partner A",
+      "B": "Partner B",
+      "band": "Feasible band",
+      "confirm": "Both confirm"
+    },
+    "partner": {
+      "A": "Partner A — your view",
+      "B": "Partner B — your view"
+    },
+    "markHint": "Tap each goal to mark it Must keep / Flexible / Undecided. Your amounts stay private.",
+    "mark": {
+      "none": "Not marked",
+      "mustKeep": "Must keep",
+      "flexible": "Flexible",
+      "undecided": "Undecided"
+    },
+    "privateRange": "Your private affordable range",
+    "min": "Min",
+    "max": "Max",
+    "staysPrivate": "Never shared — used only to compute the overlap",
+    "next": "Next",
+    "bandTitle": "The overlap — no raw numbers shared",
+    "conflictUndecided": "{item}: still undecided by one partner",
+    "conflictMustFlex": "{item}: Partner {side} must-keep, the other flexible",
+    "noConflicts": "No conflicts on the shared goals.",
+    "chooseWithinBand": "Choose a shared contribution within the band",
+    "toConfirm": "To confirmation",
+    "confirmTitle": "Both partners confirm",
+    "partnerAConfirms": "Partner A confirms",
+    "partnerBConfirms": "Partner B confirms",
+    "splitRatio": "Split (Partner A / Partner B)",
+    "bothConfirmedOk": "Both confirmed — this can become a shared commitment.",
+    "needsBoth": "Needs both partners before anything is committed or applied elsewhere."
   },
   "today": {
     "bankNow": {
@@ -4258,7 +4471,8 @@
   "life": {
     "map": {
       "label": "Your life map",
-      "intro": "Where each part of your life stands, and how they pull on each other. Tap a node."
+      "intro": "Where each part of your life stands, and how they pull on each other. Tap a node.",
+      "introEvidence": "Where each part of your life stands. Tap a node to see the evidence behind it."
     },
     "node": {
       "income": "Income",
@@ -4268,6 +4482,42 @@
       "freedom": "Freedom",
       "future": "Future",
       "notYet": "Not set up"
+    },
+    "evidence": {
+      "state": "Current state",
+      "confirmed": "You've confirmed",
+      "estimate": "Still an estimate",
+      "unknown": "Not known",
+      "none": "—",
+      "recentChanges": "Last changes",
+      "noChanges": "No recorded changes yet.",
+      "memoryLens": "Open Memory Lens"
+    },
+    "field": {
+      "statedMonthlyIncome": "Monthly income",
+      "monthlyExpenses": "Monthly expenses",
+      "currentSavings": "Savings",
+      "homeTargetPrice": "Home target price",
+      "weddingBudget": "Wedding budget",
+      "partnerName": "Partner",
+      "monthlyInvestment": "Monthly investing",
+      "creditCardOutstanding": "Card balance",
+      "retirementTargetIncome": "Retirement target income",
+      "currentAge": "Age"
+    },
+    "related": {
+      "futureField": "Home scene",
+      "personalEconomy": "Personal Economy",
+      "needEmergency": "Emergency scene",
+      "strategicBalance": "Strategic Balance",
+      "needHome": "Home planner",
+      "familyConstellation": "Family scene",
+      "weddingLivingPlan": "Wedding scene",
+      "capitalPaths": "Capital Paths",
+      "repaymentPath": "Repayment Path",
+      "futureLifeTimeline": "Future Life",
+      "needRetirement": "Retirement planner",
+      "profile": "Profile"
     }
   },
   "guardianDecisions": {
@@ -4275,5 +4525,153 @@
     "clear": "Nothing needs a decision from you right now.",
     "more": "{count} more coming up.",
     "review": "Review in Explore"
+  },
+  "livingScene": {
+    "spine": {
+      "label": "Where you are",
+      "step": "Step {n} of 7"
+    },
+    "phase": {
+      "reality": "What does the system know right now?",
+      "possible": "What could happen if this changes?",
+      "allocation": "Who carries the freed or added room, and where does it go?",
+      "turningPoint": "Why does this need a decision now?",
+      "committed": "What did you confirm?",
+      "guardian": "What is the system protecting?",
+      "memory": "Why did today turn out this way?"
+    },
+    "reality": {
+      "title": "What the system knows",
+      "hint": "Move something above to see what it changes.",
+      "unknownHead": "Not known — shown as unknown, never counted as a gap:"
+    },
+    "possible": {
+      "title": "What could change",
+      "serverConfirmed": "Cross-goal effect confirmed from your plan and cashflow.",
+      "projectedNote": "Projected from your confirmed plan and cashflow — not a quote."
+    },
+    "allocation": {
+      "title": "Where the room goes",
+      "freed": "{amount}/mo freed. You place it — nothing moves on its own.",
+      "pressure": "{amount}/mo of new pressure. Say where it comes from.",
+      "spineNote": "Choose a split below. An unplaced remainder stays available.",
+      "keepFlexible": "Keep flexible",
+      "accelerate": "Accelerate {goal}",
+      "rebuildSafety": "Rebuild safety",
+      "split": "Or split it",
+      "overspent": "{amount}/mo over what was freed",
+      "remaining": "{amount}/mo still to place",
+      "noAutoMove": "Freed room is never routed automatically.",
+      "fromFlexible": "From flexible cashflow",
+      "slowAnother": "Slow {goal}",
+      "anotherGoal": "another goal"
+    },
+    "turningPoint": {
+      "acknowledge": "I've seen this",
+      "generic": "This is a point where waiting changes your options.",
+      "ifYouWait": "If you wait: {text}"
+    },
+    "committed": {
+      "title": "What you confirmed",
+      "hint": "Sealed. Guardian is now watching this path.",
+      "revocable": "Revocable at any time — this restores the previous plan.",
+      "monthly": "Monthly",
+      "effective": "Starts",
+      "ready": "On track for",
+      "review": "Review sealing {amount}/mo",
+      "guardianCant": "Guardian watches and notifies — it never moves money.",
+      "shadowOnly": "This is a shadow simulation, not a bank instruction.",
+      "autopause": "Auto-pauses if your emergency buffer drops below 6 months.",
+      "confirm": "Confirm and seal",
+      "notYet": "Not yet",
+      "notSealable": "This can't be sealed yet — the plan doesn't cover its core cost.",
+      "sealError": "Couldn't seal that. Try again."
+    },
+    "guardian": {
+      "title": "What Guardian is protecting",
+      "watching": "Guardian is watching this commitment against your real cashflow.",
+      "standDown": "Stand Guardian down",
+      "watches": "Watches this path against your real income and expenses",
+      "notifies": "Notifies you if reality drifts from the plan",
+      "neverMoves": "Never moves money — there is no bank-transfer integration",
+      "wouldNeedChoice": "A modest shock would need a choice from you — worth a plan B.",
+      "rehearsedClear": "Rehearsed against a modest shock — your commitments still hold.",
+      "rehearsing": "Rehearsing a modest shock…"
+    },
+    "memory": {
+      "title": "Why today looks like this",
+      "hint": "The chain below is rebuilt from your real Change Ledger.",
+      "noRecord": "No recorded changes for this goal yet.",
+      "handoffOffer": "A revoked commitment here released {amount}/mo — place it in Memory below.",
+      "openLedger": "Open the full Change Ledger",
+      "tag": {
+        "fact": "Fact",
+        "userChoice": "Your choice",
+        "estimate": "Estimate",
+        "inference": "Inference",
+        "unknown": "Unknown"
+      }
+    },
+    "promiseWeight": {
+      "calm": "This fits alongside your other commitments.",
+      "tightening": "Adds {amount} against {of} of monthly room — tightening.",
+      "needsDecision": "Adds {amount} against {of} of monthly room — needs a decision."
+    },
+    "reset": "Back to reality",
+    "self": {
+      "monthsToDebtFree": "Debt-free in",
+      "yearsToCloseGap": "Years to close the gap",
+      "yearsToTarget": "Years to target",
+      "planBudget": "Trip cost",
+      "protectionGap": "Protection gap",
+      "sharedContribution": "Shared contribution"
+    },
+    "node": {
+      "breathingRoom": "Breathing room",
+      "emergency": "Emergency fund",
+      "home": "Home deposit",
+      "investment": "Investing",
+      "futureLife": "Future Life",
+      "nearTerm": "Near-term goals",
+      "liquidity": "Liquidity kept",
+      "flexible": "Flexible cashflow",
+      "insurance": "Protection",
+      "retirement": "Retirement",
+      "cashflow": "Monthly cashflow",
+      "protect_income": "Income protection",
+      "protect_home_loan": "Home loan cover",
+      "protect_family": "Family cover",
+      "protect_care": "Care cover",
+      "dir": {
+        "up": "improves",
+        "down": "tightens",
+        "flat": "unchanged"
+      }
+    }
+  },
+  "explore": {
+    "eyebrow": "Explore",
+    "question": "Which part of your life do you want to change?",
+    "sub": "Pick one. You'll land in where it stands right now — not a menu.",
+    "node": {
+      "home": "Home",
+      "home.hint": "Deposit, timing, monthly room",
+      "relationship": "Relationship / Wedding",
+      "relationship.hint": "The plan and the alignment",
+      "safety": "Safety",
+      "safety.hint": "The buffer and what pushes on it",
+      "freedom": "Freedom",
+      "freedom.hint": "Capital with a job",
+      "family": "Family",
+      "family.hint": "Shared goals, private balances",
+      "experience": "Experience",
+      "experience.hint": "A trip as a life window",
+      "future": "Long-term Future",
+      "future.hint": "The Future Day and its cost",
+      "debt": "Debt",
+      "protection": "Protection"
+    },
+    "also": "Also",
+    "talkItThrough": "Talk it through instead"
   }
 }

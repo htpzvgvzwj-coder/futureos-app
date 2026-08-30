@@ -137,6 +137,7 @@ const screens = {
   HOME_FULL: "homeFull",
   LIFE_GRAPH: "lifeGraph",
   MIRROR: "mirror",
+  EXPLORE_CHAT: "exploreChat",
   JOINT_DEBATE_RESPONSE: "jointDebateResponse",
   GUARDIAN: "guardian",
   PROFILE: "profile",
@@ -3214,6 +3215,7 @@ function getNavScreen(activeScreen) {
     return screens.LIFE_GRAPH;
   }
   if (activeScreen === screens.LOADING) return screens.MIRROR;
+  if (activeScreen === screens.EXPLORE_CHAT) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
   if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
   if (activeScreen === screens.REPAYMENT_PATH) return screens.MIRROR;
@@ -3223,6 +3225,57 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.PROTECTION_ENVELOPE) return screens.MIRROR;
   if (activeScreen === screens.FAMILY_CONSTELLATION) return screens.MIRROR;
   return activeScreen;
+}
+
+// Explore is a Life Field, not a tools list. One question, seven parts of a
+// life. Tapping a node goes straight into that Studio's current reality
+// scene - never a feature menu.
+const EXPLORE_FIELD_NODES = [
+  { id: "home", screen: screens.FUTURE_FIELD, tone: "home" },
+  { id: "relationship", screen: screens.WEDDING_LIVING_PLAN, tone: "rel" },
+  { id: "safety", screen: screens.NEED_EMERGENCY, tone: "safety" },
+  { id: "freedom", screen: screens.CAPITAL_PATHS, tone: "freedom" },
+  { id: "family", screen: screens.FAMILY_CONSTELLATION, tone: "family" },
+  { id: "experience", screen: screens.TRIP_ORBIT, tone: "exp" },
+  { id: "future", screen: screens.FUTURE_LIFE_TIMELINE, tone: "future" },
+];
+const EXPLORE_FIELD_MORE = [
+  { id: "debt", screen: screens.REPAYMENT_PATH },
+  { id: "protection", screen: screens.PROTECTION_ENVELOPE },
+];
+
+function ExploreLifeField({ setActiveScreen, t }) {
+  return (
+    <Screen className="exploreField">
+      <header className="exploreFieldHead">
+        <p className="exploreFieldEyebrow">{t("explore.eyebrow")}</p>
+        <h1>{t("explore.question")}</h1>
+        <p className="exploreFieldSub">{t("explore.sub")}</p>
+      </header>
+
+      <div className="exploreFieldGrid">
+        {EXPLORE_FIELD_NODES.map((n) => (
+          <button key={n.id} type="button" className={`exploreFieldNode exploreFieldNode-${n.tone}`} onClick={() => setActiveScreen(n.screen)}>
+            <span className="exploreFieldNodeName">{t(`explore.node.${n.id}`)}</span>
+            <span className="exploreFieldNodeHint">{t(`explore.node.${n.id}.hint`)}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="exploreFieldMore">
+        <span>{t("explore.also")}</span>
+        {EXPLORE_FIELD_MORE.map((n) => (
+          <button key={n.id} type="button" className="exploreFieldMoreBtn" onClick={() => setActiveScreen(n.screen)}>
+            {t(`explore.node.${n.id}`)}
+          </button>
+        ))}
+      </div>
+
+      <button type="button" className="linkButton exploreFieldTalk" onClick={() => setActiveScreen(screens.EXPLORE_CHAT)}>
+        {t("explore.talkItThrough")}
+      </button>
+    </Screen>
+  );
 }
 
 function Header({ eyebrow, title, subtitle }) {
@@ -4570,9 +4623,102 @@ function getLifeNodes(profile, healthScores, selectedGoalIds) {
   ];
 }
 
+// Which profile fields sit behind each life node, and whether each is a
+// user-confirmed value or still the starting assumption (defaultProfile).
+const LIFE_NODE_FIELDS = {
+  income: ["statedMonthlyIncome", "monthlyExpenses"],
+  safety: ["currentSavings", "monthlyExpenses"],
+  home: ["homeTargetPrice", "currentSavings"],
+  relationships: ["weddingBudget", "partnerName"],
+  freedom: ["monthlyInvestment", "creditCardOutstanding"],
+  future: ["retirementTargetIncome", "currentAge"],
+};
+const LIFE_NODE_RELATED = {
+  income: [screens.PROFILE, screens.PERSONAL_ECONOMY],
+  safety: [screens.NEED_EMERGENCY, screens.STRATEGIC_BALANCE],
+  home: [screens.FUTURE_FIELD, screens.NEED_HOME],
+  relationships: [screens.FAMILY_CONSTELLATION, screens.WEDDING_LIVING_PLAN],
+  freedom: [screens.CAPITAL_PATHS, screens.REPAYMENT_PATH],
+  future: [screens.FUTURE_LIFE_TIMELINE, screens.NEED_RETIREMENT],
+};
+
+function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
+  const [events, setEvents] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/change-ledger?filter=all")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => alive && setEvents(Array.isArray(d?.events) ? d.events.slice(0, 3) : []))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const fields = LIFE_NODE_FIELDS[node.id] ?? [];
+  const confirmed = [];
+  const estimates = [];
+  const unknowns = [];
+  for (const key of fields) {
+    const val = profile?.[key];
+    const def = defaultProfile?.[key];
+    if (val == null || val === "") unknowns.push(key);
+    else if (def != null && val === def) estimates.push(key);
+    else confirmed.push(key);
+  }
+
+  return (
+    <div className="lifeEvidence">
+      <p className="lifeEvidenceState">
+        {t("life.evidence.state")}: <b>{node.value == null ? t("life.node.notYet") : `${node.value}/100`}</b>
+      </p>
+
+      <dl className="lifeEvidenceCols">
+        <div>
+          <dt>{t("life.evidence.confirmed")}</dt>
+          <dd>{confirmed.length ? confirmed.map((k) => t(`life.field.${k}`)).join(", ") : t("life.evidence.none")}</dd>
+        </div>
+        <div>
+          <dt>{t("life.evidence.estimate")}</dt>
+          <dd>{estimates.length ? estimates.map((k) => t(`life.field.${k}`)).join(", ") : t("life.evidence.none")}</dd>
+        </div>
+        <div>
+          <dt>{t("life.evidence.unknown")}</dt>
+          <dd>{unknowns.length ? unknowns.map((k) => t(`life.field.${k}`)).join(", ") : t("life.evidence.none")}</dd>
+        </div>
+      </dl>
+
+      <div className="lifeEvidenceChanges">
+        <p>{t("life.evidence.recentChanges")}</p>
+        {events.length ? (
+          <ul>
+            {events.map((e) => (
+              <li key={e.id}>{formatEvent(e, t)?.headline ?? e.kind ?? ""}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="lifeEvidenceEmpty">{t("life.evidence.noChanges")}</p>
+        )}
+      </div>
+
+      <div className="lifeEvidenceRelated">
+        {(LIFE_NODE_RELATED[node.id] ?? [node.screen]).map((sc) => (
+          <button key={sc} type="button" className="lifeEvidenceGo" onClick={() => setActiveScreen(sc)}>
+            {t(`life.related.${sc}`)}
+          </button>
+        ))}
+        <button type="button" className="linkButton" onClick={() => setActiveScreen(screens.MEMORY_LENS)}>
+          {t("life.evidence.memoryLens")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
+  const [openNodeId, setOpenNodeId] = useState(null);
   const profile = getUserProfile(preferences);
   const customGoals = getCustomGoals(preferences);
   const detectedStage = getDetectedLifeStage(profile, customGoals, t);
@@ -4580,6 +4726,7 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
   const selectedGoalIds = getProfileGoalIds(profile, customGoals);
   const detectedNeeds = getDetectedNeeds(selectedGoalIds, healthScores);
   const lifeNodes = getLifeNodes(profile, healthScores, selectedGoalIds);
+  const openNode = lifeNodes.find((n) => n.id === openNodeId) ?? null;
 
   return (
     <Screen>
@@ -4597,15 +4744,22 @@ function LifeGraph({ goWithLoading, setActiveScreen, preferences, t }) {
       </div>
 
       <section className="lifeNodeMap" aria-label={t("life.map.label")}>
-        <p className="lifeNodeIntro">{t("life.map.intro")}</p>
+        <p className="lifeNodeIntro">{t("life.map.introEvidence")}</p>
         <div className="lifeNodeGrid">
           {lifeNodes.map((n) => (
-            <button key={n.id} type="button" className={`lifeNode lifeNode-${n.value == null ? "unknown" : n.value >= 70 ? "ok" : n.value >= 50 ? "watch" : "attention"}`} onClick={() => setActiveScreen(n.screen)}>
+            <button
+              key={n.id}
+              type="button"
+              className={`lifeNode lifeNode-${n.value == null ? "unknown" : n.value >= 70 ? "ok" : n.value >= 50 ? "watch" : "attention"} ${openNodeId === n.id ? "is-open" : ""}`}
+              onClick={() => setOpenNodeId(openNodeId === n.id ? null : n.id)}
+              aria-expanded={openNodeId === n.id}
+            >
               <strong>{t(`life.node.${n.id}`)}</strong>
               <span>{n.value == null ? t("life.node.notYet") : `${n.value}/100`}</span>
             </button>
           ))}
         </div>
+        {openNode ? <LifeNodeEvidence node={openNode} profile={profile} t={t} setActiveScreen={setActiveScreen} /> : null}
       </section>
 
       {healthAnalysisOpen ? (
@@ -17628,7 +17782,8 @@ export default function App() {
     ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.MIRROR]: mirrorSimulatorScreen,
+    [screens.MIRROR]: <ExploreLifeField setActiveScreen={setActiveScreen} t={t} />,
+    [screens.EXPLORE_CHAT]: mirrorSimulatorScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
