@@ -6813,3 +6813,46 @@ nextjs-portal {
 .hhStackTotal { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 700; }
 .hhAfterlife { margin: 0; font-size: 0.8rem; }
 @media (max-width: 360px) { .hhReadouts, .hhSteppers { flex-direction: column; } }
+
+/* Safety Runway (Living Thread commit 3) */
+.rwScene { display: flex; flex-direction: column; gap: 12px; }
+.rwSurface { display: flex; flex-direction: column; gap: 10px; }
+.rwField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.rwField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.rwStrip { fill: rgba(20,36,58,0.08); }
+.rwSeg { stroke: rgba(20,36,58,0.15); stroke-width: 1; }
+.rwFog { fill: rgba(154,167,189,0.35); }
+.rwRail { stroke: var(--success); stroke-width: 2; stroke-dasharray: 4 3; }
+.rwRail.is-crossed { stroke: var(--ocbc-red); }
+.rwRailLabel { font-size: 8px; fill: var(--muted); }
+.rwCurrent { stroke: var(--navy); stroke-width: 2.5; }
+.rwProtected { stroke: var(--navy-2); stroke-width: 1.5; stroke-dasharray: 2 2; }
+.rwMarkerLabel { font-size: 8px; fill: var(--navy); }
+.rwLoad { fill: var(--navy-2); }
+.rwLoad.is-essential { fill: var(--ocbc-red); }
+.rwEnd { cursor: grab; }
+.rwEndLine { stroke: var(--navy); stroke-width: 1.5; }
+.rwEndFlag { fill: var(--navy); }
+.rwQuiet { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(15,159,132,0.12); color: var(--success); font-size: 0.86rem; }
+.rwRebuild { display: flex; flex-direction: column; gap: 6px; }
+.rwRebuild label { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; font-size: 0.8rem; }
+.rwRebuild label span { grid-column: 1 / -1; color: var(--muted); }
+.rwRebuild input[type="range"] { grid-column: 1; }
+.rwSteppers { display: flex; gap: 8px; }
+.rwSteppers .toStepper { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.rwSurvive { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.rwSurviveHead { margin: 0 0 6px; font-size: 0.76rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.rwSurvive ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rwSurvive li { display: flex; justify-content: space-between; font-size: 0.82rem; }
+.rwSurvive li.is-risk b { color: var(--ocbc-red); }
+.rwRehearseBtn { align-self: flex-start; }
+.rwRehearse { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--soft); display: flex; flex-direction: column; gap: 8px; }
+.rwRehearse label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; }
+.rwRehearse input[type="number"] { width: 90px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.rwRehearsalResult { border-left: 3px solid var(--navy-2); padding-left: 10px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 3px; }
+.rwRehearsalResult p { margin: 0; }
+.rwVerdict-holds { border-left-color: var(--success); }
+.rwVerdict-needs_a_choice { border-left-color: var(--ocbc-red); }
+.rwSurvivors { list-style: none; margin: 4px 0 0; padding: 0; font-size: 0.78rem; }
+.rwSurvivors li.is-risk { color: var(--ocbc-red); }
+@media (max-width: 360px) { .rwSteppers { flex-direction: column; } }

@@ -3568,7 +3568,10 @@
       "minimum_renovation_reserve": "minimum renovation reserve",
       "latest_purchase_month": "latest purchase month",
       "no_partner_share": "no partner share",
-      "minimum_post_purchase_cash": "minimum cash left after buying"
+      "minimum_post_purchase_cash": "minimum cash left after buying",
+      "minimum_floor_months": "minimum floor months",
+      "maximum_rebuild_monthly": "maximum monthly rebuild",
+      "no_goal_funding_below_floor": "no goal funding below the floor"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -4545,7 +4548,8 @@
       "futureLifeTimeline": "Future Life",
       "needRetirement": "Retirement planner",
       "profile": "Profile",
-      "homeHorizon": "Home Horizon"
+      "homeHorizon": "Home Horizon",
+      "emergencyRunway": "Safety Runway"
     }
   },
   "guardianDecisions": {
@@ -4842,6 +4846,74 @@
       "overCeiling": "The loan exceeds the {factor} regulatory ceiling.",
       "emergencyNearRail": "Your buffer after buying would be {months} months - close to your rail.",
       "depositReady": "Your deposit is fully saved for this price and month."
+    }
+  },
+  "emergencyRunway": {
+    "loading": "Loading your safety picture…",
+    "title": "Safety Runway",
+    "subtitle": "Not how many months you saved - which of your commitments keep going if life changes.",
+    "noData": "Add your monthly expenses and liquid savings to see your runway.",
+    "summaryLine": "Safety · {months} essential months · floor {floor}",
+    "months": "{n} mo",
+    "fog": "not enough info",
+    "estimateNote": "The runway is essential months (a reference 75% of expenses unless you classify them). A rehearsal never changes your real plan.",
+    "field": {
+      "label": "Safety Runway - drag the end flag to set your target protected months",
+      "rail": "Floor {months}mo",
+      "now": "Now {months}mo",
+      "target": "Target: {months} months"
+    },
+    "row": {
+      "current": "Current runway",
+      "burn": "Essential monthly burn",
+      "rebuild": "Monthly rebuild",
+      "toFloor": "To the floor"
+    },
+    "prov": {
+      "liquid": "confirmed liquid savings",
+      "you": "you set this",
+      "rebuildMath": "rebuild math",
+      "system_estimate": "reference estimate",
+      "user_confirmed": "you confirmed",
+      "bank_confirmed": "from your bank data",
+      "unknown": "not known"
+    },
+    "quietZone": "You're above your target. Nothing here needs more saving right now.",
+    "rebuildLabel": "Monthly rebuild contribution",
+    "useSuggested": "Use {amount}/mo (reaches the target in ~2 years)",
+    "targetLabel": "{n}-month target",
+    "shorter": "Shorter runway",
+    "longer": "Longer runway",
+    "survivability": "Which commitments keep going",
+    "essential": "essential",
+    "rehearseOpen": "Rehearse a change",
+    "rehearseNote": "Rehearsal only - this never changes your real plan or moves money.",
+    "gapMonths": "Income gap (months)",
+    "tempExpense": "Extra monthly expense",
+    "runRehearsal": "Run the rehearsal",
+    "verdict": {
+      "holds": "Your protected commitments hold through this.",
+      "dips_then_recovers": "You dip below the floor, then recover.",
+      "needs_a_choice": "This would need a choice from you - a commitment to pause or a change to make."
+    },
+    "breachAt": "Floor crossed around month {m}",
+    "recoveryGradient": "Back to the floor about {m} months after the low point",
+    "survives": "keeps going",
+    "atRisk": "at risk",
+    "mirror": {
+      "sixMonths": "6-month target",
+      "floorOnly": "Protect the floor only",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "liquid_assets": "Liquid savings",
+      "monthly_expenses": "Monthly expenses",
+      "essential_share": "Essential vs discretionary split"
+    },
+    "tp": {
+      "belowFloor": "Your runway is {months} months - below your {floor}-month floor.",
+      "justRecovered": "You've just climbed back to your safety floor.",
+      "quietZone": "You're comfortably above your target - a calm state, no action needed."
     }
   }
 }

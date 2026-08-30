@@ -19,13 +19,13 @@ const DOMAIN_SCREEN = {
   family: "familyConstellation",
   wedding: "weddingLivingPlan",
   home: "homeHorizon",
-  emergency: "needEmergency",
+  emergency: "emergencyRunway",
 };
 
 const ALL_AREAS = [
   { id: "home", screen: "homeHorizon" },
   { id: "relationship", screen: "weddingLivingPlan" },
-  { id: "safety", screen: "needEmergency" },
+  { id: "safety", screen: "emergencyRunway" },
   { id: "freedom", screen: "capitalPaths" },
   { id: "family", screen: "familyConstellation" },
   { id: "experience", screen: "tripOrbit" },

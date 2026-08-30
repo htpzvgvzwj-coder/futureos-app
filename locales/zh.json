@@ -3386,7 +3386,10 @@
       "minimum_renovation_reserve": "最低装修储备",
       "latest_purchase_month": "最晚购房月份",
       "no_partner_share": "不使用伴侣出资",
-      "minimum_post_purchase_cash": "买房后最低现金留存"
+      "minimum_post_purchase_cash": "买房后最低现金留存",
+      "minimum_floor_months": "最低下限月数",
+      "maximum_rebuild_monthly": "每月重建上限",
+      "no_goal_funding_below_floor": "低于下限时不为目标供款"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4363,7 +4366,8 @@
       "futureLifeTimeline": "未来生活",
       "needRetirement": "退休规划",
       "profile": "资料",
-      "homeHorizon": "住房地平线"
+      "homeHorizon": "住房地平线",
+      "emergencyRunway": "安全跑道"
     }
   },
   "guardianDecisions": {
@@ -4660,6 +4664,74 @@
       "overCeiling": "贷款超过 {factor} 监管上限。",
       "emergencyNearRail": "买房后你的缓冲约为 {months} 个月——接近你的边界。",
       "depositReady": "按此房价与月份，你的首付已全部存够。"
+    }
+  },
+  "emergencyRunway": {
+    "loading": "正在加载你的安全全景…",
+    "title": "安全跑道",
+    "subtitle": "不是你存了几个月，而是当生活改变时，哪些承诺还能继续。",
+    "noData": "填写每月支出与流动储蓄，即可看到你的跑道。",
+    "summaryLine": "安全 · {months} 个必要月份 · 下限 {floor}",
+    "months": "{n} 个月",
+    "fog": "信息不足",
+    "estimateNote": "跑道以必要月份计（未分类时按参考的 75% 支出）。演练绝不改变你的真实计划。",
+    "field": {
+      "label": "安全跑道——拖动末端旗标设定目标保护月数",
+      "rail": "下限 {months} 月",
+      "now": "现在 {months} 月",
+      "target": "目标：{months} 个月"
+    },
+    "row": {
+      "current": "当前跑道",
+      "burn": "每月必要开销",
+      "rebuild": "每月重建",
+      "toFloor": "到达下限"
+    },
+    "prov": {
+      "liquid": "已确认的流动储蓄",
+      "you": "你设定的",
+      "rebuildMath": "重建计算",
+      "system_estimate": "参考估算",
+      "user_confirmed": "你已确认",
+      "bank_confirmed": "来自银行数据",
+      "unknown": "未知"
+    },
+    "quietZone": "你已高于目标。此处目前无需再增加储蓄。",
+    "rebuildLabel": "每月重建供款",
+    "useSuggested": "使用 {amount}/月（约 2 年达到目标）",
+    "targetLabel": "{n} 个月目标",
+    "shorter": "更短的跑道",
+    "longer": "更长的跑道",
+    "survivability": "哪些承诺能继续",
+    "essential": "必要",
+    "rehearseOpen": "演练一次变化",
+    "rehearseNote": "仅为演练——绝不改变你的真实计划或划转资金。",
+    "gapMonths": "收入中断（月）",
+    "tempExpense": "额外每月支出",
+    "runRehearsal": "运行演练",
+    "verdict": {
+      "holds": "你受保护的承诺能挺过这次。",
+      "dips_then_recovers": "你会跌破下限，之后恢复。",
+      "needs_a_choice": "这会需要你做出选择——暂停某项承诺，或做出改变。"
+    },
+    "breachAt": "约在第 {m} 个月跌破下限",
+    "recoveryGradient": "从最低点起约 {m} 个月回到下限",
+    "survives": "可继续",
+    "atRisk": "有风险",
+    "mirror": {
+      "sixMonths": "6 个月目标",
+      "floorOnly": "只守住下限",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "liquid_assets": "流动储蓄",
+      "monthly_expenses": "每月支出",
+      "essential_share": "必要与非必要占比"
+    },
+    "tp": {
+      "belowFloor": "你的跑道为 {months} 个月——低于 {floor} 个月的下限。",
+      "justRecovered": "你刚刚回到安全下限。",
+      "quietZone": "你已稳稳高于目标——一个平静的状态，无需行动。"
     }
   }
 }

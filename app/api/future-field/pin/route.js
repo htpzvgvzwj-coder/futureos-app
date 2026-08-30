@@ -22,6 +22,10 @@ const PIN_KINDS = {
   latest_purchase_month: "lte", // value + metric are YYYYMM integers
   no_partner_share: "flag",
   minimum_post_purchase_cash: "gte",
+  // Safety Runway domain pins (Living Thread commit 3).
+  minimum_floor_months: "gte",
+  maximum_rebuild_monthly: "lte",
+  no_goal_funding_below_floor: "flag",
 };
 
 export async function GET(request) {

@@ -129,12 +129,10 @@ test("every registered Studio declares all eleven contract slots (null allowed, 
   }
 });
 
-test("Emergency still declares no native scene (Runway not built); Home now has Home Horizon", () => {
-  assert.equal(getStudioContract("emergency").nativeScene, null);
-  // Home Horizon landed in Living Thread commit 2
+test("Home Horizon (commit 2) and Safety Runway (commit 3) are wired as native scenes", () => {
   assert.equal(getStudioContract("home").nativeScene, "features/home/HomeHorizon");
-  assert.ok(getStudioContract("home").crossGoalProjector);
-  for (const d of ["loan", "retirement", "travel", "investment", "insurance", "family", "wedding", "home"]) {
+  assert.equal(getStudioContract("emergency").nativeScene, "features/emergency/EmergencyRunway");
+  for (const d of ["loan", "retirement", "travel", "investment", "insurance", "family", "wedding", "home", "emergency"]) {
     assert.ok(getStudioContract(d).nativeScene, `${d} has a native scene wired`);
   }
 });
@@ -143,9 +141,9 @@ test("wiredContractSlots reports only the non-null slots", () => {
   const loan = wiredContractSlots("loan");
   assert.ok(loan.includes("financeProjector") && loan.includes("crossGoalProjector") && loan.includes("turningPointRules"));
   assert.ok(!loan.includes("replayMapper"), "loan replayMapper is not built yet");
-  const home = wiredContractSlots("home");
-  assert.ok(home.includes("nativeScene") && home.includes("crossGoalProjector") && home.includes("turningPointRules") && home.includes("provenanceRules"));
-  assert.ok(!home.includes("replayMapper"), "home ThreadMemoryScrubber mapping is commit 12");
-  const emergency = wiredContractSlots("emergency");
-  assert.ok(!emergency.includes("nativeScene"));
+  for (const d of ["home", "emergency"]) {
+    const w = wiredContractSlots(d);
+    assert.ok(w.includes("nativeScene") && w.includes("crossGoalProjector") && w.includes("turningPointRules") && w.includes("provenanceRules") && w.includes("unknownRules"));
+    assert.ok(!w.includes("replayMapper"), `${d} ThreadMemoryScrubber mapping is commit 12`);
+  }
 });
