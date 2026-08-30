@@ -4124,7 +4124,11 @@
     "overAllocated": "That's more than was released.",
     "confirm": "Confirm this handoff",
     "confirmed": "Handoff confirmed. {unallocated}/month still available.",
-    "error": "Couldn't confirm the handoff. Try again."
+    "error": "Couldn't confirm the handoff. Try again.",
+    "sendTo": "Send to {goal}",
+    "aGoal": "A goal",
+    "pickGoal": "Pick a goal…",
+    "needTarget": "Pick which goal this goes to."
   },
   "repaymentPath": {
     "title": "Repayment Path",
@@ -4469,7 +4473,8 @@
       "label": "Bank now",
       "available": "Available",
       "cardDue": "Card payment due - {amount}",
-      "clear": "Nothing needs handling this week."
+      "clear": "Nothing needs handling this week.",
+      "unknown": "Not set up yet"
     },
     "plans": {
       "label": "Your plans",
@@ -4716,6 +4721,34 @@
     "tension": {
       "tightening": "Your commitments are tightening this month.",
       "needs_a_decision": "A commitment needs a decision from you."
+    },
+    "placeholder": "e.g. pay off my loan sooner, take a trip next year…",
+    "routedTo": "This points at {studio}",
+    "openStudio": "Open {studio}",
+    "clarify": "A couple of things this could mean — pick one:",
+    "noMatch": "Couldn't tell which part of your plan that's about. Try naming a goal, or open all life areas below.",
+    "threadUnavailable": "Live picture unavailable right now — the studios still work.",
+    "route": {
+      "loan": "Loan",
+      "retirement": "Retirement",
+      "travel": "Travel",
+      "investment": "Investing",
+      "insurance": "Protection",
+      "family": "Family",
+      "wedding": "Wedding",
+      "home": "Home",
+      "emergency": "Safety buffer"
+    },
+    "why": {
+      "loan": "it's about debt and monthly repayments",
+      "retirement": "it's about your later-life income",
+      "travel": "it's about a trip as a life window",
+      "investment": "it's about capital working toward a future",
+      "insurance": "it's about protecting income or family",
+      "family": "it's about planning money with a partner",
+      "wedding": "it's about the wedding plan",
+      "home": "it's about a home deposit and timing",
+      "emergency": "it's about your safety buffer"
     }
   }
 }

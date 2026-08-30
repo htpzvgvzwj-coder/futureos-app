@@ -3942,7 +3942,11 @@
     "overAllocated": "超过了释放出的金额。",
     "confirm": "确认此接力",
     "confirmed": "接力已确认。仍有 {unallocated}/月可用。",
-    "error": "无法确认接力，请重试。"
+    "error": "无法确认接力，请重试。",
+    "sendTo": "投向{goal}",
+    "aGoal": "某个目标",
+    "pickGoal": "选择一个目标…",
+    "needTarget": "请选择这笔金额去向哪个目标。"
   },
   "repaymentPath": {
     "title": "还款之路",
@@ -4287,7 +4291,8 @@
       "label": "此刻银行",
       "available": "可用",
       "cardDue": "信用卡待还——{amount}",
-      "clear": "本周没有需要处理的银行事项。"
+      "clear": "本周没有需要处理的银行事项。",
+      "unknown": "尚未设置"
     },
     "plans": {
       "label": "你的计划",
@@ -4534,6 +4539,34 @@
     "tension": {
       "tightening": "本月你的承诺正在收紧。",
       "needs_a_decision": "有一项承诺需要你做决定。"
+    },
+    "placeholder": "例如：更快还清贷款、明年去旅行……",
+    "routedTo": "这指向「{studio}」",
+    "openStudio": "打开{studio}",
+    "clarify": "这可能有几个意思——选一个：",
+    "noMatch": "无法判断这属于计划的哪一部分。试着说出一个目标，或在下方打开所有人生领域。",
+    "threadUnavailable": "实时全景暂不可用——各工作室仍可使用。",
+    "route": {
+      "loan": "贷款",
+      "retirement": "退休",
+      "travel": "旅行",
+      "investment": "投资",
+      "insurance": "保障",
+      "family": "家庭",
+      "wedding": "婚礼",
+      "home": "住房",
+      "emergency": "安全缓冲"
+    },
+    "why": {
+      "loan": "这关乎债务和每月还款",
+      "retirement": "这关乎你晚年的收入",
+      "travel": "这关乎把一次旅行当作人生窗口",
+      "investment": "这关乎让资本为某个未来工作",
+      "insurance": "这关乎保障收入或家庭",
+      "family": "这关乎和伴侣一起规划金钱",
+      "wedding": "这关乎婚礼计划",
+      "home": "这关乎购房首付与时间",
+      "emergency": "这关乎你的安全缓冲"
     }
   }
 }

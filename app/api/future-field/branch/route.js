@@ -161,8 +161,14 @@ export async function POST(request) {
       ? context.adapter.projectImpacts(peeled.data, context.realityPlanData, context.projectionContext ?? {})
       : null;
 
+  // Explicit sealability verdict (Part 0.4) - never "missing means true".
+  const sealableVerdict =
+    peeled.feasibility && typeof peeled.feasibility.sealable === "boolean"
+      ? { sealable: peeled.feasibility.sealable, reason: peeled.feasibility.sealableReason ?? (peeled.feasibility.sealable ? "ok" : "blocked") }
+      : { sealable: false, reason: "sealability_not_computed" };
+
   return Response.json({
-    branch: { id: branch.id, label, delta: peeled.delta, feasibility: peeled.feasibility, projectedImpacts },
+    branch: { id: branch.id, label, delta: peeled.delta, feasibility: peeled.feasibility, sealableVerdict, projectedImpacts },
     ledgerEventId: ledger?.event?.id ?? null,
   });
 }

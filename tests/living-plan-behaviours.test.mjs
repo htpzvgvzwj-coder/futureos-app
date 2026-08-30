@@ -83,13 +83,28 @@ test("future handoff: a completed commitment releases its full monthly; nothing 
   const h = buildHandoffCandidate({
     commitment: { id: "c1", domain: "wedding", monthly_contribution: 1100, status: "active", effectiveMonth: "2026-01", endMonth: "2027-07" },
     reason: "completed",
+    activeGoals: ["home", "retirement", "wedding"],
     now: NOW,
   });
   assert.equal(h.releasedMonthly, 1100);
   assert.equal(h.unallocatedMonthly, 1100);
   assert.equal(h.state, "candidate");
   assert.equal(handoffAffectsOtherGoals(h), false);
-  assert.ok(h.targets.includes("home") && h.targets.includes("flexible"));
+  // Part 0.2: targets are the customer's REAL active goals, minus the
+  // source (wedding), plus emergency + flexible. Never a hardcoded list.
+  assert.ok(h.targets.includes("home") && h.targets.includes("retirement") && h.targets.includes("emergency") && h.targets.includes("flexible"));
+  assert.ok(!h.targets.includes("wedding"), "source goal is not a destination for a completed handoff");
+  assert.equal(h.targetGoalId, null, "no target chosen yet");
+});
+
+test("future handoff: with no active goals, only emergency + flexible are offered (never a default Home)", () => {
+  const h = buildHandoffCandidate({
+    commitment: { id: "c2", domain: "loan", monthly_contribution: 400, status: "active" },
+    reason: "revoked",
+    now: NOW,
+  });
+  assert.deepEqual(h.targets, ["emergency", "flexible"]);
+  assert.ok(!h.targets.includes("home"));
 });
 
 test("future handoff: a 'reduced' commitment only releases the difference", () => {

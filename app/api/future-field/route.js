@@ -2,8 +2,21 @@ import { getCurrentUserId } from "../../../lib/auth.js";
 import { loadDomainContext, ensurePlan } from "../../../lib/future-field/service.js";
 import { futureFieldSupportedDomains } from "../../../lib/future-field/adapters.js";
 import { planStore, compareRealityToCommitted } from "../../../lib/plan-runtime/index.js";
+import { query } from "../../../lib/db.js";
 
 export const runtime = "nodejs";
+
+// Part 0.4: an explicit sealability verdict for a path - never "undefined
+// means true". A path is sealable only when its feasibility SAYS so.
+function sealabilityVerdict(feasibility) {
+  if (!feasibility || feasibility.available === false) {
+    return { sealable: false, reason: feasibility?.reason ?? "no_feasibility" };
+  }
+  if (typeof feasibility.sealable !== "boolean") {
+    return { sealable: false, reason: "sealability_not_computed" };
+  }
+  return { sealable: feasibility.sealable, reason: feasibility.sealableReason ?? (feasibility.sealable ? "ok" : "blocked") };
+}
 
 // Assemble the Future Field for one domain: the reality path (confirmed
 // plan + real feasibility), the possible paths (branches), the pins, and
@@ -35,6 +48,43 @@ export async function GET(request) {
     planStore.getApplicableConstraints(userId, { planId: plan.id, domain }),
     planStore.getCurrentPlanVersion(plan.id),
   ]);
+
+  // Part 0.3: the identity of THIS scene's seal. A scene is sealed only
+  // when an active commitment for the same (domain, plan) exists. Any
+  // generic confirmed_savings_plan is NOT this scene's seal.
+  const { rows: commitRows } = await query(
+    `select id, domain, plan_id, plan_branch_id, monthly_contribution, effective_month, source_moment
+     from goal_commitments
+     where profile_key = $1 and domain = $2 and plan_id = $3 and status = 'active'
+     order by created_at desc limit 1`,
+    [userId, domain, plan.id],
+  );
+  let sceneSeal = { sealed: false };
+  if (commitRows[0]) {
+    const c = commitRows[0];
+    const sm = c.source_moment ?? {};
+    const { rows: gpRows } = await query(
+      `select id, pause_conditions, reconfirm_after_days from guardian_policies
+       where profile_key = $1 and commitment_id = $2 and active = true order by created_at desc limit 1`,
+      [userId, c.id],
+    );
+    sceneSeal = {
+      sealed: true,
+      commitmentId: c.id,
+      domain: c.domain,
+      planId: c.plan_id,
+      branchId: c.plan_branch_id ?? null,
+      baseVersion: sm.baseVersion ?? null,
+      monthlyContribution: Number(c.monthly_contribution) || 0,
+      effectiveMonth: c.effective_month,
+      allocation: sm.allocation ?? null,
+      allocationTargetGoalId: sm.allocationTargetGoalId ?? sm.allocationGoalId ?? null,
+      guardianPolicy: gpRows[0]
+        ? { id: gpRows[0].id, pauseConditions: gpRows[0].pause_conditions ?? [], reconfirmAfterDays: gpRows[0].reconfirm_after_days }
+        : null,
+      identityMatches: true,
+    };
+  }
 
   const realityFeasibility = context.adapter.feasibility(context.realityPlanData);
   const projector = context.adapter.projector(context.realityPlanData);
@@ -76,9 +126,11 @@ export async function GET(request) {
     state: plan.state,
     currentVersion: currentVersion?.version ?? "0",
     hasRealityPath: true,
+    sceneSeal,
     realityPath: {
       data: context.realityPlanData,
       feasibility: realityFeasibility,
+      sealableVerdict: sealabilityVerdict(realityFeasibility),
       monthlyContribution: context.realityPlanData.monthly_contribution || 0,
       ...realityReady,
     },
@@ -91,13 +143,17 @@ export async function GET(request) {
         typeof context.adapter.projectImpacts === "function"
           ? context.adapter.projectImpacts(b.data ?? context.realityPlanData, context.realityPlanData, context.projectionContext ?? {})
           : null;
+      // Recompute the branch's feasibility now (its stored copy can be
+      // stale) so the sealability verdict is current and explicit.
+      const freshFeasibility = context.adapter.feasibility(b.data ?? context.realityPlanData);
       return {
         id: b.id,
         label: b.label,
         status: b.status,
         baseVersion: b.base_version,
         delta: b.delta,
-        feasibility: b.feasibility,
+        feasibility: freshFeasibility,
+        sealableVerdict: sealabilityVerdict(freshFeasibility),
         monthlyContribution: monthly,
         projectedImpacts,
         ...readyMonthFor(b.data ?? context.realityPlanData, monthly),

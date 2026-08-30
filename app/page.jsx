@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-screen.jsx";
 import { formatEvent } from "../lib/change-ledger/format.js";
 import { nodeEvents } from "../lib/life/node-evidence.js";
+import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
+import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
 import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
 import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
@@ -3228,127 +3230,8 @@ function getNavScreen(activeScreen) {
   return activeScreen;
 }
 
-// Explore is intent-first, not a feature menu:
-//   1. Continue your active future  (only when one exists)
-//   2. one personalised current tension, from real status data
-//   3. one input: "What do you want to change?" -> routes to the Studio
-// "All life areas" is a secondary, closed drawer - never the first screen.
-const EXPLORE_INTENTS = [
-  { id: "debt", screen: screens.REPAYMENT_PATH },
-  { id: "home", screen: screens.FUTURE_FIELD },
-  { id: "retire", screen: screens.FUTURE_LIFE_TIMELINE },
-  { id: "trip", screen: screens.TRIP_ORBIT },
-  { id: "grow", screen: screens.CAPITAL_PATHS },
-  { id: "protect", screen: screens.PROTECTION_ENVELOPE },
-  { id: "partner", screen: screens.FAMILY_CONSTELLATION },
-  { id: "wedding", screen: screens.WEDDING_LIVING_PLAN },
-  { id: "safety", screen: screens.NEED_EMERGENCY },
-];
-const EXPLORE_ALL_AREAS = [
-  { id: "home", screen: screens.FUTURE_FIELD },
-  { id: "relationship", screen: screens.WEDDING_LIVING_PLAN },
-  { id: "safety", screen: screens.NEED_EMERGENCY },
-  { id: "freedom", screen: screens.CAPITAL_PATHS },
-  { id: "family", screen: screens.FAMILY_CONSTELLATION },
-  { id: "experience", screen: screens.TRIP_ORBIT },
-  { id: "future", screen: screens.FUTURE_LIFE_TIMELINE },
-  { id: "debt", screen: screens.REPAYMENT_PATH },
-  { id: "protection", screen: screens.PROTECTION_ENVELOPE },
-];
-const EXPLORE_DRAFT_SCREEN = {
-  loan: screens.REPAYMENT_PATH,
-  retirement: screens.FUTURE_LIFE_TIMELINE,
-  travel: screens.TRIP_ORBIT,
-  investment: screens.CAPITAL_PATHS,
-  insurance: screens.PROTECTION_ENVELOPE,
-  family: screens.FAMILY_CONSTELLATION,
-};
-
-function readActiveDraftDomain() {
-  try {
-    for (let i = 0; i < window.sessionStorage.length; i++) {
-      const k = window.sessionStorage.key(i);
-      const m = k && k.match(/^livingScene:draft:(\w+)$/);
-      if (m) return m[1];
-    }
-  } catch {
-    /* storage blocked - fine */
-  }
-  return null;
-}
-
-function ExploreMoment({ setActiveScreen, t }) {
-  const [status, setStatus] = useState(null);
-  const [intent, setIntent] = useState("");
-  const activeDraft = readActiveDraftDomain();
-
-  useEffect(() => {
-    let alive = true;
-    fetch("/api/living-plan/status")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => alive && setStatus(d))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const tp = status?.nextTurningPoint ?? null;
-  const pw = status?.promiseWeight ?? null;
-  const tension = tp?.whyNowKey
-    ? t(tp.whyNowKey, tp.whyNowParams)
-    : pw && pw.status && pw.status !== "calm"
-      ? t(`explore.tension.${pw.status}`)
-      : null;
-
-  const go = () => {
-    const m = EXPLORE_INTENTS.find((x) => x.id === intent);
-    if (m) setActiveScreen(m.screen);
-  };
-
-  return (
-    <Screen className="exploreMoment">
-      <header className="exploreMomentHead">
-        <p className="exploreFieldEyebrow">{t("explore.eyebrow")}</p>
-      </header>
-
-      {activeDraft && EXPLORE_DRAFT_SCREEN[activeDraft] ? (
-        <button type="button" className="exploreContinue" onClick={() => setActiveScreen(EXPLORE_DRAFT_SCREEN[activeDraft])}>
-          <span className="exploreContinueLabel">{t("explore.continue")}</span>
-          <span className="exploreContinueName">{t(`livingScene.node.${activeDraft === "loan" ? "breathingRoom" : activeDraft}`) || activeDraft}</span>
-        </button>
-      ) : null}
-
-      {tension ? <p className="exploreTension">{tension}</p> : null}
-
-      <div className="exploreIntent">
-        <label htmlFor="exploreIntentSelect">{t("explore.question")}</label>
-        <select id="exploreIntentSelect" value={intent} onChange={(e) => setIntent(e.target.value)}>
-          <option value="">{t("explore.pick")}</option>
-          {EXPLORE_INTENTS.map((x) => (
-            <option key={x.id} value={x.id}>{t(`explore.intent.${x.id}`)}</option>
-          ))}
-        </select>
-        <button type="button" className="lsPrimaryBtn" disabled={!intent} onClick={go}>{t("explore.goIntent")}</button>
-      </div>
-
-      <button type="button" className="linkButton exploreFieldTalk" onClick={() => setActiveScreen(screens.EXPLORE_CHAT)}>
-        {t("explore.talkItThrough")}
-      </button>
-
-      <details className="exploreAllAreas">
-        <summary>{t("explore.allAreas")}</summary>
-        <div className="exploreAllGrid">
-          {EXPLORE_ALL_AREAS.map((n) => (
-            <button key={n.id} type="button" className="exploreFieldMoreBtn" onClick={() => setActiveScreen(n.screen)}>
-              {t(`explore.node.${n.id}`)}
-            </button>
-          ))}
-        </div>
-      </details>
-    </Screen>
-  );
-}
+// Explore is intent-first (app/features/explore/ExploreScreen.jsx). It reads
+// the canonical Life Thread for "Continue your future" and the one tension.
 
 function Header({ eyebrow, title, subtitle }) {
   return (
@@ -3796,28 +3679,38 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
 // LivingPlanStatus), and Latest Change (one line -> Change Replay).
 // "Everything on your accounts" opens the full account view.
 function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
+  // Part 7: Today's main state is the canonical Life Thread. The old
+  // profile-derived values are only a fallback while the snapshot loads.
+  const { thread } = useLifeThread();
   const profile = getUserProfile(preferences);
   const hasRealProfile = String(profile?.statedMonthlyIncome ?? "") !== String(defaultProfile.statedMonthlyIncome);
-  const balance = getProfileAmount(profile, "currentSavings", 85000);
-  const cardOutstanding = getProfileAmount(profile, "creditCardOutstanding", 0);
 
-  const [latestChange, setLatestChange] = useState(null);
+  const threadBank = thread?.bankNow ?? null;
+  const balanceKnown = threadBank ? threadBank.known : hasRealProfile;
+  const balance = threadBank && threadBank.known ? threadBank.availableBalance : getProfileAmount(profile, "currentSavings", 85000);
+  const cardDue = threadBank?.oneThingThisWeek?.kind === "card_payment" ? threadBank.oneThingThisWeek.amount : getProfileAmount(profile, "creditCardOutstanding", 0);
+
+  const [latestChangeFallback, setLatestChangeFallback] = useState(null);
   useEffect(() => {
+    if (thread) return; // the thread carries latestChange - no separate fetch
     let alive = true;
     fetch("/api/change-ledger?filter=all")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (!alive || !d?.events?.length) return;
-        setLatestChange(formatEvent(d.events[0], t));
+        setLatestChangeFallback(formatEvent(d.events[0], t));
       })
       .catch(() => {});
     return () => {
       alive = false;
     };
-  }, [t]);
+  }, [t, thread]);
+  const latestChange = thread?.latestChange
+    ? { headline: thread.latestChange.headline }
+    : latestChangeFallback;
 
-  const bankTask = cardOutstanding > 0
-    ? { label: t("today.bankNow.cardDue", { amount: formatSgd(cardOutstanding) }), onClick: () => setActiveScreen(screens.ACCOUNT_DETAIL) }
+  const bankTask = cardDue > 0
+    ? { label: t("today.bankNow.cardDue", { amount: formatSgd(cardDue) }), onClick: () => setActiveScreen(screens.ACCOUNT_DETAIL) }
     : null;
 
   const plans = [
@@ -3843,7 +3736,7 @@ function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
         <section className="todayBankNow" aria-label={t("today.bankNow.label")}>
           <button type="button" className="todayBalance" onClick={() => setActiveScreen(screens.ACCOUNT_DETAIL)}>
             <span>{t("today.bankNow.available")}</span>
-            <strong>{formatSgd(balance)}</strong>
+            <strong>{balanceKnown ? formatSgd(balance) : t("today.bankNow.unknown")}</strong>
           </button>
           {bankTask ? (
             <button type="button" className="todayBankTask" onClick={bankTask.onClick}>
@@ -17732,7 +17625,7 @@ export default function App() {
     ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.MIRROR]: <ExploreMoment setActiveScreen={setActiveScreen} t={t} />,
+    [screens.MIRROR]: <ExploreScreen setActiveScreen={setActiveScreen} t={t} />,
     [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
@@ -17827,17 +17720,19 @@ export default function App() {
   }
 
   return (
-    <PhoneShell
-      activeScreen={activeScreen}
-      setActiveScreen={setActiveScreen}
-      language={language}
-      setLanguage={setLanguage}
-      theme={effectiveTheme}
-      simpleMode={Boolean(preferences.accessibility?.simpleMode)}
-      t={t}
-    >
-      <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
-    </PhoneShell>
+    <LifeThreadProvider enabled={authStatus === "authenticated"}>
+      <PhoneShell
+        activeScreen={activeScreen}
+        setActiveScreen={setActiveScreen}
+        language={language}
+        setLanguage={setLanguage}
+        theme={effectiveTheme}
+        simpleMode={Boolean(preferences.accessibility?.simpleMode)}
+        t={t}
+      >
+        <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+      </PhoneShell>
+    </LifeThreadProvider>
   );
 }
 

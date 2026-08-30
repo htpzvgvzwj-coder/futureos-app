@@ -6757,3 +6757,14 @@ nextjs-portal {
 @media (prefers-reduced-motion: reduce) {
   .lsSheet { transition: none; }
 }
+
+/* One Life Thread (PR #13) - Explore intent result */
+.exploreIntent input[type="text"] { border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-size: 0.9rem; background: var(--surface); width: 100%; }
+.exploreRouted { border: 1px solid var(--line); border-left: 3px solid var(--navy); border-radius: 12px; background: var(--surface); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.exploreRoutedWhy { margin: 0; font-size: 0.84rem; }
+.exploreClarify { display: flex; flex-direction: column; gap: 8px; }
+.exploreClarify > p { margin: 0; font-size: 0.84rem; color: var(--muted); }
+.exploreClarifyChips { display: flex; flex-wrap: wrap; gap: 8px; }
+.exploreNoMatch { margin: 0; font-size: 0.82rem; color: var(--muted); }
+.fhSplit select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 0.8rem; margin: 0 4px; }
+.fhTaps .secondaryButton.is-on { border-color: var(--navy); background: var(--soft); }
