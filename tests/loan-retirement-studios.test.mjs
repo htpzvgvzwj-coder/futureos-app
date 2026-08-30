@@ -58,28 +58,32 @@ test("loan feasibility: months-to-debt-free, debt weight, monthly freedom, Futur
   assert.ok(f.futureScore >= 0 && f.futureScore <= 100);
 });
 
-test("loan: extra repayment finishes sooner but the projectImpacts show it as PRESSURE (costs monthly freedom)", () => {
+test("loan: extra repayment finishes sooner; the unified impactSet shows PRESSURE and a ghost Future Handoff", () => {
   const f0 = loan.feasibility(loanReality);
   const branch = { ...loanReality, extra_repayment: 300 };
   const f1 = loan.feasibility(branch);
   assert.ok(f1.monthsToDebtFree < f0.monthsToDebtFree, "extra repayment -> debt-free sooner");
 
-  const proj = loan.projectImpacts(branch, loanReality, ctx);
-  assert.equal(proj.mode, "pressure");
-  assert.equal(proj.pressure.extraMonthlyNeeded, 300);
-  assert.equal(proj.availableImpact, null);
+  // Living Thread commit 4: projectImpacts now returns the studio-contract
+  // impactSet (Debt Gravity), not the old monthly-shift shape.
+  const impact = loan.projectImpacts(branch, loanReality, ctx);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 300);
+  assert.equal(impact.resourceDelta.freedMonthly, 0);
+  assert.equal(impact.resourceDelta.futureHandoffAtPayoff.state, "ghost");
+  assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(impact.allocationRequired, true);
 });
 
-test("loan: a LOWER installment branch FREES cashflow -> availableImpact, allocation governs where it goes", () => {
-  const branch = { ...loanReality, monthly_installment: 400 };
-  const proj = loan.projectImpacts(branch, loanReality, ctx);
-  assert.equal(proj.mode, "freed");
-  assert.equal(proj.freedCashflow, 155);
-  assert.ok(proj.availableImpact.maxHomeMonthsEarlier >= 0);
-  assert.equal(proj.allocatedImpact, null);
+test("loan: reducing a prior extra repayment FREES cashflow; a leg is solid only once allocated", () => {
+  const priorBranch = { ...loanReality, extra_repayment: 300 };
+  const relaxed = { ...loanReality, extra_repayment: 100 };
+  const impact = loan.projectImpacts(relaxed, priorBranch, ctx);
+  assert.equal(impact.resourceDelta.freedMonthly, 200);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 
-  const withAlloc = loan.projectImpacts({ ...branch, allocation: { goalMonthly: 155, emergencyMonthly: 0, flexibleMonthly: 0 } }, loanReality, ctx);
-  assert.ok(withAlloc.allocatedImpact.home.monthsDelta <= 0);
+  const withAlloc = loan.projectImpacts({ ...relaxed, allocation: { goalMonthly: 200, emergencyMonthly: 0, flexibleMonthly: 0 } }, priorBranch, ctx);
+  assert.notEqual(withAlloc.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null);
 });
 
 test("loan Bend: solve the extra repayment to be debt-free by a target month", () => {

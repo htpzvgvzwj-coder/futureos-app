@@ -3571,7 +3571,12 @@
       "minimum_post_purchase_cash": "minimum cash left after buying",
       "minimum_floor_months": "minimum floor months",
       "maximum_rebuild_monthly": "maximum monthly rebuild",
-      "no_goal_funding_below_floor": "no goal funding below the floor"
+      "no_goal_funding_below_floor": "no goal funding below the floor",
+      "minimum_breathing_room": "minimum breathing room",
+      "maximum_extra_payment": "maximum extra payment",
+      "protect_emergency_floor": "protect the emergency floor",
+      "no_one_off_from_protected_savings": "no one-off from protected savings",
+      "target_debt_only": "target debt only"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -4914,6 +4919,68 @@
       "belowFloor": "Your runway is {months} months - below your {floor}-month floor.",
       "justRecovered": "You've just climbed back to your safety floor.",
       "quietZone": "You're comfortably above your target - a calm state, no action needed."
+    }
+  },
+  "debtGravity": {
+    "loading": "Loading your debts…",
+    "title": "Debt Gravity",
+    "subtitle": "Not a repayment table - when your debt gives your monthly freedom back.",
+    "noDebt": "No confirmed debt to work with yet.",
+    "summaryLine": "Debt · {label} · debt-free {debtFree}",
+    "estimateNote": "Reducing-balance amortization. Unknown interest rates and early-repayment fees are shown as unknown, never assumed 0.",
+    "field": {
+      "label": "Debt Gravity - drag the Release Knot to choose a payoff date; the extra monthly back-solves",
+      "cashflow": "cashflow",
+      "freedom": "Freedom",
+      "knot": "Release Knot at {months} months"
+    },
+    "row": {
+      "balance": "Target balance",
+      "freedomDate": "Freedom Date",
+      "released": "Monthly released at payoff",
+      "breathing": "Breathing room now"
+    },
+    "prov": {
+      "bank": "from your bank data",
+      "amort": "reducing-balance amortization",
+      "estimate": "estimate"
+    },
+    "read": {
+      "debtFree": "Debt-free in",
+      "saved": "{m} months sooner",
+      "breathing": "Breathing room"
+    },
+    "extraLabel": "Extra monthly repayment",
+    "handoffPreview": {
+      "title": "Future Handoff (preview)",
+      "body": "Around {month}, {amount}/mo comes back as an available resource. It stays a ghost until the debt actually clears - and you place it then, nothing is auto-routed."
+    },
+    "compareStrategies": "Compare strategies",
+    "strategy": {
+      "highest_rate_first": "Highest rate first",
+      "smallest_balance_first": "Smallest balance first",
+      "balanced": "Balanced",
+      "clearsIn": "clears everything in {m} months",
+      "interest": "{amount} total interest"
+    },
+    "body": {
+      "balance": "Balance",
+      "apr": "Interest rate",
+      "minimum": "Minimum payment",
+      "fee": "Early-repayment fee",
+      "unknown": "not known"
+    },
+    "mirror": {
+      "in12": "Clear in 12 months",
+      "minimumOnly": "Minimum only",
+      "reset": "Back to reality"
+    },
+    "unknownGeneric": "{id}",
+    "tp": {
+      "nearPayoff": "{label} can be cleared in about {months} months from here.",
+      "belowBreathing": "This extra takes your monthly breathing room below your floor.",
+      "belowBreathingWait": "a smaller extra, or a later payoff date, keeps the floor",
+      "aprUnknown": "One of these debts has an unconfirmed interest rate - confirm it for an accurate payoff."
     }
   }
 }

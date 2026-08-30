@@ -467,9 +467,15 @@ test("Loan + Retirement studios: real reality path + feasibility + branch persis
     const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
     assert.equal(Number(reloaded.data[overrideKey]), overrideVal, `${domain} branch survives reload`);
 
-    // paying more is pressure (never silently "frees" money)
+    // paying more is pressure (never silently "frees" money). loan now
+    // returns the unified studio-contract impactSet; retirement still the
+    // monthly-shift shape - accept either.
     const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
-    assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
+    if (proj.mode != null) {
+      assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
+    } else {
+      assert.ok(proj.resourceDelta && Array.isArray(proj.affectedGoals) && typeof proj.allocationRequired === "boolean", "a valid unified impactSet");
+    }
   }
 });
 

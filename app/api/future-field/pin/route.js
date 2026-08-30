@@ -26,6 +26,12 @@ const PIN_KINDS = {
   minimum_floor_months: "gte",
   maximum_rebuild_monthly: "lte",
   no_goal_funding_below_floor: "flag",
+  // Debt Gravity domain pins (Living Thread commit 4).
+  minimum_breathing_room: "gte",
+  maximum_extra_payment: "lte",
+  protect_emergency_floor: "flag",
+  no_one_off_from_protected_savings: "flag",
+  target_debt_only: "flag",
 };
 
 export async function GET(request) {

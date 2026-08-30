@@ -37,7 +37,7 @@ const ALLOWED_OVERRIDES = {
     "partner_contribution",
   ]),
   emergency: new Set(["target_months", "floor_months", "monthly_contribution", "protected_commitments", "essential_share", "fund_goals_anyway"]),
-  loan: new Set(["extra_repayment", "monthly_installment"]),
+  loan: new Set(["extra_repayment", "monthly_installment", "one_off_payment", "target_debt", "breathing_room_floor", "repayment_strategy", "excluded_debt_ids"]),
   retirement: new Set(["monthly_contribution", "target_monthly_income"]),
   travel: new Set(["travellers", "nights", "comfort_tier", "destination_type", "trip_month", "total_budget", "monthly_contribution"]),
   investment: new Set(["monthly_commitment", "target_pool", "horizon_years"]),

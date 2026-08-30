@@ -3389,7 +3389,12 @@
       "minimum_post_purchase_cash": "买房后最低现金留存",
       "minimum_floor_months": "最低下限月数",
       "maximum_rebuild_monthly": "每月重建上限",
-      "no_goal_funding_below_floor": "低于下限时不为目标供款"
+      "no_goal_funding_below_floor": "低于下限时不为目标供款",
+      "minimum_breathing_room": "最低喘息空间",
+      "maximum_extra_payment": "额外还款上限",
+      "protect_emergency_floor": "保护应急下限",
+      "no_one_off_from_protected_savings": "不从受保护储蓄中一次性还款",
+      "target_debt_only": "仅目标债务"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4732,6 +4737,68 @@
       "belowFloor": "你的跑道为 {months} 个月——低于 {floor} 个月的下限。",
       "justRecovered": "你刚刚回到安全下限。",
       "quietZone": "你已稳稳高于目标——一个平静的状态，无需行动。"
+    }
+  },
+  "debtGravity": {
+    "loading": "正在加载你的债务…",
+    "title": "债务引力",
+    "subtitle": "不是还款表——而是债务何时把每月的自由还给你。",
+    "noDebt": "尚无可处理的已确认债务。",
+    "summaryLine": "债务 · {label} · {debtFree} 还清",
+    "estimateNote": "递减余额摊还。未确认的利率与提前还款费用显示为未知，绝不假设为 0。",
+    "field": {
+      "label": "债务引力——拖动释放结点选择还清日期；额外月供反解",
+      "cashflow": "现金流",
+      "freedom": "自由",
+      "knot": "释放结点在第 {months} 个月"
+    },
+    "row": {
+      "balance": "目标余额",
+      "freedomDate": "自由日",
+      "released": "还清时释放的月供",
+      "breathing": "当前喘息空间"
+    },
+    "prov": {
+      "bank": "来自银行数据",
+      "amort": "递减余额摊还",
+      "estimate": "估算"
+    },
+    "read": {
+      "debtFree": "还清还需",
+      "saved": "提前 {m} 个月",
+      "breathing": "喘息空间"
+    },
+    "extraLabel": "额外每月还款",
+    "handoffPreview": {
+      "title": "未来交接（预览）",
+      "body": "约在 {month}，{amount}/月 会作为可用资源回到你手中。在债务真正还清前它只是虚影——届时由你安放，不会被自动分配。"
+    },
+    "compareStrategies": "比较策略",
+    "strategy": {
+      "highest_rate_first": "先还最高利率",
+      "smallest_balance_first": "先还最小余额",
+      "balanced": "平衡",
+      "clearsIn": "在 {m} 个月内全部还清",
+      "interest": "总利息 {amount}"
+    },
+    "body": {
+      "balance": "余额",
+      "apr": "利率",
+      "minimum": "最低还款",
+      "fee": "提前还款费用",
+      "unknown": "未知"
+    },
+    "mirror": {
+      "in12": "12 个月内还清",
+      "minimumOnly": "仅最低还款",
+      "reset": "回到现实"
+    },
+    "unknownGeneric": "{id}",
+    "tp": {
+      "nearPayoff": "{label} 大约可在 {months} 个月内还清。",
+      "belowBreathing": "这笔额外还款会让你的每月喘息空间跌破下限。",
+      "belowBreathingWait": "更小的额外还款，或更晚的还清日期，能守住下限",
+      "aprUnknown": "其中一笔债务的利率尚未确认——确认后才能得到准确的还清时间。"
     }
   }
 }

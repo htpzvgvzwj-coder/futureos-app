@@ -6856,3 +6856,44 @@ nextjs-portal {
 .rwSurvivors { list-style: none; margin: 4px 0 0; padding: 0; font-size: 0.78rem; }
 .rwSurvivors li.is-risk { color: var(--ocbc-red); }
 @media (max-width: 360px) { .rwSteppers { flex-direction: column; } }
+
+/* Debt Gravity (Living Thread commit 4) */
+.dgScene { display: flex; flex-direction: column; gap: 12px; }
+.dgSurface { display: flex; flex-direction: column; gap: 10px; }
+.dgField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.dgField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.dgCashflow { fill: var(--teal); }
+.dgSmall { font-size: 7px; fill: var(--muted); }
+.dgAxis { stroke: var(--line); stroke-width: 1; }
+.dgPull { stroke: rgba(20,36,58,0.25); stroke-width: 1; }
+.dgBall { fill: var(--navy-2); }
+.dgBall.is-card { fill: var(--ocbc-red); }
+.dgBody.is-target .dgBall { stroke: var(--navy); stroke-width: 2; }
+.dgBody { cursor: pointer; }
+.dgKnot { cursor: grab; }
+.dgKnotLine { stroke: var(--navy); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.dgKnotFlag { fill: var(--navy); }
+.dgBreathTrack { fill: var(--line); }
+.dgBreathFill { fill: var(--success); }
+.dgBreathFill.is-low { fill: var(--ocbc-red); }
+.dgReadouts { display: flex; gap: 8px; }
+.dgReadout { flex: 1; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.dgReadout span { font-size: 0.7rem; color: var(--muted); }
+.dgReadout b { font-size: 1rem; }
+.dgReadout em { font-size: 0.68rem; color: var(--navy-2); font-style: normal; }
+.dgReadout.is-better b { color: var(--success); }
+.dgReadout.is-worse b { color: var(--ocbc-red); }
+.dgExtra { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; font-size: 0.8rem; }
+.dgExtra span { grid-column: 1 / -1; color: var(--muted); }
+.dgExtra input[type="range"] { grid-column: 1; }
+.dgHandoffGhost { border: 1px dashed var(--navy-2); border-radius: 12px; padding: 10px 12px; background: rgba(20,36,58,0.04); font-size: 0.8rem; }
+.dgHandoffGhost p { margin: 0 0 3px; }
+.dgStrategies { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.dgStrategy { display: flex; flex-direction: column; gap: 1px; font-size: 0.78rem; }
+.dgStrategy b { font-size: 0.82rem; }
+.dgStrategy em { color: var(--muted); font-style: normal; font-size: 0.72rem; }
+.dgBodySheet { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--soft); }
+.dgBodySheet h4 { margin: 0 0 6px; font-size: 0.86rem; }
+.dgBodySheet dl { margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.dgBodySheet dl div { display: flex; justify-content: space-between; font-size: 0.8rem; }
+@media (max-width: 360px) { .dgReadouts { flex-direction: column; } }

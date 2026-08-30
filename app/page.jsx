@@ -16,7 +16,7 @@ import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-st
 import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
 import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
-import { RepaymentPath } from "./features/loan/RepaymentPath.jsx";
+import { DebtGravity } from "./features/loan/DebtGravity.jsx";
 import { FutureLifeTimeline } from "./features/retirement/FutureLifeTimeline.jsx";
 import { TripOrbit } from "./features/travel/TripOrbit.jsx";
 import { CapitalPaths } from "./features/investment/CapitalPaths.jsx";
@@ -17604,7 +17604,7 @@ export default function App() {
     [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
     [screens.EMERGENCY_RUNWAY]: <EmergencyRunway t={t} setActiveScreen={setActiveScreen} />,
     [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.REPAYMENT_PATH]: <RepaymentPath t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.REPAYMENT_PATH]: <DebtGravity t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.TRIP_ORBIT]: <TripOrbit t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.CAPITAL_PATHS]: <CapitalPaths t={t} setActiveScreen={setActiveScreen} language={language} />,
