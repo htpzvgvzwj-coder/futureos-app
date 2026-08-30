@@ -472,3 +472,37 @@ test("Loan + Retirement studios: real reality path + feasibility + branch persis
     assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
   }
 });
+
+test("Investment studio: real reality path from the fixture's confirmed recurring pick + branch persistence", opts, async (t) => {
+  const { ffService, ffAdapters, store, ff, pool } = await mods();
+  const ctx = await ffService.loadDomainContext(FIXTURE_HOME_USER, "investment");
+  if (!ctx.realityPlanData) {
+    t.skip("fixture has no confirmed recurring investment");
+    return;
+  }
+  const adapter = ffAdapters.getFutureFieldAdapter("investment");
+  const feas = adapter.feasibility(ctx.realityPlanData);
+  assert.equal(feas.available, true);
+  assert.ok(feas.monthlyCommitment > 0);
+  assert.ok(["readyToInvest", "buildBufferFirst", "payDownDebtFirst", "noRoomYet"].includes(feas.readiness));
+
+  const plan = await ffService.ensurePlan(FIXTURE_HOME_USER, "investment", ctx);
+  t.after(async () => {
+    await pool.query("delete from plan_branches where plan_id = $1", [plan.id]);
+    await pool.query("delete from plan_versions where plan_id = $1", [plan.id]);
+    await pool.query("delete from plans where id = $1", [plan.id]);
+  });
+  const peeled = ff.peelBranch({
+    baseData: ctx.realityPlanData,
+    overrides: { monthly_commitment: Math.max(100, Math.round(Number(ctx.realityPlanData.monthly_commitment) * 0.6)) },
+    feasibilityFn: (d) => adapter.feasibility(d),
+  });
+  const branch = await store.createBranch(plan.id, FIXTURE_HOME_USER, {
+    label: "itest invest lower", baseVersion: "1", data: peeled.data, delta: peeled.delta, feasibility: peeled.feasibility,
+  });
+  const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
+  assert.ok(reloaded, "investment branch persists");
+  const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
+  assert.equal(proj.mode, "freed", "committing less frees cashflow");
+  assert.equal(proj.allocatedImpact, null, "nothing auto-routed");
+});

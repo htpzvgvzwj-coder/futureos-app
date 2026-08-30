@@ -3540,7 +3540,15 @@
       "extra_repayment": "额外还款",
       "monthly_installment": "每月月供",
       "monthly_contribution": "每月金额",
-      "target_monthly_income": "目标每月收入"
+      "target_monthly_income": "目标每月收入",
+      "travellers": "同行人数",
+      "nights": "晚数",
+      "comfort_tier": "舒适度",
+      "destination_type": "目的地",
+      "trip_month": "出行月份",
+      "monthly_commitment": "每月投入",
+      "target_pool": "目标资金池",
+      "horizon_years": "期限（年）"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3602,7 +3610,8 @@
       "nothing_freed": "该分支不会释放任何现金流。",
       "over_allocated": "拆分金额超过了释放出的金额，请调低其中一项。",
       "branch_not_found": "该分支已不存在。",
-      "no_loan": "没有可供分支的已确认贷款。"
+      "no_loan": "没有可供分支的已确认贷款。",
+      "missing_trip_shape": "请先设置同行人数和晚数。"
     },
     "noRealityPathWedding": "你还没有已确认的婚礼预算。先设置一个，婚礼生活计划就会打开。",
     "goConfirmPlanWedding": "打开婚礼规划师",
@@ -3628,6 +3637,16 @@
         "restaurant": "餐厅",
         "hotel": "酒店宴会",
         "outdoor": "户外"
+      },
+      "comfort_tier": {
+        "budget": "经济",
+        "mid": "中档",
+        "premium": "高端"
+      },
+      "destination_type": {
+        "domestic": "国内",
+        "regional": "周边",
+        "longhaul": "长途"
       }
     },
     "possibleIfAllocated": "若你分配释放出的现金流，则可能"
@@ -3943,5 +3962,43 @@
     "years": "{years} 年",
     "noPlan": "你还没有已确认的退休计划。",
     "estimateNote": "补齐年数是按 25 年退休期、不假设投资回报的估算。"
+  },
+  "tripOrbit": {
+    "title": "旅程轨道",
+    "subtitle": "旅行是一扇人生之窗——日期、人数、舒适度——不是一张预算表。",
+    "entryTitle": "旅程轨道",
+    "entryBody": "移动日期、同行人数或舒适度，看费用、付款节点，以及你自己分配的被释放现金流。",
+    "fieldTitle": "时间场中的旅程",
+    "fieldSubtitle": "缩小规模以释放由你分配的现金流，或保留它并在别处调整。",
+    "theWindow": "旅行之窗",
+    "tripCost": "旅行费用",
+    "perTraveller": "人均",
+    "monthlyNeeded": "每月所需",
+    "readyBy": "资金到位于",
+    "belowCost": "你的预算比真实费用低 {amount}——减少晚数、人数或舒适度，或提高预算。",
+    "noPlan": "你还没有已确认的旅行计划。",
+    "estimateNote": "参考费率估算，非机票或酒店报价。日期和目的地对此影响很大。"
+  },
+  "capitalPaths": {
+    "title": "资本路径",
+    "subtitle": "有任务的资本——这笔钱在为哪个未来工作，期限多长。",
+    "entryTitle": "资本路径",
+    "entryBody": "移动每月投入额，看到达目标的年数与它当下占用的现金流之间的取舍。",
+    "fieldTitle": "时间场中的投资",
+    "fieldSubtitle": "多投以更快到达目标，或少投以释放由你在别处分配的现金流。",
+    "thisCapital": "这笔资本",
+    "monthly": "每月",
+    "horizon": "期限",
+    "contributedBy": "到期累计投入",
+    "yearsToTarget": "到达目标年数",
+    "years": "年",
+    "noPlan": "你还没有已确认的定期投资。",
+    "estimateNote": "仅为累计投入金额——此处不假设任何投资回报。",
+    "readiness": {
+      "ready": "应急缓冲为 {months} 个月——有投资空间。",
+      "buffer": "应急缓冲仅 {months} 个月——先建立好再在此增加。",
+      "debt": "仍有高成本债务——先清偿再在此增加。",
+      "noRoom": "当前没有每月可投资的空间。"
+    }
   }
 }

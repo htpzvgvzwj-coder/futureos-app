@@ -89,6 +89,20 @@ const PEEL_FIELDS = {
     { field: "monthly_contribution", kind: "money" },
     { field: "target_monthly_income", kind: "money" },
   ],
+  travel: [
+    { field: "travellers", kind: "count" },
+    { field: "nights", kind: "count" },
+    { field: "comfort_tier", kind: "select", options: ["budget", "mid", "premium"] },
+    { field: "destination_type", kind: "select", options: ["domestic", "regional", "longhaul"] },
+    { field: "trip_month", kind: "month" },
+    { field: "total_budget", kind: "money" },
+    { field: "monthly_contribution", kind: "money" },
+  ],
+  investment: [
+    { field: "monthly_commitment", kind: "money" },
+    { field: "target_pool", kind: "money" },
+    { field: "horizon_years", kind: "count" },
+  ],
 };
 function peelFieldsFor(domain) {
   return PEEL_FIELDS[domain] ?? PEEL_FIELDS.home;

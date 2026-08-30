@@ -3722,7 +3722,15 @@
       "extra_repayment": "Extra repayment",
       "monthly_installment": "Monthly installment",
       "monthly_contribution": "Monthly amount",
-      "target_monthly_income": "Target monthly income"
+      "target_monthly_income": "Target monthly income",
+      "travellers": "Travellers",
+      "nights": "Nights",
+      "comfort_tier": "Comfort",
+      "destination_type": "Destination",
+      "trip_month": "Trip month",
+      "monthly_commitment": "Monthly commitment",
+      "target_pool": "Target pool",
+      "horizon_years": "Horizon (years)"
     },
     "bendTitle": "Bend - move the outcome",
     "bendHelp": "Drag the reality node on the field, or set a target date here. The system solves the monthly amount.",
@@ -3784,7 +3792,8 @@
       "nothing_freed": "This branch doesn't free any cashflow.",
       "over_allocated": "That splits more than was freed. Lower one of the amounts.",
       "branch_not_found": "That branch no longer exists.",
-      "no_loan": "No confirmed loan to branch from."
+      "no_loan": "No confirmed loan to branch from.",
+      "missing_trip_shape": "Set the number of travellers and nights first."
     },
     "noRealityPathWedding": "You do not have a confirmed wedding budget yet. Set one up first, then the Wedding Living Plan opens.",
     "goConfirmPlanWedding": "Open Wedding Planner",
@@ -3810,6 +3819,16 @@
         "restaurant": "Restaurant",
         "hotel": "Hotel banquet",
         "outdoor": "Outdoor"
+      },
+      "comfort_tier": {
+        "budget": "Budget",
+        "mid": "Mid",
+        "premium": "Premium"
+      },
+      "destination_type": {
+        "domestic": "Domestic",
+        "regional": "Regional",
+        "longhaul": "Long-haul"
       }
     },
     "possibleIfAllocated": "possible if you allocate the freed cashflow"
@@ -4125,5 +4144,43 @@
     "years": "{years} years",
     "noPlan": "You have no confirmed retirement plan yet.",
     "estimateNote": "Years-to-close is an estimate over a 25-year retirement horizon with no investment return assumed."
+  },
+  "tripOrbit": {
+    "title": "Trip Orbit",
+    "subtitle": "A trip is a life window - date, people, comfort - not a budget sheet.",
+    "entryTitle": "Trip Orbit",
+    "entryBody": "Move the date, travellers or comfort and see the cost, the payment nodes, and the freed cashflow you place.",
+    "fieldTitle": "Your trip on the time field",
+    "fieldSubtitle": "Scale it down to free cashflow you place yourself, or keep it and adjust elsewhere.",
+    "theWindow": "The trip window",
+    "tripCost": "Trip cost",
+    "perTraveller": "Per traveller",
+    "monthlyNeeded": "Monthly needed",
+    "readyBy": "Funded by",
+    "belowCost": "Your budget is {amount} below the real cost - cut nights, travellers, or comfort, or raise it.",
+    "noPlan": "You have no confirmed trip yet.",
+    "estimateNote": "Reference-rate estimate, not a fare or hotel quote. Date and destination move this a lot."
+  },
+  "capitalPaths": {
+    "title": "Capital Paths",
+    "subtitle": "Capital with a job - which future is this money working for, over what horizon.",
+    "entryTitle": "Capital Paths",
+    "entryBody": "Move the monthly commitment and see years-to-target against the cashflow it costs now.",
+    "fieldTitle": "Your investment on the time field",
+    "fieldSubtitle": "Commit more to reach the target sooner, or less to free cashflow you place elsewhere.",
+    "thisCapital": "This capital",
+    "monthly": "Monthly",
+    "horizon": "Horizon",
+    "contributedBy": "Contributed by horizon",
+    "yearsToTarget": "Years to target",
+    "years": "years",
+    "noPlan": "You have no confirmed recurring investment yet.",
+    "estimateNote": "Contributed amount only - no investment return is assumed here.",
+    "readiness": {
+      "ready": "Emergency buffer is {months} months - room to invest.",
+      "buffer": "Emergency buffer is only {months} months - build it before adding more here.",
+      "debt": "High-cost debt outstanding - clear it before adding more here.",
+      "noRoom": "No monthly room to invest right now."
+    }
   }
 }
