@@ -3576,7 +3576,13 @@
       "maximum_extra_payment": "maximum extra payment",
       "protect_emergency_floor": "protect the emergency floor",
       "no_one_off_from_protected_savings": "no one-off from protected savings",
-      "target_debt_only": "target debt only"
+      "target_debt_only": "target debt only",
+      "minimum_current_breathing_room": "minimum current breathing room",
+      "minimum_emergency_floor": "minimum emergency floor",
+      "maximum_monthly_contribution": "maximum monthly contribution",
+      "protected_future_day_choices": "protected Future Day choices",
+      "no_assumed_inheritance": "no assumed inheritance",
+      "no_unconfirmed_partner_assets": "no unconfirmed partner assets"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -4981,6 +4987,94 @@
       "belowBreathing": "This extra takes your monthly breathing room below your floor.",
       "belowBreathingWait": "a smaller extra, or a later payoff date, keeps the floor",
       "aprUnknown": "One of these debts has an unconfirmed interest rate - confirm it for an accurate payoff."
+    }
+  },
+  "futureDayLoom": {
+    "loading": "Loading your retirement picture…",
+    "title": "Future-Day Loom",
+    "subtitle": "Not how much you need first - build a future day, then work backwards to now.",
+    "noPlan": "Confirm a retirement plan to weave your Future-Day Loom.",
+    "summaryLine": "Retirement · gap {gap}/mo · {contribution}",
+    "estimateNote": "Every figure is a range. No investment return is assumed in the base. CPF LIFE, existing assets, inheritance and partner assets are counted only when confirmed.",
+    "step": "Question {n} of {of}",
+    "back": "Back",
+    "skipToLoom": "Skip to the loom",
+    "q": {
+      "where": "Where will you live?",
+      "where.stay_here": "Stay where I am",
+      "where.smaller_town": "A smaller town",
+      "where.overseas_lower_cost": "Overseas, lower cost",
+      "where.overseas_higher_cost": "Overseas, higher cost",
+      "housing": "Your home then?",
+      "housing.own_paid_off": "Own it, paid off",
+      "housing.still_paying": "Still paying it off",
+      "housing.renting": "Renting",
+      "housing.downsize": "Downsized",
+      "work": "Working rhythm?",
+      "work.fully_stopped": "Fully stopped",
+      "work.part_time": "Part-time",
+      "work.keep_working": "Keep working",
+      "routine": "Daily routine?",
+      "routine.simple": "Simple",
+      "routine.comfortable": "Comfortable",
+      "routine.active_social": "Active and social",
+      "care": "Caring for someone?",
+      "care.caring_for_someone": "Yes",
+      "care.not_caring": "No",
+      "flexibility": "Room for the unexpected?",
+      "flexibility.tight": "Tight",
+      "flexibility.some_room": "Some room",
+      "flexibility.lots_of_room": "Lots of room",
+      "supported_people": "People I support"
+    },
+    "yourFutureDay": "Your Future Day",
+    "dayBaselineOnly": "Just your baseline so far - answer a question to shape it.",
+    "supportedPeople": "People you'll support",
+    "fewer": "Fewer",
+    "more": "More",
+    "editDay": "Edit the Future Day",
+    "field": {
+      "label": "Future-Day Loom - pull the Now/Future seam to trade current freedom for future life",
+      "now": "Now",
+      "future": "Future",
+      "seam": "Now / Future seam",
+      "openBand": "Open future: {pct}%",
+      "age": "Retire at {age}",
+      "retireAt": "Retire ~{age}"
+    },
+    "row": {
+      "target": "Future monthly life",
+      "confirmedIncome": "Confirmed income",
+      "gap": "Monthly gap",
+      "needContribution": "Contribution needed"
+    },
+    "prov": {
+      "range": "a range, not a point",
+      "noReturn": "no return assumed",
+      "bank_confirmed": "from your bank data",
+      "system_estimate": "estimate",
+      "unknown": "not known"
+    },
+    "readout": "Contributing {contribution} · {band} of the widest future covered",
+    "withReturn": "With returns: about {amount}/mo ({pct}% assumed)",
+    "decisionEcho": "You've made a few similar retirement choices - Guardian noticed. It won't act on it.",
+    "mirror": {
+      "moreFuture": "Weight the future",
+      "moreNow": "Weight now",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "monthly_expenses": "Monthly expenses",
+      "cpf_life_monthly": "CPF LIFE payout",
+      "existing_retirement_assets": "Existing retirement assets",
+      "current_age": "Your age",
+      "target_monthly_income": "Target monthly income"
+    },
+    "tp": {
+      "liquidityConflict": "This contribution is more than your monthly cashflow can cover.",
+      "liquidityConflictWait": "a smaller contribution, or a later retirement age, keeps it affordable",
+      "belowBreathing": "This contribution takes your current monthly room below your floor.",
+      "gapThreshold": "Your contribution is below the middle of the range needed for this Future Day (~{needLow}/mo)."
     }
   }
 }

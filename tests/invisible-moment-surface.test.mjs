@@ -116,12 +116,16 @@ test("allocationSettled requires an explicit target when the goal leg is funded"
 });
 
 // ---- Part 2.5: no synthetic Decision Echo from one slider ----------
-test("Retirement and Investment scenes declare no synthetic turning point / echo", () => {
-  const ret = read("app/features/retirement/FutureLifeTimeline.jsx");
+test("Retirement and Investment scenes carry no synthetic Decision Echo", () => {
+  // Retirement is now Future-Day Loom (Living Thread commit 5). It has a
+  // REAL turning point (liquidity conflict / breathing floor) - not a
+  // synthetic echo - and the real Decision Echo comes from the server's
+  // >=3 user-confirmed Ledger actions gate, not from one adjustment.
+  const ret = read("app/features/retirement/FutureDayLoom.jsx");
   const inv = read("app/features/investment/CapitalPaths.jsx");
-  assert.ok(/turningPointFor=\{null\}/.test(ret), "retirement passes turningPointFor={null}");
+  assert.ok(!/function retirementEcho/.test(ret) && !/futureLifeTimeline\.echo/.test(ret), "no synthetic retirementEcho");
+  assert.ok(/detectDecisionEchoes|projection\?\.decisionEcho|decisionEcho/.test(read("app/api/future-day-loom/route.js")), "the real Decision Echo comes from the >=3 gate");
   assert.ok(/turningPointFor=\{null\}/.test(inv), "investment passes turningPointFor={null}");
-  assert.ok(!/function retirementEcho/.test(ret), "retirementEcho removed");
   assert.ok(!/function capitalEcho/.test(inv), "capitalEcho removed");
 });
 

@@ -32,6 +32,13 @@ const PIN_KINDS = {
   protect_emergency_floor: "flag",
   no_one_off_from_protected_savings: "flag",
   target_debt_only: "flag",
+  // Future-Day Loom domain pins (Living Thread commit 5).
+  minimum_current_breathing_room: "gte",
+  minimum_emergency_floor: "gte",
+  maximum_monthly_contribution: "lte",
+  protected_future_day_choices: "flag",
+  no_assumed_inheritance: "flag",
+  no_unconfirmed_partner_assets: "flag",
 };
 
 export async function GET(request) {

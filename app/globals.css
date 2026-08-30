@@ -6897,3 +6897,42 @@ nextjs-portal {
 .dgBodySheet dl { margin: 0; display: flex; flex-direction: column; gap: 3px; }
 .dgBodySheet dl div { display: flex; justify-content: space-between; font-size: 0.8rem; }
 @media (max-width: 360px) { .dgReadouts { flex-direction: column; } }
+
+/* Future-Day Loom (Living Thread commit 5) */
+.lmScene { display: flex; flex-direction: column; gap: 12px; }
+.lmSurface { display: flex; flex-direction: column; gap: 12px; }
+.lmField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.lmField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.lmThread { stroke: rgba(20,36,58,0.25); stroke-width: 2; }
+.lmNow { fill: var(--navy-2); }
+.lmFuture { fill: var(--navy); }
+.lmSmall { font-size: 8px; fill: var(--muted); }
+.lmSeam { cursor: grab; }
+.lmSeam:focus-visible { outline: none; }
+.lmSeamLine { stroke: var(--navy); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.lmSeamKnot { fill: var(--navy); }
+.lmSeam:focus-visible .lmSeamKnot { stroke: var(--teal); stroke-width: 3; }
+.lmBandTrack { fill: var(--line); }
+.lmBandFill { fill: var(--success); }
+.lmAge { cursor: pointer; }
+.lmAge:focus-visible { outline: none; }
+.lmAgeLabel { font-size: 9px; fill: var(--navy-2); }
+.lmAge:focus-visible .lmAgeLabel { fill: var(--teal); font-weight: 700; }
+.lmQuestion { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); }
+.lmStep { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.lmQuestion h3 { margin: 0; font-size: 1rem; }
+.lmOptions { display: flex; flex-direction: column; gap: 6px; }
+.lmOptions button { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); font-size: 0.86rem; text-align: left; }
+.lmOptions button em { font-style: normal; font-size: 0.72rem; color: var(--navy-2); }
+.lmOptions button.is-on { border-color: var(--navy); background: rgba(20,36,58,0.06); }
+.lmQNav { display: flex; gap: 8px; }
+.lmFutureDay { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.lmFutureDay h3 { margin: 0; font-size: 0.9rem; }
+.lmDayParts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.lmDayParts li { display: flex; justify-content: space-between; gap: 10px; font-size: 0.82rem; }
+.lmSupported { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.82rem; }
+.lmSupported .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.lmReadout { margin: 0; font-size: 0.86rem; color: var(--navy-2); }
+.lmEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
+@media (max-width: 360px) { .lmDayParts li { flex-direction: column; gap: 1px; } }
+@media (prefers-reduced-motion: reduce) { .lmSeam, .lmSeamKnot, .lmBandFill { transition: none !important; } }

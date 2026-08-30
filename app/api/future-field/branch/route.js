@@ -38,7 +38,7 @@ const ALLOWED_OVERRIDES = {
   ]),
   emergency: new Set(["target_months", "floor_months", "monthly_contribution", "protected_commitments", "essential_share", "fund_goals_anyway"]),
   loan: new Set(["extra_repayment", "monthly_installment", "one_off_payment", "target_debt", "breathing_room_floor", "repayment_strategy", "excluded_debt_ids"]),
-  retirement: new Set(["monthly_contribution", "target_monthly_income"]),
+  retirement: new Set(["monthly_contribution", "target_monthly_income", "future_day", "future_age", "inflation_assumption", "longevity_years", "real_return_assumption", "minimum_current_breathing_room"]),
   travel: new Set(["travellers", "nights", "comfort_tier", "destination_type", "trip_month", "total_budget", "monthly_contribution"]),
   investment: new Set(["monthly_commitment", "target_pool", "horizon_years"]),
   insurance: new Set(["monthly_premium_now", "income_protection_months", "existing_income_protection", "existing_life_cover", "existing_ci_cover", "home_loan_outstanding", "dependents"]),

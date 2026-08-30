@@ -3394,7 +3394,13 @@
       "maximum_extra_payment": "额外还款上限",
       "protect_emergency_floor": "保护应急下限",
       "no_one_off_from_protected_savings": "不从受保护储蓄中一次性还款",
-      "target_debt_only": "仅目标债务"
+      "target_debt_only": "仅目标债务",
+      "minimum_current_breathing_room": "最低当前喘息空间",
+      "minimum_emergency_floor": "最低应急下限",
+      "maximum_monthly_contribution": "每月供款上限",
+      "protected_future_day_choices": "受保护的未来之日选择",
+      "no_assumed_inheritance": "不假设遗产",
+      "no_unconfirmed_partner_assets": "不计入未确认的伴侣资产"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4799,6 +4805,94 @@
       "belowBreathing": "这笔额外还款会让你的每月喘息空间跌破下限。",
       "belowBreathingWait": "更小的额外还款，或更晚的还清日期，能守住下限",
       "aprUnknown": "其中一笔债务的利率尚未确认——确认后才能得到准确的还清时间。"
+    }
+  },
+  "futureDayLoom": {
+    "loading": "正在加载你的退休全景…",
+    "title": "未来之日织机",
+    "subtitle": "不是先问你需要多少——先构建未来的一天，再倒推回现在。",
+    "noPlan": "确认退休计划后即可编织你的未来之日织机。",
+    "summaryLine": "退休 · 缺口 {gap}/月 · {contribution}",
+    "estimateNote": "所有数字都是区间。基准不假设任何投资回报。CPF LIFE、现有资产、遗产与伴侣资产只有在确认后才计入。",
+    "step": "第 {n} / {of} 题",
+    "back": "返回",
+    "skipToLoom": "跳到织机",
+    "q": {
+      "where": "你会住在哪里？",
+      "where.stay_here": "留在原地",
+      "where.smaller_town": "更小的城镇",
+      "where.overseas_lower_cost": "海外，低成本",
+      "where.overseas_higher_cost": "海外，高成本",
+      "housing": "那时的住房？",
+      "housing.own_paid_off": "自有，已还清",
+      "housing.still_paying": "仍在还贷",
+      "housing.renting": "租房",
+      "housing.downsize": "换小房",
+      "work": "工作节奏？",
+      "work.fully_stopped": "完全停止",
+      "work.part_time": "兼职",
+      "work.keep_working": "继续工作",
+      "routine": "日常生活？",
+      "routine.simple": "简朴",
+      "routine.comfortable": "舒适",
+      "routine.active_social": "活跃且社交",
+      "care": "在照顾某人吗？",
+      "care.caring_for_someone": "是",
+      "care.not_caring": "否",
+      "flexibility": "为意外留的空间？",
+      "flexibility.tight": "很紧",
+      "flexibility.some_room": "一些空间",
+      "flexibility.lots_of_room": "很多空间",
+      "supported_people": "我供养的人"
+    },
+    "yourFutureDay": "你的未来之日",
+    "dayBaselineOnly": "目前只有基准——回答一个问题来塑造它。",
+    "supportedPeople": "你将供养的人数",
+    "fewer": "减少",
+    "more": "增加",
+    "editDay": "编辑未来之日",
+    "field": {
+      "label": "未来之日织机——拉动「现在 / 未来」接缝，以当下的自由换取未来的生活",
+      "now": "现在",
+      "future": "未来",
+      "seam": "现在 / 未来 接缝",
+      "openBand": "开放的未来：{pct}%",
+      "age": "在 {age} 岁退休",
+      "retireAt": "约 {age} 岁退休"
+    },
+    "row": {
+      "target": "未来每月生活",
+      "confirmedIncome": "已确认收入",
+      "gap": "每月缺口",
+      "needContribution": "所需供款"
+    },
+    "prov": {
+      "range": "是区间，不是一个点",
+      "noReturn": "不假设回报",
+      "bank_confirmed": "来自银行数据",
+      "system_estimate": "估算",
+      "unknown": "未知"
+    },
+    "readout": "供款 {contribution} · 已覆盖最宽未来的 {band}",
+    "withReturn": "考虑回报：约 {amount}/月（假设 {pct}%）",
+    "decisionEcho": "你做了几次类似的退休选择——守护者注意到了。它不会据此行动。",
+    "mirror": {
+      "moreFuture": "偏向未来",
+      "moreNow": "偏向现在",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "monthly_expenses": "每月支出",
+      "cpf_life_monthly": "CPF LIFE 给付",
+      "existing_retirement_assets": "现有退休资产",
+      "current_age": "你的年龄",
+      "target_monthly_income": "目标每月收入"
+    },
+    "tp": {
+      "liquidityConflict": "这笔供款超过了你每月现金流所能承担的。",
+      "liquidityConflictWait": "更小的供款，或更晚的退休年龄，能让它可负担",
+      "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
+      "gapThreshold": "你的供款低于此未来之日所需区间的中位（约 {needLow}/月）。"
     }
   }
 }
