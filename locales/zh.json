@@ -3957,7 +3957,36 @@
     "futureScore": "未来分数",
     "months": "{months} 个月",
     "noLoan": "你还没有已确认的贷款。",
-    "estimateNote": "结清月数是按已确认利率的等额本息估算，非银行对账单。"
+    "estimateNote": "结清月数是按已确认利率的等额本息估算，非银行对账单。",
+    "loading": "正在加载你的贷款…",
+    "reality": {
+      "principal": "未偿本金",
+      "installment": "合同月供",
+      "rate": "利率",
+      "debtFreeNow": "还清（当前节奏）",
+      "fromLoan": "来自你已确认的贷款",
+      "amortization": "递减余额摊还"
+    },
+    "soonerBy": "提前 {n} 个月",
+    "laterBy": "推迟 {n} 个月",
+    "dragLabel": "月还款——在喘息空间与更快还清之间拖动",
+    "pole": {
+      "breathingRoom": "喘息空间",
+      "debtWeight": "债务重量"
+    },
+    "extraNow": "额外 {amount}/月 · 合计 {total}/月",
+    "weightOfIncome": "收入的 {pct}% 用于这笔贷款",
+    "mirror": {
+      "breathingRoom": "保留喘息空间",
+      "balanced": "平衡路径",
+      "clearFaster": "更快还清"
+    },
+    "turningPoint": {
+      "overcommit": "这会让你的自由现金流低于零 {amount}/月。",
+      "overcommitWait": "等待可保留选择权，但债务会拖得更久",
+      "halfIncome": "这会把收入的 {pct}% 投入还款。",
+      "halfIncomeWait": "现在放缓一点，能为冲击留出空间"
+    }
   },
   "futureLifeTimeline": {
     "title": "未来人生时间线",
@@ -3973,7 +4002,56 @@
     "closeGapIn": "补齐缺口于",
     "years": "{years} 年",
     "noPlan": "你还没有已确认的退休计划。",
-    "estimateNote": "补齐年数是按 25 年退休期、不假设投资回报的估算。"
+    "estimateNote": "补齐年数是按 25 年退休期、不假设投资回报的估算。",
+    "loading": "正在加载你的退休计划…",
+    "reality": {
+      "target": "目标每月生活",
+      "gap": "对比 CPF LIFE 的月缺口",
+      "topup": "每月补充",
+      "fromPlan": "来自你已确认的计划",
+      "cpfLife": "CPF LIFE 给付估算"
+    },
+    "futureDay": "构建一个「未来的一天」",
+    "day": {
+      "place": "住在哪里",
+      "place.city": "城市",
+      "place.town": "小镇",
+      "place.lowerCost": "低成本地区",
+      "time": "你的时间",
+      "time.fullStop": "完全停止工作",
+      "time.partTime": "兼职",
+      "time.keepWorking": "继续工作",
+      "care": "照顾家人",
+      "care.caring": "是",
+      "care.notCaring": "否",
+      "radius": "生活范围有多广",
+      "radius.local": "本地",
+      "radius.regional": "区域",
+      "radius.global": "全球",
+      "keep": "保留的日常",
+      "keep.diningOut": "外出就餐",
+      "keep.car": "一辆车",
+      "keep.yearlyTravel": "每年一次旅行"
+    },
+    "assumption": "换算为目标 {target}、缺口 {gap}。这些是透明假设——你的 CPF LIFE 估算保持不变。",
+    "axis": "现在 → 未来生活",
+    "stop": {
+      "now": "现在",
+      "weddingHome": "婚礼 / 住房",
+      "family": "家庭",
+      "career": "职业灵活度",
+      "futureLife": "未来生活"
+    },
+    "dragLabel": "每月空间——在近期目标与未来生活之间拖动",
+    "pole": {
+      "nearTerm": "近期",
+      "futureLife": "未来生活"
+    },
+    "readout": "补充 {topup} · 缺口在 {years} 内补齐",
+    "echo": {
+      "protectNearTerm": "你一再把空间拉回近期。要不要用一个 Pin 固定补充上限，而不是每次都重新决定？",
+      "protectNearTermWait": "没有 Pin，这个问题每次都会再出现"
+    }
   },
   "tripOrbit": {
     "title": "旅程轨道",
@@ -3984,12 +4062,50 @@
     "fieldSubtitle": "缩小规模以释放由你分配的现金流，或保留它并在别处调整。",
     "theWindow": "旅行之窗",
     "tripCost": "旅行费用",
-    "perTraveller": "人均",
+    "perTraveller": "每人 {amount}",
     "monthlyNeeded": "每月所需",
     "readyBy": "资金到位于",
     "belowCost": "你的预算比真实费用低 {amount}——减少晚数、人数或舒适度，或提高预算。",
     "noPlan": "你还没有已确认的旅行计划。",
-    "estimateNote": "参考费率估算，非机票或酒店报价。日期和目的地对此影响很大。"
+    "estimateNote": "参考费率估算，非机票或酒店报价。日期和目的地对此影响很大。",
+    "loading": "正在加载你的行程…",
+    "reality": {
+      "shape": "行程形态",
+      "shapeValue": "{people} 人 · {nights} 晚",
+      "cost": "参考成本",
+      "month": "出行月份",
+      "fromPlan": "来自你已确认的计划",
+      "referenceRate": "新加坡参考费率估算"
+    },
+    "window": "旅行窗口",
+    "node": {
+      "people": "人数",
+      "nights": "晚数",
+      "comfort": "舒适度",
+      "date": "日期",
+      "budget": "预算"
+    },
+    "fewer": "减少",
+    "more": "增加",
+    "earlier": "提前",
+    "later": "推迟",
+    "comfort": {
+      "budget": "经济",
+      "mid": "中等",
+      "premium": "高端"
+    },
+    "dest": {
+      "domestic": "境内",
+      "regional": "周边",
+      "longhaul": "远程"
+    },
+    "monthly": "每月储蓄",
+    "needMonthly": "约需 {amount}/月 才能准备好",
+    "mirror": {
+      "keepExperience": "保留体验",
+      "shiftWindow": "调整窗口",
+      "preserveCommitments": "保住其他承诺"
+    }
   },
   "capitalPaths": {
     "title": "资本路径",
@@ -4003,7 +4119,7 @@
     "horizon": "期限",
     "contributedBy": "到期累计投入",
     "yearsToTarget": "到达目标年数",
-    "years": "年",
+    "years": "{n} 年",
     "noPlan": "你还没有已确认的定期投资。",
     "estimateNote": "仅为累计投入金额——此处不假设任何投资回报。",
     "readiness": {
@@ -4011,6 +4127,38 @@
       "buffer": "应急缓冲仅 {months} 个月——先建立好再在此增加。",
       "debt": "仍有高成本债务——先清偿再在此增加。",
       "noRoom": "当前没有每月可投资的空间。"
+    },
+    "loading": "正在加载你的投资计划…",
+    "reality": {
+      "pool": "每月可用资本",
+      "investing": "当前投资",
+      "readiness": "就绪度",
+      "fromCashflow": "来自你的真实现金流",
+      "fromPlan": "来自你已确认的计划",
+      "gate": "投资就绪闸门"
+    },
+    "over": "超出可用资本 {amount}/月",
+    "unassigned": "尚未分配工作 {amount}/月",
+    "job": {
+      "safety": "安全",
+      "wedding": "婚礼",
+      "home": "住房",
+      "flexible": "灵活",
+      "retirement": "退休",
+      "longTerm": "长期资本"
+    },
+    "liquid": "保持流动",
+    "locked": "锁定至期限",
+    "liquidityGate": "流动性闸门——这笔钱必须保持可用多久",
+    "gate": {
+      "soon": "很快需要",
+      "longterm": "长期"
+    },
+    "possibleAllocation": "可能：{liquid} 流动，{invest}/月 投资",
+    "noReturnNote": "不假设投资回报——仅为投入金额。此处不进行任何交易；封存仅记录意图。",
+    "echo": {
+      "liquidity": "你把大部分资本保持流动。要不要用 Pin 固定一个流动性下限，而不是压缩长期部分？",
+      "liquidityWait": "没有 Pin，长期部分会不断被挤压"
     }
   },
   "protectionEnvelope": {
@@ -4035,7 +4183,29 @@
     "gap": "缺口 {amount}",
     "summary": "{known} 个已知缺口，{unknown} 个未知。每月约 {premium} 可补上已知缺口。",
     "noData": "在个人资料中填写支出和任何保额信息即可查看。",
-    "estimateNote": "缺口按你填报的保额计算——未知的显示为未知。保费为参考估算，非报价。不含核保。"
+    "estimateNote": "缺口按你填报的保额计算——未知的显示为未知。保费为参考估算，非报价。不含核保。",
+    "loading": "正在加载你的保障情况…",
+    "reality": {
+      "premium": "当前保费",
+      "knownGaps": "已知缺口",
+      "unknowns": "未知项",
+      "declared": "来自你的填报",
+      "fromDeclared": "来自你填报的保障",
+      "notCounted": "不计为缺口"
+    },
+    "panel": {
+      "needHave": "需保障 {need} · 你持有 {have}",
+      "unknownHelp": "在你的资料中补上这个数字，它就不再是未知。",
+      "confirmCover": "确认你已持有的保障",
+      "premiumToProtect": "约 {amount}/月 可保障此项"
+    },
+    "totalPremium": "每月保障总支出",
+    "impliedExtra": "补齐这些缺口约增加 {amount}/月",
+    "noSaleNote": "此处不销售任何产品。无核保、无报价——仅参考费率。",
+    "turningPoint": {
+      "newResponsibility": "你新增了一项责任。哪一项保障需要重新确认？",
+      "newResponsibilityWait": "未被保障的新负债，往往是最伤的缺口"
+    }
   },
   "familyConstellation": {
     "title": "家庭星座",
@@ -4055,7 +4225,50 @@
     "blindMergePrompt": "双方先各自设定私密区间和 必保 / 可让 / 未定，之后才显示可行区间。",
     "bothConfirm": "此更改需要双方确认。",
     "privacyNote": "双方的私密承受力和余额永不共享——只共享区间和已约定的贡献。",
-    "noData": "在个人资料中设置共同每月贡献和共同项目即可查看。"
+    "noData": "在个人资料中设置共同每月贡献和共同项目即可查看。",
+    "loading": "正在加载你的家庭计划…",
+    "reality": {
+      "shared": "共同月供",
+      "split": "分摊",
+      "items": "共同目标",
+      "agreed": "双方约定",
+      "sharedGoals": "共同目标"
+    },
+    "noItems": "添加一个共同目标以运行盲合并。",
+    "step": {
+      "A": "伴侣 A",
+      "B": "伴侣 B",
+      "band": "可行区间",
+      "confirm": "双方确认"
+    },
+    "partner": {
+      "A": "伴侣 A——你的视图",
+      "B": "伴侣 B——你的视图"
+    },
+    "markHint": "点每个目标，标记为必保 / 可弹性 / 未定。你的金额保持私密。",
+    "mark": {
+      "none": "未标记",
+      "mustKeep": "必保",
+      "flexible": "可弹性",
+      "undecided": "未定"
+    },
+    "privateRange": "你的私密可负担区间",
+    "min": "最低",
+    "max": "最高",
+    "staysPrivate": "绝不共享——仅用于计算重叠",
+    "next": "下一步",
+    "bandTitle": "重叠区间——不共享原始数字",
+    "conflictUndecided": "{item}：一方仍未决定",
+    "conflictMustFlex": "{item}：伴侣 {side} 必保，另一方可弹性",
+    "noConflicts": "共同目标上没有冲突。",
+    "chooseWithinBand": "在区间内选择共同月供",
+    "toConfirm": "去确认",
+    "confirmTitle": "双方确认",
+    "partnerAConfirms": "伴侣 A 确认",
+    "partnerBConfirms": "伴侣 B 确认",
+    "splitRatio": "分摊（伴侣 A / 伴侣 B）",
+    "bothConfirmedOk": "双方已确认——这可以成为一项共同承诺。",
+    "needsBoth": "在任何内容被确认或应用到别处之前，都需要双方同意。"
   },
   "today": {
     "bankNow": {
@@ -4076,7 +4289,8 @@
   "life": {
     "map": {
       "label": "你的人生地图",
-      "intro": "你人生各部分所处的位置，以及它们如何相互牵动。点一个节点。"
+      "intro": "你人生各部分所处的位置，以及它们如何相互牵动。点一个节点。",
+      "introEvidence": "你人生各部分所处的位置。点一个节点，查看它背后的证据。"
     },
     "node": {
       "income": "收入",
@@ -4086,6 +4300,42 @@
       "freedom": "自由",
       "future": "未来",
       "notYet": "尚未设置"
+    },
+    "evidence": {
+      "state": "当前状态",
+      "confirmed": "你已确认",
+      "estimate": "仍是估算",
+      "unknown": "未知",
+      "none": "—",
+      "recentChanges": "最近的变化",
+      "noChanges": "暂无记录的变化。",
+      "memoryLens": "打开 Memory Lens"
+    },
+    "field": {
+      "statedMonthlyIncome": "月收入",
+      "monthlyExpenses": "月支出",
+      "currentSavings": "储蓄",
+      "homeTargetPrice": "购房目标价",
+      "weddingBudget": "婚礼预算",
+      "partnerName": "伴侣",
+      "monthlyInvestment": "每月投资",
+      "creditCardOutstanding": "信用卡余额",
+      "retirementTargetIncome": "退休目标收入",
+      "currentAge": "年龄"
+    },
+    "related": {
+      "futureField": "住房场景",
+      "personalEconomy": "个人经济",
+      "needEmergency": "应急场景",
+      "strategicBalance": "战略平衡",
+      "needHome": "购房规划",
+      "familyConstellation": "家庭场景",
+      "weddingLivingPlan": "婚礼场景",
+      "capitalPaths": "资本路径",
+      "repaymentPath": "还款路径",
+      "futureLifeTimeline": "未来生活",
+      "needRetirement": "退休规划",
+      "profile": "资料"
     }
   },
   "guardianDecisions": {
@@ -4093,5 +4343,153 @@
     "clear": "目前没有需要你决定的事。",
     "more": "还有 {count} 项即将到来。",
     "review": "在探索中查看"
+  },
+  "livingScene": {
+    "spine": {
+      "label": "你在哪一步",
+      "step": "第 {n} / 7 步"
+    },
+    "phase": {
+      "reality": "系统现在知道什么？",
+      "possible": "改变后可能发生什么？",
+      "allocation": "释放或新增的资源由谁承担、去哪里？",
+      "turningPoint": "为什么现在需要决定？",
+      "committed": "你确认了什么？",
+      "guardian": "系统正在守护什么？",
+      "memory": "今天为什么会变成这样？"
+    },
+    "reality": {
+      "title": "系统已知",
+      "hint": "在上方移动某项，看看它会改变什么。",
+      "unknownHead": "未知——显示为未知，绝不计入缺口："
+    },
+    "possible": {
+      "title": "可能的变化",
+      "serverConfirmed": "跨目标影响已根据你的计划和现金流确认。",
+      "projectedNote": "基于你已确认的计划和现金流投影——不是报价。"
+    },
+    "allocation": {
+      "title": "资源去向",
+      "freed": "每月释放 {amount}。由你安排——不会自动流动。",
+      "pressure": "每月新增 {amount} 压力。请说明它从哪里来。",
+      "spineNote": "在下方选择分配。未安排的余额保持可用。",
+      "keepFlexible": "保持灵活",
+      "accelerate": "加速{goal}",
+      "rebuildSafety": "重建安全垫",
+      "split": "或拆分",
+      "overspent": "超出已释放额 {amount}/月",
+      "remaining": "还需安排 {amount}/月",
+      "noAutoMove": "释放的资源绝不自动分配。",
+      "fromFlexible": "来自灵活现金流",
+      "slowAnother": "放慢{goal}",
+      "anotherGoal": "另一个目标"
+    },
+    "turningPoint": {
+      "acknowledge": "我已了解",
+      "generic": "在这个节点，等待会改变你的选项。",
+      "ifYouWait": "如果等待：{text}"
+    },
+    "committed": {
+      "title": "你确认的内容",
+      "hint": "已封存。守护者正在跟踪这条路径。",
+      "revocable": "随时可撤销——撤销将恢复此前的计划。",
+      "monthly": "每月",
+      "effective": "起始",
+      "ready": "预计达成",
+      "review": "查看封存 {amount}/月",
+      "guardianCant": "守护者只观察和提醒——绝不划转资金。",
+      "shadowOnly": "这是影子模拟，不是银行指令。",
+      "autopause": "若应急储备低于 6 个月将自动暂停。",
+      "confirm": "确认并封存",
+      "notYet": "暂不",
+      "notSealable": "暂时无法封存——计划未覆盖其核心成本。",
+      "sealError": "封存失败，请重试。"
+    },
+    "guardian": {
+      "title": "守护者正在守护的",
+      "watching": "守护者正对照你的真实现金流跟踪这项承诺。",
+      "standDown": "让守护者退出",
+      "watches": "对照真实收入与支出跟踪这条路径",
+      "notifies": "当现实偏离计划时提醒你",
+      "neverMoves": "绝不划转资金——没有银行转账集成",
+      "wouldNeedChoice": "一次中等冲击就需要你做选择——值得准备 B 计划。",
+      "rehearsedClear": "已对中等冲击预演——你的承诺仍然成立。",
+      "rehearsing": "正在预演中等冲击……"
+    },
+    "memory": {
+      "title": "今天为何如此",
+      "hint": "下方的链条由你真实的变化账本重建。",
+      "noRecord": "此目标暂无记录的变化。",
+      "handoffOffer": "此处被撤销的承诺释放了 {amount}/月——在下方 Memory 中安排它。",
+      "openLedger": "打开完整变化账本",
+      "tag": {
+        "fact": "事实",
+        "userChoice": "你的选择",
+        "estimate": "估算",
+        "inference": "推断",
+        "unknown": "未知"
+      }
+    },
+    "promiseWeight": {
+      "calm": "这能与你的其他承诺并存。",
+      "tightening": "在每月 {of} 的空间中新增 {amount}——开始紧张。",
+      "needsDecision": "在每月 {of} 的空间中新增 {amount}——需要一个决定。"
+    },
+    "reset": "回到现实",
+    "self": {
+      "monthsToDebtFree": "还清还需",
+      "yearsToCloseGap": "补齐缺口所需年数",
+      "yearsToTarget": "达到目标所需年数",
+      "planBudget": "旅行成本",
+      "protectionGap": "保障缺口",
+      "sharedContribution": "共同月供"
+    },
+    "node": {
+      "breathingRoom": "喘息空间",
+      "emergency": "应急基金",
+      "home": "购房首付",
+      "investment": "投资",
+      "futureLife": "未来生活",
+      "nearTerm": "近期目标",
+      "liquidity": "保留的流动性",
+      "flexible": "灵活现金流",
+      "insurance": "保障",
+      "retirement": "退休",
+      "cashflow": "每月现金流",
+      "protect_income": "收入保障",
+      "protect_home_loan": "房贷保障",
+      "protect_family": "家庭保障",
+      "protect_care": "重疾/照护保障",
+      "dir": {
+        "up": "改善",
+        "down": "收紧",
+        "flat": "不变"
+      }
+    }
+  },
+  "explore": {
+    "eyebrow": "探索",
+    "question": "你现在想改变人生的哪一部分？",
+    "sub": "选一个。你会直接进入它当前的状态——不是菜单。",
+    "node": {
+      "home": "住房",
+      "home.hint": "首付、时间、每月空间",
+      "relationship": "关系 / 婚礼",
+      "relationship.hint": "计划与共识",
+      "safety": "安全",
+      "safety.hint": "缓冲垫与压力来源",
+      "freedom": "自由",
+      "freedom.hint": "有工作的资本",
+      "family": "家庭",
+      "family.hint": "共同目标，私密余额",
+      "experience": "体验",
+      "experience.hint": "把一次旅行当作人生窗口",
+      "future": "长期未来",
+      "future.hint": "「未来的一天」及其成本",
+      "debt": "债务",
+      "protection": "保障"
+    },
+    "also": "还有",
+    "talkItThrough": "改为聊一聊"
   }
 }
