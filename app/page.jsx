@@ -14,6 +14,8 @@ import { RepaymentPath } from "./features/loan/RepaymentPath.jsx";
 import { FutureLifeTimeline } from "./features/retirement/FutureLifeTimeline.jsx";
 import { TripOrbit } from "./features/travel/TripOrbit.jsx";
 import { CapitalPaths } from "./features/investment/CapitalPaths.jsx";
+import { ProtectionEnvelope } from "./features/insurance/ProtectionEnvelope.jsx";
+import { FamilyConstellation } from "./features/family/FamilyConstellation.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -166,6 +168,8 @@ const screens = {
   FUTURE_LIFE_TIMELINE: "futureLifeTimeline",
   TRIP_ORBIT: "tripOrbit",
   CAPITAL_PATHS: "capitalPaths",
+  PROTECTION_ENVELOPE: "protectionEnvelope",
+  FAMILY_CONSTELLATION: "familyConstellation",
   CROSS_BANK_DATA: "crossBankData",
   PRODUCT_FIT: "productFit",
   PEER_BENCHMARK: "peerBenchmark",
@@ -3212,6 +3216,8 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.FUTURE_LIFE_TIMELINE) return screens.MIRROR;
   if (activeScreen === screens.TRIP_ORBIT) return screens.MIRROR;
   if (activeScreen === screens.CAPITAL_PATHS) return screens.MIRROR;
+  if (activeScreen === screens.PROTECTION_ENVELOPE) return screens.MIRROR;
+  if (activeScreen === screens.FAMILY_CONSTELLATION) return screens.MIRROR;
   return activeScreen;
 }
 
@@ -5400,6 +5406,24 @@ function MirrorToolsPanel({ t, setActiveScreen, openLoops, memories }) {
           <span>
             {t("capitalPaths.entryTitle")}
             <small style={{ display: "block", fontWeight: 400 }}>{t("capitalPaths.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.PROTECTION_ENVELOPE)}>
+          <ShieldCheck size={15} />
+          <span>
+            {t("protectionEnvelope.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("protectionEnvelope.entryBody")}</small>
+          </span>
+          <ChevronRight size={14} />
+        </button>
+
+        <button type="button" className="checkOption weddingEntryOption" onClick={() => setActiveScreen(screens.FAMILY_CONSTELLATION)}>
+          <Sparkles size={15} />
+          <span>
+            {t("familyConstellation.entryTitle")}
+            <small style={{ display: "block", fontWeight: 400 }}>{t("familyConstellation.entryBody")}</small>
           </span>
           <ChevronRight size={14} />
         </button>
@@ -17445,6 +17469,8 @@ export default function App() {
     [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.TRIP_ORBIT]: <TripOrbit t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.CAPITAL_PATHS]: <CapitalPaths t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.PROTECTION_ENVELOPE]: <ProtectionEnvelope t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.FAMILY_CONSTELLATION]: <FamilyConstellation t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

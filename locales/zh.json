@@ -3548,7 +3548,16 @@
       "trip_month": "出行月份",
       "monthly_commitment": "每月投入",
       "target_pool": "目标资金池",
-      "horizon_years": "期限（年）"
+      "horizon_years": "期限（年）",
+      "monthly_premium_now": "每月保费",
+      "income_protection_months": "收入保障（月）",
+      "existing_income_protection": "现有收入保障",
+      "existing_life_cover": "现有人寿保额",
+      "existing_ci_cover": "现有重疾保额",
+      "home_loan_outstanding": "房贷余额",
+      "dependents": "受养人数",
+      "shared_monthly_contribution": "共同每月",
+      "partner_share_ratio": "你的份额（%）"
     },
     "bendTitle": "Bend——移动结果",
     "bendHelp": "在场中拖动现实节点，或在此设定目标日期。系统会反算每月金额。",
@@ -3596,7 +3605,7 @@
       "scheduled_no_bank_transfer": "已安排——已排定，尚无银行转账。"
     },
     "err": {
-      "no_reality_path": "尚无可供分支的已确认内容。",
+      "no_reality_path": "尚无可供分支的已设置内容。",
       "no_valid_overrides": "请选择要改变的内容。",
       "outcome_not_supported": "该结果暂时无法移动。",
       "target_in_the_past": "请选择未来的日期。",
@@ -4000,5 +4009,49 @@
       "debt": "仍有高成本债务——先清偿再在此增加。",
       "noRoom": "当前没有每月可投资的空间。"
     }
+  },
+  "protectionEnvelope": {
+    "title": "保障边界",
+    "subtitle": "如果现实改变，哪些人生承诺会失去保障——以及哪些只是未知。",
+    "entryTitle": "保障边界",
+    "entryBody": "查看收入、房贷、家庭和照护——哪些已保障、哪些有缺口、哪些未知。",
+    "fieldTitle": "时间场中的保障",
+    "fieldSubtitle": "增加保额以补上已知缺口（需付保费），或削减以释放现金流。",
+    "whatIsCovered": "已保障的内容",
+    "node": {
+      "income": "收入",
+      "home_loan": "房贷",
+      "family": "家庭 / 受养人",
+      "care": "重疾 / 照护"
+    },
+    "status": {
+      "covered": "已保障",
+      "partial": "保额未确认",
+      "unknown": "未知——信息不足"
+    },
+    "gap": "缺口 {amount}",
+    "summary": "{known} 个已知缺口，{unknown} 个未知。每月约 {premium} 可补上已知缺口。",
+    "noData": "在个人资料中填写支出和任何保额信息即可查看。",
+    "estimateNote": "缺口按你填报的保额计算——未知的显示为未知。保费为参考估算，非报价。不含核保。"
+  },
+  "familyConstellation": {
+    "title": "家庭星座",
+    "subtitle": "带边界的共同未来——已约定的贡献可见，私人余额永不可见。",
+    "entryTitle": "家庭星座",
+    "entryBody": "共同每月额、其分摊，以及哪些变更需要双方确认。",
+    "fieldTitle": "时间场中的家庭计划",
+    "fieldSubtitle": "移动共同贡献——对它或某个必保项目的更改需要双方确认。",
+    "theShared": "共同计划",
+    "sharedMonthly": "共同每月",
+    "yourShare": "你的份额",
+    "partnerShare": "伴侣份额",
+    "committed": "已投入项目",
+    "jointBand": "双方可行区间：{low}-{high}/月。",
+    "noBand": "尚无重叠的可承受区间——需要沟通。",
+    "conflicts": "{count} 个冲突点",
+    "blindMergePrompt": "双方先各自设定私密区间和 必保 / 可让 / 未定，之后才显示可行区间。",
+    "bothConfirm": "此更改需要双方确认。",
+    "privacyNote": "双方的私密承受力和余额永不共享——只共享区间和已约定的贡献。",
+    "noData": "在个人资料中设置共同每月贡献和共同项目即可查看。"
   }
 }
