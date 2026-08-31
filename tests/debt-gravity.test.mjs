@@ -47,12 +47,16 @@ test("SECTION M causal test: extra repayment -> earlier payoff, LESS current bre
   assert.equal(impact.resourceDelta.futureHandoffAtPayoff.state, "ghost");
   assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
   for (const g of impact.affectedGoals) assert.equal(g.confirmedAfter, null, `${g.goalId} stays a ghost until allocated`);
-  // Per-leg (causal-spine round): allocate ONLY to Home -> the Home leg
-  // is solid, every other leg stays a ghost.
+  // Per-leg (causal-spine round): allocate ONLY to Home -> the Home leg is
+  // PLACED (a definite Ghost: placedAfter set, confirmedAfter still null -
+  // nothing is Solid until Seal), every other leg stays "possible".
   const placed = projectDebtImpact({ branchPlan: planAt(400), realityPlan: planAt(0), debts, context: ctx, allocation: { home: 200 } });
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded Home leg is solid");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "wedding").confirmedAfter, null, "Wedding was not funded -> ghost");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "Emergency was not funded -> ghost");
+  const home = placed.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(home.effectState, "placed", "the funded Home leg is placed");
+  assert.notEqual(home.placedAfter, null, "the funded Home leg has a placedAfter");
+  assert.equal(home.confirmedAfter, null, "...but nothing is Solid until Seal");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "wedding").effectState, "possible", "Wedding was not funded");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "emergency").effectState, "possible", "Emergency was not funded");
 });
 
 test("Breathing Room Floor blocks over-repayment", () => {

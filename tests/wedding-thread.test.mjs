@@ -37,16 +37,21 @@ test("SECTION M causal test: fewer guests frees the user's monthly need; a bigge
 test("allocating the freed amount turns a goal solid; nothing is auto-routed", () => {
   const ghost = projectWeddingThreadImpact({ branchPlan: { ...reality, guest_count: 80 }, realityPlan: reality, context: ctx });
   assert.ok(ghost.affectedGoals.every((g) => g.confirmedAfter == null));
-  // Per-leg: allocate ONLY to Home -> Home solid, every other leg ghost.
+  // Per-leg: allocate ONLY to Home -> the Home leg is "placed" (a definite
+  // Ghost: placedAfter set, confirmedAfter still null), every other leg
+  // stays "possible". Nothing is Solid until Seal.
   const placed = projectWeddingThreadImpact({
     branchPlan: { ...reality, guest_count: 80 },
     realityPlan: reality,
     context: ctx,
     allocation: { home: Math.round(ghost.resourceDelta.freedMonthly) },
   });
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded Home leg is solid");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "retirement").confirmedAfter, null, "Retirement was not funded -> ghost");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "Emergency was not funded -> ghost");
+  const home = placed.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(home.effectState, "placed", "the funded Home leg is placed");
+  assert.notEqual(home.placedAfter, null);
+  assert.equal(home.confirmedAfter, null, "nothing is Solid until Seal");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "retirement").effectState, "possible", "Retirement was not funded");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "emergency").effectState, "possible", "Emergency was not funded");
 });
 
 test("the legacy two-layer wedding projection is still available for the existing scene", () => {

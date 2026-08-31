@@ -69,12 +69,16 @@ test("Safety Runway: bigger target -> bigger rebuild; impactSet tightens goals a
   assert.ok(impact.affectedGoals.length >= 2);
   assert.ok(impact.affectedGoals.every((g) => g.direction === "down" && g.confirmedAfter == null));
   assert.equal(impact.allocationRequired, true);
-  // Per-leg (causal-spine round): allocate ONLY to Home -> the Home leg
-  // is solid, every other leg stays a ghost.
+  // Per-leg (causal-spine round): allocate ONLY to Home -> the Home leg is
+  // "placed" (a definite Ghost: placedAfter set, confirmedAfter still null -
+  // nothing is Solid until Seal), every other leg stays "possible".
   const placed = adapter.projectImpacts(peeled.data, realityData, projCtx, { home: 300 });
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded Home leg is solid");
+  const homeLeg = placed.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(homeLeg.effectState, "placed", "the funded Home leg is placed");
+  assert.notEqual(homeLeg.placedAfter, null);
+  assert.equal(homeLeg.confirmedAfter, null, "nothing is Solid until Seal");
   const other = placed.affectedGoals.find((g) => g.goalId !== "home");
-  assert.equal(other.confirmedAfter, null, `${other.goalId} was not funded -> ghost`);
+  assert.equal(other.effectState, "possible", `${other.goalId} was not funded`);
 
   // minimum_floor_months Pin at 6, evaluated against the branch's real runway.
   await store.setConstraint(pk, { planId: plan.id, kind: "minimum_floor_months", operator: "gte", value: 6, scope: "plan", cause: { trigger: "itest" } });

@@ -41,11 +41,15 @@ test("SECTION M causal test: a bigger target raises the rebuild needed; other go
   }
   assert.equal(impact.allocationRequired, true);
 
-  // Per-leg: allocate ONLY to Home -> the Home leg is solid, others ghost.
+  // Per-leg: allocate ONLY to Home -> the Home leg is PLACED (definite
+  // Ghost until Seal), others stay "possible".
   const placed = projectRunwayImpact({ branchData: { ...base, monthly_contribution: 800 }, realityData: base, context: ctx, allocation: { home: 300 } });
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded Home leg becomes solid");
+  const home = placed.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(home.effectState, "placed", "the funded Home leg is placed");
+  assert.notEqual(home.placedAfter, null);
+  assert.equal(home.confirmedAfter, null, "nothing is Solid until Seal");
   const nonHome = placed.affectedGoals.find((g) => g.goalId !== "home");
-  assert.equal(nonHome.confirmedAfter, null, `${nonHome.goalId} was not funded -> stays a ghost`);
+  assert.equal(nonHome.effectState, "possible", `${nonHome.goalId} was not funded`);
 });
 
 test("rehearseShock is PURE - it never mutates the plan, and reports a real recovery gradient", () => {

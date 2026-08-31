@@ -100,48 +100,98 @@ test("enrichCrossGoalEdges attaches a unit-tagged magnitude + ghost/solid state 
   assert.equal(enriched.find((e) => e.to === "future").impactState, "none");
 });
 
-test("a SEALED plan keeps influencing the Life Thread as SOLID reality; revoke removes it", async () => {
-  const wedReality = {
-    wedding_date: "2027-06", guest_count: 150, venue_tier: "mid_range", venue_type: "hotel",
-    photography_tier: "mid", attire_tier: "mid", monthly_contribution: 800, partner_contribution: 400, current_savings: 6000,
-  };
-  const sealedData = { ...wedReality, guest_count: 90 }; // the sealed, smaller wedding
-  const sealedBranch = {
-    id: "wed-sealed",
-    status: "sealed",
-    data: sealedData,
-    delta: { before: { guest_count: 150 }, after: { guest_count: 90 } },
-  };
-  const planStore = { getCurrentPlanVersion: async () => ({ data: sealedData }) };
-  const branchesByPlan = [{ plan: { domain: "wedding", id: "p-wed" }, branches: [sealedBranch] }];
-  const threadContext = { monthlyIncome: 8000, monthlyExpenses: 3800, committedMonthlyTotal: 900, emergencyBufferMonths: 6, availableMonthlyCashflow: 1500 };
+// Shared fixture for the Part A three-state (possible / placed / confirmed) tests.
+const WED_REALITY = {
+  wedding_date: "2027-06", guest_count: 150, venue_tier: "mid_range", venue_type: "hotel",
+  photography_tier: "mid", attire_tier: "mid", monthly_contribution: 800, partner_contribution: 400, current_savings: 6000,
+};
+const WED_CTX = { monthlyIncome: 8000, monthlyExpenses: 3800, committedMonthlyTotal: 900, emergencyBufferMonths: 6, availableMonthlyCashflow: 1500 };
 
-  // Sealed -> a SOLID cross-goal impact on Home / Safety.
-  const sealedOut = await collectStudioImpacts({
-    branchesByPlan,
-    planStore,
-    threadContext,
-    commitmentsByPlanId: { "p-wed": { id: "c-wed", plan_branch_id: "wed-sealed" } },
-  });
-  assert.equal(sealedOut.moments.wedding.state, "sealedBranch");
-  assert.equal(sealedOut.perStudio[0].state, "solid");
-  assert.ok(sealedOut.sealedStudioCount === 1);
-  const solidGroups = sealedOut.aggregated.filter((g) => g.state === "solid");
-  assert.ok(solidGroups.length >= 2, "the sealed wedding lands solid on >= 2 goals");
-  for (const g of solidGroups) assert.notEqual(g.confirmedAfter, null);
-  assert.ok(Object.values(sealedOut.nodeImpacts).flat().some((x) => x.state === "solid"));
+function wedSealed({ data, allocation = null, revoked = false }) {
+  const sealedData = { ...WED_REALITY, ...data, ...(allocation ? { allocation } : {}) };
+  const branch = { id: "wed-sealed", status: "sealed", data: sealedData, delta: { before: { guest_count: 150 }, after: { guest_count: sealedData.guest_count } } };
+  return {
+    branchesByPlan: [{ plan: { domain: "wedding", id: "p-wed" }, branches: [branch] }],
+    planStore: { getCurrentPlanVersion: async () => ({ data: sealedData }) },
+    commitmentsByPlanId: revoked ? {} : { "p-wed": { id: "c-wed", plan_branch_id: "wed-sealed" } },
+    threadContext: WED_CTX,
+  };
+}
 
-  // REVOKE -> the commitment is no longer active -> no sealed moment ->
-  // the solid impact is gone (the plan falls back to reality).
-  const revokedOut = await collectStudioImpacts({
-    branchesByPlan,
-    planStore,
-    threadContext,
-    commitmentsByPlanId: {}, // revoked
-  });
-  assert.notEqual(revokedOut.moments.wedding.state, "sealedBranch");
-  assert.equal(revokedOut.perStudio.length, 0, "no active branch, no sealed commitment -> nothing drives");
-  assert.equal(revokedOut.sealedStudioCount, 0);
+test("Part A test 2: a SEALED release with NO allocation -> the freed resource is a confirmed FACT, but downstream goals stay ghost", async () => {
+  const out = await collectStudioImpacts(wedSealed({ data: { guest_count: 90 } }));
+  assert.equal(out.moments.wedding.state, "sealedBranch");
+  assert.equal(out.perStudio[0].state, "solid");
+  assert.equal(out.sealedStudioCount, 1);
+
+  // the release itself is real, sealed, and entirely UNPLACED
+  const ledger = Object.values(out.resourceLedger);
+  assert.equal(ledger.length, 1);
+  assert.equal(ledger[0].kind, "released_resource");
+  assert.equal(ledger[0].state, "confirmed");
+  assert.ok(ledger[0].totalMonthly > 0);
+  assert.equal(ledger[0].placedMonthly, 0, "nothing was routed");
+  assert.equal(ledger[0].unplacedMonthly, ledger[0].totalMonthly, "the whole amount is flexible / unplaced");
+  assert.equal(out.monthlyResourceTotals.confirmedPlacedMonthly, 0);
+
+  // NOT every affected goal is Solid - the money did not go to Home / Retirement / Emergency
+  const solidGroups = out.aggregated.filter((g) => g.state === "solid");
+  assert.equal(solidGroups.length, 0, "an unallocated release confirms NO downstream goal");
+  assert.ok(out.aggregated.length >= 2, "the possible (ghost) layer still shows what the money COULD do");
+});
+
+test("Part A test 1: a SEALED release allocated to Emergency -> only the funded leg is Solid; Home / Retirement are not", async () => {
+  const ghost = await collectStudioImpacts(wedSealed({ data: { guest_count: 90 }, revoked: true, allocation: null }));
+  void ghost;
+  const freed = Object.values((await collectStudioImpacts(wedSealed({ data: { guest_count: 90 } }))).resourceLedger)[0].totalMonthly;
+
+  const out = await collectStudioImpacts(wedSealed({ data: { guest_count: 90 }, allocation: { emergency: freed } }));
+  const ledger = Object.values(out.resourceLedger)[0];
+  assert.equal(ledger.state, "confirmed");
+  assert.equal(ledger.placedMonthly, freed, "the whole freed amount is placed on Emergency");
+  assert.equal(ledger.unplacedMonthly, 0);
+  assert.equal(out.monthlyResourceTotals.confirmedPlacedMonthly, freed);
+
+  const emergency = out.aggregated.find((g) => g.targetGoalId === "emergency");
+  assert.ok(emergency && emergency.state === "solid", "the funded Emergency leg is Solid");
+  for (const g of out.aggregated.filter((g) => g.targetGoalId !== "emergency")) {
+    assert.equal(g.state, "ghost", `${g.targetGoalId} was not funded -> stays a ghost`);
+  }
+  // Σ confirmed placed <= freed (resource conservation)
+  assert.ok(out.monthlyResourceTotals.confirmedPlacedMonthly <= ledger.totalMonthly);
+});
+
+test("Part A test 3: a SEALED bigger wedding adds pressure counted ONCE, not once per affected goal", async () => {
+  const out = await collectStudioImpacts(wedSealed({ data: { guest_count: 260, venue_tier: "premium" } }));
+  const ledger = Object.values(out.resourceLedger)[0];
+  assert.equal(ledger.kind, "direct_pressure");
+  assert.equal(ledger.state, "confirmed");
+  const perStudioPressure = out.perStudio[0].addedPressureMonthly;
+  assert.ok(perStudioPressure > 0);
+  // the ledger total equals ONE studio's pressure - it is NOT multiplied by
+  // the number of goals the pressure competes with.
+  assert.equal(ledger.totalMonthly, perStudioPressure);
+  assert.equal(out.monthlyResourceTotals.addedPressureMonthly, perStudioPressure, "counted once");
+  // sealed direct pressure IS confirmed reality on every goal it competes with
+  const solidGroups = out.aggregated.filter((g) => g.state === "solid");
+  assert.ok(solidGroups.length >= 2, "the money genuinely left -> every competing goal really has less room");
+  // ...but each goal is its OWN (goal,metric,unit) group - the amounts are never summed together
+  const keys = out.aggregated.map((g) => `${g.targetGoalId}::${g.metric}::${g.unit}`);
+  assert.equal(new Set(keys).size, keys.length);
+});
+
+test("Part A test 4: revoking a SEALED release removes the Solid impact and restores prior reality", async () => {
+  const freed = Object.values((await collectStudioImpacts(wedSealed({ data: { guest_count: 90 } }))).resourceLedger)[0].totalMonthly;
+
+  const sealed = await collectStudioImpacts(wedSealed({ data: { guest_count: 90 }, allocation: { emergency: freed } }));
+  assert.ok(sealed.aggregated.some((g) => g.state === "solid"));
+
+  const revoked = await collectStudioImpacts(wedSealed({ data: { guest_count: 90 }, allocation: { emergency: freed }, revoked: true }));
+  assert.notEqual(revoked.moments.wedding.state, "sealedBranch");
+  assert.equal(revoked.perStudio.length, 0, "no active branch, no sealed commitment -> nothing drives");
+  assert.equal(revoked.sealedStudioCount, 0);
+  assert.equal(Object.keys(revoked.resourceLedger).length, 0);
+  assert.equal(revoked.aggregated.filter((g) => g.state === "solid").length, 0);
 });
 
 test("NO metric->unit guessing: an affected goal with no unit is INVALID, not coerced", async () => {

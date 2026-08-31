@@ -88,7 +88,10 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
     }
   };
 
-  const solidGoals = ghostGoals.filter((g) => g.confirmedAfter != null);
+  // A funded leg is "placed" (a definite Ghost) before Seal and "confirmed"
+  // after - show either as the current routed outcome.
+  const routedAmount = (g) => g.confirmedAfter ?? g.placedAfter ?? null;
+  const solidGoals = ghostGoals.filter((g) => routedAmount(g) != null);
 
   return (
     <section className="wlpView wlpReleased" aria-labelledby="releasedTitle">
@@ -144,7 +147,7 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
           <strong>{t("weddingLivingPlan.released.resultTitle")}</strong>
           <ul>
             {solidGoals.map((g) => (
-              <li key={g.goalId}>{t("weddingLivingPlan.released.solidGoal", { goal: t(`weddingLivingPlan.released.goalName.${g.goalId}`), amount: sgd(g.confirmedAfter) })}</li>
+              <li key={g.goalId}>{t("weddingLivingPlan.released.solidGoal", { goal: t(`weddingLivingPlan.released.goalName.${g.goalId}`), amount: sgd(routedAmount(g)) })}</li>
             ))}
           </ul>
           <p className="wlpMuted">{t("weddingLivingPlan.released.stillPossible")}</p>

@@ -87,6 +87,35 @@ test("confirmed aggregation is DELTA-based - absolute confirmedAfter values are 
   assert.equal(g.beforeMismatch, false, "both sources agree on the canonical before");
 });
 
+test("placed is a Ghost: it never contributes a confirmed delta; only a sealed (confirmed) measure does", () => {
+  const before = 1000;
+  // the customer routed 200 to this goal but has NOT sealed -> "placed"
+  const placed = buildImpactMeasure({
+    targetGoalId: "emergency", metric: "monthlyRoom", unit: "sgd_per_month",
+    before, possibleAfter: 1200, placedAfter: 1200, effectState: "placed", effectKind: "released_resource", sourceBranchId: "A",
+  });
+  assert.equal(placed.effectState, "placed");
+  assert.equal(placed.placedAfter, 1200);
+  assert.equal(placed.confirmedAfter, null, "a placed leg carries NO Solid number");
+
+  const p = aggregateImpactMeasures([placed]).aggregated[0];
+  assert.equal(p.state, "ghost", "still a Ghost");
+  assert.equal(p.placement, "placed");
+  assert.equal(p.placedAfter, 1200);
+  assert.equal(p.confirmedAfter, null);
+
+  // now the same leg is sealed -> "confirmed"
+  const confirmed = buildImpactMeasure({
+    targetGoalId: "emergency", metric: "monthlyRoom", unit: "sgd_per_month",
+    before, possibleAfter: 1200, confirmedAfter: 1200, effectState: "confirmed", effectKind: "released_resource", sourceBranchId: "A",
+  });
+  const c = aggregateImpactMeasures([confirmed]).aggregated[0];
+  assert.equal(c.state, "solid");
+  assert.equal(c.placement, "confirmed");
+  assert.equal(c.confirmedAfter, 1200);
+  assert.equal(c.confirmedDelta, 200);
+});
+
 test("a ghost + a solid source in one group: state is solid, direction from the confirmed delta", () => {
   const ghost = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 1000, possibleAfter: 1200 });
   const solid = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 1000, possibleAfter: 900, confirmedAfter: 900 });

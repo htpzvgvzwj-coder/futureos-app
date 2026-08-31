@@ -82,11 +82,15 @@ test("loan: reducing a prior extra repayment FREES cashflow; a leg is solid only
   assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
   assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 
-  // Per-leg (causal-spine round): only the leg that was funded turns solid.
+  // Per-leg (causal-spine round): only the funded leg moves to "placed" (a
+  // definite Ghost) - nothing is Solid until Seal.
   const withAlloc = loan.projectImpacts({ ...relaxed, allocation: { home: 200 } }, priorBranch, ctx);
-  assert.notEqual(withAlloc.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded home leg is solid");
-  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "wedding").confirmedAfter, null, "an unfunded leg stays a ghost");
-  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "emergency was not funded");
+  const home = withAlloc.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(home.effectState, "placed", "the funded home leg is placed");
+  assert.notEqual(home.placedAfter, null);
+  assert.equal(home.confirmedAfter, null, "nothing is Solid until Seal");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "wedding").effectState, "possible", "an unfunded leg stays possible");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "emergency").effectState, "possible", "emergency was not funded");
 });
 
 test("loan Bend: solve the extra repayment to be debt-free by a target month", () => {
@@ -128,11 +132,15 @@ test("retirement: a LOWER top-up frees cashflow; nothing moves without allocatio
   assert.equal(impact.resourceDelta.freedMonthly, 300);
   assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
   assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
-  // Per-leg: allocate ONLY to Emergency -> Emergency solid, every other leg still ghost.
+  // Per-leg: allocate ONLY to Emergency -> Emergency is "placed" (a definite
+  // Ghost), every other leg stays "possible". Nothing is Solid until Seal.
   const placed = retire.projectImpacts({ ...relaxed, allocation: { emergency: 300 } }, priorBranch, ctx);
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "the funded emergency leg is solid");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "Home was not funded -> ghost");
-  assert.equal(placed.affectedGoals.find((g) => g.goalId === "investment").confirmedAfter, null, "Investment was not funded -> ghost");
+  const em = placed.affectedGoals.find((g) => g.goalId === "emergency");
+  assert.equal(em.effectState, "placed", "the funded emergency leg is placed");
+  assert.notEqual(em.placedAfter, null);
+  assert.equal(em.confirmedAfter, null, "nothing is Solid until Seal");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "home").effectState, "possible", "Home was not funded");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "investment").effectState, "possible", "Investment was not funded");
 });
 
 test("generic projectMonthlyShift: neutral when the monthly is unchanged", () => {

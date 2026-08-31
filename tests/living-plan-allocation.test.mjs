@@ -11,7 +11,9 @@ import {
 } from "../lib/living-plan/allocation.js";
 import {
   FRAGMENT_STATES,
+  FRAGMENT_STATES_V2,
   deriveFutureFragment,
+  deriveFutureFragmentV2,
   fragmentIsActionable,
 } from "../lib/living-plan/future-fragment.js";
 
@@ -85,5 +87,71 @@ test("future-fragment: unclaimed -> allocated -> committed states derive from br
 test("future-fragment: every state string is in FRAGMENT_STATES", () => {
   for (const s of ["unclaimed", "allocated", "committed", "revoked", "handed_off", "expired"]) {
     assert.ok(FRAGMENT_STATES.includes(s));
+  }
+});
+
+// ---- Future Fragment V2 state machine (Part A4) ----------------------
+
+test("fragment V2: no released resource -> no fragment", () => {
+  assert.equal(deriveFutureFragmentV2({ freedMonthly: 0, addedPressureMonthly: 0 }), null);
+});
+
+test("fragment V2: possible -> placed -> sealed as the customer routes then Seals", () => {
+  const base = { branch: { id: "b1", data: {} }, freedMonthly: 300 };
+
+  const possible = deriveFutureFragmentV2({ ...base });
+  assert.equal(possible.state, "possible");
+  assert.equal(possible.placedMonthly, 0);
+  assert.equal(possible.unplacedMonthly, 300);
+  assert.equal(possible.isGhost, true);
+  assert.equal(possible.confirmedMonthly, 0);
+
+  const placed = deriveFutureFragmentV2({ ...base, allocation: { emergencyMonthly: 200 } });
+  assert.equal(placed.state, "placed");
+  assert.equal(placed.placedMonthly, 200);
+  assert.equal(placed.unplacedMonthly, 100);
+  assert.equal(placed.isGhost, true, "placed is still a Ghost - nothing moved");
+  assert.equal(placed.confirmedMonthly, 0);
+
+  const sealed = deriveFutureFragmentV2({
+    branch: { id: "b1", status: "sealed", data: {} },
+    freedMonthly: 300,
+    allocation: { emergencyMonthly: 200 },
+    sealedCommitment: { id: "c1", status: "active" },
+  });
+  assert.equal(sealed.state, "sealed");
+  assert.equal(sealed.confirmedMonthly, 200, "the placed leg is now Solid");
+  assert.equal(sealed.unplacedMonthly, 100, "the remainder stays flexible");
+  assert.equal(sealed.isGhost, false);
+});
+
+test("fragment V2: revoke falls back; expiry only bites an un-routed, un-sealed fragment", () => {
+  const revoked = deriveFutureFragmentV2({
+    branch: { id: "b1", data: {} },
+    freedMonthly: 300,
+    allocation: { emergencyMonthly: 300 },
+    sealedCommitment: { status: "revoked" },
+  });
+  assert.equal(revoked.state, "revoked");
+
+  const expired = deriveFutureFragmentV2({
+    branch: { id: "b1", data: { fragment_valid_until: "2020-01-01" } },
+    freedMonthly: 300,
+    now: new Date("2026-01-01"),
+  });
+  assert.equal(expired.state, "expired");
+
+  const stillPlaced = deriveFutureFragmentV2({
+    branch: { id: "b1", data: { fragment_valid_until: "2020-01-01" } },
+    freedMonthly: 300,
+    allocation: { emergencyMonthly: 300 },
+    now: new Date("2026-01-01"),
+  });
+  assert.equal(stillPlaced.state, "placed", "a routed fragment does not silently expire");
+});
+
+test("fragment V2: every state string is in FRAGMENT_STATES_V2", () => {
+  for (const s of ["possible", "placed", "sealed", "released", "revoked", "expired"]) {
+    assert.ok(FRAGMENT_STATES_V2.includes(s));
   }
 });

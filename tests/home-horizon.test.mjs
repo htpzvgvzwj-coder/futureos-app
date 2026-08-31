@@ -59,14 +59,18 @@ test("projectHomeImpact returns a valid server impactSet; emergency goes DOWN an
   assert.equal(em.direction, "down");
   assert.equal(em.confirmedAfter, null, "possible only - not confirmed without an allocation");
   assert.ok(is.affectedGoals.filter((g) => g.direction !== "flat").length >= 2, "at least two affected goals move");
-  // with an allocation, the placed legs become confirmed
+  // with an allocation, the placed legs move to "placed" (a definite Ghost:
+  // placedAfter set, still not Solid - only Seal confirms).
   const placed = projectHomeImpact({
     branchData: { ...base, estimated_price: 780000 },
     realityData: base,
     context: { ...ctx, weddingActive: true, retirementActive: true },
     allocation: { emergencyMonthly: 200 },
   });
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null);
+  const pem = placed.affectedGoals.find((g) => g.goalId === "emergency");
+  assert.equal(pem.effectState, "placed");
+  assert.notEqual(pem.placedAfter, null);
+  assert.equal(pem.confirmedAfter, null, "nothing is Solid until Seal");
 });
 
 test("CPF and partner money stay UNKNOWN unless confirmed - never defaulted, never counted", () => {
