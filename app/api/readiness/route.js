@@ -1,4 +1,5 @@
 import { query } from "../../../lib/db.js";
+import { checkEnv } from "../../../lib/env-check.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,14 @@ export async function GET() {
       ready = false;
     }
   }
+
+  const env = checkEnv();
+  checks.env = env.ok ? "ok" : "missing_required";
+  if (!env.ok) {
+    ready = false;
+    checks.missingEnv = env.missingRequired;
+  }
+  checks.providers = env.providers;
 
   return Response.json({ ready, checks, time: new Date().toISOString() }, { status: ready ? 200 : 503 });
 }

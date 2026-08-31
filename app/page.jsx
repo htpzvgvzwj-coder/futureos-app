@@ -9,7 +9,11 @@ import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
-import { BankTodayConnected, GuardianConnected, RippleStripConnected } from "./components/bank/connected.jsx";
+import {
+  BankTodayConnected, GuardianConnected, RippleStripConnected, OnboardingGate,
+  RealityEntryConnected, CsvImportConnected, AccountControlConnected,
+  MoneyRescueConnected, RealityDriftConnected,
+} from "./components/bank/connected.jsx";
 import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
@@ -193,6 +197,11 @@ const screens = {
   ACCOUNT_DETAIL: "accountDetail",
   SPENDING_RISK: "spendingRisk",
   LOADING: "loading",
+  ONBOARDING: "onboarding",
+  REALITY_ENTRY: "realityEntry",
+  CSV_IMPORT: "csvImport",
+  ACCOUNT_CONTROL: "accountControl",
+  MONEY_RESCUE: "moneyRescue",
 };
 
 const locales = { en, zh, ms, ta };
@@ -17642,17 +17651,23 @@ export default function App() {
 
   const currentScreen = {
     [screens.HOME]: (
-      <>
+      <OnboardingGate onOpen={openFromBank}>
         <BankTodayConnected onOpen={openFromBank} onRippleAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
         {livingThreadEntrance("today")}
         <TodayScreen {...shared} />
-      </>
+      </OnboardingGate>
     ),
+    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} />,
+    [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
+    [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
+    [screens.ACCOUNT_CONTROL]: <AccountControlConnected onDone={() => setActiveScreen(screens.PROFILE)} />,
+    [screens.MONEY_RESCUE]: <MoneyRescueConnected onOpen={openFromBank} />,
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: (
       <>
         <RippleStripConnected onAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
         {livingThreadEntrance("life")}
+        <RealityDriftConnected onOpen={openFromBank} />
         <LifeGraph {...shared} />
       </>
     ),

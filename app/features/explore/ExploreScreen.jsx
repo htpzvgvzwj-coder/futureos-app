@@ -31,7 +31,7 @@ function Screen({ children, className }) {
 
 export function ExploreScreen({ setActiveScreen, t }) {
   const { thread, status } = useLifeThread();
-  const { ripple } = useBankData();
+  const { ripple, capabilities } = useBankData();
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -138,7 +138,7 @@ export function ExploreScreen({ setActiveScreen, t }) {
       <CurrentRippleStrip ripple={ripple} compact onAction={(a) => a === "compare" && go("mirror")} />
 
       {/* The complete capability directory - always visible, no drawer. */}
-      <ExploreCatalog onOpen={(screen) => go(screen)} activeDomains={activeDomains} t={t} />
+      <ExploreCatalog onOpen={(screen) => go(screen)} activeDomains={activeDomains} capabilities={capabilities} t={t} />
 
       {status === "error" ? <p className="lsProvenance">{t("explore.threadUnavailable")}</p> : null}
     </Screen>

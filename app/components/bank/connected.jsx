@@ -8,6 +8,12 @@ import { useBankData } from "./useBankData.jsx";
 import { BankTodayHeader } from "./BankTodayHeader.jsx";
 import { GuardianSections } from "./GuardianSections.jsx";
 import { CurrentRippleStrip } from "./CurrentRippleStrip.jsx";
+import { OnboardingWizard } from "./OnboardingWizard.jsx";
+import { RealityEntry } from "./RealityEntry.jsx";
+import { CsvImportWizard } from "./CsvImportWizard.jsx";
+import { AccountControl } from "./AccountControl.jsx";
+import { MoneyRescuePanel } from "./MoneyRescuePanel.jsx";
+import { RealityDriftPanel } from "./RealityDriftPanel.jsx";
 
 export function BankTodayConnected({ onOpen, onRippleAction }) {
   const { twin, ripple, status } = useBankData();
@@ -22,4 +28,59 @@ export function GuardianConnected({ onOpen, onControl }) {
 export function RippleStripConnected({ onAction, compact = true }) {
   const { ripple } = useBankData();
   return <CurrentRippleStrip ripple={ripple} onAction={onAction} compact={compact} />;
+}
+
+// The onboarding gate: a brand-new user (onboarding not complete) sees the
+// wizard instead of the app. Returns null once complete so the caller
+// renders the real screen.
+export function OnboardingGate({ onOpen, children }) {
+  const { onboarding, status, reload } = useBankData();
+  if (status === "loading" || status === "idle") return null; // let the app render its own loading
+  const ob = onboarding?.onboarding ?? null;
+  if (ob && ob.status !== "complete" && ob.status !== "not_started") {
+    return <OnboardingWizard onComplete={reload} onOpen={onOpen} />;
+  }
+  if (ob && ob.status === "not_started") {
+    return <OnboardingWizard onComplete={reload} onOpen={onOpen} />;
+  }
+  return children ?? null;
+}
+
+export function RealityEntryConnected({ onDone, onOpen }) {
+  const { invalidate } = useBankData();
+  return (
+    <RealityEntry
+      onOpen={onOpen}
+      onDone={() => {
+        invalidate();
+        onDone?.();
+      }}
+    />
+  );
+}
+
+export function CsvImportConnected({ onDone }) {
+  const { invalidate } = useBankData();
+  return (
+    <CsvImportWizard
+      onDone={() => {
+        invalidate();
+        onDone?.();
+      }}
+    />
+  );
+}
+
+export function AccountControlConnected({ onDone }) {
+  return <AccountControl onDone={onDone} />;
+}
+
+export function MoneyRescueConnected({ onOpen }) {
+  const { twin } = useBankData();
+  return <MoneyRescuePanel cases={twin?.rescueCases ?? []} onOpen={onOpen} />;
+}
+
+export function RealityDriftConnected({ onOpen }) {
+  const { twin } = useBankData();
+  return <RealityDriftPanel drift={twin?.realityDrift ?? null} onOpen={onOpen} />;
 }

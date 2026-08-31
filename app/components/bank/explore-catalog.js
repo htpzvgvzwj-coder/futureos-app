@@ -40,14 +40,14 @@ export const EXPLORE_GROUPS = [
     id: "solve_problem",
     title: "Solve a money problem",
     entries: [
-      { id: "money_rescue", name: "Money Rescue", problem: "One place for any money problem.", reads: ["financial_assets", "transactions", "recurring_obligations", "commitments"], result: "Calm cases: what happened, what's at risk, your options.", cta: "hardship" },
-      { id: "failed_payment", name: "Failed payment help", problem: "A payment did not go through.", reads: ["transactions"], result: "Why it failed and how to retry safely.", cta: "hardship" },
-      { id: "cashflow_pressure", name: "Upcoming cashflow pressure", problem: "Bills are about to cluster.", reads: ["recurring_obligations", "income_streams"], result: "When the pinch is and how to smooth it.", cta: "hardship" },
+      { id: "money_rescue", name: "Money Rescue", problem: "One place for any money problem.", reads: ["financial_assets", "transactions", "recurring_obligations", "commitments"], result: "Calm cases: what happened, what's at risk, your options.", cta: "moneyRescue" },
+      { id: "failed_payment", name: "Failed payment help", problem: "A payment did not go through.", reads: ["transactions"], result: "Why it failed and how to retry safely.", cta: "moneyRescue" },
+      { id: "cashflow_pressure", name: "Upcoming cashflow pressure", problem: "Bills are about to cluster.", reads: ["recurring_obligations", "income_streams"], result: "When the pinch is and how to smooth it.", cta: "moneyRescue" },
       { id: "unknown_txn", name: "Unknown transaction review", problem: "You don't recognise a charge.", reads: ["transactions"], result: "Recognise, dispute or recategorise.", cta: "spendingRisk" },
       { id: "subscription_control", name: "Subscription control", problem: "Too many or duplicate subscriptions.", reads: ["recurring_obligations"], result: "Duplicates flagged; cancel guidance.", cta: "personalEconomy" },
       { id: "debt_support", name: "Debt repayment support", problem: "Debt feels heavy.", reads: ["liabilities"], result: "A repayment path and freed cashflow.", cta: "repaymentPath" },
       { id: "emergency_review", name: "Emergency buffer review", problem: "Is my safety net enough?", reads: ["financial_assets", "transactions"], result: "Months of cover and how to rebuild.", cta: "emergencyRunway" },
-      { id: "income_interruption", name: "Income interruption support", problem: "Income stopped or is late.", reads: ["income_streams", "financial_assets"], result: "A short-term buffer plan.", cta: "hardship" },
+      { id: "income_interruption", name: "Income interruption support", problem: "Income stopped or is late.", reads: ["income_streams", "financial_assets"], result: "A short-term buffer plan.", cta: "moneyRescue" },
     ],
   },
   {

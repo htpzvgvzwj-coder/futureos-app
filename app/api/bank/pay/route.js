@@ -1,5 +1,6 @@
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { recordInternalTransfer, recordCardRepayment } from "../../../../lib/transaction-ledger/store.js";
+import { guard } from "../../../../lib/http-guards.js";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,8 @@ export const runtime = "nodejs";
 // customer's own accounts is a real double-entry ledger write. Anything
 // leaving the bank returns `not_connected` - it is NEVER faked as sent.
 export async function POST(request) {
+  const blocked = guard(request, { bucket: "pay", limit: 20, windowMs: 60_000 });
+  if (blocked) return blocked;
   const userId = await getCurrentUserId(request);
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
   const body = await request.json().catch(() => ({}));

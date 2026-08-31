@@ -357,3 +357,222 @@
     --bk-surface: #1a2036;
   }
 }
+
+/* ---- production-state primitives (AsyncState.jsx) ------------- */
+.stateBox {
+  border: 1px solid var(--bk-line);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--bk-fg-dim);
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--bk-line);
+  border-top-color: var(--bk-accent);
+  border-radius: 50%;
+  animation: bkspin 0.8s linear infinite;
+}
+@keyframes bkspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+.emptyTitle {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0;
+}
+.staleBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--bk-warn);
+  border: 1px solid var(--bk-warn);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.staleBanner button {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ---- wizard / forms (Onboarding, CSV, RealityEntry, AccountControl) --- */
+.wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--bk-fg);
+}
+.wizardSteps {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--bk-fg-dim);
+}
+.wizardStep {
+  flex: 1;
+  border-top: 3px solid var(--bk-line);
+  padding-top: 4px;
+}
+.wizardStepActive {
+  border-top-color: var(--bk-accent);
+  color: var(--bk-fg);
+  font-weight: 600;
+}
+.wizardStepDone {
+  border-top-color: var(--bk-good);
+}
+.choiceList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.choiceBtn {
+  text-align: left;
+  border: 1px solid var(--bk-line);
+  background: var(--bk-surface);
+  color: inherit;
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.choiceBtn[aria-pressed="true"] {
+  border-color: var(--bk-accent);
+  box-shadow: inset 0 0 0 1px var(--bk-accent);
+}
+.choiceName {
+  font-weight: 600;
+  display: block;
+}
+.choiceHint {
+  font-size: 12px;
+  color: var(--bk-fg-dim);
+}
+.consentRow {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bk-line);
+  font-size: 13px;
+  align-items: flex-start;
+}
+.consentRow label {
+  flex: 1;
+}
+.consentReq {
+  font-size: 10px;
+  border: 1px solid var(--bk-warn);
+  color: var(--bk-warn);
+  border-radius: 999px;
+  padding: 0 5px;
+  margin-left: 6px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.field input,
+.field select,
+.field textarea {
+  border: 1px solid var(--bk-line);
+  border-radius: 8px;
+  padding: 8px;
+  font: inherit;
+  background: var(--bk-surface);
+  color: inherit;
+}
+.fieldError {
+  color: var(--bk-bad);
+  font-size: 12px;
+}
+.primaryBtn {
+  border: 1px solid var(--bk-accent);
+  background: var(--bk-accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ghostBtn {
+  border: 1px solid var(--bk-line);
+  background: transparent;
+  color: inherit;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+.dangerBtn {
+  border: 1px solid var(--bk-bad);
+  background: transparent;
+  color: var(--bk-bad);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rowActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.previewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.previewTable th,
+.previewTable td {
+  border-bottom: 1px solid var(--bk-line);
+  padding: 4px 6px;
+  text-align: left;
+}
+.pill {
+  font-size: 10px;
+  border-radius: 999px;
+  padding: 1px 7px;
+  border: 1px solid var(--bk-line);
+  white-space: nowrap;
+}
+.pillLive {
+  color: var(--bk-good);
+  border-color: var(--bk-good);
+}
+.pillLimited {
+  color: var(--bk-warn);
+  border-color: var(--bk-warn);
+}
+.pillBlocked {
+  color: var(--bk-fg-dim);
+}

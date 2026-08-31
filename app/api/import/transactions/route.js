@@ -1,6 +1,7 @@
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { parseCsv, guessMapping, normaliseRows, splitDuplicates } from "../../../../lib/csv-import/parse.js";
 import { fileHash, existingFingerprints, commitBatch, rollbackBatch, listBatches } from "../../../../lib/csv-import/store.js";
+import { guard } from "../../../../lib/http-guards.js";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const blocked = guard(request, { bucket: "import", limit: 12, windowMs: 60_000 });
+  if (blocked) return blocked;
   const userId = await getCurrentUserId(request);
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
   const body = await request.json().catch(() => ({}));

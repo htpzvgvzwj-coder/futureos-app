@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { createSession, SESSION_COOKIE_NAME, verifyPassword } from "../../../../lib/auth.js";
+import { guard } from "../../../../lib/http-guards.js";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,11 @@ const loginSchema = z.object({
 });
 
 export async function POST(request) {
+  // Rate limit sign-in attempts per client (brute-force + credential
+  // stuffing) and require a same-origin request.
+  const blocked = guard(request, { bucket: "auth-login", limit: 10, windowMs: 60_000 });
+  if (blocked) return blocked;
+
   const body = await request.json();
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {

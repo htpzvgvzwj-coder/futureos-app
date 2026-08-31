@@ -3,6 +3,7 @@ import { loadFinancialTwin } from "../../../lib/financial-twin/collect.js";
 import { computeSafeToSpend } from "../../../lib/financial-twin/safe-to-spend.js";
 import { projectFutureBalance } from "../../../lib/financial-twin/future-balance.js";
 import { detectRescueCases } from "../../../lib/money-rescue/detect.js";
+import { detectRealityDrift, summariseObserved } from "../../../lib/reality-drift/detect.js";
 import { listFinancialAssets, listLiabilities, listIncomeStreams, listRecurringObligations } from "../../../lib/financial-twin/rows-store.js";
 import { listTransactions, getAccountBalances, getSpendingTotal } from "../../../lib/transaction-ledger/store.js";
 import { query } from "../../../lib/db.js";
@@ -69,6 +70,21 @@ export async function GET(request) {
 
     const rescueCases = detectRescueCases({ twin, safeToSpend, transactions, recurring, commitments, incomeStreams, now: today });
 
+    // Reality Drift: bucket the last few months of posted spend + income
+    // and compare to what the plan assumed (recurring obligations proxy
+    // for planned essentials; income streams for planned income).
+    const buckets = monthlyBuckets(transactions, 3);
+    const observed = summariseObserved(buckets);
+    const realityDrift = detectRealityDrift({
+      planned: {
+        monthlyEssentials: recurring.filter((r) => r.kind !== "loan_repayment").reduce((s, r) => s + (r.monthlyAmount || 0), 0),
+        monthlyIncome: incomeStreams.reduce((s, i) => s + (i.monthlyAmount || 0), 0),
+        monthlyContribution: commitments.reduce((s, c) => s + (c.monthlyContribution || 0), 0),
+      },
+      observed,
+      monthsPerImpactUnit: 1 / 200,
+    });
+
     return Response.json({
       asOf: today,
       twin,
@@ -76,6 +92,7 @@ export async function GET(request) {
       recentTransactions: transactions.slice(0, 12),
       safeToSpend,
       futureBalance,
+      realityDrift,
       rescueCases,
       spendingLast90Days: spend90,
       counts: { assets: assets.length, liabilities: liabilities.length, incomeStreams: incomeStreams.length, recurring: recurring.length },
@@ -90,6 +107,21 @@ export async function GET(request) {
 function iso(d) {
   if (!d) return null;
   return typeof d === "string" ? d.slice(0, 10) : new Date(d).toISOString().slice(0, 10);
+}
+// Group posted transactions into the last N whole calendar months.
+function monthlyBuckets(transactions, n) {
+  const now = new Date();
+  const months = [];
+  for (let i = n; i >= 1; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  return months.map((m) => {
+    const rows = transactions.filter((t) => t.status === "posted" && String(t.postedAt ?? t.authorisedAt ?? "").slice(0, 7) === m);
+    const essentials = rows.filter((t) => t.direction === "debit" && !t.isInternalTransfer && !t.isCardRepayment).reduce((s, t) => s + Number(t.amount || 0), 0);
+    const income = rows.filter((t) => t.direction === "credit" && t.channel === "salary").reduce((s, t) => s + Number(t.amount || 0), 0);
+    return { month: m, essentials, income, contribution: 0 };
+  });
 }
 function addDays(isoStr, n) {
   return new Date(new Date(isoStr).getTime() + n * 86_400_000).toISOString().slice(0, 10);

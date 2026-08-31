@@ -1409,3 +1409,15 @@ create table if not exists account_deletions (
   reason        text,
   completed_at  timestamptz
 );
+
+-- Usable Release UI: account recovery (email delivery needs a provider;
+-- the token mechanism + reset flow are real).
+create table if not exists password_reset_tokens (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references users(id),
+  token_hash   text not null unique,
+  expires_at   timestamptz not null,
+  used_at      timestamptz,
+  created_at   timestamptz not null default now()
+);
+create index if not exists password_reset_tokens_user_idx on password_reset_tokens (user_id);
