@@ -1,14 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { existsSync } from "node:fs";
 
 // Living Thread - the real 320/390 screenshots the acceptance matrix
-// (Part O) asks for. Run on a browser-capable machine after
-// `npm run test:e2e:seed`; the first run writes the baselines under
-// e2e/*-snapshots/.
-//
-// light + dark x EN + ZH x reduced-motion is driven by the projects in
-// playwright.config.ts plus the params below.
-test.skip(!existsSync("e2e/.auth/user.json"), "run `npm run test:e2e:seed` first");
+// (Part O) asks for. globalSetup seeds the user; light/dark x EN/ZH x
+// reduced-motion is driven by the params below x the viewport projects
+// in playwright.config.ts. No skips.
 
 const SCENES = [
   "#homeHorizon", "#emergencyRunway", "#repaymentPath", "#futureLifeTimeline",

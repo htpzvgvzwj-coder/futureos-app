@@ -78,12 +78,18 @@ test("globals.css keeps wide content inside its own horizontal-scroll container 
   assert.match(globals, /overflow-x: auto/, "at least one overflow-x: auto scroll container exists");
 });
 
-test("the Playwright config + specs exist for the browser-machine run", () => {
+test("the Playwright config + specs exist and DO NOT conditionally skip", () => {
   const cfg = read("playwright.config.ts");
   assert.match(cfg, /mobile-320/);
   assert.match(cfg, /mobile-390/);
+  assert.match(cfg, /globalSetup/, "auth is seeded by a globalSetup, not an env var");
   const spec = read("e2e/flagship-studios.spec.ts");
   assert.match(spec, /getByRole\("slider"\)/);
   assert.match(spec, /ArrowRight/);
-  read("e2e/visual-regression.spec.ts"); // present + parseable-as-text
+  assert.doesNotMatch(spec, /test\.skip\(/, "no conditional test.skip in the flagship spec");
+  assert.doesNotMatch(spec, /if \(await .*\.(isEnabled|isVisible)\(\)/, "no if-guarded steps - every step expects visible + enabled");
+  assert.match(spec, /toHaveScreenshot/, "each Studio produces a screenshot");
+  const vr = read("e2e/visual-regression.spec.ts");
+  assert.doesNotMatch(vr, /test\.skip\(/, "no conditional skip in the visual spec");
+  read("e2e/global-setup.ts"); // present
 });

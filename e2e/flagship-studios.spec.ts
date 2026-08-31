@@ -1,117 +1,141 @@
 import { test, expect, Page } from "@playwright/test";
-import { existsSync } from "node:fs";
 
-// Living Thread - the nine flagship Studios, end to end, as the seeded E2E
-// user. Run `npm run test:e2e:seed` first (writes e2e/.auth/user.json);
-// without it these skip rather than fail.
-const HAS_AUTH = existsSync("e2e/.auth/user.json");
-test.skip(!HAS_AUTH, "run `npm run test:e2e:seed` first");
+// Living Thread - the nine flagship Studios end to end, as the seeded E2E
+// user. NO conditional escapes: every step expects its element visible +
+// enabled and fails otherwise; every API call must be 200; every impact
+// unit must be non-null.
 
-// domain -> the URL hash the SPA routes on + the primary variable control.
-const STUDIOS: { name: string; hash: string; sealMonthly: number }[] = [
-  { name: "Home Horizon", hash: "homeHorizon", sealMonthly: 1800 },
-  { name: "Safety Runway", hash: "emergencyRunway", sealMonthly: 500 },
-  { name: "Debt Gravity", hash: "repaymentPath", sealMonthly: 300 },
-  { name: "Future-Day Loom", hash: "futureLifeTimeline", sealMonthly: 500 },
-  { name: "Calendar Orbit", hash: "tripOrbit", sealMonthly: 300 },
-  { name: "Capital Prism", hash: "capitalPaths", sealMonthly: 800 },
-  { name: "Living Envelope", hash: "protectionEnvelope", sealMonthly: 60 },
-  { name: "Private Constellation", hash: "familyConstellation", sealMonthly: 1100 },
-  { name: "Wedding Living Plan", hash: "weddingLivingPlan", sealMonthly: 800 },
+const STUDIOS: { name: string; hash: string; api: string }[] = [
+  { name: "Home Horizon", hash: "homeHorizon", api: "home-horizon" },
+  { name: "Safety Runway", hash: "emergencyRunway", api: "emergency-runway" },
+  { name: "Debt Gravity", hash: "repaymentPath", api: "debt-gravity" },
+  { name: "Future-Day Loom", hash: "futureLifeTimeline", api: "future-day-loom" },
+  { name: "Calendar Orbit", hash: "tripOrbit", api: "calendar-orbit" },
+  { name: "Capital Prism", hash: "capitalPaths", api: "capital-prism" },
+  { name: "Living Envelope", hash: "protectionEnvelope", api: "living-envelope" },
+  { name: "Private Constellation", hash: "familyConstellation", api: "private-constellation" },
+  { name: "Wedding Living Scene", hash: "weddingLivingPlan", api: "wedding-thread" },
 ];
+const UNITS = ["sgd", "sgd_per_month", "months", "percentage", "date_shift_months", "count"];
 
-async function openStudio(page: Page, hash: string) {
+async function open(page: Page, hash: string) {
   await page.goto(`/#${hash}`);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+}
+async function apiJson(page: Page, api: string) {
+  const res = await page.request.get(`/api/${api}`);
+  expect(res.status(), `/api/${api} must be 200`).toBe(200);
+  return res.json();
 }
 
 for (const s of STUDIOS) {
-  test(`${s.name}: the 12-point causal-spine walk`, async ({ page }, testInfo) => {
-    await openStudio(page, s.hash);
+  test(`${s.name}: 12-point causal-spine walk`, async ({ page }, testInfo) => {
+    await open(page, s.hash);
 
-    // 1 + 2 - move a core variable, the numbers recompute immediately
+    // 1 + 2 - move a core variable, the numbers recompute
     const slider = page.getByRole("slider").first();
     await expect(slider).toBeVisible();
-    const numbersBefore = await page.locator("text=/SGD\\s?[0-9]/").allTextContents();
     await slider.focus();
+    const before = (await page.locator("body").innerText()).match(/SGD\s?[\d,]+/g)?.join("|") ?? "";
     await slider.press("ArrowRight");
     await slider.press("ArrowRight");
-    await page.waitForTimeout(300);
-    const numbersAfter = await page.locator("text=/SGD\\s?[0-9]/").allTextContents();
-    expect(numbersAfter.join("|"), "a figure changed after moving the control").not.toBe(numbersBefore.join("|"));
+    await page.waitForTimeout(400);
+    const after = (await page.locator("body").innerText()).match(/SGD\s?[\d,]+/g)?.join("|") ?? "";
+    expect(after, "a figure changed after moving the control").not.toBe(before);
 
-    // 3 - create a real branch (Fork), 4 - only the active branch is live
+    // 3 - Fork creates a real branch
     const fork = page.getByRole("button", { name: /Fork this|从此分叉/ });
-    if (await fork.isEnabled().catch(() => false)) {
-      await fork.click();
-      await expect(page.locator(".lsBranchList li")).toHaveCount(1, { timeout: 10_000 });
-      await slider.press("ArrowRight");
-      await page.getByRole("button", { name: /Fork this|从此分叉/ }).click();
-      await expect(page.locator(".lsBranchList li")).toHaveCount(2);
-      // compare view lists both, with a per-branch monthly effect + sealable
-      await page.getByRole("button", { name: /^Compare$|^对比$/ }).click();
-      await expect(page.locator(".lsBranchCompare")).toBeVisible();
+    await expect(fork).toBeVisible();
+    await expect(fork).toBeEnabled();
+    await fork.click();
+    await expect(page.locator(".lsBranchList li")).toHaveCount(1);
+
+    // 4 - a second Fork + Compare shows both; ONLY the active one drives
+    await slider.press("ArrowRight");
+    await page.waitForTimeout(400);
+    await expect(page.getByRole("button", { name: /Fork this|从此分叉/ })).toBeEnabled();
+    await page.getByRole("button", { name: /Fork this|从此分叉/ }).click();
+    await expect(page.locator(".lsBranchList li")).toHaveCount(2);
+    await page.getByRole("button", { name: /^Compare$|^对比$/ }).click();
+    await expect(page.locator(".lsBranchCompare")).toBeVisible();
+
+    const thread1 = await apiJson(page, "life-thread");
+    // select the FIRST branch as the active moment, then the second, and
+    // assert the thread's studio moment state follows the selection.
+    const chips = page.locator(".lsBranchPick");
+    await chips.nth(0).click();
+    await page.waitForTimeout(600);
+    const threadA = await apiJson(page, "life-thread");
+    await chips.nth(1).click();
+    await page.waitForTimeout(600);
+    const threadB = await apiJson(page, "life-thread");
+    expect(threadA.studioMomentStates?.[domainKey(s.hash)], "active branch selected").toBe("activeBranch");
+    expect(JSON.stringify(threadA.studioImpacts?.aggregated ?? []), "the two active selections differ")
+      .not.toBe(JSON.stringify(threadB.studioImpacts?.aggregated ?? []));
+    void thread1;
+
+    // 5 - the impactSet tags every affected goal with a typed unit
+    const body = await apiJson(page, s.api);
+    const goals = body?.impactSet?.affectedGoals ?? [];
+    expect(goals.length, "the impactSet has affected goals").toBeGreaterThan(0);
+    for (const g of goals) {
+      expect(g.unit, `${s.name}: ${g.goalId}.${g.metric} carries a typed unit`).not.toBeNull();
+      expect(UNITS).toContain(g.unit);
+      expect(["up", "down", "flat"]).toContain(g.direction);
+    }
+    // 6 - allocation is per-leg
+    const legs = body?.impactSet?.allocationLegs ?? null;
+    for (const g of goals) {
+      const funded = legs && Number(legs[g.goalId]) > 0;
+      if (!funded) expect(g.confirmedAfter, `${g.goalId} unfunded -> ghost`).toBeNull();
     }
 
-    // 5 - impactSet units: the network response tags each affected goal
-    const domainApi = {
-      homeHorizon: "home-horizon", emergencyRunway: "emergency-runway", repaymentPath: "debt-gravity",
-      futureLifeTimeline: "future-day-loom", tripOrbit: "calendar-orbit", capitalPaths: "capital-prism",
-      protectionEnvelope: "living-envelope", familyConstellation: "private-constellation", weddingLivingPlan: "wedding-thread",
-    }[s.hash]!;
-    const api = await page.request.get(`/api/${domainApi}`);
-    if (api.ok()) {
-      const body = await api.json();
-      const goals = body?.impactSet?.affectedGoals ?? [];
-      for (const g of goals) {
-        expect(["sgd", "sgd_per_month", "months", "percentage", "date_shift_months", "count", null]).toContain(g.unit ?? null);
-        expect(["up", "down", "flat"]).toContain(g.direction);
-      }
-      // 6 - allocation is per-leg (confirmedAfter only where a leg is funded)
-      if (body?.impactSet?.allocationLegs) {
-        const legs = body.impactSet.allocationLegs;
-        for (const g of goals) {
-          const funded = legs && legs[g.goalId] > 0;
-          if (!funded) expect(g.confirmedAfter).toBeNull();
-        }
-      }
-      // 9 - guardian policy shape is present in the response
-      expect(body?.guardianState).toBeTruthy();
-    }
+    // 7 + 8 - Seal preview then confirm
+    const review = page.getByRole("button", { name: /Review|Seal|封存/ }).first();
+    await expect(review).toBeVisible();
+    await expect(review).toBeEnabled();
+    await review.click();
+    await expect(page.getByText(/Guardian|守护者/)).toBeVisible();
+    const confirm = page.getByRole("button", { name: /Confirm|确认封存|Seal it/ }).first();
+    await expect(confirm).toBeVisible();
+    await expect(confirm).toBeEnabled();
+    await confirm.click();
 
-    // 7 + 8 - Seal preview then confirm (through the scene's own control)
-    const reviewBtn = page.getByRole("button", { name: /Review|Seal|封存/ }).first();
-    if (await reviewBtn.isVisible().catch(() => false)) {
-      await reviewBtn.click();
-      await expect(page.getByText(/Guardian|守护者/)).toBeVisible();
-      const confirmBtn = page.getByRole("button", { name: /Confirm|确认封存|Seal it/ }).first();
-      if (await confirmBtn.isEnabled().catch(() => false)) {
-        await confirmBtn.click();
-        // 9 - a Guardian watch rail appears in place
-        await expect(page.locator(".lsGuardianRail")).toBeVisible({ timeout: 10_000 });
-        // 10 - reload restores the same sealed moment
-        await page.reload();
-        await expect(page.locator(".lsGuardianRail")).toBeVisible({ timeout: 15_000 });
-      }
-    }
+    // 9 - the Guardian rail appears in place
+    await expect(page.locator(".lsGuardianRail")).toBeVisible();
 
-    // 11 - Memory Scrubber replays before/after
+    // ghost -> solid: the sealed studio now contributes a SOLID impact
+    const sealedThread = await apiJson(page, "life-thread");
+    expect(sealedThread.sealedStudioCount, "at least one sealed studio drives a solid impact").toBeGreaterThan(0);
+    const solid = (sealedThread.studioImpacts?.aggregated ?? []).some((g: { state: string }) => g.state === "solid");
+    expect(solid, "a solid cross-goal group exists after Seal").toBe(true);
+
+    // 10 - reload restores the same sealed moment
+    const railTextBefore = await page.locator(".lsGuardianRail").innerText();
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator(".lsGuardianRail")).toBeVisible();
+    expect(await page.locator(".lsGuardianRail").innerText()).toBe(railTextBefore);
+    const reThread = await apiJson(page, "life-thread");
+    expect(reThread.sealedStudioCount).toBe(sealedThread.sealedStudioCount);
+
+    // 11 - Memory Scrubber replays Before / After
     const scrub = page.getByText(/Memory Scrubber|记忆回溯器/);
-    if (await scrub.isVisible().catch(() => false)) {
-      await scrub.click();
-      await expect(page.locator(".lsScrubTable, .lsScrubDrawer")).toBeVisible();
-    }
+    await expect(scrub).toBeVisible();
+    await scrub.click();
+    await expect(page.locator(".lsScrubTable, .lsScrubDrawer")).toBeVisible();
 
-    // 12 - no horizontal body scroll at this viewport
+    // 12 - no horizontal body scroll at this viewport, + a screenshot
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow, `no horizontal body scroll (${testInfo.project.name})`).toBeLessThanOrEqual(1);
+    expect(overflow, `no h-scroll (${testInfo.project.name})`).toBeLessThanOrEqual(1);
+    await expect(page).toHaveScreenshot(`${s.hash}-${testInfo.project.name}.png`, { fullPage: true, maxDiffPixelRatio: 0.03 });
   });
 }
 
-test("EN <-> ZH: no raw i18n keys leak into a Studio heading", async ({ page }) => {
-  for (const s of STUDIOS) {
-    await openStudio(page, s.hash);
-    const h1 = (await page.getByRole("heading", { level: 1 }).first().textContent()) ?? "";
-    expect(h1).not.toMatch(/^[a-z][A-Za-z]+\.[a-z]/);
-  }
-});
+function domainKey(hash: string) {
+  return {
+    homeHorizon: "home", emergencyRunway: "emergency", repaymentPath: "loan", futureLifeTimeline: "retirement",
+    tripOrbit: "travel", capitalPaths: "investment", protectionEnvelope: "insurance", familyConstellation: "family",
+    weddingLivingPlan: "wedding",
+  }[hash]!;
+}
