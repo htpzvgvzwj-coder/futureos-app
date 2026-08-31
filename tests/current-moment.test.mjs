@@ -3,8 +3,17 @@ import assert from "node:assert/strict";
 import { resolveCurrentMoment, impactSourceBranchId, momentDrivesLifeThread, MOMENT_STATES } from "../lib/living-plan/current-moment.js";
 import { collectStudioImpacts } from "../lib/life-thread/cross-studio-impact.js";
 
-test("the four moment states are explicit", () => {
-  assert.deepEqual(MOMENT_STATES, ["reality", "activeBranch", "alternatives", "sealedBranch"]);
+test("the five moment states are explicit", () => {
+  assert.deepEqual(MOMENT_STATES, ["reality", "activeBranch", "alternatives", "sealedBranch", "conflict"]);
+});
+
+test("MORE THAN ONE active branch -> conflict; it drives NOTHING and does not silently pick one", () => {
+  const m = resolveCurrentMoment({ branches: [{ id: "a", status: "active" }, { id: "b", status: "active" }, { id: "c", status: "open" }] });
+  assert.equal(m.state, "conflict");
+  assert.equal(m.branchId, null);
+  assert.deepEqual(m.activeBranchIds.sort(), ["a", "b"]);
+  assert.equal(impactSourceBranchId(m), null);
+  assert.equal(momentDrivesLifeThread(m), false);
 });
 
 test("no branches -> reality; reality drives the Life Thread but has no branch overlay", () => {
@@ -43,11 +52,11 @@ test("a single open branch is treated as the active moment (nothing to disambigu
   assert.equal(m.branchId, "only");
 });
 
-test("a sealed commitment -> sealedBranch (which IS reality now); it drives the thread", () => {
-  const m = resolveCurrentMoment({ branches: [{ id: "a", status: "open" }], sealedCommitment: { id: "c1", plan_branch_id: "a" } });
+test("a sealed commitment -> sealedBranch; it drives the thread AS SOLID reality (its branch is the source)", () => {
+  const m = resolveCurrentMoment({ branches: [{ id: "a", status: "sealed" }], sealedCommitment: { id: "c1", plan_branch_id: "a" } });
   assert.equal(m.state, "sealedBranch");
   assert.equal(m.commitmentId, "c1");
-  assert.equal(impactSourceBranchId(m), null, "sealed = reality, no branch overlay");
+  assert.equal(impactSourceBranchId(m), "a", "the sealed branch IS the projection source, marked solid");
   assert.equal(momentDrivesLifeThread(m), true);
 });
 

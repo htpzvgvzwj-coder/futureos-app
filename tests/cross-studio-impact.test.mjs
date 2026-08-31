@@ -99,3 +99,79 @@ test("enrichCrossGoalEdges attaches a unit-tagged magnitude + ghost/solid state 
   assert.equal(safetyEdge.magnitude, 180);
   assert.equal(enriched.find((e) => e.to === "future").impactState, "none");
 });
+
+test("a SEALED plan keeps influencing the Life Thread as SOLID reality; revoke removes it", async () => {
+  const wedReality = {
+    wedding_date: "2027-06", guest_count: 150, venue_tier: "mid_range", venue_type: "hotel",
+    photography_tier: "mid", attire_tier: "mid", monthly_contribution: 800, partner_contribution: 400, current_savings: 6000,
+  };
+  const sealedData = { ...wedReality, guest_count: 90 }; // the sealed, smaller wedding
+  const sealedBranch = {
+    id: "wed-sealed",
+    status: "sealed",
+    data: sealedData,
+    delta: { before: { guest_count: 150 }, after: { guest_count: 90 } },
+  };
+  const planStore = { getCurrentPlanVersion: async () => ({ data: sealedData }) };
+  const branchesByPlan = [{ plan: { domain: "wedding", id: "p-wed" }, branches: [sealedBranch] }];
+  const threadContext = { monthlyIncome: 8000, monthlyExpenses: 3800, committedMonthlyTotal: 900, emergencyBufferMonths: 6, availableMonthlyCashflow: 1500 };
+
+  // Sealed -> a SOLID cross-goal impact on Home / Safety.
+  const sealedOut = await collectStudioImpacts({
+    branchesByPlan,
+    planStore,
+    threadContext,
+    commitmentsByPlanId: { "p-wed": { id: "c-wed", plan_branch_id: "wed-sealed" } },
+  });
+  assert.equal(sealedOut.moments.wedding.state, "sealedBranch");
+  assert.equal(sealedOut.perStudio[0].state, "solid");
+  assert.ok(sealedOut.sealedStudioCount === 1);
+  const solidGroups = sealedOut.aggregated.filter((g) => g.state === "solid");
+  assert.ok(solidGroups.length >= 2, "the sealed wedding lands solid on >= 2 goals");
+  for (const g of solidGroups) assert.notEqual(g.confirmedAfter, null);
+  assert.ok(Object.values(sealedOut.nodeImpacts).flat().some((x) => x.state === "solid"));
+
+  // REVOKE -> the commitment is no longer active -> no sealed moment ->
+  // the solid impact is gone (the plan falls back to reality).
+  const revokedOut = await collectStudioImpacts({
+    branchesByPlan,
+    planStore,
+    threadContext,
+    commitmentsByPlanId: {}, // revoked
+  });
+  assert.notEqual(revokedOut.moments.wedding.state, "sealedBranch");
+  assert.equal(revokedOut.perStudio.length, 0, "no active branch, no sealed commitment -> nothing drives");
+  assert.equal(revokedOut.sealedStudioCount, 0);
+});
+
+test("NO metric->unit guessing: an affected goal with no unit is INVALID, not coerced", async () => {
+  // A fake adapter whose projector forgets the unit on one goal.
+  const fakeAdapters = await import("../lib/future-field/adapters.js");
+  const orig = fakeAdapters.getFutureFieldAdapter;
+  // patch is not possible on an ESM export; instead assert the measure
+  // path directly via a hand-built impact through collectStudioImpacts is
+  // out of reach, so assert buildImpactMeasure's contract (the single
+  // source of truth collectStudioImpacts now relies on).
+  const { buildImpactMeasure } = await import("../lib/living-plan/impact-measure.js");
+  const noUnit = buildImpactMeasure({ targetGoalId: "future", metric: "yearsToTarget", before: 12, possibleAfter: 9 });
+  assert.equal(noUnit.valid, false, "yearsToTarget with no unit is invalid, never silently 'months'");
+  assert.equal(noUnit.invalidReason, "missing_or_unknown_unit");
+  void orig;
+});
+
+test("two active branches on one plan -> conflict -> that plan drives NOTHING", async () => {
+  const branchesByPlan = [
+    {
+      plan: { domain: "travel", id: "p-travel" },
+      branches: [
+        { id: "x", status: "active", data: { ...REALITY["p-travel"], nights: 4 } },
+        { id: "y", status: "active", data: { ...REALITY["p-travel"], nights: 18 } },
+      ],
+    },
+  ];
+  const out = await collectStudioImpacts({ branchesByPlan, planStore: fakePlanStore(REALITY), threadContext: THREAD_CTX });
+  assert.equal(out.moments.travel.state, "conflict");
+  assert.equal(out.perStudio.length, 0);
+  assert.equal(out.conflicts.length, 1);
+  assert.deepEqual(out.conflicts[0].activeBranchIds.sort(), ["x", "y"]);
+});

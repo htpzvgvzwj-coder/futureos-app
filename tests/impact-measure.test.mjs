@@ -72,6 +72,30 @@ test("a measure with no unit (or an unknown unit) is INVALID, never coerced", ()
   assert.equal(aggregated.length, 0, "invalid measures never reach a group");
 });
 
+test("confirmed aggregation is DELTA-based - absolute confirmedAfter values are never summed", () => {
+  const before = 1000;
+  const a = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before, possibleAfter: 900, confirmedAfter: 900, sourceBranchId: "A" });
+  const b = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before, possibleAfter: 800, confirmedAfter: 800, sourceBranchId: "B" });
+  const { aggregated } = aggregateImpactMeasures([a, b]);
+  assert.equal(aggregated.length, 1);
+  const g = aggregated[0];
+  // 1000 + (900-1000) + (800-1000) = 1000 - 100 - 200 = 700  (NOT 1700)
+  assert.equal(g.confirmedAfter, 700);
+  assert.equal(g.confirmedDelta, -300);
+  assert.equal(g.state, "solid");
+  assert.equal(g.direction, "down", "the net confirmed delta is negative");
+  assert.equal(g.beforeMismatch, false, "both sources agree on the canonical before");
+});
+
+test("a ghost + a solid source in one group: state is solid, direction from the confirmed delta", () => {
+  const ghost = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 1000, possibleAfter: 1200 });
+  const solid = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 1000, possibleAfter: 900, confirmedAfter: 900 });
+  const { aggregated } = aggregateImpactMeasures([ghost, solid]);
+  assert.equal(aggregated[0].state, "solid");
+  assert.equal(aggregated[0].confirmedAfter, 900);
+  assert.equal(aggregated[0].possibleAfter, 1100, "the possible layer still shows both deltas");
+});
+
 test("aggregation sums deltas ONLY within a (goal, metric, unit) group", () => {
   const a = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -100, sourceBranchId: "loan" });
   const b = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -80, sourceBranchId: "travel" });
