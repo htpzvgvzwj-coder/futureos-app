@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
+import { existsSync } from "node:fs";
 
-// Living Thread commit 13 - the real 320/390 screenshots the acceptance
-// matrix (Part O) asks for. Run on a browser-capable machine; the first
-// run writes the baselines under e2e/flagship-studios.spec.ts-snapshots/.
+// Living Thread - the real 320/390 screenshots the acceptance matrix
+// (Part O) asks for. Run on a browser-capable machine after
+// `npm run test:e2e:seed`; the first run writes the baselines under
+// e2e/*-snapshots/.
 //
 // light + dark x EN + ZH x reduced-motion is driven by the projects in
 // playwright.config.ts plus the params below.
-const STORAGE = process.env.E2E_STORAGE_STATE;
-test.skip(!STORAGE, "set E2E_STORAGE_STATE to a logged-in storageState json");
-if (STORAGE) test.use({ storageState: STORAGE });
+test.skip(!existsSync("e2e/.auth/user.json"), "run `npm run test:e2e:seed` first");
 
 const SCENES = [
   "#homeHorizon", "#emergencyRunway", "#repaymentPath", "#futureLifeTimeline",

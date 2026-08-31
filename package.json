@@ -19,7 +19,8 @@
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "test:e2e": "playwright test",
     "test:e2e:install": "npm i -D @playwright/test && playwright install chromium",
-    "test:e2e:update-snapshots": "playwright test --update-snapshots"
+    "test:e2e:update-snapshots": "playwright test --update-snapshots",
+    "test:e2e:seed": "node --env-file=.env scripts/seed-e2e-user.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",
