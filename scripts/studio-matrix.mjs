@@ -70,7 +70,7 @@ const STUDIO_FILES = {
   investment: { scene: "app/features/investment/CapitalPrism.jsx", finance: "lib/investment/capital-prism-finance.js", projector: "lib/investment/capital-prism-projector.js", route: "app/api/capital-prism/route.js", itest: "tests/integration/capital-prism.integration.test.mjs" },
   insurance: { scene: "app/features/insurance/LivingEnvelope.jsx", finance: "lib/insurance/living-envelope-finance.js", projector: "lib/insurance/living-envelope-projector.js", route: "app/api/living-envelope/route.js", itest: "tests/integration/living-envelope.integration.test.mjs" },
   family: { scene: "app/features/family/PrivateConstellation.jsx", finance: "lib/family/private-constellation-finance.js", projector: "lib/family/private-constellation-projector.js", route: "app/api/private-constellation/route.js", itest: "tests/integration/private-constellation.integration.test.mjs" },
-  wedding: { scene: "app/features/wedding/WeddingLivingPlan.jsx", finance: "lib/wedding/plan-finance.js", projector: "lib/wedding/wedding-thread-projector.js", route: "app/api/wedding-thread/route.js", itest: "tests/integration/wedding-thread.integration.test.mjs" },
+  wedding: { scene: "app/features/wedding/WeddingContinuousScene.jsx", finance: "lib/wedding/plan-finance.js", projector: "lib/wedding/wedding-thread-projector.js", route: "app/api/wedding-thread/route.js", itest: "tests/integration/wedding-thread.integration.test.mjs" },
 };
 const GENERIC_PINS = new Set(["emergency_floor_months", "max_monthly_contribution", "no_guardian_auto_move", "no_balance_share", "no_partner_data_in_viewer_response"]);
 

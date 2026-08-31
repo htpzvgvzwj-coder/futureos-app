@@ -3592,7 +3592,9 @@
       "no_underwriting_or_quote": "no underwriting or quote",
       "no_unknown_counted_as_gap": "no unknown counted as a gap",
       "minimum_confirmations": "minimum confirmations",
-      "no_partner_data_in_viewer_response": "no partner data in the viewer response"
+      "no_partner_data_in_viewer_response": "no partner data in the viewer response",
+      "latest_wedding_month": "latest wedding month",
+      "minimum_guest_experience_spend": "minimum spend per guest"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -5400,5 +5402,62 @@
     "field": "Field",
     "monthlyEffect": "Monthly effect",
     "sealableRow": "Sealable"
+  },
+  "weddingScene": {
+    "loading": "Loading your wedding…",
+    "title": "Wedding Living Scene",
+    "subtitle": "One continuous scene. Drag the guest knob to widen or narrow the budget river; drag the date knob to move the wedding.",
+    "noPlan": "Add a guest count and a date to open the Wedding Living Scene.",
+    "summaryLine": "Wedding · {cost} · {month}",
+    "estimateNote": "Singapore reference-rate estimate, not a vendor quote. Your partner's earmarked savings stay private - only their committed monthly is shared.",
+    "now": "Now",
+    "guestsWord": "guests",
+    "none": "none",
+    "belowCost": "Your budget is {amount} under the reference cost - not sealable until that closes.",
+    "readout": "About {perGuest} per guest · {need}/mo is your personal share.",
+    "row": {
+      "cost": "Reference cost",
+      "guests": "Guests",
+      "need": "Your monthly share",
+      "gap": "Budget gap"
+    },
+    "prov": {
+      "referenceRate": "reference rate, not a quote",
+      "fromPlan": "from your plan",
+      "yourShare": "your split, partner's stays private",
+      "vsBudget": "vs your budget ceiling"
+    },
+    "unknown": {
+      "guest_count": "Guest count",
+      "wedding_date": "Wedding date"
+    },
+    "field": {
+      "label": "Budget River - drag the guest knob to widen/narrow the river, the date knob to move the wedding",
+      "guests": "Guests: {n}",
+      "date": "Wedding date"
+    },
+    "ctx": {
+      "venue": "Venue",
+      "couple": "Couple alignment"
+    },
+    "venueTier": "Venue tier",
+    "venue": {
+      "budget": "Budget",
+      "mid_range": "Mid-range",
+      "premium": "Premium"
+    },
+    "partnerMonthly": "Partner's monthly contribution",
+    "partnerNote": "Only the agreed monthly is shared. Neither side's balance is revealed.",
+    "less": "Less",
+    "more": "More",
+    "mirror": {
+      "fewer": "Fewer guests",
+      "later": "Wedding later",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "budgetGap": "Your budget is {amount} under the reference cost.",
+      "behindPace": "At this pace your share won't be funded in time (need ~{need}/mo)."
+    }
   }
 }

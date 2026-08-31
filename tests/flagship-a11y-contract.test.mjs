@@ -21,6 +21,7 @@ const SCENES = {
   investment: { file: "app/features/investment/CapitalPrism.jsx", css: "cp" },
   insurance: { file: "app/features/insurance/LivingEnvelope.jsx", css: "le" },
   family: { file: "app/features/family/PrivateConstellation.jsx", css: "pc" },
+  wedding: { file: "app/features/wedding/WeddingContinuousScene.jsx", css: "wc" },
 };
 
 const globals = read("app/globals.css");

@@ -11,7 +11,7 @@ import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
-import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
+import { WeddingContinuousScene } from "./features/wedding/WeddingContinuousScene.jsx";
 import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
 import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
 import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
@@ -17603,7 +17603,7 @@ export default function App() {
     ),
     [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
     [screens.EMERGENCY_RUNWAY]: <EmergencyRunway t={t} setActiveScreen={setActiveScreen} />,
-    [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.WEDDING_LIVING_PLAN]: <WeddingContinuousScene t={t} setActiveScreen={setActiveScreen} />,
     [screens.REPAYMENT_PATH]: <DebtGravity t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_LIFE_TIMELINE]: <FutureDayLoom t={t} setActiveScreen={setActiveScreen} />,
     [screens.TRIP_ORBIT]: <CalendarOrbit t={t} setActiveScreen={setActiveScreen} />,

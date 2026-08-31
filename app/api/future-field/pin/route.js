@@ -53,6 +53,9 @@ const PIN_KINDS = {
   // Private Constellation domain pins (Living Thread commit 9).
   minimum_confirmations: "gte",
   no_partner_data_in_viewer_response: "flag",
+  // Wedding continuous-scene domain pins (causal-spine round).
+  latest_wedding_month: "lte", // YYYYMM integer
+  minimum_guest_experience_spend: "gte", // per-guest floor
 };
 
 export async function GET(request) {

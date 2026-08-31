@@ -3410,7 +3410,9 @@
       "no_underwriting_or_quote": "不核保、不报价",
       "no_unknown_counted_as_gap": "未知不计为缺口",
       "minimum_confirmations": "最少确认数",
-      "no_partner_data_in_viewer_response": "查看方响应中不含伴侣数据"
+      "no_partner_data_in_viewer_response": "查看方响应中不含伴侣数据",
+      "latest_wedding_month": "最晚婚礼月份",
+      "minimum_guest_experience_spend": "每位宾客最低支出"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -5218,5 +5220,62 @@
     "field": "字段",
     "monthlyEffect": "每月影响",
     "sealableRow": "可封存"
+  },
+  "weddingScene": {
+    "loading": "正在加载你的婚礼…",
+    "title": "婚礼生活场景",
+    "subtitle": "一个连续的场景。拖动宾客旋钮加宽或收窄预算之河；拖动日期旋钮移动婚期。",
+    "noPlan": "填入宾客人数和日期即可打开婚礼生活场景。",
+    "summaryLine": "婚礼 · {cost} · {month}",
+    "estimateNote": "来自新加坡的参考费率估算，不是供应商报价。伴侣预留的储蓄保持私密——只共享其承诺的每月供款。",
+    "now": "现在",
+    "guestsWord": "位宾客",
+    "none": "无",
+    "belowCost": "你的预算比参考成本低 {amount}——在补齐之前无法封存。",
+    "readout": "每位宾客约 {perGuest} · 你的个人份额为 {need}/月。",
+    "row": {
+      "cost": "参考成本",
+      "guests": "宾客",
+      "need": "你的每月份额",
+      "gap": "预算缺口"
+    },
+    "prov": {
+      "referenceRate": "参考费率，不是报价",
+      "fromPlan": "来自你的计划",
+      "yourShare": "你的份额，伴侣的保持私密",
+      "vsBudget": "对比你的预算上限"
+    },
+    "unknown": {
+      "guest_count": "宾客人数",
+      "wedding_date": "婚礼日期"
+    },
+    "field": {
+      "label": "预算之河——拖动宾客旋钮加宽/收窄河道，拖动日期旋钮移动婚期",
+      "guests": "宾客：{n}",
+      "date": "婚礼日期"
+    },
+    "ctx": {
+      "venue": "场地",
+      "couple": "伴侣共识"
+    },
+    "venueTier": "场地档次",
+    "venue": {
+      "budget": "经济",
+      "mid_range": "中档",
+      "premium": "高档"
+    },
+    "partnerMonthly": "伴侣的每月供款",
+    "partnerNote": "只共享约定的每月金额。任何一方的余额都不会披露。",
+    "less": "减少",
+    "more": "增加",
+    "mirror": {
+      "fewer": "减少宾客",
+      "later": "推迟婚礼",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "budgetGap": "你的预算比参考成本低 {amount}。",
+      "behindPace": "按此节奏，你的份额无法及时备好（约需每月 {need}）。"
+    }
   }
 }

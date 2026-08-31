@@ -7041,3 +7041,30 @@ nextjs-portal {
   .rwEnd, .rwEndFlag, .rwRail, .rwCurrent, .rwLoad { transition: none !important; animation: none !important; }
   .dgBall, .dgKnot, .dgKnotLine, .dgBreathFill, .dgBody { transition: none !important; animation: none !important; }
 }
+
+/* Wedding Living Scene - continuous Budget River (causal-spine round) */
+.wcScene { display: flex; flex-direction: column; gap: 12px; }
+.wcSurface { display: flex; flex-direction: column; gap: 10px; }
+.wcField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.wcField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.wcAxis { stroke: var(--line); stroke-width: 1; }
+.wcSmall { font-size: 8px; fill: var(--muted); }
+.wcRiver { fill: rgba(20,36,58,0.16); stroke: var(--navy-2); stroke-width: 1; }
+.wcRiver.is-short { fill: rgba(215,25,32,0.16); stroke: var(--ocbc-red); }
+.wcPay { fill: var(--navy-2); }
+.wcGuests { cursor: ns-resize; }
+.wcGuests:focus-visible { outline: none; }
+.wcGuestStem { stroke: var(--navy-2); stroke-width: 1; stroke-dasharray: 2 2; }
+.wcGuestKnot { fill: var(--navy); }
+.wcGuests:focus-visible .wcGuestKnot { stroke: var(--teal); stroke-width: 3; }
+.wcDate { cursor: ew-resize; }
+.wcDate:focus-visible { outline: none; }
+.wcDateKnot { fill: var(--navy); }
+.wcDate:focus-visible .wcDateKnot { stroke: var(--teal); stroke-width: 3; }
+.wcOrbitRing { fill: none; stroke: var(--navy-2); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.wcReadout { margin: 0; font-size: 0.84rem; color: var(--navy-2); }
+.wcCtx { display: flex; gap: 8px; }
+.wcSheet { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--soft); display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; }
+.wcSheet label { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.wcSheet .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+@media (prefers-reduced-motion: reduce) { .wcGuests, .wcGuestKnot, .wcDate, .wcDateKnot, .wcRiver, .wcOrbitRing { transition: none !important; } }
