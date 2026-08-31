@@ -1147,3 +1147,175 @@ drop index if exists goal_commitments_idempotency_key;
 create unique index if not exists goal_commitments_idempotency_key_v2
   on goal_commitments (profile_key, (source_moment->>'idempotencyKey'))
   where source_moment ? 'idempotencyKey' and status = 'active';
+
+-- ============================================================
+-- Future Bank (PR #15 feat/future-bank-surface): the canonical
+-- Bank Reality tables. profile_key holds users.id. Money columns
+-- are numeric(18,2) - exact decimal, no float drift. Every row
+-- carries source_type (+ as_of) so a system estimate can never be
+-- read as a bank fact. See lib/financial-twin/* and
+-- lib/transaction-ledger/*.
+-- ============================================================
+
+create table if not exists bank_accounts (
+  id             uuid primary key default gen_random_uuid(),
+  profile_key    text not null,
+  kind           text not null,
+  display_name   text not null default '',
+  institution    text,
+  currency       text not null default 'SGD',
+  masked_number  text,
+  is_liability   boolean not null default false,
+  credit_limit   numeric(18,2),
+  goal_domain    text,
+  status         text not null default 'active',
+  source_type    text not null default 'user_confirmed',
+  source_name    text,
+  opened_at      timestamptz,
+  as_of          timestamptz not null default now(),
+  last_synced_at timestamptz,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+create index if not exists bank_accounts_profile_idx on bank_accounts (profile_key, status);
+
+create table if not exists bank_transactions (
+  id                   uuid primary key default gen_random_uuid(),
+  profile_key          text not null,
+  account_id           uuid not null references bank_accounts(id),
+  direction            text not null,
+  amount               numeric(18,2) not null check (amount >= 0),
+  currency             text not null default 'SGD',
+  original_amount      numeric(18,2),
+  original_currency    text,
+  fx_rate              numeric(20,8),
+  status               text not null default 'posted',
+  category             text,
+  channel              text,
+  merchant             text,
+  counterparty_masked  text,
+  reference            text,
+  transfer_id          text,
+  reversal_of          uuid references bank_transactions(id),
+  is_internal_transfer boolean not null default false,
+  is_card_repayment    boolean not null default false,
+  recurring_group      text,
+  idempotency_key      text,
+  source_type          text not null default 'user_confirmed',
+  authorised_at        timestamptz,
+  posted_at            timestamptz,
+  created_at           timestamptz not null default now()
+);
+create index if not exists bank_transactions_account_idx
+  on bank_transactions (account_id, coalesce(posted_at, authorised_at, created_at) desc);
+create index if not exists bank_transactions_profile_idx
+  on bank_transactions (profile_key, created_at desc);
+create index if not exists bank_transactions_recurring_idx
+  on bank_transactions (profile_key, recurring_group) where recurring_group is not null;
+create unique index if not exists bank_transactions_idempotency_idx
+  on bank_transactions (profile_key, idempotency_key, direction, account_id)
+  where idempotency_key is not null;
+
+create table if not exists financial_assets (
+  id                uuid primary key default gen_random_uuid(),
+  profile_key       text not null,
+  asset_class       text not null,
+  label             text not null default '',
+  linked_account_id uuid references bank_accounts(id),
+  currency          text not null default 'SGD',
+  current_value     numeric(18,2) not null default 0,
+  available_value   numeric(18,2),
+  liquidity_class   text not null default 'liquid',
+  restricted_purpose text,
+  owner_type        text not null default 'self',
+  ownership_percent numeric(6,3) not null default 100,
+  source_type       text not null default 'user_confirmed',
+  source_name       text,
+  confidence        text not null default 'medium',
+  is_user_confirmed boolean not null default true,
+  as_of             timestamptz not null default now(),
+  last_synced_at    timestamptz,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+create index if not exists financial_assets_profile_idx on financial_assets (profile_key, asset_class);
+
+create table if not exists liabilities (
+  id                 uuid primary key default gen_random_uuid(),
+  profile_key        text not null,
+  liability_class    text not null,
+  label              text not null default '',
+  linked_account_id  uuid references bank_accounts(id),
+  currency           text not null default 'SGD',
+  current_balance    numeric(18,2) not null default 0,
+  original_principal numeric(18,2),
+  apr                numeric(6,3),
+  minimum_monthly    numeric(18,2),
+  next_due_date      date,
+  owner_type         text not null default 'self',
+  ownership_percent  numeric(6,3) not null default 100,
+  source_type        text not null default 'user_confirmed',
+  as_of              timestamptz not null default now(),
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now()
+);
+create index if not exists liabilities_profile_idx on liabilities (profile_key, liability_class);
+
+create table if not exists income_streams (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  label            text not null default '',
+  kind             text not null default 'salary',
+  monthly_amount   numeric(18,2) not null default 0,
+  currency         text not null default 'SGD',
+  pay_day_of_month smallint,
+  next_expected_date date,
+  source_type      text not null default 'user_confirmed',
+  detected_from_account_id uuid references bank_accounts(id),
+  active           boolean not null default true,
+  as_of            timestamptz not null default now(),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index if not exists income_streams_profile_idx on income_streams (profile_key, active);
+
+create table if not exists recurring_obligations (
+  id              uuid primary key default gen_random_uuid(),
+  profile_key     text not null,
+  label           text not null default '',
+  kind            text not null default 'subscription',
+  merchant        text,
+  monthly_amount  numeric(18,2) not null default 0,
+  currency        text not null default 'SGD',
+  cadence         text not null default 'monthly',
+  next_due_date   date,
+  recurring_group text,
+  category        text,
+  source_type     text not null default 'system_estimated',
+  active          boolean not null default true,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index if not exists recurring_obligations_profile_idx on recurring_obligations (profile_key, active);
+
+create table if not exists ripple_events (
+  id             uuid primary key default gen_random_uuid(),
+  profile_key    text not null,
+  kind           text not null,
+  domain         text,
+  cause          text not null default '',
+  monthly_delta  numeric(18,2),
+  affected_goals jsonb not null default '[]',
+  state          text not null default 'possible',
+  severity       text not null default 'information',
+  dedupe_key     text,
+  source_ref     jsonb not null default '{}',
+  snapshot_id    text,
+  superseded_by  uuid references ripple_events(id),
+  occurred_at    timestamptz not null default now(),
+  created_at     timestamptz not null default now()
+);
+create index if not exists ripple_events_profile_idx on ripple_events (profile_key, occurred_at desc);
+create unique index if not exists ripple_events_dedupe_idx
+  on ripple_events (profile_key, dedupe_key)
+  where dedupe_key is not null and state <> 'superseded' and state <> 'revoked';
