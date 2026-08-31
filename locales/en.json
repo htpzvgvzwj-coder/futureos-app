@@ -5438,7 +5438,8 @@
     },
     "ctx": {
       "venue": "Venue",
-      "couple": "Couple alignment"
+      "couple": "Couple alignment",
+      "guests": "Guests"
     },
     "venueTier": "Venue tier",
     "venue": {
@@ -5458,6 +5459,43 @@
     "tp": {
       "budgetGap": "Your budget is {amount} under the reference cost.",
       "behindPace": "At this pace your share won't be funded in time (need ~{need}/mo)."
+    },
+    "venueType": "Venue type",
+    "venueRecompute": "Type, tier, date and guest count all re-run the cost together.",
+    "type": {
+      "community": "Community",
+      "restaurant": "Restaurant",
+      "hotel": "Hotel",
+      "outdoor": "Outdoor"
+    },
+    "orbit": {
+      "label": "Guest Orbit - concentric rings by tier; arrow keys move guests in or out of a ring",
+      "help": "Break the headcount into tiers - each ring grows with its guests, the total feeds the cost.",
+      "tier": "{tier}: {n} guests",
+      "inner": "Inner circle",
+      "family": "Family",
+      "friends": "Friends"
+    },
+    "align": {
+      "help": "Each of you marks every shared item Must Keep / Flexible / Undecided and sets a private range. Only the overlap, the agreed items and the conflict count are shared.",
+      "yourRange": "Your private affordable ceiling",
+      "item": {
+        "venue": "Venue",
+        "photography": "Photography",
+        "catering": "Catering",
+        "attire": "Attire",
+        "guest_count": "Guest count"
+      },
+      "mark": {
+        "mustKeep": "Must keep",
+        "flexible": "Flexible",
+        "undecided": "Undecided"
+      },
+      "resolve": "Resolve → new branch",
+      "resolveLabel": "Resolve: {item}",
+      "band": "Shared affordable band: {low}–{high}",
+      "noBand": "No overlapping affordable band yet - one range needs to move.",
+      "status": "{agreed} agreed · {conflicts} conflict(s)"
     }
   }
 }

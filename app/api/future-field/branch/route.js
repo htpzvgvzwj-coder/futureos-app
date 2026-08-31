@@ -28,6 +28,7 @@ const ALLOWED_OVERRIDES = {
   wedding: new Set([
     "wedding_date",
     "guest_count",
+    "guest_tiers",
     "venue_tier",
     "venue_type",
     "photography_tier",
@@ -35,6 +36,7 @@ const ALLOWED_OVERRIDES = {
     "total_budget",
     "monthly_contribution",
     "partner_contribution",
+    "couple_alignment",
   ]),
   emergency: new Set(["target_months", "floor_months", "monthly_contribution", "protected_commitments", "essential_share", "fund_goals_anyway"]),
   loan: new Set(["extra_repayment", "monthly_installment", "one_off_payment", "target_debt", "breathing_room_floor", "repayment_strategy", "excluded_debt_ids"]),

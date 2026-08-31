@@ -5256,7 +5256,8 @@
     },
     "ctx": {
       "venue": "场地",
-      "couple": "伴侣共识"
+      "couple": "伴侣共识",
+      "guests": "宾客"
     },
     "venueTier": "场地档次",
     "venue": {
@@ -5276,6 +5277,43 @@
     "tp": {
       "budgetGap": "你的预算比参考成本低 {amount}。",
       "behindPace": "按此节奏，你的份额无法及时备好（约需每月 {need}）。"
+    },
+    "venueType": "场地类型",
+    "venueRecompute": "类型、档次、日期和宾客数会一起重算成本。",
+    "type": {
+      "community": "社区",
+      "restaurant": "餐厅",
+      "hotel": "酒店",
+      "outdoor": "户外"
+    },
+    "orbit": {
+      "label": "宾客星轨——按层级的同心环；方向键将宾客移入或移出某个环",
+      "help": "把人数分成层级——每个环随其宾客数增大，总数进入成本计算。",
+      "tier": "{tier}：{n} 位宾客",
+      "inner": "核心圈",
+      "family": "家人",
+      "friends": "朋友"
+    },
+    "align": {
+      "help": "你们各自把每个共享项标记为「必须保留 / 灵活 / 未定」并设定一个私密区间。只共享重叠部分、达成一致的项和冲突计数。",
+      "yourRange": "你的私密可负担上限",
+      "item": {
+        "venue": "场地",
+        "photography": "摄影",
+        "catering": "餐饮",
+        "attire": "礼服",
+        "guest_count": "宾客人数"
+      },
+      "mark": {
+        "mustKeep": "必须保留",
+        "flexible": "灵活",
+        "undecided": "未定"
+      },
+      "resolve": "解决 → 新分支",
+      "resolveLabel": "解决：{item}",
+      "band": "共享可负担区间：{low}–{high}",
+      "noBand": "尚无重叠的可负担区间——需要一方调整范围。",
+      "status": "{agreed} 项一致 · {conflicts} 处冲突"
     }
   }
 }

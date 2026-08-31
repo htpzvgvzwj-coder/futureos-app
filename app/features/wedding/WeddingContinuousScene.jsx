@@ -13,16 +13,41 @@
 import { useMemo, useState } from "react";
 import { computeWeddingPlanFinance } from "../../../lib/wedding/plan-finance.js";
 import { projectWeddingThreadImpact } from "../../../lib/wedding/wedding-thread-projector.js";
+import { blindMerge } from "../../../lib/family/constellation-finance.js";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
 
 function sgd(n) {
   return `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 }
-const WED_KEYS = ["wedding_date", "guest_count", "venue_tier", "venue_type", "photography_tier", "attire_tier", "total_budget", "monthly_contribution", "partner_contribution"];
+const WED_KEYS = ["wedding_date", "guest_count", "guest_tiers", "venue_tier", "venue_type", "photography_tier", "attire_tier", "total_budget", "monthly_contribution", "partner_contribution", "couple_alignment"];
 const VENUE_TIERS = ["budget", "mid_range", "premium"];
+const VENUE_TYPES = ["community", "restaurant", "hotel", "outdoor"];
+const GUEST_TIERS = ["inner", "family", "friends"]; // concentric orbit rings
+const ALIGNMENT_ITEMS = ["venue", "photography", "catering", "attire", "guest_count"];
+const MARKS = ["mustKeep", "flexible", "undecided"];
 const MIN_GUESTS = 10;
 const MAX_GUESTS = 400;
+
+function tiersFrom(m) {
+  const t = m.guest_tiers && typeof m.guest_tiers === "object" ? m.guest_tiers : null;
+  const total = Number(m.guest_count) || MIN_GUESTS;
+  if (t && GUEST_TIERS.some((k) => t[k] != null)) {
+    return { inner: Math.max(0, Number(t.inner) || 0), family: Math.max(0, Number(t.family) || 0), friends: Math.max(0, Number(t.friends) || 0) };
+  }
+  // default split when the customer has not broken it down yet
+  return { inner: Math.round(total * 0.2), family: Math.round(total * 0.35), friends: total - Math.round(total * 0.2) - Math.round(total * 0.35) };
+}
+function alignmentView(side) {
+  const v = { affordableMin: Number(side?.affordableMin) || 0, affordableMax: Number(side?.affordableMax) || 0, mustKeep: [], flexible: [], undecided: [] };
+  for (const id of ALIGNMENT_ITEMS) {
+    const mk = side?.marks?.[id];
+    if (mk === "mustKeep") v.mustKeep.push(id);
+    else if (mk === "flexible") v.flexible.push(id);
+    else v.undecided.push(id);
+  }
+  return v;
+}
 
 function merged(reality, branchVars) {
   const out = { ...reality };
@@ -176,6 +201,96 @@ function RiverField({ t, wed, m, dragGuests, onGuests, onDate }) {
   );
 }
 
+// Guest Orbit - concentric rings by tier (inner circle / family /
+// friends). Each ring's radius grows with its headcount; the arrow keys
+// move guests between the selected ring and the total. The tier counts
+// always sum to guest_count, which is what the finance engine reads.
+function GuestOrbit({ t, tiers, onTier }) {
+  const cx = 60;
+  const cy = 60;
+  const rFor = (n) => 10 + Math.min(40, Math.sqrt(Math.max(0, n)) * 3.2);
+  return (
+    <svg className="wcOrbitField" viewBox="0 0 120 120" role="group" aria-label={t("weddingScene.orbit.label")}>
+      {GUEST_TIERS.map((tier, i) => (
+        <g
+          key={tier}
+          className="wcOrbitTier"
+          role="slider"
+          tabIndex={0}
+          aria-label={t("weddingScene.orbit.tier", { tier: t(`weddingScene.orbit.${tier}`), n: tiers[tier] })}
+          aria-valuemin={0}
+          aria-valuemax={400}
+          aria-valuenow={tiers[tier]}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowRight") onTier(tier, tiers[tier] + 5);
+            else if (e.key === "ArrowDown" || e.key === "ArrowLeft") onTier(tier, Math.max(0, tiers[tier] - 5));
+            else return;
+            e.preventDefault();
+          }}
+        >
+          <circle cx={cx} cy={cy} r={rFor(tiers[tier])} className={`wcOrbitRing wcOrbitRing-${i}`} />
+          <text x={cx} y={cy - rFor(tiers[tier]) - 2} className="wcSmall" textAnchor="middle">
+            {t(`weddingScene.orbit.${tier}`)} {tiers[tier]}
+          </text>
+        </g>
+      ))}
+      <text x={cx} y={cy + 3} className="wcOrbitTotal" textAnchor="middle">{tiers.inner + tiers.family + tiers.friends}</text>
+    </svg>
+  );
+}
+
+// Couple Alignment - two independent Must Keep / Flexible / Undecided
+// marks + a private affordable range per side. blindMerge returns ONLY
+// the overlapping band, the agreed items and a conflict count - never
+// either side's raw amounts.
+function CoupleAlignment({ t, self, partner, onMark, onRange, onResolve }) {
+  const merge = useMemo(
+    () => blindMerge({ partnerA: alignmentView(self), partnerB: alignmentView(partner), sharedItems: ALIGNMENT_ITEMS.map((id) => ({ id, monthlyCost: 0 })) }),
+    [self, partner],
+  );
+  const cycle = (id) => {
+    const cur = self?.marks?.[id] ?? "undecided";
+    const next = MARKS[(MARKS.indexOf(cur) + 1) % MARKS.length];
+    onMark(id, next);
+  };
+  return (
+    <div className="wcSheet wcAlign">
+      <p className="lsProvenance">{t("weddingScene.align.help")}</p>
+      <label className="wcAlignRange">
+        <span>{t("weddingScene.align.yourRange")}</span>
+        <div className="toStepper">
+          <button type="button" onClick={() => onRange(Math.max(0, (Number(self?.affordableMax) || 0) - 200))} aria-label={t("weddingScene.less")}>−</button>
+          <b>{sgd(self?.affordableMax || 0)}</b>
+          <button type="button" onClick={() => onRange((Number(self?.affordableMax) || 0) + 200)} aria-label={t("weddingScene.more")}>+</button>
+        </div>
+      </label>
+      <ul className="wcAlignItems">
+        {ALIGNMENT_ITEMS.map((id) => {
+          const mine = self?.marks?.[id] ?? "undecided";
+          const conflict = (merge.conflicts ?? []).some((c) => c.itemId === id);
+          return (
+            <li key={id} className={conflict ? "is-conflict" : ""}>
+              <button type="button" className={`wcMark wcMark-${mine}`} onClick={() => cycle(id)}>
+                {t(`weddingScene.align.item.${id}`)} · {t(`weddingScene.align.mark.${mine}`)}
+              </button>
+              {conflict ? (
+                <button type="button" className="lsGhostBtn" onClick={() => onResolve(id)}>{t("weddingScene.align.resolve")}</button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="wcReadout">
+        {merge.feasibleBandExists
+          ? t("weddingScene.align.band", { low: sgd(merge.jointBand.low), high: sgd(merge.jointBand.high) })
+          : t("weddingScene.align.noBand")}
+      </p>
+      <p className="wcReadout">{t("weddingScene.align.status", { agreed: (merge.agreedMustKeep ?? []).length, conflicts: (merge.conflicts ?? []).length })}</p>
+      <p className="lsProvenance">{t("weddingScene.partnerNote")}</p>
+    </div>
+  );
+}
+
 function WeddingSceneInner({ t, setActiveScreen }) {
   const s = useLivingScene();
   const reality = s.realityData;
@@ -203,10 +318,26 @@ function WeddingSceneInner({ t, setActiveScreen }) {
 
   const guests = Number(m.guest_count) || MIN_GUESTS;
   const partnerMonthly = Number(m.partner_contribution) || 0;
+  const tiers = tiersFrom(m);
+  const align = m.couple_alignment && typeof m.couple_alignment === "object" ? m.couple_alignment : {};
+  const alignSelf = align.self ?? { affordableMax: 0, marks: {} };
+  const alignPartner = align.partner ?? reality.partner_marks ?? { affordableMax: 0, marks: { venue: "mustKeep", photography: "flexible" } };
   const set = (k, v) => s.setVar(k, v);
   const onGuests = (n, dragging) => {
     if (dragging != null) setDragGuests(dragging);
     if (Number.isFinite(n)) set("guest_count", Math.max(MIN_GUESTS, Math.min(MAX_GUESTS, n)));
+  };
+  const onTier = (tier, v) => {
+    const next = { ...tiers, [tier]: Math.max(0, Math.round(v)) };
+    set("guest_tiers", next);
+    set("guest_count", Math.max(MIN_GUESTS, Math.min(MAX_GUESTS, next.inner + next.family + next.friends)));
+  };
+  const setAlign = (patch) => set("couple_alignment", { self: { ...alignSelf, ...patch, marks: { ...alignSelf.marks, ...(patch.marks ?? {}) } }, partner: alignPartner });
+  const onResolveConflict = async (itemId) => {
+    // A resolution is a real decision: it becomes its own branch (and a
+    // Change Ledger / Change Replay entry via the branch-created event).
+    setAlign({ marks: { [itemId]: "flexible" } });
+    await s.forkBranch(t("weddingScene.align.resolveLabel", { item: t(`weddingScene.align.item.${itemId}`) }));
   };
 
   return (
@@ -244,31 +375,62 @@ function WeddingSceneInner({ t, setActiveScreen }) {
 
           {/* contextual sheets on the current decision - not permanent tabs */}
           <div className="wcCtx">
+            <button type="button" className="lsGhostBtn" aria-expanded={sheet === "guests"} onClick={() => setSheet(sheet === "guests" ? null : "guests")}>{t("weddingScene.ctx.guests")}</button>
             <button type="button" className="lsGhostBtn" aria-expanded={sheet === "venue"} onClick={() => setSheet(sheet === "venue" ? null : "venue")}>{t("weddingScene.ctx.venue")}</button>
             <button type="button" className="lsGhostBtn" aria-expanded={sheet === "couple"} onClick={() => setSheet(sheet === "couple" ? null : "couple")}>{t("weddingScene.ctx.couple")}</button>
           </div>
+          {sheet === "guests" ? (
+            <div className="wcSheet">
+              <span>{t("weddingScene.orbit.help")}</span>
+              <GuestOrbit t={t} tiers={tiers} onTier={onTier} />
+            </div>
+          ) : null}
           {sheet === "venue" ? (
             <div className="wcSheet">
+              <span>{t("weddingScene.venueType")}</span>
+              <div className="toSeg">
+                {VENUE_TYPES.map((v) => (
+                  <button key={v} type="button" className={m.venue_type === v ? "is-on" : ""} onClick={() => set("venue_type", v)}>{t(`weddingScene.type.${v}`)}</button>
+                ))}
+              </div>
               <span>{t("weddingScene.venueTier")}</span>
               <div className="toSeg">
                 {VENUE_TIERS.map((v) => (
                   <button key={v} type="button" className={m.venue_tier === v ? "is-on" : ""} onClick={() => set("venue_tier", v)}>{t(`weddingScene.venue.${v}`)}</button>
                 ))}
               </div>
+              <label>
+                <span>{t("weddingScene.field.date")}</span>
+                <div className="toStepper">
+                  <button type="button" onClick={() => set("wedding_date", shiftMonth(m.wedding_date, -1))} aria-label={t("weddingScene.less")}>−</button>
+                  <b>{m.wedding_date || "?"}</b>
+                  <button type="button" onClick={() => set("wedding_date", shiftMonth(m.wedding_date, 1))} aria-label={t("weddingScene.more")}>+</button>
+                </div>
+              </label>
+              <p className="lsProvenance">{t("weddingScene.venueRecompute")}</p>
             </div>
           ) : null}
           {sheet === "couple" ? (
-            <div className="wcSheet">
-              <label>
-                <span>{t("weddingScene.partnerMonthly")}</span>
-                <div className="toStepper">
-                  <button type="button" onClick={() => set("partner_contribution", Math.max(0, partnerMonthly - 50))} aria-label={t("weddingScene.less")}>−</button>
-                  <b>{sgd(partnerMonthly)}</b>
-                  <button type="button" onClick={() => set("partner_contribution", partnerMonthly + 50)} aria-label={t("weddingScene.more")}>+</button>
-                </div>
-              </label>
-              <p className="lsProvenance">{t("weddingScene.partnerNote")}</p>
-            </div>
+            <>
+              <div className="wcSheet">
+                <label>
+                  <span>{t("weddingScene.partnerMonthly")}</span>
+                  <div className="toStepper">
+                    <button type="button" onClick={() => set("partner_contribution", Math.max(0, partnerMonthly - 50))} aria-label={t("weddingScene.less")}>−</button>
+                    <b>{sgd(partnerMonthly)}</b>
+                    <button type="button" onClick={() => set("partner_contribution", partnerMonthly + 50)} aria-label={t("weddingScene.more")}>+</button>
+                  </div>
+                </label>
+              </div>
+              <CoupleAlignment
+                t={t}
+                self={alignSelf}
+                partner={alignPartner}
+                onMark={(id, mark) => setAlign({ marks: { [id]: mark } })}
+                onRange={(v) => setAlign({ affordableMax: v, affordableMin: Math.round(v * 0.6) })}
+                onResolve={onResolveConflict}
+              />
+            </>
           ) : null}
 
           <div className="rpMirror">

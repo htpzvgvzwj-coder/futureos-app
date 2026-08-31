@@ -7068,3 +7068,22 @@ nextjs-portal {
 .wcSheet label { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .wcSheet .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
 @media (prefers-reduced-motion: reduce) { .wcGuests, .wcGuestKnot, .wcDate, .wcDateKnot, .wcRiver, .wcOrbitRing { transition: none !important; } }
+
+/* Wedding second-layer: Guest Orbit + Couple Alignment (causal-spine round) */
+.wcOrbitField { width: 100%; max-width: 200px; height: auto; display: block; }
+.wcOrbitTier:focus-visible { outline: none; }
+.wcOrbitRing { fill: none; stroke-width: 2; }
+.wcOrbitRing-0 { stroke: var(--navy); }
+.wcOrbitRing-1 { stroke: var(--navy-2); }
+.wcOrbitRing-2 { stroke: var(--muted); stroke-dasharray: 3 2; }
+.wcOrbitTier:focus-visible .wcOrbitRing { stroke: var(--teal); }
+.wcOrbitTotal { font-size: 11px; fill: var(--navy); font-weight: 700; }
+.wcAlign { gap: 6px; }
+.wcAlignRange { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.wcAlignItems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.wcAlignItems li { display: flex; gap: 6px; align-items: center; }
+.wcAlignItems li.is-conflict { outline: 1px solid var(--ocbc-red); border-radius: 8px; padding: 2px; }
+.wcMark { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 0.78rem; text-align: left; background: var(--surface); }
+.wcMark-mustKeep { border-color: var(--success); }
+.wcMark-flexible { border-color: var(--navy-2); }
+.wcMark-undecided { border-color: var(--muted); color: var(--muted); }

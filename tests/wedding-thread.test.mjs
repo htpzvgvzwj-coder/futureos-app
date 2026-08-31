@@ -75,3 +75,32 @@ test("wedding: two domain-specific pins are declared as real registry constraint
   assert.ok(domainPins.includes("minimum_guest_experience_spend"));
   assert.ok(domainPins.length >= 2);
 });
+
+test("wedding Couple Alignment: blindMerge shows only the overlap + conflicts, never a private amount", async () => {
+  const { blindMerge } = await import("../lib/family/constellation-finance.js");
+  const items = ["venue", "photography", "catering"].map((id) => ({ id, monthlyCost: 0 }));
+  const merged = blindMerge({
+    partnerA: { affordableMin: 900, affordableMax: 1600, mustKeep: ["venue"], flexible: ["photography"], undecided: ["catering"] },
+    partnerB: { affordableMin: 1100, affordableMax: 1800, mustKeep: ["venue", "catering"], flexible: [], undecided: ["photography"] },
+    sharedItems: items,
+  });
+  // the shared band is the OVERLAP only
+  assert.deepEqual(merged.jointBand, { low: 1100, high: 1600 });
+  // A's raw min/max are NOT in the returned object anywhere
+  const s = JSON.stringify(merged);
+  assert.ok(!s.includes("900") && !s.includes("1800"), "no private ceiling / floor leaks");
+  // catering is a conflict (one Must Keep, one Undecided) -> both must reconfirm
+  assert.ok(merged.conflicts.length >= 1);
+  assert.equal(merged.bothConfirmedRequired, true);
+  // venue is agreed by both
+  assert.deepEqual(merged.agreedMustKeep, ["venue"]);
+});
+
+test("wedding continuous scene: Guest Orbit tiers + Couple Alignment + conflict->branch are wired", () => {
+  const src = readFileSync(new URL("../app/features/wedding/WeddingContinuousScene.jsx", import.meta.url), "utf8");
+  assert.match(src, /GUEST_TIERS = \["inner", "family", "friends"\]/, "three concentric guest tiers");
+  assert.match(src, /blindMerge\(/, "Couple Alignment runs a real blind merge");
+  assert.match(src, /s\.forkBranch\(/, "resolving a conflict produces a real branch (Change Replay entry)");
+  assert.match(src, /guest_tiers|couple_alignment/, "the new vars feed the same branchVars -> same Life Thread");
+  assert.match(src, /VENUE_TYPES|venue_type/, "venue type recomputes alongside tier / date / guests");
+});
