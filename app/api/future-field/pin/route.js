@@ -46,6 +46,10 @@ const PIN_KINDS = {
   minimum_liquid_capital: "gte",
   minimum_flexible_capital: "gte",
   no_investing_below_readiness_gate: "flag",
+  // Living Envelope domain pins (Living Thread commit 8).
+  minimum_income_protection_months: "gte",
+  no_underwriting_or_quote: "flag",
+  no_unknown_counted_as_gap: "flag",
 };
 
 export async function GET(request) {

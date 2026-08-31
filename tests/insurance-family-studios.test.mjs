@@ -45,12 +45,16 @@ test("protection envelope: closing a KNOWN gap costs a reference premium (never 
   assert.ok(e.assumptions.some((a) => /unknowns are shown as unknown/i.test(a)));
 });
 
-test("insurance adapter: adding premium to close a gap projects as PRESSURE (costs monthly)", () => {
+test("insurance adapter: raising the premium projects as monthly PRESSURE (unified impactSet)", () => {
   const reality = { monthly_expenses: 4000, existing_income_protection: 0, monthly_premium_now: 40, home_loan_outstanding: 0, existing_life_cover: 0, dependents: 0, annual_care_cost: 0, existing_ci_cover: 0, income_protection_months: 12 };
   const branch = { ...reality, monthly_premium_now: 90 };
+  // Living Thread commit 8: projectImpacts returns the studio-contract
+  // impactSet (Living Envelope), not the old monthly-shift shape.
   const proj = ins.projectImpacts(branch, reality, { monthlyIncome: 7000, monthlyExpenses: 4000, committedExcludingDomain: 500, emergencyBufferMonths: 6, home: null });
-  assert.equal(proj.mode, "pressure");
-  assert.equal(proj.pressure.extraMonthlyNeeded, 50);
+  assert.equal(proj.resourceDelta.addedPressureMonthly, 50);
+  assert.equal(proj.resourceDelta.freedMonthly, 0);
+  assert.ok(proj.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(proj.allocationRequired, true);
 });
 
 test("blind merge: computes only the overlapping band, never either side's raw numbers, and flags conflicts", () => {

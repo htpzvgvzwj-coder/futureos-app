@@ -3405,7 +3405,10 @@
       "no_trip_funding_below_emergency_floor": "旅行供款不得低于应急下限",
       "minimum_liquid_capital": "最低流动资本",
       "minimum_flexible_capital": "最低灵活资本",
-      "no_investing_below_readiness_gate": "就绪闸门未过前不投资"
+      "no_investing_below_readiness_gate": "就绪闸门未过前不投资",
+      "minimum_income_protection_months": "最低收入保障月数",
+      "no_underwriting_or_quote": "不核保、不报价",
+      "no_unknown_counted_as_gap": "未知不计为缺口"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -5049,6 +5052,67 @@
     "tp": {
       "overAllocated": "你分配的金额超过了每月资本池。",
       "readinessGate": "就绪闸门（{gate}）意味着锁定投资分段暂时无法封存。"
+    }
+  },
+  "livingEnvelope": {
+    "loading": "正在加载你的保障全景…",
+    "title": "生命信封",
+    "subtitle": "围绕你的人生节点的一层膜。向外拖动一个顶点即可在该处拉伸保障——保费实时重算。",
+    "noPlan": "告诉我们你已有的保障，即可绘制你的生命信封。",
+    "summaryLine": "保障 · 敞口 {exposure} · {premium}",
+    "estimateNote": "缺口使用你自己陈述的保障——未知节点显示为未知，绝不计为缺口。保费为参考估算，不是报价。绝不进行核保。封存仅承诺每月保费的变更。",
+    "exposureLabel": "已知敞口",
+    "unknownShort": "未知",
+    "premiumReadout": "保费：现在 {now}/月 → 按此膜为 {after}/月。",
+    "unknownNote": "{n} 个节点未知——以虚线显示，绝不计为缺口。确认它们以绘制完整的膜。",
+    "belowIncomeFloor": "收入保障月数低于你固定的下限。",
+    "decisionEcho": "你最近多次重塑保障——守护者注意到了。它不会据此行动。",
+    "noPolicyNote": "此处不购买任何保单，不进行核保，不产生报价。封存仅设定保费计划。",
+    "row": {
+      "exposure": "已知敞口",
+      "premium": "当前保费",
+      "toClose": "补齐已知缺口所需保费",
+      "status": "信封状态"
+    },
+    "prov": {
+      "knownOnly": "仅已知缺口",
+      "user_confirmed": "你申报的保障",
+      "system_estimate": "参考估算",
+      "referenceRate": "参考费率，不是报价",
+      "transparent": "公开显示，不隐藏"
+    },
+    "unknown": {
+      "income_cover_or_need": "收入保障",
+      "home_loan_cover_or_need": "房贷保障",
+      "family_cover_or_need": "家庭保障",
+      "care_cover_or_need": "护理 / 重疾保障"
+    },
+    "status": {
+      "has_unknowns": "存在未知",
+      "exposure_identified": "已识别敞口",
+      "sealed_shut": "已封闭"
+    },
+    "node": {
+      "income": "收入",
+      "home_loan": "房贷",
+      "family": "家庭",
+      "care": "护理"
+    },
+    "field": {
+      "label": "生命信封——在某个节点向外拖动膜的顶点以在该处拉伸保障",
+      "handle": "{node} 保障"
+    },
+    "mirror": {
+      "close": "补齐第一个缺口",
+      "clear": "清除拉伸的保障",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "liquidityConflict": "这笔保费超过了你每月现金流所能承担的。",
+      "liquidityConflictWait": "更小的保费，或现在少补几个缺口，能让它可负担",
+      "belowBreathing": "这笔保费会让你当前的每月空间跌破下限。",
+      "belowIncomeFloor": "你的收入保障月数低于你固定的下限。",
+      "exposure": "还有 {nodes} 个人生节点位于膜之外。"
     }
   }
 }

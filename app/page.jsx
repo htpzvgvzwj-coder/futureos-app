@@ -20,7 +20,7 @@ import { DebtGravity } from "./features/loan/DebtGravity.jsx";
 import { FutureDayLoom } from "./features/retirement/FutureDayLoom.jsx";
 import { CalendarOrbit } from "./features/travel/CalendarOrbit.jsx";
 import { CapitalPrism } from "./features/investment/CapitalPrism.jsx";
-import { ProtectionEnvelope } from "./features/insurance/ProtectionEnvelope.jsx";
+import { LivingEnvelope } from "./features/insurance/LivingEnvelope.jsx";
 import { FamilyConstellation } from "./features/family/FamilyConstellation.jsx";
 import {
   Accessibility,
@@ -17608,7 +17608,7 @@ export default function App() {
     [screens.FUTURE_LIFE_TIMELINE]: <FutureDayLoom t={t} setActiveScreen={setActiveScreen} />,
     [screens.TRIP_ORBIT]: <CalendarOrbit t={t} setActiveScreen={setActiveScreen} />,
     [screens.CAPITAL_PATHS]: <CapitalPrism t={t} setActiveScreen={setActiveScreen} />,
-    [screens.PROTECTION_ENVELOPE]: <ProtectionEnvelope t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.PROTECTION_ENVELOPE]: <LivingEnvelope t={t} setActiveScreen={setActiveScreen} />,
     [screens.FAMILY_CONSTELLATION]: <FamilyConstellation t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
