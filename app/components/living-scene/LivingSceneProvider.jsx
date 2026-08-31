@@ -291,17 +291,33 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     [domain, refetchField, invalidateLifeThread],
   );
 
-  // Select: make a saved branch the active one and load its edits back in.
-  const selectBranch = useCallback((id) => {
-    const b = (field?.possiblePaths ?? []).find((x) => x.id === id);
-    if (!b) return;
-    setServerBranch(b);
-    const after = b.delta?.after && typeof b.delta.after === "object" ? b.delta.after : null;
-    if (after) {
-      setBranchVars({ ...after });
-      persistDraft(domain, { branchVars: after });
-    }
-  }, [domain, field]);
+  // Select: make a saved branch THE active moment (server-side), load its
+  // edits back in, and refresh - so it (and only it) drives the Life
+  // Thread. Every other open branch becomes an alternative (compare only).
+  const selectBranch = useCallback(
+    async (id) => {
+      const b = (field?.possiblePaths ?? []).find((x) => x.id === id);
+      if (!b) return;
+      setServerBranch(b);
+      const after = b.delta?.after && typeof b.delta.after === "object" ? b.delta.after : null;
+      if (after) {
+        setBranchVars({ ...after });
+        persistDraft(domain, { branchVars: after });
+      }
+      try {
+        await fetch(`/api/future-field/branch?action=activate&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ branchId: id }),
+        });
+      } catch {
+        /* offline - local selection still stands */
+      }
+      await refetchField();
+      invalidateLifeThread();
+    },
+    [domain, field, refetchField, invalidateLifeThread],
+  );
 
   // Undo: discard a possible future (kept in history, never hard-deleted).
   const discardBranch = useCallback(

@@ -82,8 +82,11 @@ test("loan: reducing a prior extra repayment FREES cashflow; a leg is solid only
   assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
   assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 
-  const withAlloc = loan.projectImpacts({ ...relaxed, allocation: { goalMonthly: 200, emergencyMonthly: 0, flexibleMonthly: 0 } }, priorBranch, ctx);
-  assert.notEqual(withAlloc.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null);
+  // Per-leg (causal-spine round): only the leg that was funded turns solid.
+  const withAlloc = loan.projectImpacts({ ...relaxed, allocation: { home: 200 } }, priorBranch, ctx);
+  assert.notEqual(withAlloc.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded home leg is solid");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "wedding").confirmedAfter, null, "an unfunded leg stays a ghost");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "emergency was not funded");
 });
 
 test("loan Bend: solve the extra repayment to be debt-free by a target month", () => {
@@ -125,8 +128,11 @@ test("retirement: a LOWER top-up frees cashflow; nothing moves without allocatio
   assert.equal(impact.resourceDelta.freedMonthly, 300);
   assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
   assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
-  const placed = retire.projectImpacts({ ...relaxed, allocation: { goalMonthly: 300, emergencyMonthly: 0, flexibleMonthly: 0 } }, priorBranch, ctx);
-  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null);
+  // Per-leg: allocate ONLY to Emergency -> Emergency solid, every other leg still ghost.
+  const placed = retire.projectImpacts({ ...relaxed, allocation: { emergency: 300 } }, priorBranch, ctx);
+  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "the funded emergency leg is solid");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "Home was not funded -> ghost");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "investment").confirmedAfter, null, "Investment was not funded -> ghost");
 });
 
 test("generic projectMonthlyShift: neutral when the monthly is unchanged", () => {

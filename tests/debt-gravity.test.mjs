@@ -47,8 +47,12 @@ test("SECTION M causal test: extra repayment -> earlier payoff, LESS current bre
   assert.equal(impact.resourceDelta.futureHandoffAtPayoff.state, "ghost");
   assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
   for (const g of impact.affectedGoals) assert.equal(g.confirmedAfter, null, `${g.goalId} stays a ghost until allocated`);
-  const placed = projectDebtImpact({ branchPlan: planAt(400), realityPlan: planAt(0), debts, context: ctx, allocation: { flexibleMonthly: 200 } });
-  assert.notEqual(placed.affectedGoals[0].confirmedAfter, null);
+  // Per-leg (causal-spine round): allocate ONLY to Home -> the Home leg
+  // is solid, every other leg stays a ghost.
+  const placed = projectDebtImpact({ branchPlan: planAt(400), realityPlan: planAt(0), debts, context: ctx, allocation: { home: 200 } });
+  assert.notEqual(placed.affectedGoals.find((g) => g.goalId === "home").confirmedAfter, null, "the funded Home leg is solid");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "wedding").confirmedAfter, null, "Wedding was not funded -> ghost");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "emergency").confirmedAfter, null, "Emergency was not funded -> ghost");
 });
 
 test("Breathing Room Floor blocks over-repayment", () => {
