@@ -85,7 +85,10 @@ export async function POST(request) {
     if (!branch) return Response.json({ error: "branch_not_found" }, { status: 404 });
 
     const projBefore = context.adapter.projectImpacts(branch.data, context.realityPlanData, context.projectionContext ?? {}, null);
-    const freed = projBefore?.freedCashflow ?? 0;
+    // Living Thread: every Studio adapter now emits the shared
+    // Studio-Contract impactSet (resourceDelta.freedMonthly). Fall back to
+    // the legacy monthly-shift field for any adapter not yet aligned.
+    const freed = projBefore?.resourceDelta?.freedMonthly ?? projBefore?.freedCashflow ?? 0;
     const check = validateAllocation({ freedCashflow: freed, allocation: body.allocation });
     if (!check.ok) {
       return Response.json({ error: check.error, freedCashflow: freed }, { status: 422 });

@@ -14,7 +14,14 @@ import { getLivingPlanSpec, getStudioContract, livingPlanDomains } from "../lib/
 // ghost/solid split, no Future Fragment object, no Memory Scrubber, no
 // domain-specific Pins/turning points/replay for most).
 const EVIDENCE = {
-  wedding: { native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, real_branches: true, seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true, unknown_not_faked: true, two_domain_pins: true, domain_integration_test: true },
+  // Living Thread commit 10: Wedding continuous-scene alignment.
+  wedding: {
+    native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
+    two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true,
+    reload_restores: true, mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+  },
   // Living Thread commit 2: Home Horizon.
   home: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,

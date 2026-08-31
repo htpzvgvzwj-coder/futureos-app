@@ -4041,7 +4041,19 @@
       "homeLater": "Home deposit about {months} month(s) later.",
       "emergencyUp": "Emergency buffer {before} to {after} months.",
       "flexibleUp": "{amount}/month more free cashflow.",
-      "stillPossible": "Still a possible future - it becomes real when you Seal."
+      "stillPossible": "Still a possible future - it becomes real when you Seal.",
+      "ghostGoal": "Could add about {amount}/mo of room to {goal} (not moved yet).",
+      "solidGoal": "Allocated: about {amount}/mo toward {goal}.",
+      "goalName": {
+        "home": "your home deposit",
+        "emergency": "your emergency buffer",
+        "retirement": "your retirement",
+        "flexible": "flexible cash"
+      }
+    },
+    "tp": {
+      "budgetGap": "Your budget ceiling is {amount} under the reference cost.",
+      "behindPace": "At this contribution you won't have your share funded in time (need ~{need}/mo)."
     }
   },
   "promiseWeight": {

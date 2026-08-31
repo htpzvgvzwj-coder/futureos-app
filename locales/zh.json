@@ -3859,7 +3859,19 @@
       "homeLater": "购房首付约推后 {months} 个月。",
       "emergencyUp": "应急缓冲：{before} → {after} 个月。",
       "flexibleUp": "每月多出 {amount} 自由现金流。",
-      "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。"
+      "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。",
+      "ghostGoal": "可为{goal}增加约 {amount}/月 的空间（尚未转移）。",
+      "solidGoal": "已分配：约 {amount}/月 用于{goal}。",
+      "goalName": {
+        "home": "你的购房首付",
+        "emergency": "你的应急储备",
+        "retirement": "你的退休",
+        "flexible": "灵活资金"
+      }
+    },
+    "tp": {
+      "budgetGap": "你的预算上限比参考成本低 {amount}。",
+      "behindPace": "按此供款，你无法及时备好你的份额（约需每月 {need}）。"
     }
   },
   "promiseWeight": {
