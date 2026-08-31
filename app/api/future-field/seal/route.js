@@ -7,7 +7,7 @@ import {
   validateCommitmentAmount,
   buildAdjustedSavingsPlanPayload,
 } from "../../../../lib/plan-runtime/index.js";
-import { sealAtomic, validateSealAllocation, resolveAllowedTargets, findSealByIdempotencyKey } from "../../../../lib/plan-runtime/atomic-seal.js";
+import { sealAtomic, resolveAllowedTargets, findSealByIdempotencyKey } from "../../../../lib/plan-runtime/atomic-seal.js";
 import { checkSealBranch, serverResourceDelta } from "../../../../lib/plan-runtime/seal-guards.js";
 import { query } from "../../../../lib/db.js";
 import * as homeStore from "../../../../lib/home-store.js";
@@ -132,22 +132,16 @@ export async function POST(request) {
   }
 
   // confirm --------------------------------------------------------------
-  if (budgetBelowCore) {
-    return Response.json(
-      {
-        error: "budget_below_core",
-        budgetGap: sealFeasibility.budgetGap,
-        computedCoreTotal: sealFeasibility.computedCoreTotal,
-        userBudgetCeiling: sealFeasibility.userBudgetCeiling,
-        unresolvedItems: sealFeasibility.unresolvedItems,
-        preview,
-      },
-      { status: 422 },
-    );
+  // A confirm MUST carry an idempotency key (per user).
+  const idempotencyKey = typeof body.idempotencyKey === "string" && body.idempotencyKey.trim() ? body.idempotencyKey.trim().slice(0, 120) : null;
+  if (!idempotencyKey) {
+    return Response.json({ error: "idempotency_key_required", hint: "resend confirm with a stable idempotencyKey" }, { status: 400 });
   }
-  if (!constraintCheck.ok) {
-    return Response.json({ error: "violates_pins", violations: constraintCheck.violations, preview }, { status: 422 });
+  const existing = await findSealByIdempotencyKey(userId, idempotencyKey);
+  if (existing) {
+    return Response.json({ commitment: existing, preview, idempotent: true });
   }
+
   const amountCheck = validateCommitmentAmount({
     monthlyContribution: monthlyAmount,
     sliderMin: 0,
@@ -159,36 +153,36 @@ export async function POST(request) {
   }
 
   const effectiveMonth = nextMonthKey();
-
-  // Part 0.1: allocation + Seal are ONE atomic operation. The client sends
-  // the allocation, its explicit target goal and an idempotency key with
-  // the confirm request - not as a separate /allocate call.
-  const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.slice(0, 120) : null;
-  const existing = await findSealByIdempotencyKey(userId, idempotencyKey);
-  if (existing) {
-    return Response.json({ commitment: existing, preview, idempotent: true });
-  }
-
-  // Allowed allocation targets = the customer's real active goal domains + emergency.
   const { rows: planRows } = await query(`select distinct domain from plans where profile_key = $1`, [userId]);
   const allowedTargets = resolveAllowedTargets(planRows.map((r) => r.domain));
 
-  const allocationInput = serverAllocationInput;
-  const targetInput = body.allocationTargetGoalId ?? branch?.data?.allocationGoalId ?? null;
-
-  // freed / added-pressure were recomputed SERVER-SIDE above (serverFreed /
-  // serverAddedPressure). The client's body.freedCashflow /
-  // body.addedPressure are never read.
-  const allocCheck = validateSealAllocation({
-    allocation: allocationInput,
-    allocationTargetGoalId: targetInput,
-    freedCashflow: serverFreed,
-    addedPressure: serverAddedPressure,
-    allowedTargets,
-  });
-  if (!allocCheck.ok) {
-    return Response.json({ error: allocCheck.error, allowedTargets: allocCheck.allowedTargets ?? allowedTargets }, { status: 422 });
-  }
+  // The one authoritative recompute - runs INSIDE the transaction, on the
+  // FOR-UPDATE-locked branch data. Never reads the client's numbers.
+  const recompute = (lockedData, priorReality) => {
+    const feasibility = context.adapter.feasibility(lockedData, context.projectionContext ?? {});
+    const projFn = context.adapter.projector(lockedData);
+    const pm = projFn(monthlyAmount);
+    const pr = projFn(Number(priorReality?.monthly_contribution) || 0);
+    const dMonths = pm != null && pr != null ? Math.max(0, pm - pr) : null;
+    const metrics = context.adapter.constraintMetrics(lockedData, feasibility, {
+      emergencyBufferMonths: context.emergencyBufferMonths,
+      proposedMonthly: monthlyAmount,
+      delayMonths: dMonths,
+      guardianAutoMove: false,
+    });
+    const cc = checkConstraints(pins, metrics);
+    let srv = { freedCashflow: 0, addedPressure: 0 };
+    if (typeof context.adapter.projectImpacts === "function") {
+      try {
+        srv = serverResourceDelta(
+          context.adapter.projectImpacts(lockedData, priorReality, context.projectionContext ?? {}, body.allocation ?? lockedData?.allocation ?? null),
+        );
+      } catch {
+        srv = { freedCashflow: 0, addedPressure: 0 };
+      }
+    }
+    return { feasibility, constraintCheck: cc, serverFreed: srv.freedCashflow, serverAddedPressure: srv.addedPressure };
+  };
 
   let sealResult;
   try {
@@ -197,7 +191,6 @@ export async function POST(request) {
       domain,
       planId: plan.id,
       branchId: branch?.id ?? null,
-      branchData: branch?.data ?? null,
       monthlyAmount,
       effectiveMonth,
       readyMonth,
@@ -205,25 +198,38 @@ export async function POST(request) {
       priorMonthlyContribution: context.realityPlanData.monthly_contribution || 0,
       supersededSavingsPlan: context.confirmedSavingsPlan,
       emergencyFloorMonths: EMERGENCY_FUND_MONTHS_TARGET,
-      allocation: allocCheck.allocation,
-      targetGoalId: allocCheck.targetGoalId,
+      allocationInput: body.allocation ?? branch?.data?.allocation ?? null,
+      allocationTargetGoalId: body.allocationTargetGoalId ?? branch?.data?.allocationGoalId ?? null,
+      allowedTargets,
+      realityData: context.realityPlanData,
+      recompute,
       sealPreview: preview,
       idempotencyKey,
     });
   } catch (error) {
-    // Postgres unique_violation - the DB-level Seal idempotency /
-    // one-active-per-domain guards. A concurrent duplicate confirm loses
-    // the race here instead of double-writing.
-    if (error?.code === "23505") {
+    const c = error?.code;
+    if (c === "STALE_BRANCH") {
+      return Response.json({ error: "stale_branch", branchBaseVersion: error.branchBaseVersion, currentPlanVersion: error.currentPlanVersion }, { status: 409 });
+    }
+    if (c === "NOT_SEALABLE") {
+      return Response.json({ error: "budget_below_core", reason: error.reason, budgetGap: error.budgetGap, preview }, { status: 422 });
+    }
+    if (c === "VIOLATES_PINS") {
+      return Response.json({ error: "violates_pins", violations: error.violations, preview }, { status: 422 });
+    }
+    if (c === "BAD_ALLOCATION") {
+      return Response.json({ error: error.allocationError ?? "bad_allocation", allowedTargets: error.allowedTargets ?? allowedTargets }, { status: 422 });
+    }
+    if (c === "SEAL_UNIQUE_VIOLATION" || c === "23505") {
       const dup = await findSealByIdempotencyKey(userId, idempotencyKey);
       if (dup) return Response.json({ commitment: dup, preview, idempotent: true }, { status: 200 });
       return Response.json({ error: "duplicate_seal" }, { status: 409 });
     }
-    if (error?.code === "ACTIVE_COMMITMENT_EXISTS") {
-      return Response.json({ error: "active_commitment_exists" }, { status: 409 });
+    if (c === "BRANCH_NOT_FOUND" || c === "BRANCH_PLAN_MISMATCH") {
+      return Response.json({ error: c.toLowerCase() }, { status: 409 });
     }
-    if (error?.code === "BRANCH_NOT_FOUND" || error?.code === "BRANCH_PLAN_MISMATCH") {
-      return Response.json({ error: error.code.toLowerCase() }, { status: 409 });
+    if (c === "BRANCH_NOT_SEALABLE") {
+      return Response.json({ error: "branch_not_sealable", branchStatus: error.branchStatus }, { status: 409 });
     }
     throw error;
   }
@@ -259,7 +265,8 @@ export async function POST(request) {
     allocationTargetGoalId: sealResult.targetGoalId,
     preview,
     ledgerEventIds: sealResult.ledgerEventIds,
-    // echo what the SERVER computed and sealed against - never the client's
-    serverComputed: { freedCashflow: serverFreed, addedPressure: serverAddedPressure, sealedAgainstPlanVersion: currentVersionRow?.version ?? null },
+    // echo what the SERVER computed inside the transaction and sealed
+    // against - never the client's numbers.
+    serverComputed: sealResult.serverComputed,
   });
 }

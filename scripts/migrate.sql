@@ -1139,3 +1139,11 @@ create unique index if not exists goal_commitments_idempotency_key
 create unique index if not exists plan_branches_one_active_per_plan
   on plan_branches (plan_id)
   where status = 'active';
+
+-- Living Thread (causal-spine round, blocker 4): Seal idempotency is
+-- PER USER. Different users may reuse the same client key without
+-- colliding.
+drop index if exists goal_commitments_idempotency_key;
+create unique index if not exists goal_commitments_idempotency_key_v2
+  on goal_commitments (profile_key, (source_moment->>'idempotencyKey'))
+  where source_moment ? 'idempotencyKey' and status = 'active';
