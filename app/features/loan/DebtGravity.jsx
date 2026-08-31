@@ -8,7 +8,7 @@
 // comes back after payoff is a Future Handoff - shown as a ghost before it
 // is real, and never auto-routed.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { computeDebtGravity, requiredExtraForPayoffMonth } from "../../../lib/loan/debt-gravity-finance.js";
 import { projectDebtImpact } from "../../../lib/loan/debt-gravity-projector.js";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
@@ -197,7 +197,12 @@ function DebtGravityInner({ t, setActiveScreen }) {
 
   const serverDebts = server?.reality?.debts ?? null;
   const proj = s.projection?.gravity?.available ? s.projection : null;
-  const gravity = proj?.gravity ?? (reality ? computeDebtGravity({ debts: serverDebts?.length ? serverDebts : debtsFromReality(reality), planData: gravityPlan(reality, s.branchVars), context: gravityCtx(reality, s.context) }) : null);
+  // Re-run the domain finance engine on every branch-var change (memoised).
+  const localGravity = useMemo(
+    () => (reality ? computeDebtGravity({ debts: serverDebts?.length ? serverDebts : debtsFromReality(reality), planData: gravityPlan(reality, s.branchVars), context: gravityCtx(reality, s.context) }) : null),
+    [reality, serverDebts, s.branchVars, s.context],
+  );
+  const gravity = proj?.gravity ?? localGravity;
 
   if (s.loadState === "loading") return <p className="wlpEmpty">{t("debtGravity.loading")}</p>;
   if (s.loadState !== "ready" || !feas?.available || !gravity?.available) {

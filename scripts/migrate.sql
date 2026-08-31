@@ -1126,3 +1126,10 @@ create table if not exists family_participants (
 
 create index if not exists family_participants_plan_idx
   on family_participants (family_plan_id);
+
+-- Living Thread (causal-spine round): DB-level idempotency for Seal. A
+-- second confirm with the same client idempotency key can never create a
+-- second active commitment.
+create unique index if not exists goal_commitments_idempotency_key
+  on goal_commitments ((source_moment->>'idempotencyKey'))
+  where source_moment ? 'idempotencyKey' and status = 'active';

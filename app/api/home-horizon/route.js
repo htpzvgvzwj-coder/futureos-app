@@ -75,7 +75,12 @@ export async function GET(request) {
     sealableVerdict: { sealable: Boolean(h?.available && h.sealable), reason: h?.sealableReason ?? "no_reality" },
     turningPoints: homeTurningPoints({ horizon: h, context: projCtx, constraints }),
     guardianState: sealed
-      ? { state: "watching", watching: ["deposit_progress", "rate_assumption_freshness", "emergency_rail"], commitmentId: sealed.id }
+      ? {
+          state: "watching",
+          watching: ["deposit_progress", "rate_assumption_freshness", "emergency_rail"],
+          commitmentId: sealed.id,
+          mayNot: ["apply_for_a_loan", "transfer_money", "pick_a_property", "auto_increase_contribution"],
+        }
       : { state: "idle" },
     provenance: {
       price: realityData.estimated_price != null ? "user_confirmed" : "system_estimate",

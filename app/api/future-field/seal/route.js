@@ -8,6 +8,7 @@ import {
   buildAdjustedSavingsPlanPayload,
 } from "../../../../lib/plan-runtime/index.js";
 import { sealAtomic, validateSealAllocation, resolveAllowedTargets, findSealByIdempotencyKey } from "../../../../lib/plan-runtime/atomic-seal.js";
+import { checkSealBranch, serverResourceDelta } from "../../../../lib/plan-runtime/seal-guards.js";
 import { query } from "../../../../lib/db.js";
 import * as homeStore from "../../../../lib/home-store.js";
 import * as weddingStore from "../../../../lib/wedding-store.js";
@@ -47,6 +48,15 @@ export async function POST(request) {
   const plan = await ensurePlan(userId, domain, context);
   const branch = body.branchId ? await planStore.getBranch(body.branchId, userId) : null;
 
+  // Server-authoritative Seal (causal-spine round): re-read the locked
+  // branch + the current plan version from the DB and REFUSE a stale
+  // branch instead of overwriting the newer plan.
+  const currentVersionRow = await planStore.getCurrentPlanVersion(plan.id);
+  const branchGuard = checkSealBranch({ branch, planId: plan.id, currentPlanVersion: currentVersionRow?.version ?? null });
+  if (!branchGuard.ok) {
+    return Response.json({ error: branchGuard.error, ...branchGuard.detail }, { status: branchGuard.status });
+  }
+
   // Real pin check against this seal's numbers.
   const pins = await planStore.getApplicableConstraints(userId, { planId: plan.id, domain });
   const projector = context.adapter.projector(branch?.data ?? context.realityPlanData);
@@ -74,6 +84,26 @@ export async function POST(request) {
     return d.toISOString().slice(0, 7);
   })();
 
+  // Server-recomputed freed / added pressure from the locked branch - the
+  // ONLY figures the Seal trusts (the client's are ignored entirely).
+  const serverAllocationInput = body.allocation ?? branch?.data?.allocation ?? null;
+  let serverDelta = { freedCashflow: 0, addedPressure: 0 };
+  if (typeof context.adapter.projectImpacts === "function") {
+    try {
+      const srvImpact = context.adapter.projectImpacts(
+        branch?.data ?? context.realityPlanData,
+        context.realityPlanData,
+        context.projectionContext ?? {},
+        serverAllocationInput,
+      );
+      serverDelta = serverResourceDelta(srvImpact);
+    } catch {
+      serverDelta = { freedCashflow: 0, addedPressure: 0 };
+    }
+  }
+  const serverFreed = serverDelta.freedCashflow;
+  const serverAddedPressure = serverDelta.addedPressure;
+
   const preview = buildSealPreview({
     branch: branch ?? { label: "reality path", feasibility: context.adapter.feasibility(context.realityPlanData) },
     planDomain: domain,
@@ -94,6 +124,9 @@ export async function POST(request) {
         sealable: !budgetBelowCore && constraintCheck.ok,
         budgetGap: sealFeasibility?.budgetGap ?? 0,
         unresolvedItems: sealFeasibility?.unresolvedItems ?? [],
+        // server-computed - the client cannot influence these
+        serverFreedCashflow: serverFreed,
+        serverAddedPressure,
       },
     });
   }
@@ -140,13 +173,17 @@ export async function POST(request) {
   const { rows: planRows } = await query(`select distinct domain from plans where profile_key = $1`, [userId]);
   const allowedTargets = resolveAllowedTargets(planRows.map((r) => r.domain));
 
-  const allocationInput = body.allocation ?? branch?.data?.allocation ?? null;
+  const allocationInput = serverAllocationInput;
   const targetInput = body.allocationTargetGoalId ?? branch?.data?.allocationGoalId ?? null;
+
+  // freed / added-pressure were recomputed SERVER-SIDE above (serverFreed /
+  // serverAddedPressure). The client's body.freedCashflow /
+  // body.addedPressure are never read.
   const allocCheck = validateSealAllocation({
     allocation: allocationInput,
     allocationTargetGoalId: targetInput,
-    freedCashflow: Number(body.freedCashflow) || 0,
-    addedPressure: Number(body.addedPressure) || 0,
+    freedCashflow: serverFreed,
+    addedPressure: serverAddedPressure,
     allowedTargets,
   });
   if (!allocCheck.ok) {
@@ -174,6 +211,14 @@ export async function POST(request) {
       idempotencyKey,
     });
   } catch (error) {
+    // Postgres unique_violation - the DB-level Seal idempotency /
+    // one-active-per-domain guards. A concurrent duplicate confirm loses
+    // the race here instead of double-writing.
+    if (error?.code === "23505") {
+      const dup = await findSealByIdempotencyKey(userId, idempotencyKey);
+      if (dup) return Response.json({ commitment: dup, preview, idempotent: true }, { status: 200 });
+      return Response.json({ error: "duplicate_seal" }, { status: 409 });
+    }
     if (error?.code === "ACTIVE_COMMITMENT_EXISTS") {
       return Response.json({ error: "active_commitment_exists" }, { status: 409 });
     }
@@ -214,5 +259,7 @@ export async function POST(request) {
     allocationTargetGoalId: sealResult.targetGoalId,
     preview,
     ledgerEventIds: sealResult.ledgerEventIds,
+    // echo what the SERVER computed and sealed against - never the client's
+    serverComputed: { freedCashflow: serverFreed, addedPressure: serverAddedPressure, sealedAgainstPlanVersion: currentVersionRow?.version ?? null },
   });
 }
