@@ -1091,3 +1091,38 @@ create index if not exists guardian_policies_profile_active_idx
 
 alter table goal_commitments add column if not exists plan_id uuid;
 alter table goal_commitments add column if not exists plan_branch_id uuid;
+
+-- Living Thread commit 9: Family - Private Constellation.
+-- Two INDEPENDENT participant identities per family plan. Neither
+-- participant's private affordability numbers or per-item marks are ever
+-- readable by the other - only the merged band and confirmation state.
+create table if not exists family_plans (
+  id            uuid primary key default gen_random_uuid(),
+  plan_id       uuid not null references plans(id),
+  created_by    text not null,
+  invite_code   text unique,
+  status        text not null default 'forming',   -- forming | both_joined | merged
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create unique index if not exists family_plans_plan_idx on family_plans (plan_id);
+
+create table if not exists family_participants (
+  id              uuid primary key default gen_random_uuid(),
+  family_plan_id  uuid not null references family_plans(id),
+  participant_key text not null,                    -- an independent identity
+  role            text not null default 'partner',  -- initiator | partner
+  display_name    text not null default '',
+  -- { affordableMin, affordableMax, marks: { itemId: mustKeep|flexible|undecided } }
+  -- Written only by the owning participant; never returned to the other.
+  private_view    jsonb not null default '{}',
+  confirmed       boolean not null default false,
+  confirmed_at    timestamptz,
+  joined_at       timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  unique (family_plan_id, participant_key)
+);
+
+create index if not exists family_participants_plan_idx
+  on family_participants (family_plan_id);

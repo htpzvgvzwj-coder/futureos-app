@@ -21,7 +21,7 @@ import { FutureDayLoom } from "./features/retirement/FutureDayLoom.jsx";
 import { CalendarOrbit } from "./features/travel/CalendarOrbit.jsx";
 import { CapitalPrism } from "./features/investment/CapitalPrism.jsx";
 import { LivingEnvelope } from "./features/insurance/LivingEnvelope.jsx";
-import { FamilyConstellation } from "./features/family/FamilyConstellation.jsx";
+import { PrivateConstellation } from "./features/family/PrivateConstellation.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -17609,7 +17609,7 @@ export default function App() {
     [screens.TRIP_ORBIT]: <CalendarOrbit t={t} setActiveScreen={setActiveScreen} />,
     [screens.CAPITAL_PATHS]: <CapitalPrism t={t} setActiveScreen={setActiveScreen} />,
     [screens.PROTECTION_ENVELOPE]: <LivingEnvelope t={t} setActiveScreen={setActiveScreen} />,
-    [screens.FAMILY_CONSTELLATION]: <FamilyConstellation t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.FAMILY_CONSTELLATION]: <PrivateConstellation t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),

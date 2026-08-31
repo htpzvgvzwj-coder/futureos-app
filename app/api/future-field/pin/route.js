@@ -50,6 +50,9 @@ const PIN_KINDS = {
   minimum_income_protection_months: "gte",
   no_underwriting_or_quote: "flag",
   no_unknown_counted_as_gap: "flag",
+  // Private Constellation domain pins (Living Thread commit 9).
+  minimum_confirmations: "gte",
+  no_partner_data_in_viewer_response: "flag",
 };
 
 export async function GET(request) {

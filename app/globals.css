@@ -7038,3 +7038,34 @@ nextjs-portal {
 .leUnknownNote { margin: 0; font-size: 0.76rem; color: var(--muted); }
 .leEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
 @media (prefers-reduced-motion: reduce) { .leMembrane, .leHandle, .leHandleKnot { transition: none !important; } }
+
+/* Private Constellation (Living Thread commit 9) */
+.pcScene { display: flex; flex-direction: column; gap: 12px; }
+.pcSurface { display: flex; flex-direction: column; gap: 10px; }
+.pcField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.pcField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.pcLink { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.pcLink.is-locked { stroke: var(--success); stroke-dasharray: none; stroke-width: 2; }
+.pcYou { fill: var(--navy); }
+.pcPartner { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 2; }
+.pcPartner.is-confirmed { fill: var(--navy-2); stroke: var(--navy-2); stroke-dasharray: none; }
+.pcPartner.is-absent { opacity: 0.5; }
+.pcStarLabel { font-size: 8px; fill: var(--navy-2); font-weight: 600; }
+.pcNode { cursor: grab; }
+.pcNode:focus-visible { outline: none; }
+.pcNodeStem { stroke: rgba(20,36,58,0.15); stroke-width: 1; }
+.pcNodeDot { stroke: var(--surface); stroke-width: 1.5; }
+.pcNodeDot.pc-mustKeep { fill: var(--success); }
+.pcNodeDot.pc-flexible { fill: var(--navy-2); }
+.pcNodeDot.pc-undecided { fill: var(--muted); }
+.pcNodeDot.is-locked { stroke: var(--success); stroke-width: 3; }
+.pcNode:focus-visible .pcNodeDot { stroke: var(--teal); stroke-width: 3; }
+.pcNodeLabel { font-size: 7px; fill: var(--muted); }
+.pcConflicts { font-size: 9px; fill: var(--ocbc-red); font-weight: 700; }
+.pcCtlRow { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.82rem; }
+.pcCtlRow .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.pcReadout { margin: 0; font-size: 0.84rem; color: var(--navy-2); }
+.pcWarn { margin: 0; font-size: 0.8rem; color: #b45309; }
+.pcInvite { margin: 0; font-size: 0.8rem; font-family: ui-monospace, monospace; color: var(--navy); }
+.pcEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
+@media (prefers-reduced-motion: reduce) { .pcNode, .pcNodeDot, .pcLink { transition: none !important; } }

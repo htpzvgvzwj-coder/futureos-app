@@ -3408,7 +3408,9 @@
       "no_investing_below_readiness_gate": "就绪闸门未过前不投资",
       "minimum_income_protection_months": "最低收入保障月数",
       "no_underwriting_or_quote": "不核保、不报价",
-      "no_unknown_counted_as_gap": "未知不计为缺口"
+      "no_unknown_counted_as_gap": "未知不计为缺口",
+      "minimum_confirmations": "最少确认数",
+      "no_partner_data_in_viewer_response": "查看方响应中不含伴侣数据"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -5113,6 +5115,58 @@
       "belowBreathing": "这笔保费会让你当前的每月空间跌破下限。",
       "belowIncomeFloor": "你的收入保障月数低于你固定的下限。",
       "exposure": "还有 {nodes} 个人生节点位于膜之外。"
+    }
+  },
+  "privateConstellation": {
+    "loading": "正在加载你们的共享全景…",
+    "title": "私密星座",
+    "subtitle": "两个独立身份，一个未来。你完整看到自己的标记——对伴侣只看到一个剪影。",
+    "noPlan": "开始一个共享计划即可打开你的私密星座。",
+    "summaryLine": "共享 · 你的份额 {yours} · 资金池 {shared}",
+    "estimateNote": "每位参与者都是独立身份——彼此都无法读取对方的可负担数字或逐项标记。只共享重叠区间、已达成一致的节点和冲突计数。在双方分别加入并确认之前，任何内容都无法封存。",
+    "you": "你",
+    "partnerConfirmed": "伴侣 · 已确认",
+    "partnerJoined": "伴侣 · 已加入",
+    "partnerAbsent": "伴侣 · 未加入",
+    "conflicts": "{n} 处冲突",
+    "noBand": "尚无可行区间",
+    "needsBoth": "在封存之前，需要你们双方分别确认。",
+    "sharedContribution": "共享每月供款",
+    "less": "减少",
+    "more": "增加",
+    "shareReadout": "你的份额 {yours}/月 · 伴侣的份额 {theirs}/月（来自约定的比例，不是其余额）。",
+    "inviteCode": "伴侣邀请码：{code}",
+    "decisionEcho": "你最近多次重塑共享计划——守护者注意到了。它不会据此行动。",
+    "privacyNote": "个人余额和逐项标记从不共享。守护者绝不代替你的伴侣确认。",
+    "confirmMine": "确认我的视图",
+    "confirmed": "你的视图已确认",
+    "row": {
+      "yours": "你的份额",
+      "shared": "共享供款",
+      "band": "可行区间",
+      "partner": "伴侣"
+    },
+    "prov": {
+      "yours": "你约定的份额",
+      "agreed": "约定的资金池",
+      "merged": "仅重叠部分",
+      "redacted": "仅剪影"
+    },
+    "unknown": {
+      "partner_participation": "伴侣参与"
+    },
+    "field": {
+      "label": "私密星座——将共享节点拖向你表示「必须保留」，拖离表示「灵活」",
+      "node": "{item}——你的标记"
+    },
+    "mirror": {
+      "reset": "回到现实"
+    },
+    "tp": {
+      "awaitingPartner": "你的伴侣尚未加入——无法进行合并。",
+      "awaitingConfirmations": "还有一方需要确认——双方都确认前无法封存。",
+      "conflicts": "有 {n} 个共享节点被你们标记得不一致。",
+      "liquidityConflict": "你在这笔供款中的份额超过了你的现金流所能承担的。"
     }
   }
 }

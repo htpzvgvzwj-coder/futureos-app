@@ -99,12 +99,15 @@ test("family constellation: split by ratio, private balances never in the output
   assert.equal(f.bothConfirmedRequired, true); // education conflict
 });
 
-test("family adapter: lowering the shared contribution frees cashflow; nothing auto-routed; no_balance_share is always pinned", () => {
-  const reality = { shared_monthly_contribution: 2000, partner_share_ratio: 0.5, items: [] };
+test("family adapter: lowering the shared contribution frees the viewer's cashflow; nothing auto-routed; no_balance_share stays pinned", () => {
+  const reality = { shared_monthly_contribution: 2000, partner_share_ratio: 0.5, items: [], monthly_income: 7000, monthly_expenses: 3800 };
+  // Living Thread commit 9: projectImpacts returns the studio-contract
+  // impactSet (Private Constellation), keyed off the VIEWER's own share.
   const proj = fam.projectImpacts({ ...reality, shared_monthly_contribution: 1500 }, reality, { monthlyIncome: 7000, monthlyExpenses: 3800, committedExcludingDomain: 900, emergencyBufferMonths: 6, home: null });
-  assert.equal(proj.mode, "freed");
-  assert.equal(proj.freedCashflow, 500);
-  assert.equal(proj.allocatedImpact, null);
+  assert.equal(proj.resourceDelta.freedMonthly, 250, "half of the 500 pool reduction is the viewer's share");
+  assert.equal(proj.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(proj.affectedGoals.every((g) => g.confirmedAfter == null));
   const metrics = fam.constraintMetrics(reality, null, {});
   assert.equal(metrics.no_balance_share, true);
+  assert.equal(metrics.no_partner_data_in_viewer_response, false);
 });

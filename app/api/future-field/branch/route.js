@@ -42,7 +42,7 @@ const ALLOWED_OVERRIDES = {
   travel: new Set(["travellers", "nights", "comfort_tier", "destination_type", "trip_month", "total_budget", "monthly_contribution", "latest_trip_month", "minimum_current_breathing_room"]),
   investment: new Set(["monthly_commitment", "target_pool", "horizon_years", "jobs", "liquidity_gate_years", "real_return_assumption"]),
   insurance: new Set(["monthly_premium_now", "income_protection_months", "existing_income_protection", "existing_life_cover", "existing_ci_cover", "home_loan_outstanding", "dependents", "desired_cover", "minimum_current_breathing_room", "minimum_income_protection_months"]),
-  family: new Set(["shared_monthly_contribution", "partner_share_ratio"]),
+  family: new Set(["shared_monthly_contribution", "partner_share_ratio", "minimum_current_breathing_room"]),
 };
 
 // Peel: create a possible future off the reality path. Also handles

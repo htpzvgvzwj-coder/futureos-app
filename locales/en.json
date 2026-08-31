@@ -3590,7 +3590,9 @@
       "no_investing_below_readiness_gate": "no investing below the readiness gate",
       "minimum_income_protection_months": "minimum income-protection months",
       "no_underwriting_or_quote": "no underwriting or quote",
-      "no_unknown_counted_as_gap": "no unknown counted as a gap"
+      "no_unknown_counted_as_gap": "no unknown counted as a gap",
+      "minimum_confirmations": "minimum confirmations",
+      "no_partner_data_in_viewer_response": "no partner data in the viewer response"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -5295,6 +5297,58 @@
       "belowBreathing": "This premium takes your current monthly room below your floor.",
       "belowIncomeFloor": "Your income-protection months are below the floor you pinned.",
       "exposure": "{nodes} life node(s) still sit outside the membrane."
+    }
+  },
+  "privateConstellation": {
+    "loading": "Loading your shared picture…",
+    "title": "Private Constellation",
+    "subtitle": "Two separate identities, one future. You see your own marks in full - of your partner, only a silhouette.",
+    "noPlan": "Start a shared plan to open your Private Constellation.",
+    "summaryLine": "Shared · your share {yours} · pool {shared}",
+    "estimateNote": "Each participant is a separate identity - neither can read the other's affordability numbers or per-item marks. Only the overlapping band, the agreed nodes and a conflict count are shared. Nothing seals until BOTH have joined and confirmed separately.",
+    "you": "You",
+    "partnerConfirmed": "Partner · confirmed",
+    "partnerJoined": "Partner · joined",
+    "partnerAbsent": "Partner · not joined",
+    "conflicts": "{n} conflict(s)",
+    "noBand": "no feasible band yet",
+    "needsBoth": "This needs both of you to confirm separately before it can seal.",
+    "sharedContribution": "Shared monthly contribution",
+    "less": "Less",
+    "more": "More",
+    "shareReadout": "Your share {yours}/mo · partner's share {theirs}/mo (from the agreed split, not their balance).",
+    "inviteCode": "Partner invite code: {code}",
+    "decisionEcho": "You've reshaped the shared plan a few times lately - Guardian noticed. It won't act on it.",
+    "privacyNote": "Individual balances and per-item marks are never shared. Guardian never confirms on your partner's behalf.",
+    "confirmMine": "Confirm my view",
+    "confirmed": "Your view is confirmed",
+    "row": {
+      "yours": "Your share",
+      "shared": "Shared contribution",
+      "band": "Feasible band",
+      "partner": "Partner"
+    },
+    "prov": {
+      "yours": "your agreed share",
+      "agreed": "agreed pool",
+      "merged": "overlap only",
+      "redacted": "silhouette only"
+    },
+    "unknown": {
+      "partner_participation": "Partner participation"
+    },
+    "field": {
+      "label": "Private Constellation - drag a shared node toward you for Must Keep, away for Flexible",
+      "node": "{item} - your mark"
+    },
+    "mirror": {
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "awaitingPartner": "Your partner hasn't joined yet - the merge can't run.",
+      "awaitingConfirmations": "One side still needs to confirm - nothing seals until both do.",
+      "conflicts": "{n} shared node(s) are marked differently by each of you.",
+      "liquidityConflict": "Your share of this contribution is more than your cashflow can cover."
     }
   }
 }
