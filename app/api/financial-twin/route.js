@@ -1,0 +1,95 @@
+import { getCurrentUserId } from "../../../lib/auth.js";
+import { loadFinancialTwin } from "../../../lib/financial-twin/collect.js";
+import { computeSafeToSpend } from "../../../lib/financial-twin/safe-to-spend.js";
+import { projectFutureBalance } from "../../../lib/financial-twin/future-balance.js";
+import { detectRescueCases } from "../../../lib/money-rescue/detect.js";
+import { listFinancialAssets, listLiabilities, listIncomeStreams, listRecurringObligations } from "../../../lib/financial-twin/rows-store.js";
+import { listTransactions, getAccountBalances, getSpendingTotal } from "../../../lib/transaction-ledger/store.js";
+import { query } from "../../../lib/db.js";
+
+export const runtime = "nodejs";
+
+// GET /api/financial-twin
+// The one canonical money picture: the Financial Twin + Safe-to-Spend +
+// Future Balance + any Money Rescue cases. Every Studio, Today, Life and
+// Guardian read from this so no two of them disagree on the numbers.
+export async function GET(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const [twin, assets, liabilities, incomeStreams, recurring, transactions, balances, spend90] = await Promise.all([
+      loadFinancialTwin(userId),
+      listFinancialAssets(userId),
+      listLiabilities(userId),
+      listIncomeStreams(userId),
+      listRecurringObligations(userId),
+      listTransactions(userId, { limit: 40 }),
+      getAccountBalances(userId),
+      getSpendingTotal(userId, { from: addDays(today, -90) }).catch(() => 0),
+    ]);
+
+    const commitmentsRes = await query(
+      `select domain, monthly_contribution from goal_commitments where profile_key = $1 and status = 'active'`,
+      [userId],
+    );
+    const commitments = commitmentsRes.rows.map((r) => ({ domain: r.domain, monthlyContribution: Number(r.monthly_contribution) }));
+
+    // near-term obligations: recurring bills with a due date + liability minimums
+    const obligations = [
+      ...recurring
+        .filter((r) => r.nextDueDate)
+        .map((r) => ({ label: r.label || r.merchant || "bill", amount: r.monthlyAmount, dueDate: iso(r.nextDueDate), kind: r.kind })),
+      ...liabilities
+        .filter((l) => l.nextDueDate && l.minimumMonthly)
+        .map((l) => ({ label: l.label || l.liabilityClass, amount: l.minimumMonthly, dueDate: iso(l.nextDueDate), kind: "loan_repayment" })),
+    ];
+    const inflows = incomeStreams
+      .filter((s) => s.nextExpectedDate)
+      .map((s) => ({ label: s.label || s.kind, amount: s.monthlyAmount, expectedDate: iso(s.nextExpectedDate), confidence: s.sourceType === "bank_synced" ? "expected" : "conditional" }));
+
+    const safeToSpend = computeSafeToSpend({ twin, obligations, inflows, now: today });
+
+    // Future Balance: start from liquid cash, apply scheduled in/out flows.
+    const events = [
+      ...inflows.map((i) => ({ date: i.expectedDate, amount: Math.abs(i.amount), label: i.label, confidence: i.confidence })),
+      ...obligations.map((o) => ({ date: o.dueDate, amount: -Math.abs(o.amount), label: o.label, confidence: "confirmed" })),
+      ...commitments.map((c) => ({ date: addDays(today, 30), amount: -Math.abs(c.monthlyContribution), label: `${c.domain} plan`, confidence: "confirmed" })),
+    ];
+    const nextPayday = inflows.map((i) => i.expectedDate).sort()[0] ?? null;
+    const nextBillDate = obligations.map((o) => o.dueDate).sort()[0] ?? null;
+    const futureBalance = projectFutureBalance({
+      startingLiquid: twin.liquidAssets,
+      now: today,
+      events,
+      nextPayday,
+      nextBillDate,
+    });
+
+    const rescueCases = detectRescueCases({ twin, safeToSpend, transactions, recurring, commitments, incomeStreams, now: today });
+
+    return Response.json({
+      asOf: today,
+      twin,
+      balances,
+      safeToSpend,
+      futureBalance,
+      rescueCases,
+      spendingLast90Days: spend90,
+      counts: { assets: assets.length, liabilities: liabilities.length, incomeStreams: incomeStreams.length, recurring: recurring.length },
+      isEmpty: twin.isEmpty && balances.length === 0,
+    });
+  } catch (error) {
+    console.error("[financial-twin] build failed:", error?.message);
+    return Response.json({ error: "financial_twin_unavailable" }, { status: 500 });
+  }
+}
+
+function iso(d) {
+  if (!d) return null;
+  return typeof d === "string" ? d.slice(0, 10) : new Date(d).toISOString().slice(0, 10);
+}
+function addDays(isoStr, n) {
+  return new Date(new Date(isoStr).getTime() + n * 86_400_000).toISOString().slice(0, 10);
+}
