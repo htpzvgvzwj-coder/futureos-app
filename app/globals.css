@@ -6349,14 +6349,6 @@ nextjs-portal {
 .fhMsg { margin: 0; font-size: 0.82rem; color: var(--navy-2); }
 @media (max-width: 360px) { .fhSplit { grid-template-columns: 1fr; } }
 
-/* Insurance / Family studios */
-.peNodes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.peNodes li { display: flex; justify-content: space-between; gap: 10px; font-size: 0.85rem; background: var(--soft); border-radius: 10px; padding: 8px 10px; border-left: 4px solid var(--line); }
-.peStatusKnown { border-left-color: #b8860b; }
-.peStatusPartial { border-left-color: var(--navy-2); }
-.peStatusUnknown { border-left-color: #9aa7bd; }
-.peStatusUnknown b { color: var(--muted); font-style: italic; }
-
 /* ============================================================
    Four-entry IA - Today / Life / Guardian
    ============================================================ */
@@ -6525,13 +6517,7 @@ nextjs-portal {
 .flStops { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between; font-size: 0.66rem; color: var(--muted); }
 .flStops .is-future { color: var(--navy); font-weight: 700; }
 .flReadout { margin: 0; font-size: 0.8rem; text-align: center; }
-
-/* Travel - Trip Orbit */
-.toScene { display: flex; flex-direction: column; gap: 10px; }
 .toOrbit { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.toCentre { grid-column: 1 / -1; text-align: center; border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 2px; background: var(--soft); }
-.toCentre b { font-size: 1.2rem; }
-.toCentre em { font-size: 0.72rem; color: var(--muted); font-style: normal; }
 .toNode { border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
 .toNode > span { font-size: 0.72rem; color: var(--muted); }
 .toStepper { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
@@ -6552,61 +6538,12 @@ nextjs-portal {
 .cpJob > span em { font-size: 0.64rem; color: var(--muted); font-style: normal; }
 .cpJob.is-locked { opacity: 0.92; }
 .cpGate { display: grid; grid-template-columns: 1fr; gap: 4px; font-size: 0.78rem; border-top: 1px dashed var(--line); padding-top: 8px; }
-
-/* Insurance - Protection Envelope */
-.peScene { display: flex; flex-direction: column; gap: 10px; }
-.peEnvelope { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.peNode { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 3px; text-align: left; }
-.peNode-covered { border-left-color: var(--success); }
-.peNode-partial { border-left-color: #f59e0b; }
-.peNode-unknown { border-left-color: #9aa7bd; }
-.peNode-gap { border-left-color: var(--ocbc-red); }
 .peNode.is-open { background: var(--soft); }
-.peNodeName { font-size: 0.82rem; font-weight: 600; }
-.peNodeState { font-size: 0.74rem; color: var(--muted); }
-.peNodePanel { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--soft); }
-.peNodeData { margin: 0; font-size: 0.8rem; }
-.peCoverInput, .peSlider { display: grid; grid-template-columns: 1fr; gap: 4px; font-size: 0.76rem; }
-.peNodePremium { margin: 0; font-size: 0.78rem; color: var(--navy-2); }
-
-/* Family - Constellation + Blind Merge */
-.fcScene { display: flex; flex-direction: column; gap: 10px; }
-.fcSteps { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; font-size: 0.68rem; }
-.fcSteps li { flex: 1; text-align: center; padding: 5px 2px; border-radius: 8px; background: var(--soft); color: var(--muted); }
 .fcSteps li.is-now { background: var(--navy); color: #fff; }
-.fcPartner, .fcBand, .fcConfirm { display: flex; flex-direction: column; gap: 8px; }
-.fcPartner h3, .fcBand h3, .fcConfirm h3 { margin: 0; font-size: 0.86rem; }
-.fcItems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.fcItems li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; }
-.fcMark { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; font-size: 0.72rem; }
-.fcMark-mustKeep { border-color: var(--ocbc-red); color: var(--ocbc-red); }
-.fcMark-flexible { border-color: var(--success); color: var(--success); }
-.fcMark-undecided { border-color: #f59e0b; color: #b45309; }
-.fcRange { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.76rem; }
-.fcRange input { width: 90px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
-.fcPrivate { flex-basis: 100%; font-size: 0.68rem; color: var(--muted); }
-.fcBandRange { margin: 0; font-size: 0.9rem; font-weight: 700; }
-.fcConflicts { margin: 0; padding-left: 16px; font-size: 0.78rem; color: #b45309; }
-.fcSlider { display: grid; grid-template-columns: 1fr; gap: 4px; font-size: 0.78rem; }
-.fcConfirm label { display: flex; gap: 8px; align-items: center; font-size: 0.82rem; }
 
 /* Explore - Life Field */
 .exploreField { display: flex; flex-direction: column; gap: 14px; }
-.exploreFieldHead h1 { margin: 4px 0; font-size: 1.15rem; }
 .exploreFieldEyebrow { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.exploreFieldSub { margin: 0; font-size: 0.82rem; color: var(--muted); }
-.exploreFieldGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.exploreFieldNode { border: 1px solid var(--line); border-top: 4px solid var(--navy); border-radius: 14px; background: var(--surface); padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; text-align: left; min-height: 84px; }
-.exploreFieldNode-home { border-top-color: var(--teal); }
-.exploreFieldNode-rel { border-top-color: var(--ocbc-red); }
-.exploreFieldNode-safety { border-top-color: var(--success); }
-.exploreFieldNode-freedom { border-top-color: var(--navy-2); }
-.exploreFieldNode-family { border-top-color: #7c3aed; }
-.exploreFieldNode-exp { border-top-color: #f59e0b; }
-.exploreFieldNode-future { border-top-color: var(--navy); }
-.exploreFieldNodeName { font-size: 0.92rem; font-weight: 700; }
-.exploreFieldNodeHint { font-size: 0.72rem; color: var(--muted); }
-.exploreFieldMore { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.78rem; color: var(--muted); }
 .exploreFieldMoreBtn { border: 1px solid var(--line); background: var(--soft); border-radius: 999px; padding: 6px 14px; font-size: 0.78rem; color: var(--ink); }
 .exploreFieldTalk { align-self: flex-start; }
 
@@ -6622,7 +6559,6 @@ nextjs-portal {
 .lifeEvidenceChanges ul { margin: 0; padding-left: 16px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 3px; }
 .lifeEvidenceEmpty { font-style: italic; }
 .lifeEvidenceRelated { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.lifeEvidenceGo { border: 1px solid var(--line); background: var(--soft); border-radius: 999px; padding: 6px 12px; font-size: 0.76rem; }
 
 @media (max-width: 390px) {
   .rpReadouts { flex-direction: column; }
@@ -6702,15 +6638,7 @@ nextjs-portal {
 
 /* Retirement - stepped Future Day */
 .flDayProgress { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-.flDayNav { display: flex; gap: 8px; }
-
-/* Travel - tap-to-reveal orbit */
-.toNodeRing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.toNodeChip { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; text-align: left; }
 .toNodeChip.is-open { border-color: var(--navy); background: var(--soft); }
-.toNodeChip span { font-size: 0.68rem; color: var(--muted); }
-.toNodeChip b { font-size: 0.86rem; }
-.toNodeCtl { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--soft); }
 .toNodeCtl.toStepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .toNodeCtl.toSeg { display: flex; gap: 6px; }
 .toNodeCtl.toSlider { display: grid; grid-template-columns: 76px 1fr auto; gap: 8px; align-items: center; font-size: 0.76rem; }
