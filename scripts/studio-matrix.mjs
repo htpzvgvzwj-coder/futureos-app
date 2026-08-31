@@ -1,82 +1,99 @@
-// The nine-Studio flagship completion matrix - DERIVED FROM EVIDENCE, not
-// a hand-written EVIDENCE={x:true} bag (causal-spine round).
+// The nine-Studio flagship completion matrix - SCORED ONLY FROM EXECUTED
+// RESULTS (causal-spine round, blocker 6).
 //
-// Every criterion resolves to met / not-met from a concrete check:
-//   - file / route / interaction CONTENT (regex over the shipped source)
-//   - the shared unit-test run actually being green
-//   - Playwright / screenshot artifacts being physically present under e2e/
+// A criterion is `met` only when it is backed by one of:
+//   - a NAMED unit test that actually PASSED in this run
+//   - a Playwright JSON report line for the relevant spec that PASSED
+//   - a screenshot file physically present under e2e/
+//   - an integration test that PASSED (only when run with --with-integration)
 //
-// The Playwright-dependent criterion (mobile_a11y) is `met` ONLY when the
-// artifacts exist. They do not, so no Studio can read as `complete` until
-// the browser-machine QA has been run and its artifacts committed.
+// There is NO "the file exists" / "a regex matched the source" evidence.
+// Scene-structure, route-shape, Seal-flow, Guardian-rail, reload and
+// mobile criteria therefore stay UNMET until the Playwright run + its
+// artifacts are committed. This script will not report 9x 19/20.
 //
-// Run: node scripts/studio-matrix.mjs        (add --json for machine output)
+// Run:  node scripts/studio-matrix.mjs [--with-integration] [--json]
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { FLAGSHIP_CRITERIA } from "../lib/living-plan/studio-contract.js";
-import { getLivingPlanSpec, getStudioContract, livingPlanDomains } from "../lib/living-plan/registry.js";
+import { livingPlanDomains, getStudioContract } from "../lib/living-plan/registry.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const P = (...s) => path.join(ROOT, ...s);
 const has = (rel) => existsSync(P(rel));
-const read = (rel) => (has(rel) ? readFileSync(P(rel), "utf8") : "");
+const withIntegration = process.argv.includes("--with-integration");
 
-// ---- run the relevant unit tests once, capture the summary -------------
-function runUnitTests(files) {
-  const present = files.filter((f) => has(f));
-  if (!present.length) return { pass: 0, fail: 0, ran: false };
+// ---- run tests, capture EVERY test name -> pass/fail ------------------
+function runTests(cmd, args) {
   let out = "";
   try {
-    out = execFileSync(process.execPath, ["--test", ...present.map((f) => P(f))], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    out = execFileSync(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], cwd: ROOT, maxBuffer: 32 * 1024 * 1024 });
   } catch (e) {
     out = `${e.stdout ?? ""}\n${e.stderr ?? ""}`;
   }
-  const m = /# pass (\d+)[\s\S]*?# fail (\d+)/.exec(out) || /ℹ pass (\d+)[\s\S]*?ℹ fail (\d+)/.exec(out);
-  return m ? { pass: Number(m[1]), fail: Number(m[2]), ran: true } : { pass: 0, fail: 0, ran: true };
+  const byName = new Map();
+  const record = (name, passed) => {
+    const n = name.trim();
+    if (!n) return;
+    byName.set(n, (byName.get(n) ?? true) && passed);
+  };
+  for (const raw of out.split(/\r?\n/)) {
+    const line = raw.trim();
+    // TAP: "ok 12 - name" / "not ok 12 - name"
+    let m = /^(ok|not ok) \d+ - (.+?)(?: # .*)?$/.exec(line);
+    if (m) {
+      record(m[2], m[1] === "ok");
+      continue;
+    }
+    // node:test spec reporter: "✔ name (1.23ms)" / "✖ name (1.23ms)"
+    m = /^([✔✖✓✗xX>]|not ok|✔|✖)\s+(.+?)\s+\(\d[\d.]*ms\)$/.exec(line);
+    if (m) {
+      record(m[2], /[✔✓✔]/.test(m[1]));
+      continue;
+    }
+  }
+  const tot = /# pass (\d+)[\s\S]*?# fail (\d+)/.exec(out) || /ℹ pass (\d+)[\s\S]*?ℹ fail (\d+)/.exec(out) || /(\d+) passing[\s\S]*?(\d+) failing/.exec(out);
+  return { byName, pass: tot ? Number(tot[1]) : 0, fail: tot ? Number(tot[2]) : 0, ran: Boolean(tot) || byName.size > 0 };
 }
 
-const CORE_TESTS = [
-  "tests/impact-measure.test.mjs",
-  "tests/current-moment.test.mjs",
-  "tests/cross-studio-impact.test.mjs",
-  "tests/seal-guards.test.mjs",
-  "tests/studio-contract.test.mjs",
-  "tests/memory-scrub.test.mjs",
-  "tests/flagship-a11y-contract.test.mjs",
-];
-const STUDIO_TEST = {
-  home: "tests/home-horizon.test.mjs",
-  emergency: "tests/emergency-runway.test.mjs",
-  loan: "tests/debt-gravity.test.mjs",
-  retirement: "tests/future-day-loom.test.mjs",
-  travel: "tests/calendar-orbit.test.mjs",
-  investment: "tests/capital-prism.test.mjs",
-  insurance: "tests/living-envelope.test.mjs",
-  family: "tests/private-constellation.test.mjs",
-  wedding: "tests/wedding-thread.test.mjs",
-};
-const UNIT = runUnitTests([...CORE_TESTS, ...Object.values(STUDIO_TEST)]);
-const UNIT_GREEN = UNIT.ran && UNIT.fail === 0 && UNIT.pass > 0;
+const unitFiles = readdirSync(P("tests"))
+  .filter((f) => f.endsWith(".test.mjs"))
+  .map((f) => path.join("tests", f));
+const UNIT = runTests(process.execPath, ["--test", ...unitFiles.map((f) => P(f))]);
 
-const STUDIO_FILES = {
-  home: { scene: "app/features/home/HomeHorizon.jsx", finance: "lib/home/horizon-finance.js", projector: "lib/home/horizon-projector.js", route: "app/api/home-horizon/route.js", itest: "tests/integration/home-horizon.integration.test.mjs" },
-  emergency: { scene: "app/features/emergency/EmergencyRunway.jsx", finance: "lib/emergency/runway-finance.js", projector: "lib/emergency/runway-projector.js", route: "app/api/emergency-runway/route.js", itest: "tests/integration/emergency-runway.integration.test.mjs" },
-  loan: { scene: "app/features/loan/DebtGravity.jsx", finance: "lib/loan/debt-gravity-finance.js", projector: "lib/loan/debt-gravity-projector.js", route: "app/api/debt-gravity/route.js", itest: "tests/integration/debt-gravity.integration.test.mjs" },
-  retirement: { scene: "app/features/retirement/FutureDayLoom.jsx", finance: "lib/retirement/future-day-finance.js", projector: "lib/retirement/future-day-projector.js", route: "app/api/future-day-loom/route.js", itest: "tests/integration/future-day-loom.integration.test.mjs" },
-  travel: { scene: "app/features/travel/CalendarOrbit.jsx", finance: "lib/travel/calendar-orbit-finance.js", projector: "lib/travel/calendar-orbit-projector.js", route: "app/api/calendar-orbit/route.js", itest: "tests/integration/calendar-orbit.integration.test.mjs" },
-  investment: { scene: "app/features/investment/CapitalPrism.jsx", finance: "lib/investment/capital-prism-finance.js", projector: "lib/investment/capital-prism-projector.js", route: "app/api/capital-prism/route.js", itest: "tests/integration/capital-prism.integration.test.mjs" },
-  insurance: { scene: "app/features/insurance/LivingEnvelope.jsx", finance: "lib/insurance/living-envelope-finance.js", projector: "lib/insurance/living-envelope-projector.js", route: "app/api/living-envelope/route.js", itest: "tests/integration/living-envelope.integration.test.mjs" },
-  family: { scene: "app/features/family/PrivateConstellation.jsx", finance: "lib/family/private-constellation-finance.js", projector: "lib/family/private-constellation-projector.js", route: "app/api/private-constellation/route.js", itest: "tests/integration/private-constellation.integration.test.mjs" },
-  wedding: { scene: "app/features/wedding/WeddingContinuousScene.jsx", finance: "lib/wedding/plan-finance.js", projector: "lib/wedding/wedding-thread-projector.js", route: "app/api/wedding-thread/route.js", itest: "tests/integration/wedding-thread.integration.test.mjs" },
+const integrationFiles = has("tests/integration")
+  ? readdirSync(P("tests/integration"))
+      .filter((f) => f.endsWith(".test.mjs"))
+      .map((f) => path.join("tests/integration", f))
+  : [];
+const INTEGRATION = withIntegration
+  ? runTests(process.execPath, ["--test", "--env-file=.env", ...integrationFiles.map((f) => P(f))])
+  : { byName: new Map(), pass: 0, fail: 0, ran: false };
+
+const testPassed = (re, results = UNIT) => {
+  for (const [name, ok] of results.byName) if (ok && re.test(name)) return true;
+  return false;
 };
-const GENERIC_PINS = new Set(["emergency_floor_months", "max_monthly_contribution", "no_guardian_auto_move", "no_balance_share", "no_partner_data_in_viewer_response"]);
+const testExists = (re, results = UNIT) => {
+  for (const [name] of results.byName) if (re.test(name)) return true;
+  return false;
+};
 
 // ---- Playwright / screenshot artifacts --------------------------------
-function e2eArtifacts() {
-  const report = has("e2e/report/index.html") || has("e2e/report");
+function e2e() {
+  let report = null;
+  for (const f of ["e2e/report/results.json", "e2e/results.json", "e2e/report/report.json"]) {
+    if (has(f)) {
+      try {
+        report = JSON.parse(readFileSync(P(f), "utf8"));
+      } catch {
+        /* keep null */
+      }
+    }
+  }
   let screenshots = 0;
   const walk = (d) => {
     if (!has(d)) return;
@@ -87,89 +104,122 @@ function e2eArtifacts() {
     }
   };
   for (const d of ["e2e/flagship-studios.spec.ts-snapshots", "e2e/visual-regression.spec.ts-snapshots", "e2e/__screenshots__", "e2e/screenshots"]) walk(d);
-  return { report, screenshots };
+  return { report, screenshots, hasReport: report != null || has("e2e/report/index.html") };
 }
-const E2E = e2eArtifacts();
+const E2E = e2e();
+const e2eSpecPassed = (specNameRe) => {
+  if (!E2E.report || !Array.isArray(E2E.report.suites)) return false;
+  const flat = [];
+  const collect = (s) => {
+    for (const sp of s.specs ?? []) flat.push(sp);
+    for (const c of s.suites ?? []) collect(c);
+  };
+  for (const s of E2E.report.suites) collect(s);
+  return flat.some((sp) => specNameRe.test(sp.title ?? "") && (sp.ok === true || (sp.tests ?? []).every((t) => t.results?.every((r) => r.status === "passed"))));
+};
 
-const CSS = read("app/globals.css");
-const SHELL = read("app/components/living-scene/SceneShell.jsx");
-const PROVIDER = read("app/components/living-scene/LivingSceneProvider.jsx");
-const SEAL_ROUTE = read("app/api/future-field/seal/route.js");
+// ---- per-Studio unit-test name fragments ------------------------------
+const T = {
+  home: { sectionM: /SECTION M causal test: raising the price/, impactSet: /projectHomeImpact returns a valid server impactSet/, unknown: /CPF and partner money stay UNKNOWN/, pins: /homeAdapter exposes the six Home domain pins/ },
+  emergency: { sectionM: /SECTION M causal test: a bigger target raises the rebuild/, impactSet: /emergencyAdapter exposes the runway .* a cross-goal impactSet/, unknown: /Unknown (liquid assets stay FOG|monthly expenses)/, pins: /emergencyAdapter exposes the runway \+ three domain pins/ },
+  loan: { sectionM: /SECTION M causal test: extra repayment/, impactSet: /loanAdapter carries the Gravity view, five domain pins, and a valid cross-goal impactSet/, unknown: /unknown APR \/ fee stay unknown/, pins: /loanAdapter carries the Gravity view, five domain pins/ },
+  retirement: { sectionM: /SECTION M causal test: a richer Future Day/, impactSet: /retirementAdapter carries the Loom, the six domain pins, and a valid cross-goal impactSet/, unknown: /CPF LIFE \/ assets \/ inheritance: unknown unless confirmed/, pins: /retirementAdapter carries the Loom, the six domain pins/ },
+  travel: { sectionM: /SECTION M causal test: a bigger trip raises the required monthly pace/, impactSet: /travelAdapter carries the Orbit, the domain pins, and a valid cross-goal impactSet/, unknown: /unknown earmarked savings stay FOG/, pins: /travelAdapter carries the Orbit, the domain pins/ },
+  investment: { sectionM: /SECTION M causal test: more into the locked bands/, impactSet: /investmentAdapter carries the Prism, the domain pins, and a valid cross-goal impactSet/, unknown: /unknown capital pool stays FOG/, pins: /investmentAdapter carries the Prism, the domain pins/ },
+  insurance: { sectionM: /SECTION M causal test: stretching the membrane/, impactSet: /insuranceAdapter carries the Envelope, the domain pins, and a valid cross-goal impactSet/, unknown: /an Unknown node is never counted as a gap/, pins: /insuranceAdapter carries the Envelope, the domain pins/ },
+  family: { sectionM: /SECTION M causal test: a higher shared contribution/, impactSet: /familyAdapter carries the Constellation, the domain pins, and a valid cross-goal impactSet/, unknown: /redacted silhouette of the partner/, pins: /familyAdapter carries the Constellation, the domain pins/ },
+  wedding: { sectionM: /SECTION M causal test: fewer guests frees/, impactSet: /Wedding adapter now emits the shared Studio-Contract impactSet/, unknown: /an unknown guest count \/ date is surfaced/, pins: /two domain-specific pins are declared as real registry constraints/ },
+};
+
+// core cross-cutting tests that must be green for any impact/ghost claim
+const CORE_GREEN =
+  testPassed(/confirmed aggregation is DELTA-based/) &&
+  testPassed(/a SEALED plan keeps influencing the Life Thread as SOLID reality/) &&
+  testPassed(/two active branches on one plan -> conflict/) &&
+  testPassed(/NO metric->unit guessing/);
 
 function evaluate(domain) {
-  const f = STUDIO_FILES[domain];
-  const spec = getLivingPlanSpec(domain);
-  const contract = getStudioContract(domain) ?? {};
-  const scene = read(f.scene);
-  const proj = read(f.projector);
-  const route = read(f.route);
-  const domainPins = (contract.constraintKinds ?? spec?.constraints ?? []).filter((c) => !GENERIC_PINS.has(c));
-
+  const t = T[domain] ?? {};
   const C = {};
-  const set = (id, met, evidence) => {
-    C[id] = { met: Boolean(met), evidence: met ? evidence : `no evidence: ${evidence}` };
-  };
+  const set = (id, met, ifMet, ifNot) => (C[id] = { met: Boolean(met), evidence: met ? ifMet : ifNot ?? ifMet });
 
-  set("native_scene", has(f.scene) && /LivingSceneProvider/.test(scene), `${f.scene} mounts LivingSceneProvider`);
-  set("domain_visual", /<svg/.test(scene) && /role="slider"/.test(scene), `${f.scene} has <svg> + role="slider"`);
-  set("not_card_grid", /<svg/.test(scene) && !/VIEWS\s*=\s*\[[^\]]*"guests"[^\]]*"budget"[^\]]*"compare"/.test(scene), `${f.scene} main visual is an SVG, not a permanent-tab grid`);
-  set("real_finance_recalc", has(f.finance) && /useMemo\(/.test(scene) && /compute[A-Z]\w+\(/.test(scene), `${f.scene} recomputes ${path.basename(f.finance)} in a useMemo`);
-  set("server_impactset", /buildImpactSet/.test(proj) && /allocationLegs/.test(proj) && new RegExp(path.basename(f.projector).replace(/\.js$/, "")).test(route), `${path.basename(f.projector)} builds a legged impactSet; the route consumes it`);
-  set("two_affected_goals", (proj.match(/goalId:/g) ?? []).length >= 2 || /\.map\(\(goalId\)\s*=>/.test(proj), `${path.basename(f.projector)} affectedGoals has >= 2 entries`);
-  set("ghost_vs_solid", /\n\s*legs,\n\s*\}\);/.test(proj), `${path.basename(f.projector)} passes per-leg \`legs\` to buildImpactSet`);
+  // -- unit-test-backed logic criteria --
+  set("real_finance_recalc", t.sectionM && testPassed(t.sectionM), `unit: the Section-M causal test passed`, t.sectionM ? "the Section-M causal test is failing" : "no mapped Section-M test");
+  set("server_impactset", t.impactSet && testPassed(t.impactSet) && CORE_GREEN, "unit: the adapter impactSet test + core impact-measure/current-moment green", "the adapter impactSet test or a core impact-measure test is failing");
+  set("two_affected_goals", t.sectionM && testPassed(t.sectionM), "unit: the Section-M test asserts >= 2 affected goals move", "the Section-M test is failing");
+  set("ghost_vs_solid", CORE_GREEN && (t.sectionM ? testPassed(t.sectionM) : false), "unit: DELTA-based confirmed aggregation + sealed-solid + ghost-until-allocated all green", "a core ghost/solid test is failing");
+  set("unknown_not_faked", t.unknown ? testPassed(t.unknown) : false, "unit: the studio's unknown / FOG test passed", t.unknown ? "the unknown / FOG test is failing" : "no unknown-path unit test for this studio");
+  set("two_domain_pins", t.pins ? testPassed(t.pins) : false, "unit: the adapter test asserts the domain pins are real metrics", t.pins ? "the domain-pins adapter test is failing" : "no domain-pin unit test");
+  set("memory_scrub", testPassed(/beforeAfter\(index\) returns real Before \/ After state/), "unit: memory-scrub Before/After test passed", "no passing memory-scrub Before/After unit test");
+  const guardianRe = /Shadow Guardian previews|Guardian never moves money|guardian.*shadow.*never actual/i;
   set(
-    "future_fragment",
-    /futureFragment:[\s\S]{0,90}releasedMonthly/.test(route) || /futureHandoff(AtPayoff|Preview)[\s\S]{0,120}releasedMonthly/.test(route + proj),
-    `${path.basename(f.route)} emits a released resource -> Future Fragment / Handoff (never auto-routed)`,
+    "guardian_no_execution",
+    testPassed(guardianRe) || testPassed(guardianRe, INTEGRATION),
+    "test: a guardian-no-execution assertion passed",
+    "no passing guardian-no-execution assertion (it lives in an integration test - pass --with-integration)",
   );
-  set("added_pressure_source", /addedPressure:[\s\S]{0,140}sources:/.test(route), `${path.basename(f.route)} emits addedPressure.sources`);
-  set("real_branches", (has("app/components/living-scene/BranchStrip.jsx") && /<BranchStrip/.test(SHELL)) || /Compare strategies|WeddingMirror/.test(scene), `BranchStrip mounted in SceneShell (or a bespoke Compare lens)`);
-  set("two_domain_pins", domainPins.length >= 2, `registry declares ${domainPins.length} domain-specific pins: ${domainPins.join(", ") || "none"}`);
-  set("seal_consent", /buildSealPreview/.test(SEAL_ROUTE) && /MomentOutlet/.test(SHELL), `seal route builds a consent preview; SceneShell shows the MomentOutlet`);
-  set("guardian_in_place", /guardianState:[\s\S]{0,260}watching[\s\S]{0,260}mayNot/.test(route), `${path.basename(f.route)} emits guardianState.watching + mayNot`);
-  set("guardian_no_execution", /mayNot:\s*\[[^\]]+\]/.test(route) && !/transferMoney\(|executeTrade\(|bookVendor\(/.test(proj), `guardian.mayNot non-empty; projector never executes`);
-  set("ledger_causal_chain", has("lib/living-plan/memory-lens.js") && has("app/api/living-plan/memory-lens/route.js"), `Memory Lens causal chain shipped`);
-  set("memory_scrub", has("lib/living-plan/memory-scrub.js") && has("app/api/memory-scrub/route.js") && /ThreadMemoryScrubber/.test(SHELL) && contract.replayMapper != null, `Memory Scrubber + route + mounted + registry.replayMapper`);
-  set("reload_restores", /sceneSeal[\s\S]{0,400}identityMatches/.test(PROVIDER), `provider restores a sealed moment on reload`);
+  const ledgerRe = /Memory Lens builds a real causal chain|Memory Lens.*causal chain/i;
   set(
-    "mobile_a11y",
-    /role="slider"/.test(scene) && /aria-(valuenow|valuetext)=/.test(scene) && /prefers-reduced-motion/.test(CSS) && (E2E.report || E2E.screenshots > 0),
-    E2E.report || E2E.screenshots > 0 ? `static a11y OK + Playwright artifacts present` : `static a11y OK, but NO Playwright report / screenshots under e2e/ - run npm run test:e2e on a browser machine`,
+    "ledger_causal_chain",
+    testPassed(ledgerRe) || testPassed(ledgerRe, INTEGRATION),
+    "test: the memory-lens causal-chain assertion passed",
+    "no passing memory-lens causal-chain assertion (integration - pass --with-integration)",
   );
-  set("unknown_not_faked", /unknown|Unknown|noPlan|FOG|fog/.test(scene), `${f.scene} renders an explicit unknown / no-data path`);
+
+  // -- integration-run-backed --
+  const itestName = new RegExp(`${domain}|${{ home: "Home Horizon", emergency: "Safety Runway", loan: "Debt Gravity", retirement: "Future-Day Loom", travel: "Calendar Orbit", investment: "Capital Prism", insurance: "Living Envelope", family: "Private Constellation", wedding: "Wedding" }[domain]}`, "i");
   set(
     "domain_integration_test",
-    has(f.itest),
-    `${f.itest} present (run: npm run test:integration)`,
+    withIntegration && INTEGRATION.ran && testPassed(itestName, INTEGRATION),
+    `integration run: a ${domain} test passed`,
+    withIntegration ? `no passing ${domain} integration test in this run` : "not run - pass --with-integration",
   );
+
+  // -- Playwright / screenshot-backed (NOT provable without the browser run) --
+  const pw = e2eSpecPassed(new RegExp("12-point causal-spine walk", "i"));
+  set("native_scene", pw, "e2e: the causal-spine walk mounted the scene", "needs the Playwright run (e2e/report absent)");
+  set("domain_visual", pw, "e2e: a role=slider handle was visible + moved", "needs the Playwright run");
+  set("not_card_grid", pw, "e2e: the SVG main visual passed", "needs the Playwright run");
+  set("real_branches", pw, "e2e: Fork + Compare of two branches passed", "needs the Playwright run");
+  set("seal_consent", pw, "e2e: Seal preview showed the Guardian summary", "needs the Playwright run");
+  set("guardian_in_place", pw, "e2e: .lsGuardianRail appeared after confirm", "needs the Playwright run");
+  set("future_fragment", pw, "e2e/api: futureFragment.releasedMonthly asserted", "needs the Playwright run");
+  set("added_pressure_source", pw, "e2e/api: addedPressure.sources asserted", "needs the Playwright run");
+  set("reload_restores", pw, "e2e: reload kept the sealed moment + Guardian", "needs the Playwright run");
+  const shots = E2E.screenshots >= 18; // 9 studios x 2 widths, minimum
+  set("mobile_a11y", pw && shots, `e2e: no h-scroll at 320/390 + ${E2E.screenshots} screenshots`, `needs the Playwright run + 320/390 screenshots (have ${E2E.screenshots})`);
 
   const met = FLAGSHIP_CRITERIA.filter((c) => C[c.id]?.met).length;
   const status = met === FLAGSHIP_CRITERIA.length ? "complete" : met > 0 ? "partial" : "not done";
   return { domain, met, total: FLAGSHIP_CRITERIA.length, status, criteria: C };
 }
 
+function matchName(re) {
+  for (const [name] of UNIT.byName) if (re.test(name)) return name;
+  return re.source;
+}
+
 const rows = livingPlanDomains().map(evaluate);
 const wired = (d) => Object.values(getStudioContract(d) ?? {}).filter((v) => v != null).length;
 
 if (process.argv.includes("--json")) {
-  console.log(JSON.stringify({ e2e: E2E, unit: UNIT, rows }, null, 2));
+  console.log(JSON.stringify({ unit: { pass: UNIT.pass, fail: UNIT.fail }, integration: withIntegration ? { pass: INTEGRATION.pass, fail: INTEGRATION.fail } : "not run", e2e: { hasReport: E2E.hasReport, screenshots: E2E.screenshots }, rows }, null, 2));
 } else {
   const pad = (s, n) => String(s).padEnd(n);
-  console.log(`\nNine-Studio flagship completion matrix (${FLAGSHIP_CRITERIA.length} criteria, derived from evidence)\n`);
-  console.log(`unit tests: ${UNIT.ran ? `${UNIT.pass} pass / ${UNIT.fail} fail${UNIT_GREEN ? "" : "  <-- NOT GREEN"}` : "not run"}`);
-  console.log(`Playwright artifacts: report=${E2E.report ? "yes" : "NO"}  screenshots=${E2E.screenshots}\n`);
+  console.log(`\nNine-Studio flagship completion matrix (${FLAGSHIP_CRITERIA.length} criteria, scored from EXECUTED results)\n`);
+  console.log(`unit tests:        ${UNIT.ran ? `${UNIT.pass} pass / ${UNIT.fail} fail` : "NOT RUN"}${UNIT.fail ? "   <-- NOT GREEN" : ""}`);
+  console.log(`integration tests: ${withIntegration ? `${INTEGRATION.pass} pass / ${INTEGRATION.fail} fail` : "not run (pass --with-integration)"}`);
+  console.log(`playwright report: ${E2E.hasReport ? "present" : "ABSENT"}   screenshots: ${E2E.screenshots}\n`);
   console.log(`${pad("Studio", 12)} ${pad("Status", 10)} ${pad("Criteria met", 14)} Contract slots`);
   console.log("-".repeat(56));
   for (const r of rows) console.log(`${pad(r.domain, 12)} ${pad(r.status, 10)} ${pad(`${r.met}/${r.total}`, 14)} ${wired(r.domain)}/11`);
   const complete = rows.filter((r) => r.status === "complete").length;
-  console.log(`\n${complete}/9 Studios complete. Ready-for-Review requires 9/9 with real evidence.`);
+  console.log(`\n${complete}/9 Studios complete. Ready-for-Review requires 9/9 - and that requires the Playwright run + screenshots + a green integration run.`);
   const openByCriterion = {};
   for (const r of rows) for (const c of FLAGSHIP_CRITERIA) if (!r.criteria[c.id]?.met) (openByCriterion[c.id] ??= []).push(r.domain);
-  if (Object.keys(openByCriterion).length) {
-    console.log(`\nOpen criteria (why not met):`);
-    for (const [id, doms] of Object.entries(openByCriterion)) {
-      const ev = rows.find((r) => !r.criteria[id]?.met).criteria[id].evidence;
-      console.log(`  - ${id} [${doms.length === 9 ? "ALL nine" : doms.join(", ")}]: ${ev}`);
-    }
+  console.log(`\nOpen criteria (why not met):`);
+  for (const [id, doms] of Object.entries(openByCriterion)) {
+    const ev = rows.find((r) => !r.criteria[id]?.met).criteria[id].evidence;
+    console.log(`  - ${id} [${doms.length === 9 ? "ALL nine" : doms.join(", ")}]: ${ev}`);
   }
 }

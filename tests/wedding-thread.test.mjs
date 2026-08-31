@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { projectWeddingThreadImpact } from "../lib/wedding/wedding-thread-projector.js";
 import { validateImpactSet } from "../lib/living-plan/studio-contract.js";
 import { getFutureFieldAdapter } from "../lib/future-field/adapters.js";
@@ -51,4 +52,26 @@ test("allocating the freed amount turns a goal solid; nothing is auto-routed", (
 test("the legacy two-layer wedding projection is still available for the existing scene", () => {
   const legacy = wed.legacyProjectImpacts({ ...reality, guest_count: 90 }, reality, ctx);
   assert.ok(legacy && ("mode" in legacy || "availableImpact" in legacy), "legacy shape preserved");
+});
+
+test("wedding: an unknown guest count / date is surfaced, never a fabricated wedding cost", async () => {
+  const { computeWeddingPlanFinance } = await import("../lib/wedding/plan-finance.js");
+  const noGuests = computeWeddingPlanFinance({ planData: { ...reality, guest_count: 0 } });
+  assert.equal(noGuests.available, false, "no guest count -> the wedding math is unavailable, not a made-up number");
+  assert.ok(/guest/i.test(String(noGuests.reason ?? "")), "the reason names the missing input");
+  // the continuous scene renders an explicit unknown branch for it
+  const src = readFileSync(new URL("../app/features/wedding/WeddingContinuousScene.jsx", import.meta.url), "utf8");
+  assert.match(src, /realityUnknowns|unknown\.guest_count|noPlan/);
+});
+
+test("wedding: two domain-specific pins are declared as real registry constraints", async () => {
+  const { getStudioContract, getLivingPlanSpec } = await import("../lib/living-plan/registry.js");
+  const contract = getStudioContract("wedding");
+  const spec = getLivingPlanSpec("wedding");
+  const generic = new Set(["emergency_floor_months", "max_monthly_contribution", "no_guardian_auto_move", "no_balance_share"]);
+  const domainPins = (contract.constraintKinds ?? spec.constraints ?? []).filter((c) => !generic.has(c));
+  assert.ok(domainPins.includes("min_core_guests"));
+  assert.ok(domainPins.includes("latest_wedding_month"));
+  assert.ok(domainPins.includes("minimum_guest_experience_spend"));
+  assert.ok(domainPins.length >= 2);
 });
