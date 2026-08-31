@@ -25,7 +25,9 @@ export default defineConfig({
   ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000",
-    storageState: "e2e/.auth/user.json", // written by globalSetup
+    // No global storageState: each flagship spec loads its OWN
+    // (domain x project) identity's cookies so one Seal never pollutes
+    // another account. See e2e/identities.mjs + scripts/seed-e2e-user.mjs.
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

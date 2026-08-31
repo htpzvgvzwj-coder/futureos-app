@@ -1,22 +1,24 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect, Page, BrowserContext } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { STUDIOS, UNITS, authFileFor, screenshotName } from "./identities.mjs";
 
-// Living Thread - the nine flagship Studios end to end, as the seeded E2E
-// user. NO conditional escapes: every step expects its element visible +
-// enabled and fails otherwise; every API call must be 200; every impact
-// unit must be non-null.
+// Living Thread - the nine flagship Studios end to end, each as its OWN
+// seeded (domain x project) identity so one Studio's Seal never pollutes
+// another's cross-goal numbers. NO conditional escapes: every step expects
+// its element visible + enabled and fails otherwise; every API call must be
+// 200; every impact unit must be non-null and in the closed vocabulary.
+//
+// Exactly 20 assertions per Studio per viewport (the "20-check walk").
 
-const STUDIOS: { name: string; hash: string; api: string }[] = [
-  { name: "Home Horizon", hash: "homeHorizon", api: "home-horizon" },
-  { name: "Safety Runway", hash: "emergencyRunway", api: "emergency-runway" },
-  { name: "Debt Gravity", hash: "repaymentPath", api: "debt-gravity" },
-  { name: "Future-Day Loom", hash: "futureLifeTimeline", api: "future-day-loom" },
-  { name: "Calendar Orbit", hash: "tripOrbit", api: "calendar-orbit" },
-  { name: "Capital Prism", hash: "capitalPaths", api: "capital-prism" },
-  { name: "Living Envelope", hash: "protectionEnvelope", api: "living-envelope" },
-  { name: "Private Constellation", hash: "familyConstellation", api: "private-constellation" },
-  { name: "Wedding Living Scene", hash: "weddingLivingPlan", api: "wedding-thread" },
-];
-const UNITS = ["sgd", "sgd_per_month", "months", "percentage", "date_shift_months", "count"];
+// Do not inherit any global auth; each test loads its own identity's cookies.
+test.use({ storageState: { cookies: [], origins: [] } });
+
+async function loadIdentity(context: BrowserContext, domain: string, project: string) {
+  const file = path.join(process.cwd(), authFileFor(domain, project));
+  const state = JSON.parse(readFileSync(file, "utf8"));
+  await context.addCookies(state.cookies);
+}
 
 async function open(page: Page, hash: string) {
   await page.goto(`/#${hash}`);
@@ -27,115 +29,131 @@ async function apiJson(page: Page, api: string) {
   expect(res.status(), `/api/${api} must be 200`).toBe(200);
   return res.json();
 }
+const figures = (s: string) => (s.match(/SGD\s?[\d,]+/g) ?? []).join("|");
 
 for (const s of STUDIOS) {
-  test(`${s.name}: 12-point causal-spine walk`, async ({ page }, testInfo) => {
+  test(`${s.name}: 20-check causal-spine walk`, async ({ page, context }, testInfo) => {
+    const project = testInfo.project.name;
+    await loadIdentity(context, s.domain, project);
+
+    // 1 - the native scene mounts
     await open(page, s.hash);
 
-    // 1 + 2 - move a core variable, the numbers recompute
+    // 2 - a keyboard-operable slider handle is present + live
     const slider = page.getByRole("slider").first();
     await expect(slider).toBeVisible();
+    await expect(slider).toBeEnabled();
     await slider.focus();
-    const before = (await page.locator("body").innerText()).match(/SGD\s?[\d,]+/g)?.join("|") ?? "";
+
+    // 3 - moving the handle recomputes a visible figure
+    const before = figures(await page.locator("body").innerText());
     await slider.press("ArrowRight");
     await slider.press("ArrowRight");
     await page.waitForTimeout(400);
-    const after = (await page.locator("body").innerText()).match(/SGD\s?[\d,]+/g)?.join("|") ?? "";
+    const after = figures(await page.locator("body").innerText());
     expect(after, "a figure changed after moving the control").not.toBe(before);
 
-    // 3 - Fork creates a real branch
-    const fork = page.getByRole("button", { name: /Fork this|从此分叉/ });
-    await expect(fork).toBeVisible();
-    await expect(fork).toBeEnabled();
-    await fork.click();
-    await expect(page.locator(".lsBranchList li")).toHaveCount(1);
-
-    // 4 - a second Fork + Compare shows both; ONLY the active one drives
-    await slider.press("ArrowRight");
-    await page.waitForTimeout(400);
-    await expect(page.getByRole("button", { name: /Fork this|从此分叉/ })).toBeEnabled();
-    await page.getByRole("button", { name: /Fork this|从此分叉/ }).click();
-    await expect(page.locator(".lsBranchList li")).toHaveCount(2);
-    await page.getByRole("button", { name: /^Compare$|^对比$/ }).click();
-    await expect(page.locator(".lsBranchCompare")).toBeVisible();
-
-    const thread1 = await apiJson(page, "life-thread");
-    // select the FIRST branch as the active moment, then the second, and
-    // assert the thread's studio moment state follows the selection.
-    const chips = page.locator(".lsBranchPick");
-    await chips.nth(0).click();
-    await page.waitForTimeout(600);
-    const threadA = await apiJson(page, "life-thread");
-    await chips.nth(1).click();
-    await page.waitForTimeout(600);
-    const threadB = await apiJson(page, "life-thread");
-    expect(threadA.studioMomentStates?.[domainKey(s.hash)], "active branch selected").toBe("activeBranch");
-    expect(JSON.stringify(threadA.studioImpacts?.aggregated ?? []), "the two active selections differ")
-      .not.toBe(JSON.stringify(threadB.studioImpacts?.aggregated ?? []));
-    void thread1;
-
-    // 5 - the impactSet tags every affected goal with a typed unit
+    // 4 - the Studio's own API answers 200
     const body = await apiJson(page, s.api);
     const goals = body?.impactSet?.affectedGoals ?? [];
+
+    // 5 - the server impactSet has affected goals
     expect(goals.length, "the impactSet has affected goals").toBeGreaterThan(0);
+
+    // 6 - every affected goal carries a typed unit from the closed vocabulary
     for (const g of goals) {
       expect(g.unit, `${s.name}: ${g.goalId}.${g.metric} carries a typed unit`).not.toBeNull();
-      expect(UNITS).toContain(g.unit);
-      expect(["up", "down", "flat"]).toContain(g.direction);
+      expect(UNITS, `${g.goalId}.${g.metric} unit is known`).toContain(g.unit);
     }
-    // 6 - allocation is per-leg
+
+    // 7 - every affected goal has a valid direction
+    for (const g of goals) expect(["up", "down", "flat"]).toContain(g.direction);
+
+    // 8 - every affected goal has a valid effectState (possible before Seal)
+    for (const g of goals) {
+      expect(["possible", "placed", "confirmed"], `${g.goalId} effectState`).toContain(g.effectState);
+    }
+
+    // 9 - per-leg: an unfunded goal has NO confirmed number
     const legs = body?.impactSet?.allocationLegs ?? null;
     for (const g of goals) {
       const funded = legs && Number(legs[g.goalId]) > 0;
       if (!funded) expect(g.confirmedAfter, `${g.goalId} unfunded -> ghost`).toBeNull();
     }
 
-    // 7 + 8 - Seal preview then confirm
+    // 10 - Fork creates a real branch
+    const forkName = /Fork this|从此分叉/;
+    const fork = page.getByRole("button", { name: forkName });
+    await expect(fork).toBeVisible();
+    await expect(fork).toBeEnabled();
+    await fork.click();
+    await expect(page.locator(".lsBranchList li")).toHaveCount(1);
+
+    // 11 - a second Fork -> two branches
+    await slider.press("ArrowRight");
+    await page.waitForTimeout(400);
+    await expect(page.getByRole("button", { name: forkName })).toBeEnabled();
+    await page.getByRole("button", { name: forkName }).click();
+    await expect(page.locator(".lsBranchList li")).toHaveCount(2);
+
+    // 12 - Compare shows both branches side by side
+    await page.getByRole("button", { name: /^Compare$|^对比$/ }).click();
+    await expect(page.locator(".lsBranchCompare")).toBeVisible();
+
+    // 13 - selecting branch A makes it the active moment in the Life Thread
+    const chips = page.locator(".lsBranchPick");
+    await chips.nth(0).click();
+    await page.waitForTimeout(600);
+    const threadA = await apiJson(page, "life-thread");
+    expect(threadA.studioMomentStates?.[s.domain], "active branch selected").toBe("activeBranch");
+
+    // 14 - the Life Thread carries ONE canonical snapshot id, and no baseline conflict
+    expect(threadA.canonicalSnapshotId, "the thread exposes a canonical snapshot id").toBeTruthy();
+    expect(threadA.studioBaselineConflict ?? false, "a clean run has no baseline conflict").toBe(false);
+
+    // 15 - selecting branch B changes the aggregated cross-goal impact
+    await chips.nth(1).click();
+    await page.waitForTimeout(600);
+    const threadB = await apiJson(page, "life-thread");
+    expect(JSON.stringify(threadB.studioImpacts?.aggregated ?? []), "the two active selections differ")
+      .not.toBe(JSON.stringify(threadA.studioImpacts?.aggregated ?? []));
+
+    // 16 - Seal preview shows the Guardian consent summary
     const review = page.getByRole("button", { name: /Review|Seal|封存/ }).first();
     await expect(review).toBeVisible();
     await expect(review).toBeEnabled();
     await review.click();
     await expect(page.getByText(/Guardian|守护者/)).toBeVisible();
+
+    // 17 - confirming the Seal puts the Guardian rail in place
     const confirm = page.getByRole("button", { name: /Confirm|确认封存|Seal it/ }).first();
     await expect(confirm).toBeVisible();
     await expect(confirm).toBeEnabled();
     await confirm.click();
-
-    // 9 - the Guardian rail appears in place
     await expect(page.locator(".lsGuardianRail")).toBeVisible();
 
-    // ghost -> solid: the sealed studio now contributes a SOLID impact
+    // 18 - ghost -> solid: the sealed Studio now drives a SOLID cross-goal group
     const sealedThread = await apiJson(page, "life-thread");
-    expect(sealedThread.sealedStudioCount, "at least one sealed studio drives a solid impact").toBeGreaterThan(0);
+    expect(sealedThread.sealedStudioCount, "a sealed studio drives a solid impact").toBeGreaterThan(0);
     const solid = (sealedThread.studioImpacts?.aggregated ?? []).some((g: { state: string }) => g.state === "solid");
     expect(solid, "a solid cross-goal group exists after Seal").toBe(true);
 
-    // 10 - reload restores the same sealed moment
+    // 19 - reload restores the identical sealed moment + Guardian rail
     const railTextBefore = await page.locator(".lsGuardianRail").innerText();
     await page.reload();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.locator(".lsGuardianRail")).toBeVisible();
-    expect(await page.locator(".lsGuardianRail").innerText()).toBe(railTextBefore);
+    expect(await page.locator(".lsGuardianRail").innerText(), "the rail text survives a reload").toBe(railTextBefore);
     const reThread = await apiJson(page, "life-thread");
-    expect(reThread.sealedStudioCount).toBe(sealedThread.sealedStudioCount);
+    expect(reThread.sealedStudioCount, "sealed count survives a reload").toBe(sealedThread.sealedStudioCount);
 
-    // 11 - Memory Scrubber replays Before / After
+    // 20 - Memory Scrubber replays Before / After; no h-scroll; one screenshot
     const scrub = page.getByText(/Memory Scrubber|记忆回溯器/);
     await expect(scrub).toBeVisible();
     await scrub.click();
     await expect(page.locator(".lsScrubTable, .lsScrubDrawer")).toBeVisible();
-
-    // 12 - no horizontal body scroll at this viewport, + a screenshot
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow, `no h-scroll (${testInfo.project.name})`).toBeLessThanOrEqual(1);
-    await expect(page).toHaveScreenshot(`${s.hash}-${testInfo.project.name}.png`, { fullPage: true, maxDiffPixelRatio: 0.03 });
+    expect(overflow, `no h-scroll (${project})`).toBeLessThanOrEqual(1);
+    await expect(page).toHaveScreenshot(screenshotName(s.hash, project), { fullPage: true, maxDiffPixelRatio: 0.03 });
   });
-}
-
-function domainKey(hash: string) {
-  return {
-    homeHorizon: "home", emergencyRunway: "emergency", repaymentPath: "loan", futureLifeTimeline: "retirement",
-    tripOrbit: "travel", capitalPaths: "investment", protectionEnvelope: "insurance", familyConstellation: "family",
-    weddingLivingPlan: "wedding",
-  }[hash]!;
 }

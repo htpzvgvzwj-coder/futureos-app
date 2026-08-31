@@ -93,3 +93,31 @@ test("the Playwright config + specs exist and DO NOT conditionally skip", () => 
   assert.doesNotMatch(vr, /test\.skip\(/, "no conditional skip in the visual spec");
   read("e2e/global-setup.ts"); // present
 });
+
+test("Part C: each flagship walk runs as its OWN (domain x project) identity - no shared account", () => {
+  const spec = read("e2e/flagship-studios.spec.ts");
+  // no global storageState, and each test loads its identity's cookies
+  assert.match(spec, /storageState:\s*\{\s*cookies:\s*\[\]/, "the spec explicitly drops any inherited auth");
+  assert.match(spec, /loadIdentity\(context, s\.domain, project\)/, "each test loads its (domain x project) cookies");
+  assert.match(spec, /authFileFor\(/, "identity file is resolved per (domain, project)");
+  const cfg = read("playwright.config.ts");
+  assert.doesNotMatch(cfg, /storageState:\s*["']e2e\/\.auth\/user\.json["']/, "no single shared storageState in the config");
+  const seed = read("scripts/seed-e2e-user.mjs");
+  assert.match(seed, /for \(const project of PROJECTS\)/, "the seed creates one identity per (domain x project)");
+  assert.match(seed, /identityEmail\(domain, project\)/);
+});
+
+test("Part C: the flagship walk has exactly 20 numbered checks", () => {
+  const spec = read("e2e/flagship-studios.spec.ts");
+  assert.match(spec, /20-check causal-spine walk/);
+  const nums = [...spec.matchAll(/^\s*\/\/ (\d{1,2}) - /gm)].map((m) => Number(m[1]));
+  assert.deepEqual(nums, Array.from({ length: 20 }, (_, i) => i + 1), "checks 1..20 are present and in order");
+});
+
+test("Part C: the matrix scores the walk PER viewport and needs a screenshot file per (studio, viewport)", () => {
+  const m = read("scripts/studio-matrix.mjs");
+  assert.match(m, /PROJECTS\.every\(\(p\) => perProject\[p\]\)/, "Playwright criteria require a pass in every viewport");
+  assert.match(m, /function shotPresent\(hash, project\)/, "screenshots are checked as a (hash x project) file matrix");
+  assert.doesNotMatch(m, /E2E\.screenshots >= 18/, "no 'count >= 18' shortcut any more");
+  assert.match(m, /t\.itest && testPassed\(t\.itest, INTEGRATION\)/, "integration evidence is matched by an exact title prefix");
+});

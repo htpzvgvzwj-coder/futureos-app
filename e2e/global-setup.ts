@@ -1,10 +1,12 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { allIdentities } from "./identities.mjs";
 
-// Playwright globalSetup - seeds the deterministic E2E user + all nine
-// reality paths + e2e/.auth/user.json. If this fails the ENTIRE run
-// fails; the specs never silently skip for missing auth.
+// Playwright globalSetup - seeds one deterministic E2E identity per
+// (Studio domain x project) + its reality path + its storageState file.
+// If this fails the ENTIRE run fails; the specs never silently skip for
+// missing auth, and one run's Seal never pollutes another's account.
 export default async function globalSetup() {
   const root = path.resolve(__dirname, "..");
   try {
@@ -13,9 +15,12 @@ export default async function globalSetup() {
       stdio: "inherit",
     });
   } catch (e) {
-    throw new Error(`E2E seed failed - cannot run the suite without a seeded user + reality paths. ${(e as Error).message}`);
+    throw new Error(`E2E seed failed - cannot run the suite without seeded identities + reality paths. ${(e as Error).message}`);
   }
-  if (!existsSync(path.join(root, "e2e/.auth/user.json"))) {
-    throw new Error("E2E seed ran but e2e/.auth/user.json was not written");
+  const missing = allIdentities()
+    .map((id) => id.authFile)
+    .filter((f) => !existsSync(path.join(root, f)));
+  if (missing.length > 0) {
+    throw new Error(`E2E seed ran but ${missing.length} storageState file(s) were not written: ${missing.join(", ")}`);
   }
 }
