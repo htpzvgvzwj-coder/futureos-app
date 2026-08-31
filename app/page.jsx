@@ -336,27 +336,29 @@ const defaultSimulatorActionStates = {
   protectionReview: "pending",
 };
 
+// No persona seed: the Future Mirror starts blank and is filled from the
+// customer's real profile (getSimulatorDefaultsFromProfile) or by hand.
 const defaultSimulatorInputs = {
   situation: "",
   goals: {
     wedding: false,
     home: false,
-    emergency: true,
-    retirement: true,
-    family: true,
-    investment: true,
+    emergency: false,
+    retirement: false,
+    family: false,
+    investment: false,
     business: false,
     custom: false,
   },
   independenceLevel: 4,
-  monthlyIncome: "7500",
-  currentSavings: "85000",
-  plannedSpending: "12000",
-  weddingBudget: "35000",
-  weddingDate: "2027-06",
-  targetHomeYear: "2030",
-  targetDownPayment: "150000",
-  propertyBudget: "750000",
+  monthlyIncome: "",
+  currentSavings: "",
+  plannedSpending: "",
+  weddingBudget: "",
+  weddingDate: "",
+  targetHomeYear: "",
+  targetDownPayment: "",
+  propertyBudget: "",
   mortgageReadiness: "preparing",
   weddingSavingsMonthly: "",
   weddingSavingsStartMonth: "",
@@ -367,57 +369,57 @@ const defaultSimulatorInputs = {
   retirementSavingsMonthly: "",
   retirementSavingsStartMonth: "",
   retirementSavingsTargetMonth: "",
-  monthlyExpenses: "3600",
-  currentEmergencyFund: "21600",
+  monthlyExpenses: "",
+  currentEmergencyFund: "",
   targetCoverageMonths: "6",
   retirementAge: "62",
-  currentInvestment: "15000",
-  monthlyInvestment: "500",
+  currentInvestment: "",
+  monthlyInvestment: "",
   targetReturnGoal: "6",
-  familyPlanningYear: "2030",
-  familyMonthlyCost: "1800",
+  familyPlanningYear: "",
+  familyMonthlyCost: "",
   insuranceReadiness: "review",
-  startupCapital: "80000",
-  launchDate: "2027-01",
+  startupCapital: "",
+  launchDate: "",
   customGoalName: "",
-  customTargetAmount: "6000",
-  customTargetDate: "2027-01",
+  customTargetAmount: "",
+  customTargetDate: "",
   customPriority: "high",
   customCategory: "Lifestyle",
   customNotes: "",
   riskPreference: "balanced",
 };
 
-const currentProfileVersion = "karina-demo-profile-2026-08-11-income-history";
+const currentProfileVersion = "profile-2026-08-29-empty-baseline";
 
+// The EMPTY profile shape. FutureOS ships with no persona: every field is
+// blank until the customer provides it, and screens render an honest
+// "unknown" / empty state (gated on `hasRealProfile`) rather than a
+// fabricated person. `statedMonthlyIncome` staying "" is what every
+// `hasRealProfile` check keys off.
 const defaultProfile = {
-  age: "27",
-  relationshipStatus: "Married",
-  occupation: "Mid-Level Marketing Executive at a retail company",
-  responsibilities:
-    "Manages campaigns and budgets at work, oversees household finances, and plans for long-term goals.",
-  pastExperience: "5 years in marketing, recently promoted",
-  lifeStage: "Late 20s, married, considering starting a family",
-  // The customer's own manually-typed figure - distinct from `monthlyIncome`,
-  // which manualEntryProvider.getProfile() computes as the EFFECTIVE number
-  // (smoothed from real incomeHistory when enough exists, this value verbatim
-  // otherwise) that every real consumer in the app actually reads.
-  statedMonthlyIncome: "7500",
-  monthlyExpenses: "3600",
-  currentSavings: "85000",
-  existingLoans: "18000",
-  creditCardOutstanding: "2400",
-  investments: "15000",
-  insuranceStatus: "Basic",
-  insuranceCoverageAmount: "150000",
-  riskPreference: "Balanced",
+  age: "",
+  relationshipStatus: "",
+  occupation: "",
+  responsibilities: "",
+  pastExperience: "",
+  lifeStage: "",
+  statedMonthlyIncome: "",
+  monthlyExpenses: "",
+  currentSavings: "",
+  existingLoans: "",
+  creditCardOutstanding: "",
+  investments: "",
+  insuranceStatus: "",
+  insuranceCoverageAmount: "",
+  riskPreference: "",
   goals: {
     wedding: false,
     home: false,
-    emergency: true,
-    retirement: true,
-    family: true,
-    investment: true,
+    emergency: false,
+    retirement: false,
+    family: false,
+    investment: false,
     business: false,
     custom: false,
   },
@@ -2396,7 +2398,7 @@ function getSimulatorActionDetail(actionId, inputs, level, t) {
 
 const defaultPreferences = {
   profileVersion: currentProfileVersion,
-  displayName: "Karina",
+  displayName: "",
   profile: defaultProfile,
   customGoals: [],
   futurePlanProducts: [],
@@ -2730,11 +2732,12 @@ function toggleProfileGoal(setPreferences, goal) {
 
 function applyProfileMigration(preferences, storedPreferences) {
   if (storedPreferences?.profileVersion === currentProfileVersion) return preferences;
-  // First-ever load (nothing saved yet): seed the default demo profile.
-  // Otherwise a customer's own edits must survive future version bumps - only stamp the
-  // new version number, never overwrite displayName/profile that mergeDefaults already preserved.
+  // First-ever load (nothing saved yet): seed the EMPTY profile shape - no
+  // persona, no name. Otherwise a customer's own edits must survive future
+  // version bumps - only stamp the new version number, never overwrite
+  // displayName/profile that mergeDefaults already preserved.
   if (!storedPreferences) {
-    return { ...preferences, profileVersion: currentProfileVersion, displayName: "Karina", profile: defaultProfile };
+    return { ...preferences, profileVersion: currentProfileVersion, displayName: "", profile: defaultProfile };
   }
   // A profile stored before the income-history feature still has the old
   // `monthlyIncome` key (the customer's own typed figure) and no
@@ -3116,17 +3119,28 @@ function getEffectiveTheme(theme, systemTheme) {
   return theme === "system" ? systemTheme : theme;
 }
 
+// No persona: when the customer has given no name, greetings address them
+// as "there" ("Hi there") and the avatar falls back to a neutral glyph -
+// never a fabricated identity.
+const FALLBACK_ADDRESS = "there";
+
+function hasGivenName(name) {
+  const trimmed = String(name ?? "").trim();
+  return Boolean(trimmed) && trimmed.toLowerCase() !== "customer";
+}
+
 function getDisplayName(name) {
   const trimmed = String(name ?? "").trim();
-  return trimmed && trimmed.toLowerCase() !== "customer" ? trimmed : "Karina";
+  return hasGivenName(name) ? trimmed : FALLBACK_ADDRESS;
 }
 
 function getInitials(name) {
+  if (!hasGivenName(name)) return "";
   const words = getDisplayName(name)
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2);
-  return words.map((word) => word[0]?.toUpperCase()).join("") || "C";
+  return words.map((word) => word[0]?.toUpperCase()).join("") || "";
 }
 
 function downloadJsonFile(filename, data) {
@@ -16914,18 +16928,15 @@ function LoadingScreen({ messageKey, t }) {
 }
 
 function CustomerProfileCard({ displayName, profile, t }) {
-  const showKarinaPhoto = getDisplayName(displayName).toLowerCase().includes("karina");
+  const named = hasGivenName(displayName);
+  const initials = getInitials(displayName);
   return (
     <section className="profileHero">
-      <div
-        className={showKarinaPhoto ? "coupleAvatar photoAvatar" : "coupleAvatar profileInitialsAvatar"}
-        role="img"
-        aria-label={displayName}
-      >
-        {showKarinaPhoto ? null : getInitials(displayName)}
+      <div className="coupleAvatar profileInitialsAvatar" role="img" aria-label={named ? displayName : t("customer.noName")}>
+        {initials || <UserRound size={20} aria-hidden="true" />}
       </div>
       <div>
-        <strong>{displayName}, {profile?.age ?? "27"}</strong>
+        <strong>{named ? displayName : t("customer.noName")}{profile?.age ? `, ${profile.age}` : ""}</strong>
         <span>{profile?.occupation || t("customer.segment")}</span>
         <small>{profile?.lifeStage || t("customer.lifeStage")}</small>
       </div>
@@ -17214,7 +17225,7 @@ export default function App() {
   // True only once the real fetched profile/preferences have actually
   // landed in state (setPreferences below) - `authStatus` alone flips to
   // "authenticated" before that async chain finishes, and `preferences`
-  // is still the initial defaultPreferences (displayName "Karina") during
+  // is still the initial defaultPreferences (empty displayName) during
   // that gap. Found via live verification: the debounced persist effect
   // used to fire on authStatus alone, genuinely PUTting the stale default
   // name to the server on every fresh signup/login before a second,
@@ -17377,7 +17388,7 @@ export default function App() {
       mirrorOutcomeStats: fetchedMirrorOutcomeStats,
       investmentOutcomeStats: fetchedInvestmentOutcomeStats,
       // The authenticated account's real display name seeds every fresh
-      // login (no more global "Karina" hardcode) - a customer's own edit in
+      // login (no persona hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once
       // one exists.
       displayName: savedPreferences?.displayName || authUser?.displayName || defaultPreferences.displayName,
@@ -17457,7 +17468,7 @@ export default function App() {
     if (authStatus !== "authenticated") return;
     // Also wait for the real fetched preferences to have landed, not just
     // authStatus - otherwise this fires while `preferences` is still the
-    // initial defaultPreferences (displayName "Karina") during the gap
+    // initial defaultPreferences (empty displayName) during the gap
     // before the async profile/preferences load finishes, genuinely
     // persisting the stale default to the server and localStorage.
     if (!preferencesLoaded) return;

@@ -29,8 +29,9 @@
     "perMonth": "{amount}/bulan"
   },
   "customer": {
-    "segment": "Eksekutif Pemasaran Pertengahan",
-    "lifeStage": "Akhir 20-an, berkahwin, mempertimbangkan untuk memulakan keluarga"
+    "noName": "Profil anda",
+    "segment": "Tambah pekerjaan anda dalam Profil",
+    "lifeStage": "Tambah peringkat hidup anda dalam Profil"
   },
   "home": {
     "title": "OCBC FutureOS",
@@ -1806,7 +1807,7 @@
         "sent": "Dihantar",
         "overBudget": {
           "title": "Perbelanjaan melebihi bajet dikesan",
-          "detail": "Karina membelanjakan {spending}, iaitu {amount} melebihi bajet bulanan selamat {budget}. Future Self Guardian mencadangkan menghentikan perbelanjaan tidak penting minggu ini."
+          "detail": "Anda membelanjakan {spending}, iaitu {amount} melebihi bajet bulanan selamat {budget}. Future Self Guardian mencadangkan menghentikan perbelanjaan tidak penting minggu ini."
         },
         "futureRisk": {
           "title": "Pemantauan risiko masa depan aktif",
@@ -1928,16 +1929,16 @@
       "deleteData": "Delete My Data",
       "policyText": "FutureOS uses approved customer data only for financial simulations, planning recommendations, and consented autonomous actions. Customers remain in control at all times.",
       "downloadedNotice": "Your local FutureOS data file has been downloaded.",
-      "deletedNotice": "Local FutureOS demo data has been reset."
+      "deletedNotice": "Data FutureOS setempat telah ditetapkan semula."
     },
     "demo": {
       "title": "App Information",
-      "description": "Demo controls for users and product review.",
+      "description": "Kawalan versi produk dan data setempat.",
       "clearSimulation": "Clear Simulation",
-      "restoreMock": "Restore Mock Data",
+      "restoreMock": "Tetapkan semula kepada profil kosong",
       "version": "Version",
       "clearNotice": "Simulasi dikosongkan. Future Mirror sedia untuk dijalankan semula.",
-      "restoreNotice": "Data tiruan dipulihkan. FutureOS kembali kepada profil pelanggan lalai."
+      "restoreNotice": "Profil ditetapkan semula. FutureOS kembali kepada profil kosong."
     },
     "profile": {
       "title": "Butiran Profil",
@@ -2024,7 +2025,7 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "Input: rizab kecemasan, perbelanjaan bulanan, status insurans, matlamat keluarga dan simpanan semasa.",
       "familyMath": "Kiraan: kesediaan kecemasan menyumbang 45% dan kesediaan perlindungan menyumbang 55%.",
-      "familyResult": "Keputusan: Karina mempunyai simpanan yang kukuh, tetapi insurans asas mengekalkan skor di bawah tahap tertinggi."
+      "familyResult": "Keputusan: simpanan yang kukuh, tetapi insurans asas mengekalkan skor di bawah tahap tertinggi."
     }
   },
   "mockScreens": {
@@ -2122,7 +2123,7 @@
   },
   "spendingRisk": {
     "title": "Butiran Risiko Perbelanjaan",
-    "subtitle": "FutureOS mengesan corak perbelanjaan yang mungkin menjejaskan matlamat masa depan Karina.",
+    "subtitle": "FutureOS mengesan corak perbelanjaan yang mungkin menjejaskan matlamat masa depan anda.",
     "homeLabel": "Amaran FutureOS",
     "homeTitleRisk": "1 risiko kewangan dikesan hari ini",
     "homeTitleSafe": "Tiada risiko perbelanjaan dikesan hari ini",
@@ -2132,8 +2133,8 @@
     "homeNoProfileTitle": "Tambah nombor sebenar anda untuk lihat gambaran perbelanjaan anda",
     "homeNoProfileDetail": "Kami belum ada pendapatan dan perbelanjaan sebenar anda, jadi tiada apa untuk disemak. Ketik untuk beritahu kami.",
     "detectedLabel": "Notifikasi automatik",
-    "detectedTitleRisk": "Karina melebihi bajet selamat sebanyak {amount}",
-    "detectedTitleSafe": "Karina masih dalam bajet bulanan selamat",
+    "detectedTitleRisk": "Anda melebihi bajet selamat sebanyak {amount}",
+    "detectedTitleSafe": "Anda masih dalam bajet bulanan selamat",
     "detectedText": "FutureOS membandingkan pendapatan, perbelanjaan semasa, komitmen matlamat dan peraturan rizab kecemasan untuk mengesan risiko lebih awal.",
     "metrics": {
       "monthlyIncome": "Pendapatan Bulanan",
@@ -2166,13 +2167,13 @@
     "recommendation": {
       "title": "Cadangan Guardian",
       "detail": "Kurangkan perbelanjaan tidak penting sebanyak {amount} bulan ini dan lindungi simpanan kecemasan.",
-      "note": "FutureOS tidak akan melaksanakan tindakan kewangan tanpa kelulusan Karina."
+      "note": "FutureOS tidak akan melaksanakan tindakan kewangan tanpa kelulusan anda."
     },
     "guardrail": {
       "title": "Apa Guardian lakukan selepas kelulusan",
       "cta": "Aktifkan Kawalan Perbelanjaan Guardian",
       "activeCta": "Kawalan Aktif",
-      "success": "Kawalan Perbelanjaan Guardian aktif. FutureOS akan memantau perbelanjaan dan melindungi matlamat simpanan Karina.",
+      "success": "Kawalan Perbelanjaan Guardian aktif. FutureOS akan memantau perbelanjaan dan melindungi matlamat simpanan anda.",
       "actions": {
         "cap": "Tetapkan kawalan lembut perbelanjaan pilihan sebanyak {budget} bulan ini.",
         "alert": "Hantar amaran segera jika perbelanjaan melebihi had diluluskan.",

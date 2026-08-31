@@ -1380,14 +1380,6 @@ nextjs-portal {
   font-weight: 950;
 }
 
-.photoAvatar {
-  background:
-    linear-gradient(135deg, rgba(20, 36, 58, 0.08), rgba(215, 25, 32, 0.06)),
-    url("/karina-profile.png") center 30% / cover no-repeat;
-  border: 2px solid rgba(255, 255, 255, 0.96);
-  box-shadow: 0 12px 24px rgba(20, 36, 58, 0.18);
-}
-
 .profileInitialsAvatar {
   box-shadow: 0 14px 28px rgba(20, 36, 58, 0.18);
 }

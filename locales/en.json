@@ -34,8 +34,9 @@
     "no": "No"
   },
   "customer": {
-    "segment": "Mid-Level Marketing Executive",
-    "lifeStage": "Late 20s, married, considering starting a family"
+    "noName": "Your profile",
+    "segment": "Add your occupation in Profile",
+    "lifeStage": "Add your life stage in Profile"
   },
   "home": {
     "title": "OCBC FutureOS",
@@ -2824,7 +2825,7 @@
         "sent": "Sent",
         "overBudget": {
           "title": "Spending over budget detected",
-          "detail": "Karina spent {spending}, which is {amount} above the safe monthly budget of {budget}. Future Self Guardian recommends pausing non-essential spending this week."
+          "detail": "You spent {spending}, which is {amount} above the safe monthly budget of {budget}. Future Self Guardian recommends pausing non-essential spending this week."
         },
         "futureRisk": {
           "title": "Future risk monitoring active",
@@ -2946,16 +2947,16 @@
       "deleteData": "Delete My Data",
       "policyText": "FutureOS uses approved customer data only for financial simulations, planning recommendations, and consented autonomous actions. Customers remain in control at all times.",
       "downloadedNotice": "Your local FutureOS data file has been downloaded.",
-      "deletedNotice": "Local FutureOS demo data has been reset."
+      "deletedNotice": "Local FutureOS data has been reset."
     },
     "demo": {
       "title": "App Information",
-      "description": "Product version and local prototype controls.",
+      "description": "Product version and local data controls.",
       "clearSimulation": "Clear Simulation",
-      "restoreMock": "Restore Mock Data",
+      "restoreMock": "Reset to empty profile",
       "version": "Version",
       "clearNotice": "Simulation cleared. Future Mirror is ready for a fresh run.",
-      "restoreNotice": "Mock data restored. FutureOS is back to the default customer profile."
+      "restoreNotice": "Profile reset. FutureOS is back to an empty profile."
     },
     "account": {
       "title": "Account",
@@ -3119,7 +3120,7 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "Inputs: emergency reserve, monthly expenses, insurance status, family planning goal and current savings.",
       "familyMath": "Math: emergency readiness contributes 45% and protection readiness contributes 55%.",
-      "familyResult": "Result: Karina has strong savings, but basic insurance keeps this score from reaching the highest band.",
+      "familyResult": "Result: strong savings, but basic insurance keeps this score from reaching the highest band.",
       "followThroughInputs": "Inputs: real savings check-ins across every confirmed goal, plus hardship recovery evidence.",
       "followThroughMath": "Math: each dimension is weighted and combined; a dimension with no data yet is excluded rather than scored as zero.",
       "followThroughResult": "Result: open the Relationship Ledger to see exactly which dimension is holding the score back."
@@ -3273,7 +3274,7 @@
   },
   "spendingRisk": {
     "title": "Spending Risk Detail",
-    "subtitle": "FutureOS detected a spending pattern that may affect Karina's future goals.",
+    "subtitle": "FutureOS detected a spending pattern that may affect your future goals.",
     "homeLabel": "FutureOS Alert",
     "homeTitleRisk": "1 financial risk detected today",
     "homeTitleSafe": "No spending risk detected today",
@@ -3283,8 +3284,8 @@
     "homeNoProfileTitle": "Add your real numbers to see your spending picture",
     "homeNoProfileDetail": "We don't have your real income and expenses yet, so there's nothing to check. Tap to tell us.",
     "detectedLabel": "Automatic notification",
-    "detectedTitleRisk": "Karina is {amount} over safe monthly budget",
-    "detectedTitleSafe": "Karina is within safe monthly budget",
+    "detectedTitleRisk": "You are {amount} over safe monthly budget",
+    "detectedTitleSafe": "You are within safe monthly budget",
     "detectedText": "FutureOS compares income, current spending, goal commitments and emergency reserve rules to detect risk before it affects long-term outcomes.",
     "metrics": {
       "monthlyIncome": "Monthly Income",
@@ -3317,13 +3318,13 @@
     "recommendation": {
       "title": "Guardian recommendation",
       "detail": "Reduce non-essential spending by {amount} this month and keep emergency savings protected.",
-      "note": "FutureOS will not execute any financial action unless Karina approves it."
+      "note": "FutureOS will not execute any financial action unless you approve it."
     },
     "guardrail": {
       "title": "What Guardian will do after approval",
       "cta": "Apply Guardian Spending Guardrail",
       "activeCta": "Guardrail Active",
-      "success": "Guardian Spending Guardrail is active. FutureOS will monitor spending and protect Karina's savings goals.",
+      "success": "Guardian Spending Guardrail is active. FutureOS will monitor spending and protect your savings goals.",
       "actions": {
         "cap": "Set a soft discretionary spending guardrail of {budget} this month.",
         "alert": "Send an instant alert if spending rises above the approved guardrail.",

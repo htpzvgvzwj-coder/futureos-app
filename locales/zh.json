@@ -35,8 +35,9 @@
     "no": "否"
   },
   "customer": {
-    "segment": "中层市场营销主管",
-    "lifeStage": "二十多岁后期,已婚,正考虑组建家庭"
+    "noName": "你的档案",
+    "segment": "在「档案」中填写你的职业",
+    "lifeStage": "在「档案」中填写你的人生阶段"
   },
   "home": {
     "title": "OCBC FutureOS",
@@ -2584,7 +2585,7 @@
         "sent": "已发送",
         "overBudget": {
           "title": "检测到超支",
-          "detail": "Karina 花费了 {spending},超出安全每月预算 {budget} 达 {amount}。Future Self Guardian 建议本周暂停非必要支出。"
+          "detail": "你花费了 {spending},超出安全每月预算 {budget} 达 {amount}。Future Self Guardian 建议本周暂停非必要支出。"
         },
         "futureRisk": {
           "title": "未来风险监测已启用",
@@ -2706,16 +2707,16 @@
       "deleteData": "删除我的数据",
       "policyText": "FutureOS 只会将已批准的客户数据用于财务模拟、规划建议和经同意的自主操作。客户始终保有控制权。",
       "downloadedNotice": "你的本地 FutureOS 数据文件已下载。",
-      "deletedNotice": "本地 FutureOS 演示数据已重置。"
+      "deletedNotice": "本地 FutureOS 数据已重置。"
     },
     "demo": {
       "title": "应用信息",
       "description": "用于用户与产品复核的演示控制。",
       "clearSimulation": "清除模拟",
-      "restoreMock": "恢复模拟数据",
+      "restoreMock": "重置为空白档案",
       "version": "版本",
       "clearNotice": "模拟已清除。Future Mirror 已准备好进行新一轮运行。",
-      "restoreNotice": "模拟数据已恢复。FutureOS 已恢复为默认客户资料。"
+      "restoreNotice": "档案已重置。FutureOS 已恢复为空白档案。"
     },
     "profile": {
       "title": "个人资料",
@@ -2845,7 +2846,7 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "输入项:应急储备、每月支出、保险状况、家庭规划目标及目前储蓄。",
       "familyMath": "计算方式:应急准备度占 45%,保障准备度占 55%。",
-      "familyResult": "结果:Karina 的储蓄状况良好,但基础保险使该分数无法达到最高档位。",
+      "familyResult": "结果:储蓄状况良好,但基础保险使该分数无法达到最高档位。",
       "followThroughInputs": "输入项：每个已确认目标背后真实的储蓄打卡记录，以及困境恢复的证据。",
       "followThroughMath": "计算方式：每个维度加权后合并；还没有数据的维度会被排除，而不是算作零分。",
       "followThroughResult": "结果：打开关系账本页面，能看到具体是哪个维度在拖分。"
@@ -2987,7 +2988,7 @@
   },
   "spendingRisk": {
     "title": "消费风险详情",
-    "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",
+    "subtitle": "FutureOS 检测到可能影响你未来目标的消费模式。",
     "homeLabel": "FutureOS 提醒",
     "homeTitleRisk": "今日检测到 1 项财务风险",
     "homeTitleSafe": "今日未检测到消费风险",
@@ -2997,8 +2998,8 @@
     "homeNoProfileTitle": "填写你的真实数字，才能看到你的消费情况",
     "homeNoProfileDetail": "我们还没有你真实的收入和支出数据，暂时无法检查。点击去填写。",
     "detectedLabel": "自动通知",
-    "detectedTitleRisk": "Karina 超出安全每月预算 {amount}",
-    "detectedTitleSafe": "Karina 处于安全每月预算之内",
+    "detectedTitleRisk": "你超出安全每月预算 {amount}",
+    "detectedTitleSafe": "你处于安全每月预算之内",
     "detectedText": "FutureOS 会比较收入、目前消费、目标承诺及应急储备规则,在影响长期结果前检测风险。",
     "metrics": {
       "monthlyIncome": "每月收入",
@@ -3031,13 +3032,13 @@
     "recommendation": {
       "title": "Guardian 建议",
       "detail": "本月减少 {amount} 的非必要支出,并保持应急储蓄受保护。",
-      "note": "除非 Karina 批准,否则 FutureOS 不会执行任何财务操作。"
+      "note": "除非你批准,否则 FutureOS 不会执行任何财务操作。"
     },
     "guardrail": {
       "title": "获批准后 Guardian 将采取的行动",
       "cta": "应用 Guardian 消费防护",
       "activeCta": "防护已启用",
-      "success": "Guardian 消费防护已启用。FutureOS 将监测消费并保护 Karina 的储蓄目标。",
+      "success": "Guardian 消费防护已启用。FutureOS 将监测消费并保护你的储蓄目标。",
       "actions": {
         "cap": "本月设置 {budget} 的软性自选消费防护线。",
         "alert": "若消费超出已批准的防护线,立即发送提醒。",
