@@ -1319,3 +1319,93 @@ create index if not exists ripple_events_profile_idx on ripple_events (profile_k
 create unique index if not exists ripple_events_dedupe_idx
   on ripple_events (profile_key, dedupe_key)
   where dedupe_key is not null and state <> 'superseded' and state <> 'revoked';
+
+-- ============================================================
+-- Usable Release Candidate (feat/usable-release-candidate):
+-- onboarding, consent, lifecycle roles, import batches, audit.
+-- profile_key holds users.id. All `create ... if not exists`.
+-- ============================================================
+
+create table if not exists user_onboarding (
+  profile_key     text primary key,
+  account_type    text not null default 'individual',  -- individual|youth|guardian_managed_child|household
+  status          text not null default 'started',     -- started|consent_done|reality_added|complete
+  step            text not null default 'account_type',
+  completed_at    timestamptz,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+-- One row per consent scope the customer explicitly granted / revoked.
+create table if not exists consent_records (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  scope         text not null,   -- account_data|transaction_data|assets_liabilities|planning_data|shared_data|guardian_monitoring
+  granted       boolean not null,
+  required      boolean not null default false,
+  version       text not null default 'v1',
+  source        text not null default 'onboarding',
+  created_at    timestamptz not null default now()
+);
+create index if not exists consent_records_profile_idx on consent_records (profile_key, scope, created_at desc);
+
+-- Lifecycle / shared-access roles. account_owner is implicit (the user
+-- themselves); rows here are grants TO other identities.
+create table if not exists lifecycle_roles (
+  id              uuid primary key default gen_random_uuid(),
+  profile_key     text not null,          -- whose data
+  subject_key     text,                   -- who holds the role (a users.id) - null for a placeholder
+  role            text not null,          -- account_owner|guardian|dependent|household_member|trusted_contact|beneficiary_placeholder
+  scope           text not null default 'view',  -- view|contribute|suggest|approve|manage|revoke
+  status          text not null default 'active',  -- active|pending|revoked
+  legal_confirmation_required boolean not null default false,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  revoked_at      timestamptz
+);
+create index if not exists lifecycle_roles_profile_idx on lifecycle_roles (profile_key, status);
+create index if not exists lifecycle_roles_subject_idx on lifecycle_roles (subject_key, status);
+
+-- CSV import batches - so an import can be shown as a receipt and rolled
+-- back atomically, and the same file can't be imported twice.
+create table if not exists import_batches (
+  id              uuid primary key default gen_random_uuid(),
+  profile_key     text not null,
+  account_id      uuid references bank_accounts(id),
+  file_name       text not null default '',
+  file_hash       text not null,          -- sha256 of the raw bytes
+  row_count       integer not null default 0,
+  imported_count  integer not null default 0,
+  skipped_count   integer not null default 0,
+  status          text not null default 'previewed',  -- previewed|committed|rolled_back|failed
+  mapping         jsonb not null default '{}',
+  created_at      timestamptz not null default now(),
+  committed_at    timestamptz,
+  rolled_back_at  timestamptz
+);
+create unique index if not exists import_batches_dedupe_idx
+  on import_batches (profile_key, file_hash)
+  where status = 'committed';
+alter table bank_transactions add column if not exists import_batch_id uuid references import_batches(id);
+create index if not exists bank_transactions_import_batch_idx on bank_transactions (import_batch_id) where import_batch_id is not null;
+
+-- Append-only audit trail for account-control + guardian decisions.
+create table if not exists audit_events (
+  id            uuid primary key default gen_random_uuid(),
+  profile_key   text not null,
+  actor_key     text,                     -- who did it (may differ from profile_key for guardian actions)
+  kind          text not null,            -- consent_granted|consent_revoked|data_exported|account_delete_requested|import_committed|import_rolled_back|guardian_decision|role_granted|role_revoked
+  detail        jsonb not null default '{}',
+  created_at    timestamptz not null default now()
+);
+create index if not exists audit_events_profile_idx on audit_events (profile_key, created_at desc);
+
+-- Soft account-deletion request (a real deletion runs a cascade + may be
+-- subject to a legal retention window).
+create table if not exists account_deletions (
+  profile_key   text primary key,
+  requested_at  timestamptz not null default now(),
+  status        text not null default 'requested',  -- requested|processing|completed|held_for_compliance
+  reason        text,
+  completed_at  timestamptz
+);
