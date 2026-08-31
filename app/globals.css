@@ -7106,3 +7106,10 @@ nextjs-portal {
 .is-stood-down .lsGuardianRailDot { background: var(--muted); }
 .lsGuardianRailWatch { margin: 0; font-size: 0.76rem; color: var(--navy-2); }
 .lsGuardianRailNever { margin: 0; font-size: 0.74rem; color: var(--muted); }
+
+/* Reduced-motion for the commit 2-4 flagship scenes (Living Thread commit 13) */
+@media (prefers-reduced-motion: reduce) {
+  .hhKnot, .hhRail, .hhSafeShadow, .hhBody, .hhRoof { transition: none !important; animation: none !important; }
+  .rwEnd, .rwEndFlag, .rwRail, .rwCurrent, .rwLoad { transition: none !important; animation: none !important; }
+  .dgBall, .dgKnot, .dgKnotLine, .dgBreathFill, .dgBody { transition: none !important; animation: none !important; }
+}

@@ -16,7 +16,10 @@
     "smoke:future-field": "node --env-file=.env _smoke_future_field.mjs",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs",
-    "postinstall": "node scripts/copy-pdf-worker.mjs"
+    "postinstall": "node scripts/copy-pdf-worker.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "npm i -D @playwright/test && playwright install chromium",
+    "test:e2e:update-snapshots": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",
