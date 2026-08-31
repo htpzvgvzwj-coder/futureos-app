@@ -131,21 +131,18 @@ export async function POST(request) {
   // it does not drive the global Life Thread). Passing branchId: null
   // deactivates all -> the moment falls back to `reality`.
   if (action === "activate") {
-    const all = await planStore.listBranches(plan.id);
-    for (const b of all) {
-      if (b.status === "active" && b.id !== body.branchId) {
-        await planStore.updateBranch(b.id, userId, { status: "open" });
+    try {
+      const res = await planStore.setActiveBranchAtomic(plan.id, body.branchId ?? null, userId);
+      return Response.json({ ok: true, activeBranchId: res.activeBranchId });
+    } catch (error) {
+      if (error?.code === "23505") {
+        return Response.json({ error: "activation_conflict", hint: "another activate won the race - re-read the branches" }, { status: 409 });
       }
+      if (error?.code === "BRANCH_NOT_FOUND") return Response.json({ error: "branch_not_found" }, { status: 404 });
+      if (error?.code === "BRANCH_PLAN_MISMATCH") return Response.json({ error: "branch_plan_mismatch" }, { status: 409 });
+      if (error?.code === "BRANCH_NOT_ACTIVATABLE") return Response.json({ error: "branch_not_activatable", status: error.branchStatus }, { status: 409 });
+      throw error;
     }
-    if (body.branchId) {
-      const target = all.find((b) => b.id === body.branchId);
-      if (!target) return Response.json({ error: "branch_not_found" }, { status: 404 });
-      if (target.status === "discarded" || target.status === "merged" || target.status === "sealed") {
-        return Response.json({ error: "branch_not_activatable", status: target.status }, { status: 409 });
-      }
-      await planStore.updateBranch(body.branchId, userId, { status: "active" });
-    }
-    return Response.json({ ok: true, activeBranchId: body.branchId ?? null });
   }
 
   if (action === "merge") {
@@ -180,20 +177,23 @@ export async function POST(request) {
 
   const peeled = peelBranch({ baseData, overrides, feasibilityFn: (data) => context.adapter.feasibility(data) });
   // A freshly peeled branch is the one the customer is now experiencing:
-  // it becomes the single active moment, demoting any prior active branch
-  // to an alternative (compare only).
-  const existing = await planStore.listBranches(plan.id);
-  for (const b of existing) {
-    if (b.status === "active") await planStore.updateBranch(b.id, userId, { status: "open" });
+  // demote any prior active branch AND insert this one active, in ONE
+  // transaction, so there is never a window with two active branches.
+  let branch;
+  try {
+    branch = await planStore.createActiveBranchAtomic(plan.id, userId, {
+      label,
+      baseVersion: currentVersion?.version ?? "0",
+      data: peeled.data,
+      delta: peeled.delta,
+      feasibility: peeled.feasibility,
+    });
+  } catch (error) {
+    if (error?.code === "23505") {
+      return Response.json({ error: "activation_conflict", hint: "a concurrent peel won the race - re-read the branches" }, { status: 409 });
+    }
+    throw error;
   }
-  const branch = await planStore.createBranch(plan.id, userId, {
-    label,
-    baseVersion: currentVersion?.version ?? "0",
-    data: peeled.data,
-    delta: peeled.delta,
-    feasibility: peeled.feasibility,
-    status: "active",
-  });
   const ledger = await recordEventSafe(
     buildBranchCreatedEvent({
       profileKey: userId,

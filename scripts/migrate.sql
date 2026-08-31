@@ -1133,3 +1133,9 @@ create index if not exists family_participants_plan_idx
 create unique index if not exists goal_commitments_idempotency_key
   on goal_commitments ((source_moment->>'idempotencyKey'))
   where source_moment ? 'idempotencyKey' and status = 'active';
+
+-- Living Thread (causal-spine round, blocker 3): at most ONE active branch
+-- per plan. Two concurrent activate requests can never both win.
+create unique index if not exists plan_branches_one_active_per_plan
+  on plan_branches (plan_id)
+  where status = 'active';
