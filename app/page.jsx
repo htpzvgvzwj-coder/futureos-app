@@ -7,6 +7,7 @@ import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-sc
 import { formatEvent } from "../lib/change-ledger/format.js";
 import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
+import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
@@ -212,6 +213,26 @@ const navItems = [
   { id: screens.MIRROR, labelKey: "nav.explore", icon: LineChart },
   { id: screens.GUARDIAN, labelKey: "nav.guardian", icon: ShieldCheck },
 ];
+
+// The four nav entrances are four Lenses onto ONE Living Thread surface.
+// Switching entrance switches the lens; the thread itself is unchanged.
+const SCREEN_FOR_LENS = {
+  today: screens.HOME,
+  life: screens.LIFE_GRAPH,
+  explore: screens.MIRROR,
+  guardian: screens.GUARDIAN,
+};
+const STUDIO_SCREEN_FOR_DOMAIN = {
+  home: screens.HOME_HORIZON,
+  emergency: screens.EMERGENCY_RUNWAY,
+  wedding: screens.WEDDING_LIVING_PLAN,
+  loan: screens.REPAYMENT_PATH,
+  retirement: screens.FUTURE_LIFE_TIMELINE,
+  travel: screens.TRIP_ORBIT,
+  investment: screens.CAPITAL_PATHS,
+  insurance: screens.PROTECTION_ENVELOPE,
+  family: screens.FAMILY_CONSTELLATION,
+};
 
 const detectedNeedDefinitions = [
   { id: "emergency", titleKey: "needs.emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
@@ -17587,10 +17608,37 @@ export default function App() {
     />
   );
 
+  // One Living Thread surface, four Lenses. Each nav entrance leads with
+  // the SAME surface (fed by the one LifeThreadProvider snapshot); its lens
+  // tabs navigate between the four entrances, and studio nodes deep-link
+  // into the matching Studio. The legacy per-screen content stays below for
+  // now (Part F trims the shell).
+  const livingThreadEntrance = (lens) => (
+    <LivingThreadEntrance
+      lens={lens}
+      onNavigateLens={(next) => setActiveScreen(SCREEN_FOR_LENS[next] ?? screens.HOME)}
+      onEnterStudio={(domain) => {
+        const target = STUDIO_SCREEN_FOR_DOMAIN[domain];
+        if (target) setActiveScreen(target);
+      }}
+      memoryEvents={memoryEvents}
+    />
+  );
+
   const currentScreen = {
-    [screens.HOME]: <TodayScreen {...shared} />,
+    [screens.HOME]: (
+      <>
+        {livingThreadEntrance("today")}
+        <TodayScreen {...shared} />
+      </>
+    ),
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
-    [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
+    [screens.LIFE_GRAPH]: (
+      <>
+        {livingThreadEntrance("life")}
+        <LifeGraph {...shared} />
+      </>
+    ),
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.DECISION_VERDICT]: (
       <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
@@ -17633,18 +17681,26 @@ export default function App() {
     ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.MIRROR]: <ExploreScreen setActiveScreen={setActiveScreen} t={t} />,
+    [screens.MIRROR]: (
+      <>
+        {livingThreadEntrance("explore")}
+        <ExploreScreen setActiveScreen={setActiveScreen} t={t} />
+      </>
+    ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (
-      <FutureSelfGuardian
-        {...shared}
-        preferences={preferences}
-        simulatorActionStates={simulatorActionStates}
-        setSimulatorActionStates={setSimulatorActionStates}
-      />
+      <>
+        {livingThreadEntrance("guardian")}
+        <FutureSelfGuardian
+          {...shared}
+          preferences={preferences}
+          simulatorActionStates={simulatorActionStates}
+          setSimulatorActionStates={setSimulatorActionStates}
+        />
+      </>
     ),
     [screens.PROFILE]: (
       <ProfileScreen

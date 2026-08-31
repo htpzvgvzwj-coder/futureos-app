@@ -139,6 +139,20 @@ test("DecisionRipple animation duration is set from the real speedMs, not a lite
   assert.doesNotMatch(src, /animationDuration: ["'`]\d/, "no hardcoded duration");
 });
 
+test("Part D2: all four nav entrances render the ONE surface as a lens - no per-entrance thread", () => {
+  const page = read("app/page.jsx");
+  for (const lens of ["today", "life", "explore", "guardian"]) {
+    assert.match(page, new RegExp(`livingThreadEntrance\\("${lens}"\\)`), `${lens} entrance renders the shared surface`);
+  }
+  // the lens tabs navigate between the four entrances
+  assert.match(page, /onNavigateLens=\{\(next\) => setActiveScreen\(SCREEN_FOR_LENS\[next\]/);
+  // studio nodes deep-link into the matching Studio scene
+  assert.match(page, /onEnterStudio=\{\(domain\) => \{/);
+  const entrance = read("app/components/living-thread/LivingThreadEntrance.jsx");
+  assert.match(entrance, /useLifeThread\(\)/, "the entrance reads the ONE canonical thread");
+  assert.doesNotMatch(entrance, /\bfetch\(|buildThreadGeometry\(|useState\(/, "the entrance does no fetching or computing of its own");
+});
+
 test("GuardianRail states the fixed 'can never' policy and is not a chatbot", () => {
   const src = read("app/components/living-thread/GuardianRail.jsx");
   for (const forbidden of ["move money", "cancel", "block or delay a payment", "change a goal", "shaming"]) {
