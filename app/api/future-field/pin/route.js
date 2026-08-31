@@ -42,6 +42,10 @@ const PIN_KINDS = {
   // Calendar Orbit domain pins (Living Thread commit 6).
   latest_trip_month: "lte", // value + metric are YYYYMM integers
   no_trip_funding_below_emergency_floor: "flag",
+  // Capital Prism domain pins (Living Thread commit 7).
+  minimum_liquid_capital: "gte",
+  minimum_flexible_capital: "gte",
+  no_investing_below_readiness_gate: "flag",
 };
 
 export async function GET(request) {

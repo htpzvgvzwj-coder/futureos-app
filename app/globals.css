@@ -6981,3 +6981,34 @@ nextjs-portal {
 .coCtlRow .toStepper { border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
 @media (max-width: 360px) { .coCtlRow { flex-direction: column; align-items: stretch; gap: 4px; } }
 @media (prefers-reduced-motion: reduce) { .coTrip, .coTripKnot, .coNightsKnot, .coFundFill { transition: none !important; } }
+
+/* Capital Prism (Living Thread commit 7) */
+.cpScene { display: flex; flex-direction: column; gap: 12px; }
+.cpSurface { display: flex; flex-direction: column; gap: 10px; }
+.cpField { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.cpField:focus-within { outline: 2px solid var(--navy); outline-offset: 2px; }
+.cpBeam { stroke: var(--navy-2); stroke-width: 3; stroke-linecap: round; }
+.cpPrism { fill: rgba(20,36,58,0.12); stroke: var(--navy-2); stroke-width: 1; }
+.cpSpecFrame { fill: none; stroke: var(--line); stroke-width: 1; }
+.cpUnassigned { fill: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(154,167,189,0.25) 3px, rgba(154,167,189,0.25) 6px); fill: rgba(154,167,189,0.18); }
+.cpBand { opacity: 0.9; }
+.cpBand-safety { fill: #0f9f84; }
+.cpBand-wedding { fill: #b07cc6; }
+.cpBand-home { fill: #4a7fb5; }
+.cpBand-flexible { fill: #9aa7bd; }
+.cpBand-retirement { fill: #d97904; }
+.cpBand-longTerm { fill: #14243a; }
+.cpBandLabel { font-size: 8px; fill: #fff; font-weight: 600; }
+.cpSeam { cursor: ns-resize; }
+.cpSeam:focus-visible { outline: none; }
+.cpSeamLine { stroke: var(--surface); stroke-width: 1.5; stroke-dasharray: 2 2; }
+.cpSeamKnot { fill: var(--surface); stroke: var(--navy); stroke-width: 2; }
+.cpSeam:focus-visible .cpSeamKnot { stroke: var(--teal); stroke-width: 3; }
+.cpGate { cursor: ns-resize; }
+.cpGate:focus-visible { outline: none; }
+.cpGateLine { stroke: var(--ocbc-red); stroke-width: 1.5; stroke-dasharray: 5 3; }
+.cpGateLabel { font-size: 8px; fill: var(--ocbc-red); font-weight: 700; }
+.cpGate:focus-visible .cpGateLine { stroke: var(--teal); }
+.cpReadout { margin: 0; font-size: 0.84rem; color: var(--navy-2); }
+.cpEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
+@media (prefers-reduced-motion: reduce) { .cpSeam, .cpSeamKnot, .cpGate, .cpGateLine { transition: none !important; } }

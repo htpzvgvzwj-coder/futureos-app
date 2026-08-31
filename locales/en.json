@@ -3584,7 +3584,10 @@
       "no_assumed_inheritance": "no assumed inheritance",
       "no_unconfirmed_partner_assets": "no unconfirmed partner assets",
       "latest_trip_month": "latest trip month",
-      "no_trip_funding_below_emergency_floor": "no trip funding below the emergency floor"
+      "no_trip_funding_below_emergency_floor": "no trip funding below the emergency floor",
+      "minimum_liquid_capital": "minimum liquid capital",
+      "minimum_flexible_capital": "minimum flexible capital",
+      "no_investing_below_readiness_gate": "no investing below the readiness gate"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -5161,6 +5164,73 @@
       "belowBreathing": "This contribution takes your current monthly room below your floor.",
       "pastLatest": "This trip month is past the month you pinned as the latest.",
       "behindPace": "At this contribution you won't have the balance ready in time (need ~{need}/mo)."
+    }
+  },
+  "capitalPrism": {
+    "loading": "Loading your capital picture…",
+    "title": "Capital Prism",
+    "subtitle": "One beam of monthly capital, split into jobs. Drag a seam to move money from one job to the next.",
+    "noPlan": "Confirm a recurring investment to open the Capital Prism.",
+    "summaryLine": "Investing · pool {pool} · {invest} locked",
+    "estimateNote": "No investment return is assumed - this is the contributed amount only. The Liquidity Gate is your rule for how long money must stay reachable, not a market call. Unknown cashflow or savings stay unknown.",
+    "over": "Over-allocated by {amount} - move a seam back before you can Seal.",
+    "unassigned": "{amount}/mo still unassigned.",
+    "gateReadout": "Reachable within {years}y: {amount}/mo.",
+    "targetReadout": "At this split: {years} to the target ({target}), contributed amount only.",
+    "withReturn": "With returns: about {years}y ({pct}% assumed)",
+    "decisionEcho": "You've re-split your capital a few times lately - Guardian noticed. It won't act on it.",
+    "noReturnNote": "No trade is executed here. Sealing sets your own recurring plan; nothing is bought or sold.",
+    "row": {
+      "pool": "Monthly capital pool",
+      "investing": "Locked investing",
+      "liquid": "Kept liquid",
+      "readiness": "Readiness gate"
+    },
+    "prov": {
+      "bank_confirmed": "from your cashflow",
+      "system_estimate": "estimate",
+      "unknown": "not known",
+      "noReturn": "no return assumed",
+      "transparent": "shown, not buried",
+      "gate": "the real readiness gate"
+    },
+    "unknown": {
+      "available_monthly_cashflow": "Available monthly cashflow",
+      "current_savings": "Current savings",
+      "credit_card_outstanding": "Credit-card outstanding"
+    },
+    "readiness": {
+      "readyToInvest": "Ready to invest",
+      "buildBufferFirst": "Build the emergency buffer first",
+      "payDownDebtFirst": "Clear high-cost debt first",
+      "noRoomYet": "No monthly room yet"
+    },
+    "blocked": {
+      "buildBufferFirst": "Locked investing bands aren't sealable until your emergency buffer is built.",
+      "payDownDebtFirst": "Locked investing bands aren't sealable while high-cost card debt is outstanding.",
+      "noRoomYet": "Locked investing bands aren't sealable until there's monthly room."
+    },
+    "job": {
+      "safety": "Safety",
+      "wedding": "Wedding",
+      "home": "Home",
+      "flexible": "Flexible",
+      "retirement": "Retirement",
+      "longTerm": "Long-term capital"
+    },
+    "field": {
+      "label": "Capital Prism - drag a seam between two bands to move capital; drag the Liquidity Gate line for the years",
+      "seam": "Seam between {a} and {b}",
+      "gate": "Liquidity Gate: {n} years"
+    },
+    "mirror": {
+      "longer": "Longer horizon",
+      "sooner": "Sooner reachable",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "overAllocated": "You've assigned more than the monthly capital pool holds.",
+      "readinessGate": "The readiness gate ({gate}) means locked investing bands can't be sealed yet."
     }
   }
 }

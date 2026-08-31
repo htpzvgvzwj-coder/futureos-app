@@ -122,11 +122,15 @@ test("Retirement and Investment scenes carry no synthetic Decision Echo", () => 
   // synthetic echo - and the real Decision Echo comes from the server's
   // >=3 user-confirmed Ledger actions gate, not from one adjustment.
   const ret = read("app/features/retirement/FutureDayLoom.jsx");
-  const inv = read("app/features/investment/CapitalPaths.jsx");
+  const inv = read("app/features/investment/CapitalPrism.jsx");
   assert.ok(!/function retirementEcho/.test(ret) && !/futureLifeTimeline\.echo/.test(ret), "no synthetic retirementEcho");
   assert.ok(/detectDecisionEchoes|projection\?\.decisionEcho|decisionEcho/.test(read("app/api/future-day-loom/route.js")), "the real Decision Echo comes from the >=3 gate");
-  assert.ok(/turningPointFor=\{null\}/.test(inv), "investment passes turningPointFor={null}");
-  assert.ok(!/function capitalEcho/.test(inv), "capitalEcho removed");
+  // Investment is now Capital Prism (Living Thread commit 7). Its turning
+  // point is REAL (over-allocated / readiness gate), and the real Decision
+  // Echo comes from the server's >=3 user-confirmed Ledger actions gate.
+  assert.ok(!/function capitalEcho/.test(inv), "no synthetic capitalEcho");
+  assert.ok(!/turningPointFor=\{null\}/.test(inv) && /turningPointFor=\{prismTurningPoint\}/.test(inv), "investment has a real turning point");
+  assert.ok(/detectDecisionEchoes|projection\?\.decisionEcho|decisionEcho/.test(read("app/api/capital-prism/route.js")), "the real Decision Echo comes from the >=3 gate");
 });
 
 // ---- Part 3: Explore chat opens in chat mode ---------------------

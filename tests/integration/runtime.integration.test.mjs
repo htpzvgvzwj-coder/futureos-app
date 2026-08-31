@@ -508,7 +508,11 @@ test("Investment studio: real reality path from the fixture's confirmed recurrin
   });
   const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
   assert.ok(reloaded, "investment branch persists");
+  // Living Thread commit 7: projectImpacts returns the studio-contract
+  // impactSet (Capital Prism), not the old monthly-shift shape.
   const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
-  assert.equal(proj.mode, "freed", "committing less frees cashflow");
-  assert.equal(proj.allocatedImpact, null, "nothing auto-routed");
+  assert.ok(proj.resourceDelta && typeof proj.allocationRequired === "boolean");
+  assert.equal(proj.resourceDelta.addedPressureMonthly, 0, "committing less is not pressure");
+  assert.ok(proj.resourceDelta.freedMonthly >= 0, "committing less frees (or holds) cashflow");
+  assert.ok(proj.affectedGoals.every((g) => g.confirmedAfter == null), "nothing auto-routed");
 });

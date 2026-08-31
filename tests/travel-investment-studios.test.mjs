@@ -94,15 +94,20 @@ test("investment feasibility: readiness gate + years-to-target, NO return assume
   assert.ok(f.monthsToTarget > 0);
 });
 
-test("investment: more into investing is pressure now; less frees cashflow", () => {
+test("investment: more into the locked bands is monthly PRESSURE; less FREES liquid capital (unified impactSet)", () => {
   const reality = { monthly_commitment: 1000, horizon_years: 10, target_pool: 150000, current_savings: 10000, monthly_expenses: 3800, credit_card_outstanding: 0, available_monthly_cashflow: 2000 };
+  // Living Thread commit 7: projectImpacts returns the studio-contract
+  // impactSet (Capital Prism), not the old monthly-shift shape.
   const more = invest.projectImpacts({ ...reality, monthly_commitment: 1400 }, reality, ctx);
-  assert.equal(more.mode, "pressure");
-  assert.equal(more.pressure.extraMonthlyNeeded, 400);
+  assert.equal(more.resourceDelta.addedPressureMonthly, 400);
+  assert.equal(more.resourceDelta.freedMonthly, 0);
+  assert.ok(more.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(more.allocationRequired, true);
+
   const less = invest.projectImpacts({ ...reality, monthly_commitment: 700 }, reality, ctx);
-  assert.equal(less.mode, "freed");
-  assert.equal(less.freedCashflow, 300);
-  assert.equal(less.allocatedImpact, null);
+  assert.equal(less.resourceDelta.freedMonthly, 300);
+  assert.equal(less.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(less.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 });
 
 test("peelBranch works with the travel adapter", () => {

@@ -3402,7 +3402,10 @@
       "no_assumed_inheritance": "不假设遗产",
       "no_unconfirmed_partner_assets": "不计入未确认的伴侣资产",
       "latest_trip_month": "最晚旅行月份",
-      "no_trip_funding_below_emergency_floor": "旅行供款不得低于应急下限"
+      "no_trip_funding_below_emergency_floor": "旅行供款不得低于应急下限",
+      "minimum_liquid_capital": "最低流动资本",
+      "minimum_flexible_capital": "最低灵活资本",
+      "no_investing_below_readiness_gate": "就绪闸门未过前不投资"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -4979,6 +4982,73 @@
       "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
       "pastLatest": "这个旅行月份已超过你固定的最晚月份。",
       "behindPace": "按此供款，你无法及时备好尾款（约需每月 {need}）。"
+    }
+  },
+  "capitalPrism": {
+    "loading": "正在加载你的资本全景…",
+    "title": "资本棱镜",
+    "subtitle": "一束每月资本，分成各自的用途。拖动接缝，把钱从一个用途移到下一个。",
+    "noPlan": "确认一项定期投资后即可打开资本棱镜。",
+    "summaryLine": "投资 · 资金池 {pool} · 锁定 {invest}",
+    "estimateNote": "不假设任何投资回报——这只是已投入的金额。流动性闸门是你自己对资金须保持多久可动用的规则，不是市场判断。未知的现金流或储蓄保持未知。",
+    "over": "超额分配 {amount}——需要先把一个接缝移回才能封存。",
+    "unassigned": "还有 {amount}/月 未分配。",
+    "gateReadout": "{years} 年内可动用：{amount}/月。",
+    "targetReadout": "按此分配：{years} 达到目标（{target}），仅计已投入金额。",
+    "withReturn": "考虑回报：约 {years} 年（假设 {pct}%）",
+    "decisionEcho": "你最近多次重新分配资本——守护者注意到了。它不会据此行动。",
+    "noReturnNote": "此处不执行任何交易。封存只是设定你自己的定期计划；不买入也不卖出。",
+    "row": {
+      "pool": "每月资本池",
+      "investing": "锁定投资",
+      "liquid": "保持流动",
+      "readiness": "就绪闸门"
+    },
+    "prov": {
+      "bank_confirmed": "来自你的现金流",
+      "system_estimate": "估算",
+      "unknown": "未知",
+      "noReturn": "不假设回报",
+      "transparent": "公开显示，不隐藏",
+      "gate": "真实的就绪闸门"
+    },
+    "unknown": {
+      "available_monthly_cashflow": "可用每月现金流",
+      "current_savings": "当前储蓄",
+      "credit_card_outstanding": "信用卡未偿额"
+    },
+    "readiness": {
+      "readyToInvest": "可以投资",
+      "buildBufferFirst": "先建立应急储备",
+      "payDownDebtFirst": "先清偿高成本债务",
+      "noRoomYet": "尚无每月余量"
+    },
+    "blocked": {
+      "buildBufferFirst": "在应急储备建立之前，锁定投资分段无法封存。",
+      "payDownDebtFirst": "在高成本信用卡债务未清之前，锁定投资分段无法封存。",
+      "noRoomYet": "在有每月余量之前，锁定投资分段无法封存。"
+    },
+    "job": {
+      "safety": "安全垫",
+      "wedding": "婚礼",
+      "home": "住房",
+      "flexible": "灵活",
+      "retirement": "退休",
+      "longTerm": "长期资本"
+    },
+    "field": {
+      "label": "资本棱镜——拖动两段之间的接缝来移动资本；拖动流动性闸门线来调整年数",
+      "seam": "{a} 与 {b} 之间的接缝",
+      "gate": "流动性闸门：{n} 年"
+    },
+    "mirror": {
+      "longer": "更长期限",
+      "sooner": "更快可动用",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "overAllocated": "你分配的金额超过了每月资本池。",
+      "readinessGate": "就绪闸门（{gate}）意味着锁定投资分段暂时无法封存。"
     }
   }
 }
