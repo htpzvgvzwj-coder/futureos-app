@@ -8,6 +8,9 @@
 
 import { useMemo, useState } from "react";
 import { useLifeThread } from "../../components/life-thread/LifeThreadProvider.jsx";
+import { useBankData } from "../../components/bank/useBankData.jsx";
+import { ExploreCatalog } from "../../components/bank/ExploreCatalog.jsx";
+import { CurrentRippleStrip } from "../../components/bank/CurrentRippleStrip.jsx";
 import { routeIntent } from "./intent-router.js";
 
 const DOMAIN_SCREEN = {
@@ -22,24 +25,13 @@ const DOMAIN_SCREEN = {
   emergency: "emergencyRunway",
 };
 
-const ALL_AREAS = [
-  { id: "home", screen: "homeHorizon" },
-  { id: "relationship", screen: "weddingLivingPlan" },
-  { id: "safety", screen: "emergencyRunway" },
-  { id: "freedom", screen: "capitalPaths" },
-  { id: "family", screen: "familyConstellation" },
-  { id: "experience", screen: "tripOrbit" },
-  { id: "future", screen: "futureLifeTimeline" },
-  { id: "debt", screen: "repaymentPath" },
-  { id: "protection", screen: "protectionEnvelope" },
-];
-
 function Screen({ children, className }) {
   return <section className={`screen ${className ?? ""}`}>{children}</section>;
 }
 
 export function ExploreScreen({ setActiveScreen, t }) {
   const { thread, status } = useLifeThread();
+  const { ripple } = useBankData();
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -143,16 +135,10 @@ export function ExploreScreen({ setActiveScreen, t }) {
         {t("explore.talkItThrough")}
       </button>
 
-      <details className="exploreAllAreas">
-        <summary>{t("explore.allAreas")}</summary>
-        <div className="exploreAllGrid">
-          {ALL_AREAS.map((n) => (
-            <button key={n.id} type="button" className="exploreFieldMoreBtn" onClick={() => go(n.screen)}>
-              {t(`explore.node.${n.id}`)}
-            </button>
-          ))}
-        </div>
-      </details>
+      <CurrentRippleStrip ripple={ripple} compact onAction={(a) => a === "compare" && go("mirror")} />
+
+      {/* The complete capability directory - always visible, no drawer. */}
+      <ExploreCatalog onOpen={(screen) => go(screen)} activeDomains={activeDomains} t={t} />
 
       {status === "error" ? <p className="lsProvenance">{t("explore.threadUnavailable")}</p> : null}
     </Screen>

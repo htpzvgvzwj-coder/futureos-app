@@ -8,6 +8,8 @@ import { formatEvent } from "../lib/change-ledger/format.js";
 import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
+import { BankDataProvider } from "./components/bank/useBankData.jsx";
+import { BankTodayConnected, GuardianConnected, RippleStripConnected } from "./components/bank/connected.jsx";
 import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
@@ -17636,9 +17638,12 @@ export default function App() {
     />
   );
 
+  const openFromBank = (screen) => setActiveScreen(screen ?? screens.HOME);
+
   const currentScreen = {
     [screens.HOME]: (
       <>
+        <BankTodayConnected onOpen={openFromBank} onRippleAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
         {livingThreadEntrance("today")}
         <TodayScreen {...shared} />
       </>
@@ -17646,6 +17651,7 @@ export default function App() {
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: (
       <>
+        <RippleStripConnected onAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
         {livingThreadEntrance("life")}
         <LifeGraph {...shared} />
       </>
@@ -17704,6 +17710,7 @@ export default function App() {
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (
       <>
+        <GuardianConnected onOpen={openFromBank} onControl={() => setActiveScreen(screens.RELATIONSHIP_LEDGER)} />
         {livingThreadEntrance("guardian")}
         <FutureSelfGuardian
           {...shared}
@@ -17796,6 +17803,7 @@ export default function App() {
 
   return (
     <LifeThreadProvider enabled={authStatus === "authenticated"}>
+     <BankDataProvider enabled={authStatus === "authenticated"}>
       <PhoneShell
         activeScreen={activeScreen}
         setActiveScreen={setActiveScreen}
@@ -17807,6 +17815,7 @@ export default function App() {
       >
         <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
       </PhoneShell>
+     </BankDataProvider>
     </LifeThreadProvider>
   );
 }

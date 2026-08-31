@@ -73,6 +73,7 @@ export async function GET(request) {
       asOf: today,
       twin,
       balances,
+      recentTransactions: transactions.slice(0, 12),
       safeToSpend,
       futureBalance,
       rescueCases,

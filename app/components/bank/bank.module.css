@@ -1,0 +1,359 @@
+/* Future Bank surfaces - Today header, Explore catalog, Guardian sections,
+   Current Ripple strip. Scoped CSS Module. One column, honest hierarchy:
+   bank fact -> current change -> next action -> deeper evidence. No card
+   walls, no metric grids. */
+
+.bank {
+  --bk-fg: #16203a;
+  --bk-fg-dim: #5a6480;
+  --bk-line: #d9deec;
+  --bk-accent: #14243a;
+  --bk-good: #2f6f4f;
+  --bk-warn: #b26a00;
+  --bk-bad: #b23b3b;
+  --bk-surface: #fff;
+  color: var(--bk-fg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---- Today: accounts + available to spend --------------------- */
+.headline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.headlineLabel {
+  font-size: 13px;
+  color: var(--bk-fg-dim);
+}
+.headlineAmount {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.headlineSub {
+  font-size: 13px;
+  color: var(--bk-fg-dim);
+}
+.headlineWarn {
+  color: var(--bk-bad);
+}
+
+.breakdownRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--bk-fg-dim);
+  padding: 6px 0;
+  border-top: 1px solid var(--bk-line);
+  border-bottom: 1px solid var(--bk-line);
+}
+.breakdownRow b {
+  color: var(--bk-fg);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.actionBtn {
+  flex: 1;
+  border: 1px solid var(--bk-line);
+  background: var(--bk-surface);
+  color: inherit;
+  border-radius: 12px;
+  padding: 10px 4px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.actionBtn:hover {
+  border-color: var(--bk-accent);
+}
+
+.accountList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.accountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bk-line);
+  font-size: 14px;
+}
+.accountName {
+  font-weight: 600;
+}
+.accountKind {
+  font-size: 11px;
+  color: var(--bk-fg-dim);
+  margin-left: 6px;
+  text-transform: capitalize;
+}
+.accountBal {
+  text-align: right;
+}
+.accountPending {
+  display: block;
+  font-size: 11px;
+  color: var(--bk-warn);
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 4px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bk-fg-dim);
+}
+
+.txnList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.txnRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--bk-line);
+  font-size: 13px;
+}
+.txnMerchant {
+  font-weight: 600;
+}
+.txnMeta {
+  font-size: 11px;
+  color: var(--bk-fg-dim);
+}
+.txnAmt {
+  white-space: nowrap;
+}
+.txnIn {
+  color: var(--bk-good);
+}
+.txnPending {
+  color: var(--bk-warn);
+}
+
+.nextMoment {
+  border-left: 3px solid var(--bk-accent);
+  padding: 6px 0 6px 12px;
+  font-size: 13px;
+}
+
+.emptyState {
+  border: 1px dashed var(--bk-line);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--bk-fg-dim);
+}
+.emptyState button {
+  margin-top: 8px;
+}
+
+/* ---- Current Ripple strip ------------------------------------ */
+.rippleStrip {
+  border: 1px solid var(--bk-line);
+  border-left: 3px solid var(--bk-warn);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rippleState {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bk-fg-dim);
+}
+.rippleActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.rippleActions button {
+  border: 1px solid var(--bk-line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ---- Explore catalog --------------------------------------- */
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.catalogGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.catalogGroupTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+.catalogList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.catalogRow {
+  border-bottom: 1px solid var(--bk-line);
+}
+.catalogRowBtn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 10px 0;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.catalogRowHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.catalogName {
+  font-weight: 600;
+  font-size: 14px;
+}
+.catalogBadge {
+  font-size: 10px;
+  border: 1px solid var(--bk-good);
+  color: var(--bk-good);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.catalogProblem {
+  font-size: 13px;
+  color: var(--bk-fg);
+}
+.catalogResult {
+  font-size: 12px;
+  color: var(--bk-fg-dim);
+}
+.catalogMeta {
+  font-size: 11px;
+  color: var(--bk-fg-dim);
+}
+.catalogCta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bk-accent);
+}
+
+/* ---- Guardian sections ----------------------------------- */
+.guardianState {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--bk-line);
+}
+.stateCalm {
+  color: var(--bk-good);
+  border-color: var(--bk-good);
+}
+.stateWatch {
+  color: var(--bk-fg-dim);
+}
+.stateDecide {
+  color: var(--bk-warn);
+  border-color: var(--bk-warn);
+}
+.stateUrgent {
+  color: var(--bk-bad);
+  border-color: var(--bk-bad);
+}
+
+.gSection {
+  border-top: 1px solid var(--bk-line);
+  padding-top: 8px;
+}
+.gSectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.gList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gCannot li::marker {
+  content: "✕ ";
+}
+.gPerm {
+  font-size: 12px;
+  color: var(--bk-fg-dim);
+}
+.gControls {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.gControls button {
+  border: 1px solid var(--bk-line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.provenance {
+  font-size: 11px;
+  color: var(--bk-fg-dim);
+}
+
+@media (prefers-color-scheme: dark) {
+  .bank {
+    --bk-fg: #e8ebf7;
+    --bk-fg-dim: #9aa2bd;
+    --bk-line: #333a58;
+    --bk-accent: #b9c6e6;
+    --bk-good: #6cc79a;
+    --bk-warn: #e0b24d;
+    --bk-bad: #e57373;
+    --bk-surface: #1a2036;
+  }
+}
