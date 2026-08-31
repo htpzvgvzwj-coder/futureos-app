@@ -7069,3 +7069,23 @@ nextjs-portal {
 .pcInvite { margin: 0; font-size: 0.8rem; font-family: ui-monospace, monospace; color: var(--navy); }
 .pcEcho { margin: 0; font-size: 0.78rem; color: var(--muted); border-left: 3px solid var(--navy-2); padding-left: 10px; }
 @media (prefers-reduced-motion: reduce) { .pcNode, .pcNodeDot, .pcLink { transition: none !important; } }
+
+/* BranchStrip - shared real-branches control (Living Thread commit 11) */
+.lsBranchStrip { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.lsBranchRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lsBranchLabel { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.lsBranchEmpty { margin: 0; font-size: 0.8rem; color: var(--muted); }
+.lsBranchList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lsBranchList li { display: flex; align-items: stretch; gap: 6px; }
+.lsBranchList li.is-active .lsBranchPick { border-color: var(--navy); background: rgba(20,36,58,0.06); }
+.lsBranchPick { flex: 1; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: baseline; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); text-align: left; }
+.lsBranchPick b { font-size: 0.86rem; }
+.lsBranchPick em { font-style: normal; font-size: 0.72rem; color: var(--navy-2); }
+.lsBranchSealOk { font-size: 0.68rem; color: var(--success); }
+.lsBranchSealNo { font-size: 0.68rem; color: var(--ocbc-red); }
+.lsBranchDiscard { width: 32px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 1rem; color: var(--muted); }
+.lsBranchCompare { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; font-size: 0.76rem; }
+.lsBranchCompareHead, .lsBranchCompareRow { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(84px, 1fr); }
+.lsBranchCompareHead { background: var(--soft); font-weight: 700; }
+.lsBranchCompareHead span, .lsBranchCompareRow span { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.lsBranchCompareRow span:first-child, .lsBranchCompareHead span:first-child { color: var(--muted); }

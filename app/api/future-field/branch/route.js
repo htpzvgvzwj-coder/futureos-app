@@ -117,6 +117,15 @@ export async function POST(request) {
     });
   }
 
+  // Undo a possible future - the branch is kept in history as `discarded`,
+  // never hard-deleted (the Change Ledger causal chain stays intact).
+  if (action === "discard") {
+    const branch = await planStore.getBranch(body.branchId, userId);
+    if (!branch) return Response.json({ error: "branch_not_found" }, { status: 404 });
+    await planStore.updateBranch(body.branchId, userId, { status: "discarded" });
+    return Response.json({ ok: true, branchId: body.branchId, status: "discarded" });
+  }
+
   if (action === "merge") {
     const { branchIdA, branchIdB, pickMap } = body;
     const [a, b] = await Promise.all([planStore.getBranch(branchIdA, userId), planStore.getBranch(branchIdB, userId)]);

@@ -5362,5 +5362,24 @@
       "conflicts": "{n} shared node(s) are marked differently by each of you.",
       "liquidityConflict": "Your share of this contribution is more than your cashflow can cover."
     }
+  },
+  "branchStrip": {
+    "title": "Branches",
+    "fork": "Fork this",
+    "compare": "Compare",
+    "hideCompare": "Hide compare",
+    "empty": "No saved branches yet - edit the scene, then Fork to keep a version.",
+    "reality": "Reality",
+    "sealable": "sealable",
+    "notSealable": "not sealable",
+    "discard": "Discard branch",
+    "defaultName": "Branch {n}",
+    "noImpact": "no cross-goal impact",
+    "pressure": "+{amount}/mo pressure",
+    "freed": "−{amount}/mo freed",
+    "neutral": "no monthly change",
+    "field": "Field",
+    "monthlyEffect": "Monthly effect",
+    "sealableRow": "Sealable"
   }
 }

@@ -257,6 +257,71 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     clearDraft(domain);
   }, [domain]);
 
+  // ---- real branches: create / select / compare / undo -----------------
+  const refetchField = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/future-field?domain=${encodeURIComponent(domain)}`);
+      if (r.ok) setField(await r.json());
+    } catch {
+      /* offline - keep what we have */
+    }
+  }, [domain]);
+
+  // Create: pin the current edits as a named branch and keep editing.
+  const forkBranch = useCallback(
+    async (label) => {
+      const cur = branchVarsRef.current;
+      if (!cur || Object.keys(cur).length === 0) return { ok: false, error: "nothing_to_fork" };
+      try {
+        const res = await fetch(`/api/future-field/branch?action=peel&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ overrides: cur, label: String(label || "").slice(0, 60) || "Branch" }),
+        });
+        if (!res.ok) return { ok: false, error: "peel_failed" };
+        const d = await res.json();
+        if (d?.branch) setServerBranch(d.branch);
+        await refetchField();
+        invalidateLifeThread();
+        return { ok: true, branch: d?.branch ?? null };
+      } catch {
+        return { ok: false, error: "network" };
+      }
+    },
+    [domain, refetchField, invalidateLifeThread],
+  );
+
+  // Select: make a saved branch the active one and load its edits back in.
+  const selectBranch = useCallback((id) => {
+    const b = (field?.possiblePaths ?? []).find((x) => x.id === id);
+    if (!b) return;
+    setServerBranch(b);
+    const after = b.delta?.after && typeof b.delta.after === "object" ? b.delta.after : null;
+    if (after) {
+      setBranchVars({ ...after });
+      persistDraft(domain, { branchVars: after });
+    }
+  }, [domain, field]);
+
+  // Undo: discard a possible future (kept in history, never hard-deleted).
+  const discardBranch = useCallback(
+    async (id) => {
+      try {
+        await fetch(`/api/future-field/branch?action=discard&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ branchId: id }),
+        });
+      } catch {
+        /* ignore - refetch will reconcile */
+      }
+      if (serverBranch?.id === id) resetBranch();
+      await refetchField();
+      invalidateLifeThread();
+    },
+    [domain, serverBranch, resetBranch, refetchField, invalidateLifeThread],
+  );
+
   // setAllocation(nextAllocation, targetGoalId|null). A "goal" leg with no
   // explicit target is rejected - it must not silently route anywhere.
   const setAllocation = useCallback(
@@ -407,6 +472,10 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       branchDirty,
       setVar,
       resetBranch,
+      savedBranches: (field?.possiblePaths ?? []).filter((b) => b.status !== "sealed" && b.status !== "discarded" && b.status !== "merged"),
+      forkBranch,
+      selectBranch,
+      discardBranch,
       projection,
       serverProjection: serverBranch?.projectedImpacts ?? null,
       serverBranch,
@@ -434,6 +503,7 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     }),
     [
       domain, loadState, field, reality, realityData, sceneContext, crossGoalNodes, branchVars, branchDirty, setVar, resetBranch,
+      forkBranch, selectBranch, discardBranch,
       projection, serverBranch, freedCashflow, addedPressure, allocation, allocationTouched, allocationOverspent, allocationTarget,
       needsTarget, setAllocation, turningPoint, turningPointAck, acknowledgeTurningPoint, phase, canReviewCommitment, seal, confirmSeal,
       sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview,

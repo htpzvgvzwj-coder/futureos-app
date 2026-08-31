@@ -15,6 +15,7 @@ import { useLivingScene } from "./LivingSceneProvider.jsx";
 import { RealitySummary } from "./RealitySummary.jsx";
 import { MomentOutlet } from "./MomentOutlet.jsx";
 import { EvidenceDrawer, MemoryDrawer } from "./SceneDrawers.jsx";
+import { BranchStrip } from "./BranchStrip.jsx";
 
 export function SceneShell({
   t,
@@ -37,6 +38,8 @@ export function SceneShell({
       <RealitySummary t={t} summary={realitySummary} rows={realityRows} onOpenEvidence={() => setEvidenceOpen(true)} />
 
       <div className="lsSceneSurface">{children}</div>
+
+      <BranchStrip t={t} />
 
       <MomentOutlet t={t} sealMonthlyAmount={sealMonthlyAmount} goalOptions={goalOptions} formatSelf={formatSelf} />
 

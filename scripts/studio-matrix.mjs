@@ -26,17 +26,19 @@ const EVIDENCE = {
   home: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
   // Living Thread commit 3: Safety Runway.
   emergency: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (commit 12)
+    // still open: memory_scrub (commit 12)
   },
   // Living Thread commit 4: Debt Gravity.
   loan: {
@@ -51,41 +53,46 @@ const EVIDENCE = {
   retirement: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
   // Living Thread commit 6: Calendar Orbit.
   travel: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
   // Living Thread commit 7: Capital Prism.
   investment: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
   // Living Thread commit 8: Living Envelope.
   insurance: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
   // Living Thread commit 9: Private Constellation (two independent identities).
   family: {
     native_scene: true, domain_visual: true, not_card_grid: true, real_finance_recalc: true, server_impactset: true,
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
+    real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: real_branches (explicit Compare UI), memory_scrub (ThreadMemoryScrubber - commit 12)
+    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
   },
 };
 

@@ -134,7 +134,7 @@ export async function GET(request) {
       monthlyContribution: context.realityPlanData.monthly_contribution || 0,
       ...realityReady,
     },
-    possiblePaths: branches.map((b) => {
+    possiblePaths: branches.filter((b) => b.status !== "discarded" && b.status !== "merged").map((b) => {
       const monthly = Number(b.data?.monthly_contribution) || context.realityPlanData.monthly_contribution || 0;
       // Real per-branch cross-goal projection (Home + Emergency + Cashflow
       // before/after). Only domains whose adapter implements projectImpacts

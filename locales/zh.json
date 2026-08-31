@@ -5180,5 +5180,24 @@
       "conflicts": "有 {n} 个共享节点被你们标记得不一致。",
       "liquidityConflict": "你在这笔供款中的份额超过了你的现金流所能承担的。"
     }
+  },
+  "branchStrip": {
+    "title": "分支",
+    "fork": "从此分叉",
+    "compare": "对比",
+    "hideCompare": "隐藏对比",
+    "empty": "尚无已保存的分支——编辑场景后，点击「从此分叉」保留一个版本。",
+    "reality": "现实",
+    "sealable": "可封存",
+    "notSealable": "不可封存",
+    "discard": "丢弃分支",
+    "defaultName": "分支 {n}",
+    "noImpact": "无跨目标影响",
+    "pressure": "每月压力 +{amount}",
+    "freed": "每月释放 −{amount}",
+    "neutral": "每月无变化",
+    "field": "字段",
+    "monthlyEffect": "每月影响",
+    "sealableRow": "可封存"
   }
 }
