@@ -1,0 +1,260 @@
+/* Living Thread - the one continuous life-line surface. Scoped CSS Module
+   (Part D / Part F). No card walls, no metric grids, no permanent tabs. */
+
+.surface {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--lt-fg, #1a1a2e);
+}
+
+.canvasWrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* --- the spine + node states -------------------------------------- */
+.spine {
+  fill: none;
+  stroke: var(--lt-spine, #9aa3c7);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.node {
+  cursor: default;
+}
+.nodeEnterable {
+  cursor: pointer;
+}
+.nodeDot {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.stateSolid .nodeDot {
+  fill: var(--lt-solid, #2f6f4f);
+}
+.statePlaced .nodeDot {
+  fill: var(--lt-placed, #b98900);
+}
+.stateGhost .nodeDot {
+  fill: var(--lt-ghost, #7b83b8);
+  stroke-dasharray: 3 3;
+}
+.stateKnown .nodeDot {
+  fill: var(--lt-known, #4a5588);
+}
+.stateWaiting .nodeDot {
+  fill: var(--lt-waiting, #c25b3a);
+}
+.stateUnknown .nodeDot {
+  fill: none;
+  stroke: var(--lt-ghost, #7b83b8);
+  stroke-dasharray: 2 3;
+}
+.stateConflict .nodeDot {
+  fill: var(--lt-conflict, #b23b3b);
+}
+.nodeLabel {
+  font-size: 12px;
+  fill: var(--lt-fg-dim, #5a6178);
+  text-anchor: middle;
+}
+
+/* --- ripples: solid confirmed / dashed ghost / dotted placed ------ */
+.ripple {
+  fill: none;
+  stroke-linecap: round;
+}
+.rippleConfirmed {
+  stroke: var(--lt-solid, #2f6f4f);
+  stroke-width: 2.5;
+}
+.ripplePlaced {
+  stroke: var(--lt-placed, #b98900);
+  stroke-width: 2;
+  stroke-dasharray: 1 5;
+}
+.ripplePossible {
+  stroke: var(--lt-ghost, #7b83b8);
+  stroke-width: 1.75;
+  stroke-dasharray: 5 5;
+}
+.rippleConflict {
+  stroke: var(--lt-conflict, #b23b3b);
+  stroke-width: 2;
+  stroke-dasharray: 2 4;
+}
+.rippleFlow {
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+/* the travelling pulse: its dur is set inline from the REAL magnitude */
+@keyframes ltFlow {
+  from {
+    stroke-dashoffset: 220;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.rippleFlow {
+  stroke-dasharray: 6 214;
+  animation-name: ltFlow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.nowMarker line {
+  stroke: var(--lt-now, #1a1a2e);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+.nowMarker text {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--lt-now, #1a1a2e);
+  text-anchor: middle;
+}
+
+.edge {
+  stroke: var(--lt-edge, #c7ccdf);
+  stroke-width: 1.25;
+  fill: none;
+}
+.edgeSolid {
+  stroke: var(--lt-solid, #2f6f4f);
+  stroke-width: 2;
+}
+.edgeGhost {
+  stroke-dasharray: 4 4;
+}
+.edgeConflict {
+  stroke: var(--lt-conflict, #b23b3b);
+  stroke-dasharray: 2 3;
+}
+
+/* --- rails / panels around the canvas (not card walls: one column) - */
+.rail {
+  border-left: 3px solid var(--lt-spine, #9aa3c7);
+  padding: 8px 0 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.railTitle {
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.railList {
+  margin: 0;
+  padding-left: 18px;
+}
+.railMuted {
+  color: var(--lt-fg-dim, #5a6178);
+}
+.cannotList li::marker {
+  content: "✕ ";
+}
+
+.lensBar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.lensBtn {
+  border: 1px solid var(--lt-edge, #c7ccdf);
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lensBtnActive {
+  background: var(--lt-fg, #1a1a2e);
+  color: #fff;
+  border-color: var(--lt-fg, #1a1a2e);
+}
+
+.a11y {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.a11y dt {
+  font-weight: 600;
+  margin-top: 6px;
+}
+.a11y dd {
+  margin: 0 0 2px;
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.conflictBanner {
+  border-left: 3px solid var(--lt-conflict, #b23b3b);
+  padding: 6px 0 6px 12px;
+  color: var(--lt-conflict, #b23b3b);
+  font-size: 13px;
+}
+
+.scrub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.scrub input[type="range"] {
+  flex: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .surface {
+    --lt-fg: #e8eaf6;
+    --lt-fg-dim: #9aa0bd;
+    --lt-spine: #6b74a0;
+    --lt-edge: #3a4066;
+    --lt-solid: #6cc79a;
+    --lt-placed: #e0b24d;
+    --lt-ghost: #8b93c8;
+    --lt-known: #aab4e8;
+    --lt-waiting: #e08a6a;
+    --lt-now: #e8eaf6;
+    --lt-conflict: #e57373;
+  }
+}
+
+/* reduced motion: the pulse stops; ripples stay as tagged strokes and the
+   accessible view carries the full state. */
+@media (prefers-reduced-motion: reduce) {
+  .rippleFlow {
+    animation: none;
+    display: none;
+  }
+}
+.reducedMotion .rippleFlow {
+  animation: none;
+  display: none;
+}
