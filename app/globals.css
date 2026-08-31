@@ -7089,3 +7089,20 @@ nextjs-portal {
 .lsBranchCompareHead { background: var(--soft); font-weight: 700; }
 .lsBranchCompareHead span, .lsBranchCompareRow span { padding: 6px 8px; border-bottom: 1px solid var(--line); }
 .lsBranchCompareRow span:first-child, .lsBranchCompareHead span:first-child { color: var(--muted); }
+
+/* ThreadMemoryScrubber + GuardianRail (Living Thread commit 12) */
+.lsScrubDrawer .lsDrawerBody { display: flex; flex-direction: column; gap: 8px; }
+.lsScrubRange { width: 100%; }
+.lsScrubStep { margin: 0; font-size: 0.76rem; color: var(--muted); }
+.lsScrubTable { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.lsScrubTable th, .lsScrubTable td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.lsScrubTable th { color: var(--muted); font-weight: 600; }
+.lsScrubTable td:first-child { color: var(--muted); }
+.lsGuardianRail { border: 1px solid var(--line); border-left: 3px solid var(--success); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; background: rgba(15,159,132,0.06); }
+.lsGuardianRail.is-stood-down { border-left-color: var(--muted); background: var(--soft); }
+.lsGuardianRailHead { display: flex; align-items: center; gap: 8px; }
+.lsGuardianRailHead b { font-size: 0.84rem; flex: 1; }
+.lsGuardianRailDot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+.is-stood-down .lsGuardianRailDot { background: var(--muted); }
+.lsGuardianRailWatch { margin: 0; font-size: 0.76rem; color: var(--navy-2); }
+.lsGuardianRailNever { margin: 0; font-size: 0.74rem; color: var(--muted); }

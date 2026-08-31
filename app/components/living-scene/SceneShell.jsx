@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useLivingScene } from "./LivingSceneProvider.jsx";
 import { RealitySummary } from "./RealitySummary.jsx";
 import { MomentOutlet } from "./MomentOutlet.jsx";
-import { EvidenceDrawer, MemoryDrawer } from "./SceneDrawers.jsx";
+import { EvidenceDrawer, MemoryDrawer, ThreadMemoryScrubber, GuardianRail } from "./SceneDrawers.jsx";
 import { BranchStrip } from "./BranchStrip.jsx";
 
 export function SceneShell({
@@ -41,6 +41,8 @@ export function SceneShell({
 
       <BranchStrip t={t} />
 
+      <GuardianRail t={t} />
+
       <MomentOutlet t={t} sealMonthlyAmount={sealMonthlyAmount} goalOptions={goalOptions} formatSelf={formatSelf} />
 
       <EvidenceDrawer
@@ -52,6 +54,7 @@ export function SceneShell({
         note={realityNote}
       />
       {showMemoryDrawer ? <MemoryDrawer t={t} setActiveScreen={setActiveScreen} /> : null}
+      <ThreadMemoryScrubber t={t} />
     </div>
   );
 }

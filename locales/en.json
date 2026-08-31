@@ -4721,6 +4721,25 @@
         "down": "tightens",
         "flat": "unchanged"
       }
+    },
+    "scrub": {
+      "drawerTitle": "Memory Scrubber - Before / After",
+      "tooShort": "Only one version of this plan so far - nothing to scrub through yet.",
+      "handle": "Scrub through plan versions",
+      "step": "Version {n} of {of} · saved by {actor}",
+      "noChange": "No tracked field changed at this step.",
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "unknown": "unknown"
+    },
+    "guardianRail": {
+      "title": "Guardian watch",
+      "watching": "Guardian is watching",
+      "stoodDown": "Guardian has stood down",
+      "standDown": "Stand down",
+      "watches": "Watches: {list}",
+      "never": "Guardian never moves money or changes your plan. It only tells you."
     }
   },
   "explore": {

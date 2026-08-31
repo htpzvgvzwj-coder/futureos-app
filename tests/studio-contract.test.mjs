@@ -140,10 +140,12 @@ test("Home Horizon (commit 2) and Safety Runway (commit 3) are wired as native s
 test("wiredContractSlots reports only the non-null slots", () => {
   const loan = wiredContractSlots("loan");
   assert.ok(loan.includes("financeProjector") && loan.includes("crossGoalProjector") && loan.includes("turningPointRules"));
-  assert.ok(!loan.includes("replayMapper"), "loan replayMapper is not built yet");
-  for (const d of ["home", "emergency"]) {
+  // Living Thread commit 12: the ThreadMemoryScrubber replayMapper is now
+  // wired for every Studio - all eleven contract slots are non-null.
+  for (const d of ["loan", "home", "emergency", "retirement", "travel", "investment", "insurance", "family", "wedding"]) {
     const w = wiredContractSlots(d);
     assert.ok(w.includes("nativeScene") && w.includes("crossGoalProjector") && w.includes("turningPointRules") && w.includes("provenanceRules") && w.includes("unknownRules"));
-    assert.ok(!w.includes("replayMapper"), `${d} ThreadMemoryScrubber mapping is commit 12`);
+    assert.ok(w.includes("replayMapper"), `${d} ThreadMemoryScrubber mapping is wired`);
+    assert.equal(w.length, 11, `${d} has all eleven contract slots wired`);
   }
 });

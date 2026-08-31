@@ -4539,6 +4539,25 @@
         "down": "收紧",
         "flat": "不变"
       }
+    },
+    "scrub": {
+      "drawerTitle": "记忆回溯器——变更前 / 变更后",
+      "tooShort": "此计划目前只有一个版本——暂时无法回溯。",
+      "handle": "在计划版本间回溯",
+      "step": "第 {n} / {of} 版 · 由 {actor} 保存",
+      "noChange": "此步骤未改动任何被追踪的字段。",
+      "field": "字段",
+      "before": "变更前",
+      "after": "变更后",
+      "unknown": "未知"
+    },
+    "guardianRail": {
+      "title": "守护者监看",
+      "watching": "守护者正在监看",
+      "stoodDown": "守护者已停止监看",
+      "standDown": "停止监看",
+      "watches": "监看：{list}",
+      "never": "守护者绝不转移资金或更改你的计划。它只会通知你。"
     }
   },
   "explore": {

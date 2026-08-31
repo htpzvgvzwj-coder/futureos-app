@@ -20,7 +20,7 @@ const EVIDENCE = {
     two_affected_goals: true, ghost_vs_solid: true, future_fragment: true, added_pressure_source: true, two_domain_pins: true,
     real_branches: true, seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true,
     reload_restores: true, mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 2: Home Horizon.
   home: {
@@ -29,7 +29,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 3: Safety Runway.
   emergency: {
@@ -38,7 +38,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 4: Debt Gravity.
   loan: {
@@ -47,7 +47,7 @@ const EVIDENCE = {
     real_branches: true, // explicit "Compare strategies" UI
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 5: Future-Day Loom.
   retirement: {
@@ -56,7 +56,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 6: Calendar Orbit.
   travel: {
@@ -65,7 +65,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 7: Capital Prism.
   investment: {
@@ -74,7 +74,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 8: Living Envelope.
   insurance: {
@@ -83,7 +83,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
   // Living Thread commit 9: Private Constellation (two independent identities).
   family: {
@@ -92,7 +92,7 @@ const EVIDENCE = {
     real_branches: true, // shared BranchStrip Compare UI (Living Thread commit 11)
     seal_consent: true, guardian_in_place: true, guardian_no_execution: true, ledger_causal_chain: true, reload_restores: true,
     mobile_a11y: true, unknown_not_faked: true, domain_integration_test: true,
-    // still open: memory_scrub (ThreadMemoryScrubber - commit 12)
+    memory_scrub: true, // ThreadMemoryScrubber Before/After over real plan_versions (Living Thread commit 12)
   },
 };
 

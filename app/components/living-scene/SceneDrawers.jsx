@@ -47,6 +47,120 @@ export function EvidenceDrawer({ t, open, onToggle, rows = [], unknowns = [], no
   );
 }
 
+// ThreadMemoryScrubber (Living Thread commit 12) - drag back through this
+// Studio's real plan_versions and see the plan state Before | After. No
+// invented values; an absent field reads as "unknown".
+export function ThreadMemoryScrubber({ t }) {
+  const s = useLivingScene();
+  const [open, setOpen] = useState(false);
+  const [scrub, setScrub] = useState(null);
+  const [pos, setPos] = useState(null);
+
+  useEffect(() => {
+    if (!open || scrub) return;
+    let alive = true;
+    fetch(`/api/memory-scrub?domain=${encodeURIComponent(s.domain)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive) return;
+        setScrub(d);
+        setPos(d?.count ? d.count - 1 : 0);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [open, scrub, s.domain]);
+
+  const frames = scrub?.frames ?? [];
+  const idx = pos == null ? Math.max(0, frames.length - 1) : Math.max(0, Math.min(frames.length - 1, pos));
+  const after = frames[idx]?.state ?? {};
+  const before = idx > 0 ? frames[idx - 1]?.state ?? {} : {};
+  const keys = scrub?.keys?.length ? scrub.keys : Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
+  const changed = keys.filter((k) => JSON.stringify(before[k] ?? null) !== JSON.stringify(after[k] ?? null));
+
+  const fmt = (v) => (v === undefined || v === null ? t("livingScene.scrub.unknown") : typeof v === "object" ? JSON.stringify(v) : String(v));
+
+  return (
+    <details className="lsDrawer lsScrubDrawer" onToggle={(e) => setOpen(e.currentTarget.open)}>
+      <summary>{t("livingScene.scrub.drawerTitle")}</summary>
+      <div className="lsDrawerBody">
+        {frames.length < 2 ? (
+          <p className="lsProvenance">{open ? t("livingScene.scrub.tooShort") : ""}</p>
+        ) : (
+          <>
+            <input
+              type="range"
+              className="lsScrubRange"
+              min={1}
+              max={frames.length - 1}
+              value={idx}
+              aria-label={t("livingScene.scrub.handle")}
+              onChange={(e) => setPos(Number(e.target.value))}
+            />
+            <p className="lsScrubStep">
+              {t("livingScene.scrub.step", { n: idx, of: frames.length - 1, actor: frames[idx]?.actor ?? "system" })}
+            </p>
+            {changed.length === 0 ? (
+              <p className="lsProvenance">{t("livingScene.scrub.noChange")}</p>
+            ) : (
+              <table className="lsScrubTable">
+                <thead>
+                  <tr>
+                    <th>{t("livingScene.scrub.field")}</th>
+                    <th>{t("livingScene.scrub.before")}</th>
+                    <th>{t("livingScene.scrub.after")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {changed.map((k) => (
+                    <tr key={k}>
+                      <td>{k}</td>
+                      <td>{fmt(before[k])}</td>
+                      <td>{fmt(after[k])}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </>
+        )}
+      </div>
+    </details>
+  );
+}
+
+// GuardianRail (Living Thread commit 12) - the persistent, visible watch
+// state after Seal. Guardian NEVER moves money or changes the plan; this
+// rail just shows what it watches and what it may not do, plus Stand down.
+export function GuardianRail({ t }) {
+  const s = useLivingScene();
+  if (!s.sealState?.sealed) return null;
+  const policy = s.sealState.guardianPolicy ?? null;
+  const watching = policy?.watching ?? policy?.pause_conditions ?? [];
+  const stoodDown = s.guardianStandDown;
+
+  return (
+    <section className={`lsGuardianRail ${stoodDown ? "is-stood-down" : ""}`} aria-label={t("livingScene.guardianRail.title")}>
+      <div className="lsGuardianRailHead">
+        <span className="lsGuardianRailDot" aria-hidden="true" />
+        <b>{stoodDown ? t("livingScene.guardianRail.stoodDown") : t("livingScene.guardianRail.watching")}</b>
+        {!stoodDown ? (
+          <button type="button" className="lsGhostBtn" onClick={() => s.standDownGuardian?.()}>{t("livingScene.guardianRail.standDown")}</button>
+        ) : null}
+      </div>
+      {!stoodDown ? (
+        <>
+          {Array.isArray(watching) && watching.length ? (
+            <p className="lsGuardianRailWatch">{t("livingScene.guardianRail.watches", { list: watching.join(", ") })}</p>
+          ) : null}
+          <p className="lsGuardianRailNever">{t("livingScene.guardianRail.never")}</p>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
 export function MemoryDrawer({ t, setActiveScreen }) {
   const s = useLivingScene();
   const [open, setOpen] = useState(false);
