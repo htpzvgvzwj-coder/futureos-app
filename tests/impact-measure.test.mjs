@@ -125,6 +125,48 @@ test("a ghost + a solid source in one group: state is solid, direction from the 
   assert.equal(aggregated[0].possibleAfter, 1100, "the possible layer still shows both deltas");
 });
 
+test("Part B: a group whose sources disagree on `before` becomes a CONFLICT, not a pseudo-precise after", () => {
+  const a = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before: 1000, possibleAfter: 900, sourceBranchId: "A" });
+  const b = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before: 800, possibleAfter: 700, sourceBranchId: "B" });
+  const { aggregated, hasBaselineConflict } = aggregateImpactMeasures([a, b]);
+  assert.equal(aggregated.length, 1);
+  const g = aggregated[0];
+  assert.equal(g.state, "conflict");
+  assert.equal(g.valid, false);
+  assert.equal(g.invalidReason, "baseline_mismatch");
+  assert.equal(g.possibleAfter, null, "no pseudo-precise after is produced");
+  assert.equal(g.confirmedAfter, null);
+  assert.equal(hasBaselineConflict, true);
+});
+
+test("Part B: measures carrying different snapshotIds cannot be combined -> baseline_mismatch", () => {
+  const a = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -100, snapshotId: "snap-1", sourceBranchId: "A" });
+  const b = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -80, snapshotId: "snap-2", sourceBranchId: "B" });
+  const g = aggregateImpactMeasures([a, b]).aggregated[0];
+  assert.equal(g.state, "conflict");
+  assert.equal(g.invalidReason, "baseline_mismatch");
+  assert.equal(g.snapshotIdCount, 2);
+});
+
+test("Part B: the SAME resourceId inside one group is duplicate_resource (same money counted twice)", () => {
+  const a = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -100, resourceId: "p1:b1:direct_pressure", sourceBranchId: "A" });
+  const b = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -100, resourceId: "p1:b1:direct_pressure", sourceBranchId: "A" });
+  const g = aggregateImpactMeasures([a, b]).aggregated[0];
+  assert.equal(g.state, "conflict");
+  assert.equal(g.invalidReason, "duplicate_resource");
+});
+
+test("Part B: distinct resourceIds in one group aggregate normally (canonicalAfter = before + Σ delta)", () => {
+  const before = 1000;
+  const a = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before, possibleAfter: 900, resourceId: "loan:b1:released_resource", snapshotId: "s", sourceBranchId: "loan" });
+  const b = buildImpactMeasure({ targetGoalId: "home", metric: "monthlyRoom", unit: "sgd_per_month", before, possibleAfter: 950, resourceId: "travel:b2:released_resource", snapshotId: "s", sourceBranchId: "travel" });
+  const g = aggregateImpactMeasures([a, b]).aggregated[0];
+  assert.equal(g.state, "ghost");
+  assert.equal(g.possibleDelta, -150, "(-100) + (-50)");
+  assert.equal(g.possibleAfter, 850, "1000 + Σ delta, never a sum of absolute afters");
+  assert.equal(g.resourceIdCount, 2);
+});
+
 test("aggregation sums deltas ONLY within a (goal, metric, unit) group", () => {
   const a = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -100, sourceBranchId: "loan" });
   const b = buildImpactMeasure({ targetGoalId: "safety", metric: "monthlyRoom", unit: "sgd_per_month", before: 0, possibleAfter: -80, sourceBranchId: "travel" });
