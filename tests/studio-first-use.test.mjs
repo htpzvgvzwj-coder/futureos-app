@@ -107,12 +107,17 @@ test("the StudioEntryBridge is a real form, never a static dead end", () => {
 test("the Future Bank slice drives real APIs, has the Money Current + Change Receipt, no fake data", () => {
   const src = read("app/showcase/FutureBankSlice.jsx");
   assert.match(src, /Your money has a present\. It also has a direction\./, "branded welcome");
-  assert.match(src, /Available to spend/);
-  assert.match(src, /\/api\/financial-twin/);
+  assert.match(src, /Available now/);
   assert.match(src, /\/api\/future-field\/seed/);
   assert.match(src, /\/api\/bank\/accounts/, "Money Snapshot creates a real account");
-  assert.match(src, /MoneyCurrentRipple/, "the change receipt is a Money Current ripple");
+  assert.match(src, /FutureBankDataProvider/, "the shell has one Future Bank data source");
+  assert.match(src, /ChangeReceipt/, "a persisted Change Receipt component");
   assert.doesNotMatch(src, /defaultProfile|karina|restoreMockData/i, "no fake data source");
+
+  const provider = read("app/components/future-bank/FutureBankDataProvider.jsx");
+  for (const ep of ["/api/financial-twin", "/api/money-moments", "/api/life-thread", "/api/ripple", "/api/change-ledger"]) {
+    assert.ok(provider.includes(ep), `provider loads ${ep}`);
+  }
 
   const mc = read("app/showcase/MoneyCurrent.jsx");
   assert.match(mc, /Now\s+→\s+next bill\s+→\s+next income/i, "the signature current shape");

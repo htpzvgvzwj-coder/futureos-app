@@ -1421,3 +1421,23 @@ create table if not exists password_reset_tokens (
   created_at   timestamptz not null default now()
 );
 create index if not exists password_reset_tokens_user_idx on password_reset_tokens (user_id);
+
+-- Money Moments (Explore = the visible output surface). The MoneyMoment
+-- objects themselves are DERIVED each request by lib/money-moments/build.js
+-- from the Financial Twin, Life Thread, Ripple and Change Ledger - this
+-- table holds only their LIFECYCLE, keyed by a stable moment_key. A
+-- resolved/snoozed moment is re-opened automatically when its evidence
+-- hash changes (the underlying signal became true again).
+create table if not exists money_moment_state (
+  profile_key    text not null,
+  moment_key     text not null,          -- stable key from the aggregator (e.g. "rescue:payment_failed:<txnId>")
+  state          text not null default 'new',  -- new|reviewed|snoozed|resolved
+  evidence_hash  text,                   -- sha1 of the moment's evidence at the time of the last user action
+  snoozed_until  timestamptz,
+  last_action    text,                   -- reviewed|snoozed|resolved|reopened|acknowledged
+  note           text,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
+  primary key (profile_key, moment_key)
+);
+create index if not exists money_moment_state_profile_idx on money_moment_state (profile_key, updated_at desc);

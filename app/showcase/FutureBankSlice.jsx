@@ -1,51 +1,48 @@
 "use client";
 
-// Future Bank - the "Money Current" experience. One product feeling: real
-// money events flow through time; you see what is safe now, what arrives
-// next, what is spoken for, and how one future decision changes that.
+// Future Bank - the primary authenticated experience. "Money Current" is
+// the through-line: real money events flow through time; you see what is
+// safe now, what arrives next, what is spoken for, and how one decision
+// ripples that current.
 //
-//   Welcome -> Money Snapshot (3 steps) -> Today -> What needs you next
-//   -> Home Horizon -> Change Receipt
+//   Welcome -> Money Snapshot (3 steps) -> Today (the front door)
+//   Today: Money Position -> Bank Now -> Money Current -> One thing that
+//          needs you -> What changed -> Plans in motion -> Recent activity
+//   Explore ("What needs you next"): Future Bank noticed / plans moving /
+//          choose what to do
+//   + Home Horizon, Guardian, History
 //
-// Real server data throughout. Estimates and user-ranges are shown, quietly.
+// All product truth comes from FutureBankDataProvider (twin + money-moments
+// + life-thread + ripple + ledger, refreshed together). No page-local
+// calculations.
 
 import { useCallback, useEffect, useState } from "react";
 import css from "./fb.module.css";
-import { MoneyCurrent, MoneyCurrentRipple } from "./MoneyCurrent.jsx";
+import { MoneyCurrent } from "./MoneyCurrent.jsx";
 import { parseMoneyInput, formatMoney } from "../../lib/money-input.js";
+import { FutureBankDataProvider, useFutureBankData } from "../components/future-bank/FutureBankDataProvider.jsx";
+import { BankNowActions } from "../components/future-bank/BankNowActions.jsx";
+import { DetectedMoments } from "../components/future-bank/DetectedMoments.jsx";
+import { MoneyChangedReceipt } from "../components/future-bank/MoneyChangedReceipt.jsx";
+import { ActivePlanRail } from "../components/future-bank/ActivePlanRail.jsx";
+import { ChangeReceipt } from "../components/future-bank/ChangeReceipt.jsx";
+import { relTime, humanMetric, isMaterial } from "../components/future-bank/format.js";
+import fbc from "../components/future-bank/future-bank.module.css";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const POST = (url, body) =>
-  fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json().then((j) => ({ ok: r.ok, status: r.status, ...j })));
+  fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) =>
+    r.json().then((j) => ({ ok: r.ok, status: r.status, ...j })),
+  );
 
 export function FutureBankSlice({ onExitToApp = null }) {
   const [auth, setAuth] = useState("checking");
-  const [step, setStep] = useState("welcome");
-  const [twin, setTwin] = useState(null);
-  const [twinState, setTwinState] = useState("idle");
-  const [sheet, setSheet] = useState(null);
-
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setAuth(d?.id ? "in" : "anon"))
       .catch(() => setAuth("anon"));
   }, []);
-
-  const loadTwin = useCallback(async () => {
-    setTwinState((s) => (s === "ready" ? "ready" : "loading"));
-    try {
-      const r = await fetch("/api/financial-twin", { headers: { "cache-control": "no-cache" } });
-      if (!r.ok) return setTwinState(r.status === 401 ? "anon" : "error");
-      setTwin(await r.json());
-      setTwinState("ready");
-    } catch {
-      setTwinState("error");
-    }
-  }, []);
-  useEffect(() => {
-    if (auth === "in") loadTwin();
-  }, [auth, loadTwin]);
 
   if (auth === "checking") return <Shell><p className={css.lede}>Opening Future Bank…</p></Shell>;
   if (auth === "anon")
@@ -60,24 +57,101 @@ export function FutureBankSlice({ onExitToApp = null }) {
       </Shell>
     );
 
+  return (
+    <FutureBankDataProvider enabled>
+      <SliceInner onExitToApp={onExitToApp} />
+    </FutureBankDataProvider>
+  );
+}
+
+function SliceInner({ onExitToApp }) {
+  const fb = useFutureBankData();
+  const [step, setStep] = useState("welcome");
+  const [returnTo, setReturnTo] = useState("today");
+  const [sheet, setSheet] = useState(null);
+
+  const twin = fb.twin;
   const partial = twin && (twin.isEmpty || (twin.counts && twin.counts.incomeStreams === 0));
+
+  // route strings from MoneyMoment.nextActions / plan actions -> a step
+  const routeTo = useCallback((route) => {
+    const r = String(route || "");
+    if (r.startsWith("studio:") || r === "home") {
+      setReturnTo("today");
+      setStep("home");
+    } else if (r === "history") setStep("history");
+    else if (r === "guardian") setStep("guardian");
+    else if (r === "snapshot") setStep("snapshot");
+    else if (r === "explore" || r === "explore:plans") setStep("needs");
+    else if (r === "today" || r === "today:activity") setStep("today");
+    else setStep("needs");
+  }, []);
+
+  // On first data load, land on Today if the user already has a picture.
+  useEffect(() => {
+    if (step === "welcome" && twin && !twin.isEmpty) setStep("today");
+  }, [twin, step]);
 
   return (
     <Shell>
-      {step === "welcome" && <Welcome onStart={() => setStep(twin && !twin.isEmpty ? "today" : "snapshot")} onData={() => setSheet({ kind: "data" })} />}
-      {step === "snapshot" && <MoneySnapshot onDone={() => { loadTwin(); setStep("today"); }} onExplore={() => setStep("needs") } />}
-      {step === "complete" && <CompletePicture onDone={() => { loadTwin(); setStep("today"); }} />}
-      {step === "today" && (
-        <Today twin={twin} state={twinState} partial={partial} onReload={loadTwin} onExplain={(k) => setSheet({ kind: k, twin })} onNext={() => setStep("needs")} onAddSource={() => setStep("snapshot")} onComplete={() => setStep("complete")} />
+      {step === "welcome" && (
+        <Welcome onStart={() => setStep(twin && !twin.isEmpty ? "today" : "snapshot")} onData={() => setSheet({ kind: "data" })} />
       )}
-      {step === "needs" && (
-        <NeedsNext twin={twin} onBack={() => setStep("today")} onHome={() => setStep("home")} onSnapshot={() => setStep("snapshot")} onProblem={() => setSheet({ kind: "problem", twin })} onServices={() => setSheet({ kind: "services" })} onUnderstand={() => setStep("today")} />
+      {step === "snapshot" && (
+        <MoneySnapshot onDone={() => { fb.refetchAll(); setStep("today"); }} onExplore={() => setStep("needs")} />
       )}
-      {step === "home" && <HomeHorizon onBack={() => setStep("needs")} onReceipt={loadTwin} />}
+      {step === "complete" && <CompletePicture onDone={() => { fb.refetchAll(); setStep("today"); }} />}
 
-      {sheet && <BottomSheet sheet={sheet} onClose={() => setSheet(null)} onGoHome={() => { setSheet(null); setStep("home"); }} onGoSnapshot={() => { setSheet(null); setStep("snapshot"); }} />}
+      {step === "today" && (
+        <Today
+          fb={fb}
+          partial={partial}
+          onExplain={(k) => setSheet({ kind: k, twin })}
+          onNext={() => setStep("needs")}
+          onAddSource={() => setStep("snapshot")}
+          onComplete={() => setStep("complete")}
+          onBank={(k) => setSheet({ kind: k })}
+          onRoute={routeTo}
+        />
+      )}
+
+      {step === "needs" && (
+        <NeedsNext
+          fb={fb}
+          onBack={() => setStep("today")}
+          onHome={() => { setReturnTo("needs"); setStep("home"); }}
+          onSnapshot={() => setStep("snapshot")}
+          onProblem={() => setSheet({ kind: "problem", twin })}
+          onServices={() => setSheet({ kind: "services" })}
+          onRoute={routeTo}
+        />
+      )}
+
+      {step === "home" && (
+        <HomeHorizon
+          fb={fb}
+          onBack={() => setStep(returnTo)}
+          onDone={() => fb.refetchAll()}
+          onHistory={() => setStep("history")}
+        />
+      )}
+
+      {step === "guardian" && <GuardianView fb={fb} onBack={() => setStep("today")} onRoute={routeTo} />}
+      {step === "history" && <HistoryView fb={fb} onBack={() => setStep("today")} />}
+
+      {sheet && (
+        <BottomSheet
+          sheet={sheet}
+          fb={fb}
+          onClose={() => setSheet(null)}
+          onGoHome={() => { setSheet(null); setReturnTo("today"); setStep("home"); }}
+          onGoSnapshot={() => { setSheet(null); setStep("snapshot"); }}
+          onRoute={(r) => { setSheet(null); routeTo(r); }}
+        />
+      )}
+
       {onExitToApp ? (
-        <button type="button" className={css.backLink} style={{ opacity: 0.5, marginTop: "auto" }} onClick={onExitToApp}>
+        <button type="button" className={css.backLink} style={{ opacity: 0.5 }} onClick={onExitToApp}>
           Switch to the classic app
         </button>
       ) : null}
@@ -122,7 +196,6 @@ function Welcome({ onStart, onData }) {
     </div>
   );
 }
-// A small honest illustrative current for the welcome only (no user data yet).
 const welcomePreviewTwin = {
   safeToSpend: { safeToSpend: 2400, breakdown: { protectedReserve: 3000 }, nextIncome: { amount: 4200, inDays: 9, label: "Salary" }, nearTermObligationsList: [{ amount: 1450, dueDate: null, label: "Rent" }] },
 };
@@ -147,14 +220,8 @@ function MoneySnapshot({ onDone, onExplore }) {
   ];
 
   const submitAccount = async () => {
-    if (begin === "goal") {
-      onExplore();
-      return;
-    }
-    if (begin === "import") {
-      setN(9); // import sub-view
-      return;
-    }
+    if (begin === "goal") return onExplore();
+    if (begin === "import") return setN(9);
     const parsed = balance ? parseMoneyInput(balance, { min: 0 }) : { ok: true, value: 0 };
     if (!parsed.ok) return setBalErr(parsed.error);
     setBalErr("");
@@ -203,7 +270,18 @@ function MoneySnapshot({ onDone, onExplore }) {
       {n === 1 && (
         <div className={css.choiceGrid}>
           {beginOpts.map((o) => (
-            <button key={o.id} type="button" className={css.choice} aria-pressed={begin === o.id} onClick={() => { setBegin(o.id); setN(o.id === "import" || o.id === "goal" ? n : 2); if (o.id === "import" || o.id === "goal") submitAccountLater(o.id); }}>
+            <button
+              key={o.id}
+              type="button"
+              className={css.choice}
+              aria-pressed={begin === o.id}
+              onClick={() => {
+                setBegin(o.id);
+                if (o.id === "goal") return onExplore();
+                if (o.id === "import") return setN(9);
+                setN(2);
+              }}
+            >
               <b>{o.label}</b>
               <span>{o.hint}</span>
             </button>
@@ -252,11 +330,6 @@ function MoneySnapshot({ onDone, onExplore }) {
       )}
     </>
   );
-
-  function submitAccountLater(id) {
-    if (id === "goal") onExplore();
-    if (id === "import") setN(9);
-  }
 }
 
 function StepHead({ n, of, onBack, title }) {
@@ -335,7 +408,7 @@ function CsvInline({ onDone }) {
   );
 }
 
-/* ================= "Complete my picture" (later) ================= */
+/* ================= "Complete my picture" ================= */
 function CompletePicture({ onDone }) {
   const [tab, setTab] = useState("income");
   const [amount, setAmount] = useState("");
@@ -344,9 +417,8 @@ function CompletePicture({ onDone }) {
   const save = async () => {
     const p = parseMoneyInput(amount, { min: 0 });
     if (!p.ok) return setMsg(p.error);
-    const kind = tab;
-    const data = kind === "income" ? { kind: "salary", label: label || "Salary", monthlyAmount: p.value } : { label: label || "Bill", monthlyAmount: p.value };
-    const d = await POST("/api/financial-twin/rows", { kind: kind === "income" ? "income" : "recurring", data });
+    const data = tab === "income" ? { kind: "salary", label: label || "Salary", monthlyAmount: p.value } : { label: label || "Bill", monthlyAmount: p.value };
+    const d = await POST("/api/financial-twin/rows", { kind: tab === "income" ? "income" : "recurring", data });
     setMsg(d.ok ? "Saved." : d.error ?? "Could not save.");
     if (d.ok) { setAmount(""); setLabel(""); }
   };
@@ -374,14 +446,16 @@ function CompletePicture({ onDone }) {
   );
 }
 
-/* ================= C. Today ================= */
-function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource, onComplete }) {
-  if (state === "loading" || state === "idle") return <p className={css.lede}>Loading your money…</p>;
-  if (state === "error")
+/* ================= C. Today — the front door ================= */
+function Today({ fb, partial, onExplain, onNext, onAddSource, onComplete, onBank, onRoute }) {
+  const { twin, status } = fb;
+
+  if ((status === "loading" || status === "idle") && !twin) return <p className={css.lede}>Loading your money…</p>;
+  if (status === "error" && !twin)
     return (
       <>
         <p className={css.lede}>Your money picture didn't load.</p>
-        <button type="button" className={css.cta} onClick={onReload}>Try again</button>
+        <button type="button" className={css.cta} onClick={fb.refetchAll}>Try again</button>
       </>
     );
 
@@ -397,44 +471,68 @@ function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource,
   }
 
   const s2s = twin.safeToSpend ?? {};
-  const bd = twin.twin?.balanceBreakdown ?? {};
+  const bb = twin.twin?.balanceBreakdown ?? {};
+  const committedMonthly = twin.twin?.committedMonthlyTotal ?? fb.resourceSummary?.committedMonthly ?? 0;
   const txns = (twin.recentTransactions ?? []).filter((t) => t.channel !== "opening_balance");
+  const needsCount = fb.momentsRaw?.counts?.actionRequired ?? 0;
 
   return (
     <>
       <div>
         <p className={css.kicker}>Today · {new Date().toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "long" })}</p>
-        <p className={css.micro}>Balances from your ledger · tap the amount, the current or a state to explain it</p>
+        <p className={css.micro}>Balances from your ledger · tap the amount, a state or the current to explain it</p>
       </div>
 
+      {/* 1. MONEY POSITION */}
       <div className={css.bigAmountWrap}>
-        <span className={css.bigAmountLabel}>Available to spend</span>
+        <span className={css.bigAmountLabel}>Available now</span>
         <button
           type="button"
           className={`${css.bigAmount} ${s2s.belowProtectedFloor ? css.warn : ""}`}
-          aria-label={`Available to spend, ${sgd(s2s.safeToSpend)}. Tap for how this is worked out.`}
+          aria-label={`Available now, ${sgd(s2s.safeToSpend)}. Tap for how this is worked out.`}
           onClick={() => onExplain("available")}
         >
           {sgd(s2s.safeToSpend)} <span className={css.infoDot}>ⓘ</span>
         </button>
       </div>
-
-      <MoneyCurrent twin={twin} onExplain={() => onExplain("current")} />
-
       <div className={css.stateRow}>
-        <button type="button" className={css.stateChip} onClick={() => onExplain("free")}>
-          <small className={css.dotFree}>Free</small>
-          <b>{sgd(bd.availableNow)}</b>
-        </button>
-        <button type="button" className={css.stateChip} onClick={() => onExplain("spoken")}>
-          <small className={css.dotSpoken}>Spoken for</small>
-          <b>{sgd(bd.spokenFor)}</b>
-        </button>
         <button type="button" className={css.stateChip} onClick={() => onExplain("protected")}>
           <small className={css.dotProtected}>Protected</small>
-          <b>{sgd(bd.protectedFor)}</b>
+          <b>{sgd(bb.protectedFor)}</b>
+        </button>
+        <button type="button" className={css.stateChip} onClick={() => onExplain("committed")}>
+          <small className={css.dotSpoken}>Committed</small>
+          <b>{sgd(committedMonthly)}<span className={css.perMo}> /mo</span></b>
         </button>
       </div>
+
+      {/* 2. BANK NOW */}
+      <BankNowActions
+        onPayNow={() => onBank("paynow")}
+        onFx={() => onBank("fx")}
+        onScanPay={() => onBank("scanpay")}
+      />
+
+      {/* 3. MONEY CURRENT */}
+      <MoneyCurrent twin={twin} onExplain={() => onExplain("current")} detail />
+
+      {/* 4. ONE THING THAT NEEDS YOU */}
+      <section className={css.section}>
+        <p className={css.kicker}>{needsCount > 0 ? `${needsCount} thing${needsCount > 1 ? "s" : ""} need${needsCount > 1 ? "" : "s"} you` : "One thing that needs you"}</p>
+        <DetectedMoments limit={1} exclude={["turning_point"]} onRoute={onRoute} />
+      </section>
+
+      {/* 5. WHAT CHANGED SINCE YOU LAST OPENED */}
+      <section className={css.section}>
+        <p className={css.kicker}>What changed</p>
+        <MoneyChangedReceipt onRoute={onRoute} onHistory={() => onRoute("history")} />
+      </section>
+
+      {/* 6. PLANS IN MOTION */}
+      <section className={css.section}>
+        <p className={css.kicker}>Plans in motion</p>
+        <ActivePlanRail limit={3} dense onRoute={onRoute} />
+      </section>
 
       {partial ? (
         <div className={css.partial}>
@@ -444,8 +542,9 @@ function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource,
         </div>
       ) : null}
 
-      <div>
-        <p className={css.kicker} style={{ marginBottom: 6 }}>Recent activity</p>
+      {/* 7. RECENT ACTIVITY */}
+      <section className={css.section}>
+        <p className={css.kicker}>Recent activity</p>
         {txns.length === 0 ? (
           <p className={css.micro}>No transactions yet — import a statement or add one to fill this in.</p>
         ) : (
@@ -462,46 +561,68 @@ function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource,
             ))}
           </div>
         )}
-      </div>
+        <button type="button" className={css.link} onClick={() => onRoute("today:activity")}>View all activity →</button>
+      </section>
 
       <button type="button" className={css.cta} onClick={onNext}>See what needs you next</button>
     </>
   );
 }
 
-/* ================= D. What needs you next ================= */
-function NeedsNext({ twin, onBack, onHome, onSnapshot, onProblem, onServices, onUnderstand }) {
-  const rescue = twin?.rescueCases?.[0] ?? null;
-  const partial = twin && (twin.isEmpty || (twin.counts && twin.counts.incomeStreams === 0));
-  const hasTxns = (twin?.recentTransactions ?? []).some((t) => t.channel !== "opening_balance");
+/* ================= D. What needs you next (Explore) ================= */
+function NeedsNext({ fb, onBack, onHome, onSnapshot, onProblem, onServices, onRoute }) {
+  const partial = fb.twin && (fb.twin.isEmpty || (fb.twin.counts && fb.twin.counts.incomeStreams === 0));
+  const hasTxns = (fb.twin?.recentTransactions ?? []).some((t) => t.channel !== "opening_balance");
 
   let rec;
-  if (rescue) rec = { title: rescue.whatHappened, why: rescue.whyItMatters, next: rescue.options?.[0]?.label ?? "See your options", cta: "Look at this", onClick: onProblem };
-  else if (partial) rec = { title: "Make your picture sharper", why: "Future Bank can't see far ahead without your income and bills.", next: "Add them in a minute", cta: "Complete my picture", onClick: onSnapshot };
-  else if (!hasTxns) rec = { title: "Bring in your transactions", why: "Spending, bills and Safe-to-Spend all get sharper with real history.", next: "Import a CSV statement", cta: "Import now", onClick: onSnapshot };
-  else rec = { title: "Shape a home plan", why: "You have the basics. See how a real plan sits against your money.", next: "Answer 2 quick questions", cta: "Start", onClick: onHome };
+  if (fb.moments.length > 0) {
+    const m = fb.moments[0];
+    rec = { title: m.title, why: m.whyNow || m.summary, next: m.nextActions?.[0]?.label ?? "Review it", cta: "Look at this", onClick: () => onRoute(m.nextActions?.[0]?.route || "today") };
+  } else if (partial) {
+    rec = { title: "Make your picture sharper", why: "Future Bank can't see far ahead without your income and bills.", next: "Add them in a minute", cta: "Complete my picture", onClick: onSnapshot };
+  } else if (!hasTxns) {
+    rec = { title: "Bring in your transactions", why: "Spending, bills and Safe-to-Spend all get sharper with real history.", next: "Import a CSV statement", cta: "Import now", onClick: onSnapshot };
+  } else {
+    rec = { title: "Shape a home plan", why: "You have the basics. See how a real plan sits against your money.", next: "Answer 2 quick questions", cta: "Start", onClick: onHome };
+  }
 
   return (
     <>
       <button type="button" className={css.backLink} onClick={onBack}>← Today</button>
       <h1 className={css.title}>What needs you next</h1>
 
-      <div className={css.ripple} style={{ borderLeft: "3px solid var(--sea)" }}>
-        <p className={css.kicker}>Recommended</p>
-        <b style={{ fontSize: 16 }}>{rec.title}</b>
-        <span className={css.micro}>Why now: {rec.why}</span>
-        <span className={css.micro}>Next: {rec.next}</span>
-        <button type="button" className={`${css.cta} ${css.ctaSea}`} onClick={rec.onClick} style={{ marginTop: 4 }}>{rec.cta}</button>
-      </div>
+      {/* Layer 1 — Future Bank noticed */}
+      <section className={css.section}>
+        <div className={css.sectionHead}>
+          <p className={css.kicker}>Future Bank noticed</p>
+          {fb.moments.length ? <span className={css.sectionCount}>{fb.moments.length}</span> : null}
+        </div>
+        <DetectedMoments limit={3} onRoute={onRoute} />
+      </section>
 
-      <p className={css.kicker} style={{ marginTop: 4 }}>Or choose a direction</p>
-      <div className={css.choiceGrid}>
-        <button type="button" className={css.choice} onClick={onUnderstand}><b>Understand my money</b><span>Where it goes, what's recurring, what changed.</span></button>
-        <button type="button" className={css.choice} onClick={onProblem}><b>Solve a problem</b><span>A payment, a bill, a tight month, an unfamiliar charge.</span></button>
-        <button type="button" className={css.choice} onClick={onHome}><b>Build a future</b><span>Plan a home and see the cost to your other goals.</span></button>
-      </div>
+      {/* Layer 2 — Your plans are moving */}
+      <section className={css.section}>
+        <p className={css.kicker}>Your plans are moving</p>
+        <ActivePlanRail limit={6} dense={false} onRoute={onRoute} />
+      </section>
 
-      <button type="button" className={css.link} onClick={onServices}>All services</button>
+      {/* Layer 3 — Choose what to do */}
+      <section className={css.section}>
+        <p className={css.kicker}>Choose what to do</p>
+        <div className={css.ripple} style={{ borderLeft: "3px solid var(--sea)" }}>
+          <p className={css.kicker}>Recommended</p>
+          <b style={{ fontSize: 16 }}>{rec.title}</b>
+          <span className={css.micro}>Why now: {rec.why}</span>
+          <span className={css.micro}>Next: {rec.next}</span>
+          <button type="button" className={`${css.cta} ${css.ctaSea}`} onClick={rec.onClick} style={{ marginTop: 4 }}>{rec.cta}</button>
+        </div>
+        <div className={css.choiceGrid}>
+          <button type="button" className={css.choice} onClick={onBack}><b>Understand my money</b><span>Where it goes, what's recurring, what changed.</span></button>
+          <button type="button" className={css.choice} onClick={onProblem}><b>Solve a problem</b><span>A payment, a bill, a tight month, an unfamiliar charge.</span></button>
+          <button type="button" className={css.choice} onClick={onHome}><b>Build a future</b><span>Plan a home and see the cost to your other goals.</span></button>
+        </div>
+        <button type="button" className={css.link} onClick={onServices}>All services</button>
+      </section>
     </>
   );
 }
@@ -525,7 +646,7 @@ const humanSealBlock = (reason) => {
   return "A few details are still needed before this can become a commitment.";
 };
 
-function HomeHorizon({ onBack, onReceipt }) {
+function HomeHorizon({ fb, onBack, onDone, onHistory }) {
   const [band, setBand] = useState("");
   const [year, setYear] = useState("");
   const [phase, setPhase] = useState("ask");
@@ -564,20 +685,42 @@ function HomeHorizon({ onBack, onReceipt }) {
     if (!field) return;
     const v = field?.realityPath?.sealableVerdict;
     if (v && v.sealable === false && process.env.NODE_ENV !== "production") {
-      // Technical reason stays in dev logs only; the user sees humanSealBlock().
       console.warn(`[FutureBank] Home path not yet sealable — server reason: ${v.reason}`);
     }
     setPath(field);
     setPhase("receipt");
-    onReceipt?.();
+    onDone?.();
   };
 
   const after = path ? summarise(path) : null;
   const priceMid = PRICE_BANDS.find((b) => b.id === band)?.mid ?? null;
 
+  // Every materially affected plan/goal - server-sourced only. Committing
+  // this pace is that much less monthly room for every other plan (Life
+  // Thread resourceSummary); the home window is the projector's; plus any
+  // projector cross-goal row that actually moves.
+  const rs = fb.resourceSummary ?? {};
+  const paceNow = after?.monthly ?? pace;
+  const roomBefore = rs.remainingMonthlyRoom;
+  const affected = [
+    {
+      domain: "all plans", metric: "committed each month", unit: "sgd_per_month",
+      before: rs.committedMonthly ?? 0, possibleAfter: (rs.committedMonthly ?? 0) + paceNow,
+      direction: "up", favourable: false,
+    },
+    roomBefore != null
+      ? { domain: "your budget", metric: "remaining monthly room", unit: "sgd_per_month", before: roomBefore, possibleAfter: roomBefore - paceNow, direction: "down", favourable: false }
+      : { domain: "your budget", metric: "remaining monthly room", unit: "sgd_per_month", before: null, possibleAfter: null, direction: "flat" },
+    {
+      domain: "home", metric: "ready window", unit: "qualitative",
+      before: before?.readyMonth ?? "unset", possibleAfter: after?.readyMonth ?? "not yet reachable", direction: "flat",
+    },
+    ...affectedFromField(path).filter(isMaterial),
+  ];
+
   return (
     <>
-      <button type="button" className={css.backLink} onClick={onBack}>← What needs you next</button>
+      <button type="button" className={css.backLink} onClick={onBack}>← Back</button>
       <h1 className={css.title}>Home Horizon</h1>
 
       {phase === "ask" && (
@@ -624,6 +767,13 @@ function HomeHorizon({ onBack, onReceipt }) {
 
           {phase === "shape" && (
             <>
+              {affected.length > 0 && (
+                <div className={css.section}>
+                  <p className={css.kicker}>If you apply this — preview effect on other plans</p>
+                  <div className={css.horizonRange} />
+                  <PreviewAffected affected={affected} />
+                </div>
+              )}
               <div className={css.field}>
                 <label htmlFor="hh-pace">Monthly pace: <b>{sgd(pace)}</b></label>
                 <input id="hh-pace" className={css.slider} type="range" min={200} max={6000} step={100} value={pace} onChange={(e) => setPace(Number(e.target.value))} />
@@ -638,17 +788,25 @@ function HomeHorizon({ onBack, onReceipt }) {
           )}
 
           {phase === "receipt" && (
-            <MoneyCurrentRipple
+            <ChangeReceipt
               before={`Monthly pace ${before?.monthly ? sgd(before.monthly) : "SGD 0"} · window ${before?.readyMonth ?? "unset"}`}
-              changedLabel={`Set aside ${sgd(after.monthly ?? pace)} each month`}
+              changed={`Set aside ${sgd(after.monthly ?? pace)} each month toward a home`}
               after={`Monthly pace ${sgd(after.monthly ?? pace)} · window ${after.readyMonth ?? "not yet reachable"}`}
-              movedRows={movedRows(before, after)}
-              consequence={
-                humanSealBlock(path?.realityPath?.sealableVerdict?.sealable ? null : path?.realityPath?.sealableVerdict?.reason) ??
-                "This path is ready to become a commitment when you are."
+              monthlyAdded={after.monthly ?? pace}
+              affected={affected}
+              committed={Boolean(path?.realityPath?.sealableVerdict?.sealable)}
+              humanReason={
+                path?.realityPath?.sealableVerdict?.sealable
+                  ? null
+                  : humanSealBlock(path?.realityPath?.sealableVerdict?.reason)
               }
-              onNext={onBack}
-              nextLabel="Back to what needs you next"
+              guardianResponse={
+                fb.momentsRaw?.moments?.some((m) => m.sourceType === "turning_point")
+                  ? "Guardian sees a turning point ahead — review it before sealing."
+                  : "Guardian has no objection to this preview."
+              }
+              nextAction={{ label: "Back to what needs you next", onClick: onBack }}
+              onHistory={onHistory}
             />
           )}
           <p className={css.micro}>
@@ -660,36 +818,165 @@ function HomeHorizon({ onBack, onReceipt }) {
   );
 }
 
+function PreviewAffected({ affected }) {
+  const rows = affected.filter(isMaterial);
+  if (rows.length === 0) return <p className={css.micro}>No other plan is materially affected by this pace.</p>;
+  return (
+    <div className={css.horizon}>
+      {rows.map((a, i) => (
+        <div key={i} className={css.horizonRange}>
+          <span style={{ textTransform: "capitalize" }}>{String(a.domain).replace(/_/g, " ")} · {humanMetric(a.metric)}</span>
+          <span>
+            {a.before != null ? `${a.before} → ` : ""}
+            {a.possibleAfter != null ? a.possibleAfter : "Needs more information"}
+            {" "}
+            <b style={{ color: "var(--amber)" }}>Preview</b>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Every materially affected plan/goal from the server-computed impacts of
+// the seeded home path. `projectImpacts` returns an object whose
+// `affectedGoals` array is what we render - each row keeps its own unit.
+function affectedFromField(field) {
+  const paths = field?.possiblePaths ?? [];
+  let src = [];
+  for (const p of paths) {
+    const pi = p.projectedImpacts;
+    const goals = Array.isArray(pi) ? pi : Array.isArray(pi?.affectedGoals) ? pi.affectedGoals : null;
+    if (goals && goals.length) {
+      src = goals;
+      break;
+    }
+  }
+  return src
+    .filter((g) => g && (g.goalId || g.domain) && g.metric && (g.before != null || g.possibleAfter != null || g.after != null))
+    .map((g) => ({
+      domain: g.goalId ?? g.domain,
+      metric: g.metric,
+      unit: g.unit ?? (typeof g.possibleAfter === "number" && Math.abs(g.possibleAfter) <= 12 && /month|shift|buffer/i.test(g.metric) ? "months" : "qualitative"),
+      before: g.before ?? null,
+      possibleAfter: g.possibleAfter ?? g.after ?? null,
+      confirmedAfter: g.confirmedAfter ?? null,
+      direction: g.direction ?? (g.before != null && g.possibleAfter != null ? (g.possibleAfter > g.before ? "up" : g.possibleAfter < g.before ? "down" : "flat") : "flat"),
+      favourable: g.favourable ?? null,
+    }));
+}
+
 function summarise(field) {
   const rp = field?.realityPath ?? {};
   return { monthly: rp.monthlyContribution ?? rp.data?.monthly_contribution ?? null, readyMonth: rp.readyMonth ?? null, monthsToReady: rp.monthsToReady ?? null };
 }
-function movedRows(b, a) {
-  const rows = [];
-  if (b && a && b.readyMonth && a.readyMonth && b.readyMonth !== a.readyMonth) {
-    rows.push({ text: `Home window moved to ${a.readyMonth}`, delta: `was ${b.readyMonth}`, up: a.readyMonth < b.readyMonth });
-  }
-  return rows;
-}
 function projectYear(year, pace, priceMid) {
   if (!priceMid || !pace) return year;
-  const need = priceMid * 0.25; // rough down-payment
+  const need = priceMid * 0.25;
   const months = Math.ceil(need / pace);
   const d = new Date();
   d.setMonth(d.getMonth() + months);
   return d.getFullYear();
 }
 
+/* ================= Guardian ================= */
+// Guardian consumes the SAME MoneyMoment objects as Today and Explore -
+// no separate lifeThread.guardianDecision alert model, no raw i18n keys.
+function GuardianView({ fb, onBack, onRoute }) {
+  const moments = fb.momentsRaw?.allMoments ?? fb.moments ?? [];
+  const watch = moments.filter((m) => (m.severity === "action_required" || m.severity === "watch") && m.state === "new");
+  const decision = watch.find((m) => m.sourceType === "turning_point") ?? watch[0] ?? null;
+
+  return (
+    <>
+      <button type="button" className={css.backLink} onClick={onBack}>← Today</button>
+      <h1 className={css.title}>Guardian</h1>
+      <p className={css.micro}>Guardian reads the same Money Moments as Today and Explore — one model, no separate alert list.</p>
+
+      {decision ? (
+        <div className={fbc.moment} style={{ borderLeftColor: "var(--amber)" }}>
+          <div className={fbc.momentTitle}>{decision.sourceType === "turning_point" ? "A decision is waiting" : decision.title}</div>
+          <div className={fbc.momentSummary}>{decision.summary}</div>
+          <button
+            type="button"
+            className={`${fbc.act} ${fbc.primary}`}
+            onClick={() => onRoute(decision.nextActions?.[0]?.route || "home")}
+          >
+            {decision.nextActions?.[0]?.label ?? "Review the plan"}
+          </button>
+        </div>
+      ) : (
+        <div className={fbc.calm}>
+          <span className={fbc.calmTitle}>Guardian has no decision waiting.</span>
+          <span className={fbc.empty}>It is watching {watch.length} item{watch.length === 1 ? "" : "s"} on your behalf.</span>
+        </div>
+      )}
+
+      <p className={css.kicker}>Watching now</p>
+      {watch.length === 0 ? (
+        <p className={css.micro}>Nothing on watch.</p>
+      ) : (
+        <div className={fbc.section}>
+          {watch.slice(0, 5).map((m) => (
+            <div key={m.id} className={`${fbc.moment} ${fbc[m.severity] || ""}`}>
+              <div className={fbc.momentTop}>
+                <span className={`${fbc.sev} ${fbc[m.severity] || ""}`}>{String(m.severity).replace("_", " ")}</span>
+                <span className={fbc.evMeta} style={{ marginLeft: "auto" }}>{m.state}</span>
+              </div>
+              <div className={fbc.momentTitle}>{m.title}</div>
+              {m.nextActions?.[0] ? (
+                <button type="button" className={fbc.act} disabled={m.nextActions[0].available === false} onClick={() => onRoute(m.nextActions[0].route || "today")}>
+                  {m.nextActions[0].label}
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ================= History ================= */
+function HistoryView({ fb, onBack }) {
+  const events = fb.ledger?.events ?? [];
+  return (
+    <>
+      <button type="button" className={css.backLink} onClick={onBack}>← Today</button>
+      <h1 className={css.title}>History</h1>
+      <p className={css.micro}>Every confirmed change, newest first — the same causal record every Money Moment and receipt links to.</p>
+      {events.length === 0 ? (
+        <p className={css.micro}>No changes recorded yet.</p>
+      ) : (
+        <div className={css.activity}>
+          {events.slice(0, 40).map((e) => (
+            <div key={e.id} className={css.actItem}>
+              <span className={css.actGlyph}>{(e.action_type || "?")[0].toUpperCase()}</span>
+              <span className={css.actBody}>
+                <span className={css.actName}>{(e.message_key || e.action_type || "change").replace(/[._]/g, " ")}</span>
+                <span className={css.actMeta}>{e.status} · {e.source_feature} · {relTime(e.occurred_at)}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ================= Bottom sheet ================= */
-function BottomSheet({ sheet, onClose, onGoHome, onGoSnapshot }) {
+function BottomSheet({ sheet, fb, onClose, onGoHome, onGoSnapshot, onRoute }) {
   return (
     <div className={css.sheetScrim} onClick={onClose}>
       <div className={css.sheet} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <span className={css.sheetGrip} />
         {sheet.kind === "data" && <DataSheet />}
         {sheet.kind === "problem" && <ProblemSheet twin={sheet.twin} onGoHome={onGoHome} onGoSnapshot={onGoSnapshot} onClose={onClose} />}
-        {sheet.kind === "services" && <ServicesSheet onGoHome={onGoHome} onClose={onClose} />}
-        {["available", "free", "spoken", "protected", "current"].includes(sheet.kind) && <FigureSheet kind={sheet.kind} twin={sheet.twin} />}
+        {sheet.kind === "services" && <ServicesSheet onRoute={onRoute} onClose={onClose} />}
+        {sheet.kind === "paynow" && <PayNowSheet fb={fb} onClose={onClose} />}
+        {sheet.kind === "fx" && <FxSheet />}
+        {sheet.kind === "scanpay" && <ScanPaySheet />}
+        {["available", "free", "spoken", "protected", "committed", "current"].includes(sheet.kind) && <FigureSheet kind={sheet.kind} twin={sheet.twin} />}
         <button type="button" className={css.cta} onClick={onClose}>Close</button>
       </div>
     </div>
@@ -707,6 +994,97 @@ function DataSheet() {
         <li><span className={css.proofMark}>→</span> Goals: to show trade-offs before you commit.</li>
       </ul>
       <p className={css.micro}>You can export or delete everything from Account settings at any time.</p>
+    </>
+  );
+}
+
+/* ---- Bank Now sheets: honest capability states ---- */
+function PayNowSheet({ fb, onClose }) {
+  const [accts, setAccts] = useState([]);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    fetch("/api/bank/accounts").then((r) => r.json()).then((d) => {
+      const a = d.accounts ?? [];
+      setAccts(a);
+      if (a[0]) setFrom(a[0].id);
+      if (a[1]) setTo(a[1].id);
+    });
+  }, []);
+
+  const move = async () => {
+    const p = parseMoneyInput(amount, { min: 1 });
+    if (!p.ok) return setMsg(p.error);
+    if (from === to) return setMsg("Choose two different accounts.");
+    setBusy(true);
+    try {
+      const d = await POST("/api/bank/transactions", {
+        action: "transfer",
+        fromAccountId: from,
+        toAccountId: to,
+        amount: p.value,
+        idempotencyKey: `fb-transfer-${from}-${to}-${p.value}-${Date.now()}`,
+      });
+      if (!d.ok) throw new Error(d.error || "transfer");
+      setMsg(`Moved ${sgd(p.value)}. Your money picture is updating…`);
+      await fb.refetchAll();
+      setTimeout(onClose, 900);
+    } catch {
+      setMsg("Could not complete the transfer. Nothing was moved — check your activity.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <p className={css.sheetTitle}>PayNow</p>
+      <p className={css.micro}><b>External PayNow is not connected.</b> This preview can only move money between your own accounts — a real ledger entry, no external rail.</p>
+      {accts.length < 2 ? (
+        <p className={css.lede}>Add a second account first, then you can move money between them here.</p>
+      ) : (
+        <>
+          <div className={css.field}>
+            <label htmlFor="pn-from">From</label>
+            <select id="pn-from" value={from} onChange={(e) => setFrom(e.target.value)}>
+              {accts.map((a) => <option key={a.id} value={a.id}>{a.displayName || a.kind} · {sgd(a.availableBalance)}</option>)}
+            </select>
+          </div>
+          <div className={css.field}>
+            <label htmlFor="pn-to">To</label>
+            <select id="pn-to" value={to} onChange={(e) => setTo(e.target.value)}>
+              {accts.map((a) => <option key={a.id} value={a.id}>{a.displayName || a.kind}</option>)}
+            </select>
+          </div>
+          <div className={css.field}>
+            <label htmlFor="pn-amt">Amount</label>
+            <input id="pn-amt" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 200" />
+          </div>
+          {msg ? <span className={css.err}>{msg}</span> : null}
+          <button type="button" className={css.cta} disabled={busy} onClick={move}>{busy ? "Moving…" : "Move my money"}</button>
+        </>
+      )}
+    </>
+  );
+}
+function FxSheet() {
+  return (
+    <>
+      <p className={css.sheetTitle}>Foreign Exchange</p>
+      <p className={css.lede}><b>Indicative rate only.</b> No executable FX provider is connected to this preview, so Future Bank cannot quote or book a real conversion.</p>
+      <p className={css.micro}>When a provider is connected, this is where a live quote, the spread and a book button would appear.</p>
+    </>
+  );
+}
+function ScanPaySheet() {
+  return (
+    <>
+      <p className={css.sheetTitle}>Scan &amp; Pay</p>
+      <p className={css.lede}><b>Not connected.</b> Merchant QR payments need a payment rail this preview does not have. The camera is intentionally not opened.</p>
+      <p className={css.micro}>Nothing here can move money until a real rail is connected.</p>
     </>
   );
 }
@@ -766,19 +1144,22 @@ function ProblemSheet({ twin, onGoHome, onGoSnapshot, onClose }) {
 }
 
 const SERVICES = [
-  { id: "accounts", name: "Accounts & balances", help: "See every account, real balances.", status: "live", next: "Open Today" },
-  { id: "transactions", name: "Transaction activity", help: "Search and review what you spent.", status: "live", next: "Open Today" },
-  { id: "import", name: "Import a statement", help: "Bring transactions in by CSV.", status: "live", next: "Start in Money Snapshot" },
-  { id: "safe_to_spend", name: "Safe-to-Spend", help: "How much you can safely use today.", status: "live", next: "Open Today" },
-  { id: "money_current", name: "Money Current", help: "What arrives next and what's protected.", status: "live", next: "Open Today" },
+  { id: "accounts", name: "Accounts & balances", help: "See every account, real balances.", status: "live", next: "Open Today", route: "today" },
+  { id: "transactions", name: "Transaction activity", help: "Search and review what you spent.", status: "live", next: "Open Today", route: "today" },
+  { id: "import", name: "Import a statement", help: "Bring transactions in by CSV.", status: "live", next: "Start in Money Snapshot", route: "snapshot" },
+  { id: "safe_to_spend", name: "Safe-to-Spend", help: "How much you can safely use today.", status: "live", next: "Open Today", route: "today" },
+  { id: "money_current", name: "Money Current", help: "What arrives next and what's protected.", status: "live", next: "Open Today", route: "today" },
   { id: "home", name: "Home Horizon", help: "Plan a home against your money.", status: "live", next: "Start", route: "home" },
-  { id: "transfer", name: "Transfer between my accounts", help: "Move your own money (real ledger entry).", status: "live", next: "Coming to this preview" },
-  { id: "pay", name: "Pay someone / a bill", help: "Send money outside the bank.", status: "soon", next: "Needs a connected payment rail" },
+  { id: "history", name: "Change history", help: "Every confirmed change, newest first.", status: "live", next: "Open history", route: "history" },
+  { id: "guardian", name: "Guardian", help: "What needs a decision, on one model.", status: "live", next: "Open Guardian", route: "guardian" },
+  { id: "transfer", name: "Move money between my accounts", help: "A real internal ledger transfer.", status: "live", next: "Open PayNow", route: "today" },
+  { id: "pay", name: "Pay someone outside the bank", help: "Send money to another person / biller.", status: "soon", next: "Needs a connected payment rail" },
   { id: "scan_pay", name: "Scan & Pay", help: "Pay a merchant by QR.", status: "soon", next: "Needs a connected payment rail" },
+  { id: "fx", name: "Foreign exchange", help: "Convert or send another currency.", status: "soon", next: "Needs a connected FX provider" },
   { id: "cross_bank", name: "Connect other banks", help: "Bring in accounts held elsewhere.", status: "soon", next: "Needs SGFinDex" },
   { id: "insurance", name: "Protection review", help: "Estimate a cover gap.", status: "soon", next: "Needs a licensed provider" },
 ];
-function ServicesSheet({ onGoHome, onClose }) {
+function ServicesSheet({ onRoute, onClose }) {
   const [q, setQ] = useState("");
   const list = SERVICES.filter((s) => (s.name + s.help).toLowerCase().includes(q.toLowerCase()));
   return (
@@ -797,7 +1178,7 @@ function ServicesSheet({ onGoHome, onClose }) {
               type="button"
               className={css.svcNext}
               disabled={s.status === "soon"}
-              onClick={() => (s.route === "home" ? onGoHome() : onClose())}
+              onClick={() => (s.route ? onRoute?.(s.route) : onClose())}
             >
               {s.next}{s.status === "live" ? " →" : ""}
             </button>
@@ -815,7 +1196,7 @@ function FigureSheet({ kind, twin }) {
   const bb = twin?.twin?.balanceBreakdown ?? {};
   const MAP = {
     available: {
-      title: "Available to spend",
+      title: "Available now",
       value: sgd(s2s.safeToSpend),
       means: "Money you can use now without breaking a bill, your safety reserve, or a commitment.",
       formula: "Liquid cash − bills due before your next income − protected reserve − amount already committed to plans.",
@@ -823,10 +1204,19 @@ function FigureSheet({ kind, twin }) {
       confidence: "From your ledger + entered income/bills.",
       change: "A new bill, a change to your income date, or sealing a plan.",
     },
+    protected: { title: "Protected", value: sgd(bb.protectedFor), means: "Cash you deliberately set aside as a safety buffer. Held out of Available.", formula: "Balances you earmarked as an emergency / safety reserve.", parts: [], confidence: "From what you marked protected.", change: "Changing your safety-buffer target." },
+    committed: {
+      title: "Committed / month",
+      value: sgd(twin?.twin?.committedMonthlyTotal),
+      means: "The total your sealed plans claim from your money every month.",
+      formula: "Sum of the monthly contribution of every active commitment.",
+      parts: [["Active commitments", sgd(twin?.twin?.committedMonthlyTotal)]],
+      confidence: "From your active commitments.",
+      change: "Sealing, pausing or revoking a plan.",
+    },
     free: { title: "Free", value: sgd(bb.availableNow), means: "Liquid cash not protected and not spoken for.", formula: "Liquid cash − protected − spoken for.", parts: [["Liquid cash", sgd(bd.postedLiquidCash)], ["Protected", `− ${sgd(bb.protectedFor)}`], ["Spoken for", `− ${sgd(bb.spokenFor)}`]], confidence: "From your ledger.", change: "Spending, or moving money into a goal." },
     spoken: { title: "Spoken for", value: sgd(bb.spokenFor), means: "Liquid money a sealed plan already claims each month.", formula: "The smaller of your liquid cash and your committed monthly total.", parts: [["Committed monthly", sgd(twin?.twin?.committedMonthlyTotal)]], confidence: "From your active commitments.", change: "Sealing, pausing or revoking a plan." },
-    protected: { title: "Protected", value: sgd(bb.protectedFor), means: "Cash you deliberately set aside as a safety buffer.", formula: "Balances you earmarked as an emergency / safety reserve.", parts: [], confidence: "From what you marked protected.", change: "Changing your safety-buffer target." },
-    current: { title: "Your money current", value: "", means: "The real events flowing through your money: what's safe now, the next bill, the next income, what's protected, and any decision you're shaping.", formula: "Now = Available to spend. Next bill / next income = your soonest entered obligation / inflow. Protected = your safety reserve.", parts: [], confidence: "From your ledger + entered income/bills.", change: "Any new transaction, bill, income change, or plan." },
+    current: { title: "Your money current", value: "", means: "The real events flowing through your money: what's safe now, the next bill, the next income, what's protected, and any decision you're shaping.", formula: "Now = Available now. Next bill / next income = your soonest entered obligation / inflow. Protected = your safety reserve.", parts: [], confidence: "From your ledger + entered income/bills.", change: "Any new transaction, bill, income change, or plan." },
   };
   const d = MAP[kind] ?? MAP.available;
   return (

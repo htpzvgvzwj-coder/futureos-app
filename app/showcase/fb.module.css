@@ -136,6 +136,11 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+.perMo {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
 .dotFree {
   color: var(--sea);
 }
@@ -762,6 +767,54 @@
   border-top: 1px solid var(--line);
   font-size: 11px;
   line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+/* ---- Today / Explore sections ------------------------------- */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sectionCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sea);
+}
+
+/* ---- Money Current per-node detail (Today) ----------------- */
+.currentDetail {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.currentDetailRow {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 2px 10px;
+}
+.currentDetailLabel {
+  grid-row: span 2;
+  font-size: 12px;
+  font-weight: 700;
+  align-self: center;
+}
+.currentDetailEffect {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.currentDetailSource {
+  font-size: 10.5px;
   color: var(--ink-faint);
 }
 

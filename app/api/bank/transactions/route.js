@@ -1,6 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { getCurrentUserId } from "../../../../lib/auth.js";
-import { listTransactions, appendTransaction, reverseTransaction, getSpendingTotal } from "../../../../lib/transaction-ledger/store.js";
+import { listTransactions, appendTransaction, reverseTransaction, recordInternalTransfer, getSpendingTotal } from "../../../../lib/transaction-ledger/store.js";
 import { recordTransactionRipple } from "../../../../lib/ripple/record.js";
+import { recordRippleEvent } from "../../../../lib/ripple/store.js";
+import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
+import { ACTION_TYPES } from "../../../../lib/change-ledger/events.js";
 
 export const runtime = "nodejs";
 
@@ -37,6 +41,47 @@ export async function POST(request) {
       const result = await reverseTransaction(userId, body.transactionId, { reason: body.reason });
       await recordTransactionRipple(userId, { ...result.original, status: "reversed" }).catch(() => {});
       return Response.json(result);
+    }
+
+    // Atomic internal transfer between the customer's OWN accounts - a real
+    // double-entry ledger move. No external rail.
+    if (body.action === "transfer") {
+      if (!body.fromAccountId || !body.toAccountId) return Response.json({ error: "accounts_required" }, { status: 400 });
+      const idk = body.idempotencyKey || randomUUID();
+      const result = await recordInternalTransfer(userId, {
+        fromAccountId: body.fromAccountId,
+        toAccountId: body.toAccountId,
+        amount: body.amount,
+        idempotencyKey: idk,
+      });
+      if (!result.idempotent) {
+        const amt = Math.round(Number(body.amount) || 0);
+        // a real consequence the whole shell can see: Ledger + Ripple
+        await recordEventSafe({
+          profileKey: userId,
+          actor: "user",
+          sourceFeature: "mirror",
+          actionType: ACTION_TYPES.PAYMENT_MADE,
+          status: "completed",
+          messageKey: "ledger.internalTransfer",
+          messageParams: { amount: amt },
+          cause: { trigger: "internal_transfer", fromAccountId: body.fromAccountId, toAccountId: body.toAccountId },
+          afterSnapshot: { amount: amt, kind: "internal_transfer" },
+          dedupeKey: `internal_transfer:${idk}`,
+        });
+        await recordRippleEvent(userId, {
+          kind: "transaction_change",
+          domain: null,
+          cause: `You moved SGD ${amt.toLocaleString("en-SG")} between your own accounts`,
+          monthlyDelta: null,
+          affectedGoals: [],
+          state: "confirmed",
+          severity: "information",
+          dedupeKey: `internal_transfer:${idk}`,
+          sourceRef: { kind: "internal_transfer", idempotencyKey: idk },
+        }).catch(() => {});
+      }
+      return Response.json(result, { status: result.idempotent ? 200 : 201 });
     }
     const txn = await appendTransaction(userId, {
       accountId: body.accountId,

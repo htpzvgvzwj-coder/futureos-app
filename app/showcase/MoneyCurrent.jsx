@@ -26,22 +26,78 @@ export function buildCurrentNodes(twin, decision = null) {
   const nextIncome = s2s.nextIncome ?? null;
 
   const nodes = [
-    { key: "now", kind: "now", label: "Now", amount: s2s.safeToSpend ?? twin?.twin?.balanceBreakdown?.availableNow ?? 0, when: null, whenText: "safe to spend" },
+    {
+      key: "now",
+      kind: "now",
+      label: "Now",
+      amount: s2s.safeToSpend ?? twin?.twin?.balanceBreakdown?.availableNow ?? 0,
+      when: null,
+      whenText: "safe to spend",
+      effect: "This is your Available now",
+      source: "Financial Twin · Safe-to-Spend",
+    },
   ];
   if (nextBill) {
-    nodes.push({ key: "bill", kind: "out", label: "Bill", amount: -Math.abs(nextBill.amount), when: nextBill.dueDate, whenText: shortDate(nextBill.dueDate), name: nextBill.label });
+    nodes.push({
+      key: "bill",
+      kind: "out",
+      label: "Bill",
+      amount: -Math.abs(nextBill.amount),
+      when: nextBill.dueDate,
+      whenText: shortDate(nextBill.dueDate),
+      name: nextBill.label,
+      effect: `Lowers Available by ${sgd(Math.abs(nextBill.amount))} on ${shortDate(nextBill.dueDate)}`,
+      source: "Recurring obligation · confirmed",
+    });
   }
   if (nextIncome) {
-    nodes.push({ key: "income", kind: "in", label: "Income", amount: Math.abs(nextIncome.amount), when: nextIncome.expectedDate, whenText: nextIncome.inDays != null ? `in ${nextIncome.inDays}d` : shortDate(nextIncome.expectedDate), name: nextIncome.label });
+    nodes.push({
+      key: "income",
+      kind: "in",
+      label: "Income",
+      amount: Math.abs(nextIncome.amount),
+      when: nextIncome.expectedDate,
+      whenText: nextIncome.inDays != null ? `in ${nextIncome.inDays}d` : shortDate(nextIncome.expectedDate),
+      name: nextIncome.label,
+      effect: `Raises Available by ${sgd(Math.abs(nextIncome.amount))} on ${shortDate(nextIncome.expectedDate)}`,
+      source: `Income stream · ${nextIncome.confidence ?? "expected"}`,
+    });
   }
   const protectedAmt = bd.protectedReserve ?? twin?.twin?.balanceBreakdown?.protectedFor ?? 0;
   if (protectedAmt > 0) {
-    nodes.push({ key: "protected", kind: "protected", label: "Protected", amount: protectedAmt, when: null, whenText: "kept back" });
+    nodes.push({
+      key: "protected",
+      kind: "protected",
+      label: "Protected",
+      amount: protectedAmt,
+      when: null,
+      whenText: "kept back",
+      effect: "Held out of Available as your safety buffer",
+      source: "Your protected reserve",
+    });
   }
   if (decision) {
-    nodes.push({ key: "decision", kind: "decision", label: decision.label ?? "Decision", amount: decision.amount ?? null, when: decision.when ?? null, whenText: decision.whenText ?? (decision.when ? shortDate(decision.when) : "you're shaping this") });
+    nodes.push({
+      key: "decision",
+      kind: "decision",
+      label: decision.label ?? "Decision",
+      amount: decision.amount ?? null,
+      when: decision.when ?? null,
+      whenText: decision.whenText ?? (decision.when ? shortDate(decision.when) : "you're shaping this"),
+      effect: decision.effect ?? "Not affecting Available yet",
+      source: decision.source ?? "A plan you are shaping",
+    });
   } else {
-    nodes.push({ key: "decision", kind: "decision", label: "Decision", amount: null, when: null, whenText: "none pending" });
+    nodes.push({
+      key: "decision",
+      kind: "decision",
+      label: "Decision",
+      amount: null,
+      when: null,
+      whenText: "none pending",
+      effect: "Nothing pending",
+      source: "—",
+    });
   }
   return nodes;
 }
@@ -54,7 +110,7 @@ const NODE_CLASS = {
   decision: css.nodeDecision,
 };
 
-export function MoneyCurrent({ twin, decision = null, onExplain = null, compact = false }) {
+export function MoneyCurrent({ twin, decision = null, onExplain = null, compact = false, detail = false }) {
   const nodes = buildCurrentNodes(twin, decision);
   const n = nodes.length;
 
@@ -93,6 +149,17 @@ export function MoneyCurrent({ twin, decision = null, onExplain = null, compact 
           );
         })}
       </div>
+      {detail && !compact && (
+        <div className={css.currentDetail}>
+          {nodes.map((node) => (
+            <div key={node.key} className={css.currentDetailRow}>
+              <span className={css.currentDetailLabel}>{node.name || node.label}</span>
+              <span className={css.currentDetailEffect}>{node.effect}</span>
+              <span className={css.currentDetailSource}>{node.source}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
