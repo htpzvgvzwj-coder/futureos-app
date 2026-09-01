@@ -88,7 +88,12 @@ export function FutureBankSlice({ onExitToApp = null }) {
 function Shell({ children }) {
   return (
     <div className={css.app}>
-      <div className={css.shell}>{children}</div>
+      <div className={css.shell}>
+        {children}
+        <p className={css.footer}>
+          Every figure traces to your ledger or a range you chose. Your data stays on your account and is never shared.
+        </p>
+      </div>
     </div>
   );
 }
@@ -96,20 +101,25 @@ function Shell({ children }) {
 /* ================= A. Welcome ================= */
 function Welcome({ onStart, onData }) {
   return (
-    <>
-      <p className={css.kicker}>Future Bank</p>
-      <h1 className={css.display}>Your money has a present. It also has a direction.</h1>
+    <div className={css.welcomeWrap}>
+      <div>
+        <p className={css.kicker}>Future Bank</p>
+        <h1 className={css.display}>Your money has a present. It also has a direction.</h1>
+      </div>
       <div className={css.welcomeArt}>
         <MoneyCurrent twin={welcomePreviewTwin} compact />
+        <p className={css.micro} style={{ marginTop: 10 }}>A worked example — yours is built from your own accounts.</p>
       </div>
       <ul className={css.proofList}>
         <li><span className={css.proofMark}>→</span> Know what is safe to spend now.</li>
         <li><span className={css.proofMark}>→</span> See the trade-offs before you commit.</li>
         <li><span className={css.proofMark}>→</span> Keep plans connected to real life.</li>
       </ul>
-      <button type="button" className={css.cta} onClick={onStart}>Build my money picture</button>
-      <button type="button" className={css.link} onClick={onData}>How does this use my data?</button>
-    </>
+      <div>
+        <button type="button" className={css.cta} onClick={onStart}>Build my money picture</button>
+        <button type="button" className={css.link} style={{ marginTop: 10 }} onClick={onData}>How does this use my data?</button>
+      </div>
+    </div>
   );
 }
 // A small honest illustrative current for the welcome only (no user data yet).
@@ -399,7 +409,12 @@ function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource,
 
       <div className={css.bigAmountWrap}>
         <span className={css.bigAmountLabel}>Available to spend</span>
-        <button type="button" className={`${css.bigAmount} ${s2s.belowProtectedFloor ? css.warn : ""}`} onClick={() => onExplain("available")}>
+        <button
+          type="button"
+          className={`${css.bigAmount} ${s2s.belowProtectedFloor ? css.warn : ""}`}
+          aria-label={`Available to spend, ${sgd(s2s.safeToSpend)}. Tap for how this is worked out.`}
+          onClick={() => onExplain("available")}
+        >
           {sgd(s2s.safeToSpend)} <span className={css.infoDot}>ⓘ</span>
         </button>
       </div>
@@ -586,7 +601,7 @@ function HomeHorizon({ onBack, onReceipt }) {
       {(phase === "shape" || phase === "receipt") && after && (
         <>
           <div className={css.horizon}>
-            <p className={css.kicker}>Home Horizon</p>
+            <p className={css.kicker}>Your path to this home</p>
             <div className={css.horizonTrack}>
               <div className={css.horizonBase} />
               <div className={css.horizonFill} style={{ width: after.readyMonth ? "72%" : "22%" }} />

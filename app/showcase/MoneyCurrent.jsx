@@ -29,19 +29,19 @@ export function buildCurrentNodes(twin, decision = null) {
     { key: "now", kind: "now", label: "Now", amount: s2s.safeToSpend ?? twin?.twin?.balanceBreakdown?.availableNow ?? 0, when: null, whenText: "safe to spend" },
   ];
   if (nextBill) {
-    nodes.push({ key: "bill", kind: "out", label: "Next bill", amount: -Math.abs(nextBill.amount), when: nextBill.dueDate, whenText: shortDate(nextBill.dueDate), name: nextBill.label });
+    nodes.push({ key: "bill", kind: "out", label: "Bill", amount: -Math.abs(nextBill.amount), when: nextBill.dueDate, whenText: shortDate(nextBill.dueDate), name: nextBill.label });
   }
   if (nextIncome) {
-    nodes.push({ key: "income", kind: "in", label: "Next income", amount: Math.abs(nextIncome.amount), when: nextIncome.expectedDate, whenText: nextIncome.inDays != null ? `in ${nextIncome.inDays}d` : shortDate(nextIncome.expectedDate), name: nextIncome.label });
+    nodes.push({ key: "income", kind: "in", label: "Income", amount: Math.abs(nextIncome.amount), when: nextIncome.expectedDate, whenText: nextIncome.inDays != null ? `in ${nextIncome.inDays}d` : shortDate(nextIncome.expectedDate), name: nextIncome.label });
   }
   const protectedAmt = bd.protectedReserve ?? twin?.twin?.balanceBreakdown?.protectedFor ?? 0;
   if (protectedAmt > 0) {
     nodes.push({ key: "protected", kind: "protected", label: "Protected", amount: protectedAmt, when: null, whenText: "kept back" });
   }
   if (decision) {
-    nodes.push({ key: "decision", kind: "decision", label: decision.label ?? "Next decision", amount: decision.amount ?? null, when: decision.when ?? null, whenText: decision.whenText ?? (decision.when ? shortDate(decision.when) : "you're shaping this") });
+    nodes.push({ key: "decision", kind: "decision", label: decision.label ?? "Decision", amount: decision.amount ?? null, when: decision.when ?? null, whenText: decision.whenText ?? (decision.when ? shortDate(decision.when) : "you're shaping this") });
   } else {
-    nodes.push({ key: "decision", kind: "decision", label: "Next decision", amount: null, when: null, whenText: "nothing pending" });
+    nodes.push({ key: "decision", kind: "decision", label: "Decision", amount: null, when: null, whenText: "none pending" });
   }
   return nodes;
 }
@@ -70,31 +70,25 @@ export function MoneyCurrent({ twin, decision = null, onExplain = null, compact 
           ) : null}
         </div>
       )}
-      <div className={css.track} style={{ height: compact ? 64 : 84 }}>
+      <div className={`${css.track} ${compact ? css.trackCompact : ""}`}>
         <div className={css.trackLine} />
         {nodes.map((node, i) => {
-          const left = n === 1 ? 50 : (i / (n - 1)) * 100;
-          const edge = left < 12 ? "left" : left > 88 ? "right" : "center";
-          const style = {
-            left: `${left}%`,
-            ...(edge === "left" ? { transform: "translate(0, -50%)", alignItems: "flex-start", textAlign: "left" } : {}),
-            ...(edge === "right" ? { transform: "translate(-100%, -50%)", alignItems: "flex-end", textAlign: "right" } : {}),
-          };
+          const align = i === 0 ? css.nodeStart : i === n - 1 ? css.nodeEnd : "";
           return (
-            <div key={node.key} className={`${css.node} ${NODE_CLASS[node.kind]}`} style={style}>
+            <div key={node.key} className={`${css.node} ${NODE_CLASS[node.kind]} ${align}`}>
               <span className={css.nodeLabelTop}>{node.label}</span>
               <span className={css.nodeDot} />
-              <span className={css.nodeLabelBot}>
+              <span className={css.nodeAmt}>
                 {node.amount != null ? (
-                  <span className={css.nodeAmt}>
+                  <>
                     {node.amount < 0 ? "−" : node.kind === "in" ? "+" : ""}
                     {sgd(Math.abs(node.amount))}
-                  </span>
+                  </>
                 ) : (
-                  <span className={css.nodeWhen}>—</span>
+                  "—"
                 )}
-                <span className={css.nodeWhen}>{node.whenText}</span>
               </span>
+              <span className={css.nodeWhen}>{node.whenText}</span>
             </div>
           );
         })}
@@ -108,6 +102,7 @@ export function MoneyCurrent({ twin, decision = null, onExplain = null, compact 
 export function MoneyCurrentRipple({ before, after, changedLabel, consequence, movedRows = [], onNext, nextLabel = "Back to what needs you" }) {
   return (
     <section className={css.ripple} aria-label="What changed">
+      <p className={css.kicker}>What changed</p>
       <div className={css.rippleRow}>
         <span className={css.rk}>Before</span>
         <span>{before}</span>
