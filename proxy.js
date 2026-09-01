@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Edge middleware (Usable RC, section 十二 / 十四):
+// Edge proxy - Next 16 convention (Usable RC, section 十二 / 十四):
 //  - security headers + a strict-ish CSP on every response
 //  - same-origin (CSRF) check for every cookie-authenticated /api mutation
 //
@@ -51,7 +51,7 @@ function sameOrigin(request) {
   return (o === null || o === host) && (r === null || r === host);
 }
 
-export function middleware(request) {
+export default function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // CSRF / same-origin for API mutations (skip auth endpoints - they carry

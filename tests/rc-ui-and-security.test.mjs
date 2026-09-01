@@ -98,8 +98,8 @@ test("AccountControl exposes export, consent revoke and a guarded delete", () =>
   assert.match(src, /window\.location\.href = "\/login"/, "delete signs the user out");
 });
 
-test("middleware sets security headers + CSP and blocks cross-origin API mutations", () => {
-  const src = read("middleware.js");
+test("proxy sets security headers + CSP and blocks cross-origin API mutations", () => {
+  const src = read("proxy.js");
   assert.match(src, /content-security-policy|content-security-policy/i);
   assert.match(src, /x-frame-options/);
   assert.match(src, /x-content-type-options/);

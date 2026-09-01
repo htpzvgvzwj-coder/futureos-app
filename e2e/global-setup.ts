@@ -9,6 +9,10 @@ import { allIdentities } from "./identities.mjs";
 // missing auth, and one run's Seal never pollutes another's account.
 export default async function globalSetup() {
   const root = path.resolve(__dirname, "..");
+  // The flagship-studios spec needs 27 seeded identities; the lean
+  // usable-release spec registers its own users and does not. Allow
+  // skipping the heavy seed.
+  if (process.env.E2E_SKIP_SEED === "1") return;
   try {
     execFileSync(process.execPath, ["--env-file=.env", "scripts/seed-e2e-user.mjs"], {
       cwd: root,

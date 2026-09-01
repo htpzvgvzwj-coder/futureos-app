@@ -108,8 +108,12 @@ export function OnboardingWizard({ onComplete, onOpen }) {
                 id={`consent-${c.scope}`}
                 type="checkbox"
                 checked={c.granted}
-                disabled={busy}
-                onChange={(e) => post({ action: "set_consent", scope: c.scope, granted: e.target.checked })}
+                onChange={(e) => {
+                  const granted = e.target.checked;
+                  // optimistic: flip locally now, reconcile from the server response
+                  setState((s) => ({ ...s, consent: s.consent.map((x) => (x.scope === c.scope ? { ...x, granted } : x)) }));
+                  post({ action: "set_consent", scope: c.scope, granted });
+                }}
               />
               <label htmlFor={`consent-${c.scope}`}>
                 <strong>{c.scope.replace(/_/g, " ")}</strong>
