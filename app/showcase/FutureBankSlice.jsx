@@ -404,7 +404,7 @@ function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource,
     <>
       <div>
         <p className={css.kicker}>Today · {new Date().toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "long" })}</p>
-        <p className={css.micro}>Balances from your ledger · every figure is explained</p>
+        <p className={css.micro}>Balances from your ledger · tap the amount, the current or a state to explain it</p>
       </div>
 
       <div className={css.bigAmountWrap}>
@@ -562,6 +562,11 @@ function HomeHorizon({ onBack, onReceipt }) {
   const apply = async () => {
     const field = await seed({ monthly_contribution: pace });
     if (!field) return;
+    const v = field?.realityPath?.sealableVerdict;
+    if (v && v.sealable === false && process.env.NODE_ENV !== "production") {
+      // Technical reason stays in dev logs only; the user sees humanSealBlock().
+      console.warn(`[FutureBank] Home path not yet sealable — server reason: ${v.reason}`);
+    }
     setPath(field);
     setPhase("receipt");
     onReceipt?.();
