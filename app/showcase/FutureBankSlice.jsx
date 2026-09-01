@@ -284,7 +284,7 @@ function Explore({ twin, onHome, onProblem, onBack }) {
           <span className={styles.choiceHint}>A payment, a bill, a tight month, an unfamiliar charge.</span>
         </button>
         <button type="button" className={styles.choiceBtn} onClick={onHome}>
-          <span className={styles.choiceName}>Build a future</span>
+          <span className={styles.choiceName}>Plan a home</span>
           <span className={styles.choiceHint}>Plan a home, and see the cost to your other goals.</span>
         </button>
       </div>
@@ -342,7 +342,7 @@ function HomeGoal({ onBack, onReceipt }) {
       const res = await fetch("/api/future-field/seed", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ domain: "home", mode: "confirmed", answers: { price_band: priceBand, target_month: month } }),
+        body: JSON.stringify({ domain: "home", mode: "estimate", answers: { price_band: priceBand, target_month: month } }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -371,7 +371,7 @@ function HomeGoal({ onBack, onReceipt }) {
       const res = await fetch("/api/future-field/seed", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ domain: "home", mode: "confirmed", answers: { price_band: priceBand, target_month: month }, exactAmounts: { monthly_contribution: parsed.value } }),
+        body: JSON.stringify({ domain: "home", mode: "estimate", answers: { price_band: priceBand, target_month: month }, exactAmounts: { monthly_contribution: parsed.value } }),
       });
       if (!res.ok) {
         setErr("Could not save your change.");
@@ -429,11 +429,14 @@ function HomeGoal({ onBack, onReceipt }) {
       {(phase === "path" || phase === "receipt") && after && (
         <>
           <div className={slice.recommend}>
-            <span className={styles.rippleState}>Here is your first path{path?.seededDraft ? " (from your inputs)" : ""}</span>
+            <span className={styles.rippleState}>Here is your first path</span>
             <strong>
               {after.readyMonth ? `On track for around ${after.readyMonth}` : "Set a monthly amount to get a target date"}
             </strong>
-            <span className={styles.txnMeta}>This changes your monthly saving pace and your safety buffer.</span>
+            <span className={styles.txnMeta}>
+              Built from your price range and target year. Property type is estimated for now — you can refine it later.
+              This changes your monthly saving pace and your safety buffer.
+            </span>
           </div>
 
           {phase === "path" && (
