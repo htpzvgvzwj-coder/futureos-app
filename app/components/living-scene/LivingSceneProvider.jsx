@@ -18,6 +18,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLifeThread } from "../life-thread/LifeThreadProvider.jsx";
+import { StudioEntryBridge } from "./StudioEntryBridge.jsx";
+import { LoadingState, ErrorState } from "../bank/AsyncState.jsx";
 import { derivePhase } from "../../../lib/living-scene/spine.js";
 import { commitmentGateOpen, allocationGoalId, allocationSettled as computeAllocationSettled } from "../../../lib/living-scene/gates.js";
 import { normalizeAllocation, allocationSum, isAllocationSet } from "../../../lib/living-plan/allocation.js";
@@ -83,6 +85,8 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   const branchVarsRef = useRef({});
 
   // ---- load the real field (source of truth for confirmed state) --------
+  const [fieldNonce, setFieldNonce] = useState(0);
+  const reloadField = useCallback(() => setFieldNonce((n) => n + 1), []);
   useEffect(() => {
     let alive = true;
     setLoadState("loading");
@@ -131,7 +135,7 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     return () => {
       alive = false;
     };
-  }, [domain]);
+  }, [domain, fieldNonce]);
 
   // ---- restore the UNSAVED DRAFT only (never "sealed") ------------------
   useEffect(() => {
@@ -516,15 +520,41 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       stressTest,
       shadowPreview,
       pins: field?.pins ?? [],
+      entryRequirements: field?.entryRequirements ?? null,
+      seededDraft: field?.seededDraft ?? null,
+      reloadField,
     }),
     [
       domain, loadState, field, reality, realityData, sceneContext, crossGoalNodes, branchVars, branchDirty, setVar, resetBranch,
       forkBranch, selectBranch, discardBranch,
       projection, serverBranch, freedCashflow, addedPressure, allocation, allocationTouched, allocationOverspent, allocationTarget,
       needsTarget, setAllocation, turningPoint, turningPointAck, acknowledgeTurningPoint, phase, canReviewCommitment, seal, confirmSeal,
-      sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview,
+      sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview, reloadField,
     ],
   );
 
   return <LivingSceneContext.Provider value={value}>{children}</LivingSceneContext.Provider>;
+}
+
+// The shared first-use gate. A Studio scene renders <StudioSceneGate> and
+// only shows its native content once loadState === "ready". Loading /
+// error / no-reality are handled here, once, for all nine domains - no
+// more per-Studio "noPlan" dead ends.
+export function StudioSceneGate({ t, onOpenRealityEntry, onBack, children }) {
+  const s = useLivingScene();
+  if (s.loadState === "loading") return <LoadingState label="Loading this Studio…" />;
+  if (s.loadState === "error") return <ErrorState onRetry={s.reloadField} onBack={onBack} message="This Studio could not load." />;
+  if (s.loadState === "no-reality") {
+    return (
+      <StudioEntryBridge
+        domain={s.domain}
+        requirements={s.entryRequirements}
+        onSeeded={() => s.reloadField()}
+        onOpenRealityEntry={onOpenRealityEntry}
+        onBack={onBack}
+        t={t}
+      />
+    );
+  }
+  return children;
 }
