@@ -1,0 +1,744 @@
+/* Future Bank visual system - "Money Current".
+   Calm, precise, premium, human. Deep ink for certainty, warm off-white
+   ground, one sea-green for forward movement, amber only for attention.
+   Mobile-first at 390px; 8px spacing rhythm; a compact, intentional page. */
+
+.app {
+  --ink: #10203a;
+  --ink-soft: #46566f;
+  --ink-faint: #8a97ad;
+  --ground: #f6f4ef; /* warm off-white */
+  --surface: #ffffff;
+  --line: #e7e3da;
+  --sea: #0f7d6b; /* forward movement */
+  --sea-soft: #e2f1ee;
+  --amber: #b5741a; /* attention only */
+  --amber-soft: #f7ecdc;
+  --radius: 14px;
+
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+}
+
+.shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  background: var(--ground);
+  padding: 20px 18px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---- type scale ------------------------------------------------ */
+.kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+.display {
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.lede {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.micro {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+/* ---- the one dominant number --------------------------------- */
+.bigAmountWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bigAmountLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.bigAmount {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.bigAmount.warn {
+  color: var(--amber);
+}
+.infoDot {
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+/* ---- state chips: Free / Spoken for / Protected -------------- */
+.stateRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.stateChip {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.stateChip small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.stateChip b {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dotFree {
+  color: var(--sea);
+}
+.dotSpoken {
+  color: var(--ink-soft);
+}
+.dotProtected {
+  color: var(--amber);
+}
+
+/* ---- Money Current -------------------------------------------- */
+.current {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 14px 14px;
+}
+.currentHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.currentTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.currentLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sea);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+.track {
+  position: relative;
+  height: 84px;
+  margin: 6px 2px 2px;
+}
+.trackLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--line), var(--sea) 60%, var(--line));
+  border-radius: 2px;
+}
+.node {
+  position: absolute;
+  top: 42px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 84px;
+}
+.nodeDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1.5px currentColor;
+}
+.nodeNow {
+  color: var(--ink);
+}
+.nodeNow .nodeDot {
+  background: var(--ink);
+}
+.nodeIn {
+  color: var(--sea);
+}
+.nodeIn .nodeDot {
+  background: var(--sea);
+}
+.nodeOut {
+  color: var(--ink-soft);
+}
+.nodeOut .nodeDot {
+  background: var(--ink-soft);
+}
+.nodeProtected {
+  color: var(--amber);
+}
+.nodeProtected .nodeDot {
+  background: var(--amber);
+}
+.nodeDecision {
+  color: var(--sea);
+}
+.nodeDecision .nodeDot {
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--sea);
+}
+.nodeLabelTop {
+  position: absolute;
+  bottom: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink-faint);
+}
+.nodeLabelBot {
+  position: absolute;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.nodeAmt {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.nodeWhen {
+  font-size: 10px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* ---- ripple (Change Receipt) -------------------------------- */
+.ripple {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rippleRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.rippleRow .rk {
+  flex: 0 0 62px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-top: 2px;
+}
+.rippleRow.moved .rk {
+  color: var(--sea);
+}
+.deltaUp {
+  color: var(--sea);
+  font-weight: 700;
+}
+.deltaDown {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+/* ---- Home Horizon ------------------------------------------- */
+.horizon {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+}
+.horizonTrack {
+  position: relative;
+  height: 64px;
+  margin: 14px 2px 8px;
+}
+.horizonBase {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30px;
+  height: 3px;
+  background: var(--line);
+  border-radius: 3px;
+}
+.horizonFill {
+  position: absolute;
+  left: 0;
+  top: 30px;
+  height: 3px;
+  background: var(--sea);
+  border-radius: 3px;
+}
+.horizonFloor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  border-top: 1.5px dashed var(--amber);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--amber);
+  padding-top: 2px;
+}
+.horizonEnd {
+  position: absolute;
+  top: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.horizonEnd b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.horizonEnd small {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+.horizonRange {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+/* ---- controls --------------------------------------------- */
+.cta {
+  background: var(--ink);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  width: 100%;
+}
+.cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ctaSea {
+  background: var(--sea);
+}
+.link {
+  background: none;
+  border: 0;
+  color: var(--sea);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.backLink {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.choiceGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.choice {
+  background: var(--surface);
+  border: 0;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.choice[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--sea);
+}
+.choice b {
+  font-size: 15px;
+  font-weight: 650;
+}
+.choice span {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.field input,
+.field select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+.field input:focus,
+.field select:focus {
+  outline: 2px solid var(--sea);
+  outline-offset: 1px;
+}
+.err {
+  font-size: 12.5px;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--sea);
+}
+
+/* ---- recent activity (not a table) ------------------------ */
+.activity {
+  display: flex;
+  flex-direction: column;
+}
+.actItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.actItem:last-child {
+  border-bottom: 0;
+}
+.actGlyph {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--sea-soft);
+  color: var(--sea);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex: 0 0 34px;
+}
+.actGlyph.out {
+  background: #efece5;
+  color: var(--ink-soft);
+}
+.actBody {
+  flex: 1;
+  min-width: 0;
+}
+.actName {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.actMeta {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+.actAmt {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.actAmt.in {
+  color: var(--sea);
+}
+
+/* ---- partial-picture banner --------------------------------- */
+.partial {
+  background: var(--amber-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.partial b {
+  font-size: 13.5px;
+  color: var(--amber);
+}
+.partial span {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* ---- bottom sheet ---------------------------------------- */
+.sheetScrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 32, 58, 0.35);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 60;
+}
+.sheet {
+  width: 100%;
+  max-width: 430px;
+  background: var(--surface);
+  border-radius: 18px 18px 0 0;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 82dvh;
+  overflow-y: auto;
+}
+.sheetGrip {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  align-self: center;
+}
+.sheetTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+.sheetKV {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sheetKV span:last-child {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.provTag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #efece5;
+  color: var(--ink-soft);
+}
+.provTag.confirmed {
+  background: var(--sea-soft);
+  color: var(--sea);
+}
+.provTag.range {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+/* ---- welcome illustration ------------------------------- */
+.welcomeArt {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+}
+.proofList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.proofList li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.proofMark {
+  color: var(--sea);
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.searchBox {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--surface);
+}
+.svcItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.svcItem.disabled {
+  opacity: 0.6;
+}
+.svcTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.svcName {
+  font-size: 14px;
+  font-weight: 650;
+}
+.svcStatus {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.svcStatus.live {
+  color: var(--sea);
+}
+.svcStatus.soon {
+  color: var(--ink-faint);
+}
+.svcHelp {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.svcNext {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--sea);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.svcNext:disabled {
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.stepDots {
+  display: flex;
+  gap: 6px;
+}
+.stepDot {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--line);
+}
+.stepDot.on {
+  background: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app {
+    --ink: #eef1f6;
+    --ink-soft: #aab3c4;
+    --ink-faint: #7c869a;
+    --ground: #101521;
+    --surface: #18202f;
+    --line: #2b3446;
+    --sea: #3fbfa8;
+    --sea-soft: #16302c;
+    --amber: #d9a24a;
+    --amber-soft: #2c2416;
+  }
+}

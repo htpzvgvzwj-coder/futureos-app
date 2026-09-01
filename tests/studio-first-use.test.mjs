@@ -104,14 +104,24 @@ test("the StudioEntryBridge is a real form, never a static dead end", () => {
   assert.doesNotMatch(src, /type="number"/, "no raw number input -> no browser 'enter a real number' bubble");
 });
 
-test("the /showcase slice hides legacy nav and drives the real APIs", () => {
+test("the Future Bank slice drives real APIs, has the Money Current + Change Receipt, no fake data", () => {
   const src = read("app/showcase/FutureBankSlice.jsx");
-  assert.match(src, /How Future Bank works/);
+  assert.match(src, /Your money has a present\. It also has a direction\./, "branded welcome");
   assert.match(src, /Available to spend/);
   assert.match(src, /\/api\/financial-twin/);
   assert.match(src, /\/api\/future-field\/seed/);
-  assert.match(src, /What changed/, "the change receipt");
+  assert.match(src, /\/api\/bank\/accounts/, "Money Snapshot creates a real account");
+  assert.match(src, /MoneyCurrentRipple/, "the change receipt is a Money Current ripple");
   assert.doesNotMatch(src, /defaultProfile|karina|restoreMockData/i, "no fake data source");
+
+  const mc = read("app/showcase/MoneyCurrent.jsx");
+  assert.match(mc, /Now\s+→\s+next bill\s+→\s+next income/i, "the signature current shape");
+  assert.match(mc, /buildCurrentNodes/);
+
+  // legacy `exceeds_regulatory_ceiling` must not reach the user
+  assert.doesNotMatch(src, /exceeds_regulatory_ceiling["'`]/, "raw internal reason is not shown");
+  assert.match(src, /needs a later target, a lower price, or more monthly room/, "human copy for the seal block");
+
   const page = read("app/showcase/page.jsx");
   assert.match(page, /FutureBankSlice/);
 });

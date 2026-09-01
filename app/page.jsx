@@ -9,6 +9,7 @@ import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
+import { FutureBankSlice } from "./showcase/FutureBankSlice.jsx";
 import {
   BankTodayConnected, GuardianConnected, RippleStripConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -17229,6 +17230,31 @@ function Screen({ children, className }) {
   );
 }
 
+// Future Bank is the primary experience; the legacy simulator app is an
+// internal migration route behind ?classic=1 (or a stored opt-in).
+function wantsClassicApp() {
+  if (typeof window === "undefined") return false;
+  try {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("classic") === "1") return true;
+    if (p.get("classic") === "0") {
+      window.localStorage.removeItem("fb:classic");
+      return false;
+    }
+    return window.localStorage.getItem("fb:classic") === "1";
+  } catch {
+    return false;
+  }
+}
+function setClassicApp(on) {
+  try {
+    window.localStorage.setItem("fb:classic", on ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+  if (typeof window !== "undefined") window.location.search = on ? "?classic=1" : "";
+}
+
 export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
@@ -17813,6 +17839,19 @@ export default function App() {
           <p style={{ padding: 24 }}>{t("loading.detail")}</p>
         </section>
       </main>
+    );
+  }
+
+  // Future Bank is the primary authenticated experience. The legacy
+  // simulator app is reachable only via ?classic=1 (an internal migration
+  // route, not primary navigation).
+  if (!wantsClassicApp()) {
+    return (
+      <LifeThreadProvider enabled>
+        <BankDataProvider enabled>
+          <FutureBankSlice onExitToApp={() => { setClassicApp(true); }} />
+        </BankDataProvider>
+      </LifeThreadProvider>
     );
   }
 

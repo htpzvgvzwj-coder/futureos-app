@@ -1,32 +1,30 @@
 "use client";
 
-// The Future Bank vertical slice - ONE visually reviewable end-to-end
-// experience, no legacy simulator screens, no feature catalogue wall.
+// Future Bank - the "Money Current" experience. One product feeling: real
+// money events flow through time; you see what is safe now, what arrives
+// next, what is spoken for, and how one future decision changes that.
 //
-//   Welcome -> Reality setup -> Today -> Explore (curated) -> Home goal
-//   -> Change Receipt
+//   Welcome -> Money Snapshot (3 steps) -> Today -> What needs you next
+//   -> Home Horizon -> Change Receipt
 //
-// Every number is real (server-computed + persisted). Estimates are
-// labelled. No demo / mock / preset persona / fake bank success.
+// Real server data throughout. Estimates and user-ranges are shown, quietly.
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "../components/bank/bank.module.css";
-import slice from "./slice.module.css";
-import { LoadingState, ErrorState } from "../components/bank/AsyncState.jsx";
-import { RealityEntry } from "../components/bank/RealityEntry.jsx";
-import { CsvImportWizard } from "../components/bank/CsvImportWizard.jsx";
+import css from "./fb.module.css";
+import { MoneyCurrent, MoneyCurrentRipple } from "./MoneyCurrent.jsx";
 import { parseMoneyInput, formatMoney } from "../../lib/money-input.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
+const POST = (url, body) =>
+  fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json().then((j) => ({ ok: r.ok, status: r.status, ...j })));
 
-export function FutureBankSlice() {
-  const [auth, setAuth] = useState("checking"); // checking | anon | in
+export function FutureBankSlice({ onExitToApp = null }) {
+  const [auth, setAuth] = useState("checking");
   const [step, setStep] = useState("welcome");
   const [twin, setTwin] = useState(null);
   const [twinState, setTwinState] = useState("idle");
-  const [explain, setExplain] = useState(null);
+  const [sheet, setSheet] = useState(null);
 
-  // ---- auth (real server session) --------------------------------
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
@@ -35,497 +33,796 @@ export function FutureBankSlice() {
   }, []);
 
   const loadTwin = useCallback(async () => {
-    setTwinState("loading");
+    setTwinState((s) => (s === "ready" ? "ready" : "loading"));
     try {
       const r = await fetch("/api/financial-twin", { headers: { "cache-control": "no-cache" } });
-      if (!r.ok) {
-        setTwinState(r.status === 401 ? "anon" : "error");
-        return;
-      }
+      if (!r.ok) return setTwinState(r.status === 401 ? "anon" : "error");
       setTwin(await r.json());
       setTwinState("ready");
     } catch {
       setTwinState("error");
     }
   }, []);
-
   useEffect(() => {
     if (auth === "in") loadTwin();
   }, [auth, loadTwin]);
 
-  // after setup completes, land on Today
-  const finishSetup = useCallback(async () => {
-    await loadTwin();
-    setStep("today");
-  }, [loadTwin]);
+  if (auth === "checking") return <Shell><p className={css.lede}>Opening Future Bank…</p></Shell>;
+  if (auth === "anon")
+    return (
+      <Shell>
+        <p className={css.kicker}>Future Bank</p>
+        <h1 className={css.title}>Sign in to continue</h1>
+        <p className={css.lede}>
+          This preview uses a real account. <a className={css.link} href="/signup">Create one</a> or{" "}
+          <a className={css.link} href="/login">sign in</a>, then return here.
+        </p>
+      </Shell>
+    );
 
-  if (auth === "checking") return <Frame><LoadingState label="Opening Future Bank…" /></Frame>;
-  if (auth === "anon") return <Frame><AnonNotice /></Frame>;
+  const partial = twin && (twin.isEmpty || (twin.counts && twin.counts.incomeStreams === 0));
 
   return (
-    <Frame>
-      {step === "welcome" && <Welcome onStart={() => setStep(twin && !twin.isEmpty ? "today" : "setup")} hasData={twin && !twin.isEmpty} />}
-      {step === "setup" && <RealitySetup onDone={finishSetup} />}
+    <Shell>
+      {step === "welcome" && <Welcome onStart={() => setStep(twin && !twin.isEmpty ? "today" : "snapshot")} onData={() => setSheet({ kind: "data" })} />}
+      {step === "snapshot" && <MoneySnapshot onDone={() => { loadTwin(); setStep("today"); }} onExplore={() => setStep("needs") } />}
+      {step === "complete" && <CompletePicture onDone={() => { loadTwin(); setStep("today"); }} />}
       {step === "today" && (
-        <Today
-          twin={twin}
-          state={twinState}
-          onReload={loadTwin}
-          onExplain={setExplain}
-          onNext={() => setStep("explore")}
-        />
+        <Today twin={twin} state={twinState} partial={partial} onReload={loadTwin} onExplain={(k) => setSheet({ kind: k, twin })} onNext={() => setStep("needs")} onAddSource={() => setStep("snapshot")} onComplete={() => setStep("complete")} />
       )}
-      {step === "explore" && (
-        <Explore twin={twin} onHome={() => setStep("home")} onBack={() => setStep("today")} onProblem={() => setStep("today")} />
+      {step === "needs" && (
+        <NeedsNext twin={twin} onBack={() => setStep("today")} onHome={() => setStep("home")} onSnapshot={() => setStep("snapshot")} onProblem={() => setSheet({ kind: "problem", twin })} onServices={() => setSheet({ kind: "services" })} onUnderstand={() => setStep("today")} />
       )}
-      {step === "home" && <HomeGoal onBack={() => setStep("explore")} onReceipt={() => loadTwin()} />}
+      {step === "home" && <HomeHorizon onBack={() => setStep("needs")} onReceipt={loadTwin} />}
 
-      {explain && <ExplainSheet item={explain} onClose={() => setExplain(null)} />}
-    </Frame>
+      {sheet && <BottomSheet sheet={sheet} onClose={() => setSheet(null)} onGoHome={() => { setSheet(null); setStep("home"); }} onGoSnapshot={() => { setSheet(null); setStep("snapshot"); }} />}
+      {onExitToApp ? (
+        <button type="button" className={css.backLink} style={{ opacity: 0.5, marginTop: "auto" }} onClick={onExitToApp}>
+          Switch to the classic app
+        </button>
+      ) : null}
+    </Shell>
   );
 }
 
-// ---------------------------------------------------------------------
-
-function Frame({ children }) {
+function Shell({ children }) {
   return (
-    <main className={slice.frame}>
-      <div className={`${styles.bank} ${slice.col}`}>{children}</div>
-    </main>
-  );
-}
-
-function AnonNotice() {
-  return (
-    <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>Please sign in first</p>
-      <p className={styles.provenance}>
-        This preview needs a real account. Open <a href="/login">/login</a> (or <a href="/signup">/signup</a>), then come back to <a href="/showcase">/showcase</a>.
-      </p>
+    <div className={css.app}>
+      <div className={css.shell}>{children}</div>
     </div>
   );
 }
 
-// 1 - Welcome -------------------------------------------------------
-function Welcome({ onStart, hasData }) {
+/* ================= A. Welcome ================= */
+function Welcome({ onStart, onData }) {
   return (
-    <section className={slice.welcome} aria-labelledby="fb-welcome">
-      <h1 id="fb-welcome" className={slice.h1}>How Future Bank works</h1>
-      <ol className={slice.ideas}>
-        <li>
-          <strong>Your real money.</strong> Your accounts, balances and transactions — entered or imported, never assumed.
-        </li>
-        <li>
-          <strong>What it means.</strong> One honest number: how much is actually safe to spend right now.
-        </li>
-        <li>
-          <strong>Your next decision.</strong> When you plan something, you see exactly what changes and what to do next.
-        </li>
-      </ol>
-      <button type="button" className={styles.primaryBtn} onClick={onStart}>
-        {hasData ? "Go to my money picture" : "Set up my money picture"}
-      </button>
-    </section>
-  );
-}
-
-// 2 - Reality setup ----------------------------------------------
-function RealitySetup({ onDone }) {
-  const [mode, setMode] = useState(null); // null | manual | csv
-  if (mode === "manual") return <RealityEntry onDone={onDone} onOpen={() => setMode("csv")} />;
-  if (mode === "csv") return <CsvImportWizard onDone={onDone} />;
-  return (
-    <section aria-labelledby="fb-setup">
-      <h1 id="fb-setup" className={slice.h1}>Add your money</h1>
-      <p className={styles.provenance}>Two ways in. You can add more any time. Nothing is assumed for you.</p>
-      <div className={styles.choiceList}>
-        <button type="button" className={styles.choiceBtn} onClick={() => setMode("manual")}>
-          <span className={styles.choiceName}>Add one account manually</span>
-          <span className={styles.choiceHint}>Name it, set the balance — about a minute.</span>
-        </button>
-        <button type="button" className={styles.choiceBtn} onClick={() => setMode("csv")}>
-          <span className={styles.choiceName}>Import transactions by CSV</span>
-          <span className={styles.choiceHint}>Upload a statement export; preview before it's saved.</span>
-        </button>
+    <>
+      <p className={css.kicker}>Future Bank</p>
+      <h1 className={css.display}>Your money has a present. It also has a direction.</h1>
+      <div className={css.welcomeArt}>
+        <MoneyCurrent twin={welcomePreviewTwin} compact />
       </div>
-      <button type="button" className={styles.ghostBtn} onClick={onDone} style={{ marginTop: 12 }}>
-        Skip for now
-      </button>
-    </section>
+      <ul className={css.proofList}>
+        <li><span className={css.proofMark}>→</span> Know what is safe to spend now.</li>
+        <li><span className={css.proofMark}>→</span> See the trade-offs before you commit.</li>
+        <li><span className={css.proofMark}>→</span> Keep plans connected to real life.</li>
+      </ul>
+      <button type="button" className={css.cta} onClick={onStart}>Build my money picture</button>
+      <button type="button" className={css.link} onClick={onData}>How does this use my data?</button>
+    </>
+  );
+}
+// A small honest illustrative current for the welcome only (no user data yet).
+const welcomePreviewTwin = {
+  safeToSpend: { safeToSpend: 2400, breakdown: { protectedReserve: 3000 }, nextIncome: { amount: 4200, inDays: 9, label: "Salary" }, nearTermObligationsList: [{ amount: 1450, dueDate: null, label: "Rent" }] },
+};
+
+/* ================= B. Money Snapshot (3 steps) ================= */
+function MoneySnapshot({ onDone, onExplore }) {
+  const [n, setN] = useState(1);
+  const [begin, setBegin] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [bank, setBank] = useState("");
+  const [balance, setBalance] = useState("");
+  const [balErr, setBalErr] = useState("");
+  const [watch, setWatch] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const beginOpts = [
+    { id: "current", label: "A current account", hint: "Everyday spending money." },
+    { id: "savings", label: "A savings account", hint: "Money you're setting aside." },
+    { id: "import", label: "Import a statement", hint: "Upload a CSV of transactions." },
+    { id: "goal", label: "Just explore a goal first", hint: "See a plan before adding accounts." },
+  ];
+
+  const submitAccount = async () => {
+    if (begin === "goal") {
+      onExplore();
+      return;
+    }
+    if (begin === "import") {
+      setN(9); // import sub-view
+      return;
+    }
+    const parsed = balance ? parseMoneyInput(balance, { min: 0 }) : { ok: true, value: 0 };
+    if (!parsed.ok) return setBalErr(parsed.error);
+    setBalErr("");
+    setBusy(true);
+    setErr("");
+    try {
+      const acc = await POST("/api/bank/accounts", { kind: begin, displayName: nickname || (begin === "savings" ? "Savings" : "Everyday"), institution: bank || undefined });
+      if (!acc.ok) throw new Error(acc.error || "account");
+      if (parsed.value > 0) {
+        await POST("/api/bank/transactions", { accountId: acc.account.id, direction: "credit", amount: parsed.value, channel: "opening_balance", category: "opening_balance", merchant: "Opening balance" });
+      }
+      setN(3);
+    } catch {
+      setErr("Could not save that. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitWatch = async () => {
+    setBusy(true);
+    try {
+      if (watch === "income") {
+        await POST("/api/financial-twin/rows", { kind: "income", data: { kind: "salary", label: "Salary", monthlyAmount: 0 } }).catch(() => {});
+      }
+      onDone();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (n === 9) {
+    return (
+      <>
+        <StepHead n={2} of={3} onBack={() => setN(1)} title="Import a statement" />
+        <p className={css.lede}>Upload a CSV export from your bank. You'll preview every row before anything is saved.</p>
+        <CsvInline onDone={() => setN(3)} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <StepHead n={n} of={3} onBack={n > 1 ? () => setN(n - 1) : null} title={n === 1 ? "Where should we begin?" : n === 2 ? "Add this account" : "What should we watch first?"} />
+
+      {n === 1 && (
+        <div className={css.choiceGrid}>
+          {beginOpts.map((o) => (
+            <button key={o.id} type="button" className={css.choice} aria-pressed={begin === o.id} onClick={() => { setBegin(o.id); setN(o.id === "import" || o.id === "goal" ? n : 2); if (o.id === "import" || o.id === "goal") submitAccountLater(o.id); }}>
+              <b>{o.label}</b>
+              <span>{o.hint}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {n === 2 && (
+        <>
+          <div className={css.field}>
+            <label htmlFor="ms-nick">Nickname</label>
+            <input id="ms-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder={begin === "savings" ? "Savings" : "Everyday"} autoComplete="off" />
+          </div>
+          <div className={css.field}>
+            <label htmlFor="ms-bal">Current balance</label>
+            <input id="ms-bal" inputMode="decimal" value={balance} onChange={(e) => setBalance(e.target.value)} onBlur={(e) => { const p = parseMoneyInput(e.target.value, { min: 0 }); if (p.ok) setBalance(formatMoney(p.value)); }} placeholder="e.g. 4,200" />
+            {balErr ? <span className={css.err}>{balErr}</span> : null}
+          </div>
+          <div className={css.field}>
+            <label htmlFor="ms-bank">Bank (optional)</label>
+            <input id="ms-bank" value={bank} onChange={(e) => setBank(e.target.value)} placeholder="e.g. OCBC" autoComplete="off" />
+          </div>
+          {err ? <span className={css.err}>{err}</span> : null}
+          <button type="button" className={css.cta} disabled={busy} onClick={submitAccount}>{busy ? "Saving…" : "Save account"}</button>
+        </>
+      )}
+
+      {n === 3 && (
+        <>
+          <p className={css.lede}>Future Bank keeps an eye on one thing to start. You can add the rest any time.</p>
+          <div className={css.choiceGrid}>
+            {[
+              { id: "bills", label: "My monthly bills", hint: "Rent, utilities, subscriptions." },
+              { id: "income", label: "My income", hint: "When salary lands, and how much." },
+              { id: "goal", label: "A future goal", hint: "A home, a wedding, a safety buffer." },
+              { id: "nothing", label: "Nothing yet", hint: "Just show me where I stand." },
+            ].map((o) => (
+              <button key={o.id} type="button" className={css.choice} aria-pressed={watch === o.id} onClick={() => setWatch(o.id)}>
+                <b>{o.label}</b>
+                <span>{o.hint}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className={css.cta} disabled={busy || !watch} onClick={submitWatch}>{busy ? "…" : "See my money picture"}</button>
+        </>
+      )}
+    </>
+  );
+
+  function submitAccountLater(id) {
+    if (id === "goal") onExplore();
+    if (id === "import") setN(9);
+  }
+}
+
+function StepHead({ n, of, onBack, title }) {
+  return (
+    <>
+      {onBack ? <button type="button" className={css.backLink} onClick={onBack}>← Back</button> : <span />}
+      <div className={css.stepDots}>
+        {Array.from({ length: of }).map((_, i) => (
+          <span key={i} className={`${css.stepDot} ${i < n ? css.on : ""}`} />
+        ))}
+      </div>
+      <h1 className={css.title}>{title}</h1>
+    </>
   );
 }
 
-// 3 - Today ------------------------------------------------------
-function Today({ twin, state, onReload, onExplain, onNext }) {
-  if (state === "loading" || state === "idle") return <LoadingState label="Loading your money…" />;
-  if (state === "error") return <ErrorState onRetry={onReload} message="Your money picture didn't load." />;
+function CsvInline({ onDone }) {
+  const [accts, setAccts] = useState([]);
+  const [accountId, setAccountId] = useState("");
+  const [csv, setCsv] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    fetch("/api/bank/accounts").then((r) => r.json()).then((d) => {
+      setAccts(d.accounts ?? []);
+      if (d.accounts?.[0]) setAccountId(d.accounts[0].id);
+    });
+  }, []);
+  const onFile = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 2 * 1024 * 1024) return setMsg("File over 2 MB.");
+    const rd = new FileReader();
+    rd.onload = () => setCsv(String(rd.result ?? ""));
+    rd.readAsText(f);
+  };
+  const doPreview = async () => {
+    setBusy(true);
+    const d = await POST("/api/import/transactions", { action: "preview", accountId, fileName: "import.csv", csv });
+    setBusy(false);
+    if (!d.ok) return setMsg(d.error ?? "Preview failed.");
+    setPreview(d);
+  };
+  const doCommit = async () => {
+    setBusy(true);
+    const d = await POST("/api/import/transactions", { action: "commit", accountId, fileName: "import.csv", csv, mapping: preview.mapping });
+    setBusy(false);
+    if (!d.ok) return setMsg(d.error ?? "Import failed.");
+    setMsg(`Imported ${d.imported}, skipped ${d.skippedDuplicates ?? 0} duplicates.`);
+    setTimeout(onDone, 700);
+  };
+  if (accts.length === 0) return <p className={css.err}>Add an account first, then import into it.</p>;
+  return (
+    <>
+      <div className={css.field}>
+        <label htmlFor="csv-acc">Into account</label>
+        <select id="csv-acc" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+          {accts.map((a) => <option key={a.id} value={a.id}>{a.displayName || a.kind}</option>)}
+        </select>
+      </div>
+      <div className={css.field}>
+        <label htmlFor="csv-file">CSV file (max 2 MB)</label>
+        <input id="csv-file" type="file" accept=".csv,text/csv" onChange={onFile} />
+      </div>
+      {msg ? <span className={css.err}>{msg}</span> : null}
+      {!preview ? (
+        <button type="button" className={css.cta} disabled={busy || !csv} onClick={doPreview}>{busy ? "…" : "Preview"}</button>
+      ) : (
+        <>
+          <p className={css.micro}>{preview.toImport} to import · {preview.duplicates} duplicates · {preview.invalidRows?.length ?? 0} invalid</p>
+          <button type="button" className={css.cta} disabled={busy || !preview.toImport} onClick={doCommit}>{busy ? "…" : `Import ${preview.toImport}`}</button>
+        </>
+      )}
+    </>
+  );
+}
+
+/* ================= "Complete my picture" (later) ================= */
+function CompletePicture({ onDone }) {
+  const [tab, setTab] = useState("income");
+  const [amount, setAmount] = useState("");
+  const [label, setLabel] = useState("");
+  const [msg, setMsg] = useState("");
+  const save = async () => {
+    const p = parseMoneyInput(amount, { min: 0 });
+    if (!p.ok) return setMsg(p.error);
+    const kind = tab;
+    const data = kind === "income" ? { kind: "salary", label: label || "Salary", monthlyAmount: p.value } : { label: label || "Bill", monthlyAmount: p.value };
+    const d = await POST("/api/financial-twin/rows", { kind: kind === "income" ? "income" : "recurring", data });
+    setMsg(d.ok ? "Saved." : d.error ?? "Could not save.");
+    if (d.ok) { setAmount(""); setLabel(""); }
+  };
+  return (
+    <>
+      <button type="button" className={css.backLink} onClick={onDone}>← Today</button>
+      <h1 className={css.title}>Complete my picture</h1>
+      <p className={css.lede}>Add income and recurring bills so Future Bank can see further ahead.</p>
+      <div className={css.chipRow}>
+        <button type="button" className={css.chip} aria-pressed={tab === "income"} onClick={() => setTab("income")}>Income</button>
+        <button type="button" className={css.chip} aria-pressed={tab === "bill"} onClick={() => setTab("bill")}>Bill</button>
+      </div>
+      <div className={css.field}>
+        <label htmlFor="cp-label">Name</label>
+        <input id="cp-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder={tab === "income" ? "Salary" : "Rent"} autoComplete="off" />
+      </div>
+      <div className={css.field}>
+        <label htmlFor="cp-amt">Monthly amount</label>
+        <input id="cp-amt" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} onBlur={(e) => { const p = parseMoneyInput(e.target.value, { min: 0 }); if (p.ok) setAmount(formatMoney(p.value)); }} placeholder="e.g. 1,500" />
+      </div>
+      {msg ? <span className={css.err}>{msg}</span> : null}
+      <button type="button" className={css.cta} onClick={save}>Add</button>
+      <button type="button" className={css.link} onClick={onDone}>Done for now</button>
+    </>
+  );
+}
+
+/* ================= C. Today ================= */
+function Today({ twin, state, partial, onReload, onExplain, onNext, onAddSource, onComplete }) {
+  if (state === "loading" || state === "idle") return <p className={css.lede}>Loading your money…</p>;
+  if (state === "error")
+    return (
+      <>
+        <p className={css.lede}>Your money picture didn't load.</p>
+        <button type="button" className={css.cta} onClick={onReload}>Try again</button>
+      </>
+    );
 
   if (!twin || twin.isEmpty) {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyTitle}>No accounts yet</p>
-        <p className={styles.provenance}>Add an account or import transactions to see your picture.</p>
-        <button type="button" className={styles.primaryBtn} onClick={onReload} style={{ marginTop: 8 }}>
-          Refresh
-        </button>
-      </div>
+      <>
+        <p className={css.kicker}>Today</p>
+        <h1 className={css.title}>Your picture is empty</h1>
+        <p className={css.lede}>Future Bank needs one real money source to begin. It stays saved to your account.</p>
+        <button type="button" className={css.cta} onClick={onAddSource}>Add your first money source</button>
+      </>
     );
   }
 
   const s2s = twin.safeToSpend ?? {};
-  const bd = s2s.breakdown ?? {};
-  const nextIn = s2s.nextIncome;
-  const nextBill = s2s.nearTermObligationsList?.[0];
-  const txns = twin.recentTransactions ?? [];
-
-  const explainItems = {
-    available: { label: "Available to spend", value: sgd(s2s.safeToSpend), how: "Liquid cash minus bills due before your next income, minus your protected safety reserve, minus what sealed plans already claim.", parts: [["Liquid cash", sgd(bd.postedLiquidCash)], ["Due before next income", `- ${sgd(bd.nearTermObligations)}`], ["Protected reserve", `- ${sgd(bd.protectedReserve)}`], ["Committed to plans", `- ${sgd(bd.alreadyCommitted)}`]] },
-  };
+  const bd = twin.twin?.balanceBreakdown ?? {};
+  const txns = (twin.recentTransactions ?? []).filter((t) => t.channel !== "opening_balance");
 
   return (
-    <section aria-labelledby="fb-today">
-      <h1 id="fb-today" className={slice.h1}>Today</h1>
+    <>
+      <div>
+        <p className={css.kicker}>Today · {new Date().toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "long" })}</p>
+        <p className={css.micro}>Balances from your ledger · every figure is explained</p>
+      </div>
 
-      <div className={styles.headline}>
-        <span className={styles.headlineLabel}>Available to spend</span>
-        <button type="button" className={`${styles.headlineAmount} ${s2s.belowProtectedFloor ? styles.headlineWarn : ""} ${slice.explainable}`} onClick={() => onExplain(explainItems.available)}>
-          {sgd(s2s.safeToSpend)} <span className={slice.explainMark} aria-hidden>ⓘ</span>
+      <div className={css.bigAmountWrap}>
+        <span className={css.bigAmountLabel}>Available to spend</span>
+        <button type="button" className={`${css.bigAmount} ${s2s.belowProtectedFloor ? css.warn : ""}`} onClick={() => onExplain("available")}>
+          {sgd(s2s.safeToSpend)} <span className={css.infoDot}>ⓘ</span>
         </button>
-        <span className={styles.headlineSub}>Tap any figure to see how it's worked out.</span>
       </div>
 
-      <div className={styles.breakdownRow}>
-        <span>Available now <b>{sgd(twin.twin?.balanceBreakdown?.availableNow)}</b></span>
-        <span>Spoken for <b>{sgd(twin.twin?.balanceBreakdown?.spokenFor)}</b></span>
-        <span>Protected <b>{sgd(twin.twin?.balanceBreakdown?.protectedFor)}</b></span>
+      <MoneyCurrent twin={twin} onExplain={() => onExplain("current")} />
+
+      <div className={css.stateRow}>
+        <button type="button" className={css.stateChip} onClick={() => onExplain("free")}>
+          <small className={css.dotFree}>Free</small>
+          <b>{sgd(bd.availableNow)}</b>
+        </button>
+        <button type="button" className={css.stateChip} onClick={() => onExplain("spoken")}>
+          <small className={css.dotSpoken}>Spoken for</small>
+          <b>{sgd(bd.spokenFor)}</b>
+        </button>
+        <button type="button" className={css.stateChip} onClick={() => onExplain("protected")}>
+          <small className={css.dotProtected}>Protected</small>
+          <b>{sgd(bd.protectedFor)}</b>
+        </button>
       </div>
 
-      <ul className={styles.accountList}>
-        {(twin.balances ?? []).map((a) => (
-          <li key={a.accountId} className={styles.accountRow}>
-            <span>
-              <span className={styles.accountName}>{a.displayName || a.kind}</span>
-              <span className={styles.accountKind}>{a.kind}</span>
-            </span>
-            <button
-              type="button"
-              className={slice.explainable}
-              onClick={() => onExplain({ label: a.displayName || a.kind, value: a.isLiability ? `− ${sgd(a.postedBalance)}` : sgd(a.postedBalance), how: `Posted balance from ${a.pendingAmount ? `${sgd(a.pendingAmount)} pending + ` : ""}your ledger. Reconciled against every transaction.`, parts: [["Posted", sgd(a.postedBalance)], ["Available", sgd(a.availableBalance)], ["Pending", sgd(a.pendingAmount)]] })}
-            >
-              {a.isLiability ? `− ${sgd(a.postedBalance)}` : sgd(a.postedBalance)} <span className={slice.explainMark} aria-hidden>ⓘ</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      {partial ? (
+        <div className={css.partial}>
+          <b>Your picture is still partial</b>
+          <span>Add income and bills to see further ahead and get sharper guidance.</span>
+          <button type="button" className={css.link} onClick={onComplete}>Complete my picture →</button>
+        </div>
+      ) : null}
 
-      {(nextIn || nextBill) && (
-        <p className={styles.nextMoment}>
-          {nextIn ? `Next income: ${sgd(nextIn.amount)} in ${nextIn.inDays} day${nextIn.inDays === 1 ? "" : "s"}. ` : ""}
-          {nextBill ? `Next bill: ${nextBill.label} ${sgd(nextBill.amount)} on ${nextBill.dueDate}.` : ""}
-        </p>
-      )}
+      <div>
+        <p className={css.kicker} style={{ marginBottom: 6 }}>Recent activity</p>
+        {txns.length === 0 ? (
+          <p className={css.micro}>No transactions yet — import a statement or add one to fill this in.</p>
+        ) : (
+          <div className={css.activity}>
+            {txns.slice(0, 5).map((t) => (
+              <div key={t.id} className={css.actItem}>
+                <span className={`${css.actGlyph} ${t.direction === "debit" ? css.out : ""}`}>{(t.merchant || "?")[0].toUpperCase()}</span>
+                <span className={css.actBody}>
+                  <span className={css.actName}>{t.merchant || t.category || t.channel || "Payment"}</span>
+                  <span className={css.actMeta}>{t.category ?? t.channel ?? ""}{t.status !== "posted" ? ` · ${t.status}` : ""}</span>
+                </span>
+                <span className={`${css.actAmt} ${t.direction === "credit" ? css.in : ""}`}>{t.direction === "credit" ? "+" : "−"} {sgd(t.amount)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <p className={styles.sectionTitle}>Recent transactions</p>
-      {txns.length === 0 ? (
-        <p className={styles.provenance}>No transactions yet — import a statement to fill this in.</p>
-      ) : (
-        <ul className={styles.txnList}>
-          {txns.slice(0, 6).map((tx) => (
-            <li key={tx.id} className={styles.txnRow}>
-              <span>
-                <span className={styles.txnMerchant}>{tx.merchant || tx.category || tx.channel || "Payment"}</span>
-                <span className={styles.txnMeta}> {tx.status !== "posted" ? tx.status : ""}</span>
-              </span>
-              <span className={`${styles.txnAmt} ${tx.direction === "credit" ? styles.txnIn : ""}`}>
-                {tx.direction === "credit" ? "+" : "−"} {sgd(tx.amount)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <button type="button" className={styles.primaryBtn} onClick={onNext} style={{ marginTop: 14 }}>
-        See what matters next
-      </button>
-    </section>
+      <button type="button" className={css.cta} onClick={onNext}>See what needs you next</button>
+    </>
   );
 }
 
-// 4 - Explore (curated, not a directory) -----------------------
-function Explore({ twin, onHome, onProblem, onBack }) {
+/* ================= D. What needs you next ================= */
+function NeedsNext({ twin, onBack, onHome, onSnapshot, onProblem, onServices, onUnderstand }) {
   const rescue = twin?.rescueCases?.[0] ?? null;
-  const hasTxns = (twin?.recentTransactions ?? []).length > 0;
-  const recommended = rescue
-    ? { title: rescue.whatHappened, why: rescue.whyItMatters, next: rescue.options?.[0]?.label ?? "See the options", onClick: onProblem, cta: "Look at this" }
-    : !hasTxns
-      ? { title: "Import your transactions", why: "Your picture is thin without them — spending, bills and Safe-to-Spend all get sharper.", next: "Upload a CSV statement", onClick: onBack, cta: "Import now" }
-      : { title: "Start with a life goal", why: "You have the basics in place. See how a real plan sits against your money.", next: "Answer 2 quick questions", onClick: onHome, cta: "Build a future" };
+  const partial = twin && (twin.isEmpty || (twin.counts && twin.counts.incomeStreams === 0));
+  const hasTxns = (twin?.recentTransactions ?? []).some((t) => t.channel !== "opening_balance");
+
+  let rec;
+  if (rescue) rec = { title: rescue.whatHappened, why: rescue.whyItMatters, next: rescue.options?.[0]?.label ?? "See your options", cta: "Look at this", onClick: onProblem };
+  else if (partial) rec = { title: "Make your picture sharper", why: "Future Bank can't see far ahead without your income and bills.", next: "Add them in a minute", cta: "Complete my picture", onClick: onSnapshot };
+  else if (!hasTxns) rec = { title: "Bring in your transactions", why: "Spending, bills and Safe-to-Spend all get sharper with real history.", next: "Import a CSV statement", cta: "Import now", onClick: onSnapshot };
+  else rec = { title: "Shape a home plan", why: "You have the basics. See how a real plan sits against your money.", next: "Answer 2 quick questions", cta: "Start", onClick: onHome };
 
   return (
-    <section aria-labelledby="fb-explore">
-      <button type="button" className={styles.ghostBtn} onClick={onBack} style={{ alignSelf: "flex-start" }}>
-        ← Today
-      </button>
-      <h1 id="fb-explore" className={slice.h1}>What matters next</h1>
+    <>
+      <button type="button" className={css.backLink} onClick={onBack}>← Today</button>
+      <h1 className={css.title}>What needs you next</h1>
 
-      <div className={slice.recommend}>
-        <span className={styles.rippleState}>Recommended for you</span>
-        <strong>{recommended.title}</strong>
-        <span className={styles.txnMeta}>Why now: {recommended.why}</span>
-        <span className={styles.txnMeta}>Next: {recommended.next}</span>
-        <button type="button" className={styles.primaryBtn} onClick={recommended.onClick} style={{ marginTop: 6 }}>
-          {recommended.cta}
-        </button>
+      <div className={css.ripple} style={{ borderLeft: "3px solid var(--sea)" }}>
+        <p className={css.kicker}>Recommended</p>
+        <b style={{ fontSize: 16 }}>{rec.title}</b>
+        <span className={css.micro}>Why now: {rec.why}</span>
+        <span className={css.micro}>Next: {rec.next}</span>
+        <button type="button" className={`${css.cta} ${css.ctaSea}`} onClick={rec.onClick} style={{ marginTop: 4 }}>{rec.cta}</button>
       </div>
 
-      <div className={styles.choiceList} style={{ marginTop: 12 }}>
-        <button type="button" className={styles.choiceBtn} onClick={onProblem}>
-          <span className={styles.choiceName}>Fix a money problem</span>
-          <span className={styles.choiceHint}>A payment, a bill, a tight month, an unfamiliar charge.</span>
-        </button>
-        <button type="button" className={styles.choiceBtn} onClick={onHome}>
-          <span className={styles.choiceName}>Plan a home</span>
-          <span className={styles.choiceHint}>Plan a home, and see the cost to your other goals.</span>
-        </button>
+      <p className={css.kicker} style={{ marginTop: 4 }}>Or choose a direction</p>
+      <div className={css.choiceGrid}>
+        <button type="button" className={css.choice} onClick={onUnderstand}><b>Understand my money</b><span>Where it goes, what's recurring, what changed.</span></button>
+        <button type="button" className={css.choice} onClick={onProblem}><b>Solve a problem</b><span>A payment, a bill, a tight month, an unfamiliar charge.</span></button>
+        <button type="button" className={css.choice} onClick={onHome}><b>Build a future</b><span>Plan a home and see the cost to your other goals.</span></button>
       </div>
 
-      <details className={slice.allServices}>
-        <summary>See all services</summary>
-        <p className={styles.provenance}>
-          The full set of Future Bank capabilities — accounts, transfers, spending insight, the nine life Studios, Guardian and history — lives in the main app.
-          Some need a bank connection that isn't wired yet; those are shown honestly, never as working buttons.
-        </p>
-      </details>
-    </section>
+      <button type="button" className={css.link} onClick={onServices}>All services</button>
+    </>
   );
 }
 
-// 5 + 6 - Home goal + Change Receipt --------------------------
+/* ================= E. Home Horizon + Change Receipt ================= */
 const PRICE_BANDS = [
-  { id: "under-400k", label: "Under 400k" },
-  { id: "400k-600k", label: "400k–600k" },
-  { id: "600k-900k", label: "600k–900k" },
-  { id: "900k-1.4m", label: "900k–1.4m" },
-  { id: "over-1.4m", label: "Over 1.4m" },
+  { id: "under-400k", label: "Under 400k", mid: 350000 },
+  { id: "400k-600k", label: "400–600k", mid: 500000 },
+  { id: "600k-900k", label: "600–900k", mid: 750000 },
+  { id: "900k-1.4m", label: "900k–1.4m", mid: 1150000 },
+  { id: "over-1.4m", label: "Over 1.4m", mid: 1650000 },
 ];
-function monthChoices(n = 8) {
-  const out = [];
-  const now = new Date();
-  for (let i = 1; i <= n; i += 1) {
-    const d = new Date(now.getFullYear() + i, now.getMonth(), 1);
-    out.push({ id: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: `${d.getFullYear()}` });
-  }
-  return out;
+function yearChoices() {
+  const y = new Date().getFullYear();
+  return Array.from({ length: 8 }, (_, i) => `${y + i + 1}`);
 }
+const humanSealBlock = (reason) => {
+  if (!reason) return null;
+  if (/regulatory_ceiling|exceeds/.test(reason)) return "This path needs a later target, a lower price, or more monthly room before it can become a commitment.";
+  if (/estimate_needs_confirmation/.test(reason)) return "Confirm the estimated details before this can become a commitment.";
+  return "A few details are still needed before this can become a commitment.";
+};
 
-function HomeGoal({ onBack, onReceipt }) {
-  const [priceBand, setPriceBand] = useState("");
-  const [month, setMonth] = useState("");
-  const [phase, setPhase] = useState("ask"); // ask | path | receipt
+function HomeHorizon({ onBack, onReceipt }) {
+  const [band, setBand] = useState("");
+  const [year, setYear] = useState("");
+  const [phase, setPhase] = useState("ask");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [path, setPath] = useState(null);
   const [before, setBefore] = useState(null);
-  const [monthly, setMonthly] = useState("");
-  const [monthlyErr, setMonthlyErr] = useState("");
+  const [pace, setPace] = useState(1000);
 
-  const loadPath = useCallback(async () => {
-    const r = await fetch("/api/future-field?domain=home", { headers: { "cache-control": "no-cache" } });
-    const d = await r.json();
-    return d;
-  }, []);
+  const loadPath = useCallback(() => fetch("/api/future-field?domain=home", { headers: { "cache-control": "no-cache" } }).then((r) => r.json()), []);
 
-  const seed = async () => {
+  const seed = async (extra = {}) => {
     setBusy(true);
     setErr("");
-    try {
-      const res = await fetch("/api/future-field/seed", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ domain: "home", mode: "estimate", answers: { price_band: priceBand, target_month: month } }),
-      });
-      const d = await res.json();
-      if (!res.ok) {
-        setErr(d.error === "missing_answers" ? "Pick a price band and a year first." : "Could not build your path.");
-        return;
-      }
-      const field = await loadPath();
-      setPath(field);
-      setBefore(summarise(field));
-      setPhase("path");
-    } finally {
+    const d = await POST("/api/future-field/seed", { domain: "home", mode: "estimate", answers: { price_band: band, target_month: `${year}-01` }, exactAmounts: extra });
+    if (!d.ok) {
       setBusy(false);
+      setErr(d.error === "missing_answers" ? "Pick a price range and a year." : "Could not build your path.");
+      return null;
     }
+    const field = await loadPath();
+    setBusy(false);
+    return field;
   };
 
-  const applyChange = async () => {
-    const parsed = parseMoneyInput(monthly, { min: 1 });
-    if (!parsed.ok) {
-      setMonthlyErr(parsed.error);
-      return;
-    }
-    setMonthlyErr("");
-    setBusy(true);
-    try {
-      // persist the changed assumption as a new plan version (real server compute)
-      const res = await fetch("/api/future-field/seed", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ domain: "home", mode: "estimate", answers: { price_band: priceBand, target_month: month }, exactAmounts: { monthly_contribution: parsed.value } }),
-      });
-      if (!res.ok) {
-        setErr("Could not save your change.");
-        return;
-      }
-      const field = await loadPath();
-      setPath(field);
-      setPhase("receipt");
-      onReceipt?.();
-    } finally {
-      setBusy(false);
-    }
+  const start = async () => {
+    const field = await seed();
+    if (!field) return;
+    setPath(field);
+    setBefore(summarise(field));
+    setPhase("shape");
+  };
+
+  const apply = async () => {
+    const field = await seed({ monthly_contribution: pace });
+    if (!field) return;
+    setPath(field);
+    setPhase("receipt");
+    onReceipt?.();
   };
 
   const after = path ? summarise(path) : null;
+  const priceMid = PRICE_BANDS.find((b) => b.id === band)?.mid ?? null;
 
   return (
-    <section aria-labelledby="fb-home">
-      <button type="button" className={styles.ghostBtn} onClick={onBack} style={{ alignSelf: "flex-start" }}>
-        ← What matters next
-      </button>
-      <h1 id="fb-home" className={slice.h1}>Your first home path</h1>
+    <>
+      <button type="button" className={css.backLink} onClick={onBack}>← What needs you next</button>
+      <h1 className={css.title}>Home Horizon</h1>
 
       {phase === "ask" && (
         <>
-          <p className={styles.provenance}>Two questions. You can refine everything afterwards.</p>
-          <fieldset className={styles.gSection} style={{ border: 0, padding: 0 }}>
-            <legend className={styles.gSectionTitle}>Roughly what price range?</legend>
-            <div className={styles.choiceList} style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          <p className={css.lede}>Two things to start. Everything is adjustable afterwards.</p>
+          <div className={css.field}>
+            <label>Price range</label>
+            <div className={css.chipRow}>
               {PRICE_BANDS.map((b) => (
-                <button key={b.id} type="button" className={styles.choiceBtn} style={{ flex: "1 1 40%" }} aria-pressed={priceBand === b.id} onClick={() => setPriceBand(b.id)}>
-                  <span className={styles.choiceName}>{b.label}</span>
-                </button>
+                <button key={b.id} type="button" className={css.chip} aria-pressed={band === b.id} onClick={() => setBand(b.id)}>{b.label}</button>
               ))}
             </div>
-          </fieldset>
-          <label className={styles.field}>
-            <span>Around which year would you like to buy?</span>
-            <select value={month} onChange={(e) => setMonth(e.target.value)}>
+          </div>
+          <div className={css.field}>
+            <label htmlFor="hh-year">Target year</label>
+            <select id="hh-year" value={year} onChange={(e) => setYear(e.target.value)}>
               <option value="">— choose —</option>
-              {monthChoices().map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                </option>
-              ))}
+              {yearChoices().map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
-          </label>
-          {err ? <p className={styles.fieldError} role="alert">{err}</p> : null}
-          <button type="button" className={styles.primaryBtn} disabled={busy || !priceBand || !month} onClick={seed}>
-            {busy ? "Working…" : "Show my first path"}
-          </button>
+          </div>
+          {err ? <span className={css.err}>{err}</span> : null}
+          <button type="button" className={css.cta} disabled={busy || !band || !year} onClick={start}>{busy ? "Working…" : "Show my horizon"}</button>
         </>
       )}
 
-      {(phase === "path" || phase === "receipt") && after && (
+      {(phase === "shape" || phase === "receipt") && after && (
         <>
-          <div className={slice.recommend}>
-            <span className={styles.rippleState}>Here is your first path</span>
-            <strong>
-              {after.readyMonth ? `On track for around ${after.readyMonth}` : "Set a monthly amount to get a target date"}
-            </strong>
-            <span className={styles.txnMeta}>
-              Built from your price range and target year. Property type is estimated for now — you can refine it later.
-              This changes your monthly saving pace and your safety buffer.
-            </span>
+          <div className={css.horizon}>
+            <p className={css.kicker}>Home Horizon</p>
+            <div className={css.horizonTrack}>
+              <div className={css.horizonBase} />
+              <div className={css.horizonFill} style={{ width: after.readyMonth ? "72%" : "22%" }} />
+              <div className={css.horizonEnd} style={{ left: after.readyMonth ? "72%" : "22%" }}>
+                <b>{after.readyMonth ?? "not reachable"}</b>
+                <small>{after.readyMonth ? "on this pace" : "at this pace"}</small>
+              </div>
+              <div className={css.horizonFloor}>Safety floor — protected buffer stays covered</div>
+            </div>
+            <div className={css.horizonRange}>
+              <span>Today</span>
+              <span>{priceMid ? sgd(priceMid) : ""} home · {year}</span>
+            </div>
           </div>
 
-          {phase === "path" && (
-            <div className={styles.gSection}>
-              <p className={styles.gSectionTitle}>Change one assumption</p>
-              <label className={styles.field}>
-                <span>What could you set aside each month?</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={monthly}
-                  placeholder="e.g. 1,500"
-                  onChange={(e) => setMonthly(e.target.value)}
-                  onBlur={(e) => {
-                    const p = parseMoneyInput(e.target.value, { min: 0 });
-                    if (p.ok) setMonthly(formatMoney(p.value));
-                  }}
-                  aria-invalid={Boolean(monthlyErr)}
-                />
-                {monthlyErr ? <span className={styles.fieldError}>{monthlyErr}</span> : null}
-              </label>
-              <button type="button" className={styles.primaryBtn} disabled={busy} onClick={applyChange}>
-                {busy ? "Saving…" : "Apply this change"}
-              </button>
-            </div>
+          {phase === "shape" && (
+            <>
+              <div className={css.field}>
+                <label htmlFor="hh-pace">Monthly pace: <b>{sgd(pace)}</b></label>
+                <input id="hh-pace" className={css.slider} type="range" min={200} max={6000} step={100} value={pace} onChange={(e) => setPace(Number(e.target.value))} />
+              </div>
+              <p className={css.micro}>
+                {after.monthsToReady != null
+                  ? `Around SGD ${pace.toLocaleString("en-SG")} a month puts your home window near ${projectYear(year, pace, priceMid)}.`
+                  : "Set a pace to see a target window."}
+              </p>
+              <button type="button" className={css.cta} disabled={busy} onClick={apply}>{busy ? "Saving…" : "Apply this pace"}</button>
+            </>
           )}
 
           {phase === "receipt" && (
-            <div className={slice.receipt} role="status">
-              <p className={styles.gSectionTitle}>What changed</p>
-              <p>
-                You set a monthly amount of <strong>{after.monthly ? sgd(after.monthly) : "—"}</strong>.
-              </p>
-              <p>
-                Your monthly saving pace →{" "}
-                <strong>{after.monthly ? sgd(after.monthly) : "—"}/mo</strong>
-                {before?.monthly != null && before.monthly !== after.monthly ? ` (was ${sgd(before.monthly)})` : ""}.
-              </p>
-              <p>
-                Your timeline →{" "}
-                <strong>{after.readyMonth ?? "not yet reachable"}</strong>
-                {before?.readyMonth && before.readyMonth !== after.readyMonth ? ` (was ${before.readyMonth})` : ""}.
-              </p>
-              <p className={styles.provenance}>
-                {path?.realityPath?.sealableVerdict?.sealable
-                  ? "This path is ready to lock in when you are."
-                  : `Not lockable yet: ${path?.realityPath?.sealableVerdict?.reason ?? "some details still needed"}.`}
-              </p>
-              <button type="button" className={styles.primaryBtn} onClick={onBack}>
-                Back to what matters next
-              </button>
-            </div>
+            <MoneyCurrentRipple
+              before={`Monthly pace ${before?.monthly ? sgd(before.monthly) : "SGD 0"} · window ${before?.readyMonth ?? "unset"}`}
+              changedLabel={`Set aside ${sgd(after.monthly ?? pace)} each month`}
+              after={`Monthly pace ${sgd(after.monthly ?? pace)} · window ${after.readyMonth ?? "not yet reachable"}`}
+              movedRows={movedRows(before, after)}
+              consequence={
+                humanSealBlock(path?.realityPath?.sealableVerdict?.sealable ? null : path?.realityPath?.sealableVerdict?.reason) ??
+                "This path is ready to become a commitment when you are."
+              }
+              onNext={onBack}
+              nextLabel="Back to what needs you next"
+            />
           )}
+          <p className={css.micro}>
+            Built from your price range and target year (a range you chose). Property type is estimated for now — refine it later.
+          </p>
         </>
       )}
-    </section>
+    </>
   );
 }
 
 function summarise(field) {
   const rp = field?.realityPath ?? {};
-  return {
-    monthly: rp.monthlyContribution ?? rp.data?.monthly_contribution ?? null,
-    readyMonth: rp.readyMonth ?? null,
-    monthsToReady: rp.monthsToReady ?? null,
-  };
+  return { monthly: rp.monthlyContribution ?? rp.data?.monthly_contribution ?? null, readyMonth: rp.readyMonth ?? null, monthsToReady: rp.monthsToReady ?? null };
+}
+function movedRows(b, a) {
+  const rows = [];
+  if (b && a && b.readyMonth && a.readyMonth && b.readyMonth !== a.readyMonth) {
+    rows.push({ text: `Home window moved to ${a.readyMonth}`, delta: `was ${b.readyMonth}`, up: a.readyMonth < b.readyMonth });
+  }
+  return rows;
+}
+function projectYear(year, pace, priceMid) {
+  if (!priceMid || !pace) return year;
+  const need = priceMid * 0.25; // rough down-payment
+  const months = Math.ceil(need / pace);
+  const d = new Date();
+  d.setMonth(d.getMonth() + months);
+  return d.getFullYear();
 }
 
-// Explain sheet -----------------------------------------------
-function ExplainSheet({ item, onClose }) {
+/* ================= Bottom sheet ================= */
+function BottomSheet({ sheet, onClose, onGoHome, onGoSnapshot }) {
   return (
-    <div className={slice.sheet} role="dialog" aria-modal="true" aria-label={`How ${item.label} is worked out`}>
-      <div className={slice.sheetInner}>
-        <p className={styles.gSectionTitle}>{item.label} — {item.value}</p>
-        <p>{item.how}</p>
-        {item.parts?.length ? (
-          <ul className={styles.gList}>
-            {item.parts.map(([k, v], i) => (
-              <li key={i}>
-                {k}: {v}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        <p className={styles.provenance}>Figures are computed on the server from your real data, not estimated here.</p>
-        <button type="button" className={styles.primaryBtn} onClick={onClose}>
-          Got it
-        </button>
+    <div className={css.sheetScrim} onClick={onClose}>
+      <div className={css.sheet} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <span className={css.sheetGrip} />
+        {sheet.kind === "data" && <DataSheet />}
+        {sheet.kind === "problem" && <ProblemSheet twin={sheet.twin} onGoHome={onGoHome} onGoSnapshot={onGoSnapshot} onClose={onClose} />}
+        {sheet.kind === "services" && <ServicesSheet onGoHome={onGoHome} onClose={onClose} />}
+        {["available", "free", "spoken", "protected", "current"].includes(sheet.kind) && <FigureSheet kind={sheet.kind} twin={sheet.twin} />}
+        <button type="button" className={css.cta} onClick={onClose}>Close</button>
       </div>
     </div>
+  );
+}
+
+function DataSheet() {
+  return (
+    <>
+      <p className={css.sheetTitle}>How Future Bank uses your data</p>
+      <p className={css.lede}>Everything you enter or import is stored to your authenticated account on the server. It is never shared, and there is no preset persona or demo data.</p>
+      <ul className={css.proofList}>
+        <li><span className={css.proofMark}>→</span> Accounts &amp; transactions: to show real balances and Safe-to-Spend.</li>
+        <li><span className={css.proofMark}>→</span> Income &amp; bills: to project what arrives next and what's spoken for.</li>
+        <li><span className={css.proofMark}>→</span> Goals: to show trade-offs before you commit.</li>
+      </ul>
+      <p className={css.micro}>You can export or delete everything from Account settings at any time.</p>
+    </>
+  );
+}
+
+function ProblemSheet({ twin, onGoHome, onGoSnapshot, onClose }) {
+  const cases = twin?.rescueCases ?? [];
+  const [picked, setPicked] = useState(null);
+  const options = [
+    { id: "payment_failed", label: "A payment or bill is under pressure", match: (c) => ["payment_failed", "low_balance_ahead", "bills_clustered", "plan_squeezes_emergency"].includes(c.kind) },
+    { id: "large_unusual_spend", label: "I don't recognise a transaction", match: (c) => ["large_unusual_spend"].includes(c.kind) },
+    { id: "salary_missing", label: "My income is late or interrupted", match: (c) => ["salary_missing"].includes(c.kind) },
+  ];
+  if (picked) {
+    const opt = options.find((o) => o.id === picked);
+    const found = cases.find(opt.match);
+    return (
+      <>
+        <button type="button" className={css.backLink} onClick={() => setPicked(null)}>← Back</button>
+        <p className={css.sheetTitle}>{opt.label}</p>
+        {found ? (
+          <>
+            <p className={css.lede}><b>{found.whatHappened}</b></p>
+            <p className={css.micro}>{found.whyItMatters}</p>
+            {found.atRisk?.length ? <p className={css.micro}>At risk: {found.atRisk.join(", ")}.</p> : null}
+            <div className={css.choiceGrid}>
+              {(found.options ?? []).map((o) => (
+                <button key={o.id} type="button" className={css.choice} onClick={() => (o.id === "open_mirror" ? onGoHome() : onClose())}>
+                  <b>{o.label}</b>
+                  {o.id === found.recommendedAction ? <span>Recommended</span> : null}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className={css.lede}>No matching issue is currently found in your data. That's good news.</p>
+            <p className={css.micro}>Future Bank keeps watching. If something changes, it will show here and on Today.</p>
+            <button type="button" className={css.link} onClick={onGoSnapshot}>Add more to my picture so checks are sharper →</button>
+          </>
+        )}
+      </>
+    );
+  }
+  return (
+    <>
+      <p className={css.sheetTitle}>What kind of problem?</p>
+      <div className={css.choiceGrid}>
+        {options.map((o) => (
+          <button key={o.id} type="button" className={css.choice} onClick={() => setPicked(o.id)}>
+            <b>{o.label}</b>
+            <span>{cases.some(o.match) ? "We found something to look at." : "We'll check your data."}</span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+const SERVICES = [
+  { id: "accounts", name: "Accounts & balances", help: "See every account, real balances.", status: "live", next: "Open Today" },
+  { id: "transactions", name: "Transaction activity", help: "Search and review what you spent.", status: "live", next: "Open Today" },
+  { id: "import", name: "Import a statement", help: "Bring transactions in by CSV.", status: "live", next: "Start in Money Snapshot" },
+  { id: "safe_to_spend", name: "Safe-to-Spend", help: "How much you can safely use today.", status: "live", next: "Open Today" },
+  { id: "money_current", name: "Money Current", help: "What arrives next and what's protected.", status: "live", next: "Open Today" },
+  { id: "home", name: "Home Horizon", help: "Plan a home against your money.", status: "live", next: "Start", route: "home" },
+  { id: "transfer", name: "Transfer between my accounts", help: "Move your own money (real ledger entry).", status: "live", next: "Coming to this preview" },
+  { id: "pay", name: "Pay someone / a bill", help: "Send money outside the bank.", status: "soon", next: "Needs a connected payment rail" },
+  { id: "scan_pay", name: "Scan & Pay", help: "Pay a merchant by QR.", status: "soon", next: "Needs a connected payment rail" },
+  { id: "cross_bank", name: "Connect other banks", help: "Bring in accounts held elsewhere.", status: "soon", next: "Needs SGFinDex" },
+  { id: "insurance", name: "Protection review", help: "Estimate a cover gap.", status: "soon", next: "Needs a licensed provider" },
+];
+function ServicesSheet({ onGoHome, onClose }) {
+  const [q, setQ] = useState("");
+  const list = SERVICES.filter((s) => (s.name + s.help).toLowerCase().includes(q.toLowerCase()));
+  return (
+    <>
+      <p className={css.sheetTitle}>All services</p>
+      <input className={css.searchBox} placeholder="Search services" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div>
+        {list.map((s) => (
+          <div key={s.id} className={`${css.svcItem} ${s.status === "soon" ? css.disabled : ""}`}>
+            <div className={css.svcTop}>
+              <span className={css.svcName}>{s.name}</span>
+              <span className={`${css.svcStatus} ${s.status === "live" ? css.live : css.soon}`}>{s.status === "live" ? "Available" : "Not connected"}</span>
+            </div>
+            <span className={css.svcHelp}>{s.help}</span>
+            <button
+              type="button"
+              className={css.svcNext}
+              disabled={s.status === "soon"}
+              onClick={() => (s.route === "home" ? onGoHome() : onClose())}
+            >
+              {s.next}{s.status === "live" ? " →" : ""}
+            </button>
+          </div>
+        ))}
+        {list.length === 0 ? <p className={css.micro}>No services match "{q}".</p> : null}
+      </div>
+    </>
+  );
+}
+
+function FigureSheet({ kind, twin }) {
+  const s2s = twin?.safeToSpend ?? {};
+  const bd = s2s.breakdown ?? {};
+  const bb = twin?.twin?.balanceBreakdown ?? {};
+  const MAP = {
+    available: {
+      title: "Available to spend",
+      value: sgd(s2s.safeToSpend),
+      means: "Money you can use now without breaking a bill, your safety reserve, or a commitment.",
+      formula: "Liquid cash − bills due before your next income − protected reserve − amount already committed to plans.",
+      parts: [["Liquid cash", sgd(bd.postedLiquidCash)], ["Due before next income", `− ${sgd(bd.nearTermObligations)}`], ["Protected reserve", `− ${sgd(bd.protectedReserve)}`], ["Committed to plans", `− ${sgd(bd.alreadyCommitted)}`]],
+      confidence: "From your ledger + entered income/bills.",
+      change: "A new bill, a change to your income date, or sealing a plan.",
+    },
+    free: { title: "Free", value: sgd(bb.availableNow), means: "Liquid cash not protected and not spoken for.", formula: "Liquid cash − protected − spoken for.", parts: [["Liquid cash", sgd(bd.postedLiquidCash)], ["Protected", `− ${sgd(bb.protectedFor)}`], ["Spoken for", `− ${sgd(bb.spokenFor)}`]], confidence: "From your ledger.", change: "Spending, or moving money into a goal." },
+    spoken: { title: "Spoken for", value: sgd(bb.spokenFor), means: "Liquid money a sealed plan already claims each month.", formula: "The smaller of your liquid cash and your committed monthly total.", parts: [["Committed monthly", sgd(twin?.twin?.committedMonthlyTotal)]], confidence: "From your active commitments.", change: "Sealing, pausing or revoking a plan." },
+    protected: { title: "Protected", value: sgd(bb.protectedFor), means: "Cash you deliberately set aside as a safety buffer.", formula: "Balances you earmarked as an emergency / safety reserve.", parts: [], confidence: "From what you marked protected.", change: "Changing your safety-buffer target." },
+    current: { title: "Your money current", value: "", means: "The real events flowing through your money: what's safe now, the next bill, the next income, what's protected, and any decision you're shaping.", formula: "Now = Available to spend. Next bill / next income = your soonest entered obligation / inflow. Protected = your safety reserve.", parts: [], confidence: "From your ledger + entered income/bills.", change: "Any new transaction, bill, income change, or plan." },
+  };
+  const d = MAP[kind] ?? MAP.available;
+  return (
+    <>
+      <p className={css.sheetTitle}>{d.title}{d.value ? ` · ${d.value}` : ""}</p>
+      <p className={css.lede}>{d.means}</p>
+      <p className={css.micro}><b>How it's worked out:</b> {d.formula}</p>
+      {d.parts.length ? (
+        <div>
+          {d.parts.map(([k, v], i) => (
+            <div key={i} className={css.sheetKV}><span>{k}</span><span>{v}</span></div>
+          ))}
+        </div>
+      ) : null}
+      <p className={css.micro}><b>Confidence:</b> {d.confidence}</p>
+      <p className={css.micro}><b>What could change it:</b> {d.change}</p>
+    </>
   );
 }
