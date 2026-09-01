@@ -23,14 +23,14 @@
   -webkit-font-smoothing: antialiased;
   display: flex;
   justify-content: center;
+  align-items: flex-start; /* shell is content-height; .app paints the rest */
 }
 
 .shell {
   width: 100%;
   max-width: 430px;
-  min-height: 100dvh;
   background: var(--ground);
-  padding: 20px 18px 96px;
+  padding: 20px 18px 40px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -666,12 +666,10 @@
 
 /* ---- welcome illustration ------------------------------- */
 .welcomeWrap {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 24px;
-  padding: 8px 0;
+  gap: 22px;
+  padding: 12px 0 4px;
 }
 .welcomeArt {
   background: var(--surface);
@@ -759,8 +757,8 @@
 }
 
 .footer {
-  margin-top: auto;
-  padding-top: 16px;
+  margin-top: 4px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
   font-size: 11px;
   line-height: 1.5;
