@@ -21,7 +21,7 @@ const NODES = {
   income: { label: "Income", domain: null, add: "Add your income", why: "so Future Bank can see what arrives each month" },
   safety: { label: "Safety", domain: "emergency", add: "Set a safety target", why: "so it knows your emergency floor", unit: "months" },
   home: { label: "Home", domain: "home", add: "Start a home plan", why: "to see when a home is reachable" },
-  relationships: { label: "Relationships", domain: "wedding", add: "Plan a wedding", why: "to weigh a wedding against your other goals" },
+  relationships: { label: "Family", domain: "relationships", add: "Set up family & care", why: "to manage a child's money, a guardian, a household or a beneficiary" },
   freedom: { label: "Freedom", domain: "investment", add: "Add income & expenses", why: "to see your free monthly cashflow" },
   future: { label: "Future", domain: "retirement", add: "Start a retirement plan", why: "to project the long term" },
 };
@@ -178,7 +178,7 @@ function Inner({ onBack, onStudio, onAddReality, onHistory, onRoute }) {
 
 function Shell({ children, onBack }) {
   return (
-    <div className={css.app}>
+    <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
         {onBack ? <button type="button" className={css.backLink} onClick={onBack}>← Today</button> : null}
         {children}

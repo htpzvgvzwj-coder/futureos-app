@@ -12,6 +12,7 @@ import { BankDataProvider } from "./components/bank/useBankData.jsx";
 import { BankHome } from "./components/future-bank/BankHome.jsx";
 import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
 import { LifeView } from "./components/future-bank/LifeView.jsx";
+import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import {
   GuardianConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -206,6 +207,7 @@ const screens = {
   ACCOUNT_CONTROL: "accountControl",
   MONEY_RESCUE: "moneyRescue",
   FINANCIAL_TWIN: "financialTwin",
+  FAMILY_CARE: "familyCare",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3264,6 +3266,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
+  if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -17677,6 +17680,9 @@ export default function App() {
     [screens.FINANCIAL_TWIN]: (
       <FinancialTwinView onBack={() => setActiveScreen(screens.HOME)} onAdd={() => setActiveScreen(screens.REALITY_ENTRY)} />
     ),
+    [screens.FAMILY_CARE]: (
+      <FamilyCareView onBack={() => setActiveScreen(screens.LIFE_GRAPH)} onWedding={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)} />
+    ),
     [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
     [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
@@ -17688,7 +17694,11 @@ export default function App() {
         onBack={() => setActiveScreen(screens.HOME)}
         onHistory={() => setActiveScreen(screens.CHANGE_LEDGER)}
         onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
-        onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; setActiveScreen(target ?? screens.REALITY_ENTRY); }}
+        onStudio={(d) => {
+          if (d === "relationships") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.REALITY_ENTRY);
+        }}
         onRoute={(r) => {
           const s = String(r || "");
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);

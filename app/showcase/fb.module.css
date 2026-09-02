@@ -37,6 +37,21 @@
   gap: 20px;
 }
 
+/* Embedded inside the tabbed PhoneShell: .screenArea is a fixed-height box
+   with overflow:hidden, so this wrapper must be the scroll container. */
+.app.embedded {
+  min-height: 0;
+  height: 100%;
+  display: block;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.app.embedded .shell {
+  margin: 0 auto;
+  min-height: 100%;
+  padding: 18px 18px 28px;
+}
+
 /* ---- type scale ------------------------------------------------ */
 .kicker {
   font-size: 12px;

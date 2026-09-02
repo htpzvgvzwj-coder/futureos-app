@@ -49,11 +49,11 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
   };
 
   if ((status === "loading" || status === "idle") && !twin) {
-    return <div className={css.app}><div className={css.shell}><p className={css.lede}>Loading your money…</p></div></div>;
+    return <div className={`${css.app} ${css.embedded}`}><div className={css.shell}><p className={css.lede}>Loading your money…</p></div></div>;
   }
   if (status === "error" && !twin) {
     return (
-      <div className={css.app}><div className={css.shell}>
+      <div className={`${css.app} ${css.embedded}`}><div className={css.shell}>
         <p className={css.lede}>Your money picture didn't load.</p>
         <button type="button" className={css.cta} onClick={fb.refetchAll}>Try again</button>
       </div></div>
@@ -73,7 +73,7 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
   const empty = !twin || twin.isEmpty;
 
   return (
-    <div className={css.app}>
+    <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
         <div>
           <p className={css.kicker}>Today · {new Date().toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "long" })}</p>

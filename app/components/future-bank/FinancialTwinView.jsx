@@ -175,7 +175,7 @@ function Inner({ onBack, onAdd }) {
 
 function Shell({ children, onBack }) {
   return (
-    <div className={css.app}>
+    <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
         {onBack ? <button type="button" className={css.backLink} onClick={onBack}>← Today</button> : null}
         {children}
