@@ -45,7 +45,7 @@ nextjs-portal {
 }
 
 .stage {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -56,7 +56,7 @@ nextjs-portal {
 
 .phone {
   width: min(100%, 430px);
-  height: min(920px, calc(100vh - 36px));
+  height: min(920px, calc(100dvh - 36px));
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(20, 36, 58, 0.12);
@@ -191,11 +191,17 @@ nextjs-portal {
   font-size: 12px;
   font-weight: 800;
   box-shadow: 0 10px 24px rgba(20, 36, 58, 0.07);
-}.screenArea {
+}
+
+.screenArea {
   position: relative;
   z-index: 2;
   height: calc(100% - 174px);
   overflow: hidden;
+}
+
+.phone.nav-hidden .screenArea {
+  height: calc(100% - 92px);
 }
 
 .screen {
@@ -5117,10 +5123,12 @@ nextjs-portal {
 .futureAlertCard:focus-visible {
   border-color: rgba(215, 25, 32, 0.26);
   transform: translateY(-1px);
-}.bottomNav {
+}
+
+.bottomNav {
   height: 82px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   gap: 4px;
   border-top: 1px solid rgba(20, 36, 58, 0.08);

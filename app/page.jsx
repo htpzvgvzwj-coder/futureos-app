@@ -3199,7 +3199,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 
   return (
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
-      <section className={`phone screen-${navScreen}`} aria-label={t("app.prototypeLabel")}>
+      <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="Future Bank">
         <div className="statusBar">
           <span>9:41</span>
           <div>
@@ -17231,33 +17231,22 @@ function Screen({ children, className }) {
 }
 
 // Future Bank is the primary experience; the legacy simulator app is an
-// internal migration route behind ?classic=1 (or a stored opt-in).
+// explicit internal review route behind ?classic=1. It is never persisted
+// and is not exposed from customer-facing navigation.
 function wantsClassicApp() {
   if (typeof window === "undefined") return false;
   try {
     const p = new URLSearchParams(window.location.search);
-    if (p.get("classic") === "1") return true;
-    if (p.get("classic") === "0") {
-      window.localStorage.removeItem("fb:classic");
-      return false;
-    }
-    return window.localStorage.getItem("fb:classic") === "1";
+    return p.get("classic") === "1";
   } catch {
     return false;
   }
-}
-function setClassicApp(on) {
-  try {
-    window.localStorage.setItem("fb:classic", on ? "1" : "0");
-  } catch {
-    /* ignore */
-  }
-  if (typeof window !== "undefined") window.location.search = on ? "?classic=1" : "";
 }
 
 export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
+  const [onboardingActive, setOnboardingActive] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   // True only once the real fetched profile/preferences have actually
   // landed in state (setPreferences below) - `authStatus` alone flips to
@@ -17677,13 +17666,13 @@ export default function App() {
 
   const currentScreen = {
     [screens.HOME]: (
-      <OnboardingGate onOpen={openFromBank}>
+      <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive}>
         <BankTodayConnected onOpen={openFromBank} onRippleAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
         {livingThreadEntrance("today")}
         <TodayScreen {...shared} />
       </OnboardingGate>
     ),
-    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} />,
+    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
     [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
     [screens.ACCOUNT_CONTROL]: <AccountControlConnected onDone={() => setActiveScreen(screens.PROFILE)} />,
@@ -17849,7 +17838,7 @@ export default function App() {
     return (
       <LifeThreadProvider enabled>
         <BankDataProvider enabled>
-          <FutureBankSlice onExitToApp={() => { setClassicApp(true); }} />
+          <FutureBankSlice />
         </BankDataProvider>
       </LifeThreadProvider>
     );
@@ -17865,6 +17854,7 @@ export default function App() {
         setLanguage={setLanguage}
         theme={effectiveTheme}
         simpleMode={Boolean(preferences.accessibility?.simpleMode)}
+        hideNav={onboardingActive}
         t={t}
       >
         <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
@@ -17873,4 +17863,3 @@ export default function App() {
     </LifeThreadProvider>
   );
 }
-

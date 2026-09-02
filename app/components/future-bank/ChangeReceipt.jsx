@@ -45,9 +45,9 @@ export function ChangeReceipt({
         <div className={css.receiptRow}>
           <span className={css.rk}>Monthly money</span>
           <span>
-            {monthlyAdded ? `${monthly(monthlyAdded)} more committed` : null}
+            {monthlyAdded ? (committed ? `${monthly(monthlyAdded)} more committed` : `${monthly(monthlyAdded)} proposed monthly pressure`) : null}
             {monthlyAdded && monthlyReleased ? " · " : null}
-            {monthlyReleased ? `${monthly(monthlyReleased)} released` : null}
+            {monthlyReleased ? (committed ? `${monthly(monthlyReleased)} released` : `${monthly(monthlyReleased)} could be released`) : null}
             {!monthlyAdded && !monthlyReleased ? "No change to your monthly total" : null}
           </span>
         </div>

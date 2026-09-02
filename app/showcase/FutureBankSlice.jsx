@@ -475,6 +475,15 @@ function Today({ fb, partial, onExplain, onNext, onAddSource, onComplete, onBank
   const committedMonthly = twin.twin?.committedMonthlyTotal ?? fb.resourceSummary?.committedMonthly ?? 0;
   const txns = (twin.recentTransactions ?? []).filter((t) => t.channel !== "opening_balance");
   const needsCount = fb.momentsRaw?.counts?.actionRequired ?? 0;
+  const currentMoment = (fb.moments ?? []).find((m) => m.state === "new" && (m.severity === "action_required" || m.severity === "watch")) ?? null;
+  const currentDecision = currentMoment
+    ? {
+        label: "Review",
+        whenText: "needs you",
+        effect: currentMoment.title,
+        source: currentMoment.evidence?.[0]?.source ? `Future Bank · ${String(currentMoment.evidence[0].source).replace(/_/g, " ")}` : "Future Bank detection",
+      }
+    : null;
 
   return (
     <>
@@ -514,7 +523,7 @@ function Today({ fb, partial, onExplain, onNext, onAddSource, onComplete, onBank
       />
 
       {/* 3. MONEY CURRENT */}
-      <MoneyCurrent twin={twin} onExplain={() => onExplain("current")} detail />
+      <MoneyCurrent twin={twin} decision={currentDecision} onExplain={() => onExplain("current")} detail />
 
       {/* 4. ONE THING THAT NEEDS YOU */}
       <section className={css.section}>
@@ -704,7 +713,7 @@ function HomeHorizon({ fb, onBack, onDone, onHistory }) {
   const roomBefore = rs.remainingMonthlyRoom;
   const affected = [
     {
-      domain: "all plans", metric: "committed each month", unit: "sgd_per_month",
+      domain: "all plans", metric: "possible monthly plan load", unit: "sgd_per_month",
       before: rs.committedMonthly ?? 0, possibleAfter: (rs.committedMonthly ?? 0) + paceNow,
       direction: "up", favourable: false,
     },
@@ -794,7 +803,7 @@ function HomeHorizon({ fb, onBack, onDone, onHistory }) {
               after={`Monthly pace ${sgd(after.monthly ?? pace)} · window ${after.readyMonth ?? "not yet reachable"}`}
               monthlyAdded={after.monthly ?? pace}
               affected={affected}
-              committed={Boolean(path?.realityPath?.sealableVerdict?.sealable)}
+              committed={false}
               humanReason={
                 path?.realityPath?.sealableVerdict?.sealable
                   ? null
@@ -886,6 +895,7 @@ function GuardianView({ fb, onBack, onRoute }) {
   const moments = fb.momentsRaw?.allMoments ?? fb.moments ?? [];
   const watch = moments.filter((m) => (m.severity === "action_required" || m.severity === "watch") && m.state === "new");
   const decision = watch.find((m) => m.sourceType === "turning_point") ?? watch[0] ?? null;
+  const watching = decision ? watch.filter((m) => m.id !== decision.id) : watch;
 
   return (
     <>
@@ -913,11 +923,11 @@ function GuardianView({ fb, onBack, onRoute }) {
       )}
 
       <p className={css.kicker}>Watching now</p>
-      {watch.length === 0 ? (
+      {watching.length === 0 ? (
         <p className={css.micro}>Nothing on watch.</p>
       ) : (
         <div className={fbc.section}>
-          {watch.slice(0, 5).map((m) => (
+          {watching.slice(0, 5).map((m) => (
             <div key={m.id} className={`${fbc.moment} ${fbc[m.severity] || ""}`}>
               <div className={fbc.momentTop}>
                 <span className={`${fbc.sev} ${fbc[m.severity] || ""}`}>{String(m.severity).replace("_", " ")}</span>

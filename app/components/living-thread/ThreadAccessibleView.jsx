@@ -21,7 +21,7 @@ export function ThreadAccessibleView({ geometry, lens }) {
   if (!geometry) return null;
   const { nodes = [], ripples = [], conflicts = [], fragments = [] } = geometry;
   return (
-    <div className={styles.a11y}>
+    <div className={`${styles.a11y} ${styles.visuallyHidden}`}>
       <p>
         Living Thread — {lens} lens. One continuous life line; switching lens changes only what is shown, never the numbers. Snapshot {geometry.snapshotId ?? "—"}.
       </p>

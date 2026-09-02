@@ -4,6 +4,8 @@
 // without threading data - they read useBankData() themselves (they render
 // inside <BankDataProvider>).
 
+import { useEffect } from "react";
+
 import { useBankData } from "./useBankData.jsx";
 import { BankTodayHeader } from "./BankTodayHeader.jsx";
 import { GuardianSections } from "./GuardianSections.jsx";
@@ -33,14 +35,18 @@ export function RippleStripConnected({ onAction, compact = true }) {
 // The onboarding gate: a brand-new user (onboarding not complete) sees the
 // wizard instead of the app. Returns null once complete so the caller
 // renders the real screen.
-export function OnboardingGate({ onOpen, children }) {
+export function OnboardingGate({ onOpen, onGateChange, children }) {
   const { onboarding, status, reload } = useBankData();
-  if (status === "loading" || status === "idle") return null; // let the app render its own loading
   const ob = onboarding?.onboarding ?? null;
-  if (ob && ob.status !== "complete" && ob.status !== "not_started") {
-    return <OnboardingWizard onComplete={reload} onOpen={onOpen} />;
-  }
-  if (ob && ob.status === "not_started") {
+  const loading = status === "loading" || status === "idle";
+  const gated = loading || Boolean(ob && ob.status !== "complete");
+
+  useEffect(() => {
+    onGateChange?.(gated);
+  }, [gated, onGateChange]);
+
+  if (loading) return null; // keep the app chrome quiet until the gate is known
+  if (gated) {
     return <OnboardingWizard onComplete={reload} onOpen={onOpen} />;
   }
   return children ?? null;

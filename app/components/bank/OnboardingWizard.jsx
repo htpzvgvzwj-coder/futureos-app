@@ -17,17 +17,24 @@ const ACCOUNT_TYPES = [
 ];
 
 const CONSENT_COPY = {
-  account_data: { why: "To show your real balances and Available to Spend.", affects: "Today, Life, Safe-to-Spend." },
-  transaction_data: { why: "To categorise spending and find recurring bills.", affects: "Transactions, Spending, Money Rescue." },
-  assets_liabilities: { why: "To compute net worth and what a plan really costs.", affects: "Financial Twin, every Studio." },
-  planning_data: { why: "To keep your plans and their history.", affects: "Studios, Mirror, History." },
-  shared_data: { why: "To let people you invite see agreed bands (never private amounts).", affects: "Shared Money, Family." },
-  guardian_monitoring: { why: "To let Guardian watch reality against your sealed plans.", affects: "Guardian alerts and check-ins." },
+  account_data: { name: "Accounts and balances", why: "Show your real balances and what is available now.", affects: "Today, Life and Safe-to-Spend." },
+  transaction_data: { name: "Transactions and spending", why: "Find spending patterns, recurring bills and unusual payments.", affects: "Activity, spending insights and Money Rescue." },
+  assets_liabilities: { name: "Assets and debts", why: "Build your net-worth picture and calculate what plans really cost.", affects: "Financial Twin and every plan." },
+  planning_data: { name: "Plans and history", why: "Keep the paths you create and explain what changed.", affects: "Studios, Mirror and History." },
+  shared_data: { name: "Shared planning", why: "Let invited people see only the ranges you agree to share.", affects: "Shared Money and Family." },
+  guardian_monitoring: { name: "Guardian monitoring", why: "Watch real money against plans you have confirmed.", affects: "Guardian alerts and check-ins." },
 };
+
+const CONSENT_GROUPS = [
+  { id: "essential", title: "Essential for your bank", scopes: ["account_data"] },
+  { id: "intelligence", title: "Intelligence you can enable", scopes: ["transaction_data", "assets_liabilities", "planning_data"] },
+  { id: "people", title: "People and Guardian", scopes: ["shared_data", "guardian_monitoring"] },
+];
 
 export function OnboardingWizard({ onComplete, onOpen }) {
   const [state, setState] = useState({ status: "loading", onboarding: null, consent: [] });
   const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
     setState((s) => ({ ...s, status: "loading" }));
@@ -46,20 +53,26 @@ export function OnboardingWizard({ onComplete, onOpen }) {
 
   const post = async (body) => {
     setBusy(true);
+    setMessage("");
     try {
       const res = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.onboarding) setState((s) => ({ ...s, onboarding: data.onboarding }));
-        if (data.consent) setState((s) => ({ ...s, consent: data.consent }));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage("We could not save that change. Please try again.");
+        return { ok: false, data };
       }
-      return { ok: res.ok, data };
+      if (data.onboarding) setState((s) => ({ ...s, onboarding: data.onboarding }));
+      if (data.consent) setState((s) => ({ ...s, consent: data.consent }));
+      return { ok: true, data };
+    } catch {
+      setMessage("Your connection was interrupted. Please try again.");
+      return { ok: false, data: null };
     } finally {
       setBusy(false);
     }
   };
 
-  if (state.status === "loading") return <LoadingState label="Setting up FutureOS…" />;
+  if (state.status === "loading") return <LoadingState label="Setting up Future Bank…" />;
   if (state.status === "error") return <ErrorState onRetry={load} message="Onboarding could not load." />;
 
   const step = state.onboarding?.step ?? "account_type";
@@ -68,7 +81,7 @@ export function OnboardingWizard({ onComplete, onOpen }) {
   const requiredGranted = requiredConsent.every((c) => c.granted);
 
   return (
-    <div className={`${styles.bank} ${styles.wizard}`} aria-label="Set up FutureOS">
+    <div className={`${styles.bank} ${styles.wizard}`} aria-label="Set up Future Bank" data-onboarding-shell>
       <ol className={styles.wizardSteps}>
         {["Account", "Consent", "Add reality", "First result"].map((label, i) => (
           <li key={label} className={`${styles.wizardStep} ${i === stepIndex ? styles.wizardStepActive : ""} ${i < stepIndex ? styles.wizardStepDone : ""}`}>
@@ -100,40 +113,70 @@ export function OnboardingWizard({ onComplete, onOpen }) {
       ) : null}
 
       {step === "consent" ? (
-        <section aria-labelledby="ob-consent">
-          <h2 id="ob-consent" className={styles.gSectionTitle}>What may FutureOS use?</h2>
-          {state.consent.map((c) => (
-            <div key={c.scope} className={styles.consentRow}>
-              <input
-                id={`consent-${c.scope}`}
-                type="checkbox"
-                checked={c.granted}
-                onChange={(e) => {
-                  const granted = e.target.checked;
-                  // optimistic: flip locally now, reconcile from the server response
-                  setState((s) => ({ ...s, consent: s.consent.map((x) => (x.scope === c.scope ? { ...x, granted } : x)) }));
-                  post({ action: "set_consent", scope: c.scope, granted });
-                }}
-              />
-              <label htmlFor={`consent-${c.scope}`}>
-                <strong>{c.scope.replace(/_/g, " ")}</strong>
-                {c.required ? <span className={styles.consentReq}>required</span> : null}
-                <br />
-                <span className={styles.choiceHint}>
-                  {CONSENT_COPY[c.scope]?.why} Affects: {CONSENT_COPY[c.scope]?.affects} You can revoke this later in Account.
-                </span>
-              </label>
-            </div>
-          ))}
-          <div className={styles.rowActions} style={{ marginTop: 12 }}>
-            <button type="button" className={styles.ghostBtn} disabled={busy} onClick={() => post({ action: "advance", step: "account_type" })}>
-              Back
-            </button>
-            <button type="button" className={styles.primaryBtn} disabled={busy || !requiredGranted} onClick={() => post({ action: "advance", step: "add_reality" })}>
-              Continue
-            </button>
+        <section aria-labelledby="ob-consent" className={styles.consentStep}>
+          <div className={styles.wizardIntro}>
+            <p className={styles.wizardEyebrow}>Your control</p>
+            <h2 id="ob-consent" className={styles.wizardTitle}>Choose what Future Bank may use</h2>
+            <p className={styles.wizardLead}>Start with the one permission needed to show your bank. Everything else is optional and can be changed later.</p>
           </div>
-          {!requiredGranted ? <p className={styles.fieldError}>The required scopes must be granted to use FutureOS as a bank.</p> : null}
+
+          <div className={styles.consentGroups}>
+            {CONSENT_GROUPS.map((group) => {
+              const rows = state.consent.filter((c) => group.scopes.includes(c.scope));
+              if (!rows.length) return null;
+              return (
+                <fieldset key={group.id} className={styles.consentGroup}>
+                  <legend>{group.title}</legend>
+                  {rows.map((c) => {
+                    const copy = CONSENT_COPY[c.scope] ?? {};
+                    return (
+                      <div key={c.scope} className={styles.consentRow}>
+                        <input
+                          id={`consent-${c.scope}`}
+                          type="checkbox"
+                          checked={c.granted}
+                          aria-describedby={`consent-help-${c.scope}`}
+                          onChange={async (e) => {
+                            const granted = e.target.checked;
+                            const previous = c.granted;
+                            setState((s) => ({ ...s, consent: s.consent.map((x) => (x.scope === c.scope ? { ...x, granted } : x)) }));
+                            const result = await post({ action: "set_consent", scope: c.scope, granted });
+                            if (!result.ok) {
+                              setState((s) => ({ ...s, consent: s.consent.map((x) => (x.scope === c.scope ? { ...x, granted: previous } : x)) }));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`consent-${c.scope}`}>
+                          <span className={styles.consentName}>
+                            {copy.name ?? c.scope.replace(/_/g, " ")}
+                            <span className={c.required ? styles.consentReq : styles.consentOptional}>{c.required ? "Required" : "Optional"}</span>
+                          </span>
+                          <span id={`consent-help-${c.scope}`} className={styles.consentHelp}>{copy.why}</span>
+                          <details className={styles.consentDetails}>
+                            <summary>Where this appears</summary>
+                            <span>{copy.affects} You can revoke or change this later in Account controls.</span>
+                          </details>
+                        </label>
+                      </div>
+                    );
+                  })}
+                </fieldset>
+              );
+            })}
+          </div>
+
+          <div className={styles.wizardActionBar}>
+            {message ? <p className={styles.fieldError} role="alert">{message}</p> : null}
+            {!requiredGranted ? <p className={styles.actionHint}>Enable Accounts and balances to continue.</p> : null}
+            <div className={styles.rowActions}>
+              <button type="button" className={styles.ghostBtn} disabled={busy} onClick={() => post({ action: "advance", step: "account_type" })}>
+                Back
+              </button>
+              <button type="button" className={styles.primaryBtn} disabled={busy || !requiredGranted} onClick={() => post({ action: "advance", step: "add_reality" })}>
+                {busy ? "Saving…" : "Continue to add your reality"}
+              </button>
+            </div>
+          </div>
         </section>
       ) : null}
 
