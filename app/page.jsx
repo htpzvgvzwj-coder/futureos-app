@@ -10,6 +10,7 @@ import { LifeThreadProvider, useLifeThread } from "./components/life-thread/Life
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
 import { BankHome } from "./components/future-bank/BankHome.jsx";
+import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
 import {
   GuardianConnected, RippleStripConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -203,6 +204,7 @@ const screens = {
   CSV_IMPORT: "csvImport",
   ACCOUNT_CONTROL: "accountControl",
   MONEY_RESCUE: "moneyRescue",
+  FINANCIAL_TWIN: "financialTwin",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3260,7 +3262,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 }
 
 function getNavScreen(activeScreen) {
-  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL].includes(activeScreen)) return screens.HOME;
+  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -17663,9 +17665,13 @@ export default function App() {
           onGuardian={() => setActiveScreen(screens.GUARDIAN)}
           onActivity={() => setActiveScreen(screens.HOME_FULL)}
           onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+          onTwin={() => setActiveScreen(screens.FINANCIAL_TWIN)}
           onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; if (target) setActiveScreen(target); }}
         />
       </OnboardingGate>
+    ),
+    [screens.FINANCIAL_TWIN]: (
+      <FinancialTwinView onBack={() => setActiveScreen(screens.HOME)} onAdd={() => setActiveScreen(screens.REALITY_ENTRY)} />
     ),
     [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,

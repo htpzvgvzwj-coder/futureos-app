@@ -32,7 +32,7 @@ export function BankHome(props) {
   );
 }
 
-function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, onAddReality }) {
+function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, onAddReality, onTwin }) {
   const fb = useFutureBankData();
   const { twin, status } = fb;
   const [sheet, setSheet] = useState(null);
@@ -110,6 +110,7 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
                 <b>{sgd(committedMonthly)}<span className={css.perMo}> /mo</span></b>
               </button>
             </div>
+            <button type="button" className={css.link} onClick={onTwin}>See my full money picture →</button>
 
             {/* 2 BANK NOW */}
             <BankNowActions

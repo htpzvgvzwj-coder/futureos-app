@@ -18,6 +18,7 @@ export async function GET(request) {
       asOf: b.asOf,
       twin: b.twin,
       balances: b.balances,
+      holdings: b.holdings,
       recentTransactions: b.recentTransactions,
       safeToSpend: b.safeToSpend,
       futureBalance: b.futureBalance,

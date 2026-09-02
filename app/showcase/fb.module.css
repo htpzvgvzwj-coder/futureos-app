@@ -30,7 +30,8 @@
   width: 100%;
   max-width: 430px;
   background: var(--ground);
-  padding: 20px 18px 40px;
+  /* bottom padding clears the tabbed shell's bottom navigation + safe area */
+  padding: 20px 18px calc(84px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 20px;
