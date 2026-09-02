@@ -192,6 +192,18 @@ export function FamilyCareView({ onBack, onWedding }) {
       setMsg("Could not save. Try again.");
     }
   };
+  const careAction = async (body, okMsg) => {
+    setBusy(true);
+    setMsg("");
+    const d = await POST_CARE(body);
+    setBusy(false);
+    if (d.ok) {
+      if (okMsg) setMsg(okMsg);
+      load();
+    } else {
+      setMsg(d.error ? `Could not: ${d.error}` : "Could not save. Try again.");
+    }
+  };
   const savePolicy = async (patch) => {
     setBusy(true);
     setMsg("");
@@ -343,16 +355,58 @@ export function FamilyCareView({ onBack, onWedding }) {
             <p className={css.kicker}>Who can see this account</p>
             <div className={css.activity}>
               {care.supervisors.map((s) => (
-                <div key={s.roleId} className={css.actItem}>
-                  <span className={css.actBody}>
-                    <span className={css.actName}>{s.personLabel}</span>
-                    <span className={css.actMeta}>{ROLE_LABEL[s.role] ?? s.role} · {s.scope === "approve" ? "sees health + approves what you send" : "sees your money health only"}</span>
-                  </span>
-                  <button type="button" className={css.link} disabled={busy} onClick={() => remove(s.roleId)}>Unlink</button>
+                <div key={s.roleId}>
+                  <div className={css.actItem}>
+                    <span className={css.actBody}>
+                      <span className={css.actName}>{s.personLabel}</span>
+                      <span className={css.actMeta}>{ROLE_LABEL[s.role] ?? s.role} · {s.scope === "approve" ? "sees health + approves what you send" : "sees your money health only"}</span>
+                    </span>
+                    <button type="button" className={css.link} disabled={busy} onClick={() => careAction({ action: "nudge", roleId: s.roleId, title: "Please check in on my account when you can" }, `Asked ${s.personLabel} to take a look.`)}>Ask to check in</button>
+                    <button type="button" className={css.link} disabled={busy} onClick={() => remove(s.roleId)}>Unlink</button>
+                  </div>
+                  {s.scope === "approve" ? (
+                    <AllowanceEditor
+                      person={s.personLabel}
+                      current={s.autoApproveWeekly}
+                      busy={busy}
+                      onSave={async (weekly) => {
+                        setBusy(true);
+                        await POST_CARE({ action: "set_allowance", roleId: s.roleId, weekly });
+                        setBusy(false);
+                        load();
+                      }}
+                    />
+                  ) : null}
                 </div>
               ))}
             </div>
             <p className={css.micro}>They never see your transactions or exact balances. Unlinking takes effect immediately.</p>
+          </section>
+        ) : null}
+
+        {/* shared ranges - what a household member sees instead of exact amounts */}
+        <section className={css.section}>
+          <p className={css.kicker}>Shared ranges</p>
+          <p className={css.micro}>Household members see a range you set here — never an exact figure. Leave this empty and they only see your money-health state.</p>
+          <SharedRanges
+            ranges={care?.sharedRanges ?? []}
+            busy={busy}
+            onSave={(r) => careAction({ action: "set_range", ...r }, "Range saved.")}
+            onDelete={(category) => careAction({ action: "delete_range", category }, "Range removed.")}
+          />
+        </section>
+
+        {/* age & permissions - youth account transition proposals */}
+        {(accountType === "youth" || accountType === "guardian_managed_child" || (care?.transitions?.length ?? 0) > 0) ? (
+          <section className={css.section}>
+            <p className={css.kicker}>Age &amp; permissions</p>
+            <AgeAndPermissions
+              birthYear={care?.birthYear ?? null}
+              transitions={care?.transitions ?? []}
+              busy={busy}
+              onSaveYear={(year) => careAction({ action: "set_birth_year", year }, "Saved. Any due proposals appear below.")}
+              onDecide={(id, apply) => careAction({ action: "transition", id, apply }, apply ? "Applied — check the approval rules above." : "Dismissed.")}
+            />
           </section>
         ) : null}
 
@@ -383,6 +437,16 @@ export function FamilyCareView({ onBack, onWedding }) {
                 {handoff.triggerNote ? `When: ${handoff.triggerNote}. ` : ""}
                 {handoff.instructions ? handoff.instructions : "No instructions added yet."}
               </span>
+              {(() => {
+                const succ = (roles ?? []).find((r) => r.id === handoff.successorRoleId);
+                if (succ && succ.status === "active" && succ.subjectKey) {
+                  return <span className={css.micro}>✓ {succ.relationLabel || ROLE_LABEL[succ.role] || "This person"} is linked and ready to take over — the handoff itself still needs the legal steps.</span>;
+                }
+                if (handoff.successorRoleId) {
+                  return <span className={css.micro}>Your chosen successor is not linked yet. Invite them on their row above so they are ready.</span>;
+                }
+                return null;
+              })()}
               <span className={css.micro}>Status: {handoff.status} — Future Bank never carries this out on its own. A real handoff needs identity checks and the right legal steps.</span>
               <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>Edit the plan</button>
             </div>
@@ -419,6 +483,7 @@ export function FamilyCareView({ onBack, onWedding }) {
             <li><span className={css.proofMark}>→</span> Youth permissions change with age, consent and local rules — not automatically.</li>
             <li><span className={css.proofMark}>→</span> Elderly care and any handoff need identity verification and the right legal steps.</li>
             <li><span className={css.proofMark}>→</span> Future Bank never guesses a life event, and never carries out a handoff on its own.</li>
+            <li><span className={css.proofMark}>→</span> This works both ways — an adult child can be the guardian or trusted contact for an ageing parent&apos;s account, with the same limits.</li>
             <li><span className={css.proofMark}>→</span> Sharing shows agreed ranges — never your exact private amounts.</li>
           </ul>
         </section>
@@ -427,24 +492,149 @@ export function FamilyCareView({ onBack, onWedding }) {
   );
 }
 
+const RANGE_CATS = [
+  { id: "rent", label: "Rent / housing" },
+  { id: "groceries", label: "Groceries" },
+  { id: "transport", label: "Transport" },
+  { id: "utilities", label: "Utilities" },
+  { id: "savings", label: "Savings" },
+  { id: "childcare", label: "Childcare" },
+  { id: "other", label: "Other" },
+];
+const RANGE_LABEL = Object.fromEntries(RANGE_CATS.map((c) => [c.id, c.label]));
+
+function SharedRanges({ ranges, busy, onSave, onDelete }) {
+  const [cat, setCat] = useState("rent");
+  const [low, setLow] = useState("");
+  const [high, setHigh] = useState("");
+  const valid = low.trim() !== "" && high.trim() !== "" && Number(high) >= Number(low);
+  return (
+    <>
+      {ranges.length > 0 ? (
+        <div className={css.activity}>
+          {ranges.map((r) => (
+            <div key={r.category} className={css.actItem}>
+              <span className={css.actBody}>
+                <span className={css.actName}>{RANGE_LABEL[r.category] ?? r.category}</span>
+                <span className={css.actMeta}>SGD {r.low.toLocaleString("en-SG")}–{r.high.toLocaleString("en-SG")}{r.note ? ` · ${r.note}` : ""}</span>
+              </span>
+              <button type="button" className={css.link} disabled={busy} onClick={() => onDelete(r.category)}>Remove</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <div className={css.choiceGrid}>
+        {RANGE_CATS.map((c) => (
+          <button key={c.id} type="button" className={css.choice} aria-pressed={cat === c.id} disabled={busy} onClick={() => setCat(c.id)}>
+            <b>{cat === c.id ? "✓ " : ""}{c.label}</b>
+          </button>
+        ))}
+      </div>
+      <div className={css.field}>
+        <label htmlFor="sr-low">Low (SGD)</label>
+        <input id="sr-low" inputMode="numeric" value={low} disabled={busy} onChange={(e) => setLow(e.target.value.replace(/[^\d]/g, ""))} />
+      </div>
+      <div className={css.field}>
+        <label htmlFor="sr-high">High (SGD)</label>
+        <input id="sr-high" inputMode="numeric" value={high} disabled={busy} onChange={(e) => setHigh(e.target.value.replace(/[^\d]/g, ""))} />
+      </div>
+      <button
+        type="button"
+        className={css.cta}
+        disabled={busy || !valid}
+        onClick={() => { onSave({ category: cat, low: Number(low), high: Number(high) }); setLow(""); setHigh(""); }}
+      >
+        Save this range
+      </button>
+    </>
+  );
+}
+
+const MILESTONE_LABEL = { turns_16: "Turned 16", turns_18: "Turned 18", custom: "A milestone" };
+
+function AgeAndPermissions({ birthYear, transitions, busy, onSaveYear, onDecide }) {
+  const [year, setYear] = useState(birthYear != null ? String(birthYear) : "");
+  useEffect(() => setYear(birthYear != null ? String(birthYear) : ""), [birthYear]);
+  const dirty = year.trim() !== "" && Number(year) !== birthYear && Number(year) >= 1900 && Number(year) <= new Date().getFullYear();
+  return (
+    <>
+      <p className={css.micro}>
+        A birth year lets Future Bank <b>propose</b> loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.
+      </p>
+      <div className={css.field}>
+        <label htmlFor="ap-year">Birth year (optional)</label>
+        <input id="ap-year" inputMode="numeric" value={year} placeholder="e.g. 2009" disabled={busy} onChange={(e) => setYear(e.target.value.replace(/[^\d]/g, "").slice(0, 4))} />
+      </div>
+      {dirty ? (
+        <button type="button" className={css.link} disabled={busy} onClick={() => onSaveYear(Number(year))}>Save birth year</button>
+      ) : null}
+      {transitions.map((tr) => (
+        <div key={tr.id} className={css.movingCard}>
+          <div className={css.movingHead}><b>{MILESTONE_LABEL[tr.milestone] ?? tr.milestone}</b></div>
+          <span className={css.micro}>{tr.rationale}</span>
+          <div className={css.choiceGrid}>
+            <button type="button" className={css.cta} disabled={busy} onClick={() => onDecide(tr.id, true)}>Apply this change</button>
+            <button type="button" className={css.choice} disabled={busy} onClick={() => onDecide(tr.id, false)}>Not now</button>
+          </div>
+        </div>
+      ))}
+      {transitions.length === 0 ? <p className={css.micro}>No proposals right now.</p> : null}
+    </>
+  );
+}
+
+function AllowanceEditor({ person, current, busy, onSave }) {
+  const [val, setVal] = useState(current != null ? String(current) : "");
+  useEffect(() => setVal(current != null ? String(current) : ""), [current]);
+  const dirty = (val.trim() === "" ? current != null : Number(val) !== current);
+  return (
+    <div className={css.field} style={{ paddingLeft: "10px" }}>
+      <label htmlFor={`allow-${person}`}>Let {person} auto-approve up to (SGD / week)</label>
+      <input
+        id={`allow-${person}`}
+        inputMode="numeric"
+        value={val}
+        placeholder="blank = they approve everything"
+        disabled={busy}
+        onChange={(e) => setVal(e.target.value.replace(/[^\d]/g, ""))}
+      />
+      {dirty ? (
+        <button type="button" className={css.link} disabled={busy} onClick={() => onSave(val.trim() === "" ? null : Number(val))}>
+          Save allowance
+        </button>
+      ) : null}
+      <span className={css.micro}>Small moves under this run without asking; anything above still waits. You are delegating a limited pre-approval.</span>
+    </div>
+  );
+}
+
 function ApprovalRules({ accountType, policy, busy, onSave }) {
   const supervised = accountType === "youth" || accountType === "guardian_managed_child";
-  const [restricted, setRestricted] = useState(policy?.restrictedNeedApproval ?? true);
-  const [over, setOver] = useState(policy?.approvalOverAmount != null ? String(policy.approvalOverAmount) : "");
+  const [restricted, setRestricted] = useState(true);
+  const [over, setOver] = useState("");
+  const [mode, setMode] = useState("approval");
+  const [hours, setHours] = useState("48");
+  const [both, setBoth] = useState(false);
   useEffect(() => {
     if (policy) {
       setRestricted(policy.restrictedNeedApproval);
       setOver(policy.approvalOverAmount != null ? String(policy.approvalOverAmount) : "");
+      setMode(policy.mode ?? "approval");
+      setHours(String(policy.coolingOffHours ?? 48));
+      setBoth(Boolean(policy.requireBoth));
     }
   }, [policy]);
   if (!policy) return <p className={css.micro}>Loading…</p>;
   const dirty =
     restricted !== policy.restrictedNeedApproval ||
-    (over.trim() === "" ? policy.approvalOverAmount != null : Number(over) !== policy.approvalOverAmount);
+    (over.trim() === "" ? policy.approvalOverAmount != null : Number(over) !== policy.approvalOverAmount) ||
+    mode !== (policy.mode ?? "approval") ||
+    Number(hours) !== (policy.coolingOffHours ?? 48) ||
+    both !== Boolean(policy.requireBoth);
   return (
     <>
       <p className={css.micro}>
-        When a rule matches, a real money move (a transfer between your own accounts, a card repayment) waits in <b>Guardian</b> for a decision instead of happening straight away. Nothing else is affected.
+        When a rule matches, a real money move (a transfer between your own accounts, a card repayment) is held instead of happening straight away. Nothing else is affected.
       </p>
       <label className={css.actItem} style={{ cursor: "pointer" }}>
         <span className={css.actBody}>
@@ -468,15 +658,50 @@ function ApprovalRules({ accountType, policy, busy, onSave }) {
           onChange={(e) => setOver(e.target.value.replace(/[^\d]/g, ""))}
         />
       </div>
+
+      <p className={css.micro}>When a move is held:</p>
+      <div className={css.choiceGrid}>
+        <button type="button" className={css.choice} aria-pressed={mode === "approval"} disabled={busy} onClick={() => setMode("approval")}>
+          <b>{mode === "approval" ? "✓ " : ""}Wait for a decision</b>
+          <span>It only happens once someone approves it.</span>
+        </button>
+        <button type="button" className={css.choice} aria-pressed={mode === "cooling_off"} disabled={busy} onClick={() => setMode("cooling_off")}>
+          <b>{mode === "cooling_off" ? "✓ " : ""}Cooling-off</b>
+          <span>It runs itself after a wait, unless someone stops it. No one has to be online.</span>
+        </button>
+      </div>
+      {mode === "cooling_off" ? (
+        <div className={css.field}>
+          <label htmlFor="ap-hours">Cooling-off wait (hours)</label>
+          <input id="ap-hours" inputMode="numeric" value={hours} disabled={busy} onChange={(e) => setHours(e.target.value.replace(/[^\d]/g, "") || "")} />
+        </div>
+      ) : null}
+
+      <label className={css.actItem} style={{ cursor: "pointer" }}>
+        <span className={css.actBody}>
+          <span className={css.actName}>Two people must agree</span>
+          <span className={css.actMeta}>A held move needs both a guardian&apos;s approval and your own confirmation before it runs.</span>
+        </span>
+        <input type="checkbox" checked={both} disabled={busy} onChange={(e) => setBoth(e.target.checked)} />
+      </label>
+
       <button
         type="button"
         className={css.cta}
         disabled={busy || !dirty}
-        onClick={() => onSave({ restrictedNeedApproval: restricted, approvalOverAmount: over.trim() === "" ? null : Number(over) })}
+        onClick={() =>
+          onSave({
+            restrictedNeedApproval: restricted,
+            approvalOverAmount: over.trim() === "" ? null : Number(over),
+            mode,
+            coolingOffHours: hours.trim() === "" ? 48 : Number(hours),
+            requireBoth: both,
+          })
+        }
       >
         Save approval rules
       </button>
-      <p className={css.micro}>An amount rule protects anyone — for example an older adult who wants a second look before a large transfer.</p>
+      <p className={css.micro}>An amount rule plus cooling-off protects an older adult who wants a pause before a large transfer, without needing anyone else to act.</p>
     </>
   );
 }

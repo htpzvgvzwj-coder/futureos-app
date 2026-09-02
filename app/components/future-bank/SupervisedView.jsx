@@ -33,20 +33,34 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
     load();
   }, [load]);
 
-  const decide = async (id, decision) => {
+  const [declineFor, setDeclineFor] = useState(null);
+  const [declineNote, setDeclineNote] = useState("");
+  const decide = async (id, decision, note) => {
     setBusyId(id);
     await fetch("/api/care", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "decide", account: ownerKey, id, decision }),
+      body: JSON.stringify({ action: "decide", account: ownerKey, id, decision, note }),
     }).catch(() => {});
     setBusyId(null);
+    setDeclineFor(null);
+    setDeclineNote("");
     load();
   };
 
   const s = data?.snapshot;
   const scope = data?.role?.scope;
   const health = s ? HEALTH[s.health] ?? HEALTH.steady : null;
+  const nudges = data?.nudges ?? [];
+  const ranges = data?.sharedRanges ?? [];
+  const nudgeDone = async (id) => {
+    await fetch("/api/care", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "nudge_done", id }),
+    }).catch(() => {});
+    load();
+  };
 
   return (
     <div className={`${css.app} ${css.embedded}`}>
@@ -60,6 +74,36 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
         </div>
 
         {err ? <p className={css.err}>{err}</p> : null}
+
+        {nudges.length > 0 ? (
+          <section className={css.section}>
+            <p className={css.kicker}>They asked you to look</p>
+            {nudges.map((n) => (
+              <div key={n.id} className={css.movingCard}>
+                <b>{n.title}</b>
+                {n.detail ? <span className={css.micro}>{n.detail}</span> : null}
+                <button type="button" className={css.link} onClick={() => nudgeDone(n.id)}>Mark done</button>
+              </div>
+            ))}
+          </section>
+        ) : null}
+
+        {ranges.length > 0 ? (
+          <section className={css.section}>
+            <p className={css.kicker}>Agreed ranges they shared</p>
+            <div className={css.activity}>
+              {ranges.map((r) => (
+                <div key={r.category} className={css.actItem}>
+                  <span className={css.actBody}>
+                    <span className={css.actName}>{r.category}</span>
+                    <span className={css.actMeta}>SGD {r.low.toLocaleString("en-SG")}–{r.high.toLocaleString("en-SG")}{r.note ? ` · ${r.note}` : ""}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className={css.micro}>These are ranges the account owner chose to share — not their actual spending.</p>
+          </section>
+        ) : null}
 
         {s ? (
           <>
@@ -79,7 +123,13 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
                 <div className={css.actItem}>
                   <span className={css.actBody}>
                     <span className={css.actName}>Reality vs plan</span>
-                    <span className={css.actMeta}>{s.realityDrift ? "Has drifted — worth a conversation" : "In line with their plan"}</span>
+                    <span className={css.actMeta}>
+                      {s.driftSeverity === "high"
+                        ? "Has drifted a lot — worth a conversation"
+                        : s.driftSeverity === "watch"
+                          ? "Drifting a little"
+                          : "In line with their plan"}
+                    </span>
                   </span>
                 </div>
                 <div className={css.actItem}>
@@ -107,10 +157,21 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
                       <div className={fbc.momentTitle}>{r.summary}</div>
                       {r.amount != null ? <div className={fbc.momentSummary}>{money(r.amount)}</div> : null}
                       {r.reason ? <div className={fbc.evMeta}>Why: {r.reason}</div> : null}
-                      <div className={css.choiceGrid}>
-                        <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => decide(r.id, "approved")}>Approve &amp; do it</button>
-                        <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => decide(r.id, "declined")}>Decline</button>
-                      </div>
+                      {declineFor === r.id ? (
+                        <div className={css.field}>
+                          <label htmlFor={`sdn-${r.id}`}>A short reason (they will see this)</label>
+                          <input id={`sdn-${r.id}`} type="text" value={declineNote} maxLength={140} autoComplete="off" onChange={(e) => setDeclineNote(e.target.value)} />
+                          <div className={css.choiceGrid}>
+                            <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => decide(r.id, "declined", declineNote.trim())}>Send decline</button>
+                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>Back</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={css.choiceGrid}>
+                          <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => decide(r.id, "approved")}>Approve &amp; do it</button>
+                          <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>Decline</button>
+                        </div>
+                      )}
                     </article>
                   ))
                 )}

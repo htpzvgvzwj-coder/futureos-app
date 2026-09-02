@@ -32,8 +32,9 @@ async function makeUser(pool, tag) {
 }
 async function cleanupUser(pool, uid) {
   await pool.query(`delete from care_invites where profile_key = $1 or accepted_by = $1`, [uid]).catch(() => {});
+  await pool.query(`delete from care_nudges where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
   await pool.query(`delete from lifecycle_roles where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
-  for (const t of ["authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
+  for (const t of ["care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
   await pool.query(`delete from users where id = $1`, [uid]).catch(() => {});
@@ -288,7 +289,7 @@ test("Phase 6 approval queue: an amount rule parks a transfer; approve executes 
     payload: { fromAccountId: cur.id, toAccountId: sav.id, amount: 900, currency: "SGD", idempotencyKey: idk + "-2" },
     reason: "over the rule",
   });
-  const declined = await authz.decideAuthRequest(u, req2.id, { decision: "declined" });
+  const declined = await authz.decideAuthRequest(u, req2.id, { decision: "declined", note: "not this month" });
   assert.equal(declined.status, "declined");
   assert.equal((await ledger.listTransactions(u)).filter((x) => x.isInternalTransfer).length, 2, "still just the first transfer");
 
@@ -372,4 +373,114 @@ test("Phase 6 Round 3 cross-user link: invite -> accept -> scoped view -> guardi
   assert.equal(await care.revokeCareLink(owner, { roleId: role.id }), true);
   assert.equal(await care.assertActiveRole(guardian, owner, "view"), null);
   assert.equal((await care.listSupervisedByMe(guardian)).length, 0);
+});
+
+test("Phase 6 Round 5 Guardian mechanics: cooling-off, weekly allowance, two-person, decline needs a reason", opts, async (t) => {
+  const { accounts, ledger, authz, care, control, pool } = await mods();
+  const owner = await makeUser(pool, "mechOwner");
+  const guardian = await makeUser(pool, "mechGuard");
+  t.after(async () => { await cleanupUser(pool, owner); await cleanupUser(pool, guardian); });
+
+  const cur = await accounts.createBankAccount(owner, { kind: "current", displayName: "Everyday" });
+  const sav = await accounts.createBankAccount(owner, { kind: "savings", displayName: "Savings" });
+  await ledger.appendTransaction(owner, { accountId: cur.id, direction: "credit", amount: 9000, channel: "salary" });
+  const link = await control.grantRole(owner, { subjectKey: guardian, role: "guardian", scope: "approve" });
+  // one internal transfer writes two ledger legs; count transfers, not legs
+  const nTransfers = async () => (await ledger.listTransactions(owner)).filter((x) => x.isInternalTransfer).length / 2;
+
+  const mk = (amount, key) =>
+    authz.createAuthRequest(owner, {
+      kind: "internal_transfer",
+      summary: `Move SGD ${amount}`,
+      amount,
+      payload: { fromAccountId: cur.id, toAccountId: sav.id, amount, currency: "SGD", idempotencyKey: key },
+      reason: "test",
+    });
+
+  // --- weekly allowance: a small move clears itself, a bigger one does not
+  await authz.setAuthPolicy(owner, { approvalOverAmount: 20, mode: "approval" });
+  await authz.setLinkAllowance(owner, link.id, 100);
+  const small = await mk(60, "mech-small-" + Date.now());
+  assert.equal(small.status, "executed", "60 <= 100/week allowance -> auto-approved");
+  assert.equal(small.autoReason, "within_allowance");
+  assert.equal(await nTransfers(), 1);
+  const big = await mk(80, "mech-big-" + Date.now()); // 60 + 80 > 100
+  assert.equal(big.status, "pending", "over the remaining allowance -> still waits");
+  await authz.cancelAuthRequest(owner, big.id);
+  await authz.setLinkAllowance(owner, link.id, null);
+
+  // --- cooling-off: a parked move runs itself once the deadline passes
+  await authz.setAuthPolicy(owner, { mode: "cooling_off", coolingOffHours: 48, requireBoth: false });
+  const cool = await mk(300, "mech-cool-" + Date.now());
+  assert.equal(cool.status, "pending");
+  assert.ok(cool.autoExecuteAt, "a cooling-off deadline is set");
+  await pool.query(`update authorization_requests set auto_execute_at = now() - interval '1 minute' where id = $1`, [cool.id]);
+  const swept = await authz.sweepDueRequests(owner);
+  assert.equal(swept, 1);
+  assert.equal((await authz.listAuthRequests(owner, { status: "executed" })).some((r) => r.id === cool.id), true);
+  assert.equal(await nTransfers(), 2);
+
+  // --- two-person: a guardian approve alone does NOT run it; owner confirm completes it
+  await authz.setAuthPolicy(owner, { mode: "approval", requireBoth: true });
+  const both = await mk(500, "mech-both-" + Date.now());
+  const gate = await care.assertActiveRole(guardian, owner, "approve");
+  const half = await authz.decideAuthRequest(owner, both.id, { decision: "approved", decidedBy: "guardian", roleId: gate.roleId });
+  assert.equal(half.blockedPendingOwner, true);
+  assert.equal(await nTransfers(), 2, "not run on the guardian's approval alone");
+  const done = await authz.confirmOwnerHalf(owner, both.id);
+  assert.equal(done.status, "executed");
+  assert.equal(await nTransfers(), 3, "runs once the owner also confirms");
+
+  // --- a decline must carry a reason
+  await authz.setAuthPolicy(owner, { requireBoth: false });
+  const dec = await mk(700, "mech-dec-" + Date.now());
+  await assert.rejects(() => authz.decideAuthRequest(owner, dec.id, { decision: "declined" }), /reason/i);
+  const declined = await authz.decideAuthRequest(owner, dec.id, { decision: "declined", note: "not now" });
+  assert.equal(declined.status, "declined");
+  assert.equal(declined.decisionNote, "not now");
+});
+
+test("Phase 6 Round 5 Care extras: nudges, shared ranges, and age-transition proposals", opts, async (t) => {
+  const [{ createNudge, listNudges, resolveNudge, setSharedRange, listSharedRanges }, transitions, { control, pool }] = await Promise.all([
+    import("../../lib/care/extras.js"),
+    import("../../lib/care/transitions.js"),
+    mods(),
+  ]);
+  const owner = await makeUser(pool, "extrasOwner");
+  const helper = await makeUser(pool, "extrasHelper");
+  t.after(async () => { await cleanupUser(pool, owner); await cleanupUser(pool, helper); });
+
+  // nudge: owner -> a linked person; they see it, then resolve it
+  const link = await control.grantRole(owner, { subjectKey: helper, role: "trusted_contact", scope: "view" });
+  const n = await createNudge(owner, { roleId: link.id, subjectKey: helper, title: "Please check in" });
+  const seen = await listNudges(helper, owner);
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].id, n.id);
+  assert.equal(await resolveNudge(helper, n.id), true);
+  assert.equal((await listNudges(helper, owner)).length, 0);
+  // someone else cannot resolve it
+  assert.equal(await resolveNudge(owner, n.id), false);
+
+  // shared ranges: upsert per category, never exact amounts elsewhere
+  await setSharedRange(owner, { category: "rent", low: 1500, high: 2000, note: "joint flat" });
+  await setSharedRange(owner, { category: "rent", low: 1600, high: 2100 });
+  const ranges = await listSharedRanges(owner);
+  assert.equal(ranges.length, 1, "same category updates, not duplicates");
+  assert.deepEqual([ranges[0].low, ranges[0].high], [1600, 2100]);
+
+  // age transitions: a youth account with a birth year >= 18 gets both proposals
+  await control.setAccountType(owner, "youth");
+  await transitions.setBirthYear(owner, new Date().getFullYear() - 19);
+  const props = await transitions.listTransitions(owner);
+  assert.equal(props.length, 2, "turns_16 and turns_18 are both proposed");
+  assert.ok(props.every((p) => p.status === "proposed"));
+  // calling again does not duplicate
+  assert.equal((await transitions.listTransitions(owner)).length, 2);
+  // applying turns_18 flips the account type + clears the amount rule
+  const t18 = props.find((p) => p.milestone === "turns_18");
+  const res = await transitions.decideTransition(owner, t18.id, true);
+  assert.equal(res.applied, true);
+  assert.equal((await control.getOnboarding(owner)).accountType, "individual");
+  // it is no longer a live proposal
+  assert.equal((await transitions.listTransitions(owner)).some((p) => p.milestone === "turns_18"), false);
 });

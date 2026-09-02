@@ -52,17 +52,34 @@ function Inner({ onRoute, onOpenSupervised }) {
   }, [loadAuth]);
   const supervised = care?.supervised ?? [];
   const supervisors = care?.supervisors ?? [];
+  const inbox = care?.inbox ?? [];
   const pending = (auth?.requests ?? []).filter((r) => r.status === "pending");
-  const decide = async (id, decision) => {
-    setBusyId(id);
+  const [declineFor, setDeclineFor] = useState(null);
+  const [declineNote, setDeclineNote] = useState("");
+  const act = async (body) => {
+    setBusyId(body.id);
     await fetch("/api/authorizations", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "decide", id, decision }),
+      body: JSON.stringify(body),
     }).catch(() => {});
     setBusyId(null);
+    setDeclineFor(null);
+    setDeclineNote("");
     loadAuth();
     fb.refetchAll?.();
+  };
+  const approve = (id) => act({ action: "decide", id, decision: "approved" });
+  const confirmBoth = (id) => act({ action: "confirm", id });
+  const stop = (id) => act({ action: "stop", id });
+  const submitDecline = (id) => {
+    if (!declineNote.trim()) return;
+    act({ action: "decide", id, decision: "declined", note: declineNote.trim() });
+  };
+  const hoursLeft = (iso) => {
+    if (!iso) return null;
+    const h = Math.round((new Date(iso).getTime() - Date.now()) / 3_600_000);
+    return h > 0 ? h : 0;
   };
 
   return (
@@ -77,6 +94,23 @@ function Inner({ onRoute, onOpenSupervised }) {
             </p>
           ) : null}
         </div>
+
+        {inbox.length > 0 ? (
+          <section className={css.section}>
+            <p className={css.kicker}>They asked you to look</p>
+            <div className={css.activity}>
+              {inbox.map((n) => (
+                <div key={n.id} className={css.actItem}>
+                  <span className={css.actBody}>
+                    <span className={css.actName}>{n.ownerLabel}</span>
+                    <span className={css.actMeta}>{n.title}</span>
+                  </span>
+                  <button type="button" className={css.link} onClick={() => onOpenSupervised?.(n.ownerKey, n.ownerLabel)}>Open</button>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {supervised.length > 0 ? (
           <section className={css.section}>
@@ -119,10 +153,39 @@ function Inner({ onRoute, onOpenSupervised }) {
                   <div className={fbc.momentTitle}>{r.summary}</div>
                   {r.amount != null ? <div className={fbc.momentSummary}>{money(r.amount)}</div> : null}
                   {r.reason ? <div className={fbc.evMeta}>Why: {r.reason}</div> : null}
-                  <div className={css.choiceGrid}>
-                    <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => decide(r.id, "approved")}>Approve &amp; do it</button>
-                    <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => decide(r.id, "declined")}>Decline</button>
-                  </div>
+                  {r.autoExecuteAt ? (
+                    <div className={fbc.evMeta}>
+                      Runs on its own in about {hoursLeft(r.autoExecuteAt)}h unless stopped.
+                    </div>
+                  ) : null}
+                  {r.ownerConfirmedAt && r.decidedBy === "guardian" ? (
+                    <div className={fbc.evMeta}>A guardian approved this — it runs once you confirm.</div>
+                  ) : r.decidedBy === "guardian" ? (
+                    <div className={fbc.evMeta}>A guardian approved this — needs your confirmation too.</div>
+                  ) : null}
+                  {declineFor === r.id ? (
+                    <div className={css.field}>
+                      <label htmlFor={`dn-${r.id}`}>A short reason (the account owner sees this)</label>
+                      <input id={`dn-${r.id}`} type="text" value={declineNote} maxLength={140} autoComplete="off" onChange={(e) => setDeclineNote(e.target.value)} />
+                      <div className={css.choiceGrid}>
+                        <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => submitDecline(r.id)}>Send decline</button>
+                        <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>Back</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={css.choiceGrid}>
+                      {r.decidedBy === "guardian" && !r.ownerConfirmedAt ? (
+                        <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => confirmBoth(r.id)}>Confirm &amp; do it</button>
+                      ) : (
+                        <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => approve(r.id)}>Approve &amp; do it</button>
+                      )}
+                      {r.autoExecuteAt ? (
+                        <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => stop(r.id)}>Stop</button>
+                      ) : (
+                        <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>Decline</button>
+                      )}
+                    </div>
+                  )}
                 </article>
               ))
             )}

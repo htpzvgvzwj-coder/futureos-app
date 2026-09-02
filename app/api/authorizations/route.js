@@ -3,7 +3,7 @@ import { guard } from "../../../lib/http-guards.js";
 import { query } from "../../../lib/db.js";
 import {
   getAuthPolicy, setAuthPolicy, listAuthRequests, decideAuthRequest, cancelAuthRequest,
-  countPendingAuthRequests, hasLinkedApprover,
+  countPendingAuthRequests, hasLinkedApprover, confirmOwnerHalf,
 } from "../../../lib/authorization/store.js";
 
 export const runtime = "nodejs";
@@ -38,9 +38,10 @@ export async function GET(request) {
 }
 
 // POST /api/authorizations
-//   { action: "set_policy", restrictedNeedApproval?, approvalOverAmount? }
-//   { action: "decide", id, decision: "approved"|"declined", note? }
-//   { action: "cancel", id }
+//   { action: "set_policy", restrictedNeedApproval?, approvalOverAmount?, mode?, coolingOffHours?, requireBoth? }
+//   { action: "decide", id, decision: "approved"|"declined", note? }  (a decline needs a note)
+//   { action: "confirm", id }   -> the owner's half of a two-person approval
+//   { action: "cancel"|"stop", id }
 // Requests themselves are created by the pay APIs, never directly here.
 export async function POST(request) {
   const userId = await getCurrentUserId(request);
@@ -51,24 +52,28 @@ export async function POST(request) {
 
   try {
     if (body.action === "set_policy") {
-      const policy = await setAuthPolicy(userId, {
-        ...(body.restrictedNeedApproval !== undefined ? { restrictedNeedApproval: body.restrictedNeedApproval } : {}),
-        ...(body.approvalOverAmount !== undefined ? { approvalOverAmount: body.approvalOverAmount } : {}),
-      });
-      return Response.json({ policy });
+      const fields = ["restrictedNeedApproval", "approvalOverAmount", "mode", "coolingOffHours", "requireBoth"];
+      const patch = Object.fromEntries(fields.filter((f) => body[f] !== undefined).map((f) => [f, body[f]]));
+      return Response.json({ policy: await setAuthPolicy(userId, patch) });
     }
     if (body.action === "decide") {
       if (!body.id) return Response.json({ error: "id_required" }, { status: 400 });
-      const linked = await hasLinkedApprover(userId);
+      // this endpoint is the OWNER's own app; the guardian decides via /api/care
       const result = await decideAuthRequest(userId, body.id, {
         decision: body.decision,
         note: body.note ?? null,
-        decidedBy: linked ? "guardian" : "owner",
+        decidedBy: "owner",
       });
       if (!result) return Response.json({ error: "request_not_found" }, { status: 404 });
       return Response.json({ request: result });
     }
-    if (body.action === "cancel") {
+    if (body.action === "confirm") {
+      if (!body.id) return Response.json({ error: "id_required" }, { status: 400 });
+      const result = await confirmOwnerHalf(userId, body.id);
+      if (!result) return Response.json({ error: "request_not_found" }, { status: 404 });
+      return Response.json({ request: result });
+    }
+    if (body.action === "cancel" || body.action === "stop") {
       if (!body.id) return Response.json({ error: "id_required" }, { status: 400 });
       return Response.json({ cancelled: await cancelAuthRequest(userId, body.id) });
     }

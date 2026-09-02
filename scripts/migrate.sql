@@ -1520,3 +1520,63 @@ create table if not exists care_invites (
 );
 create index if not exists care_invites_profile_idx on care_invites (profile_key, status);
 create index if not exists care_invites_code_idx on care_invites (code_hash) where status = 'open';
+
+-- ============================================================
+-- Phase 6 Round 5 - Guardian mechanics (allowance, cooling-off, two-person,
+-- decline reasons, per-guardian covers routing, nudges, age transitions).
+-- ============================================================
+-- per-link auto-approve ceiling the owner delegates to one guardian
+alter table lifecycle_roles add column if not exists auto_approve_weekly numeric;  -- null = off
+-- how the account handles a move that needs approval, + a two-person rule
+alter table authorization_policies add column if not exists mode text not null default 'approval'; -- approval | cooling_off
+alter table authorization_policies add column if not exists cooling_off_hours integer not null default 48;
+alter table authorization_policies add column if not exists require_both boolean not null default false;
+-- state for the new request flows
+alter table authorization_requests add column if not exists auto_execute_at timestamptz;    -- cooling_off deadline
+alter table authorization_requests add column if not exists owner_confirmed_at timestamptz; -- two-person: owner's half
+alter table authorization_requests add column if not exists auto_reason text;               -- within_allowance | cooling_off_elapsed
+alter table authorization_requests add column if not exists covers text;                    -- money area, for guardian routing
+
+-- an owner pushes one specific thing to a linked person to look at; auto-expires
+create table if not exists care_nudges (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,            -- the owner
+  role_id      uuid references lifecycle_roles(id) on delete cascade,  -- who it is for
+  subject_key  text not null,            -- that person's users.id (denormalised for the reader)
+  title        text not null,
+  detail       text,
+  ref          jsonb not null default '{}',   -- { kind, id } - a moment / plan / request
+  status       text not null default 'open', -- open | seen | done | expired
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null default (now() + interval '30 days')
+);
+create index if not exists care_nudges_subject_idx on care_nudges (subject_key, status);
+
+-- owner-defined ranges shared with household members (never exact amounts)
+create table if not exists care_shared_ranges (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,
+  category     text not null,        -- rent | groceries | transport | savings | ...
+  low          numeric not null,
+  high         numeric not null,
+  note         text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  unique (profile_key, category)
+);
+create index if not exists care_shared_ranges_profile_idx on care_shared_ranges (profile_key);
+
+-- youth account age-transition proposals: rule-triggered, owner-confirmed
+create table if not exists care_transitions (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,
+  milestone    text not null,            -- turns_16 | turns_18 | custom
+  proposes     jsonb not null default '{}',   -- { restrictedNeedApproval?, approvalOverAmount?, accountType? }
+  rationale    text not null,
+  status       text not null default 'proposed', -- proposed | applied | dismissed
+  created_at   timestamptz not null default now(),
+  decided_at   timestamptz
+);
+create index if not exists care_transitions_profile_idx on care_transitions (profile_key, status);
+-- an optional birth year to drive the milestone proposals (year only - not a full DOB)
+alter table user_onboarding add column if not exists birth_year integer;
