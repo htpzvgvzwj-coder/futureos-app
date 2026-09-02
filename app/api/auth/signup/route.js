@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { createSession, createUser, SESSION_COOKIE_NAME } from "../../../../lib/auth.js";
+import { guard } from "../../../../lib/http-guards.js";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,9 @@ const signupSchema = z.object({
 });
 
 export async function POST(request) {
+  const blocked = guard(request, { bucket: "auth-signup", limit: 5, windowMs: 300_000 });
+  if (blocked) return blocked;
+
   const body = await request.json();
   const parsed = signupSchema.safeParse(body);
   if (!parsed.success) {

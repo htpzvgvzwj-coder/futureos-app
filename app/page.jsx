@@ -7,19 +7,37 @@ import { ChangeLedgerScreen, ImpactReceipt } from "./components/change-ledger-sc
 import { formatEvent } from "../lib/change-ledger/format.js";
 import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
-import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
+import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
+import { BankDataProvider } from "./components/bank/useBankData.jsx";
+import { BankHome } from "./components/future-bank/BankHome.jsx";
+import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
+import { LifeView } from "./components/future-bank/LifeView.jsx";
+import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
+import { ExploreView } from "./components/future-bank/ExploreView.jsx";
+import { SpendingView } from "./components/future-bank/SpendingView.jsx";
+import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
+import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
+import { GuardianView } from "./components/future-bank/GuardianView.jsx";
+import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
+import {
+  OnboardingGate,
+  RealityEntryConnected, CsvImportConnected, AccountControlConnected,
+  MoneyRescueConnected,
+} from "./components/bank/connected.jsx";
+import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
+import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
-import { WeddingLivingPlan } from "./features/wedding/WeddingLivingPlan.jsx";
+import { WeddingContinuousScene } from "./features/wedding/WeddingContinuousScene.jsx";
 import { LivingPlanStatus, GuardianDecisions } from "./components/living-plan-status.jsx";
 import { MemoryLensScreen } from "./components/memory-lens-screen.jsx";
 import { ShadowGuardianPanel } from "./components/shadow-guardian-panel.jsx";
 import { FutureHandoffPanel } from "./components/future-handoff-panel.jsx";
-import { RepaymentPath } from "./features/loan/RepaymentPath.jsx";
-import { FutureLifeTimeline } from "./features/retirement/FutureLifeTimeline.jsx";
-import { TripOrbit } from "./features/travel/TripOrbit.jsx";
-import { CapitalPaths } from "./features/investment/CapitalPaths.jsx";
-import { ProtectionEnvelope } from "./features/insurance/ProtectionEnvelope.jsx";
-import { FamilyConstellation } from "./features/family/FamilyConstellation.jsx";
+import { DebtGravity } from "./features/loan/DebtGravity.jsx";
+import { FutureDayLoom } from "./features/retirement/FutureDayLoom.jsx";
+import { CalendarOrbit } from "./features/travel/CalendarOrbit.jsx";
+import { CapitalPrism } from "./features/investment/CapitalPrism.jsx";
+import { LivingEnvelope } from "./features/insurance/LivingEnvelope.jsx";
+import { PrivateConstellation } from "./features/family/PrivateConstellation.jsx";
 import {
   Accessibility,
   AlertTriangle,
@@ -169,6 +187,8 @@ const screens = {
   CHANGE_LEDGER: "changeLedger",
   MEMORY_LENS: "memoryLens",
   FUTURE_FIELD: "futureField",
+  HOME_HORIZON: "homeHorizon",
+  EMERGENCY_RUNWAY: "emergencyRunway",
   WEDDING_LIVING_PLAN: "weddingLivingPlan",
   REPAYMENT_PATH: "repaymentPath",
   FUTURE_LIFE_TIMELINE: "futureLifeTimeline",
@@ -186,6 +206,16 @@ const screens = {
   ACCOUNT_DETAIL: "accountDetail",
   SPENDING_RISK: "spendingRisk",
   LOADING: "loading",
+  ONBOARDING: "onboarding",
+  REALITY_ENTRY: "realityEntry",
+  CSV_IMPORT: "csvImport",
+  ACCOUNT_CONTROL: "accountControl",
+  MONEY_RESCUE: "moneyRescue",
+  FINANCIAL_TWIN: "financialTwin",
+  FAMILY_CARE: "familyCare",
+  SPENDING_INTELLIGENCE: "spendingIntelligence",
+  CONNECTIONS: "connections",
+  SUPERVISED: "supervised",
 };
 
 const locales = { en, zh, ms, ta };
@@ -208,6 +238,26 @@ const navItems = [
   { id: screens.MIRROR, labelKey: "nav.explore", icon: LineChart },
   { id: screens.GUARDIAN, labelKey: "nav.guardian", icon: ShieldCheck },
 ];
+
+// The four nav entrances are four Lenses onto ONE Living Thread surface.
+// Switching entrance switches the lens; the thread itself is unchanged.
+const SCREEN_FOR_LENS = {
+  today: screens.HOME,
+  life: screens.LIFE_GRAPH,
+  explore: screens.MIRROR,
+  guardian: screens.GUARDIAN,
+};
+const STUDIO_SCREEN_FOR_DOMAIN = {
+  home: screens.HOME_HORIZON,
+  emergency: screens.EMERGENCY_RUNWAY,
+  wedding: screens.WEDDING_LIVING_PLAN,
+  loan: screens.REPAYMENT_PATH,
+  retirement: screens.FUTURE_LIFE_TIMELINE,
+  travel: screens.TRIP_ORBIT,
+  investment: screens.CAPITAL_PATHS,
+  insurance: screens.PROTECTION_ENVELOPE,
+  family: screens.FAMILY_CONSTELLATION,
+};
 
 const detectedNeedDefinitions = [
   { id: "emergency", titleKey: "needs.emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
@@ -311,27 +361,29 @@ const defaultSimulatorActionStates = {
   protectionReview: "pending",
 };
 
+// No persona seed: the Future Mirror starts blank and is filled from the
+// customer's real profile (getSimulatorDefaultsFromProfile) or by hand.
 const defaultSimulatorInputs = {
   situation: "",
   goals: {
     wedding: false,
     home: false,
-    emergency: true,
-    retirement: true,
-    family: true,
-    investment: true,
+    emergency: false,
+    retirement: false,
+    family: false,
+    investment: false,
     business: false,
     custom: false,
   },
   independenceLevel: 4,
-  monthlyIncome: "7500",
-  currentSavings: "85000",
-  plannedSpending: "12000",
-  weddingBudget: "35000",
-  weddingDate: "2027-06",
-  targetHomeYear: "2030",
-  targetDownPayment: "150000",
-  propertyBudget: "750000",
+  monthlyIncome: "",
+  currentSavings: "",
+  plannedSpending: "",
+  weddingBudget: "",
+  weddingDate: "",
+  targetHomeYear: "",
+  targetDownPayment: "",
+  propertyBudget: "",
   mortgageReadiness: "preparing",
   weddingSavingsMonthly: "",
   weddingSavingsStartMonth: "",
@@ -342,57 +394,57 @@ const defaultSimulatorInputs = {
   retirementSavingsMonthly: "",
   retirementSavingsStartMonth: "",
   retirementSavingsTargetMonth: "",
-  monthlyExpenses: "3600",
-  currentEmergencyFund: "21600",
+  monthlyExpenses: "",
+  currentEmergencyFund: "",
   targetCoverageMonths: "6",
   retirementAge: "62",
-  currentInvestment: "15000",
-  monthlyInvestment: "500",
+  currentInvestment: "",
+  monthlyInvestment: "",
   targetReturnGoal: "6",
-  familyPlanningYear: "2030",
-  familyMonthlyCost: "1800",
+  familyPlanningYear: "",
+  familyMonthlyCost: "",
   insuranceReadiness: "review",
-  startupCapital: "80000",
-  launchDate: "2027-01",
+  startupCapital: "",
+  launchDate: "",
   customGoalName: "",
-  customTargetAmount: "6000",
-  customTargetDate: "2027-01",
+  customTargetAmount: "",
+  customTargetDate: "",
   customPriority: "high",
   customCategory: "Lifestyle",
   customNotes: "",
   riskPreference: "balanced",
 };
 
-const currentProfileVersion = "karina-demo-profile-2026-08-11-income-history";
+const currentProfileVersion = "profile-2026-08-29-empty-baseline";
 
+// The EMPTY profile shape. FutureOS ships with no persona: every field is
+// blank until the customer provides it, and screens render an honest
+// "unknown" / empty state (gated on `hasRealProfile`) rather than a
+// fabricated person. `statedMonthlyIncome` staying "" is what every
+// `hasRealProfile` check keys off.
 const defaultProfile = {
-  age: "27",
-  relationshipStatus: "Married",
-  occupation: "Mid-Level Marketing Executive at a retail company",
-  responsibilities:
-    "Manages campaigns and budgets at work, oversees household finances, and plans for long-term goals.",
-  pastExperience: "5 years in marketing, recently promoted",
-  lifeStage: "Late 20s, married, considering starting a family",
-  // The customer's own manually-typed figure - distinct from `monthlyIncome`,
-  // which manualEntryProvider.getProfile() computes as the EFFECTIVE number
-  // (smoothed from real incomeHistory when enough exists, this value verbatim
-  // otherwise) that every real consumer in the app actually reads.
-  statedMonthlyIncome: "7500",
-  monthlyExpenses: "3600",
-  currentSavings: "85000",
-  existingLoans: "18000",
-  creditCardOutstanding: "2400",
-  investments: "15000",
-  insuranceStatus: "Basic",
-  insuranceCoverageAmount: "150000",
-  riskPreference: "Balanced",
+  age: "",
+  relationshipStatus: "",
+  occupation: "",
+  responsibilities: "",
+  pastExperience: "",
+  lifeStage: "",
+  statedMonthlyIncome: "",
+  monthlyExpenses: "",
+  currentSavings: "",
+  existingLoans: "",
+  creditCardOutstanding: "",
+  investments: "",
+  insuranceStatus: "",
+  insuranceCoverageAmount: "",
+  riskPreference: "",
   goals: {
     wedding: false,
     home: false,
-    emergency: true,
-    retirement: true,
-    family: true,
-    investment: true,
+    emergency: false,
+    retirement: false,
+    family: false,
+    investment: false,
     business: false,
     custom: false,
   },
@@ -2371,7 +2423,7 @@ function getSimulatorActionDetail(actionId, inputs, level, t) {
 
 const defaultPreferences = {
   profileVersion: currentProfileVersion,
-  displayName: "Karina",
+  displayName: "",
   profile: defaultProfile,
   customGoals: [],
   futurePlanProducts: [],
@@ -2705,11 +2757,12 @@ function toggleProfileGoal(setPreferences, goal) {
 
 function applyProfileMigration(preferences, storedPreferences) {
   if (storedPreferences?.profileVersion === currentProfileVersion) return preferences;
-  // First-ever load (nothing saved yet): seed the default demo profile.
-  // Otherwise a customer's own edits must survive future version bumps - only stamp the
-  // new version number, never overwrite displayName/profile that mergeDefaults already preserved.
+  // First-ever load (nothing saved yet): seed the EMPTY profile shape - no
+  // persona, no name. Otherwise a customer's own edits must survive future
+  // version bumps - only stamp the new version number, never overwrite
+  // displayName/profile that mergeDefaults already preserved.
   if (!storedPreferences) {
-    return { ...preferences, profileVersion: currentProfileVersion, displayName: "Karina", profile: defaultProfile };
+    return { ...preferences, profileVersion: currentProfileVersion, displayName: "", profile: defaultProfile };
   }
   // A profile stored before the income-history feature still has the old
   // `monthlyIncome` key (the customer's own typed figure) and no
@@ -3091,17 +3144,28 @@ function getEffectiveTheme(theme, systemTheme) {
   return theme === "system" ? systemTheme : theme;
 }
 
+// No persona: when the customer has given no name, greetings address them
+// as "there" ("Hi there") and the avatar falls back to a neutral glyph -
+// never a fabricated identity.
+const FALLBACK_ADDRESS = "there";
+
+function hasGivenName(name) {
+  const trimmed = String(name ?? "").trim();
+  return Boolean(trimmed) && trimmed.toLowerCase() !== "customer";
+}
+
 function getDisplayName(name) {
   const trimmed = String(name ?? "").trim();
-  return trimmed && trimmed.toLowerCase() !== "customer" ? trimmed : "Karina";
+  return hasGivenName(name) ? trimmed : FALLBACK_ADDRESS;
 }
 
 function getInitials(name) {
+  if (!hasGivenName(name)) return "";
   const words = getDisplayName(name)
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2);
-  return words.map((word) => word[0]?.toUpperCase()).join("") || "C";
+  return words.map((word) => word[0]?.toUpperCase()).join("") || "";
 }
 
 function downloadJsonFile(filename, data) {
@@ -3148,7 +3212,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 
   return (
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
-      <section className={`phone screen-${navScreen}`} aria-label={t("app.prototypeLabel")}>
+      <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="Future Bank">
         <div className="statusBar">
           <span>9:41</span>
           <div>
@@ -3209,7 +3273,11 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 }
 
 function getNavScreen(activeScreen) {
-  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL].includes(activeScreen)) return screens.HOME;
+  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
+  if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
+  if (activeScreen === screens.SPENDING_INTELLIGENCE) return screens.MIRROR;
+  if (activeScreen === screens.CONNECTIONS) return screens.MIRROR;
+  if (activeScreen === screens.SUPERVISED) return screens.GUARDIAN;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -3220,6 +3288,8 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.LOADING) return screens.MIRROR;
   if (activeScreen === screens.EXPLORE_CHAT) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
+  if (activeScreen === screens.HOME_HORIZON) return screens.MIRROR;
+  if (activeScreen === screens.EMERGENCY_RUNWAY) return screens.MIRROR;
   if (activeScreen === screens.WEDDING_LIVING_PLAN) return screens.MIRROR;
   if (activeScreen === screens.REPAYMENT_PATH) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_LIFE_TIMELINE) return screens.MIRROR;
@@ -3678,6 +3748,9 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
 // Scan), the Active Living Plan (its current tension + next step, via
 // LivingPlanStatus), and Latest Change (one line -> Change Replay).
 // "Everything on your accounts" opens the full account view.
+// Retained for the HOME_FULL / legacy dashboard path; the primary Today
+// tab now renders <BankHome/>.
+// eslint-disable-next-line no-unused-vars
 function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
   // Part 7: Today's main state is the canonical Life Thread. The old
   // profile-derived values are only a fallback while the snapshot loads.
@@ -3715,8 +3788,8 @@ function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
 
   const plans = [
     { id: "wedding", screen: screens.WEDDING_LIVING_PLAN, icon: HeartHandshake },
-    { id: "home", screen: screens.FUTURE_FIELD, icon: Building2 },
-    { id: "emergency", screen: screens.NEED_EMERGENCY, icon: LockKeyhole },
+    { id: "home", screen: screens.HOME_HORIZON, icon: Building2 },
+    { id: "emergency", screen: screens.EMERGENCY_RUNWAY, icon: LockKeyhole },
   ];
 
   return (
@@ -4580,8 +4653,8 @@ function getLifeNodes(profile, healthScores, selectedGoalIds) {
   const score = (id) => healthScores.find((s) => s.id === id)?.value ?? null;
   return [
     { id: "income", value: score("stability") ?? score("savings"), screen: screens.PROFILE },
-    { id: "safety", value: score("emergency"), screen: screens.NEED_EMERGENCY },
-    { id: "home", value: selectedGoalIds.includes("home") ? score("savings") : null, screen: screens.FUTURE_FIELD },
+    { id: "safety", value: score("emergency"), screen: screens.EMERGENCY_RUNWAY },
+    { id: "home", value: selectedGoalIds.includes("home") ? score("savings") : null, screen: screens.HOME_HORIZON },
     { id: "relationships", value: selectedGoalIds.includes("family") || selectedGoalIds.includes("wedding") ? score("future") : null, screen: screens.FAMILY_CONSTELLATION },
     { id: "freedom", value: score("investment"), screen: screens.CAPITAL_PATHS },
     { id: "future", value: score("future"), screen: screens.FUTURE_LIFE_TIMELINE },
@@ -4600,8 +4673,8 @@ const LIFE_NODE_FIELDS = {
 };
 const LIFE_NODE_RELATED = {
   income: [screens.PROFILE, screens.PERSONAL_ECONOMY],
-  safety: [screens.NEED_EMERGENCY, screens.STRATEGIC_BALANCE],
-  home: [screens.FUTURE_FIELD, screens.NEED_HOME],
+  safety: [screens.EMERGENCY_RUNWAY, screens.STRATEGIC_BALANCE],
+  home: [screens.HOME_HORIZON, screens.NEED_HOME],
   relationships: [screens.FAMILY_CONSTELLATION, screens.WEDDING_LIVING_PLAN],
   freedom: [screens.CAPITAL_PATHS, screens.REPAYMENT_PATH],
   future: [screens.FUTURE_LIFE_TIMELINE, screens.NEED_RETIREMENT],
@@ -4687,6 +4760,9 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
   );
 }
 
+// Legacy Life Graph screen. The Life tab now renders <LifeView/>; kept for
+// reference / any deep link that still points here.
+// eslint-disable-next-line no-unused-vars
 function LifeGraph({ setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
@@ -6302,6 +6378,10 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
   );
 }
 
+// Legacy Guardian screen. The Guardian tab now renders <GuardianView/> (the
+// decision queue over the shared Money Moment stream); kept for reference and
+// still covered by tests/invisible-moment-surface.test.mjs.
+// eslint-disable-next-line no-unused-vars
 function FutureSelfGuardian({
   setActiveScreen,
   preferences,
@@ -16887,18 +16967,15 @@ function LoadingScreen({ messageKey, t }) {
 }
 
 function CustomerProfileCard({ displayName, profile, t }) {
-  const showKarinaPhoto = getDisplayName(displayName).toLowerCase().includes("karina");
+  const named = hasGivenName(displayName);
+  const initials = getInitials(displayName);
   return (
     <section className="profileHero">
-      <div
-        className={showKarinaPhoto ? "coupleAvatar photoAvatar" : "coupleAvatar profileInitialsAvatar"}
-        role="img"
-        aria-label={displayName}
-      >
-        {showKarinaPhoto ? null : getInitials(displayName)}
+      <div className="coupleAvatar profileInitialsAvatar" role="img" aria-label={named ? displayName : t("customer.noName")}>
+        {initials || <UserRound size={20} aria-hidden="true" />}
       </div>
       <div>
-        <strong>{displayName}, {profile?.age ?? "27"}</strong>
+        <strong>{named ? displayName : t("customer.noName")}{profile?.age ? `, ${profile.age}` : ""}</strong>
         <span>{profile?.occupation || t("customer.segment")}</span>
         <small>{profile?.lifeStage || t("customer.lifeStage")}</small>
       </div>
@@ -17183,11 +17260,12 @@ function Screen({ children, className }) {
 export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
+  const [onboardingActive, setOnboardingActive] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   // True only once the real fetched profile/preferences have actually
   // landed in state (setPreferences below) - `authStatus` alone flips to
   // "authenticated" before that async chain finishes, and `preferences`
-  // is still the initial defaultPreferences (displayName "Karina") during
+  // is still the initial defaultPreferences (empty displayName) during
   // that gap. Found via live verification: the debounced persist effect
   // used to fire on authStatus alone, genuinely PUTting the stale default
   // name to the server on every fresh signup/login before a second,
@@ -17220,6 +17298,7 @@ export default function App() {
   // and edit, never auto-submits on its own.
   const [otherGoalSeed, setOtherGoalSeed] = useState(null);
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
+  const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -17350,7 +17429,7 @@ export default function App() {
       mirrorOutcomeStats: fetchedMirrorOutcomeStats,
       investmentOutcomeStats: fetchedInvestmentOutcomeStats,
       // The authenticated account's real display name seeds every fresh
-      // login (no more global "Karina" hardcode) - a customer's own edit in
+      // login (no persona hardcode) - a customer's own edit in
       // Settings (still stored in preferences.displayName) always wins once
       // one exists.
       displayName: savedPreferences?.displayName || authUser?.displayName || defaultPreferences.displayName,
@@ -17430,7 +17509,7 @@ export default function App() {
     if (authStatus !== "authenticated") return;
     // Also wait for the real fetched preferences to have landed, not just
     // authStatus - otherwise this fires while `preferences` is still the
-    // initial defaultPreferences (displayName "Karina") during the gap
+    // initial defaultPreferences (empty displayName) during the gap
     // before the async profile/preferences load finishes, genuinely
     // persisting the stale default to the server and localStorage.
     if (!preferencesLoaded) return;
@@ -17581,10 +17660,76 @@ export default function App() {
     />
   );
 
+  // One Living Thread surface, four Lenses. Each nav entrance leads with
+  // the SAME surface (fed by the one LifeThreadProvider snapshot); its lens
+  // tabs navigate between the four entrances, and studio nodes deep-link
+  // into the matching Studio. The legacy per-screen content stays below for
+  // now (Part F trims the shell).
+  // eslint-disable-next-line no-unused-vars
+  const livingThreadEntrance = (lens) => (
+    <LivingThreadEntrance
+      lens={lens}
+      onNavigateLens={(next) => setActiveScreen(SCREEN_FOR_LENS[next] ?? screens.HOME)}
+      onEnterStudio={(domain) => {
+        const target = STUDIO_SCREEN_FOR_DOMAIN[domain];
+        if (target) setActiveScreen(target);
+      }}
+      memoryEvents={memoryEvents}
+    />
+  );
+
+  const openFromBank = (screen) => setActiveScreen(screen ?? screens.HOME);
+
   const currentScreen = {
-    [screens.HOME]: <TodayScreen {...shared} />,
+    [screens.HOME]: (
+      <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive}>
+        <BankHome
+          onExplore={() => setActiveScreen(screens.MIRROR)}
+          onLife={() => setActiveScreen(screens.LIFE_GRAPH)}
+          onGuardian={() => setActiveScreen(screens.GUARDIAN)}
+          onActivity={() => setActiveScreen(screens.HOME_FULL)}
+          onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+          onTwin={() => setActiveScreen(screens.FINANCIAL_TWIN)}
+          onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; if (target) setActiveScreen(target); }}
+        />
+      </OnboardingGate>
+    ),
+    [screens.FINANCIAL_TWIN]: (
+      <FinancialTwinView onBack={() => setActiveScreen(screens.HOME)} onAdd={() => setActiveScreen(screens.REALITY_ENTRY)} />
+    ),
+    [screens.FAMILY_CARE]: (
+      <FamilyCareView onBack={() => setActiveScreen(screens.LIFE_GRAPH)} onWedding={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)} />
+    ),
+    [screens.SPENDING_INTELLIGENCE]: <SpendingView onBack={() => setActiveScreen(screens.MIRROR)} />,
+    [screens.CONNECTIONS]: <ConnectionsView onBack={() => setActiveScreen(screens.MIRROR)} />,
+    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
+    [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
+    [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
+    [screens.ACCOUNT_CONTROL]: <AccountControlConnected onDone={() => setActiveScreen(screens.PROFILE)} />,
+    [screens.MONEY_RESCUE]: <MoneyRescueConnected onOpen={openFromBank} />,
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
-    [screens.LIFE_GRAPH]: <LifeGraph {...shared} />,
+    [screens.LIFE_GRAPH]: (
+      <LifeView
+        onBack={() => setActiveScreen(screens.HOME)}
+        onHistory={() => setActiveScreen(screens.CHANGE_LEDGER)}
+        onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+        onStudio={(d) => {
+          if (d === "relationships") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.REALITY_ENTRY);
+        }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s.startsWith("studio:")) { const t = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t ?? screens.MIRROR); }
+          if (s === "home") return setActiveScreen(screens.HOME_HORIZON);
+          if (s.startsWith("explore")) return setActiveScreen(screens.MIRROR);
+          if (s.startsWith("today")) return setActiveScreen(screens.HOME);
+          setActiveScreen(screens.GUARDIAN);
+        }}
+      />
+    ),
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.DECISION_VERDICT]: (
       <DecisionVerdictScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
@@ -17595,13 +17740,15 @@ export default function App() {
     [screens.FUTURE_FIELD]: (
       <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
     ),
-    [screens.WEDDING_LIVING_PLAN]: <WeddingLivingPlan t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.REPAYMENT_PATH]: <RepaymentPath t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.FUTURE_LIFE_TIMELINE]: <FutureLifeTimeline t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.TRIP_ORBIT]: <TripOrbit t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.CAPITAL_PATHS]: <CapitalPaths t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.PROTECTION_ENVELOPE]: <ProtectionEnvelope t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.FAMILY_CONSTELLATION]: <FamilyConstellation t={t} setActiveScreen={setActiveScreen} language={language} />,
+    [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
+    [screens.EMERGENCY_RUNWAY]: <EmergencyRunway t={t} setActiveScreen={setActiveScreen} />,
+    [screens.WEDDING_LIVING_PLAN]: <WeddingContinuousScene t={t} setActiveScreen={setActiveScreen} />,
+    [screens.REPAYMENT_PATH]: <DebtGravity t={t} setActiveScreen={setActiveScreen} />,
+    [screens.FUTURE_LIFE_TIMELINE]: <FutureDayLoom t={t} setActiveScreen={setActiveScreen} />,
+    [screens.TRIP_ORBIT]: <CalendarOrbit t={t} setActiveScreen={setActiveScreen} />,
+    [screens.CAPITAL_PATHS]: <CapitalPrism t={t} setActiveScreen={setActiveScreen} />,
+    [screens.PROTECTION_ENVELOPE]: <LivingEnvelope t={t} setActiveScreen={setActiveScreen} />,
+    [screens.FAMILY_CONSTELLATION]: <PrivateConstellation t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_COMPARISON]: (
       <FutureComparisonScreen t={t} setActiveScreen={setActiveScreen} language={language} profile={getUserProfile(preferences)} />
     ),
@@ -17625,17 +17772,51 @@ export default function App() {
     ),
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
-    [screens.MIRROR]: <ExploreScreen setActiveScreen={setActiveScreen} t={t} />,
+    [screens.MIRROR]: (
+      <ExploreView
+        onStudio={(d) => {
+          if (d === "family") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.HOME);
+        }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "today") return setActiveScreen(screens.HOME);
+          if (s === "rescue") return setActiveScreen(screens.MONEY_RESCUE);
+          if (s === "spending") return setActiveScreen(screens.SPENDING_INTELLIGENCE);
+          if (s === "connections") return setActiveScreen(screens.CONNECTIONS);
+          if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
+          if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s.startsWith("studio:")) { const t2 = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t2 ?? screens.HOME); }
+          setActiveScreen(screens.HOME);
+        }}
+      />
+    ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (
-      <FutureSelfGuardian
-        {...shared}
-        preferences={preferences}
-        simulatorActionStates={simulatorActionStates}
-        setSimulatorActionStates={setSimulatorActionStates}
+      <GuardianView
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s === "explore" || s === "explore:plans") return setActiveScreen(screens.MIRROR);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          setActiveScreen(screens.HOME);
+        }}
+        onOpenSupervised={(ownerKey, ownerLabel) => {
+          setSupervisedTarget({ ownerKey, ownerLabel });
+          setActiveScreen(screens.SUPERVISED);
+        }}
+      />
+    ),
+    [screens.SUPERVISED]: (
+      <SupervisedView
+        ownerKey={supervisedTarget?.ownerKey}
+        ownerLabel={supervisedTarget?.ownerLabel}
+        onBack={() => setActiveScreen(screens.GUARDIAN)}
       />
     ),
     [screens.PROFILE]: (
@@ -17719,8 +17900,12 @@ export default function App() {
     );
   }
 
+  // The Future Bank app: one shell, one bottom navigation
+  // (Today / Life / Explore / Guardian). The /showcase route still renders
+  // the FutureBankSlice review slice; it is not the primary app.
   return (
     <LifeThreadProvider enabled={authStatus === "authenticated"}>
+     <BankDataProvider enabled={authStatus === "authenticated"}>
       <PhoneShell
         activeScreen={activeScreen}
         setActiveScreen={setActiveScreen}
@@ -17728,11 +17913,14 @@ export default function App() {
         setLanguage={setLanguage}
         theme={effectiveTheme}
         simpleMode={Boolean(preferences.accessibility?.simpleMode)}
+        hideNav={onboardingActive}
         t={t}
       >
-        <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        <FutureBankDataProvider enabled>
+          <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        </FutureBankDataProvider>
       </PhoneShell>
+     </BankDataProvider>
     </LifeThreadProvider>
   );
 }
-

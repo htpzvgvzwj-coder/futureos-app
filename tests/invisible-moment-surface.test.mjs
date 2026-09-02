@@ -116,13 +116,21 @@ test("allocationSettled requires an explicit target when the goal leg is funded"
 });
 
 // ---- Part 2.5: no synthetic Decision Echo from one slider ----------
-test("Retirement and Investment scenes declare no synthetic turning point / echo", () => {
-  const ret = read("app/features/retirement/FutureLifeTimeline.jsx");
-  const inv = read("app/features/investment/CapitalPaths.jsx");
-  assert.ok(/turningPointFor=\{null\}/.test(ret), "retirement passes turningPointFor={null}");
-  assert.ok(/turningPointFor=\{null\}/.test(inv), "investment passes turningPointFor={null}");
-  assert.ok(!/function retirementEcho/.test(ret), "retirementEcho removed");
-  assert.ok(!/function capitalEcho/.test(inv), "capitalEcho removed");
+test("Retirement and Investment scenes carry no synthetic Decision Echo", () => {
+  // Retirement is now Future-Day Loom (Living Thread commit 5). It has a
+  // REAL turning point (liquidity conflict / breathing floor) - not a
+  // synthetic echo - and the real Decision Echo comes from the server's
+  // >=3 user-confirmed Ledger actions gate, not from one adjustment.
+  const ret = read("app/features/retirement/FutureDayLoom.jsx");
+  const inv = read("app/features/investment/CapitalPrism.jsx");
+  assert.ok(!/function retirementEcho/.test(ret) && !/futureLifeTimeline\.echo/.test(ret), "no synthetic retirementEcho");
+  assert.ok(/detectDecisionEchoes|projection\?\.decisionEcho|decisionEcho/.test(read("app/api/future-day-loom/route.js")), "the real Decision Echo comes from the >=3 gate");
+  // Investment is now Capital Prism (Living Thread commit 7). Its turning
+  // point is REAL (over-allocated / readiness gate), and the real Decision
+  // Echo comes from the server's >=3 user-confirmed Ledger actions gate.
+  assert.ok(!/function capitalEcho/.test(inv), "no synthetic capitalEcho");
+  assert.ok(!/turningPointFor=\{null\}/.test(inv) && /turningPointFor=\{prismTurningPoint\}/.test(inv), "investment has a real turning point");
+  assert.ok(/detectDecisionEchoes|projection\?\.decisionEcho|decisionEcho/.test(read("app/api/capital-prism/route.js")), "the real Decision Echo comes from the >=3 gate");
 });
 
 // ---- Part 3: Explore chat opens in chat mode ---------------------
@@ -132,7 +140,7 @@ test("Explore 'Talk it through' opens MirrorChatScreen directly in chat view", (
   assert.ok(/initialView === "chat" \? "chat" : "tools"/.test(page), "chat view honoured");
   assert.ok(/exploreChatScreen[\s\S]{0,200}initialView="chat"/.test(page), "EXPLORE_CHAT passes initialView=\"chat\"");
   assert.ok(!/\bExploreLifeField\b/.test(page), "old 7-node ExploreLifeField grid is gone");
-  assert.ok(/<ExploreScreen /.test(page), "the intent-first ExploreScreen feature is the Explore screen");
+  assert.ok(/<ExploreView\b/.test(page), "the Explore tab renders ExploreView (7 bank capability zones + 9 Studios)");
 });
 
 // ---- Part 4: Life evidence is node-specific --------------------

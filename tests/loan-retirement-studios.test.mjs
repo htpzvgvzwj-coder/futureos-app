@@ -58,28 +58,39 @@ test("loan feasibility: months-to-debt-free, debt weight, monthly freedom, Futur
   assert.ok(f.futureScore >= 0 && f.futureScore <= 100);
 });
 
-test("loan: extra repayment finishes sooner but the projectImpacts show it as PRESSURE (costs monthly freedom)", () => {
+test("loan: extra repayment finishes sooner; the unified impactSet shows PRESSURE and a ghost Future Handoff", () => {
   const f0 = loan.feasibility(loanReality);
   const branch = { ...loanReality, extra_repayment: 300 };
   const f1 = loan.feasibility(branch);
   assert.ok(f1.monthsToDebtFree < f0.monthsToDebtFree, "extra repayment -> debt-free sooner");
 
-  const proj = loan.projectImpacts(branch, loanReality, ctx);
-  assert.equal(proj.mode, "pressure");
-  assert.equal(proj.pressure.extraMonthlyNeeded, 300);
-  assert.equal(proj.availableImpact, null);
+  // Living Thread commit 4: projectImpacts now returns the studio-contract
+  // impactSet (Debt Gravity), not the old monthly-shift shape.
+  const impact = loan.projectImpacts(branch, loanReality, ctx);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 300);
+  assert.equal(impact.resourceDelta.freedMonthly, 0);
+  assert.equal(impact.resourceDelta.futureHandoffAtPayoff.state, "ghost");
+  assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(impact.allocationRequired, true);
 });
 
-test("loan: a LOWER installment branch FREES cashflow -> availableImpact, allocation governs where it goes", () => {
-  const branch = { ...loanReality, monthly_installment: 400 };
-  const proj = loan.projectImpacts(branch, loanReality, ctx);
-  assert.equal(proj.mode, "freed");
-  assert.equal(proj.freedCashflow, 155);
-  assert.ok(proj.availableImpact.maxHomeMonthsEarlier >= 0);
-  assert.equal(proj.allocatedImpact, null);
+test("loan: reducing a prior extra repayment FREES cashflow; a leg is solid only once allocated", () => {
+  const priorBranch = { ...loanReality, extra_repayment: 300 };
+  const relaxed = { ...loanReality, extra_repayment: 100 };
+  const impact = loan.projectImpacts(relaxed, priorBranch, ctx);
+  assert.equal(impact.resourceDelta.freedMonthly, 200);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 
-  const withAlloc = loan.projectImpacts({ ...branch, allocation: { goalMonthly: 155, emergencyMonthly: 0, flexibleMonthly: 0 } }, loanReality, ctx);
-  assert.ok(withAlloc.allocatedImpact.home.monthsDelta <= 0);
+  // Per-leg (causal-spine round): only the funded leg moves to "placed" (a
+  // definite Ghost) - nothing is Solid until Seal.
+  const withAlloc = loan.projectImpacts({ ...relaxed, allocation: { home: 200 } }, priorBranch, ctx);
+  const home = withAlloc.affectedGoals.find((g) => g.goalId === "home");
+  assert.equal(home.effectState, "placed", "the funded home leg is placed");
+  assert.notEqual(home.placedAfter, null);
+  assert.equal(home.confirmedAfter, null, "nothing is Solid until Seal");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "wedding").effectState, "possible", "an unfunded leg stays possible");
+  assert.equal(withAlloc.affectedGoals.find((g) => g.goalId === "emergency").effectState, "possible", "emergency was not funded");
 });
 
 test("loan Bend: solve the extra repayment to be debt-free by a target month", () => {
@@ -99,23 +110,37 @@ test("retirement feasibility: monthly gap, nest-egg needed, years to close", () 
   assert.ok(f.yearsToCloseGap > 0);
 });
 
-test("retirement: a HIGHER top-up closes the gap sooner but is PRESSURE now", () => {
+test("retirement: a HIGHER top-up closes the gap sooner; the unified impactSet shows PRESSURE and a gap RANGE", () => {
   const f0 = retire.feasibility(retireReality);
   const branch = { ...retireReality, monthly_contribution: 700 };
   const f1 = retire.feasibility(branch);
   assert.ok(f1.monthsToCloseGap < f0.monthsToCloseGap);
-  const proj = retire.projectImpacts(branch, retireReality, ctx);
-  assert.equal(proj.mode, "pressure");
-  assert.equal(proj.pressure.extraMonthlyNeeded, 300);
+  // Living Thread commit 5: projectImpacts now returns the studio-contract
+  // impactSet (Future-Day Loom), not the old monthly-shift shape.
+  const impact = retire.projectImpacts(branch, retireReality, ctx);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 300);
+  assert.equal(impact.resourceDelta.freedMonthly, 0);
+  assert.ok(impact.resourceDelta.gapMonthlyRangeAfter && impact.resourceDelta.gapMonthlyRangeAfter.low != null, "the gap is a range, never a point");
+  assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(impact.allocationRequired, true);
 });
 
 test("retirement: a LOWER top-up frees cashflow; nothing moves without allocation", () => {
-  const branch = { ...retireReality, monthly_contribution: 200 };
-  const proj = retire.projectImpacts(branch, retireReality, ctx);
-  assert.equal(proj.mode, "freed");
-  assert.equal(proj.freedCashflow, 200);
-  assert.equal(proj.allocatedImpact, null);
-  assert.ok(proj.availableImpact.maxEmergencyBufferAfter >= ctx.emergencyBufferMonths);
+  const priorBranch = { ...retireReality, monthly_contribution: 700 };
+  const relaxed = { ...retireReality, monthly_contribution: 400 };
+  const impact = retire.projectImpacts(relaxed, priorBranch, ctx);
+  assert.equal(impact.resourceDelta.freedMonthly, 300);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
+  // Per-leg: allocate ONLY to Emergency -> Emergency is "placed" (a definite
+  // Ghost), every other leg stays "possible". Nothing is Solid until Seal.
+  const placed = retire.projectImpacts({ ...relaxed, allocation: { emergency: 300 } }, priorBranch, ctx);
+  const em = placed.affectedGoals.find((g) => g.goalId === "emergency");
+  assert.equal(em.effectState, "placed", "the funded emergency leg is placed");
+  assert.notEqual(em.placedAfter, null);
+  assert.equal(em.confirmedAfter, null, "nothing is Solid until Seal");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "home").effectState, "possible", "Home was not funded");
+  assert.equal(placed.affectedGoals.find((g) => g.goalId === "investment").effectState, "possible", "Investment was not funded");
 });
 
 test("generic projectMonthlyShift: neutral when the monthly is unchanged", () => {

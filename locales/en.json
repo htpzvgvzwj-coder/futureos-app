@@ -34,8 +34,9 @@
     "no": "No"
   },
   "customer": {
-    "segment": "Mid-Level Marketing Executive",
-    "lifeStage": "Late 20s, married, considering starting a family"
+    "noName": "Your profile",
+    "segment": "Add your occupation in Profile",
+    "lifeStage": "Add your life stage in Profile"
   },
   "home": {
     "title": "OCBC FutureOS",
@@ -2824,7 +2825,7 @@
         "sent": "Sent",
         "overBudget": {
           "title": "Spending over budget detected",
-          "detail": "Karina spent {spending}, which is {amount} above the safe monthly budget of {budget}. Future Self Guardian recommends pausing non-essential spending this week."
+          "detail": "You spent {spending}, which is {amount} above the safe monthly budget of {budget}. Future Self Guardian recommends pausing non-essential spending this week."
         },
         "futureRisk": {
           "title": "Future risk monitoring active",
@@ -2946,16 +2947,16 @@
       "deleteData": "Delete My Data",
       "policyText": "FutureOS uses approved customer data only for financial simulations, planning recommendations, and consented autonomous actions. Customers remain in control at all times.",
       "downloadedNotice": "Your local FutureOS data file has been downloaded.",
-      "deletedNotice": "Local FutureOS demo data has been reset."
+      "deletedNotice": "Local FutureOS data has been reset."
     },
     "demo": {
       "title": "App Information",
-      "description": "Product version and local prototype controls.",
+      "description": "Product version and local data controls.",
       "clearSimulation": "Clear Simulation",
-      "restoreMock": "Restore Mock Data",
+      "restoreMock": "Reset to empty profile",
       "version": "Version",
       "clearNotice": "Simulation cleared. Future Mirror is ready for a fresh run.",
-      "restoreNotice": "Mock data restored. FutureOS is back to the default customer profile."
+      "restoreNotice": "Profile reset. FutureOS is back to an empty profile."
     },
     "account": {
       "title": "Account",
@@ -3119,7 +3120,7 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "Inputs: emergency reserve, monthly expenses, insurance status, family planning goal and current savings.",
       "familyMath": "Math: emergency readiness contributes 45% and protection readiness contributes 55%.",
-      "familyResult": "Result: Karina has strong savings, but basic insurance keeps this score from reaching the highest band.",
+      "familyResult": "Result: strong savings, but basic insurance keeps this score from reaching the highest band.",
       "followThroughInputs": "Inputs: real savings check-ins across every confirmed goal, plus hardship recovery evidence.",
       "followThroughMath": "Math: each dimension is weighted and combined; a dimension with no data yet is excluded rather than scored as zero.",
       "followThroughResult": "Result: open the Relationship Ledger to see exactly which dimension is holding the score back."
@@ -3273,7 +3274,7 @@
   },
   "spendingRisk": {
     "title": "Spending Risk Detail",
-    "subtitle": "FutureOS detected a spending pattern that may affect Karina's future goals.",
+    "subtitle": "FutureOS detected a spending pattern that may affect your future goals.",
     "homeLabel": "FutureOS Alert",
     "homeTitleRisk": "1 financial risk detected today",
     "homeTitleSafe": "No spending risk detected today",
@@ -3283,8 +3284,8 @@
     "homeNoProfileTitle": "Add your real numbers to see your spending picture",
     "homeNoProfileDetail": "We don't have your real income and expenses yet, so there's nothing to check. Tap to tell us.",
     "detectedLabel": "Automatic notification",
-    "detectedTitleRisk": "Karina is {amount} over safe monthly budget",
-    "detectedTitleSafe": "Karina is within safe monthly budget",
+    "detectedTitleRisk": "You are {amount} over safe monthly budget",
+    "detectedTitleSafe": "You are within safe monthly budget",
     "detectedText": "FutureOS compares income, current spending, goal commitments and emergency reserve rules to detect risk before it affects long-term outcomes.",
     "metrics": {
       "monthlyIncome": "Monthly Income",
@@ -3317,13 +3318,13 @@
     "recommendation": {
       "title": "Guardian recommendation",
       "detail": "Reduce non-essential spending by {amount} this month and keep emergency savings protected.",
-      "note": "FutureOS will not execute any financial action unless Karina approves it."
+      "note": "FutureOS will not execute any financial action unless you approve it."
     },
     "guardrail": {
       "title": "What Guardian will do after approval",
       "cta": "Apply Guardian Spending Guardrail",
       "activeCta": "Guardrail Active",
-      "success": "Guardian Spending Guardrail is active. FutureOS will monitor spending and protect Karina's savings goals.",
+      "success": "Guardian Spending Guardrail is active. FutureOS will monitor spending and protect your savings goals.",
       "actions": {
         "cap": "Set a soft discretionary spending guardrail of {budget} this month.",
         "alert": "Send an instant alert if spending rises above the approved guardrail.",
@@ -3562,7 +3563,39 @@
       "min_core_guests": "at least {value} core guests kept",
       "min_photo_quality": "photography quality not reduced",
       "no_balance_share": "personal balance not shared with a partner",
-      "no_guardian_auto_move": "Guardian must not move money automatically"
+      "no_guardian_auto_move": "Guardian must not move money automatically",
+      "minimum_emergency_months": "minimum emergency months",
+      "maximum_monthly_repayment": "maximum monthly repayment",
+      "minimum_renovation_reserve": "minimum renovation reserve",
+      "latest_purchase_month": "latest purchase month",
+      "no_partner_share": "no partner share",
+      "minimum_post_purchase_cash": "minimum cash left after buying",
+      "minimum_floor_months": "minimum floor months",
+      "maximum_rebuild_monthly": "maximum monthly rebuild",
+      "no_goal_funding_below_floor": "no goal funding below the floor",
+      "minimum_breathing_room": "minimum breathing room",
+      "maximum_extra_payment": "maximum extra payment",
+      "protect_emergency_floor": "protect the emergency floor",
+      "no_one_off_from_protected_savings": "no one-off from protected savings",
+      "target_debt_only": "target debt only",
+      "minimum_current_breathing_room": "minimum current breathing room",
+      "minimum_emergency_floor": "minimum emergency floor",
+      "maximum_monthly_contribution": "maximum monthly contribution",
+      "protected_future_day_choices": "protected Future Day choices",
+      "no_assumed_inheritance": "no assumed inheritance",
+      "no_unconfirmed_partner_assets": "no unconfirmed partner assets",
+      "latest_trip_month": "latest trip month",
+      "no_trip_funding_below_emergency_floor": "no trip funding below the emergency floor",
+      "minimum_liquid_capital": "minimum liquid capital",
+      "minimum_flexible_capital": "minimum flexible capital",
+      "no_investing_below_readiness_gate": "no investing below the readiness gate",
+      "minimum_income_protection_months": "minimum income-protection months",
+      "no_underwriting_or_quote": "no underwriting or quote",
+      "no_unknown_counted_as_gap": "no unknown counted as a gap",
+      "minimum_confirmations": "minimum confirmations",
+      "no_partner_data_in_viewer_response": "no partner data in the viewer response",
+      "latest_wedding_month": "latest wedding month",
+      "minimum_guest_experience_spend": "minimum spend per guest"
     },
     "impact": {
       "monthlyChange": "{metric}: {before} to {after} SGD/month",
@@ -4011,7 +4044,19 @@
       "homeLater": "Home deposit about {months} month(s) later.",
       "emergencyUp": "Emergency buffer {before} to {after} months.",
       "flexibleUp": "{amount}/month more free cashflow.",
-      "stillPossible": "Still a possible future - it becomes real when you Seal."
+      "stillPossible": "Still a possible future - it becomes real when you Seal.",
+      "ghostGoal": "Could add about {amount}/mo of room to {goal} (not moved yet).",
+      "solidGoal": "Allocated: about {amount}/mo toward {goal}.",
+      "goalName": {
+        "home": "your home deposit",
+        "emergency": "your emergency buffer",
+        "retirement": "your retirement",
+        "flexible": "flexible cash"
+      }
+    },
+    "tp": {
+      "budgetGap": "Your budget ceiling is {amount} under the reference cost.",
+      "behindPace": "At this contribution you won't have your share funded in time (need ~{need}/mo)."
     }
   },
   "promiseWeight": {
@@ -4538,7 +4583,9 @@
       "repaymentPath": "Repayment Path",
       "futureLifeTimeline": "Future Life",
       "needRetirement": "Retirement planner",
-      "profile": "Profile"
+      "profile": "Profile",
+      "homeHorizon": "Home Horizon",
+      "emergencyRunway": "Safety Runway"
     }
   },
   "guardianDecisions": {
@@ -4677,6 +4724,25 @@
         "down": "tightens",
         "flat": "unchanged"
       }
+    },
+    "scrub": {
+      "drawerTitle": "Memory Scrubber - Before / After",
+      "tooShort": "Only one version of this plan so far - nothing to scrub through yet.",
+      "handle": "Scrub through plan versions",
+      "step": "Version {n} of {of} · saved by {actor}",
+      "noChange": "No tracked field changed at this step.",
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "unknown": "unknown"
+    },
+    "guardianRail": {
+      "title": "Guardian watch",
+      "watching": "Guardian is watching",
+      "stoodDown": "Guardian has stood down",
+      "standDown": "Stand down",
+      "watches": "Watches: {list}",
+      "never": "Guardian never moves money or changes your plan. It only tells you."
     }
   },
   "explore": {
@@ -4749,6 +4815,688 @@
       "wedding": "it's about the wedding plan",
       "home": "it's about a home deposit and timing",
       "emergency": "it's about your safety buffer"
+    }
+  },
+  "homeHorizon": {
+    "loading": "Loading your home plan…",
+    "title": "Home Horizon",
+    "subtitle": "Not how much you can borrow - the life you have left after you buy.",
+    "noPlan": "Confirm a home price and a target month to see your Horizon.",
+    "summaryLine": "Home · {price} · {month}",
+    "monthsAway": "{n} mo away",
+    "months": "{n} mo",
+    "estimateNote": "Fees and rates are Singapore reference estimates, not quotes or an approval. CPF and partner money are only counted once confirmed.",
+    "field": {
+      "label": "Home Horizon - drag the house: left/right for the month, up/down for the price",
+      "knot": "Home Knot: {price}, {month}",
+      "emergencyRail": "Emergency floor - {months} months"
+    },
+    "row": {
+      "upfront": "Upfront cash needed",
+      "monthly": "Monthly repayment",
+      "ready": "Deposit ready",
+      "rules": "TDSR/MSR/LTV rules"
+    },
+    "rules": {
+      "within": "Within the rules",
+      "over": "Over the {factor} ceiling"
+    },
+    "prov": {
+      "estimate": "reference estimate",
+      "amortization": "reducing-balance amortization",
+      "savingsPace": "your savings pace",
+      "rulesAsOf": "MAS/IRAS rules as of {date}",
+      "system_estimate": "estimate",
+      "user_confirmed": "you confirmed",
+      "bank_confirmed": "from your bank data",
+      "unknown": "not known"
+    },
+    "read": {
+      "buffer": "Emergency buffer after buying",
+      "breathing": "Monthly breathing room"
+    },
+    "rateWeather": {
+      "label": "If the {rate}% assumption moves",
+      "note": "a range from the assumption alone - not a forecast"
+    },
+    "safePrice": "Safe price for {month}: {price}",
+    "aboveSafe": "{amount} above the safe price",
+    "lowerPrice": "Lower the price",
+    "raisePrice": "Raise the price",
+    "earlier": "Earlier month",
+    "later": "Later month",
+    "openStack": "Open the upfront stack",
+    "stack": {
+      "title": "Upfront stack",
+      "downPayment": "Down payment",
+      "buyerStampDuty": "Buyer's stamp duty",
+      "additionalBSD": "Additional buyer's stamp duty",
+      "legalFees": "Legal fees",
+      "valuationFee": "Valuation",
+      "mortgageStamp": "Mortgage stamp",
+      "renovationReserve": "Renovation reserve",
+      "cpfApplied": "CPF applied",
+      "partnerApplied": "Partner contribution",
+      "total": "Upfront cash needed",
+      "unknown": "not set"
+    },
+    "afterlife": {
+      "title": "The life you have left",
+      "body": "After buying: {buffer} emergency buffer, {breathing}/mo breathing room. Your other goals stay as ghosts until you place any freed or added amount."
+    },
+    "mirror": {
+      "safePrice": "Match the safe price",
+      "wait12": "Wait 12 months",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "current_savings": "Current savings",
+      "cpf_available": "CPF available",
+      "partner_contribution": "Partner contribution",
+      "renovation_reserve": "Renovation reserve"
+    },
+    "tp": {
+      "belowFloor": "This purchase would drop your emergency buffer below your floor.",
+      "belowFloorWait": "waiting a few months, or a lower price, keeps the floor intact",
+      "overCeiling": "The loan exceeds the {factor} regulatory ceiling.",
+      "emergencyNearRail": "Your buffer after buying would be {months} months - close to your rail.",
+      "depositReady": "Your deposit is fully saved for this price and month."
+    }
+  },
+  "emergencyRunway": {
+    "loading": "Loading your safety picture…",
+    "title": "Safety Runway",
+    "subtitle": "Not how many months you saved - which of your commitments keep going if life changes.",
+    "noData": "Add your monthly expenses and liquid savings to see your runway.",
+    "summaryLine": "Safety · {months} essential months · floor {floor}",
+    "months": "{n} mo",
+    "fog": "not enough info",
+    "estimateNote": "The runway is essential months (a reference 75% of expenses unless you classify them). A rehearsal never changes your real plan.",
+    "field": {
+      "label": "Safety Runway - drag the end flag to set your target protected months",
+      "rail": "Floor {months}mo",
+      "now": "Now {months}mo",
+      "target": "Target: {months} months"
+    },
+    "row": {
+      "current": "Current runway",
+      "burn": "Essential monthly burn",
+      "rebuild": "Monthly rebuild",
+      "toFloor": "To the floor"
+    },
+    "prov": {
+      "liquid": "confirmed liquid savings",
+      "you": "you set this",
+      "rebuildMath": "rebuild math",
+      "system_estimate": "reference estimate",
+      "user_confirmed": "you confirmed",
+      "bank_confirmed": "from your bank data",
+      "unknown": "not known"
+    },
+    "quietZone": "You're above your target. Nothing here needs more saving right now.",
+    "rebuildLabel": "Monthly rebuild contribution",
+    "useSuggested": "Use {amount}/mo (reaches the target in ~2 years)",
+    "targetLabel": "{n}-month target",
+    "shorter": "Shorter runway",
+    "longer": "Longer runway",
+    "survivability": "Which commitments keep going",
+    "essential": "essential",
+    "rehearseOpen": "Rehearse a change",
+    "rehearseNote": "Rehearsal only - this never changes your real plan or moves money.",
+    "gapMonths": "Income gap (months)",
+    "tempExpense": "Extra monthly expense",
+    "runRehearsal": "Run the rehearsal",
+    "verdict": {
+      "holds": "Your protected commitments hold through this.",
+      "dips_then_recovers": "You dip below the floor, then recover.",
+      "needs_a_choice": "This would need a choice from you - a commitment to pause or a change to make."
+    },
+    "breachAt": "Floor crossed around month {m}",
+    "recoveryGradient": "Back to the floor about {m} months after the low point",
+    "survives": "keeps going",
+    "atRisk": "at risk",
+    "mirror": {
+      "sixMonths": "6-month target",
+      "floorOnly": "Protect the floor only",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "liquid_assets": "Liquid savings",
+      "monthly_expenses": "Monthly expenses",
+      "essential_share": "Essential vs discretionary split"
+    },
+    "tp": {
+      "belowFloor": "Your runway is {months} months - below your {floor}-month floor.",
+      "justRecovered": "You've just climbed back to your safety floor.",
+      "quietZone": "You're comfortably above your target - a calm state, no action needed."
+    }
+  },
+  "debtGravity": {
+    "loading": "Loading your debts…",
+    "title": "Debt Gravity",
+    "subtitle": "Not a repayment table - when your debt gives your monthly freedom back.",
+    "noDebt": "No confirmed debt to work with yet.",
+    "summaryLine": "Debt · {label} · debt-free {debtFree}",
+    "estimateNote": "Reducing-balance amortization. Unknown interest rates and early-repayment fees are shown as unknown, never assumed 0.",
+    "field": {
+      "label": "Debt Gravity - drag the Release Knot to choose a payoff date; the extra monthly back-solves",
+      "cashflow": "cashflow",
+      "freedom": "Freedom",
+      "knot": "Release Knot at {months} months"
+    },
+    "row": {
+      "balance": "Target balance",
+      "freedomDate": "Freedom Date",
+      "released": "Monthly released at payoff",
+      "breathing": "Breathing room now"
+    },
+    "prov": {
+      "bank": "from your bank data",
+      "amort": "reducing-balance amortization",
+      "estimate": "estimate"
+    },
+    "read": {
+      "debtFree": "Debt-free in",
+      "saved": "{m} months sooner",
+      "breathing": "Breathing room"
+    },
+    "extraLabel": "Extra monthly repayment",
+    "handoffPreview": {
+      "title": "Future Handoff (preview)",
+      "body": "Around {month}, {amount}/mo comes back as an available resource. It stays a ghost until the debt actually clears - and you place it then, nothing is auto-routed."
+    },
+    "compareStrategies": "Compare strategies",
+    "strategy": {
+      "highest_rate_first": "Highest rate first",
+      "smallest_balance_first": "Smallest balance first",
+      "balanced": "Balanced",
+      "clearsIn": "clears everything in {m} months",
+      "interest": "{amount} total interest"
+    },
+    "body": {
+      "balance": "Balance",
+      "apr": "Interest rate",
+      "minimum": "Minimum payment",
+      "fee": "Early-repayment fee",
+      "unknown": "not known"
+    },
+    "mirror": {
+      "in12": "Clear in 12 months",
+      "minimumOnly": "Minimum only",
+      "reset": "Back to reality"
+    },
+    "unknownGeneric": "{id}",
+    "tp": {
+      "nearPayoff": "{label} can be cleared in about {months} months from here.",
+      "belowBreathing": "This extra takes your monthly breathing room below your floor.",
+      "belowBreathingWait": "a smaller extra, or a later payoff date, keeps the floor",
+      "aprUnknown": "One of these debts has an unconfirmed interest rate - confirm it for an accurate payoff."
+    }
+  },
+  "futureDayLoom": {
+    "loading": "Loading your retirement picture…",
+    "title": "Future-Day Loom",
+    "subtitle": "Not how much you need first - build a future day, then work backwards to now.",
+    "noPlan": "Confirm a retirement plan to weave your Future-Day Loom.",
+    "summaryLine": "Retirement · gap {gap}/mo · {contribution}",
+    "estimateNote": "Every figure is a range. No investment return is assumed in the base. CPF LIFE, existing assets, inheritance and partner assets are counted only when confirmed.",
+    "step": "Question {n} of {of}",
+    "back": "Back",
+    "skipToLoom": "Skip to the loom",
+    "q": {
+      "where": "Where will you live?",
+      "where.stay_here": "Stay where I am",
+      "where.smaller_town": "A smaller town",
+      "where.overseas_lower_cost": "Overseas, lower cost",
+      "where.overseas_higher_cost": "Overseas, higher cost",
+      "housing": "Your home then?",
+      "housing.own_paid_off": "Own it, paid off",
+      "housing.still_paying": "Still paying it off",
+      "housing.renting": "Renting",
+      "housing.downsize": "Downsized",
+      "work": "Working rhythm?",
+      "work.fully_stopped": "Fully stopped",
+      "work.part_time": "Part-time",
+      "work.keep_working": "Keep working",
+      "routine": "Daily routine?",
+      "routine.simple": "Simple",
+      "routine.comfortable": "Comfortable",
+      "routine.active_social": "Active and social",
+      "care": "Caring for someone?",
+      "care.caring_for_someone": "Yes",
+      "care.not_caring": "No",
+      "flexibility": "Room for the unexpected?",
+      "flexibility.tight": "Tight",
+      "flexibility.some_room": "Some room",
+      "flexibility.lots_of_room": "Lots of room",
+      "supported_people": "People I support"
+    },
+    "yourFutureDay": "Your Future Day",
+    "dayBaselineOnly": "Just your baseline so far - answer a question to shape it.",
+    "supportedPeople": "People you'll support",
+    "fewer": "Fewer",
+    "more": "More",
+    "editDay": "Edit the Future Day",
+    "field": {
+      "label": "Future-Day Loom - pull the Now/Future seam to trade current freedom for future life",
+      "now": "Now",
+      "future": "Future",
+      "seam": "Now / Future seam",
+      "openBand": "Open future: {pct}%",
+      "age": "Retire at {age}",
+      "retireAt": "Retire ~{age}"
+    },
+    "row": {
+      "target": "Future monthly life",
+      "confirmedIncome": "Confirmed income",
+      "gap": "Monthly gap",
+      "needContribution": "Contribution needed"
+    },
+    "prov": {
+      "range": "a range, not a point",
+      "noReturn": "no return assumed",
+      "bank_confirmed": "from your bank data",
+      "system_estimate": "estimate",
+      "unknown": "not known"
+    },
+    "readout": "Contributing {contribution} · {band} of the widest future covered",
+    "withReturn": "With returns: about {amount}/mo ({pct}% assumed)",
+    "decisionEcho": "You've made a few similar retirement choices - Guardian noticed. It won't act on it.",
+    "mirror": {
+      "moreFuture": "Weight the future",
+      "moreNow": "Weight now",
+      "reset": "Back to reality"
+    },
+    "unknown": {
+      "monthly_expenses": "Monthly expenses",
+      "cpf_life_monthly": "CPF LIFE payout",
+      "existing_retirement_assets": "Existing retirement assets",
+      "current_age": "Your age",
+      "target_monthly_income": "Target monthly income"
+    },
+    "tp": {
+      "liquidityConflict": "This contribution is more than your monthly cashflow can cover.",
+      "liquidityConflictWait": "a smaller contribution, or a later retirement age, keeps it affordable",
+      "belowBreathing": "This contribution takes your current monthly room below your floor.",
+      "gapThreshold": "Your contribution is below the middle of the range needed for this Future Day (~{needLow}/mo)."
+    }
+  },
+  "calendarOrbit": {
+    "loading": "Loading your trip…",
+    "title": "Calendar Orbit",
+    "subtitle": "A trip is a point on the year, not a budget row. Move it around the orbit and watch the pace change.",
+    "noPlan": "Add a trip shape - people and nights - to open the Calendar Orbit.",
+    "summaryLine": "Trip · {cost} · {month}",
+    "estimateNote": "Reference-rate estimate from Singapore (as of 2026-07), not a fare or hotel quote. Seasonality is a transparent multiplier. Unknown savings or income stay unknown - the funding pace is not computed.",
+    "perTraveller": "{amount} / traveller",
+    "showControls": "Trip details",
+    "hideControls": "Hide trip details",
+    "fewer": "Fewer",
+    "more": "More",
+    "belowCost": "Your budget is {amount} under the reference cost - not sealable until that closes.",
+    "decisionEcho": "You've shaped a few similar trips lately - Guardian noticed. It won't act on it.",
+    "row": {
+      "shape": "Trip shape",
+      "shapeValue": "{people} people · {nights} nights",
+      "cost": "Reference cost",
+      "season": "Season",
+      "pace": "Monthly pace needed"
+    },
+    "prov": {
+      "fromPlan": "from your plan",
+      "referenceRate": "reference rate, a range",
+      "transparent": "shown, not buried",
+      "backwards": "worked back from the trip month"
+    },
+    "unknown": {
+      "trip_month": "Trip month",
+      "current_savings": "Earmarked savings",
+      "monthly_income": "Monthly income"
+    },
+    "season": {
+      "peak": "Peak",
+      "shoulder": "Shoulder",
+      "off": "Off-peak"
+    },
+    "seasonNote": {
+      "peak": "Peak season - the high end of the band carries a ×{mult} multiplier, shown here.",
+      "shoulder": "Shoulder season - a small ×{mult} on the high end, shown here.",
+      "off": ""
+    },
+    "pace": {
+      "ahead": "Ahead of pace - {have}/mo against {need}/mo needed.",
+      "on_track": "On track - {have}/mo covers the {need}/mo needed.",
+      "short": "Behind - {have}/mo against {need}/mo needed by the balance date.",
+      "unknown": "Funding pace unknown until earmarked savings are confirmed."
+    },
+    "field": {
+      "label": "Calendar Orbit - drag the trip knob around the ring for the month, the radial handle for nights",
+      "now": "Now",
+      "nights": "Nights: {n}",
+      "tripMonth": "Trip month"
+    },
+    "node": {
+      "comfort": "Comfort",
+      "destination": "Destination",
+      "people": "Travellers",
+      "monthly": "Monthly contribution",
+      "budget": "Budget ceiling"
+    },
+    "comfort": {
+      "budget": "Budget",
+      "mid": "Mid",
+      "premium": "Premium"
+    },
+    "dest": {
+      "domestic": "Domestic",
+      "regional": "Regional",
+      "longhaul": "Long-haul"
+    },
+    "mirror": {
+      "later": "Trip later",
+      "sooner": "Trip sooner",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "liquidityConflict": "This monthly contribution is more than your cashflow can cover.",
+      "liquidityConflictWait": "a smaller contribution, or a later trip month, keeps it affordable",
+      "belowBreathing": "This contribution takes your current monthly room below your floor.",
+      "pastLatest": "This trip month is past the month you pinned as the latest.",
+      "behindPace": "At this contribution you won't have the balance ready in time (need ~{need}/mo)."
+    }
+  },
+  "capitalPrism": {
+    "loading": "Loading your capital picture…",
+    "title": "Capital Prism",
+    "subtitle": "One beam of monthly capital, split into jobs. Drag a seam to move money from one job to the next.",
+    "noPlan": "Confirm a recurring investment to open the Capital Prism.",
+    "summaryLine": "Investing · pool {pool} · {invest} locked",
+    "estimateNote": "No investment return is assumed - this is the contributed amount only. The Liquidity Gate is your rule for how long money must stay reachable, not a market call. Unknown cashflow or savings stay unknown.",
+    "over": "Over-allocated by {amount} - move a seam back before you can Seal.",
+    "unassigned": "{amount}/mo still unassigned.",
+    "gateReadout": "Reachable within {years}y: {amount}/mo.",
+    "targetReadout": "At this split: {years} to the target ({target}), contributed amount only.",
+    "withReturn": "With returns: about {years}y ({pct}% assumed)",
+    "decisionEcho": "You've re-split your capital a few times lately - Guardian noticed. It won't act on it.",
+    "noReturnNote": "No trade is executed here. Sealing sets your own recurring plan; nothing is bought or sold.",
+    "row": {
+      "pool": "Monthly capital pool",
+      "investing": "Locked investing",
+      "liquid": "Kept liquid",
+      "readiness": "Readiness gate"
+    },
+    "prov": {
+      "bank_confirmed": "from your cashflow",
+      "system_estimate": "estimate",
+      "unknown": "not known",
+      "noReturn": "no return assumed",
+      "transparent": "shown, not buried",
+      "gate": "the real readiness gate"
+    },
+    "unknown": {
+      "available_monthly_cashflow": "Available monthly cashflow",
+      "current_savings": "Current savings",
+      "credit_card_outstanding": "Credit-card outstanding"
+    },
+    "readiness": {
+      "readyToInvest": "Ready to invest",
+      "buildBufferFirst": "Build the emergency buffer first",
+      "payDownDebtFirst": "Clear high-cost debt first",
+      "noRoomYet": "No monthly room yet"
+    },
+    "blocked": {
+      "buildBufferFirst": "Locked investing bands aren't sealable until your emergency buffer is built.",
+      "payDownDebtFirst": "Locked investing bands aren't sealable while high-cost card debt is outstanding.",
+      "noRoomYet": "Locked investing bands aren't sealable until there's monthly room."
+    },
+    "job": {
+      "safety": "Safety",
+      "wedding": "Wedding",
+      "home": "Home",
+      "flexible": "Flexible",
+      "retirement": "Retirement",
+      "longTerm": "Long-term capital"
+    },
+    "field": {
+      "label": "Capital Prism - drag a seam between two bands to move capital; drag the Liquidity Gate line for the years",
+      "seam": "Seam between {a} and {b}",
+      "gate": "Liquidity Gate: {n} years"
+    },
+    "mirror": {
+      "longer": "Longer horizon",
+      "sooner": "Sooner reachable",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "overAllocated": "You've assigned more than the monthly capital pool holds.",
+      "readinessGate": "The readiness gate ({gate}) means locked investing bands can't be sealed yet."
+    }
+  },
+  "livingEnvelope": {
+    "loading": "Loading your protection picture…",
+    "title": "Living Envelope",
+    "subtitle": "A membrane around your life nodes. Drag a vertex out to stretch cover there - the premium recomputes live.",
+    "noPlan": "Tell us what cover you already hold to draw your Living Envelope.",
+    "summaryLine": "Protection · exposure {exposure} · {premium}",
+    "estimateNote": "Gaps use YOUR stated coverage - an Unknown node is shown as unknown, never counted as a gap. Premium figures are a reference estimate, not a quote. No underwriting is ever run. Sealing commits to a monthly premium change only.",
+    "exposureLabel": "known exposure",
+    "unknownShort": "unknown",
+    "premiumReadout": "Premium: {now}/mo now → {after}/mo with this membrane.",
+    "unknownNote": "{n} node(s) unknown - shown dashed, never counted as a gap. Confirm them to draw the full membrane.",
+    "belowIncomeFloor": "Income-protection months are below the floor you pinned.",
+    "decisionEcho": "You've reshaped your protection a few times lately - Guardian noticed. It won't act on it.",
+    "noPolicyNote": "No policy is bought here, no underwriting is run, no quote is produced. Sealing sets a premium plan only.",
+    "row": {
+      "exposure": "Known exposure",
+      "premium": "Premium now",
+      "toClose": "Premium to close known gaps",
+      "status": "Envelope status"
+    },
+    "prov": {
+      "knownOnly": "known gaps only",
+      "user_confirmed": "your declared cover",
+      "system_estimate": "reference estimate",
+      "referenceRate": "reference rate, not a quote",
+      "transparent": "shown, not buried"
+    },
+    "unknown": {
+      "income_cover_or_need": "Income protection",
+      "home_loan_cover_or_need": "Home-loan cover",
+      "family_cover_or_need": "Family cover",
+      "care_cover_or_need": "Care / critical-illness cover"
+    },
+    "status": {
+      "has_unknowns": "Has unknowns",
+      "exposure_identified": "Exposure identified",
+      "sealed_shut": "Sealed shut"
+    },
+    "node": {
+      "income": "Income",
+      "home_loan": "Home loan",
+      "family": "Family",
+      "care": "Care"
+    },
+    "field": {
+      "label": "Living Envelope - drag a membrane vertex outward at a node to stretch cover there",
+      "handle": "{node} cover"
+    },
+    "mirror": {
+      "close": "Close the first gap",
+      "clear": "Clear stretched cover",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "liquidityConflict": "This premium is more than your monthly cashflow can cover.",
+      "liquidityConflictWait": "a smaller premium, or closing fewer gaps now, keeps it affordable",
+      "belowBreathing": "This premium takes your current monthly room below your floor.",
+      "belowIncomeFloor": "Your income-protection months are below the floor you pinned.",
+      "exposure": "{nodes} life node(s) still sit outside the membrane."
+    }
+  },
+  "privateConstellation": {
+    "loading": "Loading your shared picture…",
+    "title": "Private Constellation",
+    "subtitle": "Two separate identities, one future. You see your own marks in full - of your partner, only a silhouette.",
+    "noPlan": "Start a shared plan to open your Private Constellation.",
+    "summaryLine": "Shared · your share {yours} · pool {shared}",
+    "estimateNote": "Each participant is a separate identity - neither can read the other's affordability numbers or per-item marks. Only the overlapping band, the agreed nodes and a conflict count are shared. Nothing seals until BOTH have joined and confirmed separately.",
+    "you": "You",
+    "partnerConfirmed": "Partner · confirmed",
+    "partnerJoined": "Partner · joined",
+    "partnerAbsent": "Partner · not joined",
+    "conflicts": "{n} conflict(s)",
+    "noBand": "no feasible band yet",
+    "needsBoth": "This needs both of you to confirm separately before it can seal.",
+    "sharedContribution": "Shared monthly contribution",
+    "less": "Less",
+    "more": "More",
+    "shareReadout": "Your share {yours}/mo · partner's share {theirs}/mo (from the agreed split, not their balance).",
+    "inviteCode": "Partner invite code: {code}",
+    "decisionEcho": "You've reshaped the shared plan a few times lately - Guardian noticed. It won't act on it.",
+    "privacyNote": "Individual balances and per-item marks are never shared. Guardian never confirms on your partner's behalf.",
+    "confirmMine": "Confirm my view",
+    "confirmed": "Your view is confirmed",
+    "row": {
+      "yours": "Your share",
+      "shared": "Shared contribution",
+      "band": "Feasible band",
+      "partner": "Partner"
+    },
+    "prov": {
+      "yours": "your agreed share",
+      "agreed": "agreed pool",
+      "merged": "overlap only",
+      "redacted": "silhouette only"
+    },
+    "unknown": {
+      "partner_participation": "Partner participation"
+    },
+    "field": {
+      "label": "Private Constellation - drag a shared node toward you for Must Keep, away for Flexible",
+      "node": "{item} - your mark"
+    },
+    "mirror": {
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "awaitingPartner": "Your partner hasn't joined yet - the merge can't run.",
+      "awaitingConfirmations": "One side still needs to confirm - nothing seals until both do.",
+      "conflicts": "{n} shared node(s) are marked differently by each of you.",
+      "liquidityConflict": "Your share of this contribution is more than your cashflow can cover."
+    }
+  },
+  "branchStrip": {
+    "title": "Branches",
+    "fork": "Fork this",
+    "compare": "Compare",
+    "hideCompare": "Hide compare",
+    "empty": "No saved branches yet - edit the scene, then Fork to keep a version.",
+    "reality": "Reality",
+    "sealable": "sealable",
+    "notSealable": "not sealable",
+    "discard": "Discard branch",
+    "defaultName": "Branch {n}",
+    "noImpact": "no cross-goal impact",
+    "pressure": "+{amount}/mo pressure",
+    "freed": "−{amount}/mo freed",
+    "neutral": "no monthly change",
+    "field": "Field",
+    "monthlyEffect": "Monthly effect",
+    "sealableRow": "Sealable"
+  },
+  "weddingScene": {
+    "loading": "Loading your wedding…",
+    "title": "Wedding Living Scene",
+    "subtitle": "One continuous scene. Drag the guest knob to widen or narrow the budget river; drag the date knob to move the wedding.",
+    "noPlan": "Add a guest count and a date to open the Wedding Living Scene.",
+    "summaryLine": "Wedding · {cost} · {month}",
+    "estimateNote": "Singapore reference-rate estimate, not a vendor quote. Your partner's earmarked savings stay private - only their committed monthly is shared.",
+    "now": "Now",
+    "guestsWord": "guests",
+    "none": "none",
+    "belowCost": "Your budget is {amount} under the reference cost - not sealable until that closes.",
+    "readout": "About {perGuest} per guest · {need}/mo is your personal share.",
+    "row": {
+      "cost": "Reference cost",
+      "guests": "Guests",
+      "need": "Your monthly share",
+      "gap": "Budget gap"
+    },
+    "prov": {
+      "referenceRate": "reference rate, not a quote",
+      "fromPlan": "from your plan",
+      "yourShare": "your split, partner's stays private",
+      "vsBudget": "vs your budget ceiling"
+    },
+    "unknown": {
+      "guest_count": "Guest count",
+      "wedding_date": "Wedding date"
+    },
+    "field": {
+      "label": "Budget River - drag the guest knob to widen/narrow the river, the date knob to move the wedding",
+      "guests": "Guests: {n}",
+      "date": "Wedding date"
+    },
+    "ctx": {
+      "venue": "Venue",
+      "couple": "Couple alignment",
+      "guests": "Guests"
+    },
+    "venueTier": "Venue tier",
+    "venue": {
+      "budget": "Budget",
+      "mid_range": "Mid-range",
+      "premium": "Premium"
+    },
+    "partnerMonthly": "Partner's monthly contribution",
+    "partnerNote": "Only the agreed monthly is shared. Neither side's balance is revealed.",
+    "less": "Less",
+    "more": "More",
+    "mirror": {
+      "fewer": "Fewer guests",
+      "later": "Wedding later",
+      "reset": "Back to reality"
+    },
+    "tp": {
+      "budgetGap": "Your budget is {amount} under the reference cost.",
+      "behindPace": "At this pace your share won't be funded in time (need ~{need}/mo)."
+    },
+    "venueType": "Venue type",
+    "venueRecompute": "Type, tier, date and guest count all re-run the cost together.",
+    "type": {
+      "community": "Community",
+      "restaurant": "Restaurant",
+      "hotel": "Hotel",
+      "outdoor": "Outdoor"
+    },
+    "orbit": {
+      "label": "Guest Orbit - concentric rings by tier; arrow keys move guests in or out of a ring",
+      "help": "Break the headcount into tiers - each ring grows with its guests, the total feeds the cost.",
+      "tier": "{tier}: {n} guests",
+      "inner": "Inner circle",
+      "family": "Family",
+      "friends": "Friends"
+    },
+    "align": {
+      "help": "Each of you marks every shared item Must Keep / Flexible / Undecided and sets a private range. Only the overlap, the agreed items and the conflict count are shared.",
+      "yourRange": "Your private affordable ceiling",
+      "item": {
+        "venue": "Venue",
+        "photography": "Photography",
+        "catering": "Catering",
+        "attire": "Attire",
+        "guest_count": "Guest count"
+      },
+      "mark": {
+        "mustKeep": "Must keep",
+        "flexible": "Flexible",
+        "undecided": "Undecided"
+      },
+      "resolve": "Resolve → new branch",
+      "resolveLabel": "Resolve: {item}",
+      "band": "Shared affordable band: {low}–{high}",
+      "noBand": "No overlapping affordable band yet - one range needs to move.",
+      "status": "{agreed} agreed · {conflicts} conflict(s)"
     }
   }
 }

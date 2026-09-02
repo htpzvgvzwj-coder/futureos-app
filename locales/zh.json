@@ -35,8 +35,9 @@
     "no": "否"
   },
   "customer": {
-    "segment": "中层市场营销主管",
-    "lifeStage": "二十多岁后期,已婚,正考虑组建家庭"
+    "noName": "你的档案",
+    "segment": "在「档案」中填写你的职业",
+    "lifeStage": "在「档案」中填写你的人生阶段"
   },
   "home": {
     "title": "OCBC FutureOS",
@@ -2584,7 +2585,7 @@
         "sent": "已发送",
         "overBudget": {
           "title": "检测到超支",
-          "detail": "Karina 花费了 {spending},超出安全每月预算 {budget} 达 {amount}。Future Self Guardian 建议本周暂停非必要支出。"
+          "detail": "你花费了 {spending},超出安全每月预算 {budget} 达 {amount}。Future Self Guardian 建议本周暂停非必要支出。"
         },
         "futureRisk": {
           "title": "未来风险监测已启用",
@@ -2706,16 +2707,16 @@
       "deleteData": "删除我的数据",
       "policyText": "FutureOS 只会将已批准的客户数据用于财务模拟、规划建议和经同意的自主操作。客户始终保有控制权。",
       "downloadedNotice": "你的本地 FutureOS 数据文件已下载。",
-      "deletedNotice": "本地 FutureOS 演示数据已重置。"
+      "deletedNotice": "本地 FutureOS 数据已重置。"
     },
     "demo": {
       "title": "应用信息",
       "description": "用于用户与产品复核的演示控制。",
       "clearSimulation": "清除模拟",
-      "restoreMock": "恢复模拟数据",
+      "restoreMock": "重置为空白档案",
       "version": "版本",
       "clearNotice": "模拟已清除。Future Mirror 已准备好进行新一轮运行。",
-      "restoreNotice": "模拟数据已恢复。FutureOS 已恢复为默认客户资料。"
+      "restoreNotice": "档案已重置。FutureOS 已恢复为空白档案。"
     },
     "profile": {
       "title": "个人资料",
@@ -2845,7 +2846,7 @@
       "retirementResult": "Why lower: wedding and home cash outflows reduce compounding unless the Guardian plan stays active.",
       "familyInputs": "输入项:应急储备、每月支出、保险状况、家庭规划目标及目前储蓄。",
       "familyMath": "计算方式:应急准备度占 45%,保障准备度占 55%。",
-      "familyResult": "结果:Karina 的储蓄状况良好,但基础保险使该分数无法达到最高档位。",
+      "familyResult": "结果:储蓄状况良好,但基础保险使该分数无法达到最高档位。",
       "followThroughInputs": "输入项：每个已确认目标背后真实的储蓄打卡记录，以及困境恢复的证据。",
       "followThroughMath": "计算方式：每个维度加权后合并；还没有数据的维度会被排除，而不是算作零分。",
       "followThroughResult": "结果：打开关系账本页面，能看到具体是哪个维度在拖分。"
@@ -2987,7 +2988,7 @@
   },
   "spendingRisk": {
     "title": "消费风险详情",
-    "subtitle": "FutureOS 检测到可能影响 Karina 未来目标的消费模式。",
+    "subtitle": "FutureOS 检测到可能影响你未来目标的消费模式。",
     "homeLabel": "FutureOS 提醒",
     "homeTitleRisk": "今日检测到 1 项财务风险",
     "homeTitleSafe": "今日未检测到消费风险",
@@ -2997,8 +2998,8 @@
     "homeNoProfileTitle": "填写你的真实数字，才能看到你的消费情况",
     "homeNoProfileDetail": "我们还没有你真实的收入和支出数据，暂时无法检查。点击去填写。",
     "detectedLabel": "自动通知",
-    "detectedTitleRisk": "Karina 超出安全每月预算 {amount}",
-    "detectedTitleSafe": "Karina 处于安全每月预算之内",
+    "detectedTitleRisk": "你超出安全每月预算 {amount}",
+    "detectedTitleSafe": "你处于安全每月预算之内",
     "detectedText": "FutureOS 会比较收入、目前消费、目标承诺及应急储备规则,在影响长期结果前检测风险。",
     "metrics": {
       "monthlyIncome": "每月收入",
@@ -3031,13 +3032,13 @@
     "recommendation": {
       "title": "Guardian 建议",
       "detail": "本月减少 {amount} 的非必要支出,并保持应急储蓄受保护。",
-      "note": "除非 Karina 批准,否则 FutureOS 不会执行任何财务操作。"
+      "note": "除非你批准,否则 FutureOS 不会执行任何财务操作。"
     },
     "guardrail": {
       "title": "获批准后 Guardian 将采取的行动",
       "cta": "应用 Guardian 消费防护",
       "activeCta": "防护已启用",
-      "success": "Guardian 消费防护已启用。FutureOS 将监测消费并保护 Karina 的储蓄目标。",
+      "success": "Guardian 消费防护已启用。FutureOS 将监测消费并保护你的储蓄目标。",
       "actions": {
         "cap": "本月设置 {budget} 的软性自选消费防护线。",
         "alert": "若消费超出已批准的防护线,立即发送提醒。",
@@ -3380,7 +3381,39 @@
       "min_core_guests": "至少保留 {value} 位核心宾客",
       "min_photo_quality": "不降低摄影质量",
       "no_balance_share": "不向伴侣共享个人余额",
-      "no_guardian_auto_move": "Guardian 不得自动转移资金"
+      "no_guardian_auto_move": "Guardian 不得自动转移资金",
+      "minimum_emergency_months": "最低应急月数",
+      "maximum_monthly_repayment": "每月还款上限",
+      "minimum_renovation_reserve": "最低装修储备",
+      "latest_purchase_month": "最晚购房月份",
+      "no_partner_share": "不使用伴侣出资",
+      "minimum_post_purchase_cash": "买房后最低现金留存",
+      "minimum_floor_months": "最低下限月数",
+      "maximum_rebuild_monthly": "每月重建上限",
+      "no_goal_funding_below_floor": "低于下限时不为目标供款",
+      "minimum_breathing_room": "最低喘息空间",
+      "maximum_extra_payment": "额外还款上限",
+      "protect_emergency_floor": "保护应急下限",
+      "no_one_off_from_protected_savings": "不从受保护储蓄中一次性还款",
+      "target_debt_only": "仅目标债务",
+      "minimum_current_breathing_room": "最低当前喘息空间",
+      "minimum_emergency_floor": "最低应急下限",
+      "maximum_monthly_contribution": "每月供款上限",
+      "protected_future_day_choices": "受保护的未来之日选择",
+      "no_assumed_inheritance": "不假设遗产",
+      "no_unconfirmed_partner_assets": "不计入未确认的伴侣资产",
+      "latest_trip_month": "最晚旅行月份",
+      "no_trip_funding_below_emergency_floor": "旅行供款不得低于应急下限",
+      "minimum_liquid_capital": "最低流动资本",
+      "minimum_flexible_capital": "最低灵活资本",
+      "no_investing_below_readiness_gate": "就绪闸门未过前不投资",
+      "minimum_income_protection_months": "最低收入保障月数",
+      "no_underwriting_or_quote": "不核保、不报价",
+      "no_unknown_counted_as_gap": "未知不计为缺口",
+      "minimum_confirmations": "最少确认数",
+      "no_partner_data_in_viewer_response": "查看方响应中不含伴侣数据",
+      "latest_wedding_month": "最晚婚礼月份",
+      "minimum_guest_experience_spend": "每位宾客最低支出"
     },
     "impact": {
       "monthlyChange": "{metric}：从每月 {before} 新元变为 {after} 新元",
@@ -3829,7 +3862,19 @@
       "homeLater": "购房首付约推后 {months} 个月。",
       "emergencyUp": "应急缓冲：{before} → {after} 个月。",
       "flexibleUp": "每月多出 {amount} 自由现金流。",
-      "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。"
+      "stillPossible": "仍是一个可能的未来——在你封存后才成为现实。",
+      "ghostGoal": "可为{goal}增加约 {amount}/月 的空间（尚未转移）。",
+      "solidGoal": "已分配：约 {amount}/月 用于{goal}。",
+      "goalName": {
+        "home": "你的购房首付",
+        "emergency": "你的应急储备",
+        "retirement": "你的退休",
+        "flexible": "灵活资金"
+      }
+    },
+    "tp": {
+      "budgetGap": "你的预算上限比参考成本低 {amount}。",
+      "behindPace": "按此供款，你无法及时备好你的份额（约需每月 {need}）。"
     }
   },
   "promiseWeight": {
@@ -4356,7 +4401,9 @@
       "repaymentPath": "还款路径",
       "futureLifeTimeline": "未来生活",
       "needRetirement": "退休规划",
-      "profile": "资料"
+      "profile": "资料",
+      "homeHorizon": "住房地平线",
+      "emergencyRunway": "安全跑道"
     }
   },
   "guardianDecisions": {
@@ -4495,6 +4542,25 @@
         "down": "收紧",
         "flat": "不变"
       }
+    },
+    "scrub": {
+      "drawerTitle": "记忆回溯器——变更前 / 变更后",
+      "tooShort": "此计划目前只有一个版本——暂时无法回溯。",
+      "handle": "在计划版本间回溯",
+      "step": "第 {n} / {of} 版 · 由 {actor} 保存",
+      "noChange": "此步骤未改动任何被追踪的字段。",
+      "field": "字段",
+      "before": "变更前",
+      "after": "变更后",
+      "unknown": "未知"
+    },
+    "guardianRail": {
+      "title": "守护者监看",
+      "watching": "守护者正在监看",
+      "stoodDown": "守护者已停止监看",
+      "standDown": "停止监看",
+      "watches": "监看：{list}",
+      "never": "守护者绝不转移资金或更改你的计划。它只会通知你。"
     }
   },
   "explore": {
@@ -4567,6 +4633,688 @@
       "wedding": "这关乎婚礼计划",
       "home": "这关乎购房首付与时间",
       "emergency": "这关乎你的安全缓冲"
+    }
+  },
+  "homeHorizon": {
+    "loading": "正在加载你的购房计划…",
+    "title": "住房地平线",
+    "subtitle": "不是你能借多少，而是买下之后，你还剩怎样的人生。",
+    "noPlan": "确认房价与目标月份，即可看到你的地平线。",
+    "summaryLine": "住房 · {price} · {month}",
+    "monthsAway": "还有 {n} 个月",
+    "months": "{n} 个月",
+    "estimateNote": "费用与利率为新加坡参考估算，不是报价或批核。公积金与伴侣资金只有在确认后才计入。",
+    "field": {
+      "label": "住房地平线——拖动房子：左右改月份，上下改房价",
+      "knot": "住房结点：{price}，{month}",
+      "emergencyRail": "应急下限——{months} 个月"
+    },
+    "row": {
+      "upfront": "所需首期现金",
+      "monthly": "每月还款",
+      "ready": "首付到位",
+      "rules": "TDSR/MSR/LTV 规则"
+    },
+    "rules": {
+      "within": "在规则之内",
+      "over": "超出 {factor} 上限"
+    },
+    "prov": {
+      "estimate": "参考估算",
+      "amortization": "递减余额摊还",
+      "savingsPace": "你的储蓄节奏",
+      "rulesAsOf": "MAS/IRAS 规则截至 {date}",
+      "system_estimate": "估算",
+      "user_confirmed": "你已确认",
+      "bank_confirmed": "来自银行数据",
+      "unknown": "未知"
+    },
+    "read": {
+      "buffer": "买房后的应急缓冲",
+      "breathing": "每月喘息空间"
+    },
+    "rateWeather": {
+      "label": "若 {rate}% 的假设变动",
+      "note": "仅由假设推出的区间——不是预测"
+    },
+    "safePrice": "{month} 的安全房价：{price}",
+    "aboveSafe": "高于安全房价 {amount}",
+    "lowerPrice": "降低房价",
+    "raisePrice": "提高房价",
+    "earlier": "更早的月份",
+    "later": "更晚的月份",
+    "openStack": "打开首期明细",
+    "stack": {
+      "title": "首期明细",
+      "downPayment": "首付",
+      "buyerStampDuty": "买方印花税",
+      "additionalBSD": "额外买方印花税",
+      "legalFees": "律师费",
+      "valuationFee": "估价费",
+      "mortgageStamp": "按揭印花税",
+      "renovationReserve": "装修储备",
+      "cpfApplied": "已计入的公积金",
+      "partnerApplied": "伴侣出资",
+      "total": "所需首期现金",
+      "unknown": "未设置"
+    },
+    "afterlife": {
+      "title": "你还剩下的人生",
+      "body": "买房后：应急缓冲 {buffer}，每月喘息空间 {breathing}。在你安放任何释放或新增金额之前，其他目标都保持为虚影。"
+    },
+    "mirror": {
+      "safePrice": "对齐安全房价",
+      "wait12": "等待 12 个月",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "current_savings": "当前储蓄",
+      "cpf_available": "可用公积金",
+      "partner_contribution": "伴侣出资",
+      "renovation_reserve": "装修储备"
+    },
+    "tp": {
+      "belowFloor": "这次购房会让你的应急缓冲跌破下限。",
+      "belowFloorWait": "多等几个月，或选择更低的房价，能保住下限",
+      "overCeiling": "贷款超过 {factor} 监管上限。",
+      "emergencyNearRail": "买房后你的缓冲约为 {months} 个月——接近你的边界。",
+      "depositReady": "按此房价与月份，你的首付已全部存够。"
+    }
+  },
+  "emergencyRunway": {
+    "loading": "正在加载你的安全全景…",
+    "title": "安全跑道",
+    "subtitle": "不是你存了几个月，而是当生活改变时，哪些承诺还能继续。",
+    "noData": "填写每月支出与流动储蓄，即可看到你的跑道。",
+    "summaryLine": "安全 · {months} 个必要月份 · 下限 {floor}",
+    "months": "{n} 个月",
+    "fog": "信息不足",
+    "estimateNote": "跑道以必要月份计（未分类时按参考的 75% 支出）。演练绝不改变你的真实计划。",
+    "field": {
+      "label": "安全跑道——拖动末端旗标设定目标保护月数",
+      "rail": "下限 {months} 月",
+      "now": "现在 {months} 月",
+      "target": "目标：{months} 个月"
+    },
+    "row": {
+      "current": "当前跑道",
+      "burn": "每月必要开销",
+      "rebuild": "每月重建",
+      "toFloor": "到达下限"
+    },
+    "prov": {
+      "liquid": "已确认的流动储蓄",
+      "you": "你设定的",
+      "rebuildMath": "重建计算",
+      "system_estimate": "参考估算",
+      "user_confirmed": "你已确认",
+      "bank_confirmed": "来自银行数据",
+      "unknown": "未知"
+    },
+    "quietZone": "你已高于目标。此处目前无需再增加储蓄。",
+    "rebuildLabel": "每月重建供款",
+    "useSuggested": "使用 {amount}/月（约 2 年达到目标）",
+    "targetLabel": "{n} 个月目标",
+    "shorter": "更短的跑道",
+    "longer": "更长的跑道",
+    "survivability": "哪些承诺能继续",
+    "essential": "必要",
+    "rehearseOpen": "演练一次变化",
+    "rehearseNote": "仅为演练——绝不改变你的真实计划或划转资金。",
+    "gapMonths": "收入中断（月）",
+    "tempExpense": "额外每月支出",
+    "runRehearsal": "运行演练",
+    "verdict": {
+      "holds": "你受保护的承诺能挺过这次。",
+      "dips_then_recovers": "你会跌破下限，之后恢复。",
+      "needs_a_choice": "这会需要你做出选择——暂停某项承诺，或做出改变。"
+    },
+    "breachAt": "约在第 {m} 个月跌破下限",
+    "recoveryGradient": "从最低点起约 {m} 个月回到下限",
+    "survives": "可继续",
+    "atRisk": "有风险",
+    "mirror": {
+      "sixMonths": "6 个月目标",
+      "floorOnly": "只守住下限",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "liquid_assets": "流动储蓄",
+      "monthly_expenses": "每月支出",
+      "essential_share": "必要与非必要占比"
+    },
+    "tp": {
+      "belowFloor": "你的跑道为 {months} 个月——低于 {floor} 个月的下限。",
+      "justRecovered": "你刚刚回到安全下限。",
+      "quietZone": "你已稳稳高于目标——一个平静的状态，无需行动。"
+    }
+  },
+  "debtGravity": {
+    "loading": "正在加载你的债务…",
+    "title": "债务引力",
+    "subtitle": "不是还款表——而是债务何时把每月的自由还给你。",
+    "noDebt": "尚无可处理的已确认债务。",
+    "summaryLine": "债务 · {label} · {debtFree} 还清",
+    "estimateNote": "递减余额摊还。未确认的利率与提前还款费用显示为未知，绝不假设为 0。",
+    "field": {
+      "label": "债务引力——拖动释放结点选择还清日期；额外月供反解",
+      "cashflow": "现金流",
+      "freedom": "自由",
+      "knot": "释放结点在第 {months} 个月"
+    },
+    "row": {
+      "balance": "目标余额",
+      "freedomDate": "自由日",
+      "released": "还清时释放的月供",
+      "breathing": "当前喘息空间"
+    },
+    "prov": {
+      "bank": "来自银行数据",
+      "amort": "递减余额摊还",
+      "estimate": "估算"
+    },
+    "read": {
+      "debtFree": "还清还需",
+      "saved": "提前 {m} 个月",
+      "breathing": "喘息空间"
+    },
+    "extraLabel": "额外每月还款",
+    "handoffPreview": {
+      "title": "未来交接（预览）",
+      "body": "约在 {month}，{amount}/月 会作为可用资源回到你手中。在债务真正还清前它只是虚影——届时由你安放，不会被自动分配。"
+    },
+    "compareStrategies": "比较策略",
+    "strategy": {
+      "highest_rate_first": "先还最高利率",
+      "smallest_balance_first": "先还最小余额",
+      "balanced": "平衡",
+      "clearsIn": "在 {m} 个月内全部还清",
+      "interest": "总利息 {amount}"
+    },
+    "body": {
+      "balance": "余额",
+      "apr": "利率",
+      "minimum": "最低还款",
+      "fee": "提前还款费用",
+      "unknown": "未知"
+    },
+    "mirror": {
+      "in12": "12 个月内还清",
+      "minimumOnly": "仅最低还款",
+      "reset": "回到现实"
+    },
+    "unknownGeneric": "{id}",
+    "tp": {
+      "nearPayoff": "{label} 大约可在 {months} 个月内还清。",
+      "belowBreathing": "这笔额外还款会让你的每月喘息空间跌破下限。",
+      "belowBreathingWait": "更小的额外还款，或更晚的还清日期，能守住下限",
+      "aprUnknown": "其中一笔债务的利率尚未确认——确认后才能得到准确的还清时间。"
+    }
+  },
+  "futureDayLoom": {
+    "loading": "正在加载你的退休全景…",
+    "title": "未来之日织机",
+    "subtitle": "不是先问你需要多少——先构建未来的一天，再倒推回现在。",
+    "noPlan": "确认退休计划后即可编织你的未来之日织机。",
+    "summaryLine": "退休 · 缺口 {gap}/月 · {contribution}",
+    "estimateNote": "所有数字都是区间。基准不假设任何投资回报。CPF LIFE、现有资产、遗产与伴侣资产只有在确认后才计入。",
+    "step": "第 {n} / {of} 题",
+    "back": "返回",
+    "skipToLoom": "跳到织机",
+    "q": {
+      "where": "你会住在哪里？",
+      "where.stay_here": "留在原地",
+      "where.smaller_town": "更小的城镇",
+      "where.overseas_lower_cost": "海外，低成本",
+      "where.overseas_higher_cost": "海外，高成本",
+      "housing": "那时的住房？",
+      "housing.own_paid_off": "自有，已还清",
+      "housing.still_paying": "仍在还贷",
+      "housing.renting": "租房",
+      "housing.downsize": "换小房",
+      "work": "工作节奏？",
+      "work.fully_stopped": "完全停止",
+      "work.part_time": "兼职",
+      "work.keep_working": "继续工作",
+      "routine": "日常生活？",
+      "routine.simple": "简朴",
+      "routine.comfortable": "舒适",
+      "routine.active_social": "活跃且社交",
+      "care": "在照顾某人吗？",
+      "care.caring_for_someone": "是",
+      "care.not_caring": "否",
+      "flexibility": "为意外留的空间？",
+      "flexibility.tight": "很紧",
+      "flexibility.some_room": "一些空间",
+      "flexibility.lots_of_room": "很多空间",
+      "supported_people": "我供养的人"
+    },
+    "yourFutureDay": "你的未来之日",
+    "dayBaselineOnly": "目前只有基准——回答一个问题来塑造它。",
+    "supportedPeople": "你将供养的人数",
+    "fewer": "减少",
+    "more": "增加",
+    "editDay": "编辑未来之日",
+    "field": {
+      "label": "未来之日织机——拉动「现在 / 未来」接缝，以当下的自由换取未来的生活",
+      "now": "现在",
+      "future": "未来",
+      "seam": "现在 / 未来 接缝",
+      "openBand": "开放的未来：{pct}%",
+      "age": "在 {age} 岁退休",
+      "retireAt": "约 {age} 岁退休"
+    },
+    "row": {
+      "target": "未来每月生活",
+      "confirmedIncome": "已确认收入",
+      "gap": "每月缺口",
+      "needContribution": "所需供款"
+    },
+    "prov": {
+      "range": "是区间，不是一个点",
+      "noReturn": "不假设回报",
+      "bank_confirmed": "来自银行数据",
+      "system_estimate": "估算",
+      "unknown": "未知"
+    },
+    "readout": "供款 {contribution} · 已覆盖最宽未来的 {band}",
+    "withReturn": "考虑回报：约 {amount}/月（假设 {pct}%）",
+    "decisionEcho": "你做了几次类似的退休选择——守护者注意到了。它不会据此行动。",
+    "mirror": {
+      "moreFuture": "偏向未来",
+      "moreNow": "偏向现在",
+      "reset": "回到现实"
+    },
+    "unknown": {
+      "monthly_expenses": "每月支出",
+      "cpf_life_monthly": "CPF LIFE 给付",
+      "existing_retirement_assets": "现有退休资产",
+      "current_age": "你的年龄",
+      "target_monthly_income": "目标每月收入"
+    },
+    "tp": {
+      "liquidityConflict": "这笔供款超过了你每月现金流所能承担的。",
+      "liquidityConflictWait": "更小的供款，或更晚的退休年龄，能让它可负担",
+      "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
+      "gapThreshold": "你的供款低于此未来之日所需区间的中位（约 {needLow}/月）。"
+    }
+  },
+  "calendarOrbit": {
+    "loading": "正在加载你的行程…",
+    "title": "日历轨道",
+    "subtitle": "旅行是一年中的一个点，不是预算里的一行。沿轨道移动它，看节奏如何变化。",
+    "noPlan": "填入行程轮廓——人数与晚数——即可打开日历轨道。",
+    "summaryLine": "旅行 · {cost} · {month}",
+    "estimateNote": "来自新加坡的参考费率估算（截至 2026-07），不是机票或酒店报价。季节性是一个透明的乘数。未知的储蓄或收入保持未知——不计算供款节奏。",
+    "perTraveller": "每人 {amount}",
+    "showControls": "行程细节",
+    "hideControls": "隐藏行程细节",
+    "fewer": "减少",
+    "more": "增加",
+    "belowCost": "你的预算比参考成本低 {amount}——在补齐之前无法封存。",
+    "decisionEcho": "你最近规划了几次类似的行程——守护者注意到了。它不会据此行动。",
+    "row": {
+      "shape": "行程轮廓",
+      "shapeValue": "{people} 人 · {nights} 晚",
+      "cost": "参考成本",
+      "season": "季节",
+      "pace": "所需每月节奏"
+    },
+    "prov": {
+      "fromPlan": "来自你的计划",
+      "referenceRate": "参考费率，一个区间",
+      "transparent": "公开显示，不隐藏",
+      "backwards": "从旅行月份倒推"
+    },
+    "unknown": {
+      "trip_month": "旅行月份",
+      "current_savings": "预留储蓄",
+      "monthly_income": "每月收入"
+    },
+    "season": {
+      "peak": "旺季",
+      "shoulder": "平季",
+      "off": "淡季"
+    },
+    "seasonNote": {
+      "peak": "旺季——区间高端带有 ×{mult} 乘数，在此显示。",
+      "shoulder": "平季——高端有一个小的 ×{mult}，在此显示。",
+      "off": ""
+    },
+    "pace": {
+      "ahead": "领先节奏——每月 {have}，所需每月 {need}。",
+      "on_track": "按计划——每月 {have} 覆盖所需的每月 {need}。",
+      "short": "落后——每月 {have}，尾款到期前需要每月 {need}。",
+      "unknown": "在确认预留储蓄之前，供款节奏未知。"
+    },
+    "field": {
+      "label": "日历轨道——绕环拖动旅行旋钮以调整月份，拖动径向手柄以调整晚数",
+      "now": "现在",
+      "nights": "晚数：{n}",
+      "tripMonth": "旅行月份"
+    },
+    "node": {
+      "comfort": "舒适度",
+      "destination": "目的地",
+      "people": "旅客",
+      "monthly": "每月供款",
+      "budget": "预算上限"
+    },
+    "comfort": {
+      "budget": "经济",
+      "mid": "中等",
+      "premium": "高级"
+    },
+    "dest": {
+      "domestic": "境内",
+      "regional": "周边",
+      "longhaul": "长途"
+    },
+    "mirror": {
+      "later": "推迟旅行",
+      "sooner": "提前旅行",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "liquidityConflict": "这笔每月供款超过了你的现金流所能承担的。",
+      "liquidityConflictWait": "更小的供款，或更晚的旅行月份，能让它可负担",
+      "belowBreathing": "这笔供款会让你当前的每月空间跌破下限。",
+      "pastLatest": "这个旅行月份已超过你固定的最晚月份。",
+      "behindPace": "按此供款，你无法及时备好尾款（约需每月 {need}）。"
+    }
+  },
+  "capitalPrism": {
+    "loading": "正在加载你的资本全景…",
+    "title": "资本棱镜",
+    "subtitle": "一束每月资本，分成各自的用途。拖动接缝，把钱从一个用途移到下一个。",
+    "noPlan": "确认一项定期投资后即可打开资本棱镜。",
+    "summaryLine": "投资 · 资金池 {pool} · 锁定 {invest}",
+    "estimateNote": "不假设任何投资回报——这只是已投入的金额。流动性闸门是你自己对资金须保持多久可动用的规则，不是市场判断。未知的现金流或储蓄保持未知。",
+    "over": "超额分配 {amount}——需要先把一个接缝移回才能封存。",
+    "unassigned": "还有 {amount}/月 未分配。",
+    "gateReadout": "{years} 年内可动用：{amount}/月。",
+    "targetReadout": "按此分配：{years} 达到目标（{target}），仅计已投入金额。",
+    "withReturn": "考虑回报：约 {years} 年（假设 {pct}%）",
+    "decisionEcho": "你最近多次重新分配资本——守护者注意到了。它不会据此行动。",
+    "noReturnNote": "此处不执行任何交易。封存只是设定你自己的定期计划；不买入也不卖出。",
+    "row": {
+      "pool": "每月资本池",
+      "investing": "锁定投资",
+      "liquid": "保持流动",
+      "readiness": "就绪闸门"
+    },
+    "prov": {
+      "bank_confirmed": "来自你的现金流",
+      "system_estimate": "估算",
+      "unknown": "未知",
+      "noReturn": "不假设回报",
+      "transparent": "公开显示，不隐藏",
+      "gate": "真实的就绪闸门"
+    },
+    "unknown": {
+      "available_monthly_cashflow": "可用每月现金流",
+      "current_savings": "当前储蓄",
+      "credit_card_outstanding": "信用卡未偿额"
+    },
+    "readiness": {
+      "readyToInvest": "可以投资",
+      "buildBufferFirst": "先建立应急储备",
+      "payDownDebtFirst": "先清偿高成本债务",
+      "noRoomYet": "尚无每月余量"
+    },
+    "blocked": {
+      "buildBufferFirst": "在应急储备建立之前，锁定投资分段无法封存。",
+      "payDownDebtFirst": "在高成本信用卡债务未清之前，锁定投资分段无法封存。",
+      "noRoomYet": "在有每月余量之前，锁定投资分段无法封存。"
+    },
+    "job": {
+      "safety": "安全垫",
+      "wedding": "婚礼",
+      "home": "住房",
+      "flexible": "灵活",
+      "retirement": "退休",
+      "longTerm": "长期资本"
+    },
+    "field": {
+      "label": "资本棱镜——拖动两段之间的接缝来移动资本；拖动流动性闸门线来调整年数",
+      "seam": "{a} 与 {b} 之间的接缝",
+      "gate": "流动性闸门：{n} 年"
+    },
+    "mirror": {
+      "longer": "更长期限",
+      "sooner": "更快可动用",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "overAllocated": "你分配的金额超过了每月资本池。",
+      "readinessGate": "就绪闸门（{gate}）意味着锁定投资分段暂时无法封存。"
+    }
+  },
+  "livingEnvelope": {
+    "loading": "正在加载你的保障全景…",
+    "title": "生命信封",
+    "subtitle": "围绕你的人生节点的一层膜。向外拖动一个顶点即可在该处拉伸保障——保费实时重算。",
+    "noPlan": "告诉我们你已有的保障，即可绘制你的生命信封。",
+    "summaryLine": "保障 · 敞口 {exposure} · {premium}",
+    "estimateNote": "缺口使用你自己陈述的保障——未知节点显示为未知，绝不计为缺口。保费为参考估算，不是报价。绝不进行核保。封存仅承诺每月保费的变更。",
+    "exposureLabel": "已知敞口",
+    "unknownShort": "未知",
+    "premiumReadout": "保费：现在 {now}/月 → 按此膜为 {after}/月。",
+    "unknownNote": "{n} 个节点未知——以虚线显示，绝不计为缺口。确认它们以绘制完整的膜。",
+    "belowIncomeFloor": "收入保障月数低于你固定的下限。",
+    "decisionEcho": "你最近多次重塑保障——守护者注意到了。它不会据此行动。",
+    "noPolicyNote": "此处不购买任何保单，不进行核保，不产生报价。封存仅设定保费计划。",
+    "row": {
+      "exposure": "已知敞口",
+      "premium": "当前保费",
+      "toClose": "补齐已知缺口所需保费",
+      "status": "信封状态"
+    },
+    "prov": {
+      "knownOnly": "仅已知缺口",
+      "user_confirmed": "你申报的保障",
+      "system_estimate": "参考估算",
+      "referenceRate": "参考费率，不是报价",
+      "transparent": "公开显示，不隐藏"
+    },
+    "unknown": {
+      "income_cover_or_need": "收入保障",
+      "home_loan_cover_or_need": "房贷保障",
+      "family_cover_or_need": "家庭保障",
+      "care_cover_or_need": "护理 / 重疾保障"
+    },
+    "status": {
+      "has_unknowns": "存在未知",
+      "exposure_identified": "已识别敞口",
+      "sealed_shut": "已封闭"
+    },
+    "node": {
+      "income": "收入",
+      "home_loan": "房贷",
+      "family": "家庭",
+      "care": "护理"
+    },
+    "field": {
+      "label": "生命信封——在某个节点向外拖动膜的顶点以在该处拉伸保障",
+      "handle": "{node} 保障"
+    },
+    "mirror": {
+      "close": "补齐第一个缺口",
+      "clear": "清除拉伸的保障",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "liquidityConflict": "这笔保费超过了你每月现金流所能承担的。",
+      "liquidityConflictWait": "更小的保费，或现在少补几个缺口，能让它可负担",
+      "belowBreathing": "这笔保费会让你当前的每月空间跌破下限。",
+      "belowIncomeFloor": "你的收入保障月数低于你固定的下限。",
+      "exposure": "还有 {nodes} 个人生节点位于膜之外。"
+    }
+  },
+  "privateConstellation": {
+    "loading": "正在加载你们的共享全景…",
+    "title": "私密星座",
+    "subtitle": "两个独立身份，一个未来。你完整看到自己的标记——对伴侣只看到一个剪影。",
+    "noPlan": "开始一个共享计划即可打开你的私密星座。",
+    "summaryLine": "共享 · 你的份额 {yours} · 资金池 {shared}",
+    "estimateNote": "每位参与者都是独立身份——彼此都无法读取对方的可负担数字或逐项标记。只共享重叠区间、已达成一致的节点和冲突计数。在双方分别加入并确认之前，任何内容都无法封存。",
+    "you": "你",
+    "partnerConfirmed": "伴侣 · 已确认",
+    "partnerJoined": "伴侣 · 已加入",
+    "partnerAbsent": "伴侣 · 未加入",
+    "conflicts": "{n} 处冲突",
+    "noBand": "尚无可行区间",
+    "needsBoth": "在封存之前，需要你们双方分别确认。",
+    "sharedContribution": "共享每月供款",
+    "less": "减少",
+    "more": "增加",
+    "shareReadout": "你的份额 {yours}/月 · 伴侣的份额 {theirs}/月（来自约定的比例，不是其余额）。",
+    "inviteCode": "伴侣邀请码：{code}",
+    "decisionEcho": "你最近多次重塑共享计划——守护者注意到了。它不会据此行动。",
+    "privacyNote": "个人余额和逐项标记从不共享。守护者绝不代替你的伴侣确认。",
+    "confirmMine": "确认我的视图",
+    "confirmed": "你的视图已确认",
+    "row": {
+      "yours": "你的份额",
+      "shared": "共享供款",
+      "band": "可行区间",
+      "partner": "伴侣"
+    },
+    "prov": {
+      "yours": "你约定的份额",
+      "agreed": "约定的资金池",
+      "merged": "仅重叠部分",
+      "redacted": "仅剪影"
+    },
+    "unknown": {
+      "partner_participation": "伴侣参与"
+    },
+    "field": {
+      "label": "私密星座——将共享节点拖向你表示「必须保留」，拖离表示「灵活」",
+      "node": "{item}——你的标记"
+    },
+    "mirror": {
+      "reset": "回到现实"
+    },
+    "tp": {
+      "awaitingPartner": "你的伴侣尚未加入——无法进行合并。",
+      "awaitingConfirmations": "还有一方需要确认——双方都确认前无法封存。",
+      "conflicts": "有 {n} 个共享节点被你们标记得不一致。",
+      "liquidityConflict": "你在这笔供款中的份额超过了你的现金流所能承担的。"
+    }
+  },
+  "branchStrip": {
+    "title": "分支",
+    "fork": "从此分叉",
+    "compare": "对比",
+    "hideCompare": "隐藏对比",
+    "empty": "尚无已保存的分支——编辑场景后，点击「从此分叉」保留一个版本。",
+    "reality": "现实",
+    "sealable": "可封存",
+    "notSealable": "不可封存",
+    "discard": "丢弃分支",
+    "defaultName": "分支 {n}",
+    "noImpact": "无跨目标影响",
+    "pressure": "每月压力 +{amount}",
+    "freed": "每月释放 −{amount}",
+    "neutral": "每月无变化",
+    "field": "字段",
+    "monthlyEffect": "每月影响",
+    "sealableRow": "可封存"
+  },
+  "weddingScene": {
+    "loading": "正在加载你的婚礼…",
+    "title": "婚礼生活场景",
+    "subtitle": "一个连续的场景。拖动宾客旋钮加宽或收窄预算之河；拖动日期旋钮移动婚期。",
+    "noPlan": "填入宾客人数和日期即可打开婚礼生活场景。",
+    "summaryLine": "婚礼 · {cost} · {month}",
+    "estimateNote": "来自新加坡的参考费率估算，不是供应商报价。伴侣预留的储蓄保持私密——只共享其承诺的每月供款。",
+    "now": "现在",
+    "guestsWord": "位宾客",
+    "none": "无",
+    "belowCost": "你的预算比参考成本低 {amount}——在补齐之前无法封存。",
+    "readout": "每位宾客约 {perGuest} · 你的个人份额为 {need}/月。",
+    "row": {
+      "cost": "参考成本",
+      "guests": "宾客",
+      "need": "你的每月份额",
+      "gap": "预算缺口"
+    },
+    "prov": {
+      "referenceRate": "参考费率，不是报价",
+      "fromPlan": "来自你的计划",
+      "yourShare": "你的份额，伴侣的保持私密",
+      "vsBudget": "对比你的预算上限"
+    },
+    "unknown": {
+      "guest_count": "宾客人数",
+      "wedding_date": "婚礼日期"
+    },
+    "field": {
+      "label": "预算之河——拖动宾客旋钮加宽/收窄河道，拖动日期旋钮移动婚期",
+      "guests": "宾客：{n}",
+      "date": "婚礼日期"
+    },
+    "ctx": {
+      "venue": "场地",
+      "couple": "伴侣共识",
+      "guests": "宾客"
+    },
+    "venueTier": "场地档次",
+    "venue": {
+      "budget": "经济",
+      "mid_range": "中档",
+      "premium": "高档"
+    },
+    "partnerMonthly": "伴侣的每月供款",
+    "partnerNote": "只共享约定的每月金额。任何一方的余额都不会披露。",
+    "less": "减少",
+    "more": "增加",
+    "mirror": {
+      "fewer": "减少宾客",
+      "later": "推迟婚礼",
+      "reset": "回到现实"
+    },
+    "tp": {
+      "budgetGap": "你的预算比参考成本低 {amount}。",
+      "behindPace": "按此节奏，你的份额无法及时备好（约需每月 {need}）。"
+    },
+    "venueType": "场地类型",
+    "venueRecompute": "类型、档次、日期和宾客数会一起重算成本。",
+    "type": {
+      "community": "社区",
+      "restaurant": "餐厅",
+      "hotel": "酒店",
+      "outdoor": "户外"
+    },
+    "orbit": {
+      "label": "宾客星轨——按层级的同心环；方向键将宾客移入或移出某个环",
+      "help": "把人数分成层级——每个环随其宾客数增大，总数进入成本计算。",
+      "tier": "{tier}：{n} 位宾客",
+      "inner": "核心圈",
+      "family": "家人",
+      "friends": "朋友"
+    },
+    "align": {
+      "help": "你们各自把每个共享项标记为「必须保留 / 灵活 / 未定」并设定一个私密区间。只共享重叠部分、达成一致的项和冲突计数。",
+      "yourRange": "你的私密可负担上限",
+      "item": {
+        "venue": "场地",
+        "photography": "摄影",
+        "catering": "餐饮",
+        "attire": "礼服",
+        "guest_count": "宾客人数"
+      },
+      "mark": {
+        "mustKeep": "必须保留",
+        "flexible": "灵活",
+        "undecided": "未定"
+      },
+      "resolve": "解决 → 新分支",
+      "resolveLabel": "解决：{item}",
+      "band": "共享可负担区间：{low}–{high}",
+      "noBand": "尚无重叠的可负担区间——需要一方调整范围。",
+      "status": "{agreed} 项一致 · {conflicts} 处冲突"
     }
   }
 }

@@ -12,8 +12,13 @@ function sgd(n) {
 }
 
 export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
+  // Living Thread commit 10: the wedding adapter now emits the shared
+  // Studio-Contract impactSet (resourceDelta + affectedGoals ghost/solid).
   const proj = selectedBranch?.projectedImpacts ?? null;
-  const freed = proj?.mode === "freed" ? proj.freedCashflow || 0 : 0;
+  const rd = proj?.resourceDelta ?? null;
+  const freed = Math.max(0, Number(rd?.freedMonthly) || 0);
+  const pressureAmount = Math.max(0, Number(rd?.addedPressureMonthly) || 0);
+  const ghostGoals = (proj?.affectedGoals ?? []).filter((g) => g.direction !== "flat");
 
   const existing = selectedBranch?.allocation ?? selectedBranch?.data?.allocation ?? null;
   const [alloc, setAlloc] = useState(() => existing ?? { goalMonthly: 0, emergencyMonthly: 0, flexibleMonthly: 0 });
@@ -35,13 +40,18 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
     );
   }
 
-  if (proj?.mode === "pressure") {
+  if (pressureAmount > 0) {
     return (
       <section className="wlpView wlpReleased" aria-labelledby="releasedTitle">
         <h3 id="releasedTitle">{t("weddingLivingPlan.released.title")}</h3>
         <p className="wlpWarn">
-          {t("weddingLivingPlan.released.pressure", { amount: sgd(proj.pressure?.extraMonthlyNeeded ?? 0) })}
+          {t("weddingLivingPlan.released.pressure", { amount: sgd(pressureAmount) })}
         </p>
+        <ul className="wlpReleasedAvailable">
+          {ghostGoals.map((g) => (
+            <li key={g.goalId}>{t("weddingLivingPlan.released.ghostGoal", { goal: t(`weddingLivingPlan.released.goalName.${g.goalId}`), amount: sgd(g.possibleAfter) })}</li>
+          ))}
+        </ul>
       </section>
     );
   }
@@ -78,8 +88,10 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
     }
   };
 
-  const applied = proj.allocatedImpact ?? null;
-  const avail = proj.availableImpact ?? null;
+  // A funded leg is "placed" (a definite Ghost) before Seal and "confirmed"
+  // after - show either as the current routed outcome.
+  const routedAmount = (g) => g.confirmedAfter ?? g.placedAfter ?? null;
+  const solidGoals = ghostGoals.filter((g) => routedAmount(g) != null);
 
   return (
     <section className="wlpView wlpReleased" aria-labelledby="releasedTitle">
@@ -116,15 +128,12 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
           : t("weddingLivingPlan.released.overAllocated", { amount: sgd(freed) })}
       </p>
 
-      {/* what the freed money COULD do, before allocation */}
-      {avail ? (
+      {/* what the freed money COULD do (ghost) - before allocation */}
+      {ghostGoals.length > 0 && solidGoals.length === 0 ? (
         <ul className="wlpReleasedAvailable">
-          {avail.maxHomeMonthsEarlier ? (
-            <li>{t("weddingLivingPlan.released.availHome", { months: avail.maxHomeMonthsEarlier })}</li>
-          ) : null}
-          {avail.maxEmergencyBufferAfter ? (
-            <li>{t("weddingLivingPlan.released.availEmergency", { months: avail.maxEmergencyBufferAfter })}</li>
-          ) : null}
+          {ghostGoals.map((g) => (
+            <li key={g.goalId}>{t("weddingLivingPlan.released.ghostGoal", { goal: t(`weddingLivingPlan.released.goalName.${g.goalId}`), amount: sgd(g.possibleAfter) })}</li>
+          ))}
         </ul>
       ) : null}
 
@@ -132,24 +141,14 @@ export function ReleasedFuture({ selectedBranch, t, call, reload, busy }) {
         {t("weddingLivingPlan.released.apply")}
       </button>
 
-      {/* what the CURRENT allocation actually does */}
-      {applied ? (
+      {/* what the CURRENT allocation actually does (solid) */}
+      {solidGoals.length > 0 ? (
         <div className="wlpReleasedResult" role="status">
           <strong>{t("weddingLivingPlan.released.resultTitle")}</strong>
           <ul>
-            {applied.home && applied.home.monthsDelta ? (
-              <li>
-                {applied.home.monthsDelta < 0
-                  ? t("weddingLivingPlan.released.homeEarlier", { months: Math.abs(applied.home.monthsDelta), month: applied.home.readyMonthAfter })
-                  : t("weddingLivingPlan.released.homeLater", { months: applied.home.monthsDelta })}
-              </li>
-            ) : null}
-            {applied.emergency && applied.emergency.direction === "up" ? (
-              <li>{t("weddingLivingPlan.released.emergencyUp", { before: applied.emergency.bufferBefore, after: applied.emergency.bufferAfter })}</li>
-            ) : null}
-            {applied.flexible && applied.flexible.added > 0 ? (
-              <li>{t("weddingLivingPlan.released.flexibleUp", { amount: sgd(applied.flexible.added) })}</li>
-            ) : null}
+            {solidGoals.map((g) => (
+              <li key={g.goalId}>{t("weddingLivingPlan.released.solidGoal", { goal: t(`weddingLivingPlan.released.goalName.${g.goalId}`), amount: sgd(routedAmount(g)) })}</li>
+            ))}
           </ul>
           <p className="wlpMuted">{t("weddingLivingPlan.released.stillPossible")}</p>
         </div>

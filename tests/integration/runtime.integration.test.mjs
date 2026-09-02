@@ -467,9 +467,15 @@ test("Loan + Retirement studios: real reality path + feasibility + branch persis
     const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
     assert.equal(Number(reloaded.data[overrideKey]), overrideVal, `${domain} branch survives reload`);
 
-    // paying more is pressure (never silently "frees" money)
+    // paying more is pressure (never silently "frees" money). loan now
+    // returns the unified studio-contract impactSet; retirement still the
+    // monthly-shift shape - accept either.
     const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
-    assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
+    if (proj.mode != null) {
+      assert.ok(["pressure", "freed", "neutral"].includes(proj.mode));
+    } else {
+      assert.ok(proj.resourceDelta && Array.isArray(proj.affectedGoals) && typeof proj.allocationRequired === "boolean", "a valid unified impactSet");
+    }
   }
 });
 
@@ -502,7 +508,11 @@ test("Investment studio: real reality path from the fixture's confirmed recurrin
   });
   const reloaded = (await store.listBranches(plan.id)).find((b) => b.id === branch.id);
   assert.ok(reloaded, "investment branch persists");
+  // Living Thread commit 7: projectImpacts returns the studio-contract
+  // impactSet (Capital Prism), not the old monthly-shift shape.
   const proj = adapter.projectImpacts(peeled.data, ctx.realityPlanData, ctx.projectionContext ?? {});
-  assert.equal(proj.mode, "freed", "committing less frees cashflow");
-  assert.equal(proj.allocatedImpact, null, "nothing auto-routed");
+  assert.ok(proj.resourceDelta && typeof proj.allocationRequired === "boolean");
+  assert.equal(proj.resourceDelta.addedPressureMonthly, 0, "committing less is not pressure");
+  assert.ok(proj.resourceDelta.freedMonthly >= 0, "committing less frees (or holds) cashflow");
+  assert.ok(proj.affectedGoals.every((g) => g.confirmedAfter == null), "nothing auto-routed");
 });

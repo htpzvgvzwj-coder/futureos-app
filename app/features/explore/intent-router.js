@@ -12,8 +12,8 @@ export const INTENT_ROUTES = [
   { id: "insurance", screen: "protectionEnvelope", labelKey: "explore.route.insurance", whyKey: "explore.why.insurance", keywords: ["insure", "insurance", "protect", "cover", "coverage", "income protection", "critical illness", "dependent", "term life"] },
   { id: "family", screen: "familyConstellation", labelKey: "explore.route.family", whyKey: "explore.why.family", keywords: ["partner", "spouse", "together", "joint", "shared budget", "our money", "family budget", "co-plan"] },
   { id: "wedding", screen: "weddingLivingPlan", labelKey: "explore.route.wedding", whyKey: "explore.why.wedding", keywords: ["wedding", "marry", "married", "marriage", "engaged", "engagement", "banquet"] },
-  { id: "home", screen: "futureField", labelKey: "explore.route.home", whyKey: "explore.why.home", keywords: ["house", "home", "flat", "hdb", "condo", "property", "down payment", "deposit", "bto", "resale"] },
-  { id: "emergency", screen: "needEmergency", labelKey: "explore.route.emergency", whyKey: "explore.why.emergency", keywords: ["emergency", "buffer", "safety net", "rainy day", "shock", "runway", "reserve"] },
+  { id: "home", screen: "homeHorizon", labelKey: "explore.route.home", whyKey: "explore.why.home", keywords: ["house", "home", "flat", "hdb", "condo", "property", "down payment", "deposit", "bto", "resale"] },
+  { id: "emergency", screen: "emergencyRunway", labelKey: "explore.route.emergency", whyKey: "explore.why.emergency", keywords: ["emergency", "buffer", "safety net", "rainy day", "shock", "runway", "reserve"] },
 ];
 
 // Broad category hints for when the words are about a FEELING, not a goal.

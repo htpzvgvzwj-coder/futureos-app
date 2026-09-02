@@ -15,6 +15,47 @@ const PIN_KINDS = {
   min_photo_quality: "flag",
   no_balance_share: "flag",
   no_guardian_auto_move: "flag",
+  // Home Horizon domain pins (Living Thread commit 2).
+  minimum_emergency_months: "gte",
+  maximum_monthly_repayment: "lte",
+  minimum_renovation_reserve: "gte",
+  latest_purchase_month: "lte", // value + metric are YYYYMM integers
+  no_partner_share: "flag",
+  minimum_post_purchase_cash: "gte",
+  // Safety Runway domain pins (Living Thread commit 3).
+  minimum_floor_months: "gte",
+  maximum_rebuild_monthly: "lte",
+  no_goal_funding_below_floor: "flag",
+  // Debt Gravity domain pins (Living Thread commit 4).
+  minimum_breathing_room: "gte",
+  maximum_extra_payment: "lte",
+  protect_emergency_floor: "flag",
+  no_one_off_from_protected_savings: "flag",
+  target_debt_only: "flag",
+  // Future-Day Loom domain pins (Living Thread commit 5).
+  minimum_current_breathing_room: "gte",
+  minimum_emergency_floor: "gte",
+  maximum_monthly_contribution: "lte",
+  protected_future_day_choices: "flag",
+  no_assumed_inheritance: "flag",
+  no_unconfirmed_partner_assets: "flag",
+  // Calendar Orbit domain pins (Living Thread commit 6).
+  latest_trip_month: "lte", // value + metric are YYYYMM integers
+  no_trip_funding_below_emergency_floor: "flag",
+  // Capital Prism domain pins (Living Thread commit 7).
+  minimum_liquid_capital: "gte",
+  minimum_flexible_capital: "gte",
+  no_investing_below_readiness_gate: "flag",
+  // Living Envelope domain pins (Living Thread commit 8).
+  minimum_income_protection_months: "gte",
+  no_underwriting_or_quote: "flag",
+  no_unknown_counted_as_gap: "flag",
+  // Private Constellation domain pins (Living Thread commit 9).
+  minimum_confirmations: "gte",
+  no_partner_data_in_viewer_response: "flag",
+  // Wedding continuous-scene domain pins (causal-spine round).
+  latest_wedding_month: "lte", // YYYYMM integer
+  minimum_guest_experience_spend: "gte", // per-guest floor
 };
 
 export async function GET(request) {

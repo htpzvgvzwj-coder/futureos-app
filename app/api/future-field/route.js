@@ -3,6 +3,8 @@ import { loadDomainContext, ensurePlan } from "../../../lib/future-field/service
 import { futureFieldSupportedDomains } from "../../../lib/future-field/adapters.js";
 import { planStore, compareRealityToCommitted } from "../../../lib/plan-runtime/index.js";
 import { query } from "../../../lib/db.js";
+import { loadSeededPath } from "../../../lib/future-field/seed.js";
+import { getEntryRequirements } from "../../../lib/living-scene/studio-entry-requirements.js";
 
 export const runtime = "nodejs";
 
@@ -33,13 +35,25 @@ export async function GET(request) {
   }
 
   const context = await loadDomainContext(userId, domain);
+
+  // No domain-specific confirmed artifact. Before declaring a dead end,
+  // check for a seeded first-path draft (StudioEntryBridge). If there is
+  // none, return the entry requirements so the client can render the
+  // bridge - never just "no_confirmed_plan".
   if (!context.realityPlanData) {
-    return Response.json({
-      domain,
-      hasRealityPath: false,
-      reason: "no_confirmed_plan",
-      supportedDomains: futureFieldSupportedDomains(),
-    });
+    const seeded = await loadSeededPath(userId, domain).catch(() => null);
+    if (!seeded) {
+      return Response.json({
+        domain,
+        hasRealityPath: false,
+        reason: "needs_first_path",
+        entryRequirements: getEntryRequirements(domain),
+        supportedDomains: futureFieldSupportedDomains(),
+      });
+    }
+    // treat the seeded draft as the reality path for this domain
+    context.realityPlanData = seeded.data;
+    context.seededDraft = { provenance: seeded.provenance, seedMode: seeded.seedMode, sealable: seeded.sealable, sealBlockedReason: seeded.sealBlockedReason };
   }
 
   const plan = await ensurePlan(userId, domain, context);
@@ -126,6 +140,7 @@ export async function GET(request) {
     state: plan.state,
     currentVersion: currentVersion?.version ?? "0",
     hasRealityPath: true,
+    seededDraft: context.seededDraft ?? null,
     sceneSeal,
     realityPath: {
       data: context.realityPlanData,
@@ -134,7 +149,7 @@ export async function GET(request) {
       monthlyContribution: context.realityPlanData.monthly_contribution || 0,
       ...realityReady,
     },
-    possiblePaths: branches.map((b) => {
+    possiblePaths: branches.filter((b) => b.status !== "discarded" && b.status !== "merged").map((b) => {
       const monthly = Number(b.data?.monthly_contribution) || context.realityPlanData.monthly_contribution || 0;
       // Real per-branch cross-goal projection (Home + Emergency + Cashflow
       // before/after). Only domains whose adapter implements projectImpacts

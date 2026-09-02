@@ -49,20 +49,26 @@ test("travel: a fixed budget below the real cost is NOT sealable; the gap + item
   assert.ok(f.unresolvedItems.length >= 1);
 });
 
-test("travel: fewer nights lowers the real cost; the branch frees cashflow (allocatable), nothing auto-routed", () => {
+test("travel: fewer nights lowers the real cost; the unified impactSet frees monthly pace, ghost until allocated", () => {
   const big = travel.feasibility(tripReality).computedCoreTotal;
   const branch = { ...tripReality, nights: 4 };
   assert.ok(travel.feasibility(branch).computedCoreTotal < big);
-  const proj = travel.projectImpacts(branch, tripReality, ctx);
-  assert.ok(["freed", "neutral"].includes(proj.mode));
-  if (proj.mode === "freed") assert.equal(proj.allocatedImpact, null);
+  // Living Thread commit 6: projectImpacts returns the studio-contract
+  // impactSet (Calendar Orbit), not the old monthly-shift shape.
+  const impact = travel.projectImpacts(branch, tripReality, ctx);
+  assert.equal(impact.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(impact.resourceDelta.freedMonthly >= 0);
+  assert.ok(impact.resourceDelta.tripCostRangeAfter && impact.resourceDelta.tripCostRangeAfter.low != null, "trip cost is a range");
+  assert.ok(impact.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 });
 
-test("travel: a bigger trip is pressure (costs more per month), not a free lunch", () => {
+test("travel: a bigger trip is monthly PRESSURE with named sources, not a free lunch", () => {
   const branch = { ...tripReality, travellers: 4, nights: 14, comfort_tier: "premium" };
-  const proj = travel.projectImpacts(branch, tripReality, ctx);
-  assert.equal(proj.mode, "pressure");
-  assert.ok(proj.pressure.extraMonthlyNeeded > 0);
+  const impact = travel.projectImpacts(branch, tripReality, ctx);
+  assert.ok(impact.resourceDelta.addedPressureMonthly > 0);
+  assert.equal(impact.resourceDelta.freedMonthly, 0);
+  assert.ok(impact.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(impact.allocationRequired, true);
 });
 
 test("travel provenance: reference estimates, never 'quote'", () => {
@@ -88,15 +94,20 @@ test("investment feasibility: readiness gate + years-to-target, NO return assume
   assert.ok(f.monthsToTarget > 0);
 });
 
-test("investment: more into investing is pressure now; less frees cashflow", () => {
+test("investment: more into the locked bands is monthly PRESSURE; less FREES liquid capital (unified impactSet)", () => {
   const reality = { monthly_commitment: 1000, horizon_years: 10, target_pool: 150000, current_savings: 10000, monthly_expenses: 3800, credit_card_outstanding: 0, available_monthly_cashflow: 2000 };
+  // Living Thread commit 7: projectImpacts returns the studio-contract
+  // impactSet (Capital Prism), not the old monthly-shift shape.
   const more = invest.projectImpacts({ ...reality, monthly_commitment: 1400 }, reality, ctx);
-  assert.equal(more.mode, "pressure");
-  assert.equal(more.pressure.extraMonthlyNeeded, 400);
+  assert.equal(more.resourceDelta.addedPressureMonthly, 400);
+  assert.equal(more.resourceDelta.freedMonthly, 0);
+  assert.ok(more.affectedGoals.filter((g) => g.direction === "down").length >= 2);
+  assert.equal(more.allocationRequired, true);
+
   const less = invest.projectImpacts({ ...reality, monthly_commitment: 700 }, reality, ctx);
-  assert.equal(less.mode, "freed");
-  assert.equal(less.freedCashflow, 300);
-  assert.equal(less.allocatedImpact, null);
+  assert.equal(less.resourceDelta.freedMonthly, 300);
+  assert.equal(less.resourceDelta.addedPressureMonthly, 0);
+  assert.ok(less.affectedGoals.every((g) => g.confirmedAfter == null), "possible only until allocated");
 });
 
 test("peelBranch works with the travel adapter", () => {

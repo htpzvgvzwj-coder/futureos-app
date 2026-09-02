@@ -12,10 +12,23 @@ import { validateAllocation } from "../../../../lib/living-plan/allocation.js";
 export const runtime = "nodejs";
 
 const ALLOWED_OVERRIDES = {
-  home: new Set(["estimated_price", "target_complete_month", "monthly_contribution", "property_type", "down_payment_needed"]),
+  home: new Set([
+    "estimated_price",
+    "target_complete_month",
+    "monthly_contribution",
+    "property_type",
+    "down_payment_needed",
+    "down_payment_ratio",
+    "loan_tenure",
+    "rate_assumption",
+    "renovation_reserve",
+    "keep_emergency_months",
+    "partner_contribution",
+  ]),
   wedding: new Set([
     "wedding_date",
     "guest_count",
+    "guest_tiers",
     "venue_tier",
     "venue_type",
     "photography_tier",
@@ -23,14 +36,15 @@ const ALLOWED_OVERRIDES = {
     "total_budget",
     "monthly_contribution",
     "partner_contribution",
+    "couple_alignment",
   ]),
-  emergency: new Set(["target_months", "floor_months", "monthly_contribution"]),
-  loan: new Set(["extra_repayment", "monthly_installment"]),
-  retirement: new Set(["monthly_contribution", "target_monthly_income"]),
-  travel: new Set(["travellers", "nights", "comfort_tier", "destination_type", "trip_month", "total_budget", "monthly_contribution"]),
-  investment: new Set(["monthly_commitment", "target_pool", "horizon_years"]),
-  insurance: new Set(["monthly_premium_now", "income_protection_months", "existing_income_protection", "existing_life_cover", "existing_ci_cover", "home_loan_outstanding", "dependents"]),
-  family: new Set(["shared_monthly_contribution", "partner_share_ratio"]),
+  emergency: new Set(["target_months", "floor_months", "monthly_contribution", "protected_commitments", "essential_share", "fund_goals_anyway"]),
+  loan: new Set(["extra_repayment", "monthly_installment", "one_off_payment", "target_debt", "breathing_room_floor", "repayment_strategy", "excluded_debt_ids"]),
+  retirement: new Set(["monthly_contribution", "target_monthly_income", "future_day", "future_age", "inflation_assumption", "longevity_years", "real_return_assumption", "minimum_current_breathing_room"]),
+  travel: new Set(["travellers", "nights", "comfort_tier", "destination_type", "trip_month", "total_budget", "monthly_contribution", "latest_trip_month", "minimum_current_breathing_room"]),
+  investment: new Set(["monthly_commitment", "target_pool", "horizon_years", "jobs", "liquidity_gate_years", "real_return_assumption"]),
+  insurance: new Set(["monthly_premium_now", "income_protection_months", "existing_income_protection", "existing_life_cover", "existing_ci_cover", "home_loan_outstanding", "dependents", "desired_cover", "minimum_current_breathing_room", "minimum_income_protection_months"]),
+  family: new Set(["shared_monthly_contribution", "partner_share_ratio", "minimum_current_breathing_room"]),
 };
 
 // Peel: create a possible future off the reality path. Also handles
@@ -73,7 +87,10 @@ export async function POST(request) {
     if (!branch) return Response.json({ error: "branch_not_found" }, { status: 404 });
 
     const projBefore = context.adapter.projectImpacts(branch.data, context.realityPlanData, context.projectionContext ?? {}, null);
-    const freed = projBefore?.freedCashflow ?? 0;
+    // Living Thread: every Studio adapter now emits the shared
+    // Studio-Contract impactSet (resourceDelta.freedMonthly). Fall back to
+    // the legacy monthly-shift field for any adapter not yet aligned.
+    const freed = projBefore?.resourceDelta?.freedMonthly ?? projBefore?.freedCashflow ?? 0;
     const check = validateAllocation({ freedCashflow: freed, allocation: body.allocation });
     if (!check.ok) {
       return Response.json({ error: check.error, freedCashflow: freed }, { status: 422 });
@@ -100,6 +117,34 @@ export async function POST(request) {
       unallocated: check.unallocated,
       ledgerEventId: ledger?.event?.id ?? null,
     });
+  }
+
+  // Undo a possible future - the branch is kept in history as `discarded`,
+  // never hard-deleted (the Change Ledger causal chain stays intact).
+  if (action === "discard") {
+    const branch = await planStore.getBranch(body.branchId, userId);
+    if (!branch) return Response.json({ error: "branch_not_found" }, { status: 404 });
+    await planStore.updateBranch(body.branchId, userId, { status: "discarded" });
+    return Response.json({ ok: true, branchId: body.branchId, status: "discarded" });
+  }
+
+  // Make ONE branch the active moment. Exactly one branch per plan may be
+  // `active`; every other open branch is an `alternative` (compare only,
+  // it does not drive the global Life Thread). Passing branchId: null
+  // deactivates all -> the moment falls back to `reality`.
+  if (action === "activate") {
+    try {
+      const res = await planStore.setActiveBranchAtomic(plan.id, body.branchId ?? null, userId);
+      return Response.json({ ok: true, activeBranchId: res.activeBranchId });
+    } catch (error) {
+      if (error?.code === "23505") {
+        return Response.json({ error: "activation_conflict", hint: "another activate won the race - re-read the branches" }, { status: 409 });
+      }
+      if (error?.code === "BRANCH_NOT_FOUND") return Response.json({ error: "branch_not_found" }, { status: 404 });
+      if (error?.code === "BRANCH_PLAN_MISMATCH") return Response.json({ error: "branch_plan_mismatch" }, { status: 409 });
+      if (error?.code === "BRANCH_NOT_ACTIVATABLE") return Response.json({ error: "branch_not_activatable", status: error.branchStatus }, { status: 409 });
+      throw error;
+    }
   }
 
   if (action === "merge") {
@@ -133,13 +178,24 @@ export async function POST(request) {
   const label = String(body.label ?? "").slice(0, 80) || "Possible future";
 
   const peeled = peelBranch({ baseData, overrides, feasibilityFn: (data) => context.adapter.feasibility(data) });
-  const branch = await planStore.createBranch(plan.id, userId, {
-    label,
-    baseVersion: currentVersion?.version ?? "0",
-    data: peeled.data,
-    delta: peeled.delta,
-    feasibility: peeled.feasibility,
-  });
+  // A freshly peeled branch is the one the customer is now experiencing:
+  // demote any prior active branch AND insert this one active, in ONE
+  // transaction, so there is never a window with two active branches.
+  let branch;
+  try {
+    branch = await planStore.createActiveBranchAtomic(plan.id, userId, {
+      label,
+      baseVersion: currentVersion?.version ?? "0",
+      data: peeled.data,
+      delta: peeled.delta,
+      feasibility: peeled.feasibility,
+    });
+  } catch (error) {
+    if (error?.code === "23505") {
+      return Response.json({ error: "activation_conflict", hint: "a concurrent peel won the race - re-read the branches" }, { status: 409 });
+    }
+    throw error;
+  }
   const ledger = await recordEventSafe(
     buildBranchCreatedEvent({
       profileKey: userId,

@@ -18,6 +18,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLifeThread } from "../life-thread/LifeThreadProvider.jsx";
+import { StudioEntryBridge } from "./StudioEntryBridge.jsx";
+import { LoadingState, ErrorState } from "../bank/AsyncState.jsx";
 import { derivePhase } from "../../../lib/living-scene/spine.js";
 import { commitmentGateOpen, allocationGoalId, allocationSettled as computeAllocationSettled } from "../../../lib/living-scene/gates.js";
 import { normalizeAllocation, allocationSum, isAllocationSet } from "../../../lib/living-plan/allocation.js";
@@ -83,6 +85,8 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
   const branchVarsRef = useRef({});
 
   // ---- load the real field (source of truth for confirmed state) --------
+  const [fieldNonce, setFieldNonce] = useState(0);
+  const reloadField = useCallback(() => setFieldNonce((n) => n + 1), []);
   useEffect(() => {
     let alive = true;
     setLoadState("loading");
@@ -131,7 +135,7 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     return () => {
       alive = false;
     };
-  }, [domain]);
+  }, [domain, fieldNonce]);
 
   // ---- restore the UNSAVED DRAFT only (never "sealed") ------------------
   useEffect(() => {
@@ -256,6 +260,87 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
     setServerBranch(null);
     clearDraft(domain);
   }, [domain]);
+
+  // ---- real branches: create / select / compare / undo -----------------
+  const refetchField = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/future-field?domain=${encodeURIComponent(domain)}`);
+      if (r.ok) setField(await r.json());
+    } catch {
+      /* offline - keep what we have */
+    }
+  }, [domain]);
+
+  // Create: pin the current edits as a named branch and keep editing.
+  const forkBranch = useCallback(
+    async (label) => {
+      const cur = branchVarsRef.current;
+      if (!cur || Object.keys(cur).length === 0) return { ok: false, error: "nothing_to_fork" };
+      try {
+        const res = await fetch(`/api/future-field/branch?action=peel&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ overrides: cur, label: String(label || "").slice(0, 60) || "Branch" }),
+        });
+        if (!res.ok) return { ok: false, error: "peel_failed" };
+        const d = await res.json();
+        if (d?.branch) setServerBranch(d.branch);
+        await refetchField();
+        invalidateLifeThread();
+        return { ok: true, branch: d?.branch ?? null };
+      } catch {
+        return { ok: false, error: "network" };
+      }
+    },
+    [domain, refetchField, invalidateLifeThread],
+  );
+
+  // Select: make a saved branch THE active moment (server-side), load its
+  // edits back in, and refresh - so it (and only it) drives the Life
+  // Thread. Every other open branch becomes an alternative (compare only).
+  const selectBranch = useCallback(
+    async (id) => {
+      const b = (field?.possiblePaths ?? []).find((x) => x.id === id);
+      if (!b) return;
+      setServerBranch(b);
+      const after = b.delta?.after && typeof b.delta.after === "object" ? b.delta.after : null;
+      if (after) {
+        setBranchVars({ ...after });
+        persistDraft(domain, { branchVars: after });
+      }
+      try {
+        await fetch(`/api/future-field/branch?action=activate&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ branchId: id }),
+        });
+      } catch {
+        /* offline - local selection still stands */
+      }
+      await refetchField();
+      invalidateLifeThread();
+    },
+    [domain, field, refetchField, invalidateLifeThread],
+  );
+
+  // Undo: discard a possible future (kept in history, never hard-deleted).
+  const discardBranch = useCallback(
+    async (id) => {
+      try {
+        await fetch(`/api/future-field/branch?action=discard&domain=${encodeURIComponent(domain)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ branchId: id }),
+        });
+      } catch {
+        /* ignore - refetch will reconcile */
+      }
+      if (serverBranch?.id === id) resetBranch();
+      await refetchField();
+      invalidateLifeThread();
+    },
+    [domain, serverBranch, resetBranch, refetchField, invalidateLifeThread],
+  );
 
   // setAllocation(nextAllocation, targetGoalId|null). A "goal" leg with no
   // explicit target is rejected - it must not silently route anywhere.
@@ -407,6 +492,10 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       branchDirty,
       setVar,
       resetBranch,
+      savedBranches: (field?.possiblePaths ?? []).filter((b) => b.status !== "sealed" && b.status !== "discarded" && b.status !== "merged"),
+      forkBranch,
+      selectBranch,
+      discardBranch,
       projection,
       serverProjection: serverBranch?.projectedImpacts ?? null,
       serverBranch,
@@ -431,14 +520,41 @@ export function LivingSceneProvider({ domain, projectFn, turningPointFor = null,
       stressTest,
       shadowPreview,
       pins: field?.pins ?? [],
+      entryRequirements: field?.entryRequirements ?? null,
+      seededDraft: field?.seededDraft ?? null,
+      reloadField,
     }),
     [
       domain, loadState, field, reality, realityData, sceneContext, crossGoalNodes, branchVars, branchDirty, setVar, resetBranch,
+      forkBranch, selectBranch, discardBranch,
       projection, serverBranch, freedCashflow, addedPressure, allocation, allocationTouched, allocationOverspent, allocationTarget,
       needsTarget, setAllocation, turningPoint, turningPointAck, acknowledgeTurningPoint, phase, canReviewCommitment, seal, confirmSeal,
-      sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview,
+      sealState, standDownGuardian, guardianStandDown, stressTest, shadowPreview, reloadField,
     ],
   );
 
   return <LivingSceneContext.Provider value={value}>{children}</LivingSceneContext.Provider>;
+}
+
+// The shared first-use gate. A Studio scene renders <StudioSceneGate> and
+// only shows its native content once loadState === "ready". Loading /
+// error / no-reality are handled here, once, for all nine domains - no
+// more per-Studio "noPlan" dead ends.
+export function StudioSceneGate({ t, onOpenRealityEntry, onBack, children }) {
+  const s = useLivingScene();
+  if (s.loadState === "loading") return <LoadingState label="Loading this Studio…" />;
+  if (s.loadState === "error") return <ErrorState onRetry={s.reloadField} onBack={onBack} message="This Studio could not load." />;
+  if (s.loadState === "no-reality") {
+    return (
+      <StudioEntryBridge
+        domain={s.domain}
+        requirements={s.entryRequirements}
+        onSeeded={() => s.reloadField()}
+        onOpenRealityEntry={onOpenRealityEntry}
+        onBack={onBack}
+        t={t}
+      />
+    );
+  }
+  return children;
 }
