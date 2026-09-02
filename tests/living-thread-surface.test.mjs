@@ -139,13 +139,12 @@ test("DecisionRipple animation duration is set from the real speedMs, not a lite
   assert.doesNotMatch(src, /animationDuration: ["'`]\d/, "no hardcoded duration");
 });
 
-test("Part D2: Explore / Guardian render the ONE surface as a lens; Today = BankHome, Life = LifeView", () => {
+test("Part D2: Guardian renders the ONE surface as a lens; Today / Life / Explore are the Future Bank tabs", () => {
   const page = read("app/page.jsx");
-  for (const lens of ["explore", "guardian"]) {
-    assert.match(page, new RegExp(`livingThreadEntrance\\("${lens}"\\)`), `${lens} entrance renders the shared surface`);
-  }
+  assert.match(page, /livingThreadEntrance\("guardian"\)/, "the Guardian tab still renders the shared surface");
   assert.match(page, /\[screens\.HOME\]:[\s\S]{0,200}<BankHome/, "the Today tab renders BankHome");
   assert.match(page, /\[screens\.LIFE_GRAPH\]:[\s\S]{0,120}<LifeView/, "the Life tab renders LifeView (the visible spine)");
+  assert.match(page, /\[screens\.MIRROR\]:[\s\S]{0,120}<ExploreView/, "the Explore tab renders ExploreView (7 capability zones + 9 studios)");
   // the lens tabs navigate between the four entrances
   assert.match(page, /onNavigateLens=\{\(next\) => setActiveScreen\(SCREEN_FOR_LENS\[next\]/);
   // studio nodes deep-link into the matching Studio scene

@@ -114,7 +114,7 @@ test("Today - full hierarchy with the three Bank Now actions + a detected issue"
   // 3 Money Current
   await expect(page.getByLabel(/money current/i)).toBeVisible();
   // 4 One thing that needs you - the detected unusual spend
-  await expect(page.getByText(/payment to Big Electronics is well above your usual spend/i)).toBeVisible();
+  await expect(page.getByRole("article").getByText(/payment to Big Electronics is well above your usual spend/i)).toBeVisible();
   // 6 Plans in motion / 7 Recent activity
   await expect(page.getByText(/Recent activity/i)).toBeVisible();
 
@@ -255,11 +255,11 @@ test("detector lifecycle: acknowledge persists across reload", async ({ page }) 
   await seedPicture(page, { unusual: true });
   await gotoToday(page);
 
-  await expect(page.getByText(/above your usual spend/i)).toBeVisible();
+  await expect(page.getByRole("article").getByText(/above your usual spend/i)).toBeVisible();
   await page.getByRole("button", { name: /i recognise this/i }).click();
-  await expect(page.getByText(/above your usual spend/i)).toHaveCount(0, { timeout: 15000 });
+  await expect(page.getByRole("article").getByText(/above your usual spend/i)).toHaveCount(0, { timeout: 15000 });
 
   await page.reload();
   await expect(page.getByText("Available now", { exact: true })).toBeVisible({ timeout: 20000 });
-  await expect(page.getByText(/above your usual spend/i)).toHaveCount(0);
+  await expect(page.getByRole("article").getByText(/above your usual spend/i)).toHaveCount(0);
 });

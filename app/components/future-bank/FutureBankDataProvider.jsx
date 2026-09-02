@@ -36,6 +36,14 @@ async function getJson(url) {
 }
 
 export function FutureBankDataProvider({ children, enabled = true }) {
+  // Nesting-safe: if a provider already exists above (e.g. one wrapping the
+  // whole shell), reuse it instead of firing a second set of fetches.
+  const existing = useContext(Ctx);
+  if (existing) return <>{children}</>;
+  return <ProviderImpl enabled={enabled}>{children}</ProviderImpl>;
+}
+
+function ProviderImpl({ children, enabled = true }) {
   const [state, setState] = useState({
     twin: null,
     moments: null,

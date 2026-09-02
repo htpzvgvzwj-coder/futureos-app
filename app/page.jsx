@@ -13,12 +13,13 @@ import { BankHome } from "./components/future-bank/BankHome.jsx";
 import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
 import { LifeView } from "./components/future-bank/LifeView.jsx";
 import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
+import { ExploreView } from "./components/future-bank/ExploreView.jsx";
+import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
 import {
   GuardianConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
   MoneyRescueConnected,
 } from "./components/bank/connected.jsx";
-import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
@@ -17754,10 +17755,24 @@ export default function App() {
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: (
-      <>
-        {livingThreadEntrance("explore")}
-        <ExploreScreen setActiveScreen={setActiveScreen} t={t} />
-      </>
+      <ExploreView
+        onStudio={(d) => {
+          if (d === "family") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.HOME);
+        }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "today") return setActiveScreen(screens.HOME);
+          if (s === "rescue") return setActiveScreen(screens.MONEY_RESCUE);
+          if (s === "spending") return setActiveScreen(screens.SPENDING_RISK);
+          if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
+          if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s.startsWith("studio:")) { const t2 = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t2 ?? screens.HOME); }
+          setActiveScreen(screens.HOME);
+        }}
+      />
     ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
@@ -17872,7 +17887,9 @@ export default function App() {
         hideNav={onboardingActive}
         t={t}
       >
-        <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        <FutureBankDataProvider enabled>
+          <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        </FutureBankDataProvider>
       </PhoneShell>
      </BankDataProvider>
     </LifeThreadProvider>
