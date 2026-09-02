@@ -70,7 +70,10 @@ test("the four bank flows are wired into app/page.jsx as real screens with an on
   assert.match(page, /<RealityEntryConnected/);
   assert.match(page, /<CsvImportConnected/);
   assert.match(page, /<AccountControlConnected/);
-  assert.match(page, /<RealityDriftConnected/);
+  // Reality Drift now reaches the user as a Money Moment (lib/money-moments
+  // driftToMoment), surfaced on the Today and Life tabs.
+  assert.match(read("lib/money-moments/build.js"), /driftToMoment|reality_drift/);
+  assert.match(page, /<LifeView/);
 });
 
 test("Explore catalog renders capability status pills and explains non-actionable rows (no dead buttons)", () => {

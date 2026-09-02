@@ -11,10 +11,11 @@ import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEnt
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
 import { BankHome } from "./components/future-bank/BankHome.jsx";
 import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
+import { LifeView } from "./components/future-bank/LifeView.jsx";
 import {
-  GuardianConnected, RippleStripConnected, OnboardingGate,
+  GuardianConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
-  MoneyRescueConnected, RealityDriftConnected,
+  MoneyRescueConnected,
 } from "./components/bank/connected.jsx";
 import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
@@ -4745,6 +4746,9 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
   );
 }
 
+// Legacy Life Graph screen. The Life tab now renders <LifeView/>; kept for
+// reference / any deep link that still points here.
+// eslint-disable-next-line no-unused-vars
 function LifeGraph({ setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
@@ -17680,12 +17684,22 @@ export default function App() {
     [screens.MONEY_RESCUE]: <MoneyRescueConnected onOpen={openFromBank} />,
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: (
-      <>
-        <RippleStripConnected onAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
-        {livingThreadEntrance("life")}
-        <RealityDriftConnected onOpen={openFromBank} />
-        <LifeGraph {...shared} />
-      </>
+      <LifeView
+        onBack={() => setActiveScreen(screens.HOME)}
+        onHistory={() => setActiveScreen(screens.CHANGE_LEDGER)}
+        onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+        onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; setActiveScreen(target ?? screens.REALITY_ENTRY); }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s.startsWith("studio:")) { const t = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t ?? screens.MIRROR); }
+          if (s === "home") return setActiveScreen(screens.HOME_HORIZON);
+          if (s.startsWith("explore")) return setActiveScreen(screens.MIRROR);
+          if (s.startsWith("today")) return setActiveScreen(screens.HOME);
+          setActiveScreen(screens.GUARDIAN);
+        }}
+      />
     ),
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.DECISION_VERDICT]: (
