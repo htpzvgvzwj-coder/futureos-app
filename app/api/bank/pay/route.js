@@ -1,8 +1,36 @@
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { recordInternalTransfer, recordCardRepayment } from "../../../../lib/transaction-ledger/store.js";
 import { guard } from "../../../../lib/http-guards.js";
+import { query } from "../../../../lib/db.js";
+import { getAuthPolicy, evaluateAuthorization, findRequestByIdempotency, createAuthRequest } from "../../../../lib/authorization/store.js";
 
 export const runtime = "nodejs";
+
+// If this account's rules require a guardian's approval for `kind`, park the
+// move as a pending authorization request instead of executing it. Returns a
+// response body to send back, or null to proceed with the move.
+async function approvalGate(userId, { kind, amount, currency, payload, summary }) {
+  const existing = await findRequestByIdempotency(userId, payload.idempotencyKey);
+  if (existing) {
+    if (existing.status === "executed") return null; // already approved + done - let idempotency handle it
+    if (existing.status === "pending")
+      return { status: "pending_approval", requestId: existing.id, reason: existing.reason, canMoveMoney: false };
+    if (existing.status === "declined" || existing.status === "cancelled")
+      return { status: existing.status, requestId: existing.id, reason: existing.reason, canMoveMoney: false };
+  }
+  let accountType = "individual";
+  try {
+    const r = await query(`select account_type from user_onboarding where profile_key = $1`, [userId]);
+    accountType = r.rows[0]?.account_type ?? "individual";
+  } catch {
+    /* default */
+  }
+  const policy = await getAuthPolicy(userId);
+  const verdict = evaluateAuthorization({ accountType, policy, kind, amount });
+  if (!verdict.required) return null;
+  const req = await createAuthRequest(userId, { kind, summary, amount, currency, payload, reason: verdict.reason });
+  return { status: "pending_approval", requestId: req.id, reason: verdict.reason, canMoveMoney: false };
+}
 
 // POST /api/bank/pay
 //   { type: "internal_transfer", fromAccountId, toAccountId, amount, idempotencyKey }
@@ -23,6 +51,14 @@ export async function POST(request) {
 
   try {
     if (body.type === "internal_transfer") {
+      const gate = await approvalGate(userId, {
+        kind: "internal_transfer",
+        amount: body.amount,
+        currency: body.currency ?? "SGD",
+        summary: `Move ${body.currency ?? "SGD"} ${Math.round(Number(body.amount) || 0).toLocaleString("en-SG")} between your own accounts`,
+        payload: { fromAccountId: body.fromAccountId, toAccountId: body.toAccountId, amount: body.amount, currency: body.currency ?? "SGD", idempotencyKey: idem },
+      });
+      if (gate) return Response.json(gate, { status: 202 });
       const result = await recordInternalTransfer(userId, {
         fromAccountId: body.fromAccountId,
         toAccountId: body.toAccountId,
@@ -33,6 +69,14 @@ export async function POST(request) {
       return Response.json({ status: result.idempotent ? "already_done" : "posted", ...result });
     }
     if (body.type === "card_repayment") {
+      const gate = await approvalGate(userId, {
+        kind: "card_repayment",
+        amount: body.amount,
+        currency: body.currency ?? "SGD",
+        summary: `Repay ${body.currency ?? "SGD"} ${Math.round(Number(body.amount) || 0).toLocaleString("en-SG")} to a card`,
+        payload: { fromAccountId: body.fromAccountId, cardAccountId: body.cardAccountId, amount: body.amount, currency: body.currency ?? "SGD", idempotencyKey: idem },
+      });
+      if (gate) return Response.json(gate, { status: 202 });
       const result = await recordCardRepayment(userId, {
         fromAccountId: body.fromAccountId,
         cardAccountId: body.cardAccountId,

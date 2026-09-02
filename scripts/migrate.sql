@@ -1421,3 +1421,162 @@ create table if not exists password_reset_tokens (
   created_at   timestamptz not null default now()
 );
 create index if not exists password_reset_tokens_user_idx on password_reset_tokens (user_id);
+
+-- Money Moments (Explore = the visible output surface). The MoneyMoment
+-- objects themselves are DERIVED each request by lib/money-moments/build.js
+-- from the Financial Twin, Life Thread, Ripple and Change Ledger - this
+-- table holds only their LIFECYCLE, keyed by a stable moment_key. A
+-- resolved/snoozed moment is re-opened automatically when its evidence
+-- hash changes (the underlying signal became true again).
+create table if not exists money_moment_state (
+  profile_key    text not null,
+  moment_key     text not null,          -- stable key from the aggregator (e.g. "rescue:payment_failed:<txnId>")
+  state          text not null default 'new',  -- new|reviewed|snoozed|resolved
+  evidence_hash  text,                   -- sha1 of the moment's evidence at the time of the last user action
+  snoozed_until  timestamptz,
+  last_action    text,                   -- reviewed|snoozed|resolved|reopened|acknowledged
+  note           text,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
+  primary key (profile_key, moment_key)
+);
+create index if not exists money_moment_state_profile_idx on money_moment_state (profile_key, updated_at desc);
+
+-- ============================================================
+-- Phase 6 - lifecycle / Care Circle & Handoff.
+-- The Care Circle rows carry who the person is and which parts of your
+-- money they are noted for. The handoff plan is a WRITTEN plan only -
+-- status is always 'described'; Future Bank never executes it.
+-- ============================================================
+alter table lifecycle_roles add column if not exists relation_label text;
+alter table lifecycle_roles add column if not exists note text;
+alter table lifecycle_roles add column if not exists covers jsonb not null default '[]';
+
+create table if not exists care_handoff_plans (
+  profile_key       text primary key,
+  kind              text not null default 'general',    -- general|retirement|incapacity
+  successor_role_id uuid references lifecycle_roles(id) on delete set null,
+  successor_label   text,
+  trigger_note      text,
+  instructions      text,
+  status            text not null default 'described',  -- always 'described' - never executed by the app
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+-- ============================================================
+-- Phase 6 Round 2 - authorization / approval queue.
+-- On a youth/child account (or when the owner sets an amount rule) a real
+-- money move creates a PENDING request instead of executing. A holder of
+-- an approve-scoped role decides it; on approve the move executes from the
+-- stored payload. Every step is audited + in the Change Ledger.
+-- ============================================================
+create table if not exists authorization_policies (
+  profile_key              text primary key,
+  restricted_need_approval boolean not null default true,  -- youth/child restricted actions need approval
+  approval_over_amount     numeric,                        -- any money move over this needs approval (null = off)
+  updated_at               timestamptz not null default now()
+);
+
+create table if not exists authorization_requests (
+  id                 uuid primary key default gen_random_uuid(),
+  profile_key        text not null,
+  kind               text not null,          -- internal_transfer | card_repayment
+  summary            text not null,
+  amount             numeric,
+  currency           text not null default 'SGD',
+  payload            jsonb not null default '{}',   -- enough to execute the move on approve
+  reason             text,                   -- why approval was needed
+  status             text not null default 'pending', -- pending|approved|declined|cancelled|executed|expired
+  decided_by_role_id uuid references lifecycle_roles(id) on delete set null,
+  decided_by         text,                   -- 'guardian' | 'owner'
+  decision_note      text,
+  created_at         timestamptz not null default now(),
+  decided_at         timestamptz,
+  executed_at        timestamptz,
+  expires_at         timestamptz not null default (now() + interval '14 days')
+);
+create index if not exists authorization_requests_profile_idx on authorization_requests (profile_key, status, created_at desc);
+
+-- ============================================================
+-- Phase 6 Round 3 - real cross-user linking for Care.
+-- A one-time invite code links a placeholder lifecycle_roles row to a real
+-- second person (their users.id lands in subject_key, status -> active).
+-- Only the sha256 of the code is stored; either party can revoke; every
+-- cross-account action is audited with actor_key = the guardian.
+-- ============================================================
+create table if not exists care_invites (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,                       -- the account owner who created the invite
+  role_id      uuid references lifecycle_roles(id) on delete cascade,
+  role         text not null,
+  scope        text not null default 'view',
+  code_hash    text not null unique,                -- sha256(code) - the code itself is never stored
+  status       text not null default 'open',        -- open | accepted | revoked | expired
+  accepted_by  text,                                -- users.id who accepted
+  created_at   timestamptz not null default now(),
+  accepted_at  timestamptz,
+  expires_at   timestamptz not null default (now() + interval '14 days')
+);
+create index if not exists care_invites_profile_idx on care_invites (profile_key, status);
+create index if not exists care_invites_code_idx on care_invites (code_hash) where status = 'open';
+
+-- ============================================================
+-- Phase 6 Round 5 - Guardian mechanics (allowance, cooling-off, two-person,
+-- decline reasons, per-guardian covers routing, nudges, age transitions).
+-- ============================================================
+-- per-link auto-approve ceiling the owner delegates to one guardian
+alter table lifecycle_roles add column if not exists auto_approve_weekly numeric;  -- null = off
+-- how the account handles a move that needs approval, + a two-person rule
+alter table authorization_policies add column if not exists mode text not null default 'approval'; -- approval | cooling_off
+alter table authorization_policies add column if not exists cooling_off_hours integer not null default 48;
+alter table authorization_policies add column if not exists require_both boolean not null default false;
+-- state for the new request flows
+alter table authorization_requests add column if not exists auto_execute_at timestamptz;    -- cooling_off deadline
+alter table authorization_requests add column if not exists owner_confirmed_at timestamptz; -- two-person: owner's half
+alter table authorization_requests add column if not exists auto_reason text;               -- within_allowance | cooling_off_elapsed
+alter table authorization_requests add column if not exists covers text;                    -- money area, for guardian routing
+
+-- an owner pushes one specific thing to a linked person to look at; auto-expires
+create table if not exists care_nudges (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,            -- the owner
+  role_id      uuid references lifecycle_roles(id) on delete cascade,  -- who it is for
+  subject_key  text not null,            -- that person's users.id (denormalised for the reader)
+  title        text not null,
+  detail       text,
+  ref          jsonb not null default '{}',   -- { kind, id } - a moment / plan / request
+  status       text not null default 'open', -- open | seen | done | expired
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null default (now() + interval '30 days')
+);
+create index if not exists care_nudges_subject_idx on care_nudges (subject_key, status);
+
+-- owner-defined ranges shared with household members (never exact amounts)
+create table if not exists care_shared_ranges (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,
+  category     text not null,        -- rent | groceries | transport | savings | ...
+  low          numeric not null,
+  high         numeric not null,
+  note         text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  unique (profile_key, category)
+);
+create index if not exists care_shared_ranges_profile_idx on care_shared_ranges (profile_key);
+
+-- youth account age-transition proposals: rule-triggered, owner-confirmed
+create table if not exists care_transitions (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,
+  milestone    text not null,            -- turns_16 | turns_18 | custom
+  proposes     jsonb not null default '{}',   -- { restrictedNeedApproval?, approvalOverAmount?, accountType? }
+  rationale    text not null,
+  status       text not null default 'proposed', -- proposed | applied | dismissed
+  created_at   timestamptz not null default now(),
+  decided_at   timestamptz
+);
+create index if not exists care_transitions_profile_idx on care_transitions (profile_key, status);
+-- an optional birth year to drive the milestone proposals (year only - not a full DOB)
+alter table user_onboarding add column if not exists birth_year integer;

@@ -58,7 +58,7 @@ test("the onboarding wizard is a real multi-step UI, not just an API", () => {
   assert.match(src, /Available cash|Total cash/i);
   assert.match(src, /Safe-to-Spend/);
   // account-type-specific permission copy + revoke note
-  assert.match(src, /revoke this later/i);
+  assert.match(src, /revoke.*this later/i);
 });
 
 test("the four bank flows are wired into app/page.jsx as real screens with an onboarding gate", () => {
@@ -66,11 +66,14 @@ test("the four bank flows are wired into app/page.jsx as real screens with an on
   for (const s of ["ONBOARDING", "REALITY_ENTRY", "CSV_IMPORT", "ACCOUNT_CONTROL", "MONEY_RESCUE"]) {
     assert.match(page, new RegExp(`${s}:`), `screens.${s} declared`);
   }
-  assert.match(page, /<OnboardingGate onOpen=\{openFromBank\}>/, "Today is behind the onboarding gate");
+  assert.match(page, /<OnboardingGate onOpen=\{openFromBank\}[^>]*>/, "Today is behind the onboarding gate");
   assert.match(page, /<RealityEntryConnected/);
   assert.match(page, /<CsvImportConnected/);
   assert.match(page, /<AccountControlConnected/);
-  assert.match(page, /<RealityDriftConnected/);
+  // Reality Drift now reaches the user as a Money Moment (lib/money-moments
+  // driftToMoment), surfaced on the Today and Life tabs.
+  assert.match(read("lib/money-moments/build.js"), /driftToMoment|reality_drift/);
+  assert.match(page, /<LifeView/);
 });
 
 test("Explore catalog renders capability status pills and explains non-actionable rows (no dead buttons)", () => {

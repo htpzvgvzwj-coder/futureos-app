@@ -11,7 +11,10 @@ import styles from "./living-thread.module.css";
 export function ThreadMemoryScrubber({ events = [], lastChange = null }) {
   const frames = events.length ? events : lastChange ? [lastChange] : [];
   const [i, setI] = useState(Math.max(0, frames.length - 1));
-  if (!frames.length) return null;
+  // A scrubber is only useful when there are at least two real states to
+  // compare. One event rendered as a disabled-looking slider confused
+  // customers and created a large empty block on the Life screen.
+  if (frames.length < 2) return null;
   const f = frames[Math.min(i, frames.length - 1)];
   return (
     <div className={styles.rail} data-testid="lt-memory-scrubber">

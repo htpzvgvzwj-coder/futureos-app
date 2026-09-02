@@ -1,0 +1,404 @@
+/* Future Bank shared surfaces. Colour tokens (--ink, --sea, --amber,
+   --ground, --surface, --line, --sea-soft, --amber-soft, --radius) are
+   inherited from the .app ancestor in app/showcase/fb.module.css - these
+   components are always rendered inside that shell. */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sectionKicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+.sectionCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sea);
+}
+
+/* ---- bank-now conventional actions -------------------------- */
+.bankActions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.bankAction {
+  background: var(--surface);
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-align: center;
+}
+.bankAction:disabled {
+  cursor: default;
+}
+.bankGlyph {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--sea-soft);
+  color: var(--sea);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 800;
+}
+.bankAction:disabled .bankGlyph {
+  background: #efece5;
+  color: var(--ink-faint);
+}
+.bankLabel {
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.bankState {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* ---- money-changed receipt -------------------------------- */
+.changed {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.changedHeadline {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.changedLine {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.changedLine b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.changedArrow {
+  color: var(--sea);
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+.calm {
+  background: var(--sea-soft);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.calmTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sea);
+}
+
+/* ---- detected moments ------------------------------------ */
+.moment {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 3px solid var(--line);
+}
+.moment.action_required {
+  border-left-color: var(--amber);
+}
+.moment.watch {
+  border-left-color: var(--sea);
+}
+.momentTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sev {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.sev.action_required {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+.sev.watch {
+  background: var(--sea-soft);
+  color: var(--sea);
+}
+.sev.information,
+.sev.calm {
+  background: #efece5;
+  color: var(--ink-soft);
+}
+.momentTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.momentSummary {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  background: var(--ground);
+  border-radius: 10px;
+}
+.evRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+}
+.evRow span:first-child {
+  color: var(--ink-faint);
+}
+.evRow span:last-child {
+  font-weight: 650;
+  text-align: right;
+}
+.evMeta {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+}
+.momentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.act {
+  font-size: 12.5px;
+  font-weight: 650;
+  border-radius: 999px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.act.primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.act:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+.reopened {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+/* ---- plan movement / active-plan rail ------------------- */
+.planCard {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.planTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.planName {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.stateTag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.stateTag.committed {
+  background: var(--sea-soft);
+  color: var(--sea);
+}
+.stateTag.preview {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+.stateTag.draft {
+  background: #efece5;
+  color: var(--ink-soft);
+}
+.planMonthly {
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.movement {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--ground);
+  border-radius: 10px;
+}
+.moveRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+.moveRow .k {
+  color: var(--ink-faint);
+  text-transform: capitalize;
+}
+.moveRow .v {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.moveRow .v.up {
+  color: var(--sea);
+}
+.moveRow .v.down {
+  color: var(--amber);
+}
+.moveRow .v.unknown {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+.previewNote {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--amber);
+}
+.committedNote {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--sea);
+}
+.planActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- resource totals ---------------------------------- */
+.totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.totalCell {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.totalCell small {
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.totalCell b {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- change receipt ---------------------------------- */
+.receipt {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.receiptRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.receiptRow .rk {
+  flex: 0 0 74px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-top: 2px;
+}
+.receiptRow.moved .rk {
+  color: var(--sea);
+}
+.watchList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.watchItem {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  align-items: baseline;
+}
+.watchDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--sea);
+}
+.watchItem.off .watchDot {
+  background: var(--line);
+}
+.watchItem.off {
+  color: var(--ink-faint);
+}
+.empty {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}

@@ -69,8 +69,8 @@ export function LivingThreadSurface({
   onStandDown,
   memoryEvents = [],
   reducedMotion: reducedMotionProp = null,
-  width = 960,
-  height = 320,
+  width = 760,
+  height = 360,
 }) {
   const [lensState, setLensState] = useState(defaultLens);
   const lens = lensProp ?? lensState;
@@ -116,20 +116,22 @@ export function LivingThreadSurface({
       data-lens={lens}
       data-snapshot={geometry.snapshotId ?? ""}
     >
-      <div className={styles.lensBar} role="tablist" aria-label="Living Thread lens">
-        {LENSES.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            role="tab"
-            aria-selected={l.id === lens}
-            className={`${styles.lensBtn} ${l.id === lens ? styles.lensBtnActive : ""}`}
-            onClick={() => setLens(l.id)}
-          >
-            {l.label}
-          </button>
-        ))}
-      </div>
+      {lensProp == null ? (
+        <div className={styles.lensBar} role="tablist" aria-label="Living Thread lens">
+          {LENSES.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              role="tab"
+              aria-selected={l.id === lens}
+              className={`${styles.lensBtn} ${l.id === lens ? styles.lensBtnActive : ""}`}
+              onClick={() => setLens(l.id)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {geometry.hasBaselineConflict ? (
         <p className={styles.conflictBanner} role="status">
@@ -137,6 +139,7 @@ export function LivingThreadSurface({
         </p>
       ) : null}
 
+      {lens === "life" ? <p className={styles.sectionKicker}>Life position</p> : null}
       <div className={styles.canvasWrap}>
         <svg className={styles.canvas} viewBox={geometry.viewBox} role="img" aria-label={`Living Thread, ${lens} lens`}>
           {/* the one continuous spine, always */}
@@ -194,6 +197,8 @@ export function LivingThreadSurface({
         </svg>
       </div>
 
+      {lens === "life" ? <LifeOverview geometry={geometry} onEnterStudio={onEnterStudio} /> : null}
+
       {/* --- lens-specific rails (presentation only) -------------------- */}
       {has("bankNow") && bankNow ? (
         <div className={styles.rail}>
@@ -235,4 +240,79 @@ export function LivingThreadSurface({
       <ThreadAccessibleView geometry={geometry} lens={lens} />
     </section>
   );
+}
+
+const NODE_NEXT_COPY = {
+  income: "Add income details",
+  safety: "Set your safety target",
+  home: "Complete your home details",
+  relationships: "Shape a shared-life plan",
+  freedom: "Choose a flexible-life goal",
+  future: "Set a long-term target",
+};
+
+function LifeOverview({ geometry, onEnterStudio }) {
+  const moving = [...(geometry.ripples ?? [])]
+    .filter((r) => r.direction && r.direction !== "flat")
+    .sort((a, b) => Number(b.magnitude ?? 0) - Number(a.magnitude ?? 0))[0] ?? null;
+  const nodes = geometry.nodes ?? [];
+  const nextNode = nodes.find((n) => n.enterable && n.state === "waiting")
+    ?? nodes.find((n) => n.enterable && n.state === "ghost")
+    ?? nodes.find((n) => n.enterable && n.state === "unknown")
+    ?? null;
+
+  return (
+    <div className={styles.lifeOverview}>
+      <section className={styles.lifeSignal} aria-labelledby="lt-moving-title">
+        <p className={styles.sectionKicker}>What is moving</p>
+        <h2 id="lt-moving-title" className={styles.lifeSignalTitle}>
+          {moving ? `${humanDomain(moving.fromDomain)} is changing ${humanNode(moving.to)}` : "Your plans are steady right now"}
+        </h2>
+        <p className={styles.lifeSignalBody}>
+          {moving
+            ? `${moving.state === "confirmed" ? "Committed" : "Preview"}: ${humanDirection(moving.direction)}${formatMagnitude(moving.magnitude, moving.unit)}. This comes from the same plan impact shown in Explore.`
+            : "When a transaction or plan changes your direction, the reason and affected goal will appear here."}
+        </p>
+      </section>
+
+      {nextNode ? (
+        <section className={styles.lifeNext} aria-labelledby="lt-next-title">
+          <div>
+            <p className={styles.sectionKicker}>What you can do next</p>
+            <h2 id="lt-next-title" className={styles.lifeSignalTitle}>{NODE_NEXT_COPY[nextNode.id] ?? `Review ${nextNode.label}`}</h2>
+            <p className={styles.lifeSignalBody}>{nextNode.label} needs one real detail before Future Bank can show its movement.</p>
+          </div>
+          <button type="button" className={styles.lifeNextButton} onClick={() => onEnterStudio?.(nextNode.domain)}>
+            Open {humanDomain(nextNode.domain)}
+          </button>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function humanDomain(value) {
+  const s = String(value ?? "plan").replace(/_/g, " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function humanNode(value) {
+  const node = String(value ?? "your future").replace(/_/g, " ");
+  return node === "safety" ? "your safety buffer" : node === "relationships" ? "your shared-life plans" : node === "freedom" ? "your flexible money" : `your ${node}`;
+}
+
+function humanDirection(direction) {
+  if (direction === "up") return "moving up";
+  if (direction === "down") return "moving down";
+  return "changing";
+}
+
+function formatMagnitude(value, unit) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n === 0) return "";
+  if (unit === "sgd_per_month") return ` by SGD ${Math.round(n).toLocaleString("en-SG")}/month`;
+  if (unit === "sgd") return ` by SGD ${Math.round(n).toLocaleString("en-SG")}`;
+  if (unit === "months" || unit === "date_shift_months") return ` by ${Math.round(n)} month${Math.round(n) === 1 ? "" : "s"}`;
+  if (unit === "percentage") return ` by ${Math.round(n * 10) / 10}%`;
+  return ` by ${Math.round(n * 10) / 10}`;
 }

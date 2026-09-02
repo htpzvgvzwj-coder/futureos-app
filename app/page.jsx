@@ -9,12 +9,21 @@ import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
+import { BankHome } from "./components/future-bank/BankHome.jsx";
+import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.jsx";
+import { LifeView } from "./components/future-bank/LifeView.jsx";
+import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
+import { ExploreView } from "./components/future-bank/ExploreView.jsx";
+import { SpendingView } from "./components/future-bank/SpendingView.jsx";
+import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
+import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
+import { GuardianView } from "./components/future-bank/GuardianView.jsx";
+import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
 import {
-  BankTodayConnected, GuardianConnected, RippleStripConnected, OnboardingGate,
+  OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
-  MoneyRescueConnected, RealityDriftConnected,
+  MoneyRescueConnected,
 } from "./components/bank/connected.jsx";
-import { ExploreScreen } from "./features/explore/ExploreScreen.jsx";
 import { HomeHorizon } from "./features/home/HomeHorizon.jsx";
 import { EmergencyRunway } from "./features/emergency/EmergencyRunway.jsx";
 import { FutureFieldCanvas } from "./components/future-field-canvas.jsx";
@@ -202,6 +211,11 @@ const screens = {
   CSV_IMPORT: "csvImport",
   ACCOUNT_CONTROL: "accountControl",
   MONEY_RESCUE: "moneyRescue",
+  FINANCIAL_TWIN: "financialTwin",
+  FAMILY_CARE: "familyCare",
+  SPENDING_INTELLIGENCE: "spendingIntelligence",
+  CONNECTIONS: "connections",
+  SUPERVISED: "supervised",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3198,7 +3212,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 
   return (
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
-      <section className={`phone screen-${navScreen}`} aria-label={t("app.prototypeLabel")}>
+      <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="Future Bank">
         <div className="statusBar">
           <span>9:41</span>
           <div>
@@ -3259,7 +3273,11 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 }
 
 function getNavScreen(activeScreen) {
-  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL].includes(activeScreen)) return screens.HOME;
+  if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
+  if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
+  if (activeScreen === screens.SPENDING_INTELLIGENCE) return screens.MIRROR;
+  if (activeScreen === screens.CONNECTIONS) return screens.MIRROR;
+  if (activeScreen === screens.SUPERVISED) return screens.GUARDIAN;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -3730,6 +3748,9 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
 // Scan), the Active Living Plan (its current tension + next step, via
 // LivingPlanStatus), and Latest Change (one line -> Change Replay).
 // "Everything on your accounts" opens the full account view.
+// Retained for the HOME_FULL / legacy dashboard path; the primary Today
+// tab now renders <BankHome/>.
+// eslint-disable-next-line no-unused-vars
 function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
   // Part 7: Today's main state is the canonical Life Thread. The old
   // profile-derived values are only a fallback while the snapshot loads.
@@ -4739,6 +4760,9 @@ function LifeNodeEvidence({ node, profile, t, setActiveScreen }) {
   );
 }
 
+// Legacy Life Graph screen. The Life tab now renders <LifeView/>; kept for
+// reference / any deep link that still points here.
+// eslint-disable-next-line no-unused-vars
 function LifeGraph({ setActiveScreen, preferences, t }) {
   const [healthAnalysisOpen, setHealthAnalysisOpen] = useState(false);
   const [infoModal, setInfoModal] = useState(null);
@@ -6354,6 +6378,10 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
   );
 }
 
+// Legacy Guardian screen. The Guardian tab now renders <GuardianView/> (the
+// decision queue over the shared Money Moment stream); kept for reference and
+// still covered by tests/invisible-moment-surface.test.mjs.
+// eslint-disable-next-line no-unused-vars
 function FutureSelfGuardian({
   setActiveScreen,
   preferences,
@@ -17232,6 +17260,7 @@ function Screen({ children, className }) {
 export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
+  const [onboardingActive, setOnboardingActive] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   // True only once the real fetched profile/preferences have actually
   // landed in state (setPreferences below) - `authStatus` alone flips to
@@ -17269,6 +17298,7 @@ export default function App() {
   // and edit, never auto-submits on its own.
   const [otherGoalSeed, setOtherGoalSeed] = useState(null);
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
+  const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -17635,6 +17665,7 @@ export default function App() {
   // tabs navigate between the four entrances, and studio nodes deep-link
   // into the matching Studio. The legacy per-screen content stays below for
   // now (Part F trims the shell).
+  // eslint-disable-next-line no-unused-vars
   const livingThreadEntrance = (lens) => (
     <LivingThreadEntrance
       lens={lens}
@@ -17651,25 +17682,53 @@ export default function App() {
 
   const currentScreen = {
     [screens.HOME]: (
-      <OnboardingGate onOpen={openFromBank}>
-        <BankTodayConnected onOpen={openFromBank} onRippleAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
-        {livingThreadEntrance("today")}
-        <TodayScreen {...shared} />
+      <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive}>
+        <BankHome
+          onExplore={() => setActiveScreen(screens.MIRROR)}
+          onLife={() => setActiveScreen(screens.LIFE_GRAPH)}
+          onGuardian={() => setActiveScreen(screens.GUARDIAN)}
+          onActivity={() => setActiveScreen(screens.HOME_FULL)}
+          onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+          onTwin={() => setActiveScreen(screens.FINANCIAL_TWIN)}
+          onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; if (target) setActiveScreen(target); }}
+        />
       </OnboardingGate>
     ),
-    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} />,
+    [screens.FINANCIAL_TWIN]: (
+      <FinancialTwinView onBack={() => setActiveScreen(screens.HOME)} onAdd={() => setActiveScreen(screens.REALITY_ENTRY)} />
+    ),
+    [screens.FAMILY_CARE]: (
+      <FamilyCareView onBack={() => setActiveScreen(screens.LIFE_GRAPH)} onWedding={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)} />
+    ),
+    [screens.SPENDING_INTELLIGENCE]: <SpendingView onBack={() => setActiveScreen(screens.MIRROR)} />,
+    [screens.CONNECTIONS]: <ConnectionsView onBack={() => setActiveScreen(screens.MIRROR)} />,
+    [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
     [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
     [screens.ACCOUNT_CONTROL]: <AccountControlConnected onDone={() => setActiveScreen(screens.PROFILE)} />,
     [screens.MONEY_RESCUE]: <MoneyRescueConnected onOpen={openFromBank} />,
     [screens.HOME_FULL]: <HomeDashboard {...shared} />,
     [screens.LIFE_GRAPH]: (
-      <>
-        <RippleStripConnected onAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
-        {livingThreadEntrance("life")}
-        <RealityDriftConnected onOpen={openFromBank} />
-        <LifeGraph {...shared} />
-      </>
+      <LifeView
+        onBack={() => setActiveScreen(screens.HOME)}
+        onHistory={() => setActiveScreen(screens.CHANGE_LEDGER)}
+        onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+        onStudio={(d) => {
+          if (d === "relationships") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.REALITY_ENTRY);
+        }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s.startsWith("studio:")) { const t = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t ?? screens.MIRROR); }
+          if (s === "home") return setActiveScreen(screens.HOME_HORIZON);
+          if (s.startsWith("explore")) return setActiveScreen(screens.MIRROR);
+          if (s.startsWith("today")) return setActiveScreen(screens.HOME);
+          setActiveScreen(screens.GUARDIAN);
+        }}
+      />
     ),
     [screens.RELATIONSHIP_LEDGER]: <RelationshipLedgerScreen {...shared} simulatorActionStates={simulatorActionStates} />,
     [screens.DECISION_VERDICT]: (
@@ -17714,26 +17773,51 @@ export default function App() {
     [screens.PERSONAL_ECONOMY]: <PersonalEconomyScreen t={t} setActiveScreen={setActiveScreen} preferences={preferences} />,
     [screens.DEAL_FINDER]: <DealFinderScreen t={t} setActiveScreen={setActiveScreen} language={language} />,
     [screens.MIRROR]: (
-      <>
-        {livingThreadEntrance("explore")}
-        <ExploreScreen setActiveScreen={setActiveScreen} t={t} />
-      </>
+      <ExploreView
+        onStudio={(d) => {
+          if (d === "family") return setActiveScreen(screens.FAMILY_CARE);
+          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
+          setActiveScreen(target ?? screens.HOME);
+        }}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "today") return setActiveScreen(screens.HOME);
+          if (s === "rescue") return setActiveScreen(screens.MONEY_RESCUE);
+          if (s === "spending") return setActiveScreen(screens.SPENDING_INTELLIGENCE);
+          if (s === "connections") return setActiveScreen(screens.CONNECTIONS);
+          if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
+          if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          if (s.startsWith("studio:")) { const t2 = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t2 ?? screens.HOME); }
+          setActiveScreen(screens.HOME);
+        }}
+      />
     ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,
     [screens.JOINT_DEBATE_RESPONSE]: <JointDebateResponseScreen {...shared} debateId={jointDebateViewId} />,
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (
-      <>
-        <GuardianConnected onOpen={openFromBank} onControl={() => setActiveScreen(screens.RELATIONSHIP_LEDGER)} />
-        {livingThreadEntrance("guardian")}
-        <FutureSelfGuardian
-          {...shared}
-          preferences={preferences}
-          simulatorActionStates={simulatorActionStates}
-          setSimulatorActionStates={setSimulatorActionStates}
-        />
-      </>
+      <GuardianView
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s === "explore" || s === "explore:plans") return setActiveScreen(screens.MIRROR);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          setActiveScreen(screens.HOME);
+        }}
+        onOpenSupervised={(ownerKey, ownerLabel) => {
+          setSupervisedTarget({ ownerKey, ownerLabel });
+          setActiveScreen(screens.SUPERVISED);
+        }}
+      />
+    ),
+    [screens.SUPERVISED]: (
+      <SupervisedView
+        ownerKey={supervisedTarget?.ownerKey}
+        ownerLabel={supervisedTarget?.ownerLabel}
+        onBack={() => setActiveScreen(screens.GUARDIAN)}
+      />
     ),
     [screens.PROFILE]: (
       <ProfileScreen
@@ -17816,6 +17900,9 @@ export default function App() {
     );
   }
 
+  // The Future Bank app: one shell, one bottom navigation
+  // (Today / Life / Explore / Guardian). The /showcase route still renders
+  // the FutureBankSlice review slice; it is not the primary app.
   return (
     <LifeThreadProvider enabled={authStatus === "authenticated"}>
      <BankDataProvider enabled={authStatus === "authenticated"}>
@@ -17826,12 +17913,14 @@ export default function App() {
         setLanguage={setLanguage}
         theme={effectiveTheme}
         simpleMode={Boolean(preferences.accessibility?.simpleMode)}
+        hideNav={onboardingActive}
         t={t}
       >
-        <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        <FutureBankDataProvider enabled>
+          <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+        </FutureBankDataProvider>
       </PhoneShell>
      </BankDataProvider>
     </LifeThreadProvider>
   );
 }
-
