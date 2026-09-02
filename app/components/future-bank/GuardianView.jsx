@@ -28,23 +28,30 @@ export function GuardianView(props) {
   );
 }
 
-function Inner({ onRoute }) {
+function Inner({ onRoute, onOpenSupervised }) {
   const fb = useFutureBankData();
   const all = fb.momentsRaw?.allMoments ?? fb.moments ?? [];
   const decisions = all.filter((m) => m.state === "new" && (m.severity === "action_required" || m.sourceType === "turning_point"));
   const watching = all.filter((m) => m.state === "new" && m.severity === "watch" && m.sourceType !== "turning_point");
 
   const [auth, setAuth] = useState(null);
+  const [care, setCare] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const loadAuth = useCallback(() => {
     fetch("/api/authorizations", { headers: { "cache-control": "no-cache" } })
       .then((r) => (r.ok ? r.json() : null))
       .then(setAuth)
       .catch(() => setAuth(null));
+    fetch("/api/care", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setCare)
+      .catch(() => setCare(null));
   }, []);
   useEffect(() => {
     loadAuth();
   }, [loadAuth]);
+  const supervised = care?.supervised ?? [];
+  const supervisors = care?.supervisors ?? [];
   const pending = (auth?.requests ?? []).filter((r) => r.status === "pending");
   const decide = async (id, decision) => {
     setBusyId(id);
@@ -64,7 +71,29 @@ function Inner({ onRoute }) {
         <div>
           <h1 className={css.title}>Guardian</h1>
           <p className={css.micro}>The same signals as Today, Life and Explore — here they become decisions. Guardian asks; you decide.</p>
+          {supervisors.length > 0 ? (
+            <p className={css.micro}>
+              {supervisors.map((s) => `${s.personLabel} (${s.role})`).join(", ")} can see this account&apos;s money health. Manage this in Family &amp; Care.
+            </p>
+          ) : null}
         </div>
+
+        {supervised.length > 0 ? (
+          <section className={css.section}>
+            <p className={css.kicker}>People you look after</p>
+            <div className={css.activity}>
+              {supervised.map((p) => (
+                <div key={p.roleId} className={css.actItem}>
+                  <span className={css.actBody}>
+                    <span className={css.actName}>{p.ownerLabel}</span>
+                    <span className={css.actMeta}>{p.role} · you can {p.scope === "approve" ? "view health + approve" : "view health only"}</span>
+                  </span>
+                  <button type="button" className={css.link} onClick={() => onOpenSupervised?.(p.ownerKey, p.ownerLabel)}>Open</button>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {/* approval queue - real money moves parked by the account's rules */}
         {auth && (pending.length > 0 || auth.accountType === "youth" || auth.accountType === "guardian_managed_child") ? (

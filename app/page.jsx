@@ -16,6 +16,7 @@ import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import { ExploreView } from "./components/future-bank/ExploreView.jsx";
 import { SpendingView } from "./components/future-bank/SpendingView.jsx";
 import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
+import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
 import { GuardianView } from "./components/future-bank/GuardianView.jsx";
 import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
 import {
@@ -214,6 +215,7 @@ const screens = {
   FAMILY_CARE: "familyCare",
   SPENDING_INTELLIGENCE: "spendingIntelligence",
   CONNECTIONS: "connections",
+  SUPERVISED: "supervised",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3275,6 +3277,7 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
   if (activeScreen === screens.SPENDING_INTELLIGENCE) return screens.MIRROR;
   if (activeScreen === screens.CONNECTIONS) return screens.MIRROR;
+  if (activeScreen === screens.SUPERVISED) return screens.GUARDIAN;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -17295,6 +17298,7 @@ export default function App() {
   // and edit, never auto-submits on its own.
   const [otherGoalSeed, setOtherGoalSeed] = useState(null);
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
+  const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -17802,6 +17806,17 @@ export default function App() {
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
           setActiveScreen(screens.HOME);
         }}
+        onOpenSupervised={(ownerKey, ownerLabel) => {
+          setSupervisedTarget({ ownerKey, ownerLabel });
+          setActiveScreen(screens.SUPERVISED);
+        }}
+      />
+    ),
+    [screens.SUPERVISED]: (
+      <SupervisedView
+        ownerKey={supervisedTarget?.ownerKey}
+        ownerLabel={supervisedTarget?.ownerLabel}
+        onBack={() => setActiveScreen(screens.GUARDIAN)}
       />
     ),
     [screens.PROFILE]: (

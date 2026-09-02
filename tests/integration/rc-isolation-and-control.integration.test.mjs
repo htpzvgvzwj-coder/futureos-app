@@ -9,16 +9,18 @@ const HAS_DB = Boolean(process.env.DATABASE_URL || process.env.DATABASE_URL_UNPO
 const opts = HAS_DB ? {} : { skip: "no DATABASE_URL" };
 
 async function mods() {
-  const [accounts, ledger, rows, control, csvStore, authz, db] = await Promise.all([
+  const [accounts, ledger, rows, control, csvStore, authz, care, snap, db] = await Promise.all([
     import("../../lib/bank/accounts-store.js"),
     import("../../lib/transaction-ledger/store.js"),
     import("../../lib/financial-twin/rows-store.js"),
     import("../../lib/account-control/store.js"),
     import("../../lib/csv-import/store.js"),
     import("../../lib/authorization/store.js"),
+    import("../../lib/care/link-store.js"),
+    import("../../lib/care/guardian-snapshot.js"),
     import("../../lib/db.js"),
   ]);
-  return { accounts, ledger, rows, control, csvStore, authz, pool: db.pool };
+  return { accounts, ledger, rows, control, csvStore, authz, care, snap, pool: db.pool };
 }
 
 async function makeUser(pool, tag) {
@@ -29,6 +31,8 @@ async function makeUser(pool, tag) {
   return r.rows[0].id;
 }
 async function cleanupUser(pool, uid) {
+  await pool.query(`delete from care_invites where profile_key = $1 or accepted_by = $1`, [uid]).catch(() => {});
+  await pool.query(`delete from lifecycle_roles where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
   for (const t of ["authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
@@ -290,4 +294,82 @@ test("Phase 6 approval queue: an amount rule parks a transfer; approve executes 
 
   const exp = await control.exportUserData(u);
   assert.ok("authorization_requests" in exp.tables && "authorization_policies" in exp.tables, "both new tables are in the export");
+});
+
+test("Phase 6 Round 3 cross-user link: invite -> accept -> scoped view -> guardian approves -> revoke", opts, async (t) => {
+  const { accounts, ledger, authz, care, snap, control, pool } = await mods();
+  const owner = await makeUser(pool, "linkOwner");
+  const guardian = await makeUser(pool, "linkGuardian");
+  const stranger = await makeUser(pool, "linkStranger");
+  t.after(async () => { await cleanupUser(pool, owner); await cleanupUser(pool, guardian); await cleanupUser(pool, stranger); });
+
+  // owner adds a pending guardian placeholder with approve scope, then invites
+  const role = await control.grantRole(owner, { role: "guardian", scope: "approve" });
+  assert.equal(role.status, "pending");
+  const { code } = await care.createCareInvite(owner, { roleId: role.id });
+  assert.match(code, /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
+
+  // you cannot accept your own invite
+  await assert.rejects(() => care.acceptCareInvite(owner, code), /your own invite/i);
+
+  // the guardian accepts
+  const linked = await care.acceptCareInvite(guardian, code);
+  assert.equal(linked.ownerKey, owner);
+  assert.equal(linked.scope, "approve");
+
+  // the same code cannot be used again
+  await assert.rejects(() => care.acceptCareInvite(stranger, code), /accepted|not valid/i);
+
+  // the gate: guardian passes, a stranger does not
+  assert.ok(await care.assertActiveRole(guardian, owner, "view"));
+  assert.ok(await care.assertActiveRole(guardian, owner, "approve"));
+  assert.equal(await care.assertActiveRole(stranger, owner, "view"), null);
+  assert.equal(await care.assertActiveRole(guardian, stranger, "view"), null, "the link is directional and specific");
+
+  // listings
+  const sup = await care.listSupervisedByMe(guardian);
+  assert.equal(sup.length, 1);
+  assert.equal(sup[0].ownerKey, owner);
+  assert.equal((await care.listMySupervisors(owner)).length, 1);
+
+  // a 'view' snapshot never carries amounts; an 'approve' one does
+  const viewSnap = await snap.buildGuardianSnapshot(owner, "view");
+  assert.equal(viewSnap.showsAmounts, false);
+  assert.ok(!("pendingApprovals" in viewSnap), "view scope gets no queue detail");
+  assert.ok(["steady", "tight", "attention"].includes(viewSnap.health));
+
+  // owner parks a transfer; guardian approves it through the care path
+  const cur = await accounts.createBankAccount(owner, { kind: "current", displayName: "Everyday" });
+  const sav = await accounts.createBankAccount(owner, { kind: "savings", displayName: "Savings" });
+  await ledger.appendTransaction(owner, { accountId: cur.id, direction: "credit", amount: 3000, channel: "salary" });
+  await authz.setAuthPolicy(owner, { approvalOverAmount: 50 });
+  const req = await authz.createAuthRequest(owner, {
+    kind: "internal_transfer",
+    summary: "Move SGD 300",
+    amount: 300,
+    payload: { fromAccountId: cur.id, toAccountId: sav.id, amount: 300, currency: "SGD", idempotencyKey: "itest-link-" + Date.now() },
+    reason: "over the rule",
+  });
+
+  const approveSnap = await snap.buildGuardianSnapshot(owner, "approve");
+  assert.equal(approveSnap.pendingApprovalCount, 1);
+  assert.equal(approveSnap.pendingApprovals[0].id, req.id);
+
+  const gate = await care.assertActiveRole(guardian, owner, "approve");
+  const decided = await authz.decideAuthRequest(owner, req.id, { decision: "approved", decidedBy: "guardian", roleId: gate.roleId });
+  assert.equal(decided.status, "executed");
+  assert.equal((await ledger.listTransactions(owner)).filter((x) => x.isInternalTransfer).length, 2, "the guardian's approval ran the transfer");
+
+  // the approval is on the owner's History, attributed to the guardian
+  const led = await pool.query(
+    `select actor, source_feature from change_ledger_events where profile_key = $1 and action_type = 'guardian_action'`,
+    [owner],
+  );
+  assert.equal(led.rows.length, 1, "a guardian_action History event was written");
+  assert.equal(led.rows[0].actor, "guardian");
+
+  // either party can sever the link; afterwards the gate is closed
+  assert.equal(await care.revokeCareLink(owner, { roleId: role.id }), true);
+  assert.equal(await care.assertActiveRole(guardian, owner, "view"), null);
+  assert.equal((await care.listSupervisedByMe(guardian)).length, 0);
 });

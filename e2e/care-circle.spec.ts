@@ -37,7 +37,7 @@ test("account type, a Care Circle relation, and a written handoff plan persist",
 
   // Add a guardian, then give them a relation + something they're noted for
   await page.getByRole("button", { name: /A guardian for me/i }).click();
-  await expect(page.getByText(/Added as a placeholder/i)).toBeVisible();
+  await expect(page.getByText(/until then they have no access/i)).toBeVisible();
 
   await page.getByRole("button", { name: /^Edit$/ }).first().click();
   await page.getByLabel(/Who they are/i).fill("My mother");

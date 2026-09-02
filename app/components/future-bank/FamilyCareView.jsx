@@ -37,6 +37,8 @@ const ROLE_LABEL = {
   trusted_contact: "Trusted contact",
   beneficiary_placeholder: "Beneficiary",
 };
+// roles that can be linked to a real second person via an invite code
+const LINKABLE = new Set(["guardian", "trusted_contact", "household_member", "dependent"]);
 const ROLE_CAN = {
   guardian: "Approves your key money actions.",
   dependent: "You manage their money and permissions.",
@@ -79,6 +81,10 @@ const POST_AUTH = (body) =>
   fetch("/api/authorizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(
     async (r) => ({ ok: r.ok, status: r.status, ...(await r.json().catch(() => ({}))) }),
   );
+const POST_CARE = (body) =>
+  fetch("/api/care", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(
+    async (r) => ({ ok: r.ok, status: r.status, ...(await r.json().catch(() => ({}))) }),
+  );
 
 export function FamilyCareView({ onBack, onWedding }) {
   const [roles, setRoles] = useState(null);
@@ -89,19 +95,24 @@ export function FamilyCareView({ onBack, onWedding }) {
   const [msg, setMsg] = useState("");
   const [editing, setEditing] = useState(null); // roleId being edited
   const [handoffOpen, setHandoffOpen] = useState(false);
+  const [care, setCare] = useState(null);
+  const [inviteCode, setInviteCode] = useState(null); // { roleId, code }
+  const [acceptCode, setAcceptCode] = useState("");
 
   const load = useCallback(async () => {
     try {
-      const [r, ob, h, a] = await Promise.all([
+      const [r, ob, h, a, c] = await Promise.all([
         fetch("/api/account?view=roles", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : { roles: [] })),
         fetch("/api/onboarding", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null)),
         fetch("/api/account?view=handoff", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : { handoff: null })),
         fetch("/api/authorizations", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null)),
+        fetch("/api/care", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null)),
       ]);
       setRoles(r.roles ?? []);
       setAccountType(ob?.onboarding?.accountType ?? "individual");
       setHandoff(h.handoff ?? null);
       setPolicy(a?.policy ?? null);
+      setCare(c ?? null);
     } catch {
       setRoles([]);
       setHandoff(null);
@@ -131,7 +142,7 @@ export function FamilyCareView({ onBack, onWedding }) {
     const d = await POST({ action: "grant_role", role, scope });
     setBusy(false);
     if (d.ok) {
-      setMsg("Added as a placeholder. Send them an invite from Account once invites are connected — until then they have no access.");
+      setMsg("Added. For a guardian, household member, dependent or trusted contact, use “Invite” on their row to link their real account — until then they have no access.");
       load();
     } else {
       setMsg("Could not add that role. Try again.");
@@ -139,10 +150,36 @@ export function FamilyCareView({ onBack, onWedding }) {
   };
   const remove = async (roleId) => {
     setBusy(true);
-    await POST({ action: "revoke_role", roleId });
+    // revoke through /api/care so an already-linked person is unlinked too
+    await POST_CARE({ action: "revoke", roleId });
     setBusy(false);
     setEditing(null);
+    setInviteCode((c) => (c?.roleId === roleId ? null : c));
     load();
+  };
+  const invite = async (roleId) => {
+    setBusy(true);
+    setMsg("");
+    const d = await POST_CARE({ action: "invite", roleId });
+    setBusy(false);
+    if (d.ok && d.code) {
+      setInviteCode({ roleId, code: d.code });
+    } else {
+      setMsg("Could not create an invite for that person.");
+    }
+  };
+  const acceptInvite = async () => {
+    setBusy(true);
+    setMsg("");
+    const d = await POST_CARE({ action: "accept", code: acceptCode.trim() });
+    setBusy(false);
+    if (d.ok) {
+      setAcceptCode("");
+      setMsg("Linked. You can now see their money health in Guardian → “People you look after”.");
+      load();
+    } else {
+      setMsg(d.error ? `Could not accept: ${d.error}` : "Could not accept that code.");
+    }
   };
   const saveRole = async (roleId, patch) => {
     setBusy(true);
@@ -248,25 +285,76 @@ export function FamilyCareView({ onBack, onWedding }) {
                     onRemove={() => remove(r.id)}
                   />
                 ) : (
-                  <div key={r.id} className={css.actItem}>
-                    <span className={css.actBody}>
-                      <span className={css.actName}>
-                        {r.relationLabel ? r.relationLabel : ROLE_LABEL[r.role] ?? r.role}
-                        {r.status !== "active" ? ` · ${r.status}` : ""}
+                  <div key={r.id}>
+                    <div className={css.actItem}>
+                      <span className={css.actBody}>
+                        <span className={css.actName}>
+                          {r.relationLabel ? r.relationLabel : ROLE_LABEL[r.role] ?? r.role}
+                          {r.status === "active" && r.subjectKey ? " · linked" : r.status !== "active" ? ` · ${r.status}` : ""}
+                        </span>
+                        <span className={css.actMeta}>
+                          {ROLE_LABEL[r.role] ?? r.role} — {ROLE_CAN[r.role] ?? r.scope}
+                          {r.covers?.length ? ` · noted for: ${r.covers.map((c) => COVER_LABEL[c] ?? c).join(", ")}` : ""}
+                          {r.note ? ` · ${r.note}` : ""}
+                        </span>
                       </span>
-                      <span className={css.actMeta}>
-                        {ROLE_LABEL[r.role] ?? r.role} — {ROLE_CAN[r.role] ?? r.scope}
-                        {r.covers?.length ? ` · noted for: ${r.covers.map((c) => COVER_LABEL[c] ?? c).join(", ")}` : ""}
-                        {r.note ? ` · ${r.note}` : ""}
-                      </span>
-                    </span>
-                    <button type="button" className={css.link} disabled={busy} onClick={() => setEditing(r.id)}>Edit</button>
+                      {LINKABLE.has(r.role) && r.status === "pending" ? (
+                        <button type="button" className={css.link} disabled={busy} onClick={() => invite(r.id)}>Invite</button>
+                      ) : null}
+                      <button type="button" className={css.link} disabled={busy} onClick={() => setEditing(r.id)}>Edit</button>
+                    </div>
+                    {inviteCode?.roleId === r.id ? (
+                      <div className={css.calmCard}>
+                        <b>One-time invite code</b>
+                        <span className={css.bigAmount} style={{ fontSize: "20px", letterSpacing: "1px" }}>{inviteCode.code}</span>
+                        <span className={css.micro}>
+                          Give this to {r.relationLabel || "them"} once. They open FutureOS, go to Family &amp; Care → “Someone invited you?”, and enter it. It expires in 14 days and works a single time. It is not shown again.
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 ),
               )}
             </div>
           )}
         </section>
+
+        {/* accept an invite someone sent me */}
+        <section className={css.section}>
+          <p className={css.kicker}>Someone invited you?</p>
+          <div className={css.field}>
+            <label htmlFor="fc-accept">Enter their invite code</label>
+            <input
+              id="fc-accept"
+              type="text"
+              value={acceptCode}
+              placeholder="XXXX-XXXX-XXXX"
+              autoComplete="off"
+              onChange={(e) => setAcceptCode(e.target.value.toUpperCase())}
+            />
+          </div>
+          <button type="button" className={css.cta} disabled={busy || acceptCode.trim().length < 8} onClick={acceptInvite}>Link my account to theirs</button>
+          <p className={css.micro}>You will be able to see their money health only — never their transactions or exact balances. Either of you can end it at any time.</p>
+        </section>
+
+        {/* who can see this account */}
+        {care?.supervisors?.length ? (
+          <section className={css.section}>
+            <p className={css.kicker}>Who can see this account</p>
+            <div className={css.activity}>
+              {care.supervisors.map((s) => (
+                <div key={s.roleId} className={css.actItem}>
+                  <span className={css.actBody}>
+                    <span className={css.actName}>{s.personLabel}</span>
+                    <span className={css.actMeta}>{ROLE_LABEL[s.role] ?? s.role} · {s.scope === "approve" ? "sees health + approves what you send" : "sees your money health only"}</span>
+                  </span>
+                  <button type="button" className={css.link} disabled={busy} onClick={() => remove(s.roleId)}>Unlink</button>
+                </div>
+              ))}
+            </div>
+            <p className={css.micro}>They never see your transactions or exact balances. Unlinking takes effect immediately.</p>
+          </section>
+        ) : null}
 
         {/* add someone */}
         <section className={css.section}>

@@ -1497,3 +1497,26 @@ create table if not exists authorization_requests (
   expires_at         timestamptz not null default (now() + interval '14 days')
 );
 create index if not exists authorization_requests_profile_idx on authorization_requests (profile_key, status, created_at desc);
+
+-- ============================================================
+-- Phase 6 Round 3 - real cross-user linking for Care.
+-- A one-time invite code links a placeholder lifecycle_roles row to a real
+-- second person (their users.id lands in subject_key, status -> active).
+-- Only the sha256 of the code is stored; either party can revoke; every
+-- cross-account action is audited with actor_key = the guardian.
+-- ============================================================
+create table if not exists care_invites (
+  id           uuid primary key default gen_random_uuid(),
+  profile_key  text not null,                       -- the account owner who created the invite
+  role_id      uuid references lifecycle_roles(id) on delete cascade,
+  role         text not null,
+  scope        text not null default 'view',
+  code_hash    text not null unique,                -- sha256(code) - the code itself is never stored
+  status       text not null default 'open',        -- open | accepted | revoked | expired
+  accepted_by  text,                                -- users.id who accepted
+  created_at   timestamptz not null default now(),
+  accepted_at  timestamptz,
+  expires_at   timestamptz not null default (now() + interval '14 days')
+);
+create index if not exists care_invites_profile_idx on care_invites (profile_key, status);
+create index if not exists care_invites_code_idx on care_invites (code_hash) where status = 'open';
