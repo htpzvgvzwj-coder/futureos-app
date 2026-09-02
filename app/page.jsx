@@ -9,8 +9,9 @@ import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
+import { BankHome } from "./components/future-bank/BankHome.jsx";
 import {
-  BankTodayConnected, GuardianConnected, RippleStripConnected, OnboardingGate,
+  GuardianConnected, RippleStripConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
   MoneyRescueConnected, RealityDriftConnected,
 } from "./components/bank/connected.jsx";
@@ -3730,6 +3731,9 @@ function GuardianExecutionStatusCard({ commitment, t, onRevoked }) {
 // Scan), the Active Living Plan (its current tension + next step, via
 // LivingPlanStatus), and Latest Change (one line -> Change Replay).
 // "Everything on your accounts" opens the full account view.
+// Retained for the HOME_FULL / legacy dashboard path; the primary Today
+// tab now renders <BankHome/>.
+// eslint-disable-next-line no-unused-vars
 function TodayScreen({ setActiveScreen, displayName, preferences, t }) {
   // Part 7: Today's main state is the canonical Life Thread. The old
   // profile-derived values are only a fallback while the snapshot loads.
@@ -17653,9 +17657,14 @@ export default function App() {
   const currentScreen = {
     [screens.HOME]: (
       <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive}>
-        <BankTodayConnected onOpen={openFromBank} onRippleAction={(a) => a === "compare" && setActiveScreen(screens.MIRROR)} />
-        {livingThreadEntrance("today")}
-        <TodayScreen {...shared} />
+        <BankHome
+          onExplore={() => setActiveScreen(screens.MIRROR)}
+          onLife={() => setActiveScreen(screens.LIFE_GRAPH)}
+          onGuardian={() => setActiveScreen(screens.GUARDIAN)}
+          onActivity={() => setActiveScreen(screens.HOME_FULL)}
+          onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
+          onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; if (target) setActiveScreen(target); }}
+        />
       </OnboardingGate>
     ),
     [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
