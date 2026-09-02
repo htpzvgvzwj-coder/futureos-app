@@ -14,9 +14,11 @@ import { FinancialTwinView } from "./components/future-bank/FinancialTwinView.js
 import { LifeView } from "./components/future-bank/LifeView.jsx";
 import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import { ExploreView } from "./components/future-bank/ExploreView.jsx";
+import { SpendingView } from "./components/future-bank/SpendingView.jsx";
+import { GuardianView } from "./components/future-bank/GuardianView.jsx";
 import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
 import {
-  GuardianConnected, OnboardingGate,
+  OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
   MoneyRescueConnected,
 } from "./components/bank/connected.jsx";
@@ -209,6 +211,7 @@ const screens = {
   MONEY_RESCUE: "moneyRescue",
   FINANCIAL_TWIN: "financialTwin",
   FAMILY_CARE: "familyCare",
+  SPENDING_INTELLIGENCE: "spendingIntelligence",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3268,6 +3271,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
 function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
+  if (activeScreen === screens.SPENDING_INTELLIGENCE) return screens.MIRROR;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -6368,6 +6372,10 @@ function RelationshipLedgerScreen({ preferences, setPreferences, simulatorInputs
   );
 }
 
+// Legacy Guardian screen. The Guardian tab now renders <GuardianView/> (the
+// decision queue over the shared Money Moment stream); kept for reference and
+// still covered by tests/invisible-moment-surface.test.mjs.
+// eslint-disable-next-line no-unused-vars
 function FutureSelfGuardian({
   setActiveScreen,
   preferences,
@@ -17650,6 +17658,7 @@ export default function App() {
   // tabs navigate between the four entrances, and studio nodes deep-link
   // into the matching Studio. The legacy per-screen content stays below for
   // now (Part F trims the shell).
+  // eslint-disable-next-line no-unused-vars
   const livingThreadEntrance = (lens) => (
     <LivingThreadEntrance
       lens={lens}
@@ -17684,6 +17693,7 @@ export default function App() {
     [screens.FAMILY_CARE]: (
       <FamilyCareView onBack={() => setActiveScreen(screens.LIFE_GRAPH)} onWedding={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)} />
     ),
+    [screens.SPENDING_INTELLIGENCE]: <SpendingView onBack={() => setActiveScreen(screens.MIRROR)} />,
     [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
     [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
@@ -17765,7 +17775,7 @@ export default function App() {
           const s = String(r || "");
           if (s === "today") return setActiveScreen(screens.HOME);
           if (s === "rescue") return setActiveScreen(screens.MONEY_RESCUE);
-          if (s === "spending") return setActiveScreen(screens.SPENDING_RISK);
+          if (s === "spending") return setActiveScreen(screens.SPENDING_INTELLIGENCE);
           if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
           if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
@@ -17779,16 +17789,15 @@ export default function App() {
     [screens.ACCOUNT_DETAIL]: <AccountDetailScreen {...shared} activeAccountId={activeAccountId} />,
     [screens.SPENDING_RISK]: <SpendingRiskDetailScreen {...shared} />,
     [screens.GUARDIAN]: (
-      <>
-        <GuardianConnected onOpen={openFromBank} onControl={() => setActiveScreen(screens.RELATIONSHIP_LEDGER)} />
-        {livingThreadEntrance("guardian")}
-        <FutureSelfGuardian
-          {...shared}
-          preferences={preferences}
-          simulatorActionStates={simulatorActionStates}
-          setSimulatorActionStates={setSimulatorActionStates}
-        />
-      </>
+      <GuardianView
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
+          if (s === "explore" || s === "explore:plans") return setActiveScreen(screens.MIRROR);
+          if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
+          setActiveScreen(screens.HOME);
+        }}
+      />
     ),
     [screens.PROFILE]: (
       <ProfileScreen
