@@ -175,3 +175,55 @@ test("lifecycle roles: a beneficiary placeholder is flagged as needing legal con
   assert.equal(await control.revokeRole(u, g.id), true);
   assert.equal((await control.listRoles(u)).length, 1);
 });
+
+test("Phase 6 Care Circle: relation/covers/note round-trip; handoff plan is 'described' only", opts, async (t) => {
+  const { control, pool } = await mods();
+  const u = await makeUser(pool, "care6");
+  t.after(() => cleanupUser(pool, u));
+
+  // grant with the new fields, then edit them
+  const g = await control.grantRole(u, {
+    subjectKey: "guardian-x",
+    role: "guardian",
+    scope: "approve",
+    relationLabel: "My mother",
+    covers: ["bills", "emergency", "bills"], // deduped
+    note: "joint account only",
+  });
+  assert.equal(g.relationLabel, "My mother");
+  assert.deepEqual([...g.covers].sort(), ["bills", "emergency"]);
+  assert.equal(g.note, "joint account only");
+
+  const edited = await control.updateRole(u, g.id, { relationLabel: "Mum", covers: ["everything"] });
+  assert.equal(edited.relationLabel, "Mum");
+  assert.deepEqual(edited.covers, ["everything"]);
+  assert.equal(edited.note, "joint account only", "unspecified fields are left untouched");
+
+  // a partial update with nothing to change returns null
+  assert.equal(await control.updateRole(u, g.id, {}), null);
+  // updating someone else's / a missing role returns null (no throw)
+  assert.equal(await control.updateRole("someone-else", g.id, { note: "x" }), null);
+
+  // handoff plan: upsert, always "described", never executed
+  const h1 = await control.setHandoffPlan(u, {
+    kind: "retirement",
+    successorRoleId: g.id,
+    successorLabel: "Mum",
+    triggerNote: "at 65",
+    instructions: "keep the bills paid",
+  });
+  assert.equal(h1.status, "described");
+  assert.equal(h1.kind, "retirement");
+  assert.equal(h1.successorRoleId, g.id);
+
+  const h2 = await control.setHandoffPlan(u, { kind: "incapacity", triggerNote: "if hospitalised" });
+  assert.equal(h2.kind, "incapacity", "second call updates the same row");
+  assert.equal(h2.status, "described");
+  assert.equal((await control.getHandoffPlan(u)).triggerNote, "if hospitalised");
+
+  await assert.rejects(() => control.setHandoffPlan(u, { kind: "executed" }), /invalid handoff kind/);
+
+  // export includes the new table; delete cascade removes it
+  const exp = await control.exportUserData(u);
+  assert.ok("care_handoff_plans" in exp.tables, "handoff plan is in the data export");
+});

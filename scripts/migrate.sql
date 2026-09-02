@@ -1441,3 +1441,25 @@ create table if not exists money_moment_state (
   primary key (profile_key, moment_key)
 );
 create index if not exists money_moment_state_profile_idx on money_moment_state (profile_key, updated_at desc);
+
+-- ============================================================
+-- Phase 6 - lifecycle / Care Circle & Handoff.
+-- The Care Circle rows carry who the person is and which parts of your
+-- money they are noted for. The handoff plan is a WRITTEN plan only -
+-- status is always 'described'; Future Bank never executes it.
+-- ============================================================
+alter table lifecycle_roles add column if not exists relation_label text;
+alter table lifecycle_roles add column if not exists note text;
+alter table lifecycle_roles add column if not exists covers jsonb not null default '[]';
+
+create table if not exists care_handoff_plans (
+  profile_key       text primary key,
+  kind              text not null default 'general',    -- general|retirement|incapacity
+  successor_role_id uuid references lifecycle_roles(id) on delete set null,
+  successor_label   text,
+  trigger_note      text,
+  instructions      text,
+  status            text not null default 'described',  -- always 'described' - never executed by the app
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);

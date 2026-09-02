@@ -5,8 +5,22 @@
 // Studios below. Every row states the problem it solves, its real status,
 // and a real route.
 
+import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
+
+// Real outside-data connections. None are configured yet, so every one is
+// honestly "Not connected" with what it would unlock — never a fake toggle.
+const CONNECTIONS = [
+  { id: "payment_provider", name: "Payment rail", unlocks: "Pay and Scan & Pay to people and businesses outside your own accounts." },
+  { id: "sgfindex", name: "SGFinDex (government)", unlocks: "Pull CPF, HDB, IRAS and other-bank balances into your Financial Twin automatically." },
+  { id: "insurer", name: "Insurer link", unlocks: "Turn protection-gap estimates into figures from your real policies." },
+];
+const ACCOUNT_TYPE_NOTE = {
+  youth: "Youth account — paying out, cards, FX, investing and loans need a guardian's approval.",
+  guardian_managed_child: "Child account — a guardian controls the money and every permission.",
+  household: "Household account — members see agreed ranges, never exact private amounts.",
+};
 
 // route ids resolved by page.jsx's onRoute handler
 const ZONES = [
@@ -42,6 +56,16 @@ export function ExploreView(props) {
 function Inner({ onRoute, onStudio }) {
   const fb = useFutureBankData();
   const needs = fb.momentsRaw?.counts?.actionRequired ?? 0;
+  const [caps, setCaps] = useState(null);
+  useEffect(() => {
+    fetch("/api/capabilities", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setCaps)
+      .catch(() => setCaps(null));
+  }, []);
+  const providers = caps?.providers ?? {};
+  const accountType = caps?.accountType ?? "individual";
+  const isConnected = (v) => v === "connected" || v === "sandbox";
 
   return (
     <div className={`${css.app} ${css.embedded}`}>
@@ -50,6 +74,8 @@ function Inner({ onRoute, onStudio }) {
           <h1 className={css.title}>Explore</h1>
           <p className={css.micro}>What OCBC Future Bank can do — your everyday banking, your real money, and your whole life ahead.</p>
         </div>
+
+        {ACCOUNT_TYPE_NOTE[accountType] ? <p className={css.micro}>{ACCOUNT_TYPE_NOTE[accountType]}</p> : null}
 
         {needs > 0 ? (
           <button type="button" className={`${css.partial}`} onClick={() => onRoute("today")}>
@@ -71,6 +97,26 @@ function Inner({ onRoute, onStudio }) {
               <span className={`${css.zoneStatus} ${z.status === "live" ? css.live : css.soon}`}>{z.status === "live" ? "Available" : "Coming"}</span>
             </button>
           ))}
+        </section>
+
+        {/* real outside-data connections — honest status */}
+        <section className={css.section}>
+          <p className={css.kicker}>Connections</p>
+          <div className={css.activity}>
+            {CONNECTIONS.map((c) => {
+              const connected = isConnected(providers[c.id]);
+              return (
+                <div key={c.id} className={css.actItem}>
+                  <span className={css.actBody}>
+                    <span className={css.actName}>{c.name}</span>
+                    <span className={css.actMeta}>{c.unlocks}</span>
+                  </span>
+                  <span className={`${css.zoneStatus} ${connected ? css.live : css.soon}`}>{connected ? "Connected" : "Not connected"}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className={css.micro}>Until a provider is configured, these stay off and nothing is estimated in their place.</p>
         </section>
 
         {/* 9 life Studios */}
