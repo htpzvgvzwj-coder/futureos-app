@@ -117,6 +117,7 @@ function Inner({ onRoute, onStudio }) {
             })}
           </div>
           <p className={css.micro}>Until a provider is configured, these stay off and nothing is estimated in their place.</p>
+          <button type="button" className={css.link} onClick={() => onRoute("connections")}>See everything that&apos;s limited and why →</button>
         </section>
 
         {/* 9 life Studios */}

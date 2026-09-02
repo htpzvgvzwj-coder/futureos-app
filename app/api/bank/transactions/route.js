@@ -5,6 +5,8 @@ import { recordTransactionRipple } from "../../../../lib/ripple/record.js";
 import { recordRippleEvent } from "../../../../lib/ripple/store.js";
 import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
 import { ACTION_TYPES } from "../../../../lib/change-ledger/events.js";
+import { query } from "../../../../lib/db.js";
+import { getAuthPolicy, evaluateAuthorization, findRequestByIdempotency, createAuthRequest } from "../../../../lib/authorization/store.js";
 
 export const runtime = "nodejs";
 
@@ -48,6 +50,43 @@ export async function POST(request) {
     if (body.action === "transfer") {
       if (!body.fromAccountId || !body.toAccountId) return Response.json({ error: "accounts_required" }, { status: 400 });
       const idk = body.idempotencyKey || randomUUID();
+
+      // approval gate: on a supervised account, or over the owner's amount
+      // rule, park this as a pending authorization request instead.
+      const existing = await findRequestByIdempotency(userId, idk);
+      const parked =
+        existing && existing.status !== "executed"
+          ? { status: existing.status === "pending" ? "pending_approval" : existing.status, requestId: existing.id, reason: existing.reason }
+          : null;
+      if (parked) return Response.json({ ...parked, canMoveMoney: false }, { status: 202 });
+      if (!existing) {
+        let accountType = "individual";
+        try {
+          const r = await query(`select account_type from user_onboarding where profile_key = $1`, [userId]);
+          accountType = r.rows[0]?.account_type ?? "individual";
+        } catch {
+          /* default */
+        }
+        const verdict = evaluateAuthorization({
+          accountType,
+          policy: await getAuthPolicy(userId),
+          kind: "internal_transfer",
+          amount: body.amount,
+        });
+        if (verdict.required) {
+          const amt = Math.round(Number(body.amount) || 0);
+          const req = await createAuthRequest(userId, {
+            kind: "internal_transfer",
+            summary: `Move SGD ${amt.toLocaleString("en-SG")} between your own accounts`,
+            amount: body.amount,
+            currency: "SGD",
+            payload: { fromAccountId: body.fromAccountId, toAccountId: body.toAccountId, amount: body.amount, currency: "SGD", idempotencyKey: idk },
+            reason: verdict.reason,
+          });
+          return Response.json({ status: "pending_approval", requestId: req.id, reason: verdict.reason, canMoveMoney: false }, { status: 202 });
+        }
+      }
+
       const result = await recordInternalTransfer(userId, {
         fromAccountId: body.fromAccountId,
         toAccountId: body.toAccountId,

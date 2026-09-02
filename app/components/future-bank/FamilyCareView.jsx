@@ -75,11 +75,16 @@ const POST_ONBOARDING = (body) =>
   fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(
     async (r) => ({ ok: r.ok, status: r.status, ...(await r.json().catch(() => ({}))) }),
   );
+const POST_AUTH = (body) =>
+  fetch("/api/authorizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(
+    async (r) => ({ ok: r.ok, status: r.status, ...(await r.json().catch(() => ({}))) }),
+  );
 
 export function FamilyCareView({ onBack, onWedding }) {
   const [roles, setRoles] = useState(null);
   const [accountType, setAccountType] = useState(null);
   const [handoff, setHandoff] = useState(undefined); // undefined = loading, null = none
+  const [policy, setPolicy] = useState(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [editing, setEditing] = useState(null); // roleId being edited
@@ -87,14 +92,16 @@ export function FamilyCareView({ onBack, onWedding }) {
 
   const load = useCallback(async () => {
     try {
-      const [r, ob, h] = await Promise.all([
+      const [r, ob, h, a] = await Promise.all([
         fetch("/api/account?view=roles", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : { roles: [] })),
         fetch("/api/onboarding", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null)),
         fetch("/api/account?view=handoff", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : { handoff: null })),
+        fetch("/api/authorizations", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null)),
       ]);
       setRoles(r.roles ?? []);
       setAccountType(ob?.onboarding?.accountType ?? "individual");
       setHandoff(h.handoff ?? null);
+      setPolicy(a?.policy ?? null);
     } catch {
       setRoles([]);
       setHandoff(null);
@@ -148,6 +155,18 @@ export function FamilyCareView({ onBack, onWedding }) {
       setMsg("Could not save. Try again.");
     }
   };
+  const savePolicy = async (patch) => {
+    setBusy(true);
+    setMsg("");
+    const d = await POST_AUTH({ action: "set_policy", ...patch });
+    setBusy(false);
+    if (d.ok) {
+      setPolicy(d.policy);
+      setMsg("Approval rules saved. Money moves that match will wait for a decision in Guardian.");
+    } else {
+      setMsg("Could not save the approval rules. Try again.");
+    }
+  };
   const saveHandoff = async (patch) => {
     setBusy(true);
     setMsg("");
@@ -196,6 +215,17 @@ export function FamilyCareView({ onBack, onWedding }) {
               </button>
             ))}
           </div>
+        </section>
+
+        {/* approval rules */}
+        <section className={css.section}>
+          <p className={css.kicker}>Approval rules</p>
+          <ApprovalRules
+            accountType={accountType ?? "individual"}
+            policy={policy}
+            busy={busy}
+            onSave={savePolicy}
+          />
         </section>
 
         {/* current circle */}
@@ -306,6 +336,60 @@ export function FamilyCareView({ onBack, onWedding }) {
         </section>
       </div>
     </div>
+  );
+}
+
+function ApprovalRules({ accountType, policy, busy, onSave }) {
+  const supervised = accountType === "youth" || accountType === "guardian_managed_child";
+  const [restricted, setRestricted] = useState(policy?.restrictedNeedApproval ?? true);
+  const [over, setOver] = useState(policy?.approvalOverAmount != null ? String(policy.approvalOverAmount) : "");
+  useEffect(() => {
+    if (policy) {
+      setRestricted(policy.restrictedNeedApproval);
+      setOver(policy.approvalOverAmount != null ? String(policy.approvalOverAmount) : "");
+    }
+  }, [policy]);
+  if (!policy) return <p className={css.micro}>Loading…</p>;
+  const dirty =
+    restricted !== policy.restrictedNeedApproval ||
+    (over.trim() === "" ? policy.approvalOverAmount != null : Number(over) !== policy.approvalOverAmount);
+  return (
+    <>
+      <p className={css.micro}>
+        When a rule matches, a real money move (a transfer between your own accounts, a card repayment) waits in <b>Guardian</b> for a decision instead of happening straight away. Nothing else is affected.
+      </p>
+      <label className={css.actItem} style={{ cursor: "pointer" }}>
+        <span className={css.actBody}>
+          <span className={css.actName}>Supervised actions need approval</span>
+          <span className={css.actMeta}>
+            {supervised
+              ? "This is a supervised account, so paying out, cards, FX, investing and loans need a guardian's approval."
+              : "Only applies while this is a youth or child account."}
+          </span>
+        </span>
+        <input type="checkbox" checked={restricted} disabled={busy} onChange={(e) => setRestricted(e.target.checked)} />
+      </label>
+      <div className={css.field}>
+        <label htmlFor="ap-over">Also check any move over (SGD)</label>
+        <input
+          id="ap-over"
+          inputMode="numeric"
+          value={over}
+          placeholder="e.g. 2000 — leave blank for no amount rule"
+          disabled={busy}
+          onChange={(e) => setOver(e.target.value.replace(/[^\d]/g, ""))}
+        />
+      </div>
+      <button
+        type="button"
+        className={css.cta}
+        disabled={busy || !dirty}
+        onClick={() => onSave({ restrictedNeedApproval: restricted, approvalOverAmount: over.trim() === "" ? null : Number(over) })}
+      >
+        Save approval rules
+      </button>
+      <p className={css.micro}>An amount rule protects anyone — for example an older adult who wants a second look before a large transfer.</p>
+    </>
   );
 }
 

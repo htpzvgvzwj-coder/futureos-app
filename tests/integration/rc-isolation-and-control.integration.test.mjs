@@ -9,15 +9,16 @@ const HAS_DB = Boolean(process.env.DATABASE_URL || process.env.DATABASE_URL_UNPO
 const opts = HAS_DB ? {} : { skip: "no DATABASE_URL" };
 
 async function mods() {
-  const [accounts, ledger, rows, control, csvStore, db] = await Promise.all([
+  const [accounts, ledger, rows, control, csvStore, authz, db] = await Promise.all([
     import("../../lib/bank/accounts-store.js"),
     import("../../lib/transaction-ledger/store.js"),
     import("../../lib/financial-twin/rows-store.js"),
     import("../../lib/account-control/store.js"),
     import("../../lib/csv-import/store.js"),
+    import("../../lib/authorization/store.js"),
     import("../../lib/db.js"),
   ]);
-  return { accounts, ledger, rows, control, csvStore, pool: db.pool };
+  return { accounts, ledger, rows, control, csvStore, authz, pool: db.pool };
 }
 
 async function makeUser(pool, tag) {
@@ -28,7 +29,7 @@ async function makeUser(pool, tag) {
   return r.rows[0].id;
 }
 async function cleanupUser(pool, uid) {
-  for (const t of ["bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "consent_records", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
+  for (const t of ["authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
   await pool.query(`delete from users where id = $1`, [uid]).catch(() => {});
@@ -226,4 +227,67 @@ test("Phase 6 Care Circle: relation/covers/note round-trip; handoff plan is 'des
   // export includes the new table; delete cascade removes it
   const exp = await control.exportUserData(u);
   assert.ok("care_handoff_plans" in exp.tables, "handoff plan is in the data export");
+});
+
+test("Phase 6 approval queue: an amount rule parks a transfer; approve executes it, decline does not", opts, async (t) => {
+  const { accounts, ledger, authz, control, pool } = await mods();
+  const u = await makeUser(pool, "authz6");
+  const other = await makeUser(pool, "authz6b");
+  t.after(async () => { await cleanupUser(pool, u); await cleanupUser(pool, other); });
+
+  const cur = await accounts.createBankAccount(u, { kind: "current", displayName: "Everyday" });
+  const sav = await accounts.createBankAccount(u, { kind: "savings", displayName: "Savings" });
+  await ledger.appendTransaction(u, { accountId: cur.id, direction: "credit", amount: 5000, channel: "salary" });
+
+  // owner sets "check any move over 100"
+  const policy = await authz.setAuthPolicy(u, { approvalOverAmount: 100 });
+  assert.equal(policy.approvalOverAmount, 100);
+
+  // a 500 move is above the rule -> required
+  const verdict = authz.evaluateAuthorization({ accountType: "individual", policy, kind: "internal_transfer", amount: 500 });
+  assert.equal(verdict.required, true);
+
+  const idk = "itest-authz-" + Date.now();
+  const req = await authz.createAuthRequest(u, {
+    kind: "internal_transfer",
+    summary: "Move SGD 500 between your own accounts",
+    amount: 500,
+    payload: { fromAccountId: cur.id, toAccountId: sav.id, amount: 500, currency: "SGD", idempotencyKey: idk },
+    reason: verdict.reason,
+  });
+  assert.equal((await authz.listAuthRequests(u, { status: "pending" })).length, 1);
+  assert.equal(await authz.countPendingAuthRequests(u), 1);
+
+  // no money has moved yet
+  assert.equal((await ledger.listTransactions(u)).filter((x) => x.isInternalTransfer).length, 0);
+
+  // cross-user cannot decide it
+  assert.equal(await authz.decideAuthRequest(other, req.id, { decision: "approved" }), null);
+
+  // approve -> executes the transfer from the payload, status 'executed'
+  const decided = await authz.decideAuthRequest(u, req.id, { decision: "approved", decidedBy: "owner" });
+  assert.equal(decided.status, "executed");
+  const legs = (await ledger.listTransactions(u)).filter((x) => x.isInternalTransfer);
+  assert.equal(legs.length, 2, "a real double-entry transfer ran");
+  const bal = await ledger.getAccountBalances(u);
+  assert.equal(bal.find((b) => b.accountId === sav.id).postedBalance, 500);
+
+  // deciding again is a no-op
+  const again = await authz.decideAuthRequest(u, req.id, { decision: "declined" });
+  assert.equal(again.unchanged, true);
+
+  // a declined request never moves money
+  const req2 = await authz.createAuthRequest(u, {
+    kind: "internal_transfer",
+    summary: "Move SGD 900",
+    amount: 900,
+    payload: { fromAccountId: cur.id, toAccountId: sav.id, amount: 900, currency: "SGD", idempotencyKey: idk + "-2" },
+    reason: "over the rule",
+  });
+  const declined = await authz.decideAuthRequest(u, req2.id, { decision: "declined" });
+  assert.equal(declined.status, "declined");
+  assert.equal((await ledger.listTransactions(u)).filter((x) => x.isInternalTransfer).length, 2, "still just the first transfer");
+
+  const exp = await control.exportUserData(u);
+  assert.ok("authorization_requests" in exp.tables && "authorization_policies" in exp.tables, "both new tables are in the export");
 });

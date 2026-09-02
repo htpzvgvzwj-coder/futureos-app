@@ -1463,3 +1463,37 @@ create table if not exists care_handoff_plans (
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
+
+-- ============================================================
+-- Phase 6 Round 2 - authorization / approval queue.
+-- On a youth/child account (or when the owner sets an amount rule) a real
+-- money move creates a PENDING request instead of executing. A holder of
+-- an approve-scoped role decides it; on approve the move executes from the
+-- stored payload. Every step is audited + in the Change Ledger.
+-- ============================================================
+create table if not exists authorization_policies (
+  profile_key              text primary key,
+  restricted_need_approval boolean not null default true,  -- youth/child restricted actions need approval
+  approval_over_amount     numeric,                        -- any money move over this needs approval (null = off)
+  updated_at               timestamptz not null default now()
+);
+
+create table if not exists authorization_requests (
+  id                 uuid primary key default gen_random_uuid(),
+  profile_key        text not null,
+  kind               text not null,          -- internal_transfer | card_repayment
+  summary            text not null,
+  amount             numeric,
+  currency           text not null default 'SGD',
+  payload            jsonb not null default '{}',   -- enough to execute the move on approve
+  reason             text,                   -- why approval was needed
+  status             text not null default 'pending', -- pending|approved|declined|cancelled|executed|expired
+  decided_by_role_id uuid references lifecycle_roles(id) on delete set null,
+  decided_by         text,                   -- 'guardian' | 'owner'
+  decision_note      text,
+  created_at         timestamptz not null default now(),
+  decided_at         timestamptz,
+  executed_at        timestamptz,
+  expires_at         timestamptz not null default (now() + interval '14 days')
+);
+create index if not exists authorization_requests_profile_idx on authorization_requests (profile_key, status, created_at desc);

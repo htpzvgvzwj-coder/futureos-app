@@ -15,6 +15,7 @@ import { LifeView } from "./components/future-bank/LifeView.jsx";
 import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import { ExploreView } from "./components/future-bank/ExploreView.jsx";
 import { SpendingView } from "./components/future-bank/SpendingView.jsx";
+import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
 import { GuardianView } from "./components/future-bank/GuardianView.jsx";
 import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
 import {
@@ -212,6 +213,7 @@ const screens = {
   FINANCIAL_TWIN: "financialTwin",
   FAMILY_CARE: "familyCare",
   SPENDING_INTELLIGENCE: "spendingIntelligence",
+  CONNECTIONS: "connections",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3272,6 +3274,7 @@ function getNavScreen(activeScreen) {
   if ([screens.PAYNOW, screens.SCAN_PAY, screens.FX, screens.HOME_FULL, screens.FINANCIAL_TWIN].includes(activeScreen)) return screens.HOME;
   if (activeScreen === screens.FAMILY_CARE) return screens.LIFE_GRAPH;
   if (activeScreen === screens.SPENDING_INTELLIGENCE) return screens.MIRROR;
+  if (activeScreen === screens.CONNECTIONS) return screens.MIRROR;
   if (activeScreen === screens.SPENDING_RISK) return screens.HOME;
   if ([screens.NEED_WEDDING, screens.NEED_HOME, screens.NEED_RETIREMENT, screens.NEED_LOAN, screens.NEED_INVESTMENT].includes(activeScreen)) {
     return screens.MIRROR;
@@ -17694,6 +17697,7 @@ export default function App() {
       <FamilyCareView onBack={() => setActiveScreen(screens.LIFE_GRAPH)} onWedding={() => setActiveScreen(screens.WEDDING_LIVING_PLAN)} />
     ),
     [screens.SPENDING_INTELLIGENCE]: <SpendingView onBack={() => setActiveScreen(screens.MIRROR)} />,
+    [screens.CONNECTIONS]: <ConnectionsView onBack={() => setActiveScreen(screens.MIRROR)} />,
     [screens.ONBOARDING]: <OnboardingGate onOpen={openFromBank} onGateChange={setOnboardingActive} />,
     [screens.REALITY_ENTRY]: <RealityEntryConnected onDone={() => setActiveScreen(screens.HOME)} onOpen={openFromBank} />,
     [screens.CSV_IMPORT]: <CsvImportConnected onDone={() => setActiveScreen(screens.HOME)} />,
@@ -17776,6 +17780,7 @@ export default function App() {
           if (s === "today") return setActiveScreen(screens.HOME);
           if (s === "rescue") return setActiveScreen(screens.MONEY_RESCUE);
           if (s === "spending") return setActiveScreen(screens.SPENDING_INTELLIGENCE);
+          if (s === "connections") return setActiveScreen(screens.CONNECTIONS);
           if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
           if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
