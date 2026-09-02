@@ -9,7 +9,6 @@ import { nodeEvents } from "../lib/life/node-evidence.js";
 import { LifeThreadProvider, useLifeThread } from "./components/life-thread/LifeThreadProvider.jsx";
 import { LivingThreadEntrance } from "./components/living-thread/LivingThreadEntrance.jsx";
 import { BankDataProvider } from "./components/bank/useBankData.jsx";
-import { FutureBankSlice } from "./showcase/FutureBankSlice.jsx";
 import {
   BankTodayConnected, GuardianConnected, RippleStripConnected, OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -17230,19 +17229,6 @@ function Screen({ children, className }) {
   );
 }
 
-// Future Bank is the primary experience; the legacy simulator app is an
-// explicit internal review route behind ?classic=1. It is never persisted
-// and is not exposed from customer-facing navigation.
-function wantsClassicApp() {
-  if (typeof window === "undefined") return false;
-  try {
-    const p = new URLSearchParams(window.location.search);
-    return p.get("classic") === "1";
-  } catch {
-    return false;
-  }
-}
-
 export default function App() {
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "redirecting"
@@ -17831,19 +17817,9 @@ export default function App() {
     );
   }
 
-  // Future Bank is the primary authenticated experience. The legacy
-  // simulator app is reachable only via ?classic=1 (an internal migration
-  // route, not primary navigation).
-  if (!wantsClassicApp()) {
-    return (
-      <LifeThreadProvider enabled>
-        <BankDataProvider enabled>
-          <FutureBankSlice />
-        </BankDataProvider>
-      </LifeThreadProvider>
-    );
-  }
-
+  // The Future Bank app: one shell, one bottom navigation
+  // (Today / Life / Explore / Guardian). The /showcase route still renders
+  // the FutureBankSlice review slice; it is not the primary app.
   return (
     <LifeThreadProvider enabled={authStatus === "authenticated"}>
      <BankDataProvider enabled={authStatus === "authenticated"}>
