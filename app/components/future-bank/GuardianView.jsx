@@ -62,6 +62,16 @@ function Inner({ onRoute, onOpenSupervised }) {
   const protection = gd?.protection ?? null;
   const proof = gd?.proof ?? [];
   const contract = gd?.contract ?? null;
+  const shield = gd?.promiseShield ?? null;
+  const collision = gd?.collision?.collision ? gd.collision : null;
+  const recovery = gd?.recovery?.inTrouble ? gd.recovery : null;
+  const guardianPost = async (body) => {
+    setBusyId(body.action);
+    await fetch("/api/guardian", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
+    setBusyId(null);
+    load();
+    fb.refetchAll?.();
+  };
   const supervised = care?.supervised ?? [];
   const supervisors = care?.supervisors ?? [];
   const inbox = care?.inbox ?? [];
@@ -217,6 +227,60 @@ function Inner({ onRoute, onOpenSupervised }) {
               </>
             )}
           </div>
+        ) : null}
+
+        {/* Recovery Mode — an ordered way back, not just a warning */}
+        {recovery ? (
+          <section className={css.section}>
+            <p className={css.kicker}>A way back</p>
+            <div className={g.decision}>
+              {recovery.steps.map((s) => (
+                <div key={s.order} className={g.impactRow} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
+                  <span className={g.impactVal}>{s.order}. {s.label}</span>
+                  <span className={g.impactName}>{s.detail}</span>
+                  {s.needsConfirm ? (
+                    <button type="button" className={g.go} style={{ marginTop: 4 }} disabled={busyId === "apply_recovery_step"} onClick={() => guardianPost({ action: "apply_recovery_step", order: s.order })}>
+                      Confirm this step
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            <p className={css.micro}>Guardian proposes this — nothing changes until you confirm a step.</p>
+          </section>
+        ) : null}
+
+        {/* Collision Radar — two plans competing for the same cashflow */}
+        {collision ? (
+          <section className={css.section}>
+            <p className={css.kicker}>Two plans are competing</p>
+            <div className={g.decision}>
+              <span className={g.impactVal}>{collision.summary}</span>
+              <div className={g.decisionActs} style={{ flexDirection: "column", alignItems: "stretch" }}>
+                {collision.paths.map((p) => (
+                  <button key={p.id} type="button" style={{ textAlign: "left" }} disabled={busyId === "apply_collision_path"} onClick={() => guardianPost({ action: "apply_collision_path", pathId: p.id })}>
+                    <b>{p.label}</b>
+                    <span style={{ display: "block", fontWeight: 400, color: "var(--ink-soft)", marginTop: 2 }}>{p.effect}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {/* Promise Shield — the four buckets your money is carrying */}
+        {shield ? (
+          <section className={css.section}>
+            <p className={css.kicker}>What your money is promised to</p>
+            <div>
+              {shield.buckets.map((b) => (
+                <div key={b.id} className={g.impactRow}>
+                  <span className={g.impactName}>{b.name}</span>
+                  <span className={g.impactVal}>{shield.currency} {b.amount.toLocaleString("en-SG")}</span>
+                </div>
+              ))}
+            </div>
+          </section>
         ) : null}
 
         {/* 2 — Protected by Guardian */}
