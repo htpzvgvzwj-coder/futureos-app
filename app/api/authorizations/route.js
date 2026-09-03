@@ -3,7 +3,7 @@ import { guard } from "../../../lib/http-guards.js";
 import { query } from "../../../lib/db.js";
 import {
   getAuthPolicy, setAuthPolicy, listAuthRequests, decideAuthRequest, cancelAuthRequest,
-  countPendingAuthRequests, hasLinkedApprover, confirmOwnerHalf,
+  countPendingAuthRequests, hasLinkedApprover, confirmOwnerHalf, adjustAuthRequest,
 } from "../../../lib/authorization/store.js";
 
 export const runtime = "nodejs";
@@ -70,6 +70,12 @@ export async function POST(request) {
     if (body.action === "confirm") {
       if (!body.id) return Response.json({ error: "id_required" }, { status: 400 });
       const result = await confirmOwnerHalf(userId, body.id);
+      if (!result) return Response.json({ error: "request_not_found" }, { status: 404 });
+      return Response.json({ request: result });
+    }
+    if (body.action === "adjust") {
+      if (!body.id) return Response.json({ error: "id_required" }, { status: 400 });
+      const result = await adjustAuthRequest(userId, body.id, body.amount);
       if (!result) return Response.json({ error: "request_not_found" }, { status: 404 });
       return Response.json({ request: result });
     }

@@ -8,16 +8,27 @@ import { reduceGuardianStatus } from "../../../lib/guardian/status.js";
 import { buildProtectionDomains } from "../../../lib/guardian/protection.js";
 import { buildGuardianProof } from "../../../lib/guardian/proof.js";
 import { getContracts, setContract, resetContracts, contractSummary } from "../../../lib/guardian/contract.js";
+import { buildGuardianDecision } from "../../../lib/guardian/decision.js";
 
 export const runtime = "nodejs";
 
-// GET /api/guardian -> the three layers: Guardian Now (one status), Protected
-// by Guardian (seven domains), Guardian Proof (causal replay), plus the
-// Guardian Contract. Every layer reads the same real Money Moment / Twin /
-// Change Ledger data the rest of the app does.
+// GET /api/guardian              -> the three layers + the Guardian Contract
+// GET /api/guardian?decision=<id> -> the before/after impact of one parked
+//                                    money move, with its evidence + time
 export async function GET(request) {
   const userId = await getCurrentUserId(request);
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const decisionId = new URL(request.url).searchParams.get("decision");
+  if (decisionId) {
+    try {
+      const d = await buildGuardianDecision(userId, decisionId);
+      if (!d) return Response.json({ error: "decision_not_found" }, { status: 404 });
+      return Response.json(d);
+    } catch (error) {
+      console.error("[guardian] decision failed:", error?.message);
+      return Response.json({ error: "guardian_unavailable" }, { status: 500 });
+    }
+  }
   try {
     const [mm, bundle, events, contracts, supervisors] = await Promise.all([
       buildMoneyMoments(userId).catch(() => ({ isEmpty: true, moments: [] })),
