@@ -66,8 +66,9 @@ test("owner invites a guardian; guardian accepts, sees health only, and approves
   await guardian.getByRole("button", { name: /Link my account to theirs/i }).click();
   await expect(guardian.getByText(/Linked\./i)).toBeVisible({ timeout: 15000 });
 
-  // guardian: Guardian tab -> People you look after -> Open
+  // guardian: Guardian tab -> open the handling fold -> People you look after -> Open
   await guardian.getByTestId("bottom-nav-guardian").click();
+  await guardian.getByRole("button", { name: /Handling, access & the Guardian Contract/i }).click();
   await expect(guardian.getByText(/People you look after/i)).toBeVisible({ timeout: 15000 });
   await guardian.getByRole("button", { name: /^Open$/ }).first().click();
 

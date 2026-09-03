@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 
 const ACCOUNT_TYPES = [
   { id: "individual", name: "Just me", means: "A normal adult account. No one else can see or approve." },
@@ -487,6 +488,8 @@ export function FamilyCareView({ onBack, onWedding }) {
             <li><span className={css.proofMark}>→</span> Sharing shows agreed ranges — never your exact private amounts.</li>
           </ul>
         </section>
+
+        <FeatureHistory feature="family" label="What you've set up in Family & Care" />
       </div>
     </div>
   );

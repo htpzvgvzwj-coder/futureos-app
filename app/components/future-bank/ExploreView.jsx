@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 
 // Real outside-data connections. None are configured yet, so every one is
@@ -133,6 +134,8 @@ function Inner({ onRoute, onStudio }) {
             ))}
           </div>
         </section>
+
+        <FeatureHistory feature="explore" label="What you've explored" />
       </div>
     </div>
   );

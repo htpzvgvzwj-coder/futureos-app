@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import fbc from "./future-bank.module.css";
 import g from "./guardian.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
@@ -281,6 +282,8 @@ function Inner({ onRoute, onOpenSupervised }) {
             ) : null}
           </>
         ) : null}
+
+        <FeatureHistory feature="guardian" label="Guardian's record with you" />
       </div>
     </div>
   );

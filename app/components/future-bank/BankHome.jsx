@@ -15,6 +15,7 @@
 
 import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import { MoneyCurrent } from "../../showcase/MoneyCurrent.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { BankNowActions } from "./BankNowActions.jsx";
@@ -165,6 +166,7 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
             <button type="button" className={css.cta} onClick={onExplore}>See what needs you next</button>
           </>
         )}
+        <FeatureHistory feature="today" label="What you've done in Today" />
       </div>
 
       {sheet && <HomeSheet kind={sheet.kind} fb={fb} twin={twin} onClose={() => setSheet(null)} />}

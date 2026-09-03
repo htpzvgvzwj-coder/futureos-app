@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import { money } from "./format.js";
 
 const CAT_LABEL = {
@@ -125,6 +126,7 @@ export function SpendingView({ onBack }) {
             <p className={css.micro}>Every number here traces to real posted transactions in your ledger. Nothing is estimated or AI-generated.</p>
           </>
         )}
+        <FeatureHistory feature="spending" label="Spending history" />
       </div>
     </div>
   );
