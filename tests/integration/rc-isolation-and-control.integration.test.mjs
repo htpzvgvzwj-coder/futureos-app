@@ -507,3 +507,53 @@ test("Guardian Contract: defaults, raising a capability, the never-act guard, re
   const afterReset = await resetContracts(u);
   assert.equal(afterReset.find((c) => c.capability === "pause_plan_contribution").level, "ask", "reset returns to the default");
 });
+
+test("Guardian Phase 2 decision loop: impact preview, adjust re-parks, approve writes a numeric impact_set", opts, async (t) => {
+  const [{ buildGuardianDecision }, { accounts, ledger, authz, pool }] = await Promise.all([
+    import("../../lib/guardian/decision.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gdec");
+  t.after(() => cleanupUser(pool, u));
+
+  const cur = await accounts.createBankAccount(u, { kind: "current", displayName: "Everyday" });
+  const card = await accounts.createBankAccount(u, { kind: "credit_card", displayName: "Card" });
+  await ledger.appendTransaction(u, { accountId: cur.id, direction: "credit", amount: 5000, channel: "salary" });
+  await ledger.appendTransaction(u, { accountId: card.id, direction: "debit", amount: 800, channel: "purchase" });
+  await authz.setAuthPolicy(u, { approvalOverAmount: 50 });
+
+  const req = await authz.createAuthRequest(u, {
+    kind: "card_repayment",
+    summary: "Repay SGD 300 to a card",
+    amount: 300,
+    payload: { fromAccountId: cur.id, cardAccountId: card.id, amount: 300, currency: "SGD", idempotencyKey: "gdec-" + Date.now() },
+    reason: "over the rule",
+  });
+
+  // the decision view shows a real before/after
+  const d = await buildGuardianDecision(u, req.id);
+  assert.ok(d, "decision built");
+  assert.equal(d.impact.movesOutOfSpendable, true);
+  assert.equal(d.impact.spendableNow.after, d.impact.spendableNow.before - 300);
+  assert.ok(d.evidence.some((e) => /Amount/.test(e.label)));
+
+  // adjust: cancels the old, re-parks a fresh request at the new amount
+  const adjusted = await authz.adjustAuthRequest(u, req.id, 120);
+  assert.equal(adjusted.amount, 120);
+  assert.notEqual(adjusted.id, req.id);
+  const pend = await authz.listAuthRequests(u, { status: "pending" });
+  assert.equal(pend.length, 1);
+  assert.equal(pend[0].id, adjusted.id);
+
+  // approve -> executes AND the ledger event carries a numeric impact_set
+  await authz.decideAuthRequest(u, adjusted.id, { decision: "approved", decidedBy: "owner" });
+  const led = await pool.query(
+    `select impact_set from change_ledger_events where profile_key = $1 and action_type = 'guardian_action' order by occurred_at desc limit 1`,
+    [u],
+  );
+  const impact = led.rows[0].impact_set;
+  assert.ok(Array.isArray(impact) && impact.length > 0, "impact_set populated");
+  const spend = impact.find((x) => x.metric === "spendableNow");
+  assert.ok(spend && spend.before != null && spend.after != null, "spendableNow before/after recorded");
+  assert.equal(spend.before - spend.after, 120);
+});

@@ -187,6 +187,53 @@
 .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .seg button:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ---- Decision panel (Phase 2: show impact before committing) ---- */
+.decision {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+}
+.decisionEv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.decisionEv dt { font-size: 12px; color: var(--ink-faint); }
+.decisionEv dd { font-size: 12.5px; color: var(--ink); margin: 0; text-align: right; }
+.impactRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.impactRow:first-of-type { border-top: 0; }
+.impactName { font-size: 13px; color: var(--ink-soft); }
+.impactVal { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.impactVal .to { color: var(--ink-faint); font-weight: 400; margin: 0 5px; }
+.impactVal.warn { color: var(--g-alert); }
+.impactVal.same { color: var(--ink-faint); font-weight: 400; }
+.decisionActs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.decisionActs button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.decisionActs button.go { background: var(--ink); color: #fff; border-color: var(--ink); }
+.decisionActs button:disabled { opacity: 0.5; cursor: default; }
+
 /* ---- collapsible below-the-fold operational area ---- */
 .foldToggle {
   width: 100%;

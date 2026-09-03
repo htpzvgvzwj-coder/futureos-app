@@ -18,6 +18,19 @@ import { relTime, money } from "./format.js";
 
 const LEVEL_LABEL = { calm: "Calm", watching: "Watching", decision: "Decision", urgent: "Urgent" };
 
+function ImpactRow({ name, v, currency, warn }) {
+  const fmt = (n) => `${currency} ${Number(n ?? 0).toLocaleString("en-SG")}`;
+  const same = v.before === v.after;
+  return (
+    <div className={g.impactRow}>
+      <span className={g.impactName}>{name}</span>
+      <span className={`${g.impactVal} ${same ? g.same : ""} ${warn && !same ? g.warn : ""}`}>
+        {same ? fmt(v.after) : (<>{fmt(v.before)}<span className={g.to}>→</span>{fmt(v.after)}</>)}
+      </span>
+    </div>
+  );
+}
+
 export function GuardianView(props) {
   return (
     <FutureBankDataProvider enabled>
@@ -84,14 +97,52 @@ function Inner({ onRoute, onOpenSupervised }) {
     setFoldOpen(true);
     setTimeout(() => foldRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   };
+  // Phase 2 — the decision loop: show the before/after impact before committing.
+  const [decisionId, setDecisionId] = useState(null);
+  const [decision, setDecision] = useState(null);
+  const [adjustAmt, setAdjustAmt] = useState("");
+  const openDecision = (id) => {
+    setDecisionId(id);
+    setDecision(null);
+    fetch(`/api/guardian?decision=${id}`, { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setDecision)
+      .catch(() => setDecision(null));
+  };
+  const commitDecision = async (choice) => {
+    const id = decisionId;
+    setBusyId(id);
+    if (choice === "continue") {
+      await fetch("/api/authorizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "decide", id, decision: "approved" }) }).catch(() => {});
+    } else if (choice === "cancel") {
+      await fetch("/api/authorizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "decide", id, decision: "declined", note: "Cancelled from the decision view" }) }).catch(() => {});
+    } else if (choice === "adjust" && Number(adjustAmt) > 0) {
+      const res = await fetch("/api/authorizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "adjust", id, amount: Number(adjustAmt) }) }).then((r) => r.json()).catch(() => null);
+      setBusyId(null);
+      setAdjustAmt("");
+      if (res?.request?.id) return openDecision(res.request.id);
+      setDecisionId(null);
+      load();
+      return;
+    }
+    setBusyId(null);
+    setDecisionId(null);
+    setDecision(null);
+    setAdjustAmt("");
+    load();
+    fb.refetchAll?.();
+  };
+
   const primary =
-    pending.length > 0
-      ? { label: `Review ${pending.length} approval${pending.length > 1 ? "s" : ""}`, run: openFold }
-      : now?.primaryAction
-        ? { label: now.primaryAction.label, run: () => onRoute?.(now.primaryAction.route || "today") }
-        : now?.needsSetup
-          ? { label: now.primaryAction?.label || "Add a money source", run: () => onRoute?.("reality") }
-          : null;
+    pending.length === 1
+      ? { label: "Review this decision", run: () => openDecision(pending[0].id) }
+      : pending.length > 1
+        ? { label: `Review ${pending.length} decisions`, run: openFold }
+        : now?.primaryAction
+          ? { label: now.primaryAction.label, run: () => onRoute?.(now.primaryAction.route || "today") }
+          : now?.needsSetup
+            ? { label: now.primaryAction?.label || "Add a money source", run: () => onRoute?.("reality") }
+            : null;
   const level = pending.length > 0 && (now?.level === "calm" || !now) ? "decision" : now?.level ?? "calm";
 
   return (
@@ -117,6 +168,56 @@ function Inner({ onRoute, onOpenSupervised }) {
             <span className={g.nowHeadline}>Reading your money…</span>
           </div>
         )}
+
+        {/* Phase 2 — the decision loop: impact before you commit */}
+        {decisionId ? (
+          <div className={g.decision}>
+            {!decision ? (
+              <p className={css.micro}>Working out what this does…</p>
+            ) : (
+              <>
+                <p className={css.kicker}>Before this runs</p>
+                <dl className={g.decisionEv}>
+                  {decision.evidence.map((e, i) => (
+                    <div key={i} style={{ display: "contents" }}>
+                      <dt>{e.label}</dt>
+                      <dd>{e.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <div>
+                  <ImpactRow name="Money you can spend now" v={decision.impact.spendableNow} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
+                  <ImpactRow name="Lowest balance before your income" v={decision.impact.lowestBeforeIncome} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
+                  <div className={g.impactRow}>
+                    <span className={g.impactName}>Emergency buffer</span>
+                    <span className={`${g.impactVal} ${g.same}`}>unchanged</span>
+                  </div>
+                  {decision.impact.debt ? (
+                    <ImpactRow name="Debt outstanding" v={decision.impact.debt} currency={decision.impact.currency} />
+                  ) : null}
+                </div>
+                {decision.impact.crossesSafetyLine ? (
+                  <p className={css.micro} style={{ color: "var(--g-alert)" }}>This would take you below your safety line before your next income.</p>
+                ) : !decision.impact.movesOutOfSpendable ? (
+                  <p className={css.micro}>Your total spendable money is unchanged — this only moves it between your own accounts.</p>
+                ) : null}
+                <div className={g.decisionActs}>
+                  <button type="button" className={g.go} disabled={busyId === decisionId} onClick={() => commitDecision("continue")}>Continue</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => setAdjustAmt(String(Math.round(decision.request.amount || 0)))}>Adjust amount</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => commitDecision("cancel")}>Cancel this move</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => { setDecisionId(null); setDecision(null); }}>Not now</button>
+                </div>
+                {adjustAmt !== "" ? (
+                  <div className={css.field}>
+                    <label htmlFor="gd-adj">New amount ({decision.impact.currency})</label>
+                    <input id="gd-adj" inputMode="numeric" value={adjustAmt} onChange={(e) => setAdjustAmt(e.target.value.replace(/[^\d]/g, ""))} />
+                    <button type="button" className={css.cta} disabled={busyId === decisionId || !(Number(adjustAmt) > 0)} onClick={() => commitDecision("adjust")}>Use this amount</button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
 
         {/* 2 — Protected by Guardian */}
         {protection ? (
