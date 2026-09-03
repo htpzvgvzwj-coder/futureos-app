@@ -8,10 +8,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { useTx } from "./i18n.jsx";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
 function LinkedDetail({ id, data }) {
+  const { tx } = useTx();
   if (!data) return null;
   if (id === "sgfindex") {
     return (
@@ -59,7 +61,7 @@ function LinkedDetail({ id, data }) {
   // payment_provider
   return (
     <div className={css.activity}>
-      <p className={css.micro}>Running in <b>sandbox</b> — a real external transfer still returns a sandbox receipt, never money actually sent.</p>
+      <p className={css.micro}>{tx("Running in sandbox — a real external transfer still returns a sandbox receipt, never money actually sent.")}</p>
       {(data.payees ?? []).map((p) => (
         <div key={p.id} className={css.actItem}>
           <span className={css.actBody}>
@@ -73,6 +75,7 @@ function LinkedDetail({ id, data }) {
 }
 
 export function ConnectionsView({ onBack }) {
+  const { tx } = useTx();
   const [conns, setConns] = useState(null);
   const [open, setOpen] = useState(null);
   const [busy, setBusy] = useState(null);
@@ -97,40 +100,40 @@ export function ConnectionsView({ onBack }) {
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <button type="button" className={css.backLink} onClick={onBack}>← Explore</button>
+        <button type="button" className={css.backLink} onClick={onBack}>← {tx("Explore")}</button>
         <div>
-          <h1 className={css.title}>Connections</h1>
-          <p className={css.micro}>Link your real outside data. A linked figure is tagged with its source in your Financial Twin — never presented as something we made up.</p>
+          <h1 className={css.title}>{tx("Connections")}</h1>
+          <p className={css.micro}>{tx("Link your real outside data. A linked figure is tagged with its source in your Financial Twin — never presented as something we made up.")}</p>
         </div>
 
         <section className={css.section}>
-          <p className={css.kicker}>Outside data &amp; rails</p>
+          <p className={css.kicker}>{tx("Outside data & rails")}</p>
           {conns == null ? (
-            <p className={css.micro}>Loading…</p>
+            <p className={css.micro}>{tx("Loading…")}</p>
           ) : (
             conns.map((c) => (
               <div key={c.id} data-testid={`conn-${c.id}`} style={{ borderTop: "1px solid var(--line)", padding: "12px 0" }}>
                 <div className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>{c.name}</span>
-                    <span className={css.actMeta}>{c.pulls}</span>
-                    <span className={css.actMeta}>Lands in: {c.lands}</span>
-                    {c.connected ? <span className={css.actMeta}>{c.summary}</span> : null}
+                    <span className={css.actName}>{tx(c.name)}</span>
+                    <span className={css.actMeta}>{tx(c.pulls)}</span>
+                    <span className={css.actMeta}>{tx("Lands in")}: {tx(c.lands)}</span>
+                    {c.connected ? <span className={css.actMeta}>{tx(c.summary)}</span> : null}
                   </span>
                   <span className={`${css.zoneStatus} ${c.connected ? css.live : css.soon}`}>
-                    {c.status === "sandbox" ? "Connected (sandbox)" : c.connected ? "Connected" : "Not connected"}
+                    {c.status === "sandbox" ? tx("Connected (sandbox)") : c.connected ? tx("Connected") : tx("Not connected")}
                   </span>
                 </div>
                 <div className={css.choiceGrid}>
                   {c.connected ? (
                     <>
                       <button type="button" className={css.link} onClick={() => setOpen(open === c.id ? null : c.id)}>
-                        {open === c.id ? "Hide what's linked" : "See what's linked"}
+                        {open === c.id ? tx("Hide what's linked") : tx("See what's linked")}
                       </button>
-                      <button type="button" className={css.link} disabled={busy === c.id} onClick={() => act(c.id, "disconnect")}>Disconnect</button>
+                      <button type="button" className={css.link} disabled={busy === c.id} onClick={() => act(c.id, "disconnect")}>{tx("Disconnect")}</button>
                     </>
                   ) : (
-                    <button type="button" className={css.cta} disabled={busy === c.id} onClick={() => act(c.id, "connect")}>Connect</button>
+                    <button type="button" className={css.cta} disabled={busy === c.id} onClick={() => act(c.id, "connect")}>{tx("Connect")}</button>
                   )}
                 </div>
                 {open === c.id && c.data ? <LinkedDetail id={c.id} data={c.data} /> : null}

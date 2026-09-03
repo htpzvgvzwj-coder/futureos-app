@@ -8,8 +8,10 @@
 import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { relTime } from "./format.js";
+import { useTx } from "./i18n.jsx";
 
 export function FeatureHistory({ feature, label = "Your history here" }) {
+  const { tx } = useTx();
   const [open, setOpen] = useState(false);
   const [events, setEvents] = useState(null);
 
@@ -29,22 +31,22 @@ export function FeatureHistory({ feature, label = "Your history here" }) {
         aria-expanded={open}
         style={{ width: "100%", background: "none", border: 0, borderTop: "1px solid var(--line)", padding: "13px 2px", font: "inherit", fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", textAlign: "left", display: "flex", justifyContent: "space-between", cursor: "pointer" }}
       >
-        <span>{label}</span>
-        <span>{open ? "Hide" : "Show"}</span>
+        <span>{tx(label)}</span>
+        <span>{open ? tx("Hide") : tx("Show")}</span>
       </button>
       {open ? (
         events == null ? (
-          <p className={css.micro}>Loading…</p>
+          <p className={css.micro}>{tx("Loading…")}</p>
         ) : events.length === 0 ? (
-          <p className={css.micro}>Nothing yet — what you do here will show up as a record.</p>
+          <p className={css.micro}>{tx("Nothing yet — what you do here will show up as a record.")}</p>
         ) : (
           <div className={css.activity}>
             {events.map((e, i) => (
               <div key={i} className={css.actItem}>
                 <span className={css.actBody}>
-                  <span className={css.actName}>{e.what}</span>
+                  <span className={css.actName}>{tx(e.what)}</span>
                   <span className={css.actMeta}>
-                    {e.actor === "guardian" ? "a linked guardian · " : ""}
+                    {e.actor === "guardian" ? `${tx("a linked guardian")} · ` : ""}
                     {relTime(e.when)}
                     {e.detail ? ` · ${e.detail}` : ""}
                   </span>

@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import fbc from "./future-bank.module.css";
+import { useTx } from "./i18n.jsx";
 import { money, relTime } from "./format.js";
 
 const HEALTH = {
@@ -18,6 +19,7 @@ const HEALTH = {
 };
 
 export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
+  const { tx } = useTx();
   const [data, setData] = useState(null);
   const [err, setErr] = useState("");
   const [busyId, setBusyId] = useState(null);
@@ -26,9 +28,9 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
     setErr("");
     fetch(`/api/care?account=${encodeURIComponent(ownerKey)}`, { headers: { "cache-control": "no-cache" } })
       .then(async (r) => ({ ok: r.ok, ...(await r.json().catch(() => ({}))) }))
-      .then((d) => (d.ok ? setData(d) : setErr(d.error === "not_linked" ? "You are no longer linked to this account." : "Could not load this view.")))
-      .catch(() => setErr("Could not load this view."));
-  }, [ownerKey]);
+      .then((d) => (d.ok ? setData(d) : setErr(d.error === "not_linked" ? tx("You are no longer linked to this account.") : tx("Could not load this view."))))
+      .catch(() => setErr(tx("Could not load this view.")));
+  }, [ownerKey, tx]);
   useEffect(() => {
     load();
   }, [load]);
@@ -65,11 +67,11 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <button type="button" className={css.backLink} onClick={onBack}>← Guardian</button>
+        <button type="button" className={css.backLink} onClick={onBack}>← {tx("Guardian")}</button>
         <div>
-          <h1 className={css.title}>{ownerLabel || "An account you look after"}</h1>
+          <h1 className={css.title}>{ownerLabel || tx("An account you look after")}</h1>
           <p className={css.micro}>
-            You can see {scope === "approve" ? "their money health and decide what they ask you to approve" : "their money health only"} — never their transactions or exact balances. They can end this any time.
+            {tx("You can see")} {scope === "approve" ? tx("their money health and decide what they ask you to approve") : tx("their money health only")} — {tx("never their transactions or exact balances. They can end this any time.")}
           </p>
         </div>
 
@@ -77,12 +79,12 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
 
         {nudges.length > 0 ? (
           <section className={css.section}>
-            <p className={css.kicker}>They asked you to look</p>
+            <p className={css.kicker}>{tx("They asked you to look")}</p>
             {nudges.map((n) => (
               <div key={n.id} className={css.movingCard}>
                 <b>{n.title}</b>
                 {n.detail ? <span className={css.micro}>{n.detail}</span> : null}
-                <button type="button" className={css.link} onClick={() => nudgeDone(n.id)}>Mark done</button>
+                <button type="button" className={css.link} onClick={() => nudgeDone(n.id)}>{tx("Mark done")}</button>
               </div>
             ))}
           </section>
@@ -90,86 +92,86 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
 
         {ranges.length > 0 ? (
           <section className={css.section}>
-            <p className={css.kicker}>Agreed ranges they shared</p>
+            <p className={css.kicker}>{tx("Agreed ranges they shared")}</p>
             <div className={css.activity}>
               {ranges.map((r) => (
                 <div key={r.category} className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>{r.category}</span>
+                    <span className={css.actName}>{tx(r.category)}</span>
                     <span className={css.actMeta}>SGD {r.low.toLocaleString("en-SG")}–{r.high.toLocaleString("en-SG")}{r.note ? ` · ${r.note}` : ""}</span>
                   </span>
                 </div>
               ))}
             </div>
-            <p className={css.micro}>These are ranges the account owner chose to share — not their actual spending.</p>
+            <p className={css.micro}>{tx("These are ranges the account owner chose to share — not their actual spending.")}</p>
           </section>
         ) : null}
 
         {s ? (
           <>
             <section className={css.section}>
-              <p className={css.kicker}>Right now</p>
+              <p className={css.kicker}>{tx("Right now")}</p>
               <div className={health.cls}>
-                <b>{health.label}</b>
+                <b>{tx(health.label)}</b>
                 <span className={css.micro}>{s.headline}</span>
               </div>
               <div className={css.activity}>
                 <div className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>Safe-to-spend</span>
-                    <span className={css.actMeta}>{s.safeToSpendState === "below_safe_line" ? "Below their safe line" : "At or above their safe line"}</span>
+                    <span className={css.actName}>{tx("Safe-to-spend")}</span>
+                    <span className={css.actMeta}>{s.safeToSpendState === "below_safe_line" ? tx("Below their safe line") : tx("At or above their safe line")}</span>
                   </span>
                 </div>
                 <div className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>Reality vs plan</span>
+                    <span className={css.actName}>{tx("Reality vs plan")}</span>
                     <span className={css.actMeta}>
                       {s.driftSeverity === "high"
-                        ? "Has drifted a lot — worth a conversation"
+                        ? tx("Has drifted a lot — worth a conversation")
                         : s.driftSeverity === "watch"
-                          ? "Drifting a little"
-                          : "In line with their plan"}
+                          ? tx("Drifting a little")
+                          : tx("In line with their plan")}
                     </span>
                   </span>
                 </div>
                 <div className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>Waiting for a decision</span>
-                    <span className={css.actMeta}>{s.pendingApprovalCount > 0 ? `${s.pendingApprovalCount} item${s.pendingApprovalCount > 1 ? "s" : ""}` : "Nothing"}</span>
+                    <span className={css.actName}>{tx("Waiting for a decision")}</span>
+                    <span className={css.actMeta}>{s.pendingApprovalCount > 0 ? `${s.pendingApprovalCount} ${s.pendingApprovalCount > 1 ? tx("items") : tx("item")}` : tx("Nothing")}</span>
                   </span>
                 </div>
               </div>
-              <p className={css.micro}>Updated {relTime(s.updatedAt)}.</p>
+              <p className={css.micro}>{tx("Updated")} {relTime(s.updatedAt)}.</p>
             </section>
 
             {scope === "approve" ? (
               <section className={css.section}>
-                <p className={css.kicker}>They asked you to approve</p>
+                <p className={css.kicker}>{tx("They asked you to approve")}</p>
                 {(s.pendingApprovals ?? []).length === 0 ? (
-                  <div className={css.calmCard}><b>Nothing right now.</b></div>
+                  <div className={css.calmCard}><b>{tx("Nothing right now.")}</b></div>
                 ) : (
                   s.pendingApprovals.map((r) => (
                     <article key={r.id} className={`${fbc.moment} ${fbc.action_required}`}>
                       <div className={fbc.momentTop}>
-                        <span className={`${fbc.sev} ${fbc.action_required}`}>needs approval</span>
+                        <span className={`${fbc.sev} ${fbc.action_required}`}>{tx("needs approval")}</span>
                         <span className={fbc.evMeta} style={{ marginLeft: "auto" }}>{relTime(r.createdAt)}</span>
                       </div>
-                      <div className={fbc.momentTitle}>{r.summary}</div>
+                      <div className={fbc.momentTitle}>{tx(r.summary)}</div>
                       {r.amount != null ? <div className={fbc.momentSummary}>{money(r.amount)}</div> : null}
-                      {r.reason ? <div className={fbc.evMeta}>Why: {r.reason}</div> : null}
+                      {r.reason ? <div className={fbc.evMeta}>{tx("Why")}: {tx(r.reason)}</div> : null}
                       {declineFor === r.id ? (
                         <div className={css.field}>
-                          <label htmlFor={`sdn-${r.id}`}>A short reason (they will see this)</label>
+                          <label htmlFor={`sdn-${r.id}`}>{tx("A short reason (they will see this)")}</label>
                           <input id={`sdn-${r.id}`} type="text" value={declineNote} maxLength={140} autoComplete="off" onChange={(e) => setDeclineNote(e.target.value)} />
                           <div className={css.choiceGrid}>
-                            <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => decide(r.id, "declined", declineNote.trim())}>Send decline</button>
-                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>Back</button>
+                            <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => decide(r.id, "declined", declineNote.trim())}>{tx("Send decline")}</button>
+                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>{tx("Back")}</button>
                           </div>
                         </div>
                       ) : (
                         <div className={css.choiceGrid}>
-                          <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => decide(r.id, "approved")}>Approve &amp; do it</button>
-                          <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>Decline</button>
+                          <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => decide(r.id, "approved")}>{tx("Approve & do it")}</button>
+                          <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>{tx("Decline")}</button>
                         </div>
                       )}
                     </article>
@@ -179,17 +181,17 @@ export function SupervisedView({ ownerKey, ownerLabel, onBack }) {
             ) : null}
 
             <section className={css.section}>
-              <p className={css.kicker}>What you cannot do</p>
+              <p className={css.kicker}>{tx("What you cannot do")}</p>
               <ul className={css.proofList}>
-                <li><span className={css.proofMark}>✕</span> see their transactions or exact balances</li>
-                <li><span className={css.proofMark}>✕</span> move their money{scope === "approve" ? " (only approve what they ask)" : ""}</li>
-                <li><span className={css.proofMark}>✕</span> change their goals or plans</li>
-                <li><span className={css.proofMark}>✕</span> stay linked if they revoke — it ends immediately</li>
+                <li><span className={css.proofMark}>✕</span> {tx("see their transactions or exact balances")}</li>
+                <li><span className={css.proofMark}>✕</span> {tx("move their money")}{scope === "approve" ? ` ${tx("(only approve what they ask)")}` : ""}</li>
+                <li><span className={css.proofMark}>✕</span> {tx("change their goals or plans")}</li>
+                <li><span className={css.proofMark}>✕</span> {tx("stay linked if they revoke — it ends immediately")}</li>
               </ul>
             </section>
           </>
         ) : !err ? (
-          <p className={css.lede}>Loading…</p>
+          <p className={css.lede}>{tx("Loading…")}</p>
         ) : null}
       </div>
     </div>

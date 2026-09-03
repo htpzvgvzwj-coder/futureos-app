@@ -19,6 +19,7 @@ import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
 import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
 import { GuardianView } from "./components/future-bank/GuardianView.jsx";
 import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
+import { FutureBankI18n } from "./components/future-bank/i18n.jsx";
 import {
   OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -17908,9 +17909,11 @@ export default function App() {
         hideNav={onboardingActive}
         t={t}
       >
-        <FutureBankDataProvider enabled>
-          <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
-        </FutureBankDataProvider>
+        <FutureBankI18n language={language}>
+          <FutureBankDataProvider enabled>
+            <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+          </FutureBankDataProvider>
+        </FutureBankI18n>
       </PhoneShell>
      </BankDataProvider>
     </LifeThreadProvider>

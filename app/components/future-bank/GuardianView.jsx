@@ -14,6 +14,7 @@ import { FeatureHistory } from "./FeatureHistory.jsx";
 import fbc from "./future-bank.module.css";
 import g from "./guardian.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
+import { useTx } from "./i18n.jsx";
 import { relTime, money } from "./format.js";
 
 const LEVEL_LABEL = { calm: "Calm", watching: "Watching", decision: "Decision", urgent: "Urgent" };
@@ -40,6 +41,7 @@ export function GuardianView(props) {
 }
 
 function Inner({ onRoute, onOpenSupervised }) {
+  const { tx } = useTx();
   const fb = useFutureBankData();
   const [gd, setGd] = useState(null);
   const [auth, setAuth] = useState(null);
@@ -146,37 +148,39 @@ function Inner({ onRoute, onOpenSupervised }) {
 
   const primary =
     pending.length === 1
-      ? { label: "Review this decision", run: () => openDecision(pending[0].id) }
+      ? { label: tx("Review this decision"), run: () => openDecision(pending[0].id) }
       : pending.length > 1
-        ? { label: `Review ${pending.length} decisions`, run: openFold }
+        ? { label: `${tx("Review")} ${pending.length} ${tx("decisions")}`, run: openFold }
         : now?.primaryAction
-          ? { label: now.primaryAction.label, run: () => onRoute?.(now.primaryAction.route || "today") }
+          ? { label: tx(now.primaryAction.label), run: () => onRoute?.(now.primaryAction.route || "today") }
           : now?.needsSetup
-            ? { label: now.primaryAction?.label || "Add a money source", run: () => onRoute?.("reality") }
+            ? { label: tx(now.primaryAction?.label || "Add a money source"), run: () => onRoute?.("reality") }
             : null;
   const level = pending.length > 0 && (now?.level === "calm" || !now) ? "decision" : now?.level ?? "calm";
 
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <h1 className={css.title}>Guardian</h1>
+        <h1 className={css.title}>{tx("Guardian")}</h1>
 
         {/* 1 — Guardian Now */}
         {now ? (
           <div className={`${g.now} ${g[level] || ""}`}>
-            <span className={g.nowLevel}>{LEVEL_LABEL[level] || "Calm"}</span>
+            <span className={g.nowLevel}>{tx(LEVEL_LABEL[level] || "Calm")}</span>
             <span className={g.nowHeadline}>
-              {pending.length > 0 && now.level === "calm" ? `${pending.length} money move${pending.length > 1 ? "s" : ""} need your decision` : now.headline}
+              {pending.length > 0 && now.level === "calm"
+                ? `${pending.length} ${pending.length > 1 ? tx("money moves need your decision") : tx("money move needs your decision")}`
+                : tx(now.headline)}
             </span>
-            {now.cause ? <span className={g.nowCause}>{now.cause}</span> : null}
+            {now.cause ? <span className={g.nowCause}>{tx(now.cause)}</span> : null}
             {primary ? (
               <button type="button" className={g.nowAction} onClick={primary.run}>{primary.label}</button>
             ) : null}
           </div>
         ) : (
           <div className={`${g.now} ${g.calm}`}>
-            <span className={g.nowLevel}>Guardian</span>
-            <span className={g.nowHeadline}>Reading your money…</span>
+            <span className={g.nowLevel}>{tx("Guardian")}</span>
+            <span className={g.nowHeadline}>{tx("Reading your money…")}</span>
           </div>
         )}
 
@@ -184,45 +188,45 @@ function Inner({ onRoute, onOpenSupervised }) {
         {decisionId ? (
           <div className={g.decision}>
             {!decision ? (
-              <p className={css.micro}>Working out what this does…</p>
+              <p className={css.micro}>{tx("Working out what this does…")}</p>
             ) : (
               <>
-                <p className={css.kicker}>Before this runs</p>
+                <p className={css.kicker}>{tx("Before this runs")}</p>
                 <dl className={g.decisionEv}>
                   {decision.evidence.map((e, i) => (
                     <div key={i} style={{ display: "contents" }}>
-                      <dt>{e.label}</dt>
-                      <dd>{e.value}</dd>
+                      <dt>{tx(e.label)}</dt>
+                      <dd>{tx(e.value)}</dd>
                     </div>
                   ))}
                 </dl>
                 <div>
-                  <ImpactRow name="Money you can spend now" v={decision.impact.spendableNow} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
-                  <ImpactRow name="Lowest balance before your income" v={decision.impact.lowestBeforeIncome} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
+                  <ImpactRow name={tx("Money you can spend now")} v={decision.impact.spendableNow} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
+                  <ImpactRow name={tx("Lowest balance before your income")} v={decision.impact.lowestBeforeIncome} currency={decision.impact.currency} warn={decision.impact.crossesSafetyLine} />
                   <div className={g.impactRow}>
-                    <span className={g.impactName}>Emergency buffer</span>
-                    <span className={`${g.impactVal} ${g.same}`}>unchanged</span>
+                    <span className={g.impactName}>{tx("Emergency buffer")}</span>
+                    <span className={`${g.impactVal} ${g.same}`}>{tx("unchanged")}</span>
                   </div>
                   {decision.impact.debt ? (
-                    <ImpactRow name="Debt outstanding" v={decision.impact.debt} currency={decision.impact.currency} />
+                    <ImpactRow name={tx("Debt outstanding")} v={decision.impact.debt} currency={decision.impact.currency} />
                   ) : null}
                 </div>
                 {decision.impact.crossesSafetyLine ? (
-                  <p className={css.micro} style={{ color: "var(--g-alert)" }}>This would take you below your safety line before your next income.</p>
+                  <p className={css.micro} style={{ color: "var(--g-alert)" }}>{tx("This would take you below your safety line before your next income.")}</p>
                 ) : !decision.impact.movesOutOfSpendable ? (
-                  <p className={css.micro}>Your total spendable money is unchanged — this only moves it between your own accounts.</p>
+                  <p className={css.micro}>{tx("Your total spendable money is unchanged — this only moves it between your own accounts.")}</p>
                 ) : null}
                 <div className={g.decisionActs}>
-                  <button type="button" className={g.go} disabled={busyId === decisionId} onClick={() => commitDecision("continue")}>Continue</button>
-                  <button type="button" disabled={busyId === decisionId} onClick={() => setAdjustAmt(String(Math.round(decision.request.amount || 0)))}>Adjust amount</button>
-                  <button type="button" disabled={busyId === decisionId} onClick={() => commitDecision("cancel")}>Cancel this move</button>
-                  <button type="button" disabled={busyId === decisionId} onClick={() => { setDecisionId(null); setDecision(null); }}>Not now</button>
+                  <button type="button" className={g.go} disabled={busyId === decisionId} onClick={() => commitDecision("continue")}>{tx("Continue")}</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => setAdjustAmt(String(Math.round(decision.request.amount || 0)))}>{tx("Adjust amount")}</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => commitDecision("cancel")}>{tx("Cancel this move")}</button>
+                  <button type="button" disabled={busyId === decisionId} onClick={() => { setDecisionId(null); setDecision(null); }}>{tx("Not now")}</button>
                 </div>
                 {adjustAmt !== "" ? (
                   <div className={css.field}>
-                    <label htmlFor="gd-adj">New amount ({decision.impact.currency})</label>
+                    <label htmlFor="gd-adj">{tx("New amount")} ({decision.impact.currency})</label>
                     <input id="gd-adj" inputMode="numeric" value={adjustAmt} onChange={(e) => setAdjustAmt(e.target.value.replace(/[^\d]/g, ""))} />
-                    <button type="button" className={css.cta} disabled={busyId === decisionId || !(Number(adjustAmt) > 0)} onClick={() => commitDecision("adjust")}>Use this amount</button>
+                    <button type="button" className={css.cta} disabled={busyId === decisionId || !(Number(adjustAmt) > 0)} onClick={() => commitDecision("adjust")}>{tx("Use this amount")}</button>
                   </div>
                 ) : null}
               </>
@@ -233,35 +237,35 @@ function Inner({ onRoute, onOpenSupervised }) {
         {/* Recovery Mode — an ordered way back, not just a warning */}
         {recovery ? (
           <section className={css.section}>
-            <p className={css.kicker}>A way back</p>
+            <p className={css.kicker}>{tx("A way back")}</p>
             <div className={g.decision}>
               {recovery.steps.map((s) => (
                 <div key={s.order} className={g.impactRow} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                  <span className={g.impactVal}>{s.order}. {s.label}</span>
-                  <span className={g.impactName}>{s.detail}</span>
+                  <span className={g.impactVal}>{s.order}. {tx(s.label)}</span>
+                  <span className={g.impactName}>{tx(s.detail)}</span>
                   {s.needsConfirm ? (
                     <button type="button" className={g.go} style={{ marginTop: 4 }} disabled={busyId === "apply_recovery_step"} onClick={() => guardianPost({ action: "apply_recovery_step", order: s.order })}>
-                      Confirm this step
+                      {tx("Confirm this step")}
                     </button>
                   ) : null}
                 </div>
               ))}
             </div>
-            <p className={css.micro}>Guardian proposes this — nothing changes until you confirm a step.</p>
+            <p className={css.micro}>{tx("Guardian proposes this — nothing changes until you confirm a step.")}</p>
           </section>
         ) : null}
 
         {/* Collision Radar — two plans competing for the same cashflow */}
         {collision ? (
           <section className={css.section}>
-            <p className={css.kicker}>Two plans are competing</p>
+            <p className={css.kicker}>{tx("Two plans are competing")}</p>
             <div className={g.decision}>
-              <span className={g.impactVal}>{collision.summary}</span>
+              <span className={g.impactVal}>{tx(collision.summary)}</span>
               <div className={g.decisionActs} style={{ flexDirection: "column", alignItems: "stretch" }}>
                 {collision.paths.map((p) => (
                   <button key={p.id} type="button" style={{ textAlign: "left" }} disabled={busyId === "apply_collision_path"} onClick={() => guardianPost({ action: "apply_collision_path", pathId: p.id })}>
-                    <b>{p.label}</b>
-                    <span style={{ display: "block", fontWeight: 400, color: "var(--ink-soft)", marginTop: 2 }}>{p.effect}</span>
+                    <b>{tx(p.label)}</b>
+                    <span style={{ display: "block", fontWeight: 400, color: "var(--ink-soft)", marginTop: 2 }}>{tx(p.effect)}</span>
                   </button>
                 ))}
               </div>
@@ -272,11 +276,11 @@ function Inner({ onRoute, onOpenSupervised }) {
         {/* Promise Shield — the four buckets your money is carrying */}
         {shield ? (
           <section className={css.section}>
-            <p className={css.kicker}>What your money is promised to</p>
+            <p className={css.kicker}>{tx("What your money is promised to")}</p>
             <div>
               {shield.buckets.map((b) => (
                 <div key={b.id} className={g.impactRow}>
-                  <span className={g.impactName}>{b.name}</span>
+                  <span className={g.impactName}>{tx(b.name)}</span>
                   <span className={g.impactVal}>{shield.currency} {b.amount.toLocaleString("en-SG")}</span>
                 </div>
               ))}
@@ -288,13 +292,13 @@ function Inner({ onRoute, onOpenSupervised }) {
         {protection ? (
           <section className={css.section}>
             <div className={g.protectHead}>
-              <span className={g.protectCount}>{protection.summary.protectedCount} of {protection.summary.total} promises protected</span>
+              <span className={g.protectCount}>{protection.summary.protectedCount} {tx("of")} {protection.summary.total} {tx("promises protected")}</span>
             </div>
-            <p className={g.protectNext}>Next check {protection.summary.nextCheck}</p>
+            <p className={g.protectNext}>{tx("Next check")} {tx(protection.summary.nextCheck)}</p>
             {stage && stage.id !== "unknown" ? (
               <p className={g.stageLine}>
-                <b>{stage.label}.</b> Guardian watches {stage.focus} hardest right now — {stage.why}
-                {stage.caregiverNote ? ` ${stage.caregiverNote}` : ""}
+                <b>{tx(stage.label)}.</b> {tx("Guardian watches")} {tx(stage.focus)} {tx("hardest right now —")} {tx(stage.why)}
+                {stage.caregiverNote ? ` ${tx(stage.caregiverNote)}` : ""}
               </p>
             ) : null}
             <div>
@@ -302,14 +306,14 @@ function Inner({ onRoute, onOpenSupervised }) {
                 <div key={d.id} className={g.domain}>
                   <button type="button" className={g.domainRow} onClick={() => setOpenDomain(openDomain === d.id ? null : d.id)} aria-expanded={openDomain === d.id}>
                     <span className={`${g.dot} ${g[d.status] || ""}`} />
-                    <span className={g.domainName}>{d.name}</span>
+                    <span className={g.domainName}>{tx(d.name)}</span>
                     <span className={g.domainChevron}>{openDomain === d.id ? "–" : "+"}</span>
                   </button>
                   {openDomain === d.id ? (
                     <div className={g.domainBody}>
-                      <span className={g.domainDetail}>{d.detail}</span>
+                      <span className={g.domainDetail}>{tx(d.detail)}</span>
                       <ul className={g.domainChecks}>
-                        {d.checks.map((c) => <li key={c}>{c}</li>)}
+                        {d.checks.map((c) => <li key={c}>{tx(c)}</li>)}
                       </ul>
                     </div>
                   ) : null}
@@ -322,15 +326,15 @@ function Inner({ onRoute, onOpenSupervised }) {
         {/* 3 — Guardian Proof */}
         {proof.length > 0 ? (
           <section className={css.section}>
-            <p className={css.kicker}>Guardian proof</p>
+            <p className={css.kicker}>{tx("Guardian proof")}</p>
             {proof.slice(0, 4).map((p) => (
               <div key={p.id} className={g.proofCard}>
                 <span className={g.proofWhen}>{relTime(p.when)}</span>
-                <span className={g.proofLabel}>Finding</span><span className={g.proofValue}>{p.finding}</span>
-                <span className={g.proofLabel}>Why</span><span className={g.proofValue}>{p.reasoning}</span>
-                <span className={g.proofLabel}>Impact</span><span className={g.proofValue}>{p.impact.join(" · ")}</span>
-                <span className={g.proofLabel}>Decision</span><span className={g.proofValue}>{p.decision}</span>
-                <span className={g.proofLabel}>Result</span><span className={`${g.proofValue} ${p.isActual ? "" : g.pending}`}>{p.result}</span>
+                <span className={g.proofLabel}>{tx("Finding")}</span><span className={g.proofValue}>{tx(p.finding)}</span>
+                <span className={g.proofLabel}>{tx("Why")}</span><span className={g.proofValue}>{tx(p.reasoning)}</span>
+                <span className={g.proofLabel}>{tx("Impact")}</span><span className={g.proofValue}>{p.impact.map((x) => tx(x)).join(" · ")}</span>
+                <span className={g.proofLabel}>{tx("Decision")}</span><span className={g.proofValue}>{tx(p.decision)}</span>
+                <span className={g.proofLabel}>{tx("Result")}</span><span className={`${g.proofValue} ${p.isActual ? "" : g.pending}`}>{tx(p.result)}</span>
               </div>
             ))}
           </section>
@@ -338,8 +342,8 @@ function Inner({ onRoute, onOpenSupervised }) {
 
         {/* ---- below the fold: the operational surface ---- */}
         <button type="button" className={g.foldToggle} onClick={() => setFoldOpen(!foldOpen)} aria-expanded={foldOpen} ref={foldRef}>
-          <span>Handling, access &amp; the Guardian Contract</span>
-          <span>{foldOpen ? "Hide" : "Open"}</span>
+          <span>{tx("Handling, access & the Guardian Contract")}</span>
+          <span>{foldOpen ? tx("Hide") : tx("Open")}</span>
         </button>
 
         {foldOpen ? (
@@ -347,44 +351,44 @@ function Inner({ onRoute, onOpenSupervised }) {
             {/* approval queue */}
             {auth && (pending.length > 0 || auth.accountType === "youth" || auth.accountType === "guardian_managed_child") ? (
               <section className={css.section}>
-                <p className={css.kicker}>Waiting for approval</p>
+                <p className={css.kicker}>{tx("Waiting for approval")}</p>
                 {!auth.linkedApprover ? (
-                  <p className={css.micro}>On a supervised account these go to a linked guardian. None is linked yet, so they wait here for you.</p>
+                  <p className={css.micro}>{tx("On a supervised account these go to a linked guardian. None is linked yet, so they wait here for you.")}</p>
                 ) : null}
                 {pending.length === 0 ? (
-                  <div className={css.calmCard}><b>Nothing is waiting.</b></div>
+                  <div className={css.calmCard}><b>{tx("Nothing is waiting.")}</b></div>
                 ) : (
                   pending.map((r) => (
                     <article key={r.id} className={`${fbc.moment} ${fbc.action_required}`}>
                       <div className={fbc.momentTop}>
-                        <span className={`${fbc.sev} ${fbc.action_required}`}>needs approval</span>
+                        <span className={`${fbc.sev} ${fbc.action_required}`}>{tx("needs approval")}</span>
                         <span className={fbc.evMeta} style={{ marginLeft: "auto" }}>{relTime(r.createdAt)}</span>
                       </div>
-                      <div className={fbc.momentTitle}>{r.summary}</div>
+                      <div className={fbc.momentTitle}>{tx(r.summary)}</div>
                       {r.amount != null ? <div className={fbc.momentSummary}>{money(r.amount)}</div> : null}
-                      {r.reason ? <div className={fbc.evMeta}>Why: {r.reason}</div> : null}
-                      {r.autoExecuteAt ? <div className={fbc.evMeta}>Runs on its own in about {hoursLeft(r.autoExecuteAt)}h unless stopped.</div> : null}
-                      {r.decidedBy === "guardian" ? <div className={fbc.evMeta}>A guardian approved this — needs your confirmation too.</div> : null}
+                      {r.reason ? <div className={fbc.evMeta}>{tx("Why")}: {tx(r.reason)}</div> : null}
+                      {r.autoExecuteAt ? <div className={fbc.evMeta}>{tx("Runs on its own in about")} {hoursLeft(r.autoExecuteAt)}h {tx("unless stopped.")}</div> : null}
+                      {r.decidedBy === "guardian" ? <div className={fbc.evMeta}>{tx("A guardian approved this — needs your confirmation too.")}</div> : null}
                       {declineFor === r.id ? (
                         <div className={css.field}>
-                          <label htmlFor={`dn-${r.id}`}>A short reason</label>
+                          <label htmlFor={`dn-${r.id}`}>{tx("A short reason")}</label>
                           <input id={`dn-${r.id}`} type="text" value={declineNote} maxLength={140} autoComplete="off" onChange={(e) => setDeclineNote(e.target.value)} />
                           <div className={css.choiceGrid}>
-                            <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => act({ action: "decide", id: r.id, decision: "declined", note: declineNote.trim() })}>Send decline</button>
-                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>Back</button>
+                            <button type="button" className={css.cta} disabled={busyId === r.id || !declineNote.trim()} onClick={() => act({ action: "decide", id: r.id, decision: "declined", note: declineNote.trim() })}>{tx("Send decline")}</button>
+                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => { setDeclineFor(null); setDeclineNote(""); }}>{tx("Back")}</button>
                           </div>
                         </div>
                       ) : (
                         <div className={css.choiceGrid}>
                           {r.decidedBy === "guardian" && !r.ownerConfirmedAt ? (
-                            <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => act({ action: "confirm", id: r.id })}>Confirm &amp; do it</button>
+                            <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => act({ action: "confirm", id: r.id })}>{tx("Confirm & do it")}</button>
                           ) : (
-                            <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => act({ action: "decide", id: r.id, decision: "approved" })}>Approve &amp; do it</button>
+                            <button type="button" className={css.cta} disabled={busyId === r.id} onClick={() => act({ action: "decide", id: r.id, decision: "approved" })}>{tx("Approve & do it")}</button>
                           )}
                           {r.autoExecuteAt ? (
-                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => act({ action: "stop", id: r.id })}>Stop</button>
+                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => act({ action: "stop", id: r.id })}>{tx("Stop")}</button>
                           ) : (
-                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>Decline</button>
+                            <button type="button" className={css.choice} disabled={busyId === r.id} onClick={() => setDeclineFor(r.id)}>{tx("Decline")}</button>
                           )}
                         </div>
                       )}
@@ -397,12 +401,12 @@ function Inner({ onRoute, onOpenSupervised }) {
             {/* people you look after + their nudges */}
             {inbox.length > 0 ? (
               <section className={css.section}>
-                <p className={css.kicker}>They asked you to look</p>
+                <p className={css.kicker}>{tx("They asked you to look")}</p>
                 <div className={css.activity}>
                   {inbox.map((n) => (
                     <div key={n.id} className={css.actItem}>
-                      <span className={css.actBody}><span className={css.actName}>{n.ownerLabel}</span><span className={css.actMeta}>{n.title}</span></span>
-                      <button type="button" className={css.link} onClick={() => onOpenSupervised?.(n.ownerKey, n.ownerLabel)}>Open</button>
+                      <span className={css.actBody}><span className={css.actName}>{n.ownerLabel}</span><span className={css.actMeta}>{tx(n.title)}</span></span>
+                      <button type="button" className={css.link} onClick={() => onOpenSupervised?.(n.ownerKey, n.ownerLabel)}>{tx("Open")}</button>
                     </div>
                   ))}
                 </div>
@@ -410,30 +414,30 @@ function Inner({ onRoute, onOpenSupervised }) {
             ) : null}
             {supervised.length > 0 ? (
               <section className={css.section}>
-                <p className={css.kicker}>People you look after</p>
+                <p className={css.kicker}>{tx("People you look after")}</p>
                 <div className={css.activity}>
                   {supervised.map((p) => (
                     <div key={p.roleId} className={css.actItem}>
-                      <span className={css.actBody}><span className={css.actName}>{p.ownerLabel}</span><span className={css.actMeta}>{p.role} · {p.scope === "approve" ? "view + approve" : "view only"}</span></span>
-                      <button type="button" className={css.link} onClick={() => onOpenSupervised?.(p.ownerKey, p.ownerLabel)}>Open</button>
+                      <span className={css.actBody}><span className={css.actName}>{p.ownerLabel}</span><span className={css.actMeta}>{tx(p.role)} · {p.scope === "approve" ? tx("view + approve") : tx("view only")}</span></span>
+                      <button type="button" className={css.link} onClick={() => onOpenSupervised?.(p.ownerKey, p.ownerLabel)}>{tx("Open")}</button>
                     </div>
                   ))}
                 </div>
               </section>
             ) : null}
             {supervisors.length > 0 ? (
-              <p className={css.micro}>{supervisors.map((s) => s.personLabel).join(", ")} can see this account&apos;s money health. Manage in Family &amp; Care.</p>
+              <p className={css.micro}>{supervisors.map((s) => s.personLabel).join(", ")} {tx("can see this account's money health. Manage in Family & Care.")}</p>
             ) : null}
 
             {/* Guardian Contract */}
             {contract ? (
               <section className={css.section}>
-                <p className={css.kicker}>Guardian Contract</p>
-                <p className={css.micro}>Watch = observes only · Ask = surfaces and asks you · Act = does it inside its stated scope. Revocable any time.</p>
+                <p className={css.kicker}>{tx("Guardian Contract")}</p>
+                <p className={css.micro}>{tx("Watch = observes only · Ask = surfaces and asks you · Act = does it inside its stated scope. Revocable any time.")}</p>
                 {contract.capabilities.map((c) => (
                   <div key={c.capability} className={g.capRow}>
-                    <span className={g.capLabel}>{c.label}</span>
-                    <span className={g.capScope}>{c.scope}</span>
+                    <span className={g.capLabel}>{tx(c.label)}</span>
+                    <span className={g.capScope}>{tx(c.scope)}</span>
                     <span className={g.seg}>
                       {["watch", "ask", "act"].map((lv) => (
                         <button
@@ -443,13 +447,13 @@ function Inner({ onRoute, onOpenSupervised }) {
                           disabled={lv === "act" && !c.canAct}
                           onClick={() => setCap(c.capability, lv)}
                         >
-                          {lv[0].toUpperCase() + lv.slice(1)}
+                          {tx(lv[0].toUpperCase() + lv.slice(1))}
                         </button>
                       ))}
                     </span>
                   </div>
                 ))}
-                <button type="button" className={css.link} onClick={resetCaps} style={{ marginTop: 10 }}>Reset every capability to its default</button>
+                <button type="button" className={css.link} onClick={resetCaps} style={{ marginTop: 10 }}>{tx("Reset every capability to its default")}</button>
               </section>
             ) : null}
           </>
