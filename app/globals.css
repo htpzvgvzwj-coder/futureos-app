@@ -46,23 +46,29 @@ nextjs-portal {
 
 .stage {
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
   transition:
     background 240ms ease,
     color 240ms ease;
 }
 
+/* A real app column, not a phone mockup: full viewport height, a sensible
+   reading width, no bezel or fake status bar. Wide screens get quiet
+   side margins (phone-first banking app), never a shrunken toy frame. */
 .phone {
-  width: min(100%, 430px);
-  height: min(920px, calc(100dvh - 36px));
+  width: min(100%, 480px);
+  height: 100dvh;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(20, 36, 58, 0.12);
-  border-radius: 34px;
+  border: 0;
+  border-left: 1px solid rgba(20, 36, 58, 0.08);
+  border-right: 1px solid rgba(20, 36, 58, 0.08);
+  border-radius: 0;
   background: #f8fafc;
-  box-shadow: var(--shadow);
+  box-shadow: 0 0 60px rgba(20, 36, 58, 0.06);
 }
 
 /* Simple Mode (Settings > Accessibility) - every font-size in this
@@ -196,12 +202,12 @@ nextjs-portal {
 .screenArea {
   position: relative;
   z-index: 2;
-  height: calc(100% - 174px);
+  height: calc(100% - 136px); /* brandBar 54 + bottomNav 82 */
   overflow: hidden;
 }
 
 .phone.nav-hidden .screenArea {
-  height: calc(100% - 92px);
+  height: calc(100% - 54px); /* brandBar only */
 }
 
 .screen {
@@ -5522,21 +5528,15 @@ nextjs-portal {
 }
 
 @media (max-width: 460px) {
-  .stage {
-    padding: 0;
-  }
-
   .phone {
     width: 100%;
-    height: 100vh;
-    min-height: 100vh;
-    border: 0;
-    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
     box-shadow: none;
   }
 
   .screenArea {
-    height: calc(100% - 176px);
+    height: calc(100% - 136px);
   }
 
   .pageHeader h1 {

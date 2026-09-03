@@ -1,0 +1,64 @@
+import { getCurrentUserId } from "../../../lib/auth.js";
+import { guard } from "../../../lib/http-guards.js";
+import { buildMoneyMoments } from "../../../lib/money-moments/build.js";
+import { buildFinancialTwinBundle } from "../../../lib/financial-twin/bundle.js";
+import { listEvents } from "../../../lib/change-ledger/store.js";
+import { listMySupervisors } from "../../../lib/care/link-store.js";
+import { reduceGuardianStatus } from "../../../lib/guardian/status.js";
+import { buildProtectionDomains } from "../../../lib/guardian/protection.js";
+import { buildGuardianProof } from "../../../lib/guardian/proof.js";
+import { getContracts, setContract, resetContracts, contractSummary } from "../../../lib/guardian/contract.js";
+
+export const runtime = "nodejs";
+
+// GET /api/guardian -> the three layers: Guardian Now (one status), Protected
+// by Guardian (seven domains), Guardian Proof (causal replay), plus the
+// Guardian Contract. Every layer reads the same real Money Moment / Twin /
+// Change Ledger data the rest of the app does.
+export async function GET(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+  try {
+    const [mm, bundle, events, contracts, supervisors] = await Promise.all([
+      buildMoneyMoments(userId).catch(() => ({ isEmpty: true, moments: [] })),
+      buildFinancialTwinBundle(userId).catch(() => ({ twin: null })),
+      listEvents(userId, { filter: "all", limit: 8 }).catch(() => []),
+      getContracts(userId),
+      listMySupervisors(userId).catch(() => []),
+    ]);
+    const mmForGuardian = { ...mm, hasSharedAccess: supervisors.length > 0 };
+    return Response.json({
+      now: reduceGuardianStatus(mmForGuardian),
+      protection: buildProtectionDomains({ twin: bundle.twin, mm: mmForGuardian }),
+      proof: buildGuardianProof(events),
+      contract: { capabilities: contracts, summary: contractSummary(contracts) },
+    });
+  } catch (error) {
+    console.error("[guardian] GET failed:", error?.message);
+    return Response.json({ error: "guardian_unavailable" }, { status: 500 });
+  }
+}
+
+// POST /api/guardian
+//   { action: "set_contract", capability, level }   -> raise / lower one capability
+//   { action: "reset_contract" }                    -> back to defaults (the "revoke")
+export async function POST(request) {
+  const userId = await getCurrentUserId(request);
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const blocked = guard(request, { bucket: "guardian", limit: 40 });
+  if (blocked) return blocked;
+  const body = await request.json().catch(() => ({}));
+  try {
+    if (body.action === "set_contract") {
+      const contracts = await setContract(userId, body.capability, body.level);
+      return Response.json({ contract: { capabilities: contracts, summary: contractSummary(contracts) } });
+    }
+    if (body.action === "reset_contract") {
+      const contracts = await resetContracts(userId);
+      return Response.json({ contract: { capabilities: contracts, summary: contractSummary(contracts) } });
+    }
+    return Response.json({ error: "unknown_action" }, { status: 400 });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 400 });
+  }
+}

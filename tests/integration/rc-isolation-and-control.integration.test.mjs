@@ -34,7 +34,7 @@ async function cleanupUser(pool, uid) {
   await pool.query(`delete from care_invites where profile_key = $1 or accepted_by = $1`, [uid]).catch(() => {});
   await pool.query(`delete from care_nudges where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
   await pool.query(`delete from lifecycle_roles where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
-  for (const t of ["care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
+  for (const t of ["guardian_contracts", "care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
   await pool.query(`delete from users where id = $1`, [uid]).catch(() => {});
@@ -483,4 +483,27 @@ test("Phase 6 Round 5 Care extras: nudges, shared ranges, and age-transition pro
   assert.equal((await control.getOnboarding(owner)).accountType, "individual");
   // it is no longer a live proposal
   assert.equal((await transitions.listTransitions(owner)).some((p) => p.milestone === "turns_18"), false);
+});
+
+test("Guardian Contract: defaults, raising a capability, the never-act guard, reset", opts, async (t) => {
+  const [{ getContracts, setContract, resetContracts }, { pool }] = await Promise.all([
+    import("../../lib/guardian/contract.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gcontract");
+  t.after(() => cleanupUser(pool, u));
+
+  const start = await getContracts(u);
+  assert.equal(start.find((c) => c.capability === "notify_a_guardian").level, "watch");
+  assert.equal(start.find((c) => c.capability === "pause_plan_contribution").level, "ask");
+
+  const raised = await setContract(u, "pause_plan_contribution", "act");
+  assert.equal(raised.find((c) => c.capability === "pause_plan_contribution").level, "act");
+
+  await assert.rejects(() => setContract(u, "move_emergency_funds", "act"), /never be set to "act"/i);
+  await assert.rejects(() => setContract(u, "not_a_capability", "ask"), /unknown capability/i);
+  await assert.rejects(() => setContract(u, "pause_plan_contribution", "sideways"), /invalid level/i);
+
+  const afterReset = await resetContracts(u);
+  assert.equal(afterReset.find((c) => c.capability === "pause_plan_contribution").level, "ask", "reset returns to the default");
 });

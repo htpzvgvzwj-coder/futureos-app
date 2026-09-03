@@ -1580,3 +1580,17 @@ create table if not exists care_transitions (
 create index if not exists care_transitions_profile_idx on care_transitions (profile_key, status);
 -- an optional birth year to drive the milestone proposals (year only - not a full DOB)
 alter table user_onboarding add column if not exists birth_year integer;
+
+-- ============================================================
+-- Guardian round 2 (protection layer) - the Guardian Contract.
+-- One row per capability the user has moved off its default level.
+-- level: watch | ask | act. A fixed set can never reach 'act'
+-- (enforced in lib/guardian/contract.js, not here).
+-- ============================================================
+create table if not exists guardian_contracts (
+  profile_key  text not null,
+  capability   text not null,
+  level        text not null default 'ask',   -- watch | ask | act
+  updated_at   timestamptz not null default now(),
+  primary key (profile_key, capability)
+);
