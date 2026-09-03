@@ -3,7 +3,8 @@ import { guard } from "../../../lib/http-guards.js";
 import { buildMoneyMoments } from "../../../lib/money-moments/build.js";
 import { buildFinancialTwinBundle } from "../../../lib/financial-twin/bundle.js";
 import { listEvents } from "../../../lib/change-ledger/store.js";
-import { listMySupervisors } from "../../../lib/care/link-store.js";
+import { listMySupervisors, listSupervisedByMe } from "../../../lib/care/link-store.js";
+import { deriveLifeStage } from "../../../lib/guardian/lifecycle.js";
 import { reduceGuardianStatus } from "../../../lib/guardian/status.js";
 import { buildProtectionDomains } from "../../../lib/guardian/protection.js";
 import { buildGuardianProof } from "../../../lib/guardian/proof.js";
@@ -35,18 +36,25 @@ export async function GET(request) {
     }
   }
   try {
-    const [mm, bundle, events, contracts, supervisors, lt] = await Promise.all([
+    const [mm, bundle, events, contracts, supervisors, iSupervise, lt] = await Promise.all([
       buildMoneyMoments(userId).catch(() => ({ isEmpty: true, moments: [] })),
       buildFinancialTwinBundle(userId).catch(() => ({ twin: null })),
       listEvents(userId, { filter: "all", limit: 8 }).catch(() => []),
       getContracts(userId),
       listMySupervisors(userId).catch(() => []),
+      listSupervisedByMe(userId).catch(() => []),
       buildLifeThread(userId).catch(() => ({ commitments: [], availableMonthlyCashflow: null })),
     ]);
     const mmForGuardian = { ...mm, hasSharedAccess: supervisors.length > 0 };
     return Response.json({
       now: reduceGuardianStatus(mmForGuardian),
       protection: buildProtectionDomains({ twin: bundle.twin, mm: mmForGuardian }),
+      stage: deriveLifeStage({
+        supervisedByOthers: supervisors.length,
+        iSupervise: iSupervise.length,
+        commitments: lt.commitments ?? [],
+        belowSafetyFloor: Boolean(mm.bankNow?.belowProtectedFloor) || (bundle.rescueCases ?? []).length > 0,
+      }),
       proof: buildGuardianProof(events),
       contract: { capabilities: contracts, summary: contractSummary(contracts) },
       promiseShield: buildPromiseShield({ twin: bundle.twin, safeToSpend: bundle.safeToSpend }),

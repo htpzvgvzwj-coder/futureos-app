@@ -85,6 +85,15 @@
 }
 .protectCount { font-size: 15px; font-weight: 700; color: var(--ink); }
 .protectNext { font-size: 12px; color: var(--ink-faint); }
+.stageLine {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--sea);
+  padding: 2px 0 2px 12px;
+}
+.stageLine b { color: var(--ink); font-weight: 700; }
 
 .domain {
   border-top: 1px solid var(--line);
