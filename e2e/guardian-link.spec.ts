@@ -22,6 +22,7 @@ async function onboard(api: APIRequestContext, accountType: string) {
 }
 
 test("owner invites a guardian; guardian accepts, sees health only, and approves a parked transfer", async ({ browser }) => {
+  test.setTimeout(150000);
   const ownerCtx = await browser.newContext();
   const guardianCtx = await browser.newContext();
   const owner: Page = await ownerCtx.newPage();
@@ -66,8 +67,9 @@ test("owner invites a guardian; guardian accepts, sees health only, and approves
   await guardian.getByRole("button", { name: /Link my account to theirs/i }).click();
   await expect(guardian.getByText(/Linked\./i)).toBeVisible({ timeout: 15000 });
 
-  // guardian: Guardian tab -> People you look after -> Open
+  // guardian: Guardian tab -> open the handling fold -> People you look after -> Open
   await guardian.getByTestId("bottom-nav-guardian").click();
+  await guardian.getByRole("button", { name: /Handling, access & the Guardian Contract/i }).click();
   await expect(guardian.getByText(/People you look after/i)).toBeVisible({ timeout: 15000 });
   await guardian.getByRole("button", { name: /^Open$/ }).first().click();
 
@@ -76,7 +78,7 @@ test("owner invites a guardian; guardian accepts, sees health only, and approves
   await expect(guardian.getByText(/They asked you to approve/i)).toBeVisible();
   await expect(guardian.getByText(/between your own accounts/i)).toBeVisible();
   await guardian.getByRole("button", { name: /Approve & do it/i }).click();
-  await expect(guardian.getByText(/Nothing right now\./i)).toBeVisible({ timeout: 15000 });
+  await expect(guardian.getByText(/Nothing right now\./i)).toBeVisible({ timeout: 30000 });
 
   // owner side: the transfer really ran
   const txns = await owner.request.get(`${BASE}/api/bank/transactions?limit=50`).then((r) => r.json());

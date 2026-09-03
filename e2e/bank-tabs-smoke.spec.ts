@@ -34,11 +34,11 @@ test("Guardian and Spending Intelligence tabs render for a new user", async ({ p
 
   await page.goto(BASE + "/");
 
-  // Guardian tab
+  // Guardian tab — the protection layer: one status + what it protects
   await page.getByTestId("bottom-nav-guardian").click();
   await expect(page.getByRole("heading", { name: /^Guardian$/ })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/What Guardian can never do/i)).toBeVisible();
-  await expect(page.getByText(/move money or make a payment/i)).toBeVisible();
+  await expect(page.getByText(/^(Calm|Watching|Decision|Urgent)$/).first()).toBeVisible();
+  await expect(page.getByText(/of \d+ promises protected/i)).toBeVisible();
 
   // Explore -> Spending Intelligence
   await page.getByTestId("bottom-nav-mirror").click();

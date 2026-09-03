@@ -3213,14 +3213,6 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
   return (
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
       <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="Future Bank">
-        <div className="statusBar">
-          <span>9:41</span>
-          <div>
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
         <div className="brandBar">
           <div className="brandMark">OCBC</div>
           <div className="brandActions">

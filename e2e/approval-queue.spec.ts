@@ -51,6 +51,7 @@ test("a youth account parks an internal transfer for approval; Guardian approves
   // Guardian shows it waiting; approve it
   await page.goto(BASE + "/");
   await page.getByTestId("bottom-nav-guardian").click();
+  await page.getByRole("button", { name: /Handling, access & the Guardian Contract/i }).click();
   await expect(page.getByText(/Waiting for approval/i)).toBeVisible({ timeout: 15000 });
   await expect(page.getByText(/between your own accounts/i)).toBeVisible();
   await page.getByRole("button", { name: /Approve & do it/i }).click();

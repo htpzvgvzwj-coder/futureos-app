@@ -7,6 +7,7 @@
 // missing figure stays missing.
 
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { money, relTime } from "./format.js";
 
@@ -169,6 +170,7 @@ function Inner({ onBack, onAdd }) {
           </section>
         </>
       )}
+      <FeatureHistory feature="twin" label="Changes to your money picture" />
     </Shell>
   );
 }
