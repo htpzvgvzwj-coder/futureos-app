@@ -185,6 +185,11 @@ async function main() {
   await createAsset(uid, { category: "financial", subtype: "pension", name: "CPF (OA + SA)", value: CPF_OA + CPF_SA, details: { liquidity: "illiquid" } });
   await createAsset(uid, { category: "legal", subtype: "insurance_policy", name: "Term life + CI (Great Eastern)", value: null, details: { status: "active", coverage: 250000, kind: "term_life_ci", premiumMonthly: 78 } });
 
+  // ---- the three outside-data links, connected ----
+  for (const provider of ["sgfindex", "insurer", "payment_provider"]) {
+    await connectProvider(uid, provider).catch((e) => console.log(`  (connect ${provider}: ${e.message})`));
+  }
+
   // ---- three Studio plans + active monthly commitments ----
   const seedPlan = async (domain, title, patch, monthly) => {
     const plan = await planStore.getOrCreatePlan(uid, { domain, goalKey: domain, title });
