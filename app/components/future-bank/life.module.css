@@ -138,3 +138,67 @@
 .movedHead { font-size: 13.5px; font-weight: 700; color: var(--ink); }
 .movedImpact { font-size: 12.5px; color: var(--ink-soft); }
 .movedWhen { font-size: 11px; color: var(--ink-faint); }
+
+/* ---- Future Echo — where today's plans land if nothing changes ---- */
+.echo {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.echoHead { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.echoRow { display: flex; flex-direction: column; gap: 3px; }
+.echoRow + .echoRow { border-top: 1px solid var(--line); padding-top: 8px; }
+.echoLabel { font-size: 13px; font-weight: 650; color: var(--ink); }
+.echoCells { display: flex; gap: 10px; flex-wrap: wrap; }
+.echoCell { font-size: 12px; color: var(--ink-soft); }
+.echoCell b { color: var(--ink); font-weight: 700; }
+.echoBasis { font-size: 10.5px; color: var(--ink-faint); font-style: italic; }
+
+/* ---- Ask the Line ---- */
+.ask { display: flex; flex-direction: column; gap: 8px; }
+.askRow { display: flex; gap: 8px; }
+.askInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.askInput:focus { outline: 2px solid var(--sea-soft); border-color: var(--sea); }
+.askBtn {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: #fff;
+  background: var(--sea);
+  cursor: pointer;
+}
+.askBtn:disabled { opacity: 0.5; cursor: default; }
+.askAnswer {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+  border-left: 3px solid var(--sea);
+  padding: 4px 0 4px 12px;
+}
+.askExamples { display: flex; flex-direction: column; gap: 4px; }
+.askExample {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--sea);
+  text-align: left;
+  cursor: pointer;
+}

@@ -61,6 +61,7 @@ function Inner({ onRoute, onOpenSupervised }) {
   const now = gd?.now ?? null;
   const protection = gd?.protection ?? null;
   const proof = gd?.proof ?? [];
+  const stage = gd?.stage ?? null;
   const contract = gd?.contract ?? null;
   const shield = gd?.promiseShield ?? null;
   const collision = gd?.collision?.collision ? gd.collision : null;
@@ -290,6 +291,12 @@ function Inner({ onRoute, onOpenSupervised }) {
               <span className={g.protectCount}>{protection.summary.protectedCount} of {protection.summary.total} promises protected</span>
             </div>
             <p className={g.protectNext}>Next check {protection.summary.nextCheck}</p>
+            {stage && stage.id !== "unknown" ? (
+              <p className={g.stageLine}>
+                <b>{stage.label}.</b> Guardian watches {stage.focus} hardest right now — {stage.why}
+                {stage.caregiverNote ? ` ${stage.caregiverNote}` : ""}
+              </p>
+            ) : null}
             <div>
               {protection.domains.map((d) => (
                 <div key={d.id} className={g.domain}>

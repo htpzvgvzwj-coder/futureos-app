@@ -15,10 +15,11 @@ import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvi
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
+import { buildFutureEcho, answerLineQuestion } from "../../../lib/life/ask.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 
 const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relationships: "family", freedom: "investment", future: "retirement" };
-const STATE_WORD = { solid: "on track", hollow: "not set up", ghost: "being planned", pulse: "just changed" };
+const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
 export function LifeView(props) {
   return (
@@ -34,12 +35,22 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const moments = Array.isArray(fb.moments) ? fb.moments : [];
   const planMovement = Array.isArray(fb.planMovement) ? fb.planMovement : [];
   const [openNum, setOpenNum] = useState(null);
+  const [q, setQ] = useState("");
+  const [answer, setAnswer] = useState(null);
 
   const collision = detectCollision({
     commitments: Array.isArray(lt.commitments) ? lt.commitments : [],
     availableMonthly: lt.availableMonthlyCashflow ?? null,
   });
   const thread = buildLivingThread({ lt, moments, planMovement, collision });
+  const echo = buildFutureEcho({ lt });
+
+  const ask = (text) => {
+    const query = (text ?? q).trim();
+    if (!query) return;
+    if (text != null) setQ(text);
+    setAnswer(answerLineQuestion(query, { lt, collision }));
+  };
 
   const openNode = (id) => {
     if (id === "relationships") return onStudio?.("relationships");
@@ -66,7 +77,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           {thread.numbers.map((n) => (
             <button key={n.id} type="button" className={life.numCell} onClick={() => setOpenNum(openNum === n.id ? null : n.id)}>
               <span className={life.numLabel}>{n.label}</span>
-              <span className={`${life.numValue} ${n.value == null ? life.unset : ""}`}>{n.value ?? "not set up"}</span>
+              <span className={`${life.numValue} ${n.value == null ? life.unset : ""}`}>{n.value ?? n.emptyHint ?? "—"}</span>
             </button>
           ))}
         </div>
@@ -90,10 +101,14 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                 <div className={life.nodeRowTop}>
                   <span className={life.nodeName}>{n.label}</span>
                   {n.valueText ? <span className={life.nodeVal}>{n.valueText}</span> : null}
-                  {n.collision ? <span className={life.nodeCollision}>competing</span> : <span className={life.nodeState}>{STATE_WORD[n.state]}</span>}
+                  {n.collision ? (
+                    <span className={life.nodeCollision}>{n.note}</span>
+                  ) : n.note ? (
+                    <span className={life.nodeState}>{n.note}</span>
+                  ) : null}
                 </div>
                 <button type="button" className={life.nodeBtn} onClick={() => openNode(n.id)}>
-                  {n.state === "hollow" ? "Set this up →" : "Open →"}
+                  {n.cta} →
                 </button>
               </div>
             ))}
@@ -105,6 +120,55 @@ function Inner({ onStudio, onAddReality, onRoute }) {
             ) : null}
           </div>
         </section>
+
+        {echo.plans.length ? (
+          <div className={life.echo}>
+            <span className={life.echoHead}>If today&apos;s plans keep running</span>
+            {echo.plans.map((p) => (
+              <div key={p.domain} className={life.echoRow}>
+                <span className={life.echoLabel}>{p.label} · {money(p.monthly)}/mo</span>
+                <span className={life.echoCells}>
+                  {p.at.map((a) => (
+                    <span key={a.years} className={life.echoCell}>+<b>{money(a.added)}</b> in {a.years}y</span>
+                  ))}
+                </span>
+              </div>
+            ))}
+            {echo.safety ? (
+              <div className={life.echoRow}>
+                <span className={life.echoLabel}>Safety buffer · {echo.safety.nowMonths.toFixed(1)} months now</span>
+                <span className={life.echoCells}>
+                  {echo.safety.at.map((a) => (
+                    <span key={a.years} className={life.echoCell}><b>{a.months.toFixed(1)} mo</b> in {a.years}y</span>
+                  ))}
+                </span>
+              </div>
+            ) : null}
+            <span className={life.echoBasis}>{echo.basis}</span>
+          </div>
+        ) : null}
+
+        <div className={life.ask}>
+          <form className={life.askRow} onSubmit={(e) => { e.preventDefault(); ask(); }}>
+            <input
+              className={life.askInput}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Ask about your line…"
+              aria-label="Ask about your line"
+            />
+            <button type="submit" className={life.askBtn} disabled={!q.trim()}>Ask</button>
+          </form>
+          {answer?.text ? <p className={life.askAnswer}>{answer.text}</p> : null}
+          {answer && !answer.text && answer.examples ? (
+            <div className={life.askExamples}>
+              <span className={life.echoBasis}>Try one of these:</span>
+              {answer.examples.map((ex) => (
+                <button key={ex} type="button" className={life.askExample} onClick={() => ask(ex)}>{ex}</button>
+              ))}
+            </div>
+          ) : null}
+        </div>
 
         <FeatureHistory feature="explore" label="How this line formed" />
       </div>
