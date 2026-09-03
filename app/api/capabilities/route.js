@@ -1,6 +1,7 @@
 import { getCurrentUserId } from "../../../lib/auth.js";
 import { resolveAllCapabilities } from "../../../lib/capability-registry.js";
 import { query } from "../../../lib/db.js";
+import { connectedProviderStatuses } from "../../../lib/connections/store.js";
 
 export const runtime = "nodejs";
 
@@ -20,13 +21,20 @@ export async function GET(request) {
     /* table may not exist yet - default */
   }
 
-  // Provider connection status. No real partners configured -> everything
-  // that needs one is connection_required. Honest by default.
+  // Provider connection status: an OCBC-wide env flag, OR this account's own
+  // link (from /api/connections). A per-account 'sandbox' still resolves the
+  // capability so the flow is reachable, but the flow itself stays honest
+  // about sandbox mode.
   const providers = {
     payment_provider: process.env.FUTUREOS_PAYMENT_PROVIDER ?? "unavailable",
     sgfindex: process.env.FUTUREOS_SGFINDEX ?? "unavailable",
     insurer: process.env.FUTUREOS_INSURER ?? "unavailable",
   };
+  try {
+    Object.assign(providers, await connectedProviderStatuses(userId));
+  } catch {
+    /* connections table may not exist yet */
+  }
 
   return Response.json({
     accountType,

@@ -1598,3 +1598,20 @@ create table if not exists guardian_contracts (
   updated_at   timestamptz not null default now(),
   primary key (profile_key, capability)
 );
+
+-- ============================================================
+-- Outside-data connections. One row per provider the account has linked;
+-- `data` holds the pulled, viewable detail (linked sources, policies,
+-- payees). Nothing here is a bank fact - a linked figure is tagged with
+-- its source_type in the Financial Twin.
+-- ============================================================
+create table if not exists provider_connections (
+  profile_key   text not null,
+  provider      text not null,                          -- payment_provider | sgfindex | insurer
+  status        text not null default 'not_connected',  -- connected | sandbox | not_connected
+  linked_ref    text,                                   -- masked identifier shown to the user
+  data          jsonb not null default '{}',
+  connected_at  timestamptz,
+  updated_at    timestamptz not null default now(),
+  primary key (profile_key, provider)
+);

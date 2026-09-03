@@ -22,6 +22,7 @@ import { createFinancialAsset, createLiability, createIncomeStream, upsertRecurr
 import { createCommitment } from "../lib/goal-commitment-store.js";
 import { planStore } from "../lib/plan-runtime/index.js";
 import { grantRole } from "../lib/account-control/store.js";
+import { connectProvider } from "../lib/connections/store.js";
 import { savePreferences } from "../lib/preferences-store.js";
 
 const EMAIL = process.env.DEMO_EMAIL ?? "demo@futureos.app";
@@ -36,7 +37,7 @@ const OWNED = [
   "recurring_obligations", "ripple_events", "change_ledger_events", "money_moment_state",
   "goal_commitments", "bank_accounts", "consent_records", "lifecycle_roles", "care_handoff_plans",
   "authorization_requests", "authorization_policies", "guardian_contracts", "care_shared_ranges",
-  "care_transitions", "care_nudges", "care_invites", "audit_events", "user_onboarding", "user_preferences", "assets",
+  "care_transitions", "care_nudges", "care_invites", "audit_events", "user_onboarding", "user_preferences", "assets", "provider_connections",
 ];
 
 async function wipe(uid) {
@@ -172,8 +173,8 @@ async function main() {
   const SAVINGS_BAL = 21000, EVERYDAY_BAL = 4300, CPF_OA = 46000, CPF_SA = 24000, FUND = 14500, CARD_BAL = 620;
   await createFinancialAsset(uid, { assetClass: "bank_account", label: "Everyday", linkedAccountId: everyday, currentValue: EVERYDAY_BAL, liquidityClass: "cash", sourceType: "synthetic_fixture" });
   await createFinancialAsset(uid, { assetClass: "bank_account", label: "Savings (emergency fund)", linkedAccountId: savings, currentValue: SAVINGS_BAL, liquidityClass: "near_cash", restrictedPurpose: "emergency", sourceType: "synthetic_fixture" });
-  await createFinancialAsset(uid, { assetClass: "cpf_oa", label: "CPF Ordinary Account", currentValue: CPF_OA, liquidityClass: "restricted", restrictedPurpose: "housing", sourceType: "synthetic_fixture", confidence: "medium" });
-  await createFinancialAsset(uid, { assetClass: "cpf_sa_ra", label: "CPF Special Account", currentValue: CPF_SA, liquidityClass: "restricted", restrictedPurpose: "retirement", sourceType: "synthetic_fixture" });
+  await createFinancialAsset(uid, { assetClass: "cpf_oa", label: "CPF Ordinary Account", currentValue: CPF_OA, liquidityClass: "restricted", restrictedPurpose: "housing", sourceType: "government_linked", sourceName: "SGFinDex", confidence: "high" });
+  await createFinancialAsset(uid, { assetClass: "cpf_sa_ra", label: "CPF Special Account", currentValue: CPF_SA, liquidityClass: "restricted", restrictedPurpose: "retirement", sourceType: "government_linked", sourceName: "SGFinDex", confidence: "high" });
   await createFinancialAsset(uid, { assetClass: "investment", label: "Global equity index fund", currentValue: FUND, liquidityClass: "liquid", sourceType: "synthetic_fixture", confidence: "low" });
   await createLiability(uid, { liabilityClass: "credit_card_statement", label: "365 Credit Card", linkedAccountId: card, currentBalance: CARD_BAL, apr: 26.8, minimumMonthly: 50, nextDueDate: due(18), sourceType: "synthetic_fixture" });
 

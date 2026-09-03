@@ -34,7 +34,7 @@ async function cleanupUser(pool, uid) {
   await pool.query(`delete from care_invites where profile_key = $1 or accepted_by = $1`, [uid]).catch(() => {});
   await pool.query(`delete from care_nudges where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
   await pool.query(`delete from lifecycle_roles where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
-  for (const t of ["guardian_contracts", "care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
+  for (const t of ["provider_connections", "guardian_contracts", "care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
   await pool.query(`delete from users where id = $1`, [uid]).catch(() => {});
@@ -594,4 +594,37 @@ test("Guardian Phase 3: pause / reduce a commitment drops it from the active tot
   const red0 = await reduceCommitment(wedNow.id, u, 0);
   assert.equal(red0.revoked, true);
   assert.equal(await getActiveCommitment(u, "wedding"), null);
+});
+
+test("Connections: connect / view / disconnect; a sandbox rail is flagged", opts, async (t) => {
+  const [{ getConnections, connectProvider, disconnectProvider, connectedProviderStatuses }, { pool }] = await Promise.all([
+    import("../../lib/connections/store.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "conns");
+  t.after(() => cleanupUser(pool, u));
+
+  const start = await getConnections(u);
+  assert.equal(start.length, 3);
+  assert.ok(start.every((c) => !c.connected));
+
+  const afterSg = await connectProvider(u, "sgfindex");
+  const sg = afterSg.find((c) => c.id === "sgfindex");
+  assert.equal(sg.connected, true);
+  assert.equal(sg.status, "connected");
+  assert.ok(sg.data.sources.some((s) => s.id === "cpf" && s.balances.ordinary_account > 0), "CPF balances pulled");
+  assert.match(sg.summary, /CPF/);
+
+  const afterPay = await connectProvider(u, "payment_provider");
+  const pay = afterPay.find((c) => c.id === "payment_provider");
+  assert.equal(pay.status, "sandbox", "the payment rail is honest sandbox, not 'connected'");
+  assert.equal(pay.sandbox, true);
+  assert.ok(pay.data.payees.length >= 1);
+
+  await connectProvider(u, "insurer");
+  const statuses = await connectedProviderStatuses(u);
+  assert.deepEqual(statuses, { sgfindex: "connected", payment_provider: "sandbox", insurer: "connected" });
+
+  const afterOff = await disconnectProvider(u, "sgfindex");
+  assert.equal(afterOff.find((c) => c.id === "sgfindex").connected, false);
 });
