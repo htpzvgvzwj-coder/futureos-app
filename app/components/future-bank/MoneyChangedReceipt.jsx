@@ -11,9 +11,11 @@
 
 import css from "./future-bank.module.css";
 import { useFutureBankData } from "./FutureBankDataProvider.jsx";
+import { useTx } from "./i18n.jsx";
 import { money, shortDate } from "./format.js";
 
 export function MoneyChangedReceipt({ onRoute, onHistory }) {
+  const { tx } = useTx();
   const { moneyChanged } = useFutureBankData();
   if (!moneyChanged) return null;
 
@@ -21,14 +23,14 @@ export function MoneyChangedReceipt({ onRoute, onHistory }) {
     const ev = moneyChanged.nextEvent;
     return (
       <div className={css.calm}>
-        <span className={css.calmTitle}>No material change since your last check.</span>
+        <span className={css.calmTitle}>{tx("No material change since your last check.")}</span>
         {ev ? (
           <span className={css.empty}>
-            Next: {ev.label} {money(ev.amount, { signed: true })}
-            {ev.when ? ` on ${shortDate(ev.when)}` : ""}.
+            {tx("Next")}: {tx(ev.label)} {money(ev.amount, { signed: true })}
+            {ev.when ? ` ${tx("on")} ${shortDate(ev.when)}` : ""}.
           </span>
         ) : (
-          <span className={css.empty}>No upcoming money event on record yet.</span>
+          <span className={css.empty}>{tx("No upcoming money event on record yet.")}</span>
         )}
       </div>
     );
@@ -60,11 +62,11 @@ export function MoneyChangedReceipt({ onRoute, onHistory }) {
             disabled={mc.nextAction.available === false}
             onClick={() => onRoute?.(mc.nextAction.route || "history")}
           >
-            {mc.nextAction.label}
+            {tx(mc.nextAction.label)}
           </button>
         ) : null}
         <button type="button" className={css.act} onClick={onHistory}>
-          View full history
+          {tx("View full history")}
         </button>
       </div>
     </div>

@@ -12,24 +12,26 @@
 // sheet that says so plainly - before any money would move.
 
 import css from "./future-bank.module.css";
+import { useTx } from "./i18n.jsx";
 
 export function BankNowActions({ onPayNow, onFx, onScanPay }) {
+  const { tx } = useTx();
   return (
-    <div className={css.bankActions} role="group" aria-label="Bank actions">
+    <div className={css.bankActions} role="group" aria-label={tx("Bank actions")}>
       <button type="button" className={css.bankAction} onClick={onPayNow}>
         <span className={css.bankGlyph}>⇄</span>
-        <span className={css.bankLabel}>PayNow</span>
-        <span className={css.bankState}>Move your money</span>
+        <span className={css.bankLabel}>{tx("PayNow")}</span>
+        <span className={css.bankState}>{tx("Move your money")}</span>
       </button>
       <button type="button" className={css.bankAction} onClick={onFx}>
         <span className={css.bankGlyph}>$€</span>
-        <span className={css.bankLabel}>Foreign Exchange</span>
-        <span className={css.bankState}>Indicative only</span>
+        <span className={css.bankLabel}>{tx("Foreign Exchange")}</span>
+        <span className={css.bankState}>{tx("Indicative only")}</span>
       </button>
       <button type="button" className={css.bankAction} onClick={onScanPay}>
         <span className={css.bankGlyph}>▣</span>
-        <span className={css.bankLabel}>Scan &amp; Pay</span>
-        <span className={css.bankState}>Not connected</span>
+        <span className={css.bankLabel}>{tx("Scan & Pay")}</span>
+        <span className={css.bankState}>{tx("Not connected")}</span>
       </button>
     </div>
   );

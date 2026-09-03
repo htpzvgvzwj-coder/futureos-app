@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
+import { useTx } from "./i18n.jsx";
 import { money } from "./format.js";
 
 const CAT_LABEL = {
@@ -24,6 +25,7 @@ const CAT_LABEL = {
 };
 
 export function SpendingView({ onBack }) {
+  const { tx } = useTx();
   const [txns, setTxns] = useState(null);
   useEffect(() => {
     fetch("/api/bank/transactions?limit=250", { headers: { "cache-control": "no-cache" } })
@@ -71,50 +73,50 @@ export function SpendingView({ onBack }) {
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <button type="button" className={css.backLink} onClick={onBack}>← Explore</button>
+        <button type="button" className={css.backLink} onClick={onBack}>← {tx("Explore")}</button>
         <div>
-          <h1 className={css.title}>Spending Intelligence</h1>
-          <p className={css.micro}>Your spending pattern — built only from posted transactions, and it tells you how many.</p>
+          <h1 className={css.title}>{tx("Spending Intelligence")}</h1>
+          <p className={css.micro}>{tx("Your spending pattern — built only from posted transactions, and it tells you how many.")}</p>
         </div>
 
         {!view ? (
-          <p className={css.lede}>Reading your transactions…</p>
+          <p className={css.lede}>{tx("Reading your transactions…")}</p>
         ) : view.count90 < 5 ? (
           <div className={css.calmCard}>
-            <b>Not enough history yet.</b>
-            <span className={css.micro}>Add or import about three months of transactions and a real pattern shows here — trends, categories and unusual spend, each with its evidence.</span>
+            <b>{tx("Not enough history yet.")}</b>
+            <span className={css.micro}>{tx("Add or import about three months of transactions and a real pattern shows here — trends, categories and unusual spend, each with its evidence.")}</span>
           </div>
         ) : (
           <>
             <div className={css.bigAmountWrap}>
-              <span className={css.bigAmountLabel}>Spent in the last 30 days</span>
+              <span className={css.bigAmountLabel}>{tx("Spent in the last 30 days")}</span>
               <span className={css.bigAmount}>{money(view.total30)}</span>
             </div>
-            <p className={css.micro}>Based on {view.count30} posted transaction{view.count30 === 1 ? "" : "s"} · {money(view.total90)} over 90 days ({view.count90} transactions).</p>
+            <p className={css.micro}>{tx("Based on")} {view.count30} {view.count30 === 1 ? tx("posted transaction") : tx("posted transactions")} · {money(view.total90)} {tx("over 90 days")} ({view.count90} {tx("transactions")}).</p>
 
             {view.trend ? (
               <div className={view.trend.up ? css.movingCard : css.calmCard}>
                 <b>
                   {view.trend.up
-                    ? `Your spending is up about ${Math.abs(view.trend.pct)}% this month`
-                    : `Your spending is steady (${view.trend.pct >= 0 ? "+" : ""}${view.trend.pct}% vs your recent pace)`}
+                    ? `${tx("Your spending is up about")} ${Math.abs(view.trend.pct)}% ${tx("this month")}`
+                    : `${tx("Your spending is steady")} (${view.trend.pct >= 0 ? "+" : ""}${view.trend.pct}% ${tx("vs your recent pace")})`}
                 </b>
                 <span className={css.micro}>
-                  {money(view.trend.recentMonthly)} in the last 30 days vs about {money(view.trend.priorMonthly)}/month before that. From your ledger.
+                  {money(view.trend.recentMonthly)} {tx("in the last 30 days vs about")} {money(view.trend.priorMonthly)}/{tx("month before that. From your ledger.")}
                 </span>
               </div>
             ) : null}
 
             <section className={css.section}>
-              <p className={css.kicker}>Where it went (90 days)</p>
+              <p className={css.kicker}>{tx("Where it went (90 days)")}</p>
               <div className={css.activity}>
                 {view.categories.map((c) => {
                   const pct = view.total90pct > 0 ? Math.round((c.spend / view.total90pct) * 100) : 0;
                   return (
                     <div key={c.category} className={css.actItem}>
                       <span className={css.actBody}>
-                        <span className={css.actName}>{CAT_LABEL[c.category] ?? c.category}</span>
-                        <span className={css.actMeta}>{pct}% · {c.count} transaction{c.count === 1 ? "" : "s"}</span>
+                        <span className={css.actName}>{tx(CAT_LABEL[c.category] ?? c.category)}</span>
+                        <span className={css.actMeta}>{pct}% · {c.count} {c.count === 1 ? tx("transaction") : tx("transactions")}</span>
                       </span>
                       <span className={css.actAmt}>{money(c.spend)}</span>
                     </div>
@@ -123,7 +125,7 @@ export function SpendingView({ onBack }) {
               </div>
             </section>
 
-            <p className={css.micro}>Every number here traces to real posted transactions in your ledger. Nothing is estimated or AI-generated.</p>
+            <p className={css.micro}>{tx("Every number here traces to real posted transactions in your ledger. Nothing is estimated or AI-generated.")}</p>
           </>
         )}
         <FeatureHistory feature="spending" label="Spending history" />

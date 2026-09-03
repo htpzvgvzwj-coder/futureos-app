@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
+import { useTx } from "./i18n.jsx";
 
 const ACCOUNT_TYPES = [
   { id: "individual", name: "Just me", means: "A normal adult account. No one else can see or approve." },
@@ -88,6 +89,7 @@ const POST_CARE = (body) =>
   );
 
 export function FamilyCareView({ onBack, onWedding }) {
+  const { tx } = useTx();
   const [roles, setRoles] = useState(null);
   const [accountType, setAccountType] = useState(null);
   const [handoff, setHandoff] = useState(undefined); // undefined = loading, null = none
@@ -238,17 +240,17 @@ export function FamilyCareView({ onBack, onWedding }) {
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <button type="button" className={css.backLink} onClick={onBack}>← Life</button>
+        <button type="button" className={css.backLink} onClick={onBack}>← {tx("Life")}</button>
         <div>
-          <h1 className={css.title}>Family &amp; Care</h1>
-          <p className={css.micro}>The people around your money — a child you manage, a guardian who approves, a household you share ranges with, an emergency contact, a beneficiary for later.</p>
+          <h1 className={css.title}>{tx("Family & Care")}</h1>
+          <p className={css.micro}>{tx("The people around your money — a child you manage, a guardian who approves, a household you share ranges with, an emergency contact, a beneficiary for later.")}</p>
         </div>
 
         {/* account setup */}
         <section className={css.section}>
-          <p className={css.kicker}>Account setup</p>
+          <p className={css.kicker}>{tx("Account setup")}</p>
           <p className={css.micro}>
-            This account is <b>{currentType?.name ?? "Just me"}</b>. {currentType?.means}
+            {tx("This account is")} <b>{tx(currentType?.name ?? "Just me")}</b>. {tx(currentType?.means)}
           </p>
           <div className={css.choiceGrid}>
             {ACCOUNT_TYPES.map((a) => (
@@ -260,8 +262,8 @@ export function FamilyCareView({ onBack, onWedding }) {
                 aria-pressed={a.id === accountType}
                 onClick={() => changeType(a.id)}
               >
-                <b>{a.name}{a.id === accountType ? " ✓" : ""}</b>
-                <span>{a.means}</span>
+                <b>{tx(a.name)}{a.id === accountType ? " ✓" : ""}</b>
+                <span>{tx(a.means)}</span>
               </button>
             ))}
           </div>
@@ -269,7 +271,7 @@ export function FamilyCareView({ onBack, onWedding }) {
 
         {/* approval rules */}
         <section className={css.section}>
-          <p className={css.kicker}>Approval rules</p>
+          <p className={css.kicker}>{tx("Approval rules")}</p>
           <ApprovalRules
             accountType={accountType ?? "individual"}
             policy={policy}
@@ -280,11 +282,11 @@ export function FamilyCareView({ onBack, onWedding }) {
 
         {/* current circle */}
         <section className={css.section}>
-          <p className={css.kicker}>Your circle</p>
+          <p className={css.kicker}>{tx("Your circle")}</p>
           {roles == null ? (
-            <p className={css.micro}>Loading…</p>
+            <p className={css.micro}>{tx("Loading…")}</p>
           ) : circle.length === 0 ? (
-            <p className={css.micro}>No one added yet. Add a guardian, a dependent, a household member, an emergency contact or a beneficiary below.</p>
+            <p className={css.micro}>{tx("No one added yet. Add a guardian, a dependent, a household member, an emergency contact or a beneficiary below.")}</p>
           ) : (
             <div className={css.activity}>
               {circle.map((r) =>
@@ -302,26 +304,26 @@ export function FamilyCareView({ onBack, onWedding }) {
                     <div className={css.actItem}>
                       <span className={css.actBody}>
                         <span className={css.actName}>
-                          {r.relationLabel ? r.relationLabel : ROLE_LABEL[r.role] ?? r.role}
-                          {r.status === "active" && r.subjectKey ? " · linked" : r.status !== "active" ? ` · ${r.status}` : ""}
+                          {r.relationLabel ? r.relationLabel : tx(ROLE_LABEL[r.role] ?? r.role)}
+                          {r.status === "active" && r.subjectKey ? ` · ${tx("linked")}` : r.status !== "active" ? ` · ${tx(r.status)}` : ""}
                         </span>
                         <span className={css.actMeta}>
-                          {ROLE_LABEL[r.role] ?? r.role} — {ROLE_CAN[r.role] ?? r.scope}
-                          {r.covers?.length ? ` · noted for: ${r.covers.map((c) => COVER_LABEL[c] ?? c).join(", ")}` : ""}
+                          {tx(ROLE_LABEL[r.role] ?? r.role)} — {tx(ROLE_CAN[r.role] ?? r.scope)}
+                          {r.covers?.length ? ` · ${tx("noted for")}: ${r.covers.map((c) => tx(COVER_LABEL[c] ?? c)).join(", ")}` : ""}
                           {r.note ? ` · ${r.note}` : ""}
                         </span>
                       </span>
                       {LINKABLE.has(r.role) && r.status === "pending" ? (
-                        <button type="button" className={css.link} disabled={busy} onClick={() => invite(r.id)}>Invite</button>
+                        <button type="button" className={css.link} disabled={busy} onClick={() => invite(r.id)}>{tx("Invite")}</button>
                       ) : null}
-                      <button type="button" className={css.link} disabled={busy} onClick={() => setEditing(r.id)}>Edit</button>
+                      <button type="button" className={css.link} disabled={busy} onClick={() => setEditing(r.id)}>{tx("Edit")}</button>
                     </div>
                     {inviteCode?.roleId === r.id ? (
                       <div className={css.calmCard}>
-                        <b>One-time invite code</b>
+                        <b>{tx("One-time invite code")}</b>
                         <span className={css.bigAmount} style={{ fontSize: "20px", letterSpacing: "1px" }}>{inviteCode.code}</span>
                         <span className={css.micro}>
-                          Give this to {r.relationLabel || "them"} once. They open FutureOS, go to Family &amp; Care → “Someone invited you?”, and enter it. It expires in 14 days and works a single time. It is not shown again.
+                          {tx("Give this to")} {r.relationLabel || tx("them")} {tx("once. They open FutureOS, go to Family & Care → “Someone invited you?”, and enter it. It expires in 14 days and works a single time. It is not shown again.")}
                         </span>
                       </div>
                     ) : null}
@@ -334,9 +336,9 @@ export function FamilyCareView({ onBack, onWedding }) {
 
         {/* accept an invite someone sent me */}
         <section className={css.section}>
-          <p className={css.kicker}>Someone invited you?</p>
+          <p className={css.kicker}>{tx("Someone invited you?")}</p>
           <div className={css.field}>
-            <label htmlFor="fc-accept">Enter their invite code</label>
+            <label htmlFor="fc-accept">{tx("Enter their invite code")}</label>
             <input
               id="fc-accept"
               type="text"
@@ -346,24 +348,24 @@ export function FamilyCareView({ onBack, onWedding }) {
               onChange={(e) => setAcceptCode(e.target.value.toUpperCase())}
             />
           </div>
-          <button type="button" className={css.cta} disabled={busy || acceptCode.trim().length < 8} onClick={acceptInvite}>Link my account to theirs</button>
-          <p className={css.micro}>You will be able to see their money health only — never their transactions or exact balances. Either of you can end it at any time.</p>
+          <button type="button" className={css.cta} disabled={busy || acceptCode.trim().length < 8} onClick={acceptInvite}>{tx("Link my account to theirs")}</button>
+          <p className={css.micro}>{tx("You will be able to see their money health only — never their transactions or exact balances. Either of you can end it at any time.")}</p>
         </section>
 
         {/* who can see this account */}
         {care?.supervisors?.length ? (
           <section className={css.section}>
-            <p className={css.kicker}>Who can see this account</p>
+            <p className={css.kicker}>{tx("Who can see this account")}</p>
             <div className={css.activity}>
               {care.supervisors.map((s) => (
                 <div key={s.roleId}>
                   <div className={css.actItem}>
                     <span className={css.actBody}>
                       <span className={css.actName}>{s.personLabel}</span>
-                      <span className={css.actMeta}>{ROLE_LABEL[s.role] ?? s.role} · {s.scope === "approve" ? "sees health + approves what you send" : "sees your money health only"}</span>
+                      <span className={css.actMeta}>{tx(ROLE_LABEL[s.role] ?? s.role)} · {s.scope === "approve" ? tx("sees health + approves what you send") : tx("sees your money health only")}</span>
                     </span>
-                    <button type="button" className={css.link} disabled={busy} onClick={() => careAction({ action: "nudge", roleId: s.roleId, title: "Please check in on my account when you can" }, `Asked ${s.personLabel} to take a look.`)}>Ask to check in</button>
-                    <button type="button" className={css.link} disabled={busy} onClick={() => remove(s.roleId)}>Unlink</button>
+                    <button type="button" className={css.link} disabled={busy} onClick={() => careAction({ action: "nudge", roleId: s.roleId, title: "Please check in on my account when you can" }, `${tx("Asked")} ${s.personLabel} ${tx("to take a look.")}`)}>{tx("Ask to check in")}</button>
+                    <button type="button" className={css.link} disabled={busy} onClick={() => remove(s.roleId)}>{tx("Unlink")}</button>
                   </div>
                   {s.scope === "approve" ? (
                     <AllowanceEditor
@@ -381,14 +383,14 @@ export function FamilyCareView({ onBack, onWedding }) {
                 </div>
               ))}
             </div>
-            <p className={css.micro}>They never see your transactions or exact balances. Unlinking takes effect immediately.</p>
+            <p className={css.micro}>{tx("They never see your transactions or exact balances. Unlinking takes effect immediately.")}</p>
           </section>
         ) : null}
 
         {/* shared ranges - what a household member sees instead of exact amounts */}
         <section className={css.section}>
-          <p className={css.kicker}>Shared ranges</p>
-          <p className={css.micro}>Household members see a range you set here — never an exact figure. Leave this empty and they only see your money-health state.</p>
+          <p className={css.kicker}>{tx("Shared ranges")}</p>
+          <p className={css.micro}>{tx("Household members see a range you set here — never an exact figure. Leave this empty and they only see your money-health state.")}</p>
           <SharedRanges
             ranges={care?.sharedRanges ?? []}
             busy={busy}
@@ -400,7 +402,7 @@ export function FamilyCareView({ onBack, onWedding }) {
         {/* age & permissions - youth account transition proposals */}
         {(accountType === "youth" || accountType === "guardian_managed_child" || (care?.transitions?.length ?? 0) > 0) ? (
           <section className={css.section}>
-            <p className={css.kicker}>Age &amp; permissions</p>
+            <p className={css.kicker}>{tx("Age & permissions")}</p>
             <AgeAndPermissions
               birthYear={care?.birthYear ?? null}
               transitions={care?.transitions ?? []}
@@ -413,43 +415,43 @@ export function FamilyCareView({ onBack, onWedding }) {
 
         {/* add someone */}
         <section className={css.section}>
-          <p className={css.kicker}>Add someone</p>
+          <p className={css.kicker}>{tx("Add someone")}</p>
           <div className={css.choiceGrid}>
             {ROLE_CARDS.map((c) => (
               <button key={c.role} type="button" className={css.choice} disabled={busy} onClick={() => add(c.role, c.scope)}>
-                <b>{c.name}</b>
-                <span>{c.why}</span>
+                <b>{tx(c.name)}</b>
+                <span>{tx(c.why)}</span>
               </button>
             ))}
           </div>
-          {msg ? <p className={css.micro}>{msg}</p> : null}
+          {msg ? <p className={css.micro}>{tx(msg)}</p> : null}
         </section>
 
         {/* handoff plan */}
         <section className={css.section}>
-          <p className={css.kicker}>If something happens — your handoff plan</p>
+          <p className={css.kicker}>{tx("If something happens — your handoff plan")}</p>
           {handoff === undefined ? (
-            <p className={css.micro}>Loading…</p>
+            <p className={css.micro}>{tx("Loading…")}</p>
           ) : handoff && !handoffOpen ? (
             <div className={css.calmCard}>
-              <b>{HANDOFF_KIND_LABEL[handoff.kind] ?? "A handoff"} — written down</b>
+              <b>{tx(HANDOFF_KIND_LABEL[handoff.kind] ?? "A handoff")} — {tx("written down")}</b>
               <span className={css.micro}>
-                {handoff.successorLabel ? `Successor: ${handoff.successorLabel}. ` : ""}
-                {handoff.triggerNote ? `When: ${handoff.triggerNote}. ` : ""}
-                {handoff.instructions ? handoff.instructions : "No instructions added yet."}
+                {handoff.successorLabel ? `${tx("Successor")}: ${handoff.successorLabel}. ` : ""}
+                {handoff.triggerNote ? `${tx("When")}: ${handoff.triggerNote}. ` : ""}
+                {handoff.instructions ? handoff.instructions : tx("No instructions added yet.")}
               </span>
               {(() => {
                 const succ = (roles ?? []).find((r) => r.id === handoff.successorRoleId);
                 if (succ && succ.status === "active" && succ.subjectKey) {
-                  return <span className={css.micro}>✓ {succ.relationLabel || ROLE_LABEL[succ.role] || "This person"} is linked and ready to take over — the handoff itself still needs the legal steps.</span>;
+                  return <span className={css.micro}>✓ {succ.relationLabel || tx(ROLE_LABEL[succ.role]) || tx("This person")} {tx("is linked and ready to take over — the handoff itself still needs the legal steps.")}</span>;
                 }
                 if (handoff.successorRoleId) {
-                  return <span className={css.micro}>Your chosen successor is not linked yet. Invite them on their row above so they are ready.</span>;
+                  return <span className={css.micro}>{tx("Your chosen successor is not linked yet. Invite them on their row above so they are ready.")}</span>;
                 }
                 return null;
               })()}
-              <span className={css.micro}>Status: {handoff.status} — Future Bank never carries this out on its own. A real handoff needs identity checks and the right legal steps.</span>
-              <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>Edit the plan</button>
+              <span className={css.micro}>{tx("Status")}: {tx(handoff.status)} — {tx("Future Bank never carries this out on its own. A real handoff needs identity checks and the right legal steps.")}</span>
+              <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>{tx("Edit the plan")}</button>
             </div>
           ) : handoffOpen ? (
             <HandoffEditor
@@ -461,31 +463,31 @@ export function FamilyCareView({ onBack, onWedding }) {
             />
           ) : (
             <div className={css.calmCard}>
-              <b>No handoff plan yet.</b>
-              <span className={css.micro}>Write down who should take over this account, when, and what they should know. It stays a note until you complete the real legal steps.</span>
-              <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>Write a handoff plan</button>
+              <b>{tx("No handoff plan yet.")}</b>
+              <span className={css.micro}>{tx("Write down who should take over this account, when, and what they should know. It stays a note until you complete the real legal steps.")}</span>
+              <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>{tx("Write a handoff plan")}</button>
             </div>
           )}
         </section>
 
         {/* family plans */}
         <section className={css.section}>
-          <p className={css.kicker}>Family plans</p>
+          <p className={css.kicker}>{tx("Family plans")}</p>
           <button type="button" className={css.choice} onClick={onWedding}>
-            <b>Plan a wedding together</b>
-            <span>Weigh guest count and budget against your other goals — and share only the agreed range.</span>
+            <b>{tx("Plan a wedding together")}</b>
+            <span>{tx("Weigh guest count and budget against your other goals — and share only the agreed range.")}</span>
           </button>
         </section>
 
         <section className={css.section}>
-          <p className={css.kicker}>How this stays safe</p>
+          <p className={css.kicker}>{tx("How this stays safe")}</p>
           <ul className={css.proofList}>
-            <li><span className={css.proofMark}>→</span> A minor&apos;s account is controlled by a parent or legal guardian.</li>
-            <li><span className={css.proofMark}>→</span> Youth permissions change with age, consent and local rules — not automatically.</li>
-            <li><span className={css.proofMark}>→</span> Elderly care and any handoff need identity verification and the right legal steps.</li>
-            <li><span className={css.proofMark}>→</span> Future Bank never guesses a life event, and never carries out a handoff on its own.</li>
-            <li><span className={css.proofMark}>→</span> This works both ways — an adult child can be the guardian or trusted contact for an ageing parent&apos;s account, with the same limits.</li>
-            <li><span className={css.proofMark}>→</span> Sharing shows agreed ranges — never your exact private amounts.</li>
+            <li><span className={css.proofMark}>→</span> {tx("A minor's account is controlled by a parent or legal guardian.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("Youth permissions change with age, consent and local rules — not automatically.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("Elderly care and any handoff need identity verification and the right legal steps.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("Future Bank never guesses a life event, and never carries out a handoff on its own.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("This works both ways — an adult child can be the guardian or trusted contact for an ageing parent's account, with the same limits.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("Sharing shows agreed ranges — never your exact private amounts.")}</li>
           </ul>
         </section>
 
