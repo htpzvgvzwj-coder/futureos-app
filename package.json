@@ -15,6 +15,7 @@
     "smoke:change-ledger": "node --env-file=.env _smoke_change_ledger.mjs",
     "smoke:future-field": "node --env-file=.env _smoke_future_field.mjs",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
+    "seed:demo": "node --env-file=.env scripts/seed-demo.mjs",
     "db:seed-demo": "node --env-file=.env scripts/seed-demo-user.mjs",
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "test:e2e": "playwright test",
