@@ -67,10 +67,13 @@ function Inner({ onStudio, onAddReality, onRoute }) {
       <div className={css.shell}>
         <h1 className={css.title}>{tx("Life")}</h1>
 
-        <p className={life.direction}>{tx(thread.direction)}</p>
+        <p className={life.direction}>{tx(thread.directionKey ?? thread.direction, thread.directionParams)}</p>
 
         {thread.weather ? (
-          <span className={`${life.weather} ${life[thread.weather.id] || ""}`} title={tx(thread.weather.note)}>
+          <span
+            className={`${life.weather} ${life[thread.weather.id] || ""}`}
+            title={tx(thread.weather.noteKey ?? thread.weather.note, thread.weather.noteParams)}
+          >
             <span className={life.weatherDot} /> {tx(thread.weather.label)}
           </span>
         ) : null}

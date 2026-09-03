@@ -260,7 +260,7 @@ function Inner({ onRoute, onOpenSupervised }) {
           <section className={css.section}>
             <p className={css.kicker}>{tx("Two plans are competing")}</p>
             <div className={g.decision}>
-              <span className={g.impactVal}>{tx(collision.summary)}</span>
+              <span className={g.impactVal}>{tx(collision.summaryKey ?? collision.summary, collision.summaryParams)}</span>
               <div className={g.decisionActs} style={{ flexDirection: "column", alignItems: "stretch" }}>
                 {collision.paths.map((p) => (
                   <button key={p.id} type="button" style={{ textAlign: "left" }} disabled={busyId === "apply_collision_path"} onClick={() => guardianPost({ action: "apply_collision_path", pathId: p.id })}>

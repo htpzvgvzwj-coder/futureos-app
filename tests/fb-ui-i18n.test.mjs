@@ -26,6 +26,24 @@ test("null / undefined pass through", () => {
   assert.equal(zh(undefined), undefined);
 });
 
+test("params fill {placeholders} — en uses the key as the template", () => {
+  const en = makeTx("en");
+  assert.equal(
+    en("You're reshaping {node} — nothing is committed until you seal it.", { node: "home" }),
+    "You're reshaping home — nothing is committed until you seal it.",
+  );
+  const zh = makeTx("zh");
+  assert.equal(
+    zh("You're reshaping {node} — nothing is committed until you seal it.", { node: "home" }),
+    "你正在重塑「home」 — 在你确认之前，一切都未落定。",
+  );
+});
+
+test("a missing param renders empty, not the literal {name}", () => {
+  const en = makeTx("en");
+  assert.equal(en("About {amount}/month is free to put to work.", {}), "About /month is free to put to work.");
+});
+
 test("the four offered languages all build a translator", () => {
   for (const lang of FB_LANGUAGES) {
     const tx = makeTx(lang);
