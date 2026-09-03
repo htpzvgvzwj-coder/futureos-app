@@ -9,6 +9,11 @@ import { buildProtectionDomains } from "../../../lib/guardian/protection.js";
 import { buildGuardianProof } from "../../../lib/guardian/proof.js";
 import { getContracts, setContract, resetContracts, contractSummary } from "../../../lib/guardian/contract.js";
 import { buildGuardianDecision } from "../../../lib/guardian/decision.js";
+import { buildLifeThread } from "../../../lib/life-thread/service.js";
+import { buildPromiseShield } from "../../../lib/guardian/promise-shield.js";
+import { detectCollision } from "../../../lib/guardian/collision.js";
+import { buildRecoveryPlan } from "../../../lib/guardian/recovery.js";
+import { applyCollisionPath, applyRecoveryStep } from "../../../lib/guardian/apply.js";
 
 export const runtime = "nodejs";
 
@@ -30,12 +35,13 @@ export async function GET(request) {
     }
   }
   try {
-    const [mm, bundle, events, contracts, supervisors] = await Promise.all([
+    const [mm, bundle, events, contracts, supervisors, lt] = await Promise.all([
       buildMoneyMoments(userId).catch(() => ({ isEmpty: true, moments: [] })),
       buildFinancialTwinBundle(userId).catch(() => ({ twin: null })),
       listEvents(userId, { filter: "all", limit: 8 }).catch(() => []),
       getContracts(userId),
       listMySupervisors(userId).catch(() => []),
+      buildLifeThread(userId).catch(() => ({ commitments: [], availableMonthlyCashflow: null })),
     ]);
     const mmForGuardian = { ...mm, hasSharedAccess: supervisors.length > 0 };
     return Response.json({
@@ -43,6 +49,9 @@ export async function GET(request) {
       protection: buildProtectionDomains({ twin: bundle.twin, mm: mmForGuardian }),
       proof: buildGuardianProof(events),
       contract: { capabilities: contracts, summary: contractSummary(contracts) },
+      promiseShield: buildPromiseShield({ twin: bundle.twin, safeToSpend: bundle.safeToSpend }),
+      collision: detectCollision({ commitments: lt.commitments ?? [], availableMonthly: lt.availableMonthlyCashflow ?? null }),
+      recovery: buildRecoveryPlan({ safeToSpend: bundle.safeToSpend, rescueCases: bundle.rescueCases ?? [], commitments: lt.commitments ?? [] }),
     });
   } catch (error) {
     console.error("[guardian] GET failed:", error?.message);
@@ -67,6 +76,14 @@ export async function POST(request) {
     if (body.action === "reset_contract") {
       const contracts = await resetContracts(userId);
       return Response.json({ contract: { capabilities: contracts, summary: contractSummary(contracts) } });
+    }
+    if (body.action === "apply_collision_path") {
+      if (!body.pathId) return Response.json({ error: "pathId_required" }, { status: 400 });
+      return Response.json(await applyCollisionPath(userId, body.pathId));
+    }
+    if (body.action === "apply_recovery_step") {
+      if (body.order == null) return Response.json({ error: "order_required" }, { status: 400 });
+      return Response.json(await applyRecoveryStep(userId, body.order));
     }
     return Response.json({ error: "unknown_action" }, { status: 400 });
   } catch (error) {

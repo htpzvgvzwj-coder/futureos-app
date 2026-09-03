@@ -33,6 +33,11 @@ test("Guardian shows one status + protected promises + a working, persistent Con
   // 1 — Guardian Now: exactly one status label + a headline
   await expect(page.getByText(/^(Calm|Watching|Decision|Urgent)$/).first()).toBeVisible({ timeout: 20000 });
 
+  // Promise Shield — the four buckets the money is carrying
+  await expect(page.getByText(/What your money is promised to/i)).toBeVisible();
+  await expect(page.getByText(/^Free to use$/)).toBeVisible();
+  await expect(page.getByText(/^Kept for safety$/)).toBeVisible();
+
   // 2 — Protected by Guardian
   await expect(page.getByText(/of \d+ promises protected/i)).toBeVisible();
   await expect(page.getByText(/Next check/i)).toBeVisible();

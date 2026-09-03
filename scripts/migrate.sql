@@ -869,6 +869,10 @@ create index if not exists goal_commitments_profile_domain_idx
 -- a plain number, for quick audit reads.
 alter table goal_commitments add column if not exists superseded_savings_plan jsonb;
 alter table goal_commitments add column if not exists prior_monthly_contribution numeric(12,2);
+-- Guardian Phase 3: a collision path or recovery step can pause a commitment
+-- (status 'paused'); it drops out of the active/committed total until resumed.
+alter table goal_commitments add column if not exists paused_at timestamptz;
+alter table goal_commitments add column if not exists pause_reason text;
 
 -- One active commitment per (profile, domain). A rapid double-submit, or a
 -- second "adopt" before the first is revoked, must not leave two active

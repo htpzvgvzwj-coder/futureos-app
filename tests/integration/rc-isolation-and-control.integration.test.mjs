@@ -557,3 +557,41 @@ test("Guardian Phase 2 decision loop: impact preview, adjust re-parks, approve w
   assert.ok(spend && spend.before != null && spend.after != null, "spendableNow before/after recorded");
   assert.equal(spend.before - spend.after, 120);
 });
+
+test("Guardian Phase 3: pause / reduce a commitment drops it from the active total", opts, async (t) => {
+  const [{ createCommitment, getActiveCommitment, pauseCommitment, resumeCommitment, reduceCommitment }, { pool }] = await Promise.all([
+    import("../../lib/goal-commitment-store.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gp3");
+  t.after(() => cleanupUser(pool, u));
+
+  const mk = (domain, m) => createCommitment(u, { domain, monthlyContribution: m, effectiveMonth: "2026-10", pauseIfEmergencyMonthsBelow: 3 });
+  await mk("wedding", 1500);
+  await mk("home", 1200);
+
+  // pause the smaller one -> no longer 'active'
+  const home = await getActiveCommitment(u, "home");
+  const paused = await pauseCommitment(home.id, u, { reason: "guardian_collision_path" });
+  assert.equal(paused.status, "paused");
+  assert.equal(await getActiveCommitment(u, "home"), null, "a paused commitment is not active");
+
+  // resume brings it back
+  const resumed = await resumeCommitment(home.id, u);
+  assert.equal(resumed.status, "active");
+  assert.ok(await getActiveCommitment(u, "home"));
+
+  // reduce = revoke + recreate at the lower amount, audit chain intact
+  const wed = await getActiveCommitment(u, "wedding");
+  const red = await reduceCommitment(wed.id, u, 900);
+  assert.equal(red.to, 900);
+  assert.equal(red.from, 1500);
+  const wedNow = await getActiveCommitment(u, "wedding");
+  assert.equal(Number(wedNow.monthly_contribution), 900);
+  assert.notEqual(wedNow.id, wed.id);
+
+  // reduce to 0 -> just revoked, no active row
+  const red0 = await reduceCommitment(wedNow.id, u, 0);
+  assert.equal(red0.revoked, true);
+  assert.equal(await getActiveCommitment(u, "wedding"), null);
+});
