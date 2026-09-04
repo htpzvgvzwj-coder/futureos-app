@@ -1,5 +1,6 @@
 import { getCurrentUserId } from "../../../../lib/auth.js";
 import { loadDomainContext, ensurePlan } from "../../../../lib/future-field/service.js";
+import { loadSeededPath } from "../../../../lib/future-field/seed.js";
 import { planStore, peelBranch, compareBranches, mergeBranches } from "../../../../lib/plan-runtime/index.js";
 import { recordEventSafe } from "../../../../lib/change-ledger/store.js";
 import {
@@ -59,6 +60,13 @@ export async function POST(request) {
   const body = await request.json();
 
   const context = await loadDomainContext(userId, domain);
+  // Same fallback the GET side uses: a domain with no confirmed artifact
+  // but a seeded first-path draft (StudioEntryBridge, or the example
+  // dataset's Studio plans) still has a reality path to branch from.
+  if (!context.realityPlanData) {
+    const seeded = await loadSeededPath(userId, domain).catch(() => null);
+    if (seeded?.data) context.realityPlanData = seeded.data;
+  }
   if (!context.realityPlanData || !context.adapter) {
     return Response.json({ error: "no_reality_path" }, { status: 409 });
   }
