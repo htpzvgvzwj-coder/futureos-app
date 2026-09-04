@@ -125,6 +125,72 @@
 .futureSlot .nodeDot { background: transparent; border: 2px dotted var(--ink-faint); opacity: 0.6; }
 .futureSlot span { font-size: 13px; color: var(--ink-faint); }
 
+/* ---- Future Fragments ("See what could come next") ---- */
+.fragmentSlot { position: relative; }
+.futureSlot { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+.futureSlotOpen .fragmentSlotText b { color: var(--ink); }
+.fragmentSlotText { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.fragmentSlotText b { font-size: 13.5px; font-weight: 700; color: var(--ink-soft); }
+.fragmentSlotHint { font-size: 12px; color: var(--ink-faint); }
+.fragmentSlot .domainChevron { font-size: 16px; color: var(--ink-faint); line-height: 1; }
+.nodeDotBreathe { animation: fragBreathe 2.6s ease-in-out infinite; }
+@keyframes fragBreathe {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 0.9; transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) { .nodeDotBreathe { animation: none; } }
+
+.fragmentList { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 2px 22px; }
+.fragment {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink-faint);
+  border-radius: 12px;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.frag_protect { border-left-color: #c2410c; }
+.frag_build { border-left-color: var(--sea); }
+.frag_accelerate { border-left-color: #6d28d9; }
+.fragmentHead { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.fragmentKind {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.fragmentTitle { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.fragmentDetail { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+.fragmentMeta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--ink-soft); }
+.fragmentMeta span { white-space: nowrap; }
+.fragmentWhyBtn {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sea);
+  cursor: pointer;
+}
+.fragmentWhy { margin: 2px 0 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.fragmentWhy li { font-size: 11.5px; color: var(--ink-faint); line-height: 1.4; }
+.fragmentDescribe {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
 /* ---- What Moved ---- */
 .moved {
   border: 1px solid var(--line);
