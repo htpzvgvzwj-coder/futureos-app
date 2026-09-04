@@ -23,6 +23,7 @@ import { DetectedMoments } from "./DetectedMoments.jsx";
 import { MoneyChangedReceipt } from "./MoneyChangedReceipt.jsx";
 import { ActivePlanRail } from "./ActivePlanRail.jsx";
 import { useTx } from "./i18n.jsx";
+import { echoPayment, ECHO_MIN } from "../../../lib/life/echo-payment.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
@@ -150,16 +151,29 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
                 <p className={css.micro}>{tx("No transactions yet — add or import one to fill this in.")}</p>
               ) : (
                 <div className={css.activity}>
-                  {txns.slice(0, 5).map((t) => (
-                    <div key={t.id} className={css.actItem}>
-                      <span className={`${css.actGlyph} ${t.direction === "debit" ? css.out : ""}`}>{(t.merchant || "?")[0].toUpperCase()}</span>
-                      <span className={css.actBody}>
-                        <span className={css.actName}>{t.merchant || t.category || t.channel || tx("Payment")}</span>
-                        <span className={css.actMeta}>{t.category ?? t.channel ?? ""}{t.status !== "posted" ? ` · ${tx(t.status)}` : ""}</span>
-                      </span>
-                      <span className={`${css.actAmt} ${t.direction === "credit" ? css.in : ""}`}>{t.direction === "credit" ? "+" : "−"} {sgd(t.amount)}</span>
-                    </div>
-                  ))}
+                  {txns.slice(0, 5).map((t) => {
+                    const canEcho = t.direction === "debit" && Number(t.amount) >= ECHO_MIN && t.channel !== "card_repayment";
+                    const Row = canEcho ? "button" : "div";
+                    return (
+                      <Row
+                        key={t.id}
+                        type={canEcho ? "button" : undefined}
+                        className={css.actItem}
+                        style={canEcho ? { width: "100%", background: "none", border: 0, textAlign: "left", cursor: "pointer", font: "inherit" } : undefined}
+                        onClick={canEcho ? () => setSheet({ kind: "echo", tx: t }) : undefined}
+                      >
+                        <span className={`${css.actGlyph} ${t.direction === "debit" ? css.out : ""}`}>{(t.merchant || "?")[0].toUpperCase()}</span>
+                        <span className={css.actBody}>
+                          <span className={css.actName}>{t.merchant || t.category || t.channel || tx("Payment")}</span>
+                          <span className={css.actMeta}>
+                            {t.category ?? t.channel ?? ""}{t.status !== "posted" ? ` · ${tx(t.status)}` : ""}
+                            {canEcho ? ` · ${tx("see how this moves your life")}` : ""}
+                          </span>
+                        </span>
+                        <span className={`${css.actAmt} ${t.direction === "credit" ? css.in : ""}`}>{t.direction === "credit" ? "+" : "−"} {sgd(t.amount)}</span>
+                      </Row>
+                    );
+                  })}
                 </div>
               )}
               <button type="button" className={css.link} onClick={onActivity}>{tx("View all activity →")}</button>
@@ -171,13 +185,13 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
         <FeatureHistory feature="today" label="What you've done in Today" />
       </div>
 
-      {sheet && <HomeSheet kind={sheet.kind} fb={fb} twin={twin} onClose={() => setSheet(null)} />}
+      {sheet && <HomeSheet kind={sheet.kind} tx1={sheet.tx} fb={fb} twin={twin} onClose={() => setSheet(null)} />}
     </div>
   );
 }
 
 /* ---- bottom sheets: figure explanations + honest bank-action states ---- */
-function HomeSheet({ kind, fb, twin, onClose }) {
+function HomeSheet({ kind, tx1, fb, twin, onClose }) {
   const { tx } = useTx();
   return (
     <div className={css.sheetScrim} onClick={onClose}>
@@ -187,6 +201,7 @@ function HomeSheet({ kind, fb, twin, onClose }) {
         {kind === "paynow" && <PayNowSheet fb={fb} onClose={onClose} />}
         {kind === "fx" && <FxSheet />}
         {kind === "scanpay" && <ScanPaySheet />}
+        {kind === "echo" && <EchoSheet txn={tx1} fb={fb} twin={twin} />}
         <button type="button" className={css.cta} onClick={onClose}>{tx("Close")}</button>
       </div>
     </div>
@@ -312,6 +327,33 @@ function ScanPaySheet() {
       <p className={css.sheetTitle}>{tx("Scan & Pay")}</p>
       <p className={css.lede}><b>{tx("Not connected.")}</b> {tx("Merchant QR payments need a payment rail this preview does not have. The camera is intentionally not opened.")}</p>
       <p className={css.micro}>{tx("Nothing here can move money until a real rail is connected.")}</p>
+    </>
+  );
+}
+
+// Future Echo — how one Today payment ripples along the Life line.
+function EchoSheet({ txn, fb, twin }) {
+  const { tx } = useTx();
+  const s2s = twin?.safeToSpend ?? {};
+  const echo = echoPayment({
+    amount: txn?.amount,
+    safeToSpend: s2s.safeToSpend,
+    protectedReserve: s2s.breakdown?.protectedReserve ?? twin?.twin?.balanceBreakdown?.protectedFor,
+    lifeThread: fb?.lifeThread ?? {},
+  });
+  return (
+    <>
+      <p className={css.sheetTitle}>{sgd(echo.amount)} · {txn?.merchant || tx("payment")}</p>
+      <p className={css.micro}>{tx("How this one payment moves your line:")}</p>
+      <div>
+        {echo.lines.map((l) => (
+          <div key={l.id} className={css.sheetKV}>
+            <span>{l.tone === "down" ? "↓" : "•"}</span>
+            <span>{tx(l.key, l.params)}</span>
+          </div>
+        ))}
+      </div>
+      <p className={css.micro}>{tx(echo.basis)}</p>
     </>
   );
 }
