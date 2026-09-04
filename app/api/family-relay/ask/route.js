@@ -27,27 +27,32 @@ export async function POST(request) {
   if (!(amount > 0)) return Response.json({ error: "no_amount" }, { status: 400 });
 
   try {
-    // Real context: merchants this account has paid before, and what has
-    // gone out in the last 7 days.
+    // Real context from this account's own ledger.
     const txRes = await query(
-      `select merchant, amount, posted_at from bank_transactions
-        where profile_key = $1 and direction = 'debit'
-        order by posted_at desc limit 120`,
+      `select merchant, amount, direction, posted_at from bank_transactions
+        where profile_key = $1
+        order by posted_at desc limit 200`,
       [userId],
     ).catch(() => ({ rows: [] }));
-    const knownMerchants = [...new Set(txRes.rows.map((r) => r.merchant).filter(Boolean))];
-    const spentThisWeek = txRes.rows
-      .filter((r) => Date.now() - new Date(r.posted_at).getTime() <= 7 * DAY)
-      .reduce((s, r) => s + round0(r.amount), 0);
+    const debits = txRes.rows.filter((r) => r.direction === "debit" && r.merchant && !/opening balance/i.test(r.merchant));
+    const knownMerchants = [...new Set(debits.map((r) => r.merchant))];
+    const inLastWeek = (r) => Date.now() - new Date(r.posted_at).getTime() <= 7 * DAY;
+    const spentThisWeek = debits.filter(inLastWeek).reduce((s, r) => s + round0(r.amount), 0);
 
-    // A weekly ceiling a guardian delegated, if any.
+    // The child's actual weekly allowance = their most recent pocket-money
+    // style credit (falls back to a body value, then null = no week bar).
+    const allowanceCredit = txRes.rows.find((r) => r.direction === "credit" && /pocket|allowance|pocket money/i.test(r.merchant ?? ""));
+    const weeklyAllowance = allowanceCredit ? Number(allowanceCredit.amount) : (body.weeklyAllowance ?? null);
+
+    // A per-payment ceiling a guardian delegated ("spend up to this
+    // without asking"), from the linked approver's weekly auto-approve.
     const lr = await query(
       `select auto_approve_weekly from lifecycle_roles
         where profile_key = $1 and scope = 'approve' and status = 'active' and auto_approve_weekly is not null
         order by auto_approve_weekly desc limit 1`,
       [userId],
     ).catch(() => ({ rows: [] }));
-    const weeklyAllowance = lr.rows[0] ? Number(lr.rows[0].auto_approve_weekly) : (body.weeklyAllowance ?? null);
+    const autoApproveUnder = lr.rows[0] ? Number(lr.rows[0].auto_approve_weekly) : null;
 
     const policy = await getAuthPolicy(userId);
     const evaluation = evaluateAskToPay({
@@ -56,7 +61,7 @@ export async function POST(request) {
       knownMerchants,
       savingsGoals: [],
       policy: {
-        autoApproveUnder: policy.autoApproveUnder ?? null,
+        autoApproveUnder,
         alwaysApproveOver: policy.approvalOverAmount ?? null,
         newMerchantNeedsApproval: policy.restrictedNeedApproval !== false,
       },
