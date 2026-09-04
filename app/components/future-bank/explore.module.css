@@ -143,6 +143,65 @@
 .tools { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
 .toolGroup { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 
+/* ---- Cost of Delay (hero) ---- */
+.delayGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 1fr;
+  gap: 5px 8px;
+  font-size: 12px;
+  color: #eaf0f7;
+  align-items: center;
+}
+.delayCol { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #8ea0ba; }
+.delayNow { font-weight: 800; color: #4fd1b8; }
+.chain {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cdd7e4;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: 8px;
+}
+.chain b { color: #4fd1b8; }
+
+/* ---- Before you commit ---- */
+.dont {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber);
+  border-radius: 12px;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.dont b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.stress {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 12px;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stress b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+
+/* ---- Future Receipt ---- */
+.receipt {
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.receipt b { font-size: 13px; font-weight: 700; color: var(--ink); }
+.receiptRow { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--ink-soft); }
+.receiptRow b { color: var(--sea); }
+
+.oneQ { font-size: 12px; color: var(--sea); font-weight: 600; line-height: 1.4; }
+
 /* ---- Impact Map ---- */
 .impactHeadline { border-left: 3px solid var(--amber); }
 
