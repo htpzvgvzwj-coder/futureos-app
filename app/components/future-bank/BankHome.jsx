@@ -69,10 +69,11 @@ function GrowingAccountToday({ tx, fb, twin, onActivity }) {
 
   const balance = twin?.safeToSpend?.breakdown?.postedLiquidCash ?? fb.bankNow?.available ?? null;
   const commitments = fb.lifeThread?.commitments ?? twin?.twin?.commitments ?? [];
-  const spends = (twin?.recentTransactions ?? []).filter((t) => t.direction === "debit" && t.channel !== "opening_balance" && !t.isInternalTransfer);
+  const spends = (twin?.recentTransactions ?? []).filter((t) => t.direction === "debit" && t.channel !== "opening_balance" && !t.isInternalTransfer && !/to savings/i.test(t.merchant ?? ""));
+  const GOAL_LABEL = { other: "My savings goal", investment: "Something big later", home: "A place of my own", retirement: "Way in the future" };
   const g = buildGrowingAccount({
     balance,
-    goals: commitments.map((c) => ({ label: cap(c.domain), saved: 0, target: 0, monthly: c.monthlyContribution })),
+    goals: commitments.map((c) => ({ label: GOAL_LABEL[c.domain] ?? cap(c.domain), saved: 0, target: 0, monthly: c.monthlyContribution })),
     recentSpending: spends.map((t) => ({ merchant: t.merchant, amount: t.amount, at: t.postedAt })),
     pendingRequests: reqs.map((r) => ({ amount: r.amount, merchant: r.payload?.merchant ?? r.summary })),
   });
