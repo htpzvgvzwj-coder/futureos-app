@@ -15,9 +15,10 @@ import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import { useTx } from "./i18n.jsx";
-import { resolveStage, describeStage } from "../../../lib/family-relay/stages.js";
+import { resolveStage, describeStage, ageFromBirthYear } from "../../../lib/family-relay/stages.js";
 import { evaluateAskToPay } from "../../../lib/family-relay/ask-to-pay.js";
 import { evaluatePaymentPause, PAUSE_OPTION_LABEL } from "../../../lib/family-relay/payment-pause.js";
+import { MONEY_SEED_KINDS, growingPermissions, buildHandoverChecklist } from "../../../lib/family-relay/surfaces.js";
 
 const ACCOUNT_TYPES = [
   { id: "individual", name: "Just me", means: "A normal adult account. No one else can see or approve." },
@@ -249,7 +250,7 @@ export function FamilyCareView({ onBack, onWedding }) {
           <p className={css.micro}>{tx("The people around your money — a child you manage, a guardian who approves, a household you share ranges with, an emergency contact, a beneficiary for later.")}</p>
         </div>
 
-        <FamilyRelay accountType={accountType} roles={roles} birthYear={care?.birthYear ?? null} />
+        <FamilyRelay accountType={accountType} roles={roles} birthYear={care?.birthYear ?? null} handoff={handoff} />
 
         {/* account setup */}
         <section className={css.section}>
@@ -507,7 +508,7 @@ export function FamilyCareView({ onBack, onWedding }) {
 // account is at + what each capability needs, and lets you try the two
 // stage-specific flows: Ask to Pay (child / youth) and Payment Pause
 // (later-life). The evaluators are the real pure engine.
-function FamilyRelay({ accountType, roles, birthYear }) {
+function FamilyRelay({ accountType, roles, birthYear, handoff }) {
   const { tx } = useTx();
   const active = (roles ?? []).filter((r) => r.status == null || r.status === "active");
   const guardianLinked = active.some((r) => r.role === "guardian" && r.status === "active" && r.subjectKey);
@@ -515,6 +516,16 @@ function FamilyRelay({ accountType, roles, birthYear }) {
   const d = describeStage(stage, { guardianLinked });
   const isChildish = stage === "child" || stage === "youth";
   const isLaterLife = stage === "later_life";
+  const childAge = ageFromBirthYear(birthYear);
+  const rungs = growingPermissions({ childAge, appliedRungIds: isChildish ? ["view_save", "small_spend"] : [] });
+  const handover = buildHandoverChecklist({
+    accountsCount: 1, incomeCount: 1, obligationsCount: 1,
+    rolesCount: active.filter((r) => r.role !== "account_owner").length,
+    handoff, beneficiaryCount: active.filter((r) => r.role === "beneficiary_placeholder").length,
+  });
+  const RUNG_LABEL = {
+    applied: `✓ ${tx("open")}`, ready: `◔ ${tx("age reached — apply when your family decides")}`, future: `· ${tx("later")}`,
+  };
 
   return (
     <section className={css.section}>
@@ -526,13 +537,40 @@ function FamilyRelay({ accountType, roles, birthYear }) {
         {d.can.length ? <span className={css.micro}>✓ {tx("Can")}: {d.can.map((c) => tx(c)).join(", ")}</span> : null}
         {d.needsApproval.length ? <span className={css.micro}>◔ {tx("Needs a guardian's yes")}: {d.needsApproval.map((c) => tx(c)).join(", ")}</span> : null}
         {d.cannot.length ? <span className={css.micro}>✕ {tx("Not at this stage")}: {d.cannot.map((c) => tx(c)).join(", ")}</span> : null}
-        {!guardianLinked && (stage === "child" || stage === "youth") ? (
+        {!guardianLinked && isChildish ? (
           <span className={css.micro}>{tx("No guardian is linked yet, so anything that would need a yes is held until one is.")}</span>
         ) : null}
       </div>
 
       {isChildish ? <AskToPayTry tx={tx} /> : null}
       {isLaterLife || accountType === "individual" ? <PaymentPauseTry tx={tx} /> : null}
+
+      {/* Growing Permissions ladder */}
+      <div className={css.calmCard}>
+        <b>{tx("Growing Permissions")}</b>
+        <span className={css.micro}>{tx("Nothing opens on its own. Each rung is applied when age is reached AND the family decides — and every change is a Life Memory record.")}</span>
+        {rungs.map((r) => (
+          <span key={r.id} className={css.micro}>{RUNG_LABEL[r.state]} — {tx(r.label)}{r.atAge ? ` (${tx("from age")} ${r.atAge})` : ""}</span>
+        ))}
+      </div>
+
+      {/* Money Seeds */}
+      <div className={css.calmCard}>
+        <b>{tx("Money Seeds")}</b>
+        <span className={css.micro}>{tx("Long-term funds a guardian can plant from birth. Each grows quietly and, when the child is old enough, becomes a node on their own Life Thread.")}</span>
+        {MONEY_SEED_KINDS.map((k) => (
+          <span key={k.id} className={css.micro}>· {tx(k.label)}</span>
+        ))}
+      </div>
+
+      {/* Life Handover checklist */}
+      <div className={css.calmCard}>
+        <b>{tx("Life Handover")}</b>
+        <span className={css.micro}>{tx("What a successor would need, checked against what's already in your account. It never stands in for the legal steps.")}</span>
+        {handover.map((i) => (
+          <span key={i.id} className={css.micro}>{i.done ? "✓" : "○"} {tx(i.label)}{i.done ? "" : ` — ${tx(i.hint)}`}</span>
+        ))}
+      </div>
     </section>
   );
 }
