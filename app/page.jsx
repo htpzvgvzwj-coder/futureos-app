@@ -16,6 +16,7 @@ import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import { ExploreView } from "./components/future-bank/ExploreView.jsx";
 import { ImpactMapView } from "./components/future-bank/ImpactMapView.jsx";
 import { StudioView } from "./components/future-bank/StudioView.jsx";
+import { FutureDraftsView } from "./components/future-bank/FutureDraftsView.jsx";
 import { SpendingView } from "./components/future-bank/SpendingView.jsx";
 import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
 import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
@@ -221,6 +222,7 @@ const screens = {
   SUPERVISED: "supervised",
   IMPACT_MAP: "impactMap",
   STUDIO: "studio",
+  FUTURE_DRAFTS: "futureDrafts",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3286,6 +3288,7 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.EXPLORE_CHAT) return screens.MIRROR;
   if (activeScreen === screens.IMPACT_MAP) return screens.MIRROR;
   if (activeScreen === screens.STUDIO) return screens.MIRROR;
+  if (activeScreen === screens.FUTURE_DRAFTS) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
   if (activeScreen === screens.HOME_HORIZON) return screens.MIRROR;
   if (activeScreen === screens.EMERGENCY_RUNWAY) return screens.MIRROR;
@@ -17802,6 +17805,7 @@ export default function App() {
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
           if (s === "future_field" || s.startsWith("future_field:")) return routeToFutureField(s === "future_field" ? "future_field:home" : s);
           if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
+          if (s === "future_drafts") return setActiveScreen(screens.FUTURE_DRAFTS);
           if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
           if (s.startsWith("studio:")) {
             const d = s.slice(7);
@@ -17830,6 +17834,12 @@ export default function App() {
           if (s === "future_field" || s.startsWith("future_field:")) return routeToFutureField(s === "future_field" ? `future_field:${studioViewDomain}` : s);
           setActiveScreen(screens.MIRROR);
         }}
+      />
+    ),
+    [screens.FUTURE_DRAFTS]: (
+      <FutureDraftsView
+        onBack={() => setActiveScreen(screens.MIRROR)}
+        onOpen={(d) => { setStudioViewDomain(d); setActiveScreen(screens.STUDIO); }}
       />
     ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,

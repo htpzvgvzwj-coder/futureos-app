@@ -243,6 +243,17 @@
   flex-shrink: 0;
 }
 
+/* ---- Future Drafts ---- */
+.compareGrid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 6px 10px;
+  font-size: 12.5px;
+  color: var(--ink);
+  align-items: center;
+}
+.draftPicked { box-shadow: var(--neu-pressed), inset 0 0 0 2px var(--ocbc-red, #d71920) !important; }
+
 /* ---- Impact Map ---- */
 .impactHeadline { border-left: 3px solid var(--amber); }
 

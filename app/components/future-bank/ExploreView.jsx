@@ -418,6 +418,7 @@ function Inner({ onRoute, onStudio }) {
               <span className={css.micro}>{tx("Estimate, recomputed from your Change Ledger.")}</span>
             </div>
           ) : null}
+          <button type="button" className={css.link} onClick={() => onRoute("future_drafts")}>{tx("See every future you're holding open →")}</button>
           <FeatureHistory feature="explore" label="Recent futures" />
         </section>
 

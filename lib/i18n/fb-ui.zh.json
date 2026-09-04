@@ -1371,5 +1371,18 @@
   "Answer it in Future Field →": "在 Future Field 里回答 →",
   "See what it affects": "看它影响什么",
   "See it on your line": "在你的人生线上看",
-  "Try pulling one": "试着拉一个"
+  "Try pulling one": "试着拉一个",
+  "Future Drafts": "未来草案",
+  "Every possible future you're holding open, across every plan. Nothing here is committed.": "你正在保留的所有可能未来，跨越每个计划。这里的一切都还没有承诺。",
+  "Could not load your drafts.": "无法加载你的草案。",
+  "No open drafts right now": "目前没有未结的草案",
+  "Peel a branch in any Studio's Future Field and it shows up here.": "在任意工作室的 Future Field 里分出一条分支，它就会出现在这里。",
+  "Comparing": "对比中",
+  "Pick two drafts below to compare them.": "在下面选两个草案进行对比。",
+  "Open drafts": "未结的草案",
+  "No changes recorded": "没有记录的变更",
+  "Active": "使用中",
+  "Draft": "草案",
+  "Open {name}": "打开{name}",
+  "See every future you're holding open →": "查看你保留的所有未来 →"
 }

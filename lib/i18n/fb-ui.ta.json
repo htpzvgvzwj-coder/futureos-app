@@ -659,5 +659,18 @@
   "Answer it in Future Field →": "Future Field இல் பதிலளி →",
   "See what it affects": "அது எதைப் பாதிக்கிறது என்று பார்",
   "See it on your line": "உங்கள் கோட்டில் பார்",
-  "Try pulling one": "ஒன்றை இழுத்துப் பார்"
+  "Try pulling one": "ஒன்றை இழுத்துப் பார்",
+  "Future Drafts": "எதிர்கால வரைவுகள்",
+  "Every possible future you're holding open, across every plan. Nothing here is committed.": "நீங்கள் திறந்து வைத்திருக்கும் ஒவ்வொரு சாத்தியமான எதிர்காலமும், எல்லாத் திட்டங்களிலும். இங்கே எதுவும் உறுதிசெய்யப்படவில்லை.",
+  "Could not load your drafts.": "உங்கள் வரைவுகளை ஏற்ற முடியவில்லை.",
+  "No open drafts right now": "இப்போது திறந்த வரைவுகள் இல்லை",
+  "Peel a branch in any Studio's Future Field and it shows up here.": "எந்த Studio வின் Future Field இலும் ஒரு கிளையைப் பிரித்தால் அது இங்கே தோன்றும்.",
+  "Comparing": "ஒப்பிடுகிறது",
+  "Pick two drafts below to compare them.": "கீழே இரண்டு வரைவுகளைத் தேர்ந்தெடுத்து ஒப்பிடவும்.",
+  "Open drafts": "திறந்த வரைவுகள்",
+  "No changes recorded": "மாற்றங்கள் எதுவும் பதிவு செய்யப்படவில்லை",
+  "Active": "செயலில்",
+  "Draft": "வரைவு",
+  "Open {name}": "{name} ஐத் திற",
+  "See every future you're holding open →": "நீங்கள் திறந்து வைத்திருக்கும் ஒவ்வொரு எதிர்காலத்தையும் பார் →"
 }
