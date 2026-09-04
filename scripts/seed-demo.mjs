@@ -11,30 +11,38 @@
 import bcrypt from "bcryptjs";
 import { createUser } from "../lib/auth.js";
 import { query } from "../lib/db.js";
-import { buildSampleAccount } from "../lib/sample-data/build.js";
+import { buildSampleAccount, buildChildAccount, buildElderAccount } from "../lib/sample-data/build.js";
 
-const EMAIL = process.env.DEMO_EMAIL ?? "demo@futureos.app";
 const PASSWORD = process.env.DEMO_PASSWORD ?? "demo1234";
 const BASE = process.env.DEMO_BASE_URL ?? "https://futureos-app.vercel.app";
 
-async function main() {
-  let u = (await query(`select id from users where email = $1`, [EMAIL])).rows[0];
+async function ensureUser(email, displayName) {
+  let u = (await query(`select id from users where email = $1`, [email])).rows[0];
   if (u) {
-    console.log(`• existing demo user ${EMAIL} — rebuilding its data`);
-    await query(`update users set password_hash = $2, display_name = 'Demo' where id = $1`, [u.id, await bcrypt.hash(PASSWORD, 12)]);
+    await query(`update users set password_hash = $2, display_name = $3 where id = $1`, [u.id, await bcrypt.hash(PASSWORD, 12), displayName]);
+    console.log(`• ${email} — rebuilding its data`);
   } else {
-    u = await createUser({ email: EMAIL, password: PASSWORD, displayName: "Demo" });
-    console.log(`• created demo user ${EMAIL}`);
+    u = await createUser({ email, password: PASSWORD, displayName });
+    console.log(`• created ${email}`);
   }
+  return u;
+}
 
-  await buildSampleAccount(u.id, { wipeFirst: true });
+async function main() {
+  const adult = await ensureUser(process.env.DEMO_EMAIL ?? "demo@futureos.app", "Demo");
+  await buildSampleAccount(adult.id, { wipeFirst: true });
 
-  console.log("\n✓ demo account ready\n");
-  console.log(`   URL:      ${BASE}`);
-  console.log(`   email:    ${EMAIL}`);
-  console.log(`   password: ${PASSWORD}\n`);
-  console.log("   Every Explore capability zone, every Life node, Connections and");
-  console.log("   Family & Care now have real data to work with.\n");
+  const kid = await ensureUser("demo-kid@futureos.app", "Demo (youth)");
+  await buildChildAccount(kid.id, { wipeFirst: true });
+
+  const elder = await ensureUser("demo-elder@futureos.app", "Demo (later life)");
+  await buildElderAccount(elder.id, { wipeFirst: true });
+
+  console.log("\n✓ demo accounts ready\n");
+  console.log(`   URL:   ${BASE}   password: ${PASSWORD}`);
+  console.log(`   demo@futureos.app        — funded adult (Today / Life / Guardian / History)`);
+  console.log(`   demo-kid@futureos.app    — youth: Growing Account Today + Ask to Pay`);
+  console.log(`   demo-elder@futureos.app  — later life: Calm Today + Payment Pause\n`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
