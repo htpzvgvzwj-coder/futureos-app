@@ -17,7 +17,7 @@ import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
 import { compactThread } from "../../../lib/life/snapshot-shape.js";
 import { buildFutureEcho, answerLineQuestion, lineSuggestions } from "../../../lib/life/ask.js";
-import { buildFutureFragments } from "../../../lib/life/fragments.js";
+import { buildFutureFragments, simulateFragment, describeFuture } from "../../../lib/life/fragments.js";
 import { forecastHeadline } from "../../../lib/life/forecast.js";
 import { buildNodeMoment } from "../../../lib/life/moment.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
@@ -119,6 +119,13 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [momentNode, setMomentNode] = useState(null); // node id -> Moment Sheet
   const [fragmentsOpen, setFragmentsOpen] = useState(false); // "See what could come next"
   const [openFragId, setOpenFragId] = useState(null); // fragment id -> "why this appeared"
+  const [placedFrag, setPlacedFrag] = useState(null); // fragment currently on the line (ghost)
+  const [fragMonthly, setFragMonthly] = useState(null); // adjusted monthly for the placed fragment
+  const [fragAdjustOpen, setFragAdjustOpen] = useState(false);
+  const [fragBusy, setFragBusy] = useState(false);
+  const [fragDone, setFragDone] = useState(null); // { id, receipt } once confirmed
+  const [describeText, setDescribeText] = useState("");
+  const [describedFrag, setDescribedFrag] = useState(null);
   const reconciledFor = useRef(null);
 
   const collision = detectCollision({
@@ -205,6 +212,40 @@ function Inner({ onStudio, onAddReality, onRoute }) {
     if (t === "today") return onRoute?.("today");
     if (t) return onStudio?.(t);
     onAddReality?.();
+  };
+
+  // ---- Future Fragments: place -> simulate -> confirm -----------------
+  const placeFragment = (f) => {
+    setPlacedFrag(f);
+    setFragMonthly(f.needsMonthly || null);
+    setFragAdjustOpen(false);
+    setFragDone(null);
+  };
+  const clearPlaced = () => { setPlacedFrag(null); setFragMonthly(null); setFragAdjustOpen(false); setFragDone(null); };
+  const placedReceipt = placedFrag ? simulateFragment(placedFrag, lt, { overrideMonthly: fragMonthly }) : null;
+  const confirmFragment = async () => {
+    if (!placedFrag || fragBusy) return;
+    // A described (free-text) fragment routes to its Studio to nail down
+    // specifics rather than committing a guessed number.
+    if (placedFrag.described) { onStudio?.(placedFrag.studio); clearPlaced(); return; }
+    setFragBusy(true);
+    const r = await fetch("/api/life-thread/fragment", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "confirm", fragmentId: placedFrag.id, kind: placedFrag.kind, monthly: fragMonthly }),
+    }).then((x) => (x.ok ? x.json() : x.json().then((e) => ({ error: e.error })))).catch(() => ({ error: "network" }));
+    setFragBusy(false);
+    if (r?.ok) {
+      setFragDone({ id: placedFrag.id, receipt: r.receipt });
+      setPlacedFrag(null);
+      setFragAdjustOpen(false);
+      fb.refetchAll?.();
+    }
+  };
+  const runDescribe = () => {
+    const d = describeFuture(describeText, lt);
+    setDescribedFrag(d);
+    if (d) placeFragment(d);
   };
 
   return (
@@ -343,43 +384,105 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                   {fragments.length ? <span className={life.domainChevron}>{fragmentsOpen ? "–" : "+"}</span> : null}
                 </button>
 
-                {fragmentsOpen && fragments.length ? (
+                {fragmentsOpen ? (
                   <div className={life.fragmentList}>
-                    {fragments.map((f) => (
-                      <div key={f.id} className={`${life.fragment} ${life["frag_" + f.kind] ?? ""}`}>
+                    {fragments.map((f) => {
+                      const isPlaced = placedFrag?.id === f.id;
+                      const isDone = fragDone?.id === f.id;
+                      return (
+                      <div key={f.id} className={`${life.fragment} ${life["frag_" + f.kind] ?? ""} ${isPlaced ? life.fragmentPlaced : ""}`}>
                         <div className={life.fragmentHead}>
                           <span className={life.fragmentKind}>{tx(FRAG_KIND_LABEL[f.kind] ?? f.kind)}</span>
                           <b className={life.fragmentTitle}>{tx(f.title)}</b>
                         </div>
                         <span className={life.fragmentDetail}>{f.detail}</span>
-                        <div className={life.fragmentMeta}>
-                          {f.needsMonthly > 0 ? <span>{tx("Needs")} {money(f.needsMonthly)}/mo</span> : null}
-                          {f.needsOneOff > 0 ? <span>{tx("Needs")} {money(f.needsOneOff)} {tx("once")}</span> : null}
-                          {f.projected?.planShift ? (
-                            <span>{tx(DOMAIN_LABEL[f.projected.planShift.domain] ?? f.projected.planShift.domain)}: {f.projected.planShift.monthsEarlier} {tx("months earlier")}</span>
-                          ) : null}
-                          {f.projected?.bufferMonthsAfter != null ? (
-                            <span>{tx("Safety")}: {Number(f.projected.bufferMonthsAfter).toFixed(1)} {tx("months")}</span>
-                          ) : null}
-                        </div>
-                        <button
-                          type="button"
-                          className={life.fragmentWhyBtn}
-                          onClick={() => setOpenFragId(openFragId === f.id ? null : f.id)}
-                          aria-expanded={openFragId === f.id}
-                        >
-                          {openFragId === f.id ? tx("Hide why this appeared") : tx("Why this appeared")}
-                        </button>
-                        {openFragId === f.id ? (
-                          <ul className={life.fragmentWhy}>
-                            {f.whyItAppeared.map((w, i) => <li key={i}>{tx(w)}</li>)}
-                          </ul>
-                        ) : null}
+
+                        {isDone ? (
+                          <span className={life.fragmentConfirmed}>✓ {tx("On your line as a possibility. Guardian is protecting it and Life Memory has the record.")}</span>
+                        ) : isPlaced ? (
+                          <FragmentReceipt
+                            receipt={placedReceipt}
+                            fragment={f}
+                            adjustOpen={fragAdjustOpen}
+                            monthly={fragMonthly}
+                            flexible={lt.availableMonthlyCashflow ?? 0}
+                            busy={fragBusy}
+                            tx={tx}
+                            money={money}
+                            onMonthly={setFragMonthly}
+                            onToggleAdjust={() => setFragAdjustOpen((v) => !v)}
+                            onConfirm={confirmFragment}
+                            onStudio={() => { onStudio?.(f.studio ?? DOMAIN_LABEL[f.projected?.planShift?.domain]?.toLowerCase() ?? "investment"); }}
+                            onRemove={clearPlaced}
+                          />
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className={life.fragmentWhyBtn}
+                              onClick={() => setOpenFragId(openFragId === f.id ? null : f.id)}
+                              aria-expanded={openFragId === f.id}
+                            >
+                              {openFragId === f.id ? tx("Hide why this appeared") : tx("Why this appeared")}
+                            </button>
+                            {openFragId === f.id ? (
+                              <ul className={life.fragmentWhy}>
+                                {f.whyItAppeared.map((w, i) => <li key={i}>{tx(w)}</li>)}
+                              </ul>
+                            ) : null}
+                            <button type="button" className={life.fragmentPlaceBtn} onClick={() => placeFragment(f)}>
+                              {tx("Place on my line")}
+                            </button>
+                          </>
+                        )}
                       </div>
-                    ))}
-                    <button type="button" className={life.fragmentDescribe} onClick={() => onRoute?.("explore")}>
-                      {tx("Describe another future")}
-                    </button>
+                      );
+                    })}
+
+                    {/* Describe another future */}
+                    <div className={life.fragmentDescribeBox}>
+                      {describedFrag && placedFrag?.id === describedFrag.id ? (
+                        <div className={`${life.fragment} ${life.frag_build} ${life.fragmentPlaced}`}>
+                          <div className={life.fragmentHead}>
+                            <span className={life.fragmentKind}>{tx("From your words")}</span>
+                            <b className={life.fragmentTitle}>{tx(describedFrag.goalLabel)}</b>
+                          </div>
+                          <span className={life.fragmentDetail}>{describedFrag.detail}</span>
+                          <ul className={life.fragmentWhy}>
+                            {describedFrag.questions.map((qq) => <li key={qq.id}>{tx(qq.q)}</li>)}
+                          </ul>
+                          <FragmentReceipt
+                            receipt={placedReceipt}
+                            fragment={describedFrag}
+                            adjustOpen={fragAdjustOpen}
+                            monthly={fragMonthly}
+                            flexible={lt.availableMonthlyCashflow ?? 0}
+                            busy={fragBusy}
+                            tx={tx}
+                            money={money}
+                            onMonthly={setFragMonthly}
+                            onToggleAdjust={() => setFragAdjustOpen((v) => !v)}
+                            onConfirm={confirmFragment}
+                            onStudio={() => onStudio?.(describedFrag.studio)}
+                            onRemove={() => { clearPlaced(); setDescribedFrag(null); }}
+                          />
+                        </div>
+                      ) : (
+                        <form
+                          className={life.describeRow}
+                          onSubmit={(e) => { e.preventDefault(); runDescribe(); }}
+                        >
+                          <input
+                            className={life.askInput}
+                            value={describeText}
+                            onChange={(e) => setDescribeText(e.target.value)}
+                            placeholder={tx("Describe another future…")}
+                            aria-label={tx("Describe another future")}
+                          />
+                          <button type="submit" className={life.askBtn} disabled={describeText.trim().length < 3}>{tx("Add")}</button>
+                        </form>
+                      )}
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -486,6 +589,60 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           onTry={() => { const id = momentNode; setMomentNode(null); if (isPullable(id)) setPullNode(id); else openNode(id); }}
         />
       ) : null}
+    </div>
+  );
+}
+
+// The impact receipt shown once a Fragment is placed on the line: what it
+// needs, what's left flexible, the Guardian safety check, the plan it
+// moves — then Keep / Adjust / Open Studio / Remove.
+function FragmentReceipt({ receipt, fragment, adjustOpen, monthly, flexible, busy, tx, money, onMonthly, onToggleAdjust, onConfirm, onStudio, onRemove }) {
+  if (!receipt) return null;
+  const canConfirm = receipt.affordable && receipt.safetyOk && !busy;
+  return (
+    <div className={life.fragReceipt}>
+      <span className={life.fragReceiptHead}>{tx("If you place this on your line")}</span>
+      <ul className={life.fragReceiptLines}>
+        {receipt.lines.map((l, i) => (
+          <li key={i} className={l.text.startsWith("This is") ? life.fragReceiptWarn : undefined}>
+            {l.params ? tx(l.key, l.params) : tx(l.key ?? l.text)}
+          </li>
+        ))}
+      </ul>
+      <span className={`${life.fragGuardian} ${receipt.guardian.ok ? life.fragGuardianOk : life.fragGuardianWarn}`}>
+        {receipt.guardian.ok ? "🛡 " : "⚠ "}
+        {receipt.guardian.params ? tx(receipt.guardian.key, receipt.guardian.params) : tx(receipt.guardian.key ?? receipt.guardian.text)}
+      </span>
+
+      {adjustOpen ? (
+        <div className={life.fragAdjust}>
+          <input
+            type="range"
+            className={life.pullRange}
+            min={100}
+            max={Math.max(200, Math.round((Number(flexible) || 0) / 50) * 50)}
+            step={50}
+            value={monthly ?? fragment.needsMonthly ?? 100}
+            aria-label={tx("Adjust the monthly amount")}
+            onChange={(e) => onMonthly(Number(e.target.value))}
+          />
+          <span className={life.fragAdjustVal}>{money(monthly ?? fragment.needsMonthly ?? 0)}/mo</span>
+        </div>
+      ) : null}
+
+      <div className={life.fragActs}>
+        <button type="button" className={css.cta} disabled={!canConfirm} onClick={onConfirm}>
+          {busy ? tx("Working…") : fragment.described ? tx("Open its Studio to confirm") : tx("Keep as a possibility")}
+        </button>
+        {!fragment.described ? (
+          <button type="button" className={css.link} disabled={busy} onClick={onToggleAdjust}>
+            {adjustOpen ? tx("Done adjusting") : tx("Adjust")}
+          </button>
+        ) : null}
+        <button type="button" className={css.link} disabled={busy} onClick={onStudio}>{tx("Open its Studio")}</button>
+        <button type="button" className={css.link} disabled={busy} onClick={onRemove}>{tx("Remove")}</button>
+      </div>
+      {!receipt.affordable ? <span className={life.fragReceiptWarn}>{tx("Lower the monthly amount to place this.")}</span> : null}
     </div>
   );
 }
