@@ -17,6 +17,7 @@ import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
 import { compactThread } from "../../../lib/life/snapshot-shape.js";
 import { buildFutureEcho, answerLineQuestion, lineSuggestions } from "../../../lib/life/ask.js";
+import { buildFutureFragments } from "../../../lib/life/fragments.js";
 import { forecastHeadline } from "../../../lib/life/forecast.js";
 import { buildNodeMoment } from "../../../lib/life/moment.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
@@ -57,6 +58,8 @@ function positionFragments(numbers) {
 }
 
 const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relationships: "family", freedom: "investment", future: "retirement" };
+const FRAG_KIND_LABEL = { protect: "Protect", build: "Build", accelerate: "Accelerate" };
+const DOMAIN_LABEL = { home: "Home", wedding: "Wedding", emergency: "Safety", family: "Family", investment: "Freedom", retirement: "Retirement", loan: "Loan", travel: "Travel" };
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const capWord = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
 
@@ -114,6 +117,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [forecastOpen, setForecastOpen] = useState(false);
   const [askSim, setAskSim] = useState(null); // preview of an Ask-the-Line "what if"
   const [momentNode, setMomentNode] = useState(null); // node id -> Moment Sheet
+  const [fragmentsOpen, setFragmentsOpen] = useState(false); // "See what could come next"
+  const [openFragId, setOpenFragId] = useState(null); // fragment id -> "why this appeared"
   const reconciledFor = useRef(null);
 
   const collision = detectCollision({
@@ -122,6 +127,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   });
   const thread = buildLivingThread({ lt, moments, planMovement, collision });
   const echo = buildFutureEcho({ lt });
+  const fragments = buildFutureFragments({ lt, twin: fb.twin });
   const memory = buildLifeMemory({ events: fb.ledger?.events, twin: fb.twin, lifeThread: lt });
   const position = positionFragments(thread.numbers);
 
@@ -319,11 +325,64 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                 ) : null}
               </div>
             ))}
-            {!replay && thread.futureSlot ? (
-              <button type="button" className={life.futureSlot} onClick={() => onRoute?.("explore")}>
-                <span className={life.nodeDot} />
-                <span>{tx(thread.futureSlot.label)}</span>
-              </button>
+            {!replay && (fragments.length > 0 || thread.futureSlot) ? (
+              <div className={life.fragmentSlot}>
+                <button
+                  type="button"
+                  className={`${life.futureSlot} ${fragmentsOpen ? life.futureSlotOpen : ""}`}
+                  onClick={() => (fragments.length ? setFragmentsOpen((v) => !v) : onRoute?.("explore"))}
+                  aria-expanded={fragmentsOpen}
+                >
+                  <span className={`${life.nodeDot} ${fragments.length ? life.nodeDotBreathe : ""}`} />
+                  <span className={life.fragmentSlotText}>
+                    <b>{tx("See what could come next")}</b>
+                    {fragments.length ? (
+                      <span className={life.fragmentSlotHint}>{tx("Your money has room for one more possibility.")}</span>
+                    ) : null}
+                  </span>
+                  {fragments.length ? <span className={life.domainChevron}>{fragmentsOpen ? "–" : "+"}</span> : null}
+                </button>
+
+                {fragmentsOpen && fragments.length ? (
+                  <div className={life.fragmentList}>
+                    {fragments.map((f) => (
+                      <div key={f.id} className={`${life.fragment} ${life["frag_" + f.kind] ?? ""}`}>
+                        <div className={life.fragmentHead}>
+                          <span className={life.fragmentKind}>{tx(FRAG_KIND_LABEL[f.kind] ?? f.kind)}</span>
+                          <b className={life.fragmentTitle}>{tx(f.title)}</b>
+                        </div>
+                        <span className={life.fragmentDetail}>{f.detail}</span>
+                        <div className={life.fragmentMeta}>
+                          {f.needsMonthly > 0 ? <span>{tx("Needs")} {money(f.needsMonthly)}/mo</span> : null}
+                          {f.needsOneOff > 0 ? <span>{tx("Needs")} {money(f.needsOneOff)} {tx("once")}</span> : null}
+                          {f.projected?.planShift ? (
+                            <span>{tx(DOMAIN_LABEL[f.projected.planShift.domain] ?? f.projected.planShift.domain)}: {f.projected.planShift.monthsEarlier} {tx("months earlier")}</span>
+                          ) : null}
+                          {f.projected?.bufferMonthsAfter != null ? (
+                            <span>{tx("Safety")}: {Number(f.projected.bufferMonthsAfter).toFixed(1)} {tx("months")}</span>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          className={life.fragmentWhyBtn}
+                          onClick={() => setOpenFragId(openFragId === f.id ? null : f.id)}
+                          aria-expanded={openFragId === f.id}
+                        >
+                          {openFragId === f.id ? tx("Hide why this appeared") : tx("Why this appeared")}
+                        </button>
+                        {openFragId === f.id ? (
+                          <ul className={life.fragmentWhy}>
+                            {f.whyItAppeared.map((w, i) => <li key={i}>{tx(w)}</li>)}
+                          </ul>
+                        ) : null}
+                      </div>
+                    ))}
+                    <button type="button" className={life.fragmentDescribe} onClick={() => onRoute?.("explore")}>
+                      {tx("Describe another future")}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </section>
