@@ -63,8 +63,8 @@ test("each record answers the five things", () => {
   assert.ok(r.what, "what happened");
   assert.ok(r.why, "why it matters");
   assert.deepEqual(r.money, { label: "Free each month", before: 3900, after: 3600, unit: "sgd" }, "how much money changed");
-  assert.ok(r.plansMoved.some((p) => /Wedding: 2 months sooner/.test(p)), "which plans moved");
-  assert.ok(r.plansMoved.some((p) => /Home: 1 months later/.test(p)));
+  assert.ok(r.plansMoved.some((p) => /Wedding: 2 months sooner/.test(p.text)), "which plans moved");
+  assert.ok(r.plansMoved.some((p) => /Home: 1 months later/.test(p.text)));
   assert.ok(r.guardian, "what Guardian did");
   assert.ok(r.source, "source");
   assert.ok(r.evidence.impactSet.length === 3, "raw evidence carried");
@@ -107,6 +107,8 @@ test("latestMovementLine summarises the most recent record", () => {
     lifeThread,
   });
   const line = latestMovementLine(m);
-  assert.match(line.lines[0], /increased by SGD 420/);
-  assert.match(line.lines[1], /Home: 2 months sooner/);
+  // line 0 is { key, params }, line 1 is { text }
+  assert.match(line.lines[0].key, /increased by \{amt\}/);
+  assert.equal(line.lines[0].params.amt, "SGD 420");
+  assert.match(line.lines[1].text, /Home: 2 months sooner/);
 });
