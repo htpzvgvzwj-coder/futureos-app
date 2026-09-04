@@ -24,8 +24,234 @@ import { MoneyChangedReceipt } from "./MoneyChangedReceipt.jsx";
 import { ActivePlanRail } from "./ActivePlanRail.jsx";
 import { useTx } from "./i18n.jsx";
 import { echoPayment, ECHO_MIN } from "../../../lib/life/echo-payment.js";
+import { resolveStage, STAGE_SURFACE } from "../../../lib/family-relay/stages.js";
+import { buildGrowingAccount, buildCalmToday } from "../../../lib/family-relay/surfaces.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
+
+// The life-stage surface this account should see on Today. Fetches the
+// account type + circle + birth year once; defaults to the standard Today.
+function useTodaySurface() {
+  const [info, setInfo] = useState({ surface: "standard", stage: "independent" });
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [ob, rolesRes, care] = await Promise.all([
+          fetch("/api/onboarding", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)),
+          fetch("/api/account?view=roles", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : { roles: [] })),
+          fetch("/api/care", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)),
+        ]);
+        if (!alive) return;
+        const accountType = ob?.onboarding?.accountType ?? "individual";
+        const roles = rolesRes?.roles ?? [];
+        const birthYear = care?.birthYear ?? null;
+        const stage = resolveStage({ accountType, birthYear, roles });
+        setInfo({ surface: STAGE_SURFACE[stage] ?? "standard", stage, birthYear, roles });
+      } catch {
+        /* standard Today is the safe default */
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+  return info;
+}
+
+// ---- Growing Account (the child / youth Today) ---------------------
+function GrowingAccountToday({ tx, fb, twin, onActivity }) {
+  const [reqs, setReqs] = useState([]);
+  useEffect(() => {
+    fetch("/api/authorizations", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setReqs((d?.requests ?? []).filter((x) => x.status === "pending")))
+      .catch(() => {});
+  }, []);
+
+  const balance = twin?.safeToSpend?.breakdown?.postedLiquidCash ?? fb.bankNow?.available ?? null;
+  const commitments = fb.lifeThread?.commitments ?? twin?.twin?.commitments ?? [];
+  const spends = (twin?.recentTransactions ?? []).filter((t) => t.direction === "debit" && t.channel !== "opening_balance" && !t.isInternalTransfer);
+  const g = buildGrowingAccount({
+    balance,
+    goals: commitments.map((c) => ({ label: cap(c.domain), saved: 0, target: 0, monthly: c.monthlyContribution })),
+    recentSpending: spends.map((t) => ({ merchant: t.merchant, amount: t.amount, at: t.postedAt })),
+    pendingRequests: reqs.map((r) => ({ amount: r.amount, merchant: r.payload?.merchant ?? r.summary })),
+  });
+
+  return (
+    <div className={`${css.app} ${css.embedded}`}>
+      <div className={css.shell}>
+        <p className={css.kicker}>{tx("Today")}</p>
+        {g.haveText ? (
+          <div className={css.section}>
+            <h1 className={css.title}>{g.haveText}</h1>
+            <p className={css.micro}>{tx("what you have")}</p>
+          </div>
+        ) : null}
+
+        {g.savingFor.length ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("Saving for")}</p>
+            {g.savingFor.map((s) => (
+              <div key={s.label} className={css.sheetKV}><span>{tx(s.label)}</span><span>{s.monthly ? sgd(s.monthly) + "/mo" : ""}</span></div>
+            ))}
+          </section>
+        ) : null}
+
+        {g.waitingForYes.length ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("Waiting for a yes")}</p>
+            {g.waitingForYes.map((w, i) => (
+              <div key={i} className={css.sheetKV}><span>{w.merchant}</span><span>{sgd(w.amount)}</span></div>
+            ))}
+          </section>
+        ) : null}
+
+        <AskToPayLive tx={tx} onDone={() => fb.refetchAll?.()} />
+
+        {g.recent.length ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("Lately")}</p>
+            {g.recent.map((r, i) => (
+              <div key={i} className={css.sheetKV}><span>{r.merchant}</span><span>−{sgd(r.amount)}</span></div>
+            ))}
+            <button type="button" className={css.link} onClick={onActivity}>{tx("See all")} →</button>
+          </section>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+// ---- Calm Today (the later-life Today) ----------------------------
+function CalmTodayView({ tx, fb, twin, surface, topMoment, onActivity, onGuardian }) {
+  const balance = fb.bankNow?.available ?? twin?.safeToSpend?.safeToSpend ?? null;
+  const ni = twin?.safeToSpend?.nextIncome ?? null;
+  const nb = fb.bankNow?.nextEvent?.kind === "bill" ? fb.bankNow.nextEvent : (twin?.safeToSpend?.nearTermObligationsList ?? [])[0] ?? null;
+  const contacts = (surface.roles ?? []).filter((r) => ["trusted_contact", "guardian"].includes(r.role) && (r.status == null || r.status === "active"));
+  const c = buildCalmToday({
+    balance,
+    nextIncome: ni ? { label: ni.label, amount: ni.amount, when: ni.expectedDate } : null,
+    nextBill: nb ? { label: nb.label, amount: Math.abs(nb.amount ?? 0), when: nb.when ?? nb.dueDate } : null,
+    oneThing: topMoment ? { text: topMoment.title, kind: topMoment.kind } : null,
+    trustedContacts: contacts,
+  });
+
+  return (
+    <div className={`${css.app} ${css.embedded}`}>
+      <div className={`${css.shell} ${css.calm}`}>
+        <p className={css.kicker}>{tx("Today")}</p>
+        {c.balanceText ? (
+          <div className={css.section}>
+            <h1 className={css.title} style={{ fontSize: "2rem" }}>{c.balanceText}</h1>
+            <p className={css.lede}>{tx("in your account now")}</p>
+          </div>
+        ) : null}
+
+        {c.nextIncome ? (
+          <div className={css.sheetKV}><span>{tx("Next money in")}</span><span>{sgd(c.nextIncome.amount)}{c.nextIncome.when ? ` · ${c.nextIncome.when}` : ""}</span></div>
+        ) : null}
+        {c.nextBill ? (
+          <div className={css.sheetKV}><span>{tx("Next bill")}</span><span>{sgd(c.nextBill.amount)}{c.nextBill.when ? ` · ${c.nextBill.when}` : ""}</span></div>
+        ) : null}
+
+        {c.oneThing?.text ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("One thing to look at")}</p>
+            <p className={css.lede}>{c.oneThing.text}</p>
+            <button type="button" className={css.cta} onClick={onGuardian}>{tx("Open Guardian")}</button>
+          </section>
+        ) : (
+          <p className={css.lede}>{tx("Nothing needs you right now.")}</p>
+        )}
+
+        <PaymentPauseLive tx={tx} onDone={() => fb.refetchAll?.()} />
+
+        {c.callList.length ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("People you can call")}</p>
+            {c.callList.map((p, i) => <div key={i} className={css.sheetKV}><span>{p.label}</span><span /></div>)}
+          </section>
+        ) : null}
+
+        <button type="button" className={css.link} onClick={onActivity}>{tx("See everything")} →</button>
+      </div>
+    </div>
+  );
+}
+
+// Live Ask to Pay / Payment Pause — hit the real family-relay endpoints so
+// the decision + its reasons land in the Change Ledger.
+function AskToPayLive({ tx, onDone }) {
+  const [amount, setAmount] = useState("");
+  const [merchant, setMerchant] = useState("");
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const send = async () => {
+    setBusy(true);
+    const r = await fetch("/api/family-relay/ask", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount: Number(amount), merchant }),
+    }).then((x) => x.json()).catch(() => ({ error: "network" }));
+    setBusy(false);
+    setRes(r);
+    if (r?.evaluation) onDone?.();
+  };
+  return (
+    <section className={css.section}>
+      <p className={css.kicker}>{tx("Ask to Pay")}</p>
+      <div className={css.field}><label htmlFor="g-amt">{tx("Amount (SGD)")}</label>
+        <input id="g-amt" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))} /></div>
+      <div className={css.field}><label htmlFor="g-mer">{tx("Pay to")}</label>
+        <input id="g-mer" type="text" value={merchant} onChange={(e) => setMerchant(e.target.value)} /></div>
+      <button type="button" className={css.cta} disabled={busy || !amount} onClick={send}>{busy ? tx("Working…") : tx("Ask")}</button>
+      {res?.evaluation ? (
+        <div className={css.calmCard}>
+          <b className={css.micro}>{{ auto_ok: "✓ " + tx("Goes through"), needs_approval: "◔ " + tx("Sent to a guardian"), blocked: "✕ " + tx("Held") }[res.evaluation.outcome]}</b>
+          {res.evaluation.reasons.map((x, i) => <span key={i} className={css.micro}>{x.text}</span>)}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function PaymentPauseLive({ tx, onDone }) {
+  const [amount, setAmount] = useState("");
+  const [payee, setPayee] = useState("");
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const send = async () => {
+    setBusy(true);
+    const r = await fetch("/api/family-relay/pause", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount: Number(amount), payee }),
+    }).then((x) => x.json()).catch(() => ({ error: "network" }));
+    setBusy(false);
+    setRes(r);
+    if (r?.evaluation) onDone?.();
+  };
+  return (
+    <section className={css.section}>
+      <p className={css.kicker}>{tx("Make a payment")}</p>
+      <div className={css.field}><label htmlFor="p-amt">{tx("Amount (SGD)")}</label>
+        <input id="p-amt" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))} /></div>
+      <div className={css.field}><label htmlFor="p-pay">{tx("Pay to")}</label>
+        <input id="p-pay" type="text" value={payee} onChange={(e) => setPayee(e.target.value)} /></div>
+      <button type="button" className={css.cta} disabled={busy || !amount} onClick={send}>{busy ? tx("Working…") : tx("Pay")}</button>
+      {res?.evaluation ? (
+        res.evaluation.paused ? (
+          <div className={css.calmCard}>
+            <b className={css.micro}>⚠ {tx("Paused — here's why")}</b>
+            {res.evaluation.triggers.map((t, i) => <span key={i} className={css.micro}>{t.text}</span>)}
+          </div>
+        ) : (
+          <div className={css.calmCard}><b className={css.micro}>✓ {tx("Goes through — nothing unusual about this one")}</b></div>
+        )
+      ) : null}
+    </section>
+  );
+}
+
+const cap = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
 
 export function BankHome(props) {
   return (
@@ -40,6 +266,7 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
   const fb = useFutureBankData();
   const { twin, status } = fb;
   const [sheet, setSheet] = useState(null);
+  const surface = useTodaySurface();
 
   const route = (r) => {
     const s = String(r || "");
@@ -70,6 +297,15 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
   const txns = (twin?.recentTransactions ?? []).filter((t) => t.channel !== "opening_balance");
   const needsCount = fb.momentsRaw?.counts?.actionRequired ?? 0;
   const topMoment = (fb.moments ?? []).find((m) => m.state === "new" && (m.severity === "action_required" || m.severity === "watch")) ?? null;
+
+  // Age-adapted Today: a child sees Growing Account, someone in later life
+  // with trusted help sees Calm Today. Same data, fewer things at once.
+  if (twin && !twin.isEmpty && surface.surface === "growing_account") {
+    return <GrowingAccountToday tx={tx} fb={fb} twin={twin} onActivity={onActivity} />;
+  }
+  if (twin && !twin.isEmpty && surface.surface === "calm_today") {
+    return <CalmTodayView tx={tx} fb={fb} twin={twin} surface={surface} topMoment={topMoment} onActivity={onActivity} onGuardian={onGuardian} />;
+  }
   const decision = topMoment
     ? { label: tx("Review"), whenText: tx("needs you"), effect: topMoment.title, source: tx("Future Bank detection") }
     : null;
