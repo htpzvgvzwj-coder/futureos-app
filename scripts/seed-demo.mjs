@@ -11,6 +11,7 @@
 import bcrypt from "bcryptjs";
 import { createUser } from "../lib/auth.js";
 import { query } from "../lib/db.js";
+import { grantRole } from "../lib/account-control/store.js";
 import { buildSampleAccount, buildChildAccount, buildElderAccount } from "../lib/sample-data/build.js";
 
 const PASSWORD = process.env.DEMO_PASSWORD ?? "demo1234";
@@ -32,17 +33,26 @@ async function main() {
   const adult = await ensureUser(process.env.DEMO_EMAIL ?? "demo@futureos.app", "Demo");
   await buildSampleAccount(adult.id, { wipeFirst: true });
 
-  const kid = await ensureUser("demo-kid@futureos.app", "Demo (youth)");
-  await buildChildAccount(kid.id, { wipeFirst: true });
+  // The child and the elder are in the ADULT's family: the adult is a
+  // linked approver on the child's account and a linked trusted contact
+  // on the elder's, so demo@ sees both under Guardian → "People you look
+  // after" and in Family & Care. They also each have their own login so
+  // the age-adapted Today (Growing Account / Calm Today) can be shown.
+  const kid = await ensureUser("demo-kid@futureos.app", "Aaron");
+  await buildChildAccount(kid.id, { wipeFirst: true, guardianKey: adult.id });
 
-  const elder = await ensureUser("demo-elder@futureos.app", "Demo (later life)");
-  await buildElderAccount(elder.id, { wipeFirst: true });
+  const elder = await ensureUser("demo-elder@futureos.app", "Mother");
+  await buildElderAccount(elder.id, { wipeFirst: true, trustedKey: adult.id });
+
+  // the reciprocal side on the adult's own circle
+  await grantRole(adult.id, { subjectKey: kid.id, role: "dependent", scope: "manage", relationLabel: "Aaron — my son (14)", note: "youth account I manage" }).catch(() => {});
+  await grantRole(adult.id, { subjectKey: elder.id, role: "dependent", scope: "suggest", relationLabel: "My mother", note: "I help with her banking" }).catch(() => {});
 
   console.log("\n✓ demo accounts ready\n");
   console.log(`   URL:   ${BASE}   password: ${PASSWORD}`);
-  console.log(`   demo@futureos.app        — funded adult (Today / Life / Guardian / History)`);
-  console.log(`   demo-kid@futureos.app    — youth: Growing Account Today + Ask to Pay`);
-  console.log(`   demo-elder@futureos.app  — later life: Calm Today + Payment Pause\n`);
+  console.log(`   demo@futureos.app        — the adult: their own money + Aaron & Mother under "People you look after"`);
+  console.log(`   demo-kid@futureos.app    — Aaron (14): Growing Account Today + Ask to Pay`);
+  console.log(`   demo-elder@futureos.app  — Mother: Calm Today + Payment Pause\n`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });

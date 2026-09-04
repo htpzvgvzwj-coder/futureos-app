@@ -118,3 +118,39 @@ test("stressTest shows the break point when the buffer is thin", () => {
   assert.ok(s.shortBy > 0);
   assert.match(s.breaksAt, /month \d/);
 });
+
+// 7. Trade-off Ranking
+
+test("rankTradeoffs tags each option with the axis it wins", async () => {
+  const { rankTradeoffs } = await import("../lib/explore/differentiation.js");
+  const r = rankTradeoffs([
+    { id: "pause_small", label: "Pause Wedding", monthlyCost: 0, monthsToGoal: 40, bufferAfter: 23, reversible: true, undoMonths: 1 },
+    { id: "shrink_big", label: "Shrink Home", monthlyCost: 300, monthsToGoal: 30, bufferAfter: 21, reversible: true, undoMonths: 3 },
+    { id: "dip_savings", label: "Use savings", monthlyCost: 0, monthsToGoal: 24, bufferAfter: 15, reversible: false },
+  ]);
+  assert.equal(r.winners.fastest, "dip_savings");
+  assert.equal(r.winners.safest, "pause_small");
+  assert.ok(r.options.find((o) => o.id === "pause_small").wins.includes("safest"));
+});
+
+// 8. Reality Confidence
+
+test("realityConfidence splits confirmed figures from assumptions", async () => {
+  const { realityConfidence } = await import("../lib/explore/differentiation.js");
+  const c = realityConfidence({
+    twin: { twin: { balanceBreakdown: { availableNow: 24000 } }, holdings: { incomeStreams: [{}], assets: [{ assetClass: "cpf_oa" }] }, safeToSpend: { nextIncome: { confidence: "conditional" } } },
+    lt: { commitments: [{ domain: "home" }], monthlyCommittedTotal: 2500, monthlyExpenses: 3600 },
+  });
+  assert.ok(c.confirmed.some((i) => /balances/i.test(i.label)));
+  assert.ok(c.confirmed.some((i) => /CPF/i.test(i.label)));
+  assert.ok(c.estimated.some((i) => /cover gap/i.test(i.label)));
+});
+
+// 9. Regret Check
+
+test("regretCheck surfaces the sharpest downside first", async () => {
+  const { regretCheck } = await import("../lib/explore/differentiation.js");
+  const r = regretCheck({ bufferMonthsAfter: 3.5, floorMonths: 6, monthlyRoomAfter: 900, planShiftMonths: 3 });
+  assert.equal(r.mostLikely.code, "buffer_below_floor");
+  assert.equal(regretCheck({ bufferMonthsAfter: 20, floorMonths: 6, monthlyRoomAfter: 1400 }).mostLikely.code, "none");
+});

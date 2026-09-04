@@ -17295,6 +17295,7 @@ export default function App() {
   const [otherGoalSeed, setOtherGoalSeed] = useState(null);
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
   const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
+  const [futureFieldDomain, setFutureFieldDomain] = useState("home"); // which plan Future Field opens on
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -17734,7 +17735,7 @@ export default function App() {
     [screens.CHANGE_LEDGER]: <ChangeLedgerScreen t={t} setActiveScreen={setActiveScreen} backTo={screens.LIFE_GRAPH} />,
     [screens.MEMORY_LENS]: <MemoryLensScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_FIELD]: (
-      <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain="home" backTo={screens.MIRROR} />
+      <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain={futureFieldDomain} backTo={screens.MIRROR} />
     ),
     [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
     [screens.EMERGENCY_RUNWAY]: <EmergencyRunway t={t} setActiveScreen={setActiveScreen} />,
@@ -17784,7 +17785,11 @@ export default function App() {
           if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
           if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
-          if (s === "future_field") return setActiveScreen(screens.FUTURE_FIELD);
+          if (s === "future_field" || s.startsWith("future_field:")) {
+            const d = s.includes(":") ? s.slice(s.indexOf(":") + 1) : "home";
+            setFutureFieldDomain(STUDIO_SCREEN_FOR_DOMAIN[d] ? d : "home");
+            return setActiveScreen(screens.FUTURE_FIELD);
+          }
           if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
           if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
           if (s.startsWith("studio:")) { const t2 = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t2 ?? screens.HOME); }

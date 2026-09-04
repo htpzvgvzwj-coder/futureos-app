@@ -19,6 +19,7 @@ import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvi
 import { useTx } from "./i18n.jsx";
 import {
   costOfDelay, negativeRecommendations, stressTest, receiptFromLedgerEvent, traceSecondOrder, nextBestQuestion,
+  realityConfidence, regretCheck,
 } from "../../../lib/explore/differentiation.js";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
@@ -105,6 +106,7 @@ function Inner({ onRoute, onStudio }) {
   const s2s = twin.safeToSpend ?? {};
 
   const [q, setQ] = useState("");
+  const [studioAsk, setStudioAsk] = useState("");
   const [openStudio, setOpenStudio] = useState("home");
   const [spendPreview, setSpendPreview] = useState(false);
   const [delayOpen, setDelayOpen] = useState(false);
@@ -164,6 +166,12 @@ function Inner({ onRoute, onStudio }) {
   const negatives = useMemo(() => negativeRecommendations({ lt, s2s }), [lt.availableMonthlyCashflow, lt.promiseWeight, s2s.safeToSpend, s2s.belowProtectedFloor]);
   const stress = useMemo(() => stressTest({ lt, twin: twinCtx, shock: "income_1mo" }), [lt.monthlyCommittedTotal, lt.monthlyExpenses, s2s.breakdown]);
   const receipt = useMemo(() => (latestEvent ? receiptFromLedgerEvent(latestEvent, tx) : null), [latestEvent]);
+  const confidence = useMemo(() => realityConfidence({ twin, lt }), [twin.holdings, lt.commitments, s2s.nextIncome]);
+  const soonerRow = delay?.rows?.find((r) => r.delta === -12) ?? null;
+  const regret = useMemo(
+    () => (soonerRow ? regretCheck({ bufferMonthsAfter: soonerRow.bufferMonthsAfter, floorMonths: 6, monthlyRoomAfter: soonerRow.monthlyRoomAfter, planShiftMonths: 0 }) : null),
+    [soonerRow?.bufferMonthsAfter, soonerRow?.monthlyRoomAfter],
+  );
 
   const submitQuestion = () => {
     if (!q.trim()) return onRoute("future_field");
@@ -218,6 +226,9 @@ function Inner({ onRoute, onStudio }) {
                     <span key={i}>{i > 0 ? " → " : ""}<b>{tx(c.node)}</b> {tx(c.effect)}</span>
                   ))}
                 </span>
+              ) : null}
+              {regret && regret.mostLikely.code !== "none" ? (
+                <span className={x.regret}>⚑ {tx("Most likely regret:")} {regret.mostLikely.text}</span>
               ) : null}
               <span className={css.micro}>{tx("Estimate. Open the Home Studio to test it against your real numbers.")}</span>
               <div className={x.previewActs}>
@@ -316,6 +327,13 @@ function Inner({ onRoute, onStudio }) {
               </div>
             ))}
 
+            {confidence && (confidence.confirmed.length || confidence.estimated.length) ? (
+              <div className={x.confidence}>
+                <span className={css.micro}><b>{tx("Confirmed")}:</b> {confidence.confirmed.map((c) => tx(c.label)).join(" · ")}</span>
+                <span className={css.micro}><b>{tx("Estimated")}:</b> {confidence.estimated.map((c) => tx(c.label)).join(" · ")}</span>
+              </div>
+            ) : null}
+
             {stress ? (
               <div className={x.stress}>
                 <b>{tx(stress.shock)}</b>
@@ -359,6 +377,19 @@ function Inner({ onRoute, onStudio }) {
               const oq = nextBestQuestion({ domain: studio.domain, known: [] });
               return oq ? <span className={x.oneQ}>{tx("Answer one thing to sharpen this:")} {tx(oq.q)}</span> : null;
             })()}
+            <form
+              className={x.studioAskRow}
+              onSubmit={(e) => { e.preventDefault(); onRoute(`future_field:${studio.domain}`); setStudioAsk(""); }}
+            >
+              <input
+                className={x.studioAskInput}
+                value={studioAsk}
+                onChange={(e) => setStudioAsk(e.target.value)}
+                placeholder={tx("Tell {name} what you want to test…", { name: tx(studio.name) })}
+                aria-label={tx("Tell {name} what you want to test", { name: tx(studio.name) })}
+              />
+              <button type="submit" className={x.studioAskGo} aria-label={tx("Test it")}>→</button>
+            </form>
             <button type="button" className={css.cta} onClick={() => onStudio(studio.domain)}>{tx("Explore {name}", { name: tx(studio.name) })}</button>
           </div>
         </section>

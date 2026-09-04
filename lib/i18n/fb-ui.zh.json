@@ -1347,5 +1347,17 @@
   "Only {v}/month is still flexible — a small change would leave no room to absorb a surprise.": "只剩 {v}/月 可灵活支配——小改动就没有余地应对意外了。",
   "As planned": "按原计划",
   "{n} months sooner": "提前 {n} 个月",
-  "{n} months later": "推迟 {n} 个月"
+  "{n} months later": "推迟 {n} 个月",
+  "Tell {name} what you want to test…": "告诉「{name}」你想测试什么…",
+  "Tell {name} what you want to test": "告诉「{name}」你想测试什么",
+  "Most likely regret:": "最可能后悔的是：",
+  "Estimated": "估算",
+  "Account balances": "账户余额",
+  "Recent income & bills": "近期收入和账单",
+  "Plan commitments you sealed": "你已确认的计划承诺",
+  "CPF (SGFinDex-linked)": "公积金（SGFinDex 关联）",
+  "Insurance cover gap": "保险保障缺口",
+  "Home price & timeline": "购房价格和时间线",
+  "Investment returns": "投资回报",
+  "Next income date": "下一笔收入日期"
 }

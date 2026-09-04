@@ -162,6 +162,21 @@
   padding-top: 8px;
 }
 .chain b { color: #4fd1b8; }
+.regret {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #f0c674;
+  font-weight: 600;
+}
+.confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+}
 
 /* ---- Before you commit ---- */
 .dont {
@@ -201,6 +216,29 @@
 .receiptRow b { color: var(--sea); }
 
 .oneQ { font-size: 12px; color: var(--sea); font-weight: 600; line-height: 1.4; }
+
+.studioAskRow { display: flex; gap: 8px; }
+.studioAskInput {
+  flex: 1;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+}
+.studioAskInput:focus { outline: none; border-color: var(--sea); }
+.studioAskGo {
+  background: var(--ink);
+  color: var(--surface);
+  border: 0;
+  border-radius: 999px;
+  width: 38px;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 
 /* ---- Impact Map ---- */
 .impactHeadline { border-left: 3px solid var(--amber); }
