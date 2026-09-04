@@ -60,6 +60,7 @@ function Inner({ onRoute, onStudio }) {
   const fb = useFutureBankData();
   const needs = fb.momentsRaw?.counts?.actionRequired ?? 0;
   const [caps, setCaps] = useState(null);
+  const [sampleBusy, setSampleBusy] = useState(false);
   useEffect(() => {
     fetch("/api/capabilities", { headers: { "cache-control": "no-cache" } })
       .then((r) => (r.ok ? r.json() : null))
@@ -70,6 +71,22 @@ function Inner({ onRoute, onStudio }) {
   const accountType = caps?.accountType ?? "individual";
   const isConnected = (v) => v === "connected" || v === "sandbox";
 
+  // The account has nothing to work with yet (or is still loading) — offer
+  // to fill it with the example dataset so every zone below has real
+  // numbers. Erring toward "empty" is right: a new user is exactly who
+  // this is for.
+  const looksEmpty = !Number(fb.twin?.twin?.netWorth) && (fb.lifeThread?.commitments?.length ?? 0) === 0;
+  const sample = async (action) => {
+    setSampleBusy(true);
+    await fetch("/api/account/sample-data", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action }),
+    }).catch(() => {});
+    setSampleBusy(false);
+    await fb.refetchAll?.();
+  };
+
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
@@ -77,6 +94,23 @@ function Inner({ onRoute, onStudio }) {
           <h1 className={css.title}>{tx("Explore")}</h1>
           <p className={css.micro}>{tx("What OCBC Future Bank can do — your everyday banking, your real money, and your whole life ahead.")}</p>
         </div>
+
+        <section className={css.section}>
+          <p className={css.kicker}>{tx("Try it with real numbers")}</p>
+          <p className={css.micro}>
+            {looksEmpty
+              ? tx("Your account is empty, so most features below have nothing to show. Load an example account and every zone fills with realistic figures — accounts, 90 days of spending, plans, CPF, insurance and the three links. It only touches your own data and you can clear it any time.")
+              : tx("Reload the example account to reset every feature to a known state, or clear it to start from an empty account.")}
+          </p>
+          <div className={css.choiceGrid}>
+            <button type="button" className={css.cta} disabled={sampleBusy} onClick={() => sample("load")}>
+              {sampleBusy ? tx("Working…") : looksEmpty ? tx("Load an example account") : tx("Reload example data")}
+            </button>
+            {!looksEmpty ? (
+              <button type="button" className={css.choice} disabled={sampleBusy} onClick={() => sample("clear")}>{tx("Clear it")}</button>
+            ) : null}
+          </div>
+        </section>
 
         {ACCOUNT_TYPE_NOTE[accountType] ? <p className={css.micro}>{tx(ACCOUNT_TYPE_NOTE[accountType])}</p> : null}
 

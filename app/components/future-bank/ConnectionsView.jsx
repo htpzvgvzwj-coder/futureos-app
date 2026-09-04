@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { useTx } from "./i18n.jsx";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
@@ -141,6 +142,8 @@ export function ConnectionsView({ onBack }) {
             ))
           )}
         </section>
+
+        <FeatureHistory feature="connections" label="Your connection history" />
       </div>
     </div>
   );
