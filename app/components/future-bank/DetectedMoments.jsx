@@ -15,6 +15,14 @@ import { useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
 import { afterLabel, directionClass, relTime } from "./format.js";
 
+// tx a key whose string params may themselves be translatable phrases.
+function txp(tx, key, params) {
+  if (!params) return tx(key);
+  const m = {};
+  for (const [k, v] of Object.entries(params)) m[k] = typeof v === "string" ? tx(v) : v;
+  return tx(key, m);
+}
+
 function MomentCard({ moment, onRoute }) {
   const { tx } = useTx();
   const { act } = useFutureBankData();
@@ -36,9 +44,9 @@ function MomentCard({ moment, onRoute }) {
         {moment.reopened ? <span className={css.reopened}>{tx("Reopened")}</span> : null}
         <span className={css.evMeta} style={{ marginLeft: "auto" }}>{relTime(moment.occurredAt)}</span>
       </div>
-      <div className={css.momentTitle}>{moment.title}</div>
-      <div className={css.momentSummary}>{moment.summary}</div>
-      {moment.whyNow ? <div className={css.evMeta}>{tx("Why now")}: {moment.whyNow}</div> : null}
+      <div className={css.momentTitle}>{txp(tx, moment.titleKey ?? moment.title, moment.titleParams)}</div>
+      <div className={css.momentSummary}>{txp(tx, moment.summaryKey ?? moment.summary, moment.summaryParams)}</div>
+      {moment.whyNow ? <div className={css.evMeta}>{tx("Why now")}: {txp(tx, moment.whyNowKey ?? moment.whyNow, moment.whyNowParams)}</div> : null}
 
       {(moment.evidence ?? []).length > 0 && (
         <div className={css.evidence}>
@@ -86,11 +94,11 @@ function MomentCard({ moment, onRoute }) {
                   : run("reviewed")
             }
           >
-            {busy === "acknowledged" ? tx("Saving…") : primary.label}
+            {busy === "acknowledged" ? tx("Saving…") : txp(tx, primary.labelKey ?? primary.label, primary.labelParams)}
           </button>
         ) : null}
         {primary && !primary.available && primary.unavailableReason ? (
-          <span className={css.evMeta}>{primary.unavailableReason}</span>
+          <span className={css.evMeta}>{tx(primary.unavailableReason)}</span>
         ) : null}
         <button type="button" className={css.act} disabled={busy != null} onClick={() => run("reviewed")}>
           {tx("Mark reviewed")}
