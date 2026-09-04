@@ -443,3 +443,48 @@
   color: var(--sea);
   cursor: pointer;
 }
+
+/* ---- Pressure Weather forecast ---- */
+.forecast {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: left;
+  cursor: pointer;
+}
+.forecast.fc_tight { border-color: var(--amber, #c98a2b); color: var(--ink); }
+.forecast.fc_exposed { border-color: var(--g-alert, #c0362c); color: var(--g-alert, #c0362c); }
+.forecastBody {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.forecastRow { display: grid; grid-template-columns: 10px 1fr auto; gap: 6px 8px; align-items: baseline; }
+.forecastDot { width: 8px; height: 8px; border-radius: 50%; background: var(--sea); align-self: center; }
+.forecastDot.fc_tight { background: var(--amber, #c98a2b); }
+.forecastDot.fc_exposed { background: var(--g-alert, #c0362c); }
+.forecastMonth { font-size: 12.5px; font-weight: 650; color: var(--ink); }
+.forecastNums { font-size: 11.5px; color: var(--ink-soft); text-align: right; }
+.forecastDrivers { grid-column: 2 / -1; font-size: 11.5px; color: var(--ink-faint); }
+
+/* ---- Ask the Line: what-if branch preview ---- */
+.askSim {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.askSimHead { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.askSimRow { font-size: 12.5px; color: var(--ink-soft); }

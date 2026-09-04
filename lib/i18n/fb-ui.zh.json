@@ -672,5 +672,17 @@
   "Wedding paced up": "婚礼计划加快了",
   "Home eased back": "购房计划放缓了",
   "Guardian rebalanced two plans": "守护重新平衡了两个计划",
-  "You raised your safety target": "你提高了安全目标"
+  "You raised your safety target": "你提高了安全目标",
+
+  "{month} may become {pressure} — {drivers} land in the same month.": "{month}可能会变得{pressure} — {drivers}会在同一个月到期。",
+  "{month} may become {pressure} — {driver} falls due then.": "{month}可能会变得{pressure} — {driver}将在那时到期。",
+  "tight": "吃紧",
+  "exposed": "紧绷",
+  "out": "支出",
+  "headroom": "余地",
+  "your recurring bills, plan commitments and any annual / one-off charges on record": "你的经常性账单、计划投入，以及记录在案的年度／一次性费用",
+  "Nothing else on your line moves.": "你人生脉络上的其他部分都没有变动。",
+  "Which plan is using most of my monthly money?": "哪个计划占用了我每月最多的钱？",
+  "Can I afford a home in 5 years?": "我五年后买得起房吗？",
+  "What happens if I spend SGD 1,000 now?": "如果我现在花 SGD 1,000 会怎样？"
 }

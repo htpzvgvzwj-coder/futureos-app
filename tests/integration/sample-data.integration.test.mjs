@@ -31,7 +31,8 @@ test("buildSampleAccount fills every surface; wipeSampleAccount clears it", opts
     assert.ok((await count(`select count(*) n from bank_accounts where profile_key=$1`)) === 3, "3 bank accounts");
     assert.ok((await count(`select count(*) n from bank_transactions where profile_key=$1`)) > 60, "90d of transactions");
     assert.ok((await count(`select count(*) n from income_streams where profile_key=$1`)) >= 1, "an income stream");
-    assert.ok((await count(`select count(*) n from recurring_obligations where profile_key=$1`)) === 7, "7 recurring bills");
+    assert.ok((await count(`select count(*) n from recurring_obligations where profile_key=$1`)) === 10, "7 monthly bills + 3 non-monthly charges");
+    assert.ok((await count(`select count(*) n from recurring_obligations where profile_key=$1 and cadence <> 'monthly'`)) === 3, "3 non-monthly charges for the forecast");
     assert.ok((await count(`select count(*) n from financial_assets where profile_key=$1`)) >= 5, "twin assets");
     assert.ok((await count(`select count(*) n from liabilities where profile_key=$1`)) >= 1, "the card liability");
     assert.ok((await count(`select count(*) n from assets where profile_key=$1`)) >= 5, "asset-profile rows");
