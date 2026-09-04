@@ -231,7 +231,7 @@ export function FamilyCareView({ onBack, onWedding }) {
     if (d.ok) {
       setHandoff(d.handoff);
       setHandoffOpen(false);
-      setMsg("Handoff plan saved as a written note. Future Bank never carries it out on its own.");
+      setMsg("Handoff plan saved as a written note. FutureOS never carries it out on its own.");
     } else {
       setMsg("Could not save the handoff plan. Try again.");
     }
@@ -456,7 +456,7 @@ export function FamilyCareView({ onBack, onWedding }) {
                 }
                 return null;
               })()}
-              <span className={css.micro}>{tx("Status")}: {tx(handoff.status)} — {tx("Future Bank never carries this out on its own. A real handoff needs identity checks and the right legal steps.")}</span>
+              <span className={css.micro}>{tx("Status")}: {tx(handoff.status)} — {tx("FutureOS never carries this out on its own. A real handoff needs identity checks and the right legal steps.")}</span>
               <button type="button" className={css.link} onClick={() => setHandoffOpen(true)}>{tx("Edit the plan")}</button>
             </div>
           ) : handoffOpen ? (
@@ -491,7 +491,7 @@ export function FamilyCareView({ onBack, onWedding }) {
             <li><span className={css.proofMark}>→</span> {tx("A minor's account is controlled by a parent or legal guardian.")}</li>
             <li><span className={css.proofMark}>→</span> {tx("Youth permissions change with age, consent and local rules — not automatically.")}</li>
             <li><span className={css.proofMark}>→</span> {tx("Elderly care and any handoff need identity verification and the right legal steps.")}</li>
-            <li><span className={css.proofMark}>→</span> {tx("Future Bank never guesses a life event, and never carries out a handoff on its own.")}</li>
+            <li><span className={css.proofMark}>→</span> {tx("FutureOS never guesses a life event, and never carries out a handoff on its own.")}</li>
             <li><span className={css.proofMark}>→</span> {tx("This works both ways — an adult child can be the guardian or trusted contact for an ageing parent's account, with the same limits.")}</li>
             <li><span className={css.proofMark}>→</span> {tx("Sharing shows agreed ranges — never your exact private amounts.")}</li>
           </ul>
@@ -720,7 +720,7 @@ function AgeAndPermissions({ birthYear, transitions, busy, onSaveYear, onDecide 
   return (
     <>
       <p className={css.micro}>
-        {tx("A birth year lets Future Bank propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.")}
+        {tx("A birth year lets FutureOS propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.")}
       </p>
       <div className={css.field}>
         <label htmlFor="ap-year">{tx("Birth year (optional)")}</label>
@@ -979,7 +979,7 @@ function HandoffEditor({ busy, handoff, successorChoices, onCancel, onSave }) {
         </button>
         <button type="button" className={css.choice} disabled={busy} onClick={onCancel}>{tx("Cancel")}</button>
       </div>
-      <p className={css.micro}>{tx("This is only a note. Future Bank never carries it out on its own — a real handoff needs identity checks and the right legal steps.")}</p>
+      <p className={css.micro}>{tx("This is only a note. FutureOS never carries it out on its own — a real handoff needs identity checks and the right legal steps.")}</p>
     </div>
   );
 }

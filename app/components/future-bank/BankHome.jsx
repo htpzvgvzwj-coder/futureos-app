@@ -308,7 +308,7 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
     return <CalmTodayView tx={tx} fb={fb} twin={twin} surface={surface} topMoment={topMoment} onActivity={onActivity} onGuardian={onGuardian} />;
   }
   const decision = topMoment
-    ? { label: tx("Review"), whenText: tx("needs you"), effect: topMoment.title, source: tx("Future Bank detection") }
+    ? { label: tx("Review"), whenText: tx("needs you"), effect: topMoment.title, source: tx("FutureOS detection") }
     : null;
 
   const empty = !twin || twin.isEmpty;
@@ -552,7 +552,7 @@ function FxSheet() {
   return (
     <>
       <p className={css.sheetTitle}>{tx("Foreign Exchange")}</p>
-      <p className={css.lede}><b>{tx("Indicative rate only.")}</b> {tx("No executable FX provider is connected to this preview, so Future Bank cannot quote or book a real conversion.")}</p>
+      <p className={css.lede}><b>{tx("Indicative rate only.")}</b> {tx("No executable FX provider is connected to this preview, so FutureOS cannot quote or book a real conversion.")}</p>
       <p className={css.micro}>{tx("When a provider is connected, this is where a live quote, the spread and a book button would appear.")}</p>
     </>
   );

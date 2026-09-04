@@ -1408,5 +1408,17 @@
   "Allocate it now": "இப்போது அதை ஒதுக்கு",
   "Keep it flexible": "நெகிழ்வாக வைத்திரு",
   "Hand it off to a goal": "ஒரு இலக்கிற்கு அதை ஒப்படை",
-  "Open {d} Studio": "{d} ஸ்டுடியோவைத் திற"
+  "Open {d} Studio": "{d} ஸ்டுடியோவைத் திற",
+  "FutureOS detection": "FutureOS கண்டறிதல்",
+  "No executable FX provider is connected to this preview, so FutureOS cannot quote or book a real conversion.": "இந்த முன்னோட்டத்திற்கு இயங்கக்கூடிய FX வழங்குநர் இணைக்கப்படவில்லை, எனவே FutureOS ஒரு உண்மையான மாற்றத்தை மேற்கோள் காட்டவோ பதிவு செய்யவோ முடியாது.",
+  "FutureOS is watching, based on the data it has:": "FutureOS கண்காணிக்கிறது, அதிடம் உள்ள தரவின் அடிப்படையில்:",
+  "What FutureOS does": "FutureOS என்ன செய்கிறது",
+  "FutureOS never carries this out on its own. A real handoff needs identity checks and the right legal steps.": "FutureOS இதை தானாக ஒருபோதும் செய்யாது. உண்மையான ஒப்படைப்புக்கு அடையாள சரிபார்ப்பு மற்றும் சரியான சட்ட நடவடிக்கைகள் தேவை.",
+  "FutureOS never guesses a life event, and never carries out a handoff on its own.": "FutureOS ஒருபோதும் ஒரு வாழ்க்கை நிகழ்வை யூகிக்காது, ஒப்படைப்பை தானாக ஒருபோதும் செய்யாது.",
+  "A birth year lets FutureOS propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.": "பிறந்த ஆண்டு, 16 மற்றும் 18 வயதில் விதிகளைத் தளர்த்த FutureOS பரிந்துரைக்க அனுமதிக்கிறது — அது தானாக எதையும் மாற்றாது; ஒவ்வொரு பரிந்துரையையும் நீங்கள் ஏற்கலாம் அல்லது நிராகரிக்கலாம்.",
+  "This is only a note. FutureOS never carries it out on its own — a real handoff needs identity checks and the right legal steps.": "இது ஒரு குறிப்பு மட்டுமே. FutureOS அதைத் தானாகவே செயல்படுத்தாது — ஒரு உண்மையான ஒப்படைப்புக்கு அடையாளச் சரிபார்ப்புகளும் சரியான சட்டப்படிகளும் தேவை.",
+  "Never — FutureOS has no external rail.": "ஒருபோதும் இல்லை — FutureOS இற்கு வெளிப்புற பாதை இல்லை.",
+  "Automatic — FutureOS detected it": "தானியங்கி — FutureOS அதைக் கண்டறிந்தது",
+  "This is the money picture FutureOS first built for you. Every record above is a change from here.": "இது FutureOS முதலில் உங்களுக்காக உருவாக்கிய பணப் படம். மேலே உள்ள ஒவ்வொரு பதிவும் இங்கிருந்து ஒரு மாற்றம்.",
+  "FutureOS built your first picture from your accounts, income, liabilities and 6 months of transactions.": "FutureOS உங்கள் கணக்குகள், வருமானம், பொறுப்புகள் மற்றும் 6 மாத பரிவர்த்தனைகளிலிருந்து உங்கள் முதல் படத்தை உருவாக்கியது."
 }

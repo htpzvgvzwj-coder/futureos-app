@@ -124,7 +124,7 @@ export function DetectedMoments({ limit = 1, onRoute, showWatchingWhenCalm = tru
         <span className={css.calmTitle}>{tx("Nothing needs your attention right now.")}</span>
         {showWatchingWhenCalm && (
           <>
-            <span className={css.empty}>{tx("Future Bank is watching, based on the data it has:")}</span>
+            <span className={css.empty}>{tx("FutureOS is watching, based on the data it has:")}</span>
             <div className={css.watchList}>
               {(watching ?? []).map((w, i) => (
                 <div key={i} className={`${css.watchItem} ${w.active ? "" : css.off}`}>

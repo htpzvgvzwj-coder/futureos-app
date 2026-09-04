@@ -268,7 +268,7 @@ function Inner({ onRoute, onStudio }) {
 
         {/* ---- Signature features (1 + 4) ---- */}
         <section className={css.section}>
-          <p className={css.kicker}>{tx("What Future Bank does")}</p>
+          <p className={css.kicker}>{tx("What FutureOS does")}</p>
 
           <button type="button" className={x.sigBig} onClick={() => onRoute("future_field")}>
             <span className={x.sigKind}>{tx("Future Field")}</span>

@@ -1406,5 +1406,17 @@
   "Allocate it now": "现在就分配它",
   "Keep it flexible": "保持灵活",
   "Hand it off to a goal": "把它交给一个目标",
-  "Open {d} Studio": "打开 {d} 工作室"
+  "Open {d} Studio": "打开 {d} 工作室",
+  "FutureOS detection": "FutureOS 检测",
+  "No executable FX provider is connected to this preview, so FutureOS cannot quote or book a real conversion.": "此预览未连接可执行的外汇渠道，因此 FutureOS 无法提供真实报价或成交。",
+  "FutureOS is watching, based on the data it has:": "FutureOS 正基于现有数据进行监测：",
+  "What FutureOS does": "FutureOS 能做什么",
+  "FutureOS never carries this out on its own. A real handoff needs identity checks and the right legal steps.": "FutureOS 绝不会自行执行。真正的交接需要身份核实和相应的法律程序。",
+  "FutureOS never guesses a life event, and never carries out a handoff on its own.": "FutureOS 绝不猜测人生事件，也绝不自行执行交接。",
+  "A birth year lets FutureOS propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.": "填写出生年份可让 FutureOS 在 16 岁和 18 岁时建议放宽规则——它本身不会更改任何内容；每项建议由你采用或忽略。",
+  "This is only a note. FutureOS never carries it out on its own — a real handoff needs identity checks and the right legal steps.": "这只是一份备注。FutureOS 绝不会自行执行——真正的交接需要身份核查和正确的法律程序。",
+  "Never — FutureOS has no external rail.": "绝不 — FutureOS 没有外部通道。",
+  "Automatic — FutureOS detected it": "自动 — FutureOS 检测到",
+  "This is the money picture FutureOS first built for you. Every record above is a change from here.": "这是 FutureOS 最初为你构建的资金全貌。以上每条记录都是从这里开始的变化。",
+  "FutureOS built your first picture from your accounts, income, liabilities and 6 months of transactions.": "FutureOS 根据你的账户、收入、负债和最近 6 个月的交易记录，构建了你的第一份资金全貌。"
 }

@@ -48,7 +48,7 @@
    (app/globals.css :root), not redefined here, so a rebrand is one place
    to change. */
 .shell::before {
-  content: "OCBC — Future Bank";
+  content: "OCBC FutureOS";
   order: -1;
   display: block;
   width: 100%;

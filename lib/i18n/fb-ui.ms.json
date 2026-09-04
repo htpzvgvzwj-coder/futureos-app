@@ -1408,5 +1408,17 @@
   "Allocate it now": "Peruntukkan sekarang",
   "Keep it flexible": "Kekalkan fleksibel",
   "Hand it off to a goal": "Serahkan kepada matlamat",
-  "Open {d} Studio": "Buka Studio {d}"
+  "Open {d} Studio": "Buka Studio {d}",
+  "FutureOS detection": "Pengesanan FutureOS",
+  "No executable FX provider is connected to this preview, so FutureOS cannot quote or book a real conversion.": "Tiada penyedia FX boleh laksana disambungkan ke pratonton ini, jadi FutureOS tidak boleh sebut harga atau tempah penukaran sebenar.",
+  "FutureOS is watching, based on the data it has:": "FutureOS sedang memantau, berdasarkan data yang ia ada:",
+  "What FutureOS does": "Apa yang FutureOS buat",
+  "FutureOS never carries this out on its own. A real handoff needs identity checks and the right legal steps.": "FutureOS tidak pernah melaksanakan ini sendiri. Pemindahan sebenar perlukan semakan identiti dan langkah undang-undang yang betul.",
+  "FutureOS never guesses a life event, and never carries out a handoff on its own.": "FutureOS tidak pernah meneka peristiwa hidup, dan tidak pernah melaksanakan pemindahan sendiri.",
+  "A birth year lets FutureOS propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.": "Tahun lahir membolehkan FutureOS mencadangkan pelonggaran peraturan pada umur 16 dan 18 — ia tidak mengubah apa-apa dengan sendirinya; anda guna atau tolak setiap cadangan.",
+  "This is only a note. FutureOS never carries it out on its own — a real handoff needs identity checks and the right legal steps.": "Ini hanya nota. FutureOS tidak sekali-kali melaksanakannya sendiri — penyerahan sebenar memerlukan semakan identiti dan langkah undang-undang yang betul.",
+  "Never — FutureOS has no external rail.": "Tidak pernah — FutureOS tiada laluan luaran.",
+  "Automatic — FutureOS detected it": "Automatik — FutureOS mengesannya",
+  "This is the money picture FutureOS first built for you. Every record above is a change from here.": "Ini gambaran wang yang FutureOS bina pertama untuk anda. Setiap rekod di atas adalah perubahan daripada sini.",
+  "FutureOS built your first picture from your accounts, income, liabilities and 6 months of transactions.": "FutureOS membina gambaran pertama anda daripada akaun, pendapatan, liabiliti dan 6 bulan transaksi anda."
 }
