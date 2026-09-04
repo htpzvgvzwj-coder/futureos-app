@@ -27,16 +27,17 @@ function impactLines(projected, tx) {
   for (const g of projected.affectedGoals || []) {
     const before = g.before ?? null;
     const after = g.possibleAfter ?? g.confirmedAfter ?? null;
-    if (before == null || after == null || before === after) continue;
-    const unit = /month/i.test(g.metric || "") ? "/mo" : "";
-    out.push(`${tx(cap(g.goalId))}: ${fmt(before, g.unit)}${unit} → ${fmt(after, g.unit)}${unit}`);
+    if (before == null || after == null || Number(before) === Number(after)) continue;
+    out.push(`${tx(cap(g.goalId))}: ${fmt(before, g.unit)} → ${fmt(after, g.unit)}`);
   }
   return out.slice(0, 4);
 }
 const cap = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
 function fmt(v, unit) {
-  if (unit === "sgd" || unit === "sgd_per_month") return sgd(v);
-  if (unit === "months" || unit === "date_shift_months") return `${Number(v).toFixed(1)}`;
+  if (unit === "sgd_per_month") return `${sgd(v)}/mo`;
+  if (unit === "sgd") return sgd(v);
+  if (unit === "months") return `${Number(v).toFixed(1)} mo`;
+  if (unit === "date_shift_months") return `${v > 0 ? "+" : ""}${Number(v).toFixed(0)} mo`;
   return String(v);
 }
 
