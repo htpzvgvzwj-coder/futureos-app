@@ -17299,6 +17299,17 @@ export default function App() {
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
   const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
   const [futureFieldDomain, setFutureFieldDomain] = useState("home"); // which plan Future Field opens on
+  const [futureFieldAsk, setFutureFieldAsk] = useState(""); // free text from Explore/Studio to pre-fill the peel form
+  // "future_field:<domain>" or "future_field:<domain>:ask:<urlencoded text>"
+  const routeToFutureField = (s) => {
+    const rest = s.slice("future_field:".length);
+    const askIdx = rest.indexOf(":ask:");
+    const d = askIdx === -1 ? rest : rest.slice(0, askIdx);
+    const ask = askIdx === -1 ? "" : decodeURIComponent(rest.slice(askIdx + 5));
+    setFutureFieldDomain(STUDIO_SCREEN_FOR_DOMAIN[d] ? d : "home");
+    setFutureFieldAsk(ask);
+    setActiveScreen(screens.FUTURE_FIELD);
+  };
   const [studioViewDomain, setStudioViewDomain] = useState("home"); // which Studio the unified StudioView shows
   const preferencesSyncTimer = useRef(null);
 
@@ -17739,7 +17750,7 @@ export default function App() {
     [screens.CHANGE_LEDGER]: <ChangeLedgerScreen t={t} setActiveScreen={setActiveScreen} backTo={screens.LIFE_GRAPH} />,
     [screens.MEMORY_LENS]: <MemoryLensScreen t={t} setActiveScreen={setActiveScreen} />,
     [screens.FUTURE_FIELD]: (
-      <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain={futureFieldDomain} backTo={screens.MIRROR} />
+      <FutureFieldCanvas t={t} setActiveScreen={setActiveScreen} language={language} domain={futureFieldDomain} backTo={screens.MIRROR} initialAsk={futureFieldAsk} />
     ),
     [screens.HOME_HORIZON]: <HomeHorizon t={t} setActiveScreen={setActiveScreen} />,
     [screens.EMERGENCY_RUNWAY]: <EmergencyRunway t={t} setActiveScreen={setActiveScreen} />,
@@ -17789,11 +17800,7 @@ export default function App() {
           if (s === "twin") return setActiveScreen(screens.FINANCIAL_TWIN);
           if (s === "family") return setActiveScreen(screens.FAMILY_CARE);
           if (s === "guardian") return setActiveScreen(screens.GUARDIAN);
-          if (s === "future_field" || s.startsWith("future_field:")) {
-            const d = s.includes(":") ? s.slice(s.indexOf(":") + 1) : "home";
-            setFutureFieldDomain(STUDIO_SCREEN_FOR_DOMAIN[d] ? d : "home");
-            return setActiveScreen(screens.FUTURE_FIELD);
-          }
+          if (s === "future_field" || s.startsWith("future_field:")) return routeToFutureField(s === "future_field" ? "future_field:home" : s);
           if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
           if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
           if (s.startsWith("studio:")) {
@@ -17820,11 +17827,7 @@ export default function App() {
           const s = String(r || "");
           if (s === "life") return setActiveScreen(screens.LIFE_GRAPH);
           if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
-          if (s === "future_field" || s.startsWith("future_field:")) {
-            const d = s.includes(":") ? s.slice(s.indexOf(":") + 1) : studioViewDomain;
-            setFutureFieldDomain(STUDIO_SCREEN_FOR_DOMAIN[d] ? d : "home");
-            return setActiveScreen(screens.FUTURE_FIELD);
-          }
+          if (s === "future_field" || s.startsWith("future_field:")) return routeToFutureField(s === "future_field" ? `future_field:${studioViewDomain}` : s);
           setActiveScreen(screens.MIRROR);
         }}
       />

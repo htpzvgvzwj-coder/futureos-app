@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { GoalChangeHistory } from "./change-ledger-screen.jsx";
+import { parseAsk } from "../../lib/explore/ask-parser.js";
 
 // ---- time helpers (YYYY-MM) ------------------------------------------------
 function nowMonth() {
@@ -417,6 +418,10 @@ export function FutureFieldCanvas({
   externalReload = undefined,
   selectedBranchId: externalSelectedBranchId = undefined,
   setSelectedBranchId: externalSetSelectedBranchId = undefined,
+  // Free text from Explore's "what do you want to test?" or a Studio's ask
+  // box — parsed and used ONLY to pre-fill the Peel form below. Nothing is
+  // proposed until the person reviews it and taps Peel themselves.
+  initialAsk = "",
 }) {
   const controlled = externalField !== undefined;
   const locale = language === "zh" ? "zh-CN" : "en-SG";
@@ -441,6 +446,26 @@ export function FutureFieldCanvas({
   const [peelValue, setPeelValue] = useState("");
   const [peelLabel, setPeelLabel] = useState("");
   const peelFieldMeta = peelFields.find((f) => f.field === peelField) ?? peelFields[0];
+
+  // Pre-fill the Peel form from a question typed in Explore / a Studio's
+  // ask box, once the plan's real current data has loaded. Runs once per
+  // ask; never re-applies itself, and never submits anything on its own.
+  const appliedAskRef = useRef("");
+  useEffect(() => {
+    if (!initialAsk || appliedAskRef.current === initialAsk) return;
+    if (!field?.hasRealityPath) return;
+    const parsed = parseAsk(initialAsk, domain);
+    if (!parsed || !peelFields.some((f) => f.field === parsed.field)) { appliedAskRef.current = initialAsk; return; }
+    appliedAskRef.current = initialAsk;
+    setPeelField(parsed.field);
+    if (parsed.shiftMonths != null) {
+      const anchor = field.realityPath.data?.[parsed.field] || new Date().toISOString().slice(0, 7);
+      setPeelValue(addMonths(anchor, parsed.shiftMonths));
+    } else if (parsed.value != null) {
+      setPeelValue(String(parsed.value));
+    }
+    if (parsed.label) setPeelLabel(parsed.label.slice(0, 60));
+  }, [initialAsk, field?.hasRealityPath, domain, peelFields, field?.realityPath?.data]);
 
   // Bend
   const [bendMonth, setBendMonth] = useState("");

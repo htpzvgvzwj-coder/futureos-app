@@ -42,18 +42,26 @@ const STUDIOS = [
 ];
 
 // A free-text question -> the best place to test it.
+function domainForQuestion(q) {
+  const s = String(q || "").toLowerCase();
+  if (/wedding|marry|marriage/.test(s)) return "wedding";
+  if (/debt|loan|repay|pay.*(down|off)|mortgage/.test(s)) return "loan";
+  if (/home|house|flat|hdb|condo|property|down ?payment|buy a place/.test(s)) return "home";
+  if (/retire|pension|old age/.test(s)) return "retirement";
+  if (/travel|trip|holiday|vacation/.test(s)) return "travel";
+  if (/invest|portfolio|stocks|etf/.test(s)) return "investment";
+  if (/insur|cover|protect/.test(s)) return "insurance";
+  if (/emergency|buffer|runway|survive|job loss|income stop/.test(s)) return "emergency";
+  return null;
+}
 function routeForQuestion(q) {
   const s = String(q || "").toLowerCase();
-  if (/wedding|marry|marriage/.test(s)) return "studio:wedding";
-  if (/debt|loan|repay|pay.*(down|off)|mortgage/.test(s)) return "studio:loan";
-  if (/home|house|flat|hdb|condo|property|down ?payment|buy a place/.test(s)) return "studio:home";
-  if (/retire|pension|old age/.test(s)) return "studio:retirement";
-  if (/travel|trip|holiday|vacation/.test(s)) return "studio:travel";
-  if (/invest|portfolio|stocks|etf/.test(s)) return "studio:investment";
-  if (/insur|cover|protect/.test(s)) return "studio:insurance";
-  if (/emergency|buffer|runway|survive|job loss|income stop/.test(s)) return "studio:emergency";
-  if (/spend|afford|can i|safe to/.test(s)) return "twin";
-  return "future_field";
+  if (/spend|afford|can i|safe to/.test(s) && !domainForQuestion(q)) return "twin";
+  const d = domainForQuestion(q);
+  // a concrete ask ("buy home 6 months sooner") goes straight into Future
+  // Field with the text so it can pre-fill the peel form; a bare mention
+  // of a life area with no real ask opens the Studio's framed preview.
+  return `future_field:${d ?? "home"}:ask:${encodeURIComponent(q)}`;
 }
 
 const ALL_TOOLS = [
@@ -379,7 +387,7 @@ function Inner({ onRoute, onStudio }) {
             })()}
             <form
               className={x.studioAskRow}
-              onSubmit={(e) => { e.preventDefault(); onRoute(`future_field:${studio.domain}`); setStudioAsk(""); }}
+              onSubmit={(e) => { e.preventDefault(); onRoute(`future_field:${studio.domain}:ask:${encodeURIComponent(studioAsk)}`); setStudioAsk(""); }}
             >
               <input
                 className={x.studioAskInput}
