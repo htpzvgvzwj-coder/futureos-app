@@ -664,5 +664,13 @@
   "Retirement plan changed": "退休计划已变更",
   "Retirement plan confirmed": "退休计划已确认",
   "Freedom plan changed": "自由计划已变更",
-  "Protection plan confirmed": "保障计划已确认"
+  "Protection plan confirmed": "保障计划已确认",
+
+  "Viewing your life on {d}": "正在查看你在 {d} 的人生状态",
+  "Return to now": "返回现在",
+  "See your line as it was then": "查看当时的人生脉络",
+  "Wedding paced up": "婚礼计划加快了",
+  "Home eased back": "购房计划放缓了",
+  "Guardian rebalanced two plans": "守护重新平衡了两个计划",
+  "You raised your safety target": "你提高了安全目标"
 }

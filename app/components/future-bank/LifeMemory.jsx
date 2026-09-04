@@ -17,7 +17,7 @@ import { latestMovementLine } from "../../../lib/life/memory.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
-function Record({ r, tx }) {
+function Record({ r, tx, replayable, onReplay }) {
   const [open, setOpen] = useState(false);
   return (
     <div className={life.memRec}>
@@ -38,6 +38,12 @@ function Record({ r, tx }) {
         ))}
         {r.guardian ? <span className={life.memGuardian}>{tx(r.guardian)}</span> : null}
         <span className={life.memSource}>{tx("Source")}: {tx(r.source)}</span>
+
+        {replayable && onReplay ? (
+          <button type="button" className={life.memReplay} onClick={() => onReplay(r.id, r.when)}>
+            {tx("See your line as it was then")} →
+          </button>
+        ) : null}
 
         {r.evidence ? (
           <>
@@ -65,8 +71,9 @@ function Record({ r, tx }) {
   );
 }
 
-export function LifeMemory({ memory, open, onToggle }) {
+export function LifeMemory({ memory, open, onToggle, replayableIds = [], onReplay }) {
   const { tx } = useTx();
+  const replaySet = new Set(replayableIds);
   const latest = latestMovementLine(memory);
   const sp = memory?.startingPoint;
 
@@ -97,7 +104,7 @@ export function LifeMemory({ memory, open, onToggle }) {
           <div key={b.id} className={life.memBucket}>
             <span className={life.memBucketLabel}>{tx(b.label)}</span>
             {b.records.map((r) => (
-              <Record key={r.id} r={r} tx={tx} />
+              <Record key={r.id} r={r} tx={tx} replayable={replaySet.has(r.id)} onReplay={onReplay} />
             ))}
           </div>
         ))}

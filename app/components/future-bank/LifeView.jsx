@@ -8,13 +8,14 @@
 //   What Moved       - the single most recent change + its knock-on effects
 // No nine-Studio grid, no snapshot ids, no metric keys, no dashboard.
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import life from "./life.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
 import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
+import { compactThread } from "../../../lib/life/snapshot-shape.js";
 import { buildFutureEcho, answerLineQuestion } from "../../../lib/life/ask.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 import { isPullable } from "../../../lib/life/pull.js";
@@ -75,6 +76,9 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [answer, setAnswer] = useState(null);
   const [pullNode, setPullNode] = useState(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  const [replay, setReplay] = useState(null); // { eventId, when, snapshot } | null
+  const [replayable, setReplayable] = useState([]); // ledger event ids with a snapshot
+  const reconciledFor = useRef(null);
 
   const collision = detectCollision({
     commitments: Array.isArray(lt.commitments) ? lt.commitments : [],
@@ -84,6 +88,46 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const echo = buildFutureEcho({ lt });
   const memory = buildLifeMemory({ events: fb.ledger?.events, twin: fb.twin, lifeThread: lt });
   const position = positionFragments(thread.numbers);
+
+  // Capture the current line against the latest direction-changing event
+  // (forward-only), and learn which memory records can be replayed.
+  const latestId = memory.latest?.id ?? null;
+  const captureAndLearn = useCallback(async () => {
+    if (!lt.lifeNodes) return;
+    const sig = `${latestId ?? "none"}:${thread.numbers.map((n) => n.value).join("|")}`;
+    if (reconciledFor.current === sig) return;
+    reconciledFor.current = sig;
+    try {
+      await fetch("/api/life-thread/snapshots", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ thread: compactThread(thread), latestEventId: latestId, latestEventAt: memory.latest?.when ?? null }),
+      });
+      const r = await fetch("/api/life-thread/snapshots", { headers: { "cache-control": "no-cache" } }).then((x) => (x.ok ? x.json() : null));
+      if (r) setReplayable(r.snapshottedEventIds ?? []);
+    } catch {
+      /* snapshots are best-effort */
+    }
+  }, [latestId, lt.lifeNodes, thread, memory.latest]);
+  useEffect(() => {
+    captureAndLearn();
+  }, [captureAndLearn]);
+
+  const enterReplay = async (eventId, when) => {
+    const r = await fetch(`/api/life-thread/snapshots?event=${encodeURIComponent(eventId)}`, { headers: { "cache-control": "no-cache" } })
+      .then((x) => (x.ok ? x.json() : null))
+      .catch(() => null);
+    if (r?.snapshot) setReplay({ eventId, when, snapshot: r.snapshot });
+  };
+  const exitReplay = () => setReplay(null);
+
+  // In replay the frozen snapshot drives the head of the page.
+  const st = replay?.snapshot?.thread ?? null;
+  const shownDirectionKey = st ? st.directionKey ?? st.direction : thread.directionKey ?? thread.direction;
+  const shownDirectionParams = st ? st.directionParams : thread.directionParams;
+  const shownWeather = st ? st.weather : thread.weather;
+  const shownNodes = st ? st.nodes ?? [] : thread.nodes;
+  const shownPosition = st ? positionFragments(st.numbers ?? []) : position;
 
   const ask = (text) => {
     const query = (text ?? q).trim();
@@ -105,19 +149,26 @@ function Inner({ onStudio, onAddReality, onRoute }) {
       <div className={css.shell}>
         <h1 className={css.title}>{tx("Life")}</h1>
 
-        <p className={life.direction}>{tx(thread.directionKey ?? thread.direction, thread.directionParams)}</p>
+        {replay ? (
+          <div className={life.replayBanner}>
+            <span>{tx("Viewing your life on {d}", { d: new Date(replay.when || replay.snapshot.event_at || replay.snapshot.captured_at).toLocaleDateString("en-SG", { day: "numeric", month: "long", year: "numeric" }) })}</span>
+            <button type="button" className={css.link} onClick={exitReplay}>{tx("Return to now")}</button>
+          </div>
+        ) : null}
 
-        {thread.weather ? (
+        <p className={life.direction}>{tx(shownDirectionKey, shownDirectionParams)}</p>
+
+        {shownWeather ? (
           <span
-            className={`${life.weather} ${life[thread.weather.id] || ""}`}
-            title={tx(thread.weather.noteKey ?? thread.weather.note, thread.weather.noteParams)}
+            className={`${life.weather} ${life[shownWeather.id] || ""}`}
+            title={!replay ? tx(thread.weather?.noteKey ?? thread.weather?.note, thread.weather?.noteParams) : undefined}
           >
-            <span className={life.weatherDot} /> {tx(thread.weather.label)}
+            <span className={life.weatherDot} /> {tx(shownWeather.label)}
           </span>
         ) : null}
 
         <p className={life.position}>
-          {position.map((f) => (
+          {shownPosition.map((f) => (
             <button
               key={f.id}
               type="button"
@@ -128,9 +179,9 @@ function Inner({ onStudio, onAddReality, onRoute }) {
             </button>
           ))}
         </p>
-        {openNum ? <p className={life.numSource}>{tx(position.find((x) => x.id === openNum)?.source)}</p> : null}
+        {openNum && !replay ? <p className={life.numSource}>{tx(position.find((x) => x.id === openNum)?.source)}</p> : null}
 
-        {thread.whatMoved ? (
+        {!replay && thread.whatMoved ? (
           <div className={life.moved}>
             <span className={life.movedHead}>{tx(thread.whatMoved.headline)}</span>
             {thread.whatMoved.impacts.map((im, i) => (
@@ -142,7 +193,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
 
         <section className={css.section}>
           <div className={life.thread}>
-            {thread.nodes.map((n) => (
+            {shownNodes.map((n) => (
               <div key={n.id} className={life.node}>
                 <span className={`${life.nodeDot} ${life[n.state] || ""} ${n.ring ? life.ring : ""}`} />
                 <div className={life.nodeRowTop}>
@@ -154,6 +205,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                     <span className={life.nodeState}>{tx(n.note)}</span>
                   ) : null}
                 </div>
+                {replay ? null : (
                 <div className={life.nodeActs}>
                   <button type="button" className={life.nodeBtn} onClick={() => openNode(n.id)}>
                     {tx(n.cta)} →
@@ -169,7 +221,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                     </button>
                   ) : null}
                 </div>
-                {pullNode === n.id ? (
+                )}
+                {!replay && pullNode === n.id ? (
                   <PullFold
                     nodeId={n.id}
                     onClose={() => setPullNode(null)}
@@ -179,7 +232,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                 ) : null}
               </div>
             ))}
-            {thread.futureSlot ? (
+            {!replay && thread.futureSlot ? (
               <button type="button" className={life.futureSlot} onClick={() => onRoute?.("explore")}>
                 <span className={life.nodeDot} />
                 <span>{tx(thread.futureSlot.label)}</span>
@@ -188,7 +241,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           </div>
         </section>
 
-        {echo.plans.length ? (
+        {!replay && echo.plans.length ? (
           <div className={life.echo}>
             <span className={life.echoHead}>{tx("If today's plans keep running")}</span>
             {echo.plans.map((p) => (
@@ -215,31 +268,41 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           </div>
         ) : null}
 
-        <div className={life.ask}>
-          <form className={life.askRow} onSubmit={(e) => { e.preventDefault(); ask(); }}>
-            <input
-              className={life.askInput}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={tx("Ask about your line…")}
-              aria-label={tx("Ask about your line")}
-            />
-            <button type="submit" className={life.askBtn} disabled={!q.trim()}>{tx("Ask")}</button>
-          </form>
-          {answer?.text ? <p className={life.askAnswer}>{tx(answer.text)}</p> : null}
-          {answer && !answer.text && answer.examples ? (
-            <div className={life.askExamples}>
-              <span className={life.echoBasis}>{tx("Try one of these:")}</span>
-              {answer.examples.map((ex) => (
-                <button key={ex} type="button" className={life.askExample} onClick={() => ask(ex)}>{tx(ex)}</button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        {!replay ? (
+          <div className={life.ask}>
+            <form className={life.askRow} onSubmit={(e) => { e.preventDefault(); ask(); }}>
+              <input
+                className={life.askInput}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={tx("Ask about your line…")}
+                aria-label={tx("Ask about your line")}
+              />
+              <button type="submit" className={life.askBtn} disabled={!q.trim()}>{tx("Ask")}</button>
+            </form>
+            {answer?.text ? <p className={life.askAnswer}>{tx(answer.text)}</p> : null}
+            {answer && !answer.text && answer.examples ? (
+              <div className={life.askExamples}>
+                <span className={life.echoBasis}>{tx("Try one of these:")}</span>
+                {answer.examples.map((ex) => (
+                  <button key={ex} type="button" className={life.askExample} onClick={() => ask(ex)}>{tx(ex)}</button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
-        <section className={css.section}>
-          <LifeMemory memory={memory} open={memoryOpen} onToggle={() => setMemoryOpen(!memoryOpen)} />
-        </section>
+        {!replay ? (
+          <section className={css.section}>
+            <LifeMemory
+              memory={memory}
+              open={memoryOpen}
+              onToggle={() => setMemoryOpen(!memoryOpen)}
+              replayableIds={replayable}
+              onReplay={enterReplay}
+            />
+          </section>
+        ) : null}
       </div>
     </div>
   );

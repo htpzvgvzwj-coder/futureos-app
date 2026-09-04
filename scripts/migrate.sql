@@ -1615,3 +1615,31 @@ create table if not exists provider_connections (
   updated_at    timestamptz not null default now(),
   primary key (profile_key, provider)
 );
+
+-- ============================================================
+-- Life Thread snapshots (Life vision Phase 2). One compact frozen copy
+-- of the Life Thread state, linked to the Change Ledger event it follows
+-- (kind='after_event') or the account's first picture (kind='baseline').
+-- Life Memory reads these to replay "your life on <date>". Forward-only:
+-- a snapshot is captured when a direction-changing event is first
+-- reconciled, so events older than this table have no frozen line (Life
+-- Memory falls back to the per-event Before/After record for those).
+-- ============================================================
+create table if not exists life_thread_snapshots (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  ledger_event_id  uuid,                         -- null for the baseline
+  kind             text not null default 'after_event',  -- baseline | after_event
+  captured_at      timestamptz not null default now(),
+  event_at         timestamptz,                  -- the ledger event's occurred_at (for ordering)
+  thread           jsonb not null default '{}',  -- { direction*, numbers:[{id,value}], weather:{id,label}, nodes:[{id,label,state,valueText,note}] }
+  free_monthly     numeric,
+  committed_monthly numeric,
+  safety_months    numeric
+);
+create unique index if not exists life_thread_snapshots_event_uq
+  on life_thread_snapshots (profile_key, ledger_event_id) where ledger_event_id is not null;
+create unique index if not exists life_thread_snapshots_baseline_uq
+  on life_thread_snapshots (profile_key) where kind = 'baseline';
+create index if not exists life_thread_snapshots_profile_idx
+  on life_thread_snapshots (profile_key, event_at desc);
