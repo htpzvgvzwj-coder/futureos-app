@@ -15,6 +15,9 @@ import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import { useTx } from "./i18n.jsx";
+import { resolveStage, describeStage } from "../../../lib/family-relay/stages.js";
+import { evaluateAskToPay } from "../../../lib/family-relay/ask-to-pay.js";
+import { evaluatePaymentPause, PAUSE_OPTION_LABEL } from "../../../lib/family-relay/payment-pause.js";
 
 const ACCOUNT_TYPES = [
   { id: "individual", name: "Just me", means: "A normal adult account. No one else can see or approve." },
@@ -245,6 +248,8 @@ export function FamilyCareView({ onBack, onWedding }) {
           <h1 className={css.title}>{tx("Family & Care")}</h1>
           <p className={css.micro}>{tx("The people around your money — a child you manage, a guardian who approves, a household you share ranges with, an emergency contact, a beneficiary for later.")}</p>
         </div>
+
+        <FamilyRelay accountType={accountType} roles={roles} birthYear={care?.birthYear ?? null} />
 
         {/* account setup */}
         <section className={css.section}>
@@ -493,6 +498,117 @@ export function FamilyCareView({ onBack, onWedding }) {
 
         <FeatureHistory feature="family" label="What you've set up in Family & Care" />
       </div>
+    </div>
+  );
+}
+
+// Family Relay — the same spine (Life Thread, Guardian Contract, Change
+// Ledger, permissions) adapted to a life stage. Shows the stage this
+// account is at + what each capability needs, and lets you try the two
+// stage-specific flows: Ask to Pay (child / youth) and Payment Pause
+// (later-life). The evaluators are the real pure engine.
+function FamilyRelay({ accountType, roles, birthYear }) {
+  const { tx } = useTx();
+  const active = (roles ?? []).filter((r) => r.status == null || r.status === "active");
+  const guardianLinked = active.some((r) => r.role === "guardian" && r.status === "active" && r.subjectKey);
+  const stage = resolveStage({ accountType: accountType ?? "individual", birthYear, roles: active });
+  const d = describeStage(stage, { guardianLinked });
+  const isChildish = stage === "child" || stage === "youth";
+  const isLaterLife = stage === "later_life";
+
+  return (
+    <section className={css.section}>
+      <p className={css.kicker}>{tx("Family Relay")}</p>
+      <p className={css.micro}>{tx("Money, protection and responsibility move with every life stage — on one Life Thread, one Guardian Contract, one Change Ledger.")}</p>
+
+      <div className={css.calmCard}>
+        <b>{tx(d.label)}</b>
+        {d.can.length ? <span className={css.micro}>✓ {tx("Can")}: {d.can.map((c) => tx(c)).join(", ")}</span> : null}
+        {d.needsApproval.length ? <span className={css.micro}>◔ {tx("Needs a guardian's yes")}: {d.needsApproval.map((c) => tx(c)).join(", ")}</span> : null}
+        {d.cannot.length ? <span className={css.micro}>✕ {tx("Not at this stage")}: {d.cannot.map((c) => tx(c)).join(", ")}</span> : null}
+        {!guardianLinked && (stage === "child" || stage === "youth") ? (
+          <span className={css.micro}>{tx("No guardian is linked yet, so anything that would need a yes is held until one is.")}</span>
+        ) : null}
+      </div>
+
+      {isChildish ? <AskToPayTry tx={tx} /> : null}
+      {isLaterLife || accountType === "individual" ? <PaymentPauseTry tx={tx} /> : null}
+    </section>
+  );
+}
+
+function AskToPayTry({ tx }) {
+  const [amount, setAmount] = useState("");
+  const [merchant, setMerchant] = useState("");
+  const known = ["Popular Bookstore", "NTUC FairPrice", "Kopitiam"];
+  const res = amount
+    ? evaluateAskToPay({
+        amount: Number(amount), merchant,
+        weeklyAllowance: 40, spentThisWeek: 10,
+        knownMerchants: known,
+        savingsGoals: [{ label: "New bike", monthlyContribution: 60 }],
+        policy: { autoApproveUnder: 15, alwaysApproveOver: 50, newMerchantNeedsApproval: true },
+      })
+    : null;
+  const badge = res && ({ auto_ok: "✓ " + tx("Goes through"), needs_approval: "◔ " + tx("Asks a guardian first"), blocked: "✕ " + tx("Held") }[res.outcome]);
+  return (
+    <div className={css.calmCard}>
+      <b>{tx("Ask to Pay")}</b>
+      <span className={css.micro}>{tx("A child or youth asks to pay. Guardian shows the reason for its decision, not just Approve / Reject. (Example: SGD 40/week, SGD 10 spent, saving for a bike.)")}</span>
+      <div className={css.field}>
+        <label htmlFor="a2p-amt">{tx("Amount (SGD)")}</label>
+        <input id="a2p-amt" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))} />
+      </div>
+      <div className={css.field}>
+        <label htmlFor="a2p-mer">{tx("Pay to")}</label>
+        <input id="a2p-mer" type="text" value={merchant} placeholder={tx("e.g. Popular Bookstore, or a new shop")} onChange={(e) => setMerchant(e.target.value)} />
+      </div>
+      {res ? (
+        <>
+          <b className={css.micro}>{badge}</b>
+          <ul style={{ margin: "4px 0 0", paddingLeft: "16px" }}>
+            {res.reasons.map((r, i) => <li key={i} className={css.micro}>{r.text}</li>)}
+          </ul>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function PaymentPauseTry({ tx }) {
+  const [amount, setAmount] = useState("");
+  const [payee, setPayee] = useState("");
+  const known = ["SP Group", "Singtel", "NTUC FairPrice"];
+  const recent = [
+    { payee: "SP Group", amount: 140, at: Date.now() - 5 * 86_400_000 },
+    { payee: "Singtel", amount: 42, at: Date.now() - 6 * 86_400_000 },
+  ];
+  const res = amount ? evaluatePaymentPause({ amount: Number(amount), payee, knownPayees: known, recentPayments: recent, typicalMax: 300 }) : null;
+  return (
+    <div className={css.calmCard}>
+      <b>{tx("Payment Pause")}</b>
+      <span className={css.micro}>{tx("An older adult starts a payment. Guardian holds it only for a concrete signal — a new payee, an unusual amount, a duplicate — and always explains, and you can always continue. (Example: usual payments up to SGD 300.)")}</span>
+      <div className={css.field}>
+        <label htmlFor="pp-amt">{tx("Amount (SGD)")}</label>
+        <input id="pp-amt" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))} />
+      </div>
+      <div className={css.field}>
+        <label htmlFor="pp-payee">{tx("Pay to")}</label>
+        <input id="pp-payee" type="text" value={payee} placeholder={tx("e.g. SP Group, or a new name")} onChange={(e) => setPayee(e.target.value)} />
+      </div>
+      {res ? (
+        res.paused ? (
+          <>
+            <b className={css.micro}>⚠ {tx("Paused — here's why")}</b>
+            <ul style={{ margin: "4px 0 0", paddingLeft: "16px" }}>
+              {res.triggers.map((t, i) => <li key={i} className={css.micro}>{t.text}</li>)}
+            </ul>
+            <span className={css.micro}>{res.options.map((o) => tx(PAUSE_OPTION_LABEL[o] ?? o)).join(" · ")}</span>
+          </>
+        ) : (
+          <b className={css.micro}>✓ {tx("Goes through — nothing unusual about this one")}</b>
+        )
+      ) : null}
     </div>
   );
 }
