@@ -167,5 +167,14 @@
   "Load an example account": "உதாரணக் கணக்கை ஏற்று",
   "Reload example data": "உதாரணத் தரவை மீண்டும் ஏற்று",
   "Clear it": "அழி",
-  "Working…": "செயல்படுகிறது…"
+  "Working…": "செயல்படுகிறது…",
+  "home": "வீடு",
+  "wedding": "திருமணம்",
+  "emergency": "அவசரம்",
+  "retirement": "ஓய்வூதியம்",
+  "investment": "முதலீடு",
+  "travel": "பயணம்",
+  "loan": "கடன்",
+  "family": "குடும்பம்",
+  "other": "மற்றவை"
 }

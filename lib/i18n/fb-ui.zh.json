@@ -927,5 +927,14 @@
   "monthly income": "每月收入",
   "monthly contribution": "每月投入",
   "higher": "更高",
-  "lower": "更低"
+  "lower": "更低",
+  "home": "购房",
+  "wedding": "婚礼",
+  "emergency": "应急",
+  "retirement": "退休",
+  "investment": "投资",
+  "travel": "旅行",
+  "loan": "贷款",
+  "family": "家庭",
+  "other": "其他"
 }

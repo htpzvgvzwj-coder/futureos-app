@@ -167,5 +167,14 @@
   "Load an example account": "Muatkan akaun contoh",
   "Reload example data": "Muat semula data contoh",
   "Clear it": "Kosongkannya",
-  "Working…": "Sedang berfungsi…"
+  "Working…": "Sedang berfungsi…",
+  "home": "rumah",
+  "wedding": "perkahwinan",
+  "emergency": "kecemasan",
+  "retirement": "persaraan",
+  "investment": "pelaburan",
+  "travel": "perjalanan",
+  "loan": "pinjaman",
+  "family": "keluarga",
+  "other": "lain-lain"
 }
