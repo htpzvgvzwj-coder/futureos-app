@@ -66,6 +66,31 @@ export async function POST(request) {
   const currentVersion = await planStore.getCurrentPlanVersion(plan.id);
   const baseData = currentVersion?.data ?? context.realityPlanData;
 
+  // Preview: run the peel + cross-goal projection WITHOUT persisting a
+  // branch or a Change Ledger row. This is what "Pull the Future" drags
+  // against — the line moves live, nothing is committed until the customer
+  // forks or keeps it.
+  if (action === "preview") {
+    const allowed = ALLOWED_OVERRIDES[domain] ?? ALLOWED_OVERRIDES.home;
+    const overrides = {};
+    for (const [k, v] of Object.entries(body.overrides ?? {})) {
+      if (allowed.has(k)) overrides[k] = v;
+    }
+    if (Object.keys(overrides).length === 0) {
+      return Response.json({ error: "no_valid_overrides", allowed: [...allowed] }, { status: 422 });
+    }
+    const peeled = peelBranch({ baseData, overrides, feasibilityFn: (data) => context.adapter.feasibility(data) });
+    const projectedImpacts =
+      typeof context.adapter.projectImpacts === "function"
+        ? context.adapter.projectImpacts(peeled.data, context.realityPlanData, context.projectionContext ?? {})
+        : null;
+    const sealableVerdict =
+      peeled.feasibility && typeof peeled.feasibility.sealable === "boolean"
+        ? { sealable: peeled.feasibility.sealable, reason: peeled.feasibility.sealableReason ?? (peeled.feasibility.sealable ? "ok" : "blocked") }
+        : { sealable: false, reason: "sealability_not_computed" };
+    return Response.json({ preview: { domain, delta: peeled.delta, feasibility: peeled.feasibility, sealableVerdict, projectedImpacts } });
+  }
+
   if (action === "compare") {
     const branches = await planStore.listBranches(plan.id);
     const table = compareBranches(

@@ -18,6 +18,9 @@ import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
 import { buildFutureEcho, answerLineQuestion } from "../../../lib/life/ask.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
+import { isPullable } from "../../../lib/life/pull.js";
+import { PullFold } from "./PullFold.jsx";
+import { LifeMemory } from "./LifeMemory.jsx";
 
 const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relationships: "family", freedom: "investment", future: "retirement" };
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
@@ -39,6 +42,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [openNum, setOpenNum] = useState(null);
   const [q, setQ] = useState("");
   const [answer, setAnswer] = useState(null);
+  const [pullNode, setPullNode] = useState(null);
+  const [memoryOpen, setMemoryOpen] = useState(false);
 
   const collision = detectCollision({
     commitments: Array.isArray(lt.commitments) ? lt.commitments : [],
@@ -112,9 +117,29 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                     <span className={life.nodeState}>{tx(n.note)}</span>
                   ) : null}
                 </div>
-                <button type="button" className={life.nodeBtn} onClick={() => openNode(n.id)}>
-                  {tx(n.cta)} →
-                </button>
+                <div className={life.nodeActs}>
+                  <button type="button" className={life.nodeBtn} onClick={() => openNode(n.id)}>
+                    {tx(n.cta)} →
+                  </button>
+                  {isPullable(n.id) && n.state !== "hollow" ? (
+                    <button
+                      type="button"
+                      className={life.nodePull}
+                      aria-expanded={pullNode === n.id}
+                      onClick={() => setPullNode(pullNode === n.id ? null : n.id)}
+                    >
+                      {pullNode === n.id ? tx("Close") : tx("Pull / fork")}
+                    </button>
+                  ) : null}
+                </div>
+                {pullNode === n.id ? (
+                  <PullFold
+                    nodeId={n.id}
+                    onClose={() => setPullNode(null)}
+                    onChanged={() => fb.refetchAll?.()}
+                    onStudio={(d) => onStudio?.(d)}
+                  />
+                ) : null}
               </div>
             ))}
             {thread.futureSlot ? (
@@ -174,6 +199,19 @@ function Inner({ onStudio, onAddReality, onRoute }) {
             </div>
           ) : null}
         </div>
+
+        <section className={css.section}>
+          <button
+            type="button"
+            className={life.memoryToggle}
+            aria-expanded={memoryOpen}
+            onClick={() => setMemoryOpen(!memoryOpen)}
+          >
+            <span>{tx("Life Memory — scroll back along the line")}</span>
+            <span>{memoryOpen ? tx("Hide") : tx("Show")}</span>
+          </button>
+          {memoryOpen ? <LifeMemory events={fb.ledger?.events} /> : null}
+        </section>
 
         <FeatureHistory feature="explore" label="How this line formed" />
       </div>
