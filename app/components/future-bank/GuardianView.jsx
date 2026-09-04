@@ -40,6 +40,15 @@ export function GuardianView(props) {
   );
 }
 
+// tx a key whose string params may themselves be translatable (domain
+// labels): translate each, then fill.
+function txp(tx, key, params) {
+  if (!params) return tx(key);
+  const m = {};
+  for (const [k, v] of Object.entries(params)) m[k] = typeof v === "string" ? tx(v) : v;
+  return tx(key, m);
+}
+
 function Inner({ onRoute, onOpenSupervised }) {
   const { tx } = useTx();
   const fb = useFutureBankData();
@@ -241,8 +250,8 @@ function Inner({ onRoute, onOpenSupervised }) {
             <div className={g.decision}>
               {recovery.steps.map((s) => (
                 <div key={s.order} className={g.impactRow} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                  <span className={g.impactVal}>{s.order}. {tx(s.label)}</span>
-                  <span className={g.impactName}>{tx(s.detail)}</span>
+                  <span className={g.impactVal}>{s.order}. {txp(tx, s.labelKey ?? s.label, s.labelParams)}</span>
+                  <span className={g.impactName}>{txp(tx, s.detailKey ?? s.detail, s.detailParams)}</span>
                   {s.needsConfirm ? (
                     <button type="button" className={g.go} style={{ marginTop: 4 }} disabled={busyId === "apply_recovery_step"} onClick={() => guardianPost({ action: "apply_recovery_step", order: s.order })}>
                       {tx("Confirm this step")}
@@ -265,8 +274,8 @@ function Inner({ onRoute, onOpenSupervised }) {
               <div className={g.decisionActs} style={{ flexDirection: "column", alignItems: "stretch" }}>
                 {collision.paths.map((p) => (
                   <button key={p.id} type="button" style={{ textAlign: "left" }} disabled={busyId === "apply_collision_path"} onClick={() => guardianPost({ action: "apply_collision_path", pathId: p.id })}>
-                    <b>{tx(p.label)}</b>
-                    <span style={{ display: "block", fontWeight: 400, color: "var(--ink-soft)", marginTop: 2 }}>{tx(p.effect)}</span>
+                    <b>{txp(tx, p.labelKey ?? p.label, p.labelParams)}</b>
+                    <span style={{ display: "block", fontWeight: 400, color: "var(--ink-soft)", marginTop: 2 }}>{txp(tx, p.effectKey ?? p.effect, p.effectParams)}</span>
                   </button>
                 ))}
               </div>

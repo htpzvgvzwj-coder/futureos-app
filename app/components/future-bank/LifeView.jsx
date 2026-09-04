@@ -60,6 +60,15 @@ const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relati
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const capWord = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
 
+// tx a key whose params may themselves be translatable words (domain
+// labels etc.) — translate each string param, then fill.
+function txWithParams(tx, key, params) {
+  if (!params) return tx(key);
+  const mapped = {};
+  for (const [k, v] of Object.entries(params)) mapped[k] = typeof v === "string" ? tx(v) : v;
+  return tx(key, mapped);
+}
+
 // Turn a Future Field preview's projectedImpacts into short line-movement
 // strings — shared shape with PullFold's impact rows.
 function askSimLines(preview, tx, fmtMoney) {
@@ -367,7 +376,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
               </div>
             ) : null}
 
-            {answer?.text ? <p className={life.askAnswer}>{tx(answer.text)}</p> : null}
+            {answer?.text ? <p className={life.askAnswer}>{txWithParams(tx, answer.textKey ?? answer.text, answer.textParams)}</p> : null}
 
             {askSim ? (
               <div className={life.askSim}>

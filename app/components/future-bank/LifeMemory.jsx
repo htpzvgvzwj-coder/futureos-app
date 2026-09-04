@@ -29,7 +29,9 @@ function Record({ r, tx, replayable, onReplay, onExplore }) {
         {r.when ? <span className={life.memWhen}>{relTime(r.when)}</span> : null}
         <span className={life.memWhat}>{tx(r.what)}</span>
         <span className={life.memWhy}>{tx(r.why)}</span>
-        {r.detail ? <span className={life.memWhy}>{tx(r.detail)}</span> : null}
+        {r.detailKey || r.detail ? (
+          <span className={life.memWhy}>{tx(r.detailKey ?? r.detail, r.detailParams)}</span>
+        ) : null}
 
         {r.money ? (
           <span className={life.memMoney}>
@@ -37,7 +39,7 @@ function Record({ r, tx, replayable, onReplay, onExplore }) {
           </span>
         ) : null}
         {r.plansMoved.map((p, i) => (
-          <span key={i} className={life.memPlan}>{p}</span>
+          <span key={i} className={life.memPlan}>{p.key ? tx(p.key, { ...p.params, name: tx(p.params?.name) }) : p.text}</span>
         ))}
         {r.guardian ? <span className={life.memGuardian}>{tx(r.guardian)}</span> : null}
         <span className={life.memSource}>{tx("Source")}: {tx(r.source)}</span>
@@ -91,13 +93,15 @@ export function LifeMemory({ memory, open, onToggle, replayableIds = [], onRepla
         <span className={life.memLatestKicker}>{tx(latest ? "Latest movement" : "Your starting point")}</span>
         {latest ? (
           <>
-            <span className={life.memLatestHead}>{tx(latest.headline)}</span>
+            <span className={life.memLatestHead}>{tx(latest.headlineKey ?? latest.headline)}</span>
             {latest.lines.map((l, i) => (
-              <span key={i} className={life.memLatestLine}>{l}</span>
+              <span key={i} className={life.memLatestLine}>
+                {l.key ? tx(l.key, { ...l.params, name: l.params?.name ? tx(l.params.name) : undefined, what: l.params?.what ? tx(l.params.what) : undefined }) : l.text}
+              </span>
             ))}
           </>
         ) : (
-          <span className={life.memLatestLine}>{tx(sp?.detail || "Add an account or a plan and your line begins.")}</span>
+          <span className={life.memLatestLine}>{tx(sp?.detailKey ?? sp?.detail ?? "Add an account or a plan and your line begins.", sp?.detailParams)}</span>
         )}
         <button type="button" className={life.memOpen} onClick={onToggle}>{tx("View Life Memory")} →</button>
       </div>
