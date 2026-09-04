@@ -381,5 +381,19 @@
   "Property": "சொத்து",
   "Vehicle": "வாகனம்",
   "Business": "வணிகம்",
-  "A future goal": "ஓர் எதிர்கால இலக்கு"
+  "A future goal": "ஓர் எதிர்கால இலக்கு",
+  "Available after living costs": "வாழ்க்கைச் செலவுக்குப் பிறகு கிடைக்கும்",
+  "Promised to plans": "திட்டங்களுக்கு உறுதியளிக்கப்பட்டது",
+  "Still flexible": "இன்னும் நெகிழ்வானது",
+  "{v}/month is yours after living costs.": "வாழ்க்கைச் செலவுக்குப் பிறகு மாதம் {v} உங்களுடையது.",
+  "Your money after living costs isn't worked out yet.": "வாழ்க்கைச் செலவுக்குப் பிறகான உங்கள் பணம் இன்னும் கணக்கிடப்படவில்லை.",
+  "{v}/month is still flexible.": "மாதம் {v} இன்னும் நெகிழ்வானது.",
+  "Your flexible money isn't worked out yet.": "உங்கள் நெகிழ்வான பணம் இன்னும் கணக்கிடப்படவில்லை.",
+  "What's left from your income once essential living costs are covered, before any plan.": "அத்தியாவசிய வாழ்க்கைச் செலவுகள் ஈடுசெய்யப்பட்ட பிறகு, எந்தத் திட்டத்திற்கும் முன், உங்கள் வருமானத்தில் மீதமுள்ளது.",
+  "Money left after living costs and everything promised to plans — free to move.": "வாழ்க்கைச் செலவுகள் மற்றும் திட்டங்களுக்கு உறுதியளிக்கப்பட்ட அனைத்திற்கும் பிறகு மீதமுள்ள பணம் — நகர்த்த சுதந்திரமானது.",
+  "Add your monthly income and essential spending in Today, and this fills in.": "இன்று பகுதியில் உங்கள் மாத வருமானம் மற்றும் அத்தியாவசிய செலவைச் சேர்க்கவும், இது நிரப்பப்படும்.",
+  "See what protects this": "இதை எது பாதுகாக்கிறது என்பதைப் பார்",
+  "Life Memory": "வாழ்க்கை நினைவகம்",
+  "Latest movements": "சமீபத்திய நகர்வுகள்",
+  "View full Life Memory": "முழு வாழ்க்கை நினைவகத்தைப் பார்"
 }

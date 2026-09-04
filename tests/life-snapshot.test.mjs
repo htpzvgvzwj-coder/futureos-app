@@ -38,7 +38,7 @@ test("movedBetween compares stored figures then vs now", () => {
   const snap = { free_monthly: 3600, committed_monthly: 1900, safety_months: 4.9 };
   const moved = movedBetween(snap, { free_monthly: 3450, committed_monthly: 1900, safety_months: 4.6 });
   assert.equal(moved.length, 2, "only free + safety changed");
-  assert.deepEqual(moved.find((m) => m.label === "Free each month"), { label: "Free each month", unit: "sgd", then: 3600, now: 3450 });
+  assert.deepEqual(moved.find((m) => m.label === "Available after living costs"), { label: "Available after living costs", unit: "sgd", then: 3600, now: 3450 });
   assert.ok(moved.find((m) => m.label === "Safety buffer"));
 });
 

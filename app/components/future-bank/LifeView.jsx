@@ -31,28 +31,29 @@ import { LifeMemory } from "./LifeMemory.jsx";
 // { key, params } pairs so the sentence localises.
 function positionFragments(numbers) {
   const by = Object.fromEntries((numbers || []).map((n) => [n.id, n]));
-  const free = by.free;
-  const safety = by.safety;
+  // Tolerate the older snapshot shape (free/safety) for replay.
+  const afterLiving = by.afterLiving ?? by.free;
   const committed = by.committed;
+  const flexible = by.flexible ?? by.free;
   const hasCommitted = committed?.value && !/^SGD 0\b/.test(committed.value);
   return [
     {
-      id: "free",
-      key: free?.value != null ? "You have {v}/month free." : "Your monthly free money isn't worked out yet.",
-      params: free?.value != null ? { v: free.value } : null,
-      source: free?.source,
-    },
-    {
-      id: "safety",
-      key: safety?.value != null ? "Your safety covers {v}." : "Your safety buffer isn't set up.",
-      params: safety?.value != null ? { v: safety.value } : null,
-      source: safety?.source,
+      id: "afterLiving",
+      key: afterLiving?.value != null ? "{v}/month is yours after living costs." : "Your money after living costs isn't worked out yet.",
+      params: afterLiving?.value != null ? { v: afterLiving.value } : null,
+      source: afterLiving?.source,
     },
     {
       id: "committed",
       key: hasCommitted ? "{v} is promised to your future plans." : "No money is promised to future plans yet.",
       params: hasCommitted ? { v: committed.value } : null,
       source: committed?.source,
+    },
+    {
+      id: "flexible",
+      key: flexible?.value != null ? "{v}/month is still flexible." : "Your flexible money isn't worked out yet.",
+      params: flexible?.value != null ? { v: flexible.value } : null,
+      source: flexible?.source,
     },
   ];
 }
@@ -130,7 +131,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
 
   const collision = detectCollision({
     commitments: Array.isArray(lt.commitments) ? lt.commitments : [],
-    availableMonthly: lt.availableMonthlyCashflow ?? null,
+    // money available for plans = what's left after living costs, before commitments
+    availableMonthly: lt.availableMonthlyCashflow == null ? null : lt.availableMonthlyCashflow + (lt.monthlyCommittedTotal ?? 0),
   });
   const thread = buildLivingThread({ lt, moments, planMovement, collision });
   const echo = buildFutureEcho({ lt });
@@ -587,6 +589,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           onClose={() => setMomentNode(null)}
           onOpenStudio={() => { const id = momentNode; setMomentNode(null); openNode(id); }}
           onTry={() => { const id = momentNode; setMomentNode(null); if (isPullable(id)) setPullNode(id); else openNode(id); }}
+          onProtect={() => { setMomentNode(null); onRoute?.("guardian"); }}
+          onMemory={() => { setMomentNode(null); setMemoryOpen(true); }}
         />
       ) : null}
     </div>
@@ -647,7 +651,7 @@ function FragmentReceipt({ receipt, fragment, adjustOpen, monthly, flexible, bus
   );
 }
 
-function NodeMomentSheet({ moment, tx, onClose, onOpenStudio, onTry }) {
+function NodeMomentSheet({ moment, tx, onClose, onOpenStudio, onTry, onProtect, onMemory }) {
   return (
     <div className={css.sheetScrim} onClick={onClose}>
       <div className={css.sheet} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
@@ -670,6 +674,8 @@ function NodeMomentSheet({ moment, tx, onClose, onOpenStudio, onTry }) {
         <div className={css.choiceGrid}>
           <button type="button" className={css.cta} onClick={onOpenStudio}>{tx(moment.action.key, moment.action.params)} →</button>
           <button type="button" className={css.choice} onClick={onTry}>{tx("Try a change")}</button>
+          {onProtect ? <button type="button" className={css.choice} onClick={onProtect}>{tx("See what protects this")}</button> : null}
+          {onMemory ? <button type="button" className={css.choice} onClick={onMemory}>{tx("Life Memory")}</button> : null}
         </div>
       </div>
     </div>

@@ -1095,5 +1095,19 @@
   "Property": "房产",
   "Vehicle": "车辆",
   "Business": "创业",
-  "A future goal": "一个未来目标"
+  "A future goal": "一个未来目标",
+  "Available after living costs": "生活开销后可支配",
+  "Promised to plans": "已承诺给计划",
+  "Still flexible": "仍可灵活支配",
+  "{v}/month is yours after living costs.": "扣除生活开销后，每月 {v} 归你支配。",
+  "Your money after living costs isn't worked out yet.": "扣除生活开销后的金额尚未算出。",
+  "{v}/month is still flexible.": "每月还有 {v} 可灵活支配。",
+  "Your flexible money isn't worked out yet.": "你的灵活资金尚未算出。",
+  "What's left from your income once essential living costs are covered, before any plan.": "在覆盖基本生活开销后、开始任何计划前，你收入中剩下的部分。",
+  "Money left after living costs and everything promised to plans — free to move.": "在生活开销和所有已承诺给计划的钱之后剩下的钱——可自由调动。",
+  "Add your monthly income and essential spending in Today, and this fills in.": "在「今天」中添加你的每月收入和必要开支，这里就会填上。",
+  "See what protects this": "查看什么在保护它",
+  "Life Memory": "人生记忆",
+  "Latest movements": "最近的变动",
+  "View full Life Memory": "查看完整人生记忆"
 }
