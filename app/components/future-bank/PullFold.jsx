@@ -127,7 +127,7 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
   return (
     <div className={life.pullSheet}>
       <div className={life.pullHead}>
-        <span>{tx("Pull the future")} · {tx(cap(nodeId))}</span>
+        <span>{tx("Move this goal")} · {tx(cap(nodeId))}</span>
         <button type="button" className={css.link} onClick={onClose}>{tx("Done")}</button>
       </div>
 
@@ -135,8 +135,8 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
         <p className={css.micro}>{tx("Loading…")}</p>
       ) : !field.hasRealityPath ? (
         <div className={css.calmCard}>
-          <b>{tx("Nothing to pull yet.")}</b>
-          <span className={css.micro}>{tx("Start this plan in its Studio first, then you can pull it forward or back here.")}</span>
+          <b>{tx("Nothing to change here yet.")}</b>
+          <span className={css.micro}>{tx("Start this plan in its Studio first, then you can move it here.")}</span>
           <button type="button" className={css.cta} onClick={() => onStudio?.(cfg.domain)}>{tx("Open the Studio")}</button>
         </div>
       ) : (
@@ -148,7 +148,7 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
             max={spec?.sliderMax ?? 0}
             step={spec?.step ?? 1}
             value={slider}
-            aria-label={tx("Pull the future")}
+            aria-label={tx("Move this goal")}
             onChange={(e) => onSlide(e.target.value)}
           />
           <p className={life.pullCaption}>{spec ? captionFor(spec, slider) : ""}</p>
@@ -165,17 +165,17 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
                 <span className={life.pullBlock}>{tx("Can't be kept yet")} — {tx(preview.sealableVerdict.reason)}</span>
               ) : null}
               <div className={life.pullActs}>
-                <button type="button" className={css.cta} disabled={busy != null} onClick={fork}>{tx("Fork this")}</button>
+                <button type="button" className={css.cta} disabled={busy != null} onClick={fork}>{tx("Explore this path")}</button>
                 <button type="button" className={css.link} disabled={busy != null} onClick={() => onSlide(spec.value)}>{tx("Reset")}</button>
               </div>
             </div>
           ) : (
-            <p className={css.micro}>{tx("Drag to see how the rest of your line reacts. Nothing is saved until you fork it.")}</p>
+            <p className={css.micro}>{tx("Drag to see what it affects. Nothing is saved until you explore it as a path.")}</p>
           )}
 
           {forks.length > 0 ? (
             <div className={life.forkList}>
-              <span className={life.forkHead}>{tx("Forks on this node")}</span>
+              <span className={life.forkHead}>{tx("Paths you are exploring")}</span>
               {forks.map((b) => (
                 <div key={b.id} className={life.forkRow}>
                   <span className={life.forkLabel}>
