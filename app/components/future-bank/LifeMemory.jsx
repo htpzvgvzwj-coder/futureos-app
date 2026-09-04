@@ -1,59 +1,107 @@
 "use client";
 
-// Life Memory — scroll back along the thread. The same vertical line, but
-// receding into the past: every dated change from the Change Ledger, newest
-// first, with what moved and its before → after. Read-only. Built from
-// fb.ledger (already loaded by the provider) — nothing new fetched, nothing
-// invented.
+// Life Memory — why your money life became what it is.
+//
+//   collapsed : the single most recent important change, + "View Life
+//               Memory →". Never the whole history at once.
+//   open      : a vertical timeline tied to the Life Thread — Today /
+//               This month / Earlier / Your starting point. Each record
+//               answers five things; tap it for the before/after evidence.
 
 import { useState } from "react";
 import css from "../../showcase/fb.module.css";
 import life from "./life.module.css";
 import { useTx } from "./i18n.jsx";
 import { relTime } from "./format.js";
+import { latestMovementLine } from "../../../lib/life/memory.js";
 
-const humanize = (s) => String(s || "").replace(/[_:.]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).trim();
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
-function movedLine(ev) {
-  const set = Array.isArray(ev.impact_set) ? ev.impact_set : [];
-  const first = set.find((e) => e && e.before != null && e.after != null && e.before !== e.after);
-  if (!first) return ev.uncertainty_note || null;
-  const unit = /month|_per_month/.test(first.unit || "") || /month/i.test(first.metric || "");
-  const f = (v) => (first.unit === "sgd" || first.unit === "sgd_per_month" ? sgd(v) : String(v));
-  return `${humanize(first.metric)}: ${f(first.before)}${unit ? "/mo" : ""} → ${f(first.after)}${unit ? "/mo" : ""}`;
+function Record({ r, tx }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={life.memRec}>
+      <span className={`${life.memDot} ${r.id === "starting-point" ? life.memDotStart : ""}`} />
+      <div className={life.memBody}>
+        {r.when ? <span className={life.memWhen}>{relTime(r.when)}</span> : null}
+        <span className={life.memWhat}>{tx(r.what)}</span>
+        <span className={life.memWhy}>{tx(r.why)}</span>
+        {r.detail ? <span className={life.memWhy}>{tx(r.detail)}</span> : null}
+
+        {r.money ? (
+          <span className={life.memMoney}>
+            {tx(r.money.label)}: {sgd(r.money.before)} → <b>{sgd(r.money.after)}</b>
+          </span>
+        ) : null}
+        {r.plansMoved.map((p, i) => (
+          <span key={i} className={life.memPlan}>{p}</span>
+        ))}
+        {r.guardian ? <span className={life.memGuardian}>{tx(r.guardian)}</span> : null}
+        <span className={life.memSource}>{tx("Source")}: {tx(r.source)}</span>
+
+        {r.evidence ? (
+          <>
+            <button type="button" className={life.memMore} onClick={() => setOpen(!open)}>
+              {open ? tx("Hide the evidence") : tx("Show the evidence")}
+            </button>
+            {open ? (
+              <div className={life.memEvidence}>
+                {(r.evidence.impactSet || []).map((im, i) => (
+                  <span key={i} className={css.micro}>
+                    {im.goalId} · {im.metric}: {String(im.before ?? "—")} → {String(im.after ?? "—")} {im.unit || ""}
+                  </span>
+                ))}
+                <span className={css.micro}>
+                  {tx("Confirmed")}: {r.confirmed ? tx("yes") : tx("no")} · {tx("Reversible")}: {r.reversible ? tx("yes") : tx("no")}
+                  {r.planVersion ? ` · ${tx("plan version")} ${String(r.planVersion).slice(0, 8)}` : ""}
+                </span>
+                {r.evidence.confidence ? <span className={css.micro}>{tx("confidence")}: {r.evidence.confidence}</span> : null}
+              </div>
+            ) : null}
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
-export function LifeMemory({ events }) {
+export function LifeMemory({ memory, open, onToggle }) {
   const { tx } = useTx();
-  const [limit, setLimit] = useState(6);
+  const latest = latestMovementLine(memory);
+  const sp = memory?.startingPoint;
 
-  const rows = (Array.isArray(events) ? events : [])
-    .filter((e) => e.occurred_at)
-    .slice(0, limit);
-
-  if (rows.length === 0) {
-    return <p className={css.micro}>{tx("Your line has no past yet — changes you make will pile up here.")}</p>;
+  if (!open) {
+    return (
+      <div className={life.memLatest}>
+        <span className={life.memLatestKicker}>{tx(latest ? "Latest movement" : "Your starting point")}</span>
+        {latest ? (
+          <>
+            <span className={life.memLatestHead}>{tx(latest.headline)}</span>
+            {latest.lines.map((l, i) => (
+              <span key={i} className={life.memLatestLine}>{l}</span>
+            ))}
+          </>
+        ) : (
+          <span className={life.memLatestLine}>{tx(sp?.detail || "Add an account or a plan and your line begins.")}</span>
+        )}
+        <button type="button" className={life.memOpen} onClick={onToggle}>{tx("View Life Memory")} →</button>
+      </div>
+    );
   }
 
   return (
-    <div className={life.memory}>
-      {rows.map((ev, i) => (
-        <div key={ev.id ?? i} className={life.memoryNode}>
-          <span className={life.memoryDot} />
-          <div className={life.memoryBody}>
-            <span className={life.memoryWhen}>{relTime(ev.occurred_at)}</span>
-            <span className={life.memoryWhat}>
-              {tx(humanize(ev.action_type))}
-              {ev.actor === "guardian" ? ` · ${tx("Guardian")}` : ev.actor === "partner" ? ` · ${tx("partner")}` : ""}
-            </span>
-            {movedLine(ev) ? <span className={life.memoryMoved}>{movedLine(ev)}</span> : null}
+    <div className={life.memOpenWrap}>
+      <button type="button" className={life.memOpen} onClick={onToggle}>← {tx("Back to now")}</button>
+      <div className={life.memTimeline}>
+        {(memory?.buckets ?? []).map((b) => (
+          <div key={b.id} className={life.memBucket}>
+            <span className={life.memBucketLabel}>{tx(b.label)}</span>
+            {b.records.map((r) => (
+              <Record key={r.id} r={r} tx={tx} />
+            ))}
           </div>
-        </div>
-      ))}
-      {(events?.length ?? 0) > limit ? (
-        <button type="button" className={css.link} onClick={() => setLimit((n) => n + 8)}>{tx("Further back")}</button>
-      ) : null}
+        ))}
+      </div>
     </div>
   );
 }

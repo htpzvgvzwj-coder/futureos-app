@@ -12,15 +12,46 @@ import { useState } from "react";
 import css from "../../showcase/fb.module.css";
 import life from "./life.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
-import { FeatureHistory } from "./FeatureHistory.jsx";
 import { useTx } from "./i18n.jsx";
 import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
 import { buildFutureEcho, answerLineQuestion } from "../../../lib/life/ask.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 import { isPullable } from "../../../lib/life/pull.js";
+import { buildLifeMemory } from "../../../lib/life/memory.js";
 import { PullFold } from "./PullFold.jsx";
 import { LifeMemory } from "./LifeMemory.jsx";
+
+// The three numbers, read out as one Life Position sentence instead of a
+// dashboard row. Each fragment stays tappable for its source. Returns
+// { key, params } pairs so the sentence localises.
+function positionFragments(numbers) {
+  const by = Object.fromEntries((numbers || []).map((n) => [n.id, n]));
+  const free = by.free;
+  const safety = by.safety;
+  const committed = by.committed;
+  const hasCommitted = committed?.value && !/^SGD 0\b/.test(committed.value);
+  return [
+    {
+      id: "free",
+      key: free?.value != null ? "You have {v}/month free." : "Your monthly free money isn't worked out yet.",
+      params: free?.value != null ? { v: free.value } : null,
+      source: free?.source,
+    },
+    {
+      id: "safety",
+      key: safety?.value != null ? "Your safety covers {v}." : "Your safety buffer isn't set up.",
+      params: safety?.value != null ? { v: safety.value } : null,
+      source: safety?.source,
+    },
+    {
+      id: "committed",
+      key: hasCommitted ? "{v} is promised to your future plans." : "No money is promised to future plans yet.",
+      params: hasCommitted ? { v: committed.value } : null,
+      source: committed?.source,
+    },
+  ];
+}
 
 const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relationships: "family", freedom: "investment", future: "retirement" };
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
@@ -51,6 +82,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   });
   const thread = buildLivingThread({ lt, moments, planMovement, collision });
   const echo = buildFutureEcho({ lt });
+  const memory = buildLifeMemory({ events: fb.ledger?.events, twin: fb.twin, lifeThread: lt });
+  const position = positionFragments(thread.numbers);
 
   const ask = (text) => {
     const query = (text ?? q).trim();
@@ -83,15 +116,19 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           </span>
         ) : null}
 
-        <div className={life.numbers}>
-          {thread.numbers.map((n) => (
-            <button key={n.id} type="button" className={life.numCell} onClick={() => setOpenNum(openNum === n.id ? null : n.id)}>
-              <span className={life.numLabel}>{tx(n.label)}</span>
-              <span className={`${life.numValue} ${n.value == null ? life.unset : ""}`}>{n.value ?? tx(n.emptyHint) ?? "—"}</span>
+        <p className={life.position}>
+          {position.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className={`${life.posFrag} ${openNum === f.id ? life.posFragOpen : ""}`}
+              onClick={() => setOpenNum(openNum === f.id ? null : f.id)}
+            >
+              {tx(f.key, f.params)}{" "}
             </button>
           ))}
-        </div>
-        {openNum ? <p className={life.numSource}>{tx(thread.numbers.find((x) => x.id === openNum)?.source)}</p> : null}
+        </p>
+        {openNum ? <p className={life.numSource}>{tx(position.find((x) => x.id === openNum)?.source)}</p> : null}
 
         {thread.whatMoved ? (
           <div className={life.moved}>
@@ -128,7 +165,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                       aria-expanded={pullNode === n.id}
                       onClick={() => setPullNode(pullNode === n.id ? null : n.id)}
                     >
-                      {pullNode === n.id ? tx("Close") : tx("Pull / fork")}
+                      {pullNode === n.id ? tx("Close") : tx("Try a change")}
                     </button>
                   ) : null}
                 </div>
@@ -201,19 +238,8 @@ function Inner({ onStudio, onAddReality, onRoute }) {
         </div>
 
         <section className={css.section}>
-          <button
-            type="button"
-            className={life.memoryToggle}
-            aria-expanded={memoryOpen}
-            onClick={() => setMemoryOpen(!memoryOpen)}
-          >
-            <span>{tx("Life Memory — scroll back along the line")}</span>
-            <span>{memoryOpen ? tx("Hide") : tx("Show")}</span>
-          </button>
-          {memoryOpen ? <LifeMemory events={fb.ledger?.events} /> : null}
+          <LifeMemory memory={memory} open={memoryOpen} onToggle={() => setMemoryOpen(!memoryOpen)} />
         </section>
-
-        <FeatureHistory feature="explore" label="How this line formed" />
       </div>
     </div>
   );
