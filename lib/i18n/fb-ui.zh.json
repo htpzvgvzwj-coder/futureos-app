@@ -921,5 +921,11 @@
   "Before": "之前",
   "Possible after": "之后（可能）",
   "No connected bank dispute rail": "未连接银行争议处理通道",
-  "External payment rail not connected": "外部支付通道未连接"
+  "External payment rail not connected": "外部支付通道未连接",
+  "Your plan assumed {cur} {p} {metric}. Your {months}-month observed average is {cur} {o}.{impact}": "你的计划假设{metric}为 {cur} {p}。你 {months} 个月的实际平均值是 {cur} {o}。{impact}",
+  "monthly essentials": "每月必要开支",
+  "monthly income": "每月收入",
+  "monthly contribution": "每月投入",
+  "higher": "更高",
+  "lower": "更低"
 }
