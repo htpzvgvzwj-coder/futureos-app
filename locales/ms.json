@@ -2435,5 +2435,26 @@
       "investmentName": "Existing investments",
       "insuranceName": "Existing insurance coverage"
     }
+  },
+  "turningPoint": {
+    "state": {
+      "approaching": "Menghampiri",
+      "open": "Terbuka",
+      "sealed": "Dimeterai"
+    },
+    "why": {
+      "payment_due_underfunded": "Pembayaran {amount} tertunggak pada {month} dan dana belum tersedia.",
+      "budget_below_core": "Bajet {amount} lebih rendah daripada kos sebenar pelan.",
+      "emergency_floor_near": "Penampan kecemasan anda ({buffer} bulan) hampir ke paras {floor} bulan.",
+      "fragment_expiring": "Pilihan aliran tunai yang dibebaskan akan tamat tempoh dalam {days} hari jika tidak diletakkan.",
+      "commitment_completing": "Komitmen akan selesai tidak lama lagi, membebaskan kira-kira {amount}/bulan."
+    },
+    "wait": {
+      "payment_due_underfunded": "Jika anda tunggu, pembayaran mungkin terlepas atau ditarik daripada simpanan.",
+      "budget_below_core": "Sehingga ini diselesaikan pelan tidak boleh dimeterai.",
+      "emergency_floor_near": "Jika anda tunggu, pelan lain boleh bawa penampan di bawah paras.",
+      "fragment_expiring": "Jika anda tunggu, pilihan itu kembali menjadi aliran tunai biasa tanpa apa-apa diputuskan.",
+      "commitment_completing": "Jika anda tunggu, wang dibebaskan hanya kekal sebagai aliran tunai tanpa arah."
+    }
   }
 }

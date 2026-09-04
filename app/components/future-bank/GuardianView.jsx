@@ -8,7 +8,7 @@
 // The operational surface (approval queue, people you look after, the
 // Contract) lives below the fold and stays fully usable.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import fbc from "./future-bank.module.css";
@@ -16,6 +16,8 @@ import g from "./guardian.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
 import { relTime, money } from "./format.js";
+import { realityConfidence } from "../../../lib/explore/differentiation.js";
+import { guardianBlindSpots } from "../../../lib/guardian/confidence.js";
 
 const LEVEL_LABEL = { calm: "Calm", watching: "Watching", decision: "Decision", urgent: "Urgent" };
 
@@ -55,6 +57,7 @@ function Inner({ onRoute, onOpenSupervised }) {
   const [gd, setGd] = useState(null);
   const [auth, setAuth] = useState(null);
   const [care, setCare] = useState(null);
+  const [connections, setConnections] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [openDomain, setOpenDomain] = useState(null);
   const [foldOpen, setFoldOpen] = useState(false);
@@ -64,6 +67,7 @@ function Inner({ onRoute, onOpenSupervised }) {
     fetch("/api/guardian", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setGd).catch(() => setGd(null));
     fetch("/api/authorizations", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setAuth).catch(() => setAuth(null));
     fetch("/api/care", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setCare).catch(() => setCare(null));
+    fetch("/api/connections", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then((d) => setConnections(d?.connections ?? null)).catch(() => setConnections(null));
   }, []);
   useEffect(() => {
     load();
@@ -84,6 +88,8 @@ function Inner({ onRoute, onOpenSupervised }) {
     load();
     fb.refetchAll?.();
   };
+  const confidence = useMemo(() => realityConfidence({ twin: fb.twin ?? {}, lt: fb.lifeThread ?? {} }), [fb.twin, fb.lifeThread]);
+  const blindSpots = useMemo(() => guardianBlindSpots({ connections: connections ?? [] }), [connections]);
   const supervised = care?.supervised ?? [];
   const supervisors = care?.supervisors ?? [];
   const inbox = care?.inbox ?? [];
@@ -332,6 +338,31 @@ function Inner({ onRoute, onOpenSupervised }) {
                 </div>
               ))}
             </div>
+          </section>
+        ) : null}
+
+        {/* Guardian Confidence — what's confirmed from real data vs Guardian's own estimate */}
+        {confidence && (confidence.confirmed.length || confidence.estimated.length) ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("What's confirmed vs estimated")}</p>
+            <div className={g.confidence}>
+              <span className={css.micro}><b>{tx("Confirmed")}:</b> {confidence.confirmed.map((c) => tx(c.label)).join(" · ")}</span>
+              <span className={css.micro}><b>{tx("Estimated")}:</b> {confidence.estimated.map((c) => tx(c.label)).join(" · ")}</span>
+            </div>
+          </section>
+        ) : null}
+
+        {/* Guardian Blind Spots — outside links it genuinely can't see through yet */}
+        {blindSpots.gaps.length > 0 ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("What Guardian can't see yet")}</p>
+            {blindSpots.gaps.map((gap) => (
+              <div key={gap.provider} className={g.impactRow} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
+                <span className={g.impactVal}>{tx(gap.name)}</span>
+                <span className={g.impactName}>{tx(gap.textKey)}</span>
+              </div>
+            ))}
+            <button type="button" className={css.link} onClick={() => onRoute?.("connections")}>{tx("Open")} {tx("Connections")} →</button>
           </section>
         ) : null}
 

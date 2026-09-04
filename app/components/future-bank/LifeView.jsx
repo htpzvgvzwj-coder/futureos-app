@@ -23,6 +23,8 @@ import { buildNodeMoment } from "../../../lib/life/moment.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 import { isPullable } from "../../../lib/life/pull.js";
 import { buildLifeMemory } from "../../../lib/life/memory.js";
+import { OPEN_FUTURE_LABEL, TURNING_POINT_DOMAIN_LABEL } from "../../../lib/life/turning-point-labels.js";
+import { regretCheck } from "../../../lib/explore/differentiation.js";
 import { PullFold } from "./PullFold.jsx";
 import { LifeMemory } from "./LifeMemory.jsx";
 
@@ -139,6 +141,10 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const fragments = buildFutureFragments({ lt, twin: fb.twin });
   const memory = buildLifeMemory({ events: fb.ledger?.events, twin: fb.twin, lifeThread: lt });
   const position = positionFragments(thread.numbers);
+  const tp = lt.nextTurningPoint ?? null;
+  const tpRegret = tp?.kind === "emergency_floor_near" && tp.evidence?.bufferMonths != null
+    ? regretCheck({ bufferMonthsAfter: tp.evidence.bufferMonths, floorMonths: tp.evidence.floorMonths ?? 6, monthlyRoomAfter: lt.availableMonthlyCashflow ?? null, planShiftMonths: 0 })
+    : null;
 
   // Capture the current line against the latest direction-changing event
   // (forward-only), and learn which memory records can be replayed.
@@ -338,6 +344,25 @@ function Inner({ onStudio, onAddReality, onRoute }) {
               <span key={i} className={life.movedImpact}>{im}</span>
             ))}
             <span className={life.movedWhen}>{relTime(thread.whatMoved.when)} · {tx(thread.whatMoved.status)}</span>
+          </div>
+        ) : null}
+
+        {!replay && tp ? (
+          <div className={`${life.turningPoint} ${life[`tp_${tp.state}`] || ""}`}>
+            <span className={life.tpState}>{tx(`turningPoint.state.${tp.state}`)}</span>
+            <b className={life.tpWhy}>{txWithParams(tx, tp.whyNowKey, tp.whyNowParams)}</b>
+            <span className={life.tpWait}>{tx("If you wait")} — {txWithParams(tx, tp.ifYouWaitKey, tp.ifYouWaitParams)}</span>
+            {Array.isArray(tp.openFutures) && tp.openFutures.length ? (
+              <span className={life.tpFutures}>
+                {tx("Still open")}: {tp.openFutures.map((id) => tx(OPEN_FUTURE_LABEL[id] ?? id)).join(" · ")}
+              </span>
+            ) : null}
+            {tpRegret?.mostLikely?.weight > 0 ? (
+              <span className={life.tpRegret}>⚠ {tpRegret.mostLikely.text}</span>
+            ) : null}
+            <button type="button" className={life.tpAction} onClick={() => onStudio?.(tp.domain)}>
+              {tx("Open {d} Studio", { d: tx(TURNING_POINT_DOMAIN_LABEL[tp.domain] ?? capWord(tp.domain)) })} →
+            </button>
           </div>
         ) : null}
 

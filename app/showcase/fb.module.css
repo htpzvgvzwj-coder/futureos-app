@@ -7,17 +7,17 @@
   --ink: #10203a;
   --ink-soft: #46566f;
   --ink-faint: #8a97ad;
-  --ground: #ece7de; /* warm neumorphic base — close to --surface on purpose */
-  --surface: #f8f5ef;
-  --line: #e7e3da;
+  --ground: #f4e7e4; /* light warm-red neumorphic base — close to --surface on purpose */
+  --surface: #fbf2f0;
+  --line: #ecdcd8;
   --sea: #0f7d6b; /* forward movement */
   --sea-soft: #e2f1ee;
   --amber: #b5741a; /* attention only */
   --amber-soft: #f7ecdc;
   --radius: 14px;
-  /* soft-UI dual shadow — light source top-left, on the warm ground above */
+  /* soft-UI dual shadow — light source top-left, on the warm-red ground above */
   --neu-light: rgba(255, 255, 255, 0.85);
-  --neu-dark: rgba(150, 137, 108, 0.32);
+  --neu-dark: rgba(160, 110, 104, 0.3);
   --neu-raised: 7px 7px 15px var(--neu-dark), -7px -7px 15px var(--neu-light);
   --neu-pressed: inset 4px 4px 9px var(--neu-dark), inset -4px -4px 9px var(--neu-light);
 

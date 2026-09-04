@@ -227,6 +227,16 @@
 .impactVal { font-size: 13.5px; font-weight: 600; color: var(--ink); }
 .impactVal .to { color: var(--ink-faint); font-weight: 400; margin: 0 5px; }
 .impactVal.warn { color: var(--g-alert); }
+
+/* ---- Guardian Confidence — confirmed vs estimated ---- */
+.confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+}
 .impactVal.same { color: var(--ink-faint); font-weight: 400; }
 .decisionActs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .decisionActs button {
