@@ -161,9 +161,9 @@ function Inner({ onRoute, onOpenSupervised }) {
       : pending.length > 1
         ? { label: `${tx("Review")} ${pending.length} ${tx("decisions")}`, run: openFold }
         : now?.primaryAction
-          ? { label: tx(now.primaryAction.label), run: () => onRoute?.(now.primaryAction.route || "today") }
+          ? { label: txp(tx, now.primaryAction.labelKey ?? now.primaryAction.label, now.primaryAction.labelParams), run: () => onRoute?.(now.primaryAction.route || "today") }
           : now?.needsSetup
-            ? { label: tx(now.primaryAction?.label || "Add a money source"), run: () => onRoute?.("reality") }
+            ? { label: txp(tx, now.primaryAction?.labelKey ?? now.primaryAction?.label ?? "Add a money source", now.primaryAction?.labelParams), run: () => onRoute?.("reality") }
             : null;
   const level = pending.length > 0 && (now?.level === "calm" || !now) ? "decision" : now?.level ?? "calm";
 
@@ -181,7 +181,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                 ? `${pending.length} ${pending.length > 1 ? tx("money moves need your decision") : tx("money move needs your decision")}`
                 : tx(now.headline)}
             </span>
-            {now.cause ? <span className={g.nowCause}>{tx(now.cause)}</span> : null}
+            {now.cause ? <span className={g.nowCause}>{txp(tx, now.causeKey ?? now.cause, now.causeParams)}</span> : null}
             {primary ? (
               <button type="button" className={g.nowAction} onClick={primary.run}>{primary.label}</button>
             ) : null}
