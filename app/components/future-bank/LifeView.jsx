@@ -397,6 +397,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
               onToggle={() => setMemoryOpen(!memoryOpen)}
               replayableIds={replayable}
               onReplay={enterReplay}
+              onExplore={(nodeId) => { setMemoryOpen(false); setReplay(null); setPullNode(nodeId); }}
             />
           </section>
         ) : null}

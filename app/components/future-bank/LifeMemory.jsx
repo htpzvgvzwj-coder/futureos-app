@@ -17,8 +17,11 @@ import { latestMovementLine } from "../../../lib/life/memory.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
-function Record({ r, tx, replayable, onReplay }) {
+const DOMAIN_NODE = { home: "home", wedding: "relationships", family: "relationships", emergency: "safety", investment: "freedom", retirement: "future" };
+
+function Record({ r, tx, replayable, onReplay, onExplore }) {
   const [open, setOpen] = useState(false);
+  const branchNode = r.domain ? DOMAIN_NODE[r.domain] : null;
   return (
     <div className={life.memRec}>
       <span className={`${life.memDot} ${r.id === "starting-point" ? life.memDotStart : ""}`} />
@@ -42,6 +45,11 @@ function Record({ r, tx, replayable, onReplay }) {
         {replayable && onReplay ? (
           <button type="button" className={life.memReplay} onClick={() => onReplay(r.id, r.when)}>
             {tx("See your line as it was then")} →
+          </button>
+        ) : null}
+        {branchNode && onExplore ? (
+          <button type="button" className={life.memReplay} onClick={() => onExplore(branchNode)}>
+            {tx("Explore a different choice here")} →
           </button>
         ) : null}
 
@@ -71,7 +79,7 @@ function Record({ r, tx, replayable, onReplay }) {
   );
 }
 
-export function LifeMemory({ memory, open, onToggle, replayableIds = [], onReplay }) {
+export function LifeMemory({ memory, open, onToggle, replayableIds = [], onReplay, onExplore }) {
   const { tx } = useTx();
   const replaySet = new Set(replayableIds);
   const latest = latestMovementLine(memory);
@@ -104,7 +112,7 @@ export function LifeMemory({ memory, open, onToggle, replayableIds = [], onRepla
           <div key={b.id} className={life.memBucket}>
             <span className={life.memBucketLabel}>{tx(b.label)}</span>
             {b.records.map((r) => (
-              <Record key={r.id} r={r} tx={tx} replayable={replaySet.has(r.id)} onReplay={onReplay} />
+              <Record key={r.id} r={r} tx={tx} replayable={replaySet.has(r.id)} onReplay={onReplay} onExplore={onExplore} />
             ))}
           </div>
         ))}
