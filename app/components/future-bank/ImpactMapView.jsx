@@ -3,16 +3,21 @@
 // Impact Map — one goal moves, the others move too. Not a dashboard: the
 // live cross-goal relationships from the Life Thread, the month where
 // plans are competing for the same money, and which links are being
-// pushed right now by an active simulation.
+// pushed right now by an active simulation — including one you start
+// right here, with the same Pull the Future slider Life uses.
 
+import { useState } from "react";
 import css from "../../showcase/fb.module.css";
 import x from "./explore.module.css";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
+import { PullFold } from "./PullFold.jsx";
+import { PULLABLE } from "../../../lib/life/pull.js";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const NODE_LABEL = { income: "Today", safety: "Safety", home: "Home", relationships: "Wedding", freedom: "Freedom", future: "Retirement" };
 const cap = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
+const PULLABLE_NODES = Object.keys(PULLABLE); // safety, home, relationships, freedom, future
 
 export function ImpactMapView(props) {
   return (
@@ -29,6 +34,7 @@ function Inner({ onBack, onStudio }) {
   const edges = Array.isArray(lt.crossGoalEdges) ? lt.crossGoalEdges : [];
   const pw = lt.promiseWeight?.pressureWindow ?? null;
   const active = edges.filter((e) => e.direction && e.direction !== "flat");
+  const [tryNode, setTryNode] = useState(null);
 
   return (
     <div className={`${css.app} ${css.embedded}`}>
@@ -78,6 +84,33 @@ function Inner({ onBack, onStudio }) {
               </span>
             </button>
           ))}
+        </section>
+
+        {/* Try pulling a node — the same slider Life uses; the edges above
+            react to it once you explore a path. */}
+        <section className={css.section}>
+          <p className={css.kicker}>{tx("Try pulling one")}</p>
+          <div className={css.choiceGrid}>
+            {PULLABLE_NODES.map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={css.choice}
+                aria-pressed={tryNode === n}
+                onClick={() => setTryNode(tryNode === n ? null : n)}
+              >
+                <b>{tryNode === n ? "✓ " : ""}{tx(NODE_LABEL[n] ?? cap(n))}</b>
+              </button>
+            ))}
+          </div>
+          {tryNode ? (
+            <PullFold
+              nodeId={tryNode}
+              onClose={() => setTryNode(null)}
+              onChanged={() => fb.refetchAll?.()}
+              onStudio={(d) => onStudio?.(d)}
+            />
+          ) : null}
         </section>
 
         <p className={css.micro}>{tx("Every number here is recomputed from your real accounts, plans and commitments — nothing is assumed.")}</p>
