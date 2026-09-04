@@ -37,6 +37,23 @@
   gap: 20px;
 }
 
+/* OCBC brand mark — every Future Bank screen shares this shell, so one
+   rule brands the whole tabbed app. Colour comes from the global
+   --ocbc-red tokens (app/globals.css :root), not redefined here, so it
+   always matches the rest of the product. */
+.shell::before {
+  content: "OCBC";
+  align-self: flex-start;
+  order: -1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #fff;
+  background: linear-gradient(145deg, var(--ocbc-red, #d71920), var(--ocbc-red-dark, #a50f18));
+  padding: 4px 10px 3px;
+  border-radius: 999px;
+}
+
 /* Embedded inside the tabbed PhoneShell: .screenArea is a fixed-height box
    with overflow:hidden, so this wrapper must be the scroll container. */
 .app.embedded {
@@ -419,7 +436,7 @@
 
 /* ---- controls --------------------------------------------- */
 .cta {
-  background: var(--ink);
+  background: linear-gradient(145deg, var(--ocbc-red, #d71920), var(--ocbc-red-dark, #a50f18));
   color: #fff;
   border: 0;
   border-radius: 12px;
