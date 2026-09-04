@@ -509,6 +509,7 @@ const RANGE_CATS = [
 const RANGE_LABEL = Object.fromEntries(RANGE_CATS.map((c) => [c.id, c.label]));
 
 function SharedRanges({ ranges, busy, onSave, onDelete }) {
+  const { tx } = useTx();
   const [cat, setCat] = useState("rent");
   const [low, setLow] = useState("");
   const [high, setHigh] = useState("");
@@ -520,10 +521,10 @@ function SharedRanges({ ranges, busy, onSave, onDelete }) {
           {ranges.map((r) => (
             <div key={r.category} className={css.actItem}>
               <span className={css.actBody}>
-                <span className={css.actName}>{RANGE_LABEL[r.category] ?? r.category}</span>
+                <span className={css.actName}>{tx(RANGE_LABEL[r.category] ?? r.category)}</span>
                 <span className={css.actMeta}>SGD {r.low.toLocaleString("en-SG")}–{r.high.toLocaleString("en-SG")}{r.note ? ` · ${r.note}` : ""}</span>
               </span>
-              <button type="button" className={css.link} disabled={busy} onClick={() => onDelete(r.category)}>Remove</button>
+              <button type="button" className={css.link} disabled={busy} onClick={() => onDelete(r.category)}>{tx("Remove")}</button>
             </div>
           ))}
         </div>
@@ -531,16 +532,16 @@ function SharedRanges({ ranges, busy, onSave, onDelete }) {
       <div className={css.choiceGrid}>
         {RANGE_CATS.map((c) => (
           <button key={c.id} type="button" className={css.choice} aria-pressed={cat === c.id} disabled={busy} onClick={() => setCat(c.id)}>
-            <b>{cat === c.id ? "✓ " : ""}{c.label}</b>
+            <b>{cat === c.id ? "✓ " : ""}{tx(c.label)}</b>
           </button>
         ))}
       </div>
       <div className={css.field}>
-        <label htmlFor="sr-low">Low (SGD)</label>
+        <label htmlFor="sr-low">{tx("Low (SGD)")}</label>
         <input id="sr-low" inputMode="numeric" value={low} disabled={busy} onChange={(e) => setLow(e.target.value.replace(/[^\d]/g, ""))} />
       </div>
       <div className={css.field}>
-        <label htmlFor="sr-high">High (SGD)</label>
+        <label htmlFor="sr-high">{tx("High (SGD)")}</label>
         <input id="sr-high" inputMode="numeric" value={high} disabled={busy} onChange={(e) => setHigh(e.target.value.replace(/[^\d]/g, ""))} />
       </div>
       <button
@@ -549,7 +550,7 @@ function SharedRanges({ ranges, busy, onSave, onDelete }) {
         disabled={busy || !valid}
         onClick={() => { onSave({ category: cat, low: Number(low), high: Number(high) }); setLow(""); setHigh(""); }}
       >
-        Save this range
+        {tx("Save this range")}
       </button>
     </>
   );
@@ -558,62 +559,65 @@ function SharedRanges({ ranges, busy, onSave, onDelete }) {
 const MILESTONE_LABEL = { turns_16: "Turned 16", turns_18: "Turned 18", custom: "A milestone" };
 
 function AgeAndPermissions({ birthYear, transitions, busy, onSaveYear, onDecide }) {
+  const { tx } = useTx();
   const [year, setYear] = useState(birthYear != null ? String(birthYear) : "");
   useEffect(() => setYear(birthYear != null ? String(birthYear) : ""), [birthYear]);
   const dirty = year.trim() !== "" && Number(year) !== birthYear && Number(year) >= 1900 && Number(year) <= new Date().getFullYear();
   return (
     <>
       <p className={css.micro}>
-        A birth year lets Future Bank <b>propose</b> loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.
+        {tx("A birth year lets Future Bank propose loosening the rules at 16 and 18 — it never changes anything by itself; you apply or dismiss each proposal.")}
       </p>
       <div className={css.field}>
-        <label htmlFor="ap-year">Birth year (optional)</label>
-        <input id="ap-year" inputMode="numeric" value={year} placeholder="e.g. 2009" disabled={busy} onChange={(e) => setYear(e.target.value.replace(/[^\d]/g, "").slice(0, 4))} />
+        <label htmlFor="ap-year">{tx("Birth year (optional)")}</label>
+        <input id="ap-year" inputMode="numeric" value={year} placeholder={tx("e.g. 2009")} disabled={busy} onChange={(e) => setYear(e.target.value.replace(/[^\d]/g, "").slice(0, 4))} />
       </div>
       {dirty ? (
-        <button type="button" className={css.link} disabled={busy} onClick={() => onSaveYear(Number(year))}>Save birth year</button>
+        <button type="button" className={css.link} disabled={busy} onClick={() => onSaveYear(Number(year))}>{tx("Save birth year")}</button>
       ) : null}
       {transitions.map((tr) => (
         <div key={tr.id} className={css.movingCard}>
-          <div className={css.movingHead}><b>{MILESTONE_LABEL[tr.milestone] ?? tr.milestone}</b></div>
+          <div className={css.movingHead}><b>{tx(MILESTONE_LABEL[tr.milestone] ?? tr.milestone)}</b></div>
           <span className={css.micro}>{tr.rationale}</span>
           <div className={css.choiceGrid}>
-            <button type="button" className={css.cta} disabled={busy} onClick={() => onDecide(tr.id, true)}>Apply this change</button>
-            <button type="button" className={css.choice} disabled={busy} onClick={() => onDecide(tr.id, false)}>Not now</button>
+            <button type="button" className={css.cta} disabled={busy} onClick={() => onDecide(tr.id, true)}>{tx("Apply this change")}</button>
+            <button type="button" className={css.choice} disabled={busy} onClick={() => onDecide(tr.id, false)}>{tx("Not now")}</button>
           </div>
         </div>
       ))}
-      {transitions.length === 0 ? <p className={css.micro}>No proposals right now.</p> : null}
+      {transitions.length === 0 ? <p className={css.micro}>{tx("No proposals right now.")}</p> : null}
     </>
   );
 }
 
 function AllowanceEditor({ person, current, busy, onSave }) {
+  const { tx } = useTx();
   const [val, setVal] = useState(current != null ? String(current) : "");
   useEffect(() => setVal(current != null ? String(current) : ""), [current]);
   const dirty = (val.trim() === "" ? current != null : Number(val) !== current);
   return (
     <div className={css.field} style={{ paddingLeft: "10px" }}>
-      <label htmlFor={`allow-${person}`}>Let {person} auto-approve up to (SGD / week)</label>
+      <label htmlFor={`allow-${person}`}>{tx("Let {name} auto-approve up to (SGD / week)", { name: person })}</label>
       <input
         id={`allow-${person}`}
         inputMode="numeric"
         value={val}
-        placeholder="blank = they approve everything"
+        placeholder={tx("blank = they approve everything")}
         disabled={busy}
         onChange={(e) => setVal(e.target.value.replace(/[^\d]/g, ""))}
       />
       {dirty ? (
         <button type="button" className={css.link} disabled={busy} onClick={() => onSave(val.trim() === "" ? null : Number(val))}>
-          Save allowance
+          {tx("Save allowance")}
         </button>
       ) : null}
-      <span className={css.micro}>Small moves under this run without asking; anything above still waits. You are delegating a limited pre-approval.</span>
+      <span className={css.micro}>{tx("Small moves under this run without asking; anything above still waits. You are delegating a limited pre-approval.")}</span>
     </div>
   );
 }
 
 function ApprovalRules({ accountType, policy, busy, onSave }) {
+  const { tx } = useTx();
   const supervised = accountType === "youth" || accountType === "guardian_managed_child";
   const [restricted, setRestricted] = useState(true);
   const [over, setOver] = useState("");
@@ -629,7 +633,7 @@ function ApprovalRules({ accountType, policy, busy, onSave }) {
       setBoth(Boolean(policy.requireBoth));
     }
   }, [policy]);
-  if (!policy) return <p className={css.micro}>Loading…</p>;
+  if (!policy) return <p className={css.micro}>{tx("Loading…")}</p>;
   const dirty =
     restricted !== policy.restrictedNeedApproval ||
     (over.trim() === "" ? policy.approvalOverAmount != null : Number(over) !== policy.approvalOverAmount) ||
@@ -639,53 +643,53 @@ function ApprovalRules({ accountType, policy, busy, onSave }) {
   return (
     <>
       <p className={css.micro}>
-        When a rule matches, a real money move (a transfer between your own accounts, a card repayment) is held instead of happening straight away. Nothing else is affected.
+        {tx("When a rule matches, a real money move (a transfer between your own accounts, a card repayment) is held instead of happening straight away. Nothing else is affected.")}
       </p>
       <label className={css.actItem} style={{ cursor: "pointer" }}>
         <span className={css.actBody}>
-          <span className={css.actName}>Supervised actions need approval</span>
+          <span className={css.actName}>{tx("Supervised actions need approval")}</span>
           <span className={css.actMeta}>
             {supervised
-              ? "This is a supervised account, so paying out, cards, FX, investing and loans need a guardian's approval."
-              : "Only applies while this is a youth or child account."}
+              ? tx("This is a supervised account, so paying out, cards, FX, investing and loans need a guardian's approval.")
+              : tx("Only applies while this is a youth or child account.")}
           </span>
         </span>
         <input type="checkbox" checked={restricted} disabled={busy} onChange={(e) => setRestricted(e.target.checked)} />
       </label>
       <div className={css.field}>
-        <label htmlFor="ap-over">Also check any move over (SGD)</label>
+        <label htmlFor="ap-over">{tx("Also check any move over (SGD)")}</label>
         <input
           id="ap-over"
           inputMode="numeric"
           value={over}
-          placeholder="e.g. 2000 — leave blank for no amount rule"
+          placeholder={tx("e.g. 2000 — leave blank for no amount rule")}
           disabled={busy}
           onChange={(e) => setOver(e.target.value.replace(/[^\d]/g, ""))}
         />
       </div>
 
-      <p className={css.micro}>When a move is held:</p>
+      <p className={css.micro}>{tx("When a move is held:")}</p>
       <div className={css.choiceGrid}>
         <button type="button" className={css.choice} aria-pressed={mode === "approval"} disabled={busy} onClick={() => setMode("approval")}>
-          <b>{mode === "approval" ? "✓ " : ""}Wait for a decision</b>
-          <span>It only happens once someone approves it.</span>
+          <b>{mode === "approval" ? "✓ " : ""}{tx("Wait for a decision")}</b>
+          <span>{tx("It only happens once someone approves it.")}</span>
         </button>
         <button type="button" className={css.choice} aria-pressed={mode === "cooling_off"} disabled={busy} onClick={() => setMode("cooling_off")}>
-          <b>{mode === "cooling_off" ? "✓ " : ""}Cooling-off</b>
-          <span>It runs itself after a wait, unless someone stops it. No one has to be online.</span>
+          <b>{mode === "cooling_off" ? "✓ " : ""}{tx("Cooling-off")}</b>
+          <span>{tx("It runs itself after a wait, unless someone stops it. No one has to be online.")}</span>
         </button>
       </div>
       {mode === "cooling_off" ? (
         <div className={css.field}>
-          <label htmlFor="ap-hours">Cooling-off wait (hours)</label>
+          <label htmlFor="ap-hours">{tx("Cooling-off wait (hours)")}</label>
           <input id="ap-hours" inputMode="numeric" value={hours} disabled={busy} onChange={(e) => setHours(e.target.value.replace(/[^\d]/g, "") || "")} />
         </div>
       ) : null}
 
       <label className={css.actItem} style={{ cursor: "pointer" }}>
         <span className={css.actBody}>
-          <span className={css.actName}>Two people must agree</span>
-          <span className={css.actMeta}>A held move needs both a guardian&apos;s approval and your own confirmation before it runs.</span>
+          <span className={css.actName}>{tx("Two people must agree")}</span>
+          <span className={css.actMeta}>{tx("A held move needs both a guardian's approval and your own confirmation before it runs.")}</span>
         </span>
         <input type="checkbox" checked={both} disabled={busy} onChange={(e) => setBoth(e.target.checked)} />
       </label>
@@ -704,14 +708,15 @@ function ApprovalRules({ accountType, policy, busy, onSave }) {
           })
         }
       >
-        Save approval rules
+        {tx("Save approval rules")}
       </button>
-      <p className={css.micro}>An amount rule plus cooling-off protects an older adult who wants a pause before a large transfer, without needing anyone else to act.</p>
+      <p className={css.micro}>{tx("An amount rule plus cooling-off protects an older adult who wants a pause before a large transfer, without needing anyone else to act.")}</p>
     </>
   );
 }
 
 function RoleEditor({ role, busy, onCancel, onSave, onRemove }) {
+  const { tx } = useTx();
   const [relationLabel, setRelationLabel] = useState(role.relationLabel ?? "");
   const [note, setNote] = useState(role.note ?? "");
   const [covers, setCovers] = useState(new Set(role.covers ?? []));
@@ -723,12 +728,12 @@ function RoleEditor({ role, busy, onCancel, onSave, onRemove }) {
   };
   return (
     <div className={css.movingCard}>
-      <div className={css.movingHead}><b>{ROLE_LABEL[role.role] ?? role.role}</b></div>
+      <div className={css.movingHead}><b>{tx(ROLE_LABEL[role.role] ?? role.role)}</b></div>
       <div className={css.field}>
-        <label htmlFor={`rel-${role.id}`}>Who they are</label>
-        <input id={`rel-${role.id}`} type="text" value={relationLabel} maxLength={80} placeholder="e.g. My mother, My son Aaron" onChange={(e) => setRelationLabel(e.target.value)} />
+        <label htmlFor={`rel-${role.id}`}>{tx("Who they are")}</label>
+        <input id={`rel-${role.id}`} type="text" value={relationLabel} maxLength={80} placeholder={tx("e.g. My mother, My son Aaron")} onChange={(e) => setRelationLabel(e.target.value)} />
       </div>
-      <p className={css.micro}>Noted for</p>
+      <p className={css.micro}>{tx("Noted for")}</p>
       <div className={css.choiceGrid}>
         {COVER_AREAS.map((c) => (
           <button
@@ -738,25 +743,26 @@ function RoleEditor({ role, busy, onCancel, onSave, onRemove }) {
             aria-pressed={covers.has(c.id)}
             onClick={() => toggle(c.id)}
           >
-            <b>{covers.has(c.id) ? "✓ " : ""}{c.label}</b>
+            <b>{covers.has(c.id) ? "✓ " : ""}{tx(c.label)}</b>
           </button>
         ))}
       </div>
       <div className={css.field}>
-        <label htmlFor={`note-${role.id}`}>Note (optional)</label>
-        <input id={`note-${role.id}`} type="text" value={note} maxLength={140} placeholder="e.g. only for the joint bills account" onChange={(e) => setNote(e.target.value)} />
+        <label htmlFor={`note-${role.id}`}>{tx("Note (optional)")}</label>
+        <input id={`note-${role.id}`} type="text" value={note} maxLength={140} placeholder={tx("e.g. only for the joint bills account")} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div className={css.choiceGrid}>
-        <button type="button" className={css.cta} disabled={busy} onClick={() => onSave({ relationLabel, note, covers: [...covers] })}>Save</button>
-        <button type="button" className={css.choice} disabled={busy} onClick={onCancel}>Cancel</button>
-        <button type="button" className={css.link} disabled={busy} onClick={onRemove}>Remove from circle</button>
+        <button type="button" className={css.cta} disabled={busy} onClick={() => onSave({ relationLabel, note, covers: [...covers] })}>{tx("Save")}</button>
+        <button type="button" className={css.choice} disabled={busy} onClick={onCancel}>{tx("Cancel")}</button>
+        <button type="button" className={css.link} disabled={busy} onClick={onRemove}>{tx("Remove from circle")}</button>
       </div>
-      <p className={css.micro}>“Noted for” is your own reference. It does not grant access — access needs an accepted invite and the right permission.</p>
+      <p className={css.micro}>{tx("“Noted for” is your own reference. It does not grant access — access needs an accepted invite and the right permission.")}</p>
     </div>
   );
 }
 
 function HandoffEditor({ busy, handoff, successorChoices, onCancel, onSave }) {
+  const { tx } = useTx();
   const [kind, setKind] = useState(handoff?.kind ?? "general");
   const [successorRoleId, setSuccessorRoleId] = useState(handoff?.successorRoleId ?? "");
   const [triggerNote, setTriggerNote] = useState(handoff?.triggerNote ?? "");
@@ -764,18 +770,18 @@ function HandoffEditor({ busy, handoff, successorChoices, onCancel, onSave }) {
   const chosen = successorChoices.find((r) => r.id === successorRoleId);
   return (
     <div className={css.movingCard}>
-      <div className={css.movingHead}><b>Write a handoff plan</b></div>
-      <p className={css.micro}>Kind</p>
+      <div className={css.movingHead}><b>{tx("Write a handoff plan")}</b></div>
+      <p className={css.micro}>{tx("Kind")}</p>
       <div className={css.choiceGrid}>
         {HANDOFF_KINDS.map((k) => (
           <button key={k.id} type="button" className={css.choice} aria-pressed={kind === k.id} onClick={() => setKind(k.id)}>
-            <b>{kind === k.id ? "✓ " : ""}{k.label}</b>
+            <b>{kind === k.id ? "✓ " : ""}{tx(k.label)}</b>
           </button>
         ))}
       </div>
-      <p className={css.micro}>Who should take over</p>
+      <p className={css.micro}>{tx("Who should take over")}</p>
       {successorChoices.length === 0 ? (
-        <p className={css.micro}>Add a guardian, trusted contact or beneficiary to your circle first, then choose them here.</p>
+        <p className={css.micro}>{tx("Add a guardian, trusted contact or beneficiary to your circle first, then choose them here.")}</p>
       ) : (
         <div className={css.choiceGrid}>
           {successorChoices.map((r) => (
@@ -786,19 +792,19 @@ function HandoffEditor({ busy, handoff, successorChoices, onCancel, onSave }) {
               aria-pressed={successorRoleId === r.id}
               onClick={() => setSuccessorRoleId(r.id)}
             >
-              <b>{successorRoleId === r.id ? "✓ " : ""}{r.relationLabel || ROLE_LABEL[r.role] || r.role}</b>
-              <span>{ROLE_LABEL[r.role]}</span>
+              <b>{successorRoleId === r.id ? "✓ " : ""}{r.relationLabel || tx(ROLE_LABEL[r.role] || r.role)}</b>
+              <span>{tx(ROLE_LABEL[r.role])}</span>
             </button>
           ))}
         </div>
       )}
       <div className={css.field}>
-        <label htmlFor="ho-trigger">When this plan should apply</label>
-        <input id="ho-trigger" type="text" value={triggerNote} maxLength={140} placeholder="e.g. if I'm hospitalised for more than 2 weeks" onChange={(e) => setTriggerNote(e.target.value)} />
+        <label htmlFor="ho-trigger">{tx("When this plan should apply")}</label>
+        <input id="ho-trigger" type="text" value={triggerNote} maxLength={140} placeholder={tx("e.g. if I'm hospitalised for more than 2 weeks")} onChange={(e) => setTriggerNote(e.target.value)} />
       </div>
       <div className={css.field}>
-        <label htmlFor="ho-instructions">What they should know / do</label>
-        <input id="ho-instructions" type="text" value={instructions} maxLength={280} placeholder="e.g. keep the bills paid from the joint account; the emergency fund is for medical costs" onChange={(e) => setInstructions(e.target.value)} />
+        <label htmlFor="ho-instructions">{tx("What they should know / do")}</label>
+        <input id="ho-instructions" type="text" value={instructions} maxLength={280} placeholder={tx("e.g. keep the bills paid from the joint account; the emergency fund is for medical costs")} onChange={(e) => setInstructions(e.target.value)} />
       </div>
       <div className={css.choiceGrid}>
         <button
@@ -815,11 +821,11 @@ function HandoffEditor({ busy, handoff, successorChoices, onCancel, onSave }) {
             })
           }
         >
-          Save as a written plan
+          {tx("Save as a written plan")}
         </button>
-        <button type="button" className={css.choice} disabled={busy} onClick={onCancel}>Cancel</button>
+        <button type="button" className={css.choice} disabled={busy} onClick={onCancel}>{tx("Cancel")}</button>
       </div>
-      <p className={css.micro}>This is only a note. Future Bank never carries it out on its own — a real handoff needs identity checks and the right legal steps.</p>
+      <p className={css.micro}>{tx("This is only a note. Future Bank never carries it out on its own — a real handoff needs identity checks and the right legal steps.")}</p>
     </div>
   );
 }
