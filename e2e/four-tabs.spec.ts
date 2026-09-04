@@ -50,12 +50,13 @@ test("Today / Life / Explore / Guardian all render and their key controls work",
   await expect(page.getByText(/\b(Calm|Tight|Exposed|Recovering|Opportunity)\b/).first()).toBeVisible();
   await expect(page.getByText(/Latest movement|Your starting point/i).first()).toBeVisible();
 
-  // --- Explore (bottom-nav-mirror) ---
+  // --- Explore (bottom-nav-mirror): the future experiment bench ---
   await page.getByTestId("bottom-nav-mirror").click();
-  await expect(page.getByText(/Bank capabilities/i)).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/Spend & Pay/i)).toBeVisible();
-  await expect(page.getByText(/Plan a future/i)).toBeVisible();
-  // a key control: open a capability zone
+  await expect(page.getByText(/Try a future before you commit/i)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/What Future Bank does/i)).toBeVisible();
+  await expect(page.getByText(/Future Field/i).first()).toBeVisible();
+  await expect(page.getByText(/Life Studios/i)).toBeVisible();
+  // a key control: open a signature feature
   await page.getByText(/Financial Twin/i).first().click();
   await expect(page.getByRole("heading", { name: /Your money picture/i })).toBeVisible({ timeout: 15000 });
 

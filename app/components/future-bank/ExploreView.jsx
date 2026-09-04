@@ -1,50 +1,78 @@
 "use client";
 
-// Explore — what OCBC Future Bank can do. Not one input box: the seven
-// bank capability zones a customer can understand, then the nine life
-// Studios below. Every row states the problem it solves, its real status,
-// and a real route.
+// Explore — a future experiment bench, not a feature menu. It shows
+// outputs, not options: what Future Bank can already see, test and change.
+//
+//   Hero            try a future before you commit — one before → after
+//   Signature       Future Field · Financial Twin · Impact Map ·
+//                   Money Rescue · Guardian — each with a live proof
+//   Life Studios    the same abilities as life scenarios, one at a time
+//   Recent Futures  the changes you (or the system) just tried
+//   Data sources    the outside links, demoted — status, not a headline
+//   All tools       everything else, in a compact drawer
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import x from "./explore.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
 
-// Real outside-data connections. None are configured yet, so every one is
-// honestly "Not connected" with what it would unlock — never a fake toggle.
-const CONNECTIONS = [
-  { id: "payment_provider", name: "Payment rail", unlocks: "Pay and Scan & Pay to people and businesses outside your own accounts." },
-  { id: "sgfindex", name: "SGFinDex (government)", unlocks: "Pull CPF, HDB, IRAS and other-bank balances into your Financial Twin automatically." },
-  { id: "insurer", name: "Insurer link", unlocks: "Turn protection-gap estimates into figures from your real policies." },
-];
-const ACCOUNT_TYPE_NOTE = {
-  youth: "Youth account — paying out, cards, FX, investing and loans need a guardian's approval.",
-  guardian_managed_child: "Child account — a guardian controls the money and every permission.",
-  household: "Household account — members see agreed ranges, never exact private amounts.",
+const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
+const yearOf = (s) => {
+  const m = /^(\d{4})/.exec(String(s ?? ""));
+  return m ? m[1] : null;
 };
 
-// route ids resolved by page.jsx's onRoute handler
-const ZONES = [
-  { id: "spend_pay", name: "Spend & Pay", solves: "Paying, transferring and seeing your balance in one place.", output: "Money Movement", route: "today", status: "live" },
-  { id: "safe_to_spend", name: "Safe-to-Spend", solves: "Knowing how much you can safely use right now.", output: "Available Now", route: "today", status: "live" },
-  { id: "money_rescue", name: "Money Rescue", solves: "A failed payment, an income gap, a tight month — with a way out.", output: "Problem → Next Action", route: "rescue", status: "live" },
-  { id: "spending_intelligence", name: "Spending Intelligence", solves: "Seeing spending trends, not just a list of transactions.", output: "Spending Pattern", route: "spending", status: "live" },
-  { id: "financial_twin", name: "Financial Twin", solves: "Assets, debts, CPF and investments in one real picture.", output: "Financial Reality", route: "twin", status: "live" },
-  { id: "shared_care", name: "Shared & Care", solves: "Managing money with a child, a partner, a household or a carer.", output: "Shared Commitment", route: "family", status: "live" },
-  { id: "protect_handoff", name: "Protect & Handoff", solves: "Cover gaps, retirement, care, and passing money to the next stage.", output: "Guardian / Future Handoff", route: "studio:insurance", status: "live" },
+// Studios as questions, not nouns. Each names what it shows.
+const STUDIOS = [
+  { domain: "home", name: "Home", q: "Can I buy sooner without breaking my safety room?", shows: ["Ready month", "Down-payment path", "Impact on emergency, wedding, retirement"] },
+  { domain: "wedding", name: "Wedding", q: "Can we afford the wedding we want?", shows: ["Guest count vs budget", "Partner split", "What it delays"] },
+  { domain: "loan", name: "Loan", q: "What if I pay this down faster?", shows: ["Debt-free date", "Freed money per month", "Best next use"] },
+  { domain: "retirement", name: "Retire", q: "What future income gap am I creating?", shows: ["Future income gap", "Lifestyle trade-off"] },
+  { domain: "travel", name: "Travel", q: "Can this trip fit without regret?", shows: ["Buffer after the trip", "Regret risk"] },
+  { domain: "investment", name: "Invest", q: "What money can safely leave cash?", shows: ["Liquidity gate", "Investable room", "Harmed goal if too high"] },
+  { domain: "insurance", name: "Protect", q: "What would still be uncovered?", shows: ["Protection gap", "Premium pressure"] },
+  { domain: "emergency", name: "Emergency", q: "How many months can I survive?", shows: ["Months covered", "Rebuild path"] },
+  { domain: "family", name: "Family", q: "What can we share without exposing everything?", shows: ["Shared band", "Permission boundary"] },
 ];
 
-const STUDIOS = [
-  { domain: "home", name: "Home", line: "When a home is reachable, and its cost to your other goals." },
-  { domain: "emergency", name: "Emergency fund", line: "How many months you're covered, and how to get to your floor." },
-  { domain: "wedding", name: "Wedding", line: "Guest count and budget weighed against your other goals." },
-  { domain: "loan", name: "Loan repayment", line: "Pay-off paths and the breathing room each one buys." },
-  { domain: "retirement", name: "Retirement", line: "The long-term picture and what today's choices do to it." },
-  { domain: "travel", name: "Travel", line: "A trip against your monthly room and your safety floor." },
-  { domain: "investment", name: "Investing", line: "Putting money to work without breaking near-term plans." },
-  { domain: "insurance", name: "Protection", line: "An honest estimate of a cover gap." },
-  { domain: "family", name: "Family", line: "Shared responsibilities and who can see what." },
+// A free-text question -> the best place to test it.
+function routeForQuestion(q) {
+  const s = String(q || "").toLowerCase();
+  if (/wedding|marry|marriage/.test(s)) return "studio:wedding";
+  if (/debt|loan|repay|pay.*(down|off)|mortgage/.test(s)) return "studio:loan";
+  if (/home|house|flat|hdb|condo|property|down ?payment|buy a place/.test(s)) return "studio:home";
+  if (/retire|pension|old age/.test(s)) return "studio:retirement";
+  if (/travel|trip|holiday|vacation/.test(s)) return "studio:travel";
+  if (/invest|portfolio|stocks|etf/.test(s)) return "studio:investment";
+  if (/insur|cover|protect/.test(s)) return "studio:insurance";
+  if (/emergency|buffer|runway|survive|job loss|income stop/.test(s)) return "studio:emergency";
+  if (/spend|afford|can i|safe to/.test(s)) return "twin";
+  return "future_field";
+}
+
+const ALL_TOOLS = [
+  { group: "Everyday banking", items: [
+    { label: "Pay & transfer", route: "today" },
+    { label: "Scan & Pay", route: "today" },
+    { label: "Currency exchange", route: "today" },
+  ] },
+  { group: "Understand your money", items: [
+    { label: "Financial Twin", route: "twin" },
+    { label: "Spending Intelligence", route: "spending" },
+    { label: "Import a statement", route: "today" },
+  ] },
+  { group: "Solve a problem", items: [
+    { label: "Money Rescue", route: "rescue" },
+    { label: "A failed payment", route: "rescue" },
+    { label: "An unfamiliar transaction", route: "rescue" },
+  ] },
+  { group: "Protect", items: [
+    { label: "Guardian", route: "guardian" },
+    { label: "Family & Care", route: "family" },
+    { label: "Change Ledger", route: "history" },
+  ] },
 ];
 
 export function ExploreView(props) {
@@ -58,120 +86,217 @@ export function ExploreView(props) {
 function Inner({ onRoute, onStudio }) {
   const { tx } = useTx();
   const fb = useFutureBankData();
-  const needs = fb.momentsRaw?.counts?.actionRequired ?? 0;
-  const [caps, setCaps] = useState(null);
-  const [sampleBusy, setSampleBusy] = useState(false);
-  useEffect(() => {
-    fetch("/api/capabilities", { headers: { "cache-control": "no-cache" } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setCaps)
-      .catch(() => setCaps(null));
-  }, []);
-  const providers = caps?.providers ?? {};
-  const accountType = caps?.accountType ?? "individual";
-  const isConnected = (v) => v === "connected" || v === "sandbox";
+  const lt = fb.lifeThread ?? {};
+  const twin = fb.twin ?? {};
+  const s2s = twin.safeToSpend ?? {};
 
-  // The account has nothing to work with yet (or is still loading) — offer
-  // to fill it with the example dataset so every zone below has real
-  // numbers. Erring toward "empty" is right: a new user is exactly who
-  // this is for.
-  const looksEmpty = !Number(fb.twin?.twin?.netWorth) && (fb.lifeThread?.commitments?.length ?? 0) === 0;
+  const [q, setQ] = useState("");
+  const [openStudio, setOpenStudio] = useState("home");
+  const [spendPreview, setSpendPreview] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [guardian, setGuardian] = useState(null);
+  const [sampleBusy, setSampleBusy] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/guardian", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setGuardian).catch(() => {});
+  }, [fb.version]);
+
+  const looksEmpty = !Number(twin?.twin?.netWorth) && (lt.commitments?.length ?? 0) === 0;
   const sample = async (action) => {
     setSampleBusy(true);
-    await fetch("/api/account/sample-data", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action }),
-    }).catch(() => {});
+    await fetch("/api/account/sample-data", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action }) }).catch(() => {});
     setSampleBusy(false);
     await fb.refetchAll?.();
   };
 
+  // ---- live proofs -------------------------------------------------
+  const homeNode = (lt.lifeNodes ?? []).find((n) => n.id === "home");
+  const homeYear = yearOf(homeNode?.horizon);
+  const room = lt.availableMonthlyCashflow;
+  const needs = fb.momentsRaw?.counts?.actionRequired ?? 0;
+  const topRescue = (fb.moments ?? []).find((m) => m.state === "new" && (m.severity === "action_required" || m.kind?.includes?.("rescue") || m.kind?.includes?.("payment")));
+  const gProtected = guardian?.protection?.summary ?? null;
+  const gNeeds = (guardian?.now?.level && ["decision", "urgent"].includes(guardian.now.level)) ? 1 : 0;
+  const pw = lt.promiseWeight?.pressureWindow ?? null;
+
+  const spendAmt = useMemo(() => {
+    const base = Number(s2s.safeToSpend) || 0;
+    if (base <= 0) return 0;
+    return Math.max(200, Math.round((base * 0.16) / 100) * 100); // ~a sixth of what's safe
+  }, [s2s.safeToSpend]);
+  const spendAfter = (Number(s2s.safeToSpend) || 0) - spendAmt;
+
+  const submitQuestion = () => {
+    if (!q.trim()) return onRoute("future_field");
+    onRoute(routeForQuestion(q));
+  };
+
+  const studio = STUDIOS.find((st) => st.domain === openStudio) ?? STUDIOS[0];
+
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <div>
-          <h1 className={css.title}>{tx("Explore")}</h1>
-          <p className={css.micro}>{tx("What OCBC Future Bank can do — your everyday banking, your real money, and your whole life ahead.")}</p>
-        </div>
-
-        <section className={css.section}>
-          <p className={css.kicker}>{tx("Try it with real numbers")}</p>
-          <p className={css.micro}>
-            {looksEmpty
-              ? tx("Your account is empty, so most features below have nothing to show. Load an example account and every zone fills with realistic figures — accounts, 90 days of spending, plans, CPF, insurance and the three links. It only touches your own data and you can clear it any time.")
-              : tx("Reload the example account to reset every feature to a known state, or clear it to start from an empty account.")}
-          </p>
-          <div className={css.choiceGrid}>
-            <button type="button" className={css.cta} disabled={sampleBusy} onClick={() => sample("load")}>
-              {sampleBusy ? tx("Working…") : looksEmpty ? tx("Load an example account") : tx("Reload example data")}
-            </button>
-            {!looksEmpty ? (
-              <button type="button" className={css.choice} disabled={sampleBusy} onClick={() => sample("clear")}>{tx("Clear it")}</button>
+        {/* ---- Hero ---- */}
+        <div className={x.hero}>
+          <h1 className={x.heroTitle}>{tx("Try a future before you commit")}</h1>
+          <p className={x.heroSub}>{tx("See how one decision moves your money, your plans and your safety room.")}</p>
+          <form
+            className={x.heroForm}
+            onSubmit={(e) => { e.preventDefault(); submitQuestion(); }}
+          >
+            <input
+              className={x.heroInput}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={tx("What do you want to test?")}
+              aria-label={tx("What do you want to test?")}
+            />
+            <button type="submit" className={x.heroGo} aria-label={tx("Test it")}>→</button>
+          </form>
+          <div className={x.quickRow}>
+            <button type="button" className={x.quick} onClick={() => onRoute("studio:home")}>{tx("Buy home sooner")}</button>
+            <button type="button" className={x.quick} onClick={() => onRoute("studio:loan")}>{tx("Pay debt faster")}</button>
+            {spendAmt > 0 ? (
+              <button type="button" className={x.quick} onClick={() => setSpendPreview((v) => !v)}>{tx("Spend {amt} safely", { amt: money(spendAmt) })}</button>
             ) : null}
           </div>
-        </section>
 
-        {ACCOUNT_TYPE_NOTE[accountType] ? <p className={css.micro}>{tx(ACCOUNT_TYPE_NOTE[accountType])}</p> : null}
+          {spendPreview && spendAmt > 0 ? (
+            <div className={x.preview}>
+              <span className={x.previewHead}>{tx("If you spend {amt} now", { amt: money(spendAmt) })}</span>
+              <div className={x.previewRow}><span>{tx("Safe-to-Spend")}</span><span>{money(s2s.safeToSpend)} <b>→</b> {money(spendAfter)}</span></div>
+              <div className={x.previewRow}><span>{tx("Protected reserve")}</span><span>{money(s2s.breakdown?.protectedReserve)} · {tx("untouched")}</span></div>
+              <div className={x.previewRow}><span>{tx("Below your safety line?")}</span><span>{spendAfter < 0 || s2s.belowProtectedFloor ? tx("yes — Guardian would step in") : tx("no")}</span></div>
+              <div className={x.previewActs}>
+                <button type="button" className={css.cta} onClick={() => onRoute("twin")}>{tx("Open Financial Twin")}</button>
+                <button type="button" className={css.link} onClick={() => onRoute("future_field")}>{tx("Test in Future Field")}</button>
+              </div>
+            </div>
+          ) : null}
+        </div>
 
-        {needs > 0 ? (
-          <button type="button" className={`${css.partial}`} onClick={() => onRoute("today")}>
-            <b>{needs} {needs > 1 ? tx("things need you") : tx("thing needs you")}</b>
-            <span>{tx("Open Today to see what and why →")}</span>
+        {looksEmpty ? (
+          <button type="button" className={css.partial} onClick={() => sample("load")} disabled={sampleBusy}>
+            <b>{sampleBusy ? tx("Working…") : tx("Nothing to test yet — load an example account")}</b>
+            <span>{tx("Accounts, 90 days of spending, plans, CPF and links. Only your data; clear it any time.")}</span>
           </button>
         ) : null}
 
-        {/* 7 bank capability zones */}
+        {/* ---- Signature features (1 + 4) ---- */}
         <section className={css.section}>
-          <p className={css.kicker}>{tx("Bank capabilities")}</p>
-          {ZONES.map((z) => (
-            <button key={z.id} type="button" className={css.zoneRow} onClick={() => onRoute(z.route)}>
-              <span className={css.zoneMain}>
-                <span className={css.zoneName}>{tx(z.name)}</span>
-                <span className={css.zoneSolves}>{tx(z.solves)}</span>
-                <span className={css.zoneOut}>{tx("Life Thread")}: {tx(z.output)}</span>
-              </span>
-              <span className={`${css.zoneStatus} ${z.status === "live" ? css.live : css.soon}`}>{z.status === "live" ? tx("Available") : tx("Coming")}</span>
+          <p className={css.kicker}>{tx("What Future Bank does")}</p>
+
+          <button type="button" className={x.sigBig} onClick={() => onRoute("future_field")}>
+            <span className={x.sigKind}>{tx("Future Field")}</span>
+            <b className={x.sigLead}>{tx("Test a decision before it becomes real.")}</b>
+            <span className={x.timeline}>
+              <span className={x.tlNode}>{tx("Today")}</span>
+              <span className={x.tlLine} />
+              <span className={`${x.tlNode} ${x.tlDecision}`}>{tx("Decision")}</span>
+              <span className={x.tlLine} />
+              <span className={x.tlNode}>{tx("Future")}</span>
+            </span>
+            <span className={x.sigProof}>
+              {homeYear ? tx("e.g. move Home from {y} — see what it costs elsewhere", { y: homeYear }) : tx("Move any plan and watch the whole line respond")}
+            </span>
+          </button>
+
+          <div className={x.sigGrid}>
+            <button type="button" className={x.sigCard} onClick={() => onRoute("twin")}>
+              <span className={x.sigKind}>{tx("Financial Twin")}</span>
+              <span className={x.sigDesc}>{tx("Your real financial body, not just balances.")}</span>
+              <span className={x.sigLayers}>{tx("Assets")} · {tx("Debt")} · {tx("Room")} · {tx("Promises")}</span>
+              <span className={x.sigProof}>{room != null ? tx("Monthly room: {v} after bills and promises", { v: money(room) }) : tx("Add your income to see your monthly room")}</span>
             </button>
-          ))}
-        </section>
 
-        {/* real outside-data connections — honest status */}
-        <section className={css.section}>
-          <p className={css.kicker}>{tx("Connections")}</p>
-          <div className={css.activity}>
-            {CONNECTIONS.map((c) => {
-              const connected = isConnected(providers[c.id]);
-              return (
-                <div key={c.id} className={css.actItem}>
-                  <span className={css.actBody}>
-                    <span className={css.actName}>{tx(c.name)}</span>
-                    <span className={css.actMeta}>{tx(c.unlocks)}</span>
-                  </span>
-                  <span className={`${css.zoneStatus} ${connected ? css.live : css.soon}`}>{connected ? tx("Connected") : tx("Not connected")}</span>
-                </div>
-              );
-            })}
+            <button type="button" className={x.sigCard} onClick={() => onRoute("impact_map")}>
+              <span className={x.sigKind}>{tx("Impact Map")}</span>
+              <span className={x.sigDesc}>{tx("See what moved elsewhere.")}</span>
+              <span className={x.sigProof}>
+                {pw && Number(pw.shortfall) > 0
+                  ? tx("Home and Wedding are {v}/mo short of what's free", { v: money(pw.shortfall) })
+                  : tx("Home, Safety and Wedding pull on each other — see how")}
+              </span>
+            </button>
+
+            <button type="button" className={x.sigCard} onClick={() => onRoute("rescue")}>
+              <span className={x.sigKind}>{tx("Money Rescue")}</span>
+              <span className={x.sigDesc}>{tx("When money goes wrong — problem, risk, next move.")}</span>
+              <span className={x.sigProof}>
+                {topRescue ? topRescue.title : needs > 0 ? tx("{n} things need review", { n: needs }) : tx("Nothing wrong right now")}
+              </span>
+            </button>
+
+            <button type="button" className={x.sigCard} onClick={() => onRoute("guardian")}>
+              <span className={x.sigKind}>{tx("Guardian")}</span>
+              <span className={x.sigDesc}>{tx("Watches, asks, never moves money on its own.")}</span>
+              <span className={x.sigProof}>
+                {gProtected
+                  ? tx("Watching {p} of {t} promises · {n} need permission", { p: gProtected.protectedCount, t: gProtected.total, n: gNeeds })
+                  : tx("Watching your promises and your safety line")}
+              </span>
+            </button>
           </div>
-          <p className={css.micro}>{tx("Until a provider is configured, these stay off and nothing is estimated in their place.")}</p>
-          <button type="button" className={css.link} onClick={() => onRoute("connections")}>{tx("See everything that's limited and why →")}</button>
         </section>
 
-        {/* 9 life Studios */}
+        {/* ---- Life Studios ---- */}
         <section className={css.section}>
-          <p className={css.kicker}>{tx("Plan a future")}</p>
-          <p className={css.micro}>{tx("Each Studio shows a real path and what it does to your other goals — never a fixed template.")}</p>
-          <div className={css.choiceGrid}>
-            {STUDIOS.map((s) => (
-              <button key={s.domain} type="button" className={css.choice} onClick={() => onStudio(s.domain)}>
-                <b>{tx(s.name)}</b>
-                <span>{tx(s.line)}</span>
+          <p className={css.kicker}>{tx("Life Studios")}</p>
+          <div className={x.studioTabs}>
+            {STUDIOS.map((st) => (
+              <button
+                key={st.domain}
+                type="button"
+                className={`${x.studioTab} ${openStudio === st.domain ? x.studioTabOn : ""}`}
+                onClick={() => setOpenStudio(st.domain)}
+              >
+                {tx(st.name)}
               </button>
             ))}
           </div>
+          <div className={x.studioPreview}>
+            <b className={x.studioQ}>{tx(studio.q)}</b>
+            <ul className={x.studioShows}>
+              {studio.shows.map((s) => <li key={s}>{tx(s)}</li>)}
+            </ul>
+            <button type="button" className={css.cta} onClick={() => onStudio(studio.domain)}>{tx("Explore {name}", { name: tx(studio.name) })}</button>
+          </div>
         </section>
 
-        <FeatureHistory feature="explore" label="What you've explored" />
+        {/* ---- Recent Futures ---- */}
+        <section className={css.section}>
+          <p className={css.kicker}>{tx("Recent futures")}</p>
+          <FeatureHistory feature="explore" label="Recent futures" />
+        </section>
+
+        {/* ---- Data sources (demoted) ---- */}
+        <section className={css.section}>
+          <p className={css.kicker}>{tx("Data sources")}</p>
+          <p className={css.micro}>
+            {tx("Outside links are off until configured — nothing is estimated in their place.")}
+            {" "}
+            <button type="button" className={css.link} onClick={() => onRoute("connections")}>{tx("See what's limited →")}</button>
+          </p>
+        </section>
+
+        {/* ---- All tools ---- */}
+        <section className={css.section}>
+          <button type="button" className={css.link} onClick={() => setToolsOpen((v) => !v)}>
+            {toolsOpen ? tx("Hide all tools") : tx("All tools")}
+          </button>
+          {toolsOpen ? (
+            <div className={x.tools}>
+              {ALL_TOOLS.map((grp) => (
+                <div key={grp.group} className={x.toolGroup}>
+                  <span className={css.micro}>{tx(grp.group)}</span>
+                  {grp.items.map((it) => (
+                    <button key={it.label} type="button" className={css.link} onClick={() => onRoute(it.route)}>{tx(it.label)}</button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </section>
       </div>
     </div>
   );

@@ -49,10 +49,11 @@ test("Guardian and Spending Intelligence tabs render for a new user", async ({ p
   await expect(page.getByText(/^(Calm|Watching|Decision|Urgent)$/).first()).toBeVisible();
   await expect(page.getByText(/of \d+ promises protected/i)).toBeVisible();
 
-  // Explore -> Spending Intelligence
+  // Explore -> All tools -> Spending Intelligence
   await page.getByTestId("bottom-nav-mirror").click();
-  await expect(page.getByRole("heading", { name: /Explore|Bank capabilities/i }).first()).toBeVisible({ timeout: 15000 });
-  await page.getByText(/Spending Intelligence/i).first().click();
+  await expect(page.getByText(/Try a future before you commit/i)).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: /^All tools$/i }).click();
+  await page.getByRole("button", { name: /Spending Intelligence/i }).first().click();
   await expect(page.getByRole("heading", { name: /Spending Intelligence/i })).toBeVisible({ timeout: 15000 });
   // Either a real pattern or the honest "not enough history" card - never a fake number.
   await expect(
