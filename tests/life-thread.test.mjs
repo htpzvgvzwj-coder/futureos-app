@@ -17,7 +17,8 @@ test("a fresh account: hollow nodes, a 'start a plan' direction, calm weather", 
   assert.match(t.direction, /Start a plan/i);
   assert.equal(t.weather.id, "calm");
   assert.ok(t.nodes.every((n) => ["hollow", "solid"].includes(n.state)));
-  assert.equal(t.numbers.find((n) => n.id === "free").value, null); // never invented
+  assert.equal(t.numbers.find((n) => n.id === "flexible").value, null); // never invented
+  assert.equal(t.numbers.find((n) => n.id === "afterLiving").value, null);
 });
 
 test("node forms: known+still = solid, moving draft = ghost, recent change = pulse", () => {

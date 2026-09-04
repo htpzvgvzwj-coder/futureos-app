@@ -440,6 +440,8 @@
 .memLatestKicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
 .memLatestHead { font-size: 14px; font-weight: 700; color: var(--ink); }
 .memLatestLine { font-size: 13px; color: var(--ink-soft); }
+.memRecent { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; }
+.memRecent + .memRecent { border-top: 1px solid var(--line); }
 .memOpen {
   align-self: flex-start;
   margin-top: 6px;

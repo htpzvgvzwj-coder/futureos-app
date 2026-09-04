@@ -58,7 +58,11 @@ export async function GET(request) {
       proof: buildGuardianProof(events),
       contract: { capabilities: contracts, summary: contractSummary(contracts) },
       promiseShield: buildPromiseShield({ twin: bundle.twin, safeToSpend: bundle.safeToSpend }),
-      collision: detectCollision({ commitments: lt.commitments ?? [], availableMonthly: lt.availableMonthlyCashflow ?? null }),
+      collision: detectCollision({
+        commitments: lt.commitments ?? [],
+        // money available for plans = what's left after living costs, before commitments
+        availableMonthly: lt.availableMonthlyCashflow == null ? null : lt.availableMonthlyCashflow + (lt.monthlyCommittedTotal ?? 0),
+      }),
       recovery: buildRecoveryPlan({ safeToSpend: bundle.safeToSpend, rescueCases: bundle.rescueCases ?? [], commitments: lt.commitments ?? [] }),
     });
   } catch (error) {

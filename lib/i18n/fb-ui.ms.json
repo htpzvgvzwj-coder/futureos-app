@@ -381,5 +381,19 @@
   "Property": "Hartanah",
   "Vehicle": "Kenderaan",
   "Business": "Perniagaan",
-  "A future goal": "Satu matlamat masa depan"
+  "A future goal": "Satu matlamat masa depan",
+  "Available after living costs": "Tersedia selepas kos hidup",
+  "Promised to plans": "Dijanjikan kepada pelan",
+  "Still flexible": "Masih fleksibel",
+  "{v}/month is yours after living costs.": "{v}/bulan milik anda selepas kos hidup.",
+  "Your money after living costs isn't worked out yet.": "Wang anda selepas kos hidup belum dikira.",
+  "{v}/month is still flexible.": "{v}/bulan masih fleksibel.",
+  "Your flexible money isn't worked out yet.": "Wang fleksibel anda belum dikira.",
+  "What's left from your income once essential living costs are covered, before any plan.": "Apa yang tinggal daripada pendapatan anda setelah kos hidup asas dilindungi, sebelum sebarang pelan.",
+  "Money left after living costs and everything promised to plans — free to move.": "Wang yang tinggal selepas kos hidup dan semua yang dijanjikan kepada pelan — bebas untuk digerakkan.",
+  "Add your monthly income and essential spending in Today, and this fills in.": "Tambah pendapatan bulanan dan perbelanjaan penting anda dalam Hari Ini, dan ini akan terisi.",
+  "See what protects this": "Lihat apa yang melindunginya",
+  "Life Memory": "Memori Hidup",
+  "Latest movements": "Pergerakan terkini",
+  "View full Life Memory": "Lihat Memori Hidup penuh"
 }

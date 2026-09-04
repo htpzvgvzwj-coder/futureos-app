@@ -13,7 +13,6 @@ import css from "../../showcase/fb.module.css";
 import life from "./life.module.css";
 import { useTx } from "./i18n.jsx";
 import { relTime } from "./format.js";
-import { latestMovementLine } from "../../../lib/life/memory.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
@@ -84,26 +83,31 @@ function Record({ r, tx, replayable, onReplay, onExplore }) {
 export function LifeMemory({ memory, open, onToggle, replayableIds = [], onReplay, onExplore }) {
   const { tx } = useTx();
   const replaySet = new Set(replayableIds);
-  const latest = latestMovementLine(memory);
   const sp = memory?.startingPoint;
+
+  // Collapsed: the two most recent records only — the full history is one tap away.
+  const recent = (memory?.records ?? []).slice(0, 2);
 
   if (!open) {
     return (
       <div className={life.memLatest}>
-        <span className={life.memLatestKicker}>{tx(latest ? "Latest movement" : "Your starting point")}</span>
-        {latest ? (
-          <>
-            <span className={life.memLatestHead}>{tx(latest.headlineKey ?? latest.headline)}</span>
-            {latest.lines.map((l, i) => (
-              <span key={i} className={life.memLatestLine}>
-                {l.key ? tx(l.key, { ...l.params, name: l.params?.name ? tx(l.params.name) : undefined, what: l.params?.what ? tx(l.params.what) : undefined }) : l.text}
-              </span>
-            ))}
-          </>
+        <span className={life.memLatestKicker}>{tx(recent.length ? "Latest movements" : "Your starting point")}</span>
+        {recent.length ? (
+          recent.map((r, i) => (
+            <div key={r.id ?? i} className={life.memRecent}>
+              <span className={life.memLatestHead}>{tx(r.what)}</span>
+              {r.why ? <span className={life.memLatestLine}>{tx(r.why)}</span> : null}
+              {(r.plansMoved ?? []).slice(0, 1).map((p, j) => (
+                <span key={j} className={life.memLatestLine}>
+                  {p.key ? tx(p.key, { ...p.params, name: p.params?.name ? tx(p.params.name) : undefined }) : p.text}
+                </span>
+              ))}
+            </div>
+          ))
         ) : (
           <span className={life.memLatestLine}>{tx(sp?.detailKey ?? sp?.detail ?? "Add an account or a plan and your line begins.", sp?.detailParams)}</span>
         )}
-        <button type="button" className={life.memOpen} onClick={onToggle}>{tx("View Life Memory")} →</button>
+        <button type="button" className={life.memOpen} onClick={onToggle}>{tx("View full Life Memory")} →</button>
       </div>
     );
   }
