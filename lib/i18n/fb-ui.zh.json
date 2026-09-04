@@ -1029,5 +1029,20 @@
   "Approval rules saved. Money moves that match will wait for a decision in Guardian.": "批准规则已保存。匹配的资金操作将在守护中等待决定。",
   "Could not save the approval rules. Try again.": "无法保存批准规则，请重试。",
   "Handoff plan saved as a written note. Future Bank never carries it out on its own.": "交接计划已保存为书面备注。Future Bank 绝不会自行执行。",
-  "Could not save the handoff plan. Try again.": "无法保存交接计划，请重试。"
+  "Could not save the handoff plan. Try again.": "无法保存交接计划，请重试。",
+  "Your future is funded, but {a} and {b} are competing for the same monthly space.": "你的未来已有资金保障，但{a}和{b}正在争夺同一笔每月余量。",
+  "Salary arrived": "薪水已到账",
+  "Reality caught up with your plan": "现实已与你的计划对齐",
+  "Guardian noticed": "守护已留意到",
+  "Wedding plan created": "婚礼计划已创建",
+  "Home plan created": "购房计划已创建",
+  "Safety plan created": "安全计划已创建",
+  "Freedom plan created": "自由计划已创建",
+  "Retirement plan created": "退休计划已创建",
+  "Family plan created": "家庭计划已创建",
+  "Wedding plan adjusted": "婚礼计划已调整",
+  "Home plan adjusted": "购房计划已调整",
+  "Safety plan adjusted": "安全计划已调整",
+  "Retirement plan adjusted": "退休计划已调整",
+  "Freedom plan adjusted": "自由计划已调整"
 }

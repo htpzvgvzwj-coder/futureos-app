@@ -315,5 +315,20 @@
   "Approval rules saved. Money moves that match will wait for a decision in Guardian.": "அனுமதி விதிகள் சேமிக்கப்பட்டன. பொருந்தும் பணப் பரிமாற்றங்கள் பாதுகாவலரில் ஒரு முடிவுக்காகக் காத்திருக்கும்.",
   "Could not save the approval rules. Try again.": "அனுமதி விதிகளைச் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
   "Handoff plan saved as a written note. Future Bank never carries it out on its own.": "ஒப்படைப்புத் திட்டம் எழுதப்பட்ட குறிப்பாகச் சேமிக்கப்பட்டது. Future Bank அதைத் தானாகவே செயல்படுத்தாது.",
-  "Could not save the handoff plan. Try again.": "ஒப்படைப்புத் திட்டத்தைச் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+  "Could not save the handoff plan. Try again.": "ஒப்படைப்புத் திட்டத்தைச் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+  "Your future is funded, but {a} and {b} are competing for the same monthly space.": "உங்கள் எதிர்காலத்திற்கு நிதி உள்ளது, ஆனால் {a}-ம் {b}-ம் ஒரே மாதாந்திர இடத்திற்குப் போட்டியிடுகின்றன.",
+  "Salary arrived": "சம்பளம் வந்துவிட்டது",
+  "Reality caught up with your plan": "யதார்த்தம் உங்கள் திட்டத்தை எட்டிப்பிடித்தது",
+  "Guardian noticed": "பாதுகாவலர் கவனித்தார்",
+  "Wedding plan created": "திருமணத் திட்டம் உருவாக்கப்பட்டது",
+  "Home plan created": "வீட்டுத் திட்டம் உருவாக்கப்பட்டது",
+  "Safety plan created": "பாதுகாப்புத் திட்டம் உருவாக்கப்பட்டது",
+  "Freedom plan created": "சுதந்திரத் திட்டம் உருவாக்கப்பட்டது",
+  "Retirement plan created": "ஓய்வூதியத் திட்டம் உருவாக்கப்பட்டது",
+  "Family plan created": "குடும்பத் திட்டம் உருவாக்கப்பட்டது",
+  "Wedding plan adjusted": "திருமணத் திட்டம் சரிசெய்யப்பட்டது",
+  "Home plan adjusted": "வீட்டுத் திட்டம் சரிசெய்யப்பட்டது",
+  "Safety plan adjusted": "பாதுகாப்புத் திட்டம் சரிசெய்யப்பட்டது",
+  "Retirement plan adjusted": "ஓய்வூதியத் திட்டம் சரிசெய்யப்பட்டது",
+  "Freedom plan adjusted": "சுதந்திரத் திட்டம் சரிசெய்யப்பட்டது"
 }
