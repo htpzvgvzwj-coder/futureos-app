@@ -16,7 +16,8 @@ import { useTx } from "./i18n.jsx";
 import { relTime } from "./format.js";
 import { buildLivingThread } from "../../../lib/life/thread.js";
 import { compactThread } from "../../../lib/life/snapshot-shape.js";
-import { buildFutureEcho, answerLineQuestion } from "../../../lib/life/ask.js";
+import { buildFutureEcho, answerLineQuestion, lineSuggestions } from "../../../lib/life/ask.js";
+import { forecastHeadline } from "../../../lib/life/forecast.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 import { isPullable } from "../../../lib/life/pull.js";
 import { buildLifeMemory } from "../../../lib/life/memory.js";
@@ -56,6 +57,27 @@ function positionFragments(numbers) {
 
 const NODE_TARGET = { income: "today", safety: "emergency", home: "home", relationships: "family", freedom: "investment", future: "retirement" };
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
+const capWord = (s) => String(s || "").replace(/^\w/, (c) => c.toUpperCase());
+
+// Turn a Future Field preview's projectedImpacts into short line-movement
+// strings — shared shape with PullFold's impact rows.
+function askSimLines(preview, tx, fmtMoney) {
+  const pi = preview?.projectedImpacts;
+  if (!pi) return [];
+  const out = [];
+  const rd = pi.resourceDelta || {};
+  if (rd.freedMonthly > 0) out.push(`${tx("Frees")} ${fmtMoney(rd.freedMonthly)}/${tx("mo")}`);
+  if (rd.addedPressureMonthly > 0) out.push(`${tx("Needs")} ${fmtMoney(rd.addedPressureMonthly)}/${tx("mo")} ${tx("more")}`);
+  for (const g of pi.affectedGoals || []) {
+    const before = g.before ?? null;
+    const after = g.possibleAfter ?? g.confirmedAfter ?? null;
+    if (before == null || after == null || Number(before) === Number(after)) continue;
+    const f = (v) =>
+      g.unit === "sgd_per_month" ? `${fmtMoney(v)}/mo` : g.unit === "sgd" ? fmtMoney(v) : g.unit === "date_shift_months" ? `${v > 0 ? "+" : ""}${Number(v).toFixed(0)} mo` : g.unit === "months" ? `${Number(v).toFixed(1)} mo` : String(v);
+    out.push(`${tx(capWord(g.goalId))}: ${f(before)} → ${f(after)}`);
+  }
+  return out.slice(0, 4);
+}
 
 export function LifeView(props) {
   return (
@@ -78,6 +100,9 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [replay, setReplay] = useState(null); // { eventId, when, snapshot } | null
   const [replayable, setReplayable] = useState([]); // ledger event ids with a snapshot
+  const [forecast, setForecast] = useState(null);
+  const [forecastOpen, setForecastOpen] = useState(false);
+  const [askSim, setAskSim] = useState(null); // preview of an Ask-the-Line "what if"
   const reconciledFor = useRef(null);
 
   const collision = detectCollision({
@@ -113,6 +138,14 @@ function Inner({ onStudio, onAddReality, onRoute }) {
     captureAndLearn();
   }, [captureAndLearn]);
 
+  useEffect(() => {
+    fetch("/api/life-thread/forecast", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setForecast(d && !d.error ? d : null))
+      .catch(() => setForecast(null));
+  }, []);
+  const fcHead = forecast ? forecastHeadline(forecast) : null;
+
   const enterReplay = async (eventId, when) => {
     const r = await fetch(`/api/life-thread/snapshots?event=${encodeURIComponent(eventId)}`, { headers: { "cache-control": "no-cache" } })
       .then((x) => (x.ok ? x.json() : null))
@@ -129,12 +162,25 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const shownNodes = st ? st.nodes ?? [] : thread.nodes;
   const shownPosition = st ? positionFragments(st.numbers ?? []) : position;
 
-  const ask = (text) => {
+  const ask = async (text) => {
     const query = (text ?? q).trim();
     if (!query) return;
     if (text != null) setQ(text);
-    setAnswer(answerLineQuestion(query, { lt, collision }));
+    const a = answerLineQuestion(query, { lt, collision });
+    setAnswer(a);
+    setAskSim(null);
+    if (a.simulate?.domain && a.simulate.overrides) {
+      const r = await fetch(`/api/future-field/branch?action=preview&domain=${a.simulate.domain}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ overrides: a.simulate.overrides }),
+      })
+        .then((x) => (x.ok ? x.json() : null))
+        .catch(() => null);
+      if (r?.preview) setAskSim({ label: a.simulate.label, preview: r.preview });
+    }
   };
+  const suggestions = lineSuggestions({ lt, collision });
 
   const openNode = (id) => {
     if (id === "relationships") return onStudio?.("relationships");
@@ -165,6 +211,32 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           >
             <span className={life.weatherDot} /> {tx(shownWeather.label)}
           </span>
+        ) : null}
+
+        {!replay && fcHead ? (
+          <button
+            type="button"
+            className={`${life.forecast} ${life[`fc_${fcHead.pressure}`] || ""}`}
+            aria-expanded={forecastOpen}
+            onClick={() => setForecastOpen(!forecastOpen)}
+          >
+            {tx(fcHead.key, fcHead.params)}
+          </button>
+        ) : null}
+        {!replay && forecastOpen && forecast ? (
+          <div className={life.forecastBody}>
+            {forecast.months.map((m) => (
+              <div key={m.ym} className={life.forecastRow}>
+                <span className={`${life.forecastDot} ${life[`fc_${m.pressure}`] || ""}`} />
+                <span className={life.forecastMonth}>{m.label}</span>
+                <span className={life.forecastNums}>
+                  {tx("out")} {money(m.scheduledOutflow)} · {tx("headroom")} {money(m.headroom)}
+                </span>
+                {m.drivers.length ? <span className={life.forecastDrivers}>{m.drivers.join(" · ")}</span> : null}
+              </div>
+            ))}
+            <span className={life.echoBasis}>{tx(forecast.basis)}</span>
+          </div>
         ) : null}
 
         <p className={life.position}>
@@ -280,7 +352,32 @@ function Inner({ onStudio, onAddReality, onRoute }) {
               />
               <button type="submit" className={life.askBtn} disabled={!q.trim()}>{tx("Ask")}</button>
             </form>
+
+            {!answer ? (
+              <div className={life.askExamples}>
+                {suggestions.map((s) => (
+                  <button key={s} type="button" className={life.askExample} onClick={() => ask(s)}>{tx(s)}</button>
+                ))}
+              </div>
+            ) : null}
+
             {answer?.text ? <p className={life.askAnswer}>{tx(answer.text)}</p> : null}
+
+            {askSim ? (
+              <div className={life.askSim}>
+                <span className={life.askSimHead}>{tx(askSim.label)}</span>
+                {askSimLines(askSim.preview, tx, money).map((l, i) => (
+                  <span key={i} className={life.askSimRow}>{l}</span>
+                ))}
+                {askSimLines(askSim.preview, tx, money).length === 0 ? (
+                  <span className={css.micro}>{tx("Nothing else on your line moves.")}</span>
+                ) : null}
+                {askSim.preview.sealableVerdict && !askSim.preview.sealableVerdict.sealable ? (
+                  <span className={life.pullBlock}>{tx("Can't be kept yet")} — {tx(askSim.preview.sealableVerdict.reason)}</span>
+                ) : null}
+              </div>
+            ) : null}
+
             {answer && !answer.text && answer.examples ? (
               <div className={life.askExamples}>
                 <span className={life.echoBasis}>{tx("Try one of these:")}</span>
