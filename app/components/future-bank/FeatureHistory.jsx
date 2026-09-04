@@ -1,16 +1,18 @@
 "use client";
 
-// "What you've done here" — a small, uniform history record shown at the
-// foot of every feature. Collapsed by default; opens to a compact,
-// newest-first timeline built from the app's real Change Ledger + audit
-// trail (GET /api/history?feature=). Nothing is invented.
+// "What you've done here" — a small, uniform history record. The default
+// form sits at the foot of a feature (its own bordered section); the
+// `compact` form nests inside a sub-section (no section chrome, lighter
+// type). Both are collapsed by default and open to a newest-first timeline
+// built from the app's real Change Ledger + audit trail
+// (GET /api/history?feature=). Nothing is invented.
 
 import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
 import { relTime } from "./format.js";
 import { useTx } from "./i18n.jsx";
 
-export function FeatureHistory({ feature, label = "Your history here" }) {
+export function FeatureHistory({ feature, label = "Your history here", compact = false }) {
   const { tx } = useTx();
   const [open, setOpen] = useState(false);
   const [events, setEvents] = useState(null);
@@ -23,14 +25,15 @@ export function FeatureHistory({ feature, label = "Your history here" }) {
       .catch(() => setEvents([]));
   }, [open, events, feature]);
 
+  const Wrapper = compact ? "div" : "section";
+  const wrapperClass = compact ? "" : css.section;
+  const btnStyle = compact
+    ? { width: "100%", background: "none", border: 0, padding: "8px 0 2px", font: "inherit", fontSize: 12, fontWeight: 600, color: "var(--ink-faint)", textAlign: "left", display: "flex", justifyContent: "space-between", cursor: "pointer" }
+    : { width: "100%", background: "none", border: 0, borderTop: "1px solid var(--line)", padding: "13px 2px", font: "inherit", fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", textAlign: "left", display: "flex", justifyContent: "space-between", cursor: "pointer" };
+
   return (
-    <section className={css.section}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        style={{ width: "100%", background: "none", border: 0, borderTop: "1px solid var(--line)", padding: "13px 2px", font: "inherit", fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", textAlign: "left", display: "flex", justifyContent: "space-between", cursor: "pointer" }}
-      >
+    <Wrapper className={wrapperClass}>
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} style={btnStyle}>
         <span>{tx(label)}</span>
         <span>{open ? tx("Hide") : tx("Show")}</span>
       </button>
@@ -56,6 +59,6 @@ export function FeatureHistory({ feature, label = "Your history here" }) {
           </div>
         )
       ) : null}
-    </section>
+    </Wrapper>
   );
 }
