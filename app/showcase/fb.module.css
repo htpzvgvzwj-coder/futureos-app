@@ -42,25 +42,10 @@
   gap: 20px;
 }
 
-/* OCBC masthead — a magazine cover reads wordmark + rule, not a badge.
-   Every Future Bank screen shares this shell, so one rule brands the
-   whole tabbed app. Colour comes from the global --ocbc-red tokens
-   (app/globals.css :root), not redefined here, so a rebrand is one place
-   to change. */
-.shell::before {
-  content: "OCBC FutureOS";
-  order: -1;
-  display: block;
-  width: 100%;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ocbc-red, #d71920);
-  padding-bottom: 9px;
-  margin-bottom: 2px;
-  border-bottom: 3px solid var(--ocbc-red, #d71920);
-}
+/* OCBC branding lives once, in PhoneShell's own brandBar (app/page.jsx +
+   app/globals.css .brandMark/.brandSub) above every screen's .shell — not
+   repeated per-screen here, so there is exactly one "OCBC FutureOS" on
+   the page, not two stacked on top of each other. */
 
 /* Embedded inside the tabbed PhoneShell: .screenArea is a fixed-height box
    with overflow:hidden, so this wrapper must be the scroll container. */

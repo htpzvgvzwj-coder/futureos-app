@@ -3221,7 +3221,7 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
       <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="OCBC FutureOS">
         <div className="brandBar">
-          <div className="brandMark">OCBC</div>
+          <div className="brandMark">OCBC<span className="brandSub">FutureOS</span></div>
           <div className="brandActions">
             <label className="languageSwitcher" aria-label={t("language.title")}>
               <Globe2 size={13} />
