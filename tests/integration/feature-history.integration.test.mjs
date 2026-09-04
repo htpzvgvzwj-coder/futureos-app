@@ -101,3 +101,54 @@ test("Guardian sub-section histories are correctly scoped", opts, async () => {
     await cleanup(pool, uid);
   }
 });
+
+test("money_rescue and protect_handoff sub-features are scoped to their own events", opts, async () => {
+  const { hist, ledger, audit, pool } = await mods();
+  const uid = await makeUser(pool);
+  try {
+    // a Money Rescue action: emergency ledger, action_type rescue_adopted
+    await ledger.recordEventSafe({
+      profileKey: uid,
+      actor: "user",
+      sourceFeature: "emergency",
+      actionType: "rescue_adopted",
+      status: "active",
+      messageKey: "changeLedger.event.rescue_adopted.drawdown_emergency_fund",
+      cause: { trigger: "hardship_recovery_action_applied", guardianAction: "drawdown_emergency_fund" },
+      impactSet: [{ goalId: "emergency", metric: "emergencyBuffer", before: 6, after: 4.5, unit: "months", direction: "down" }],
+    });
+    // an Emergency Studio seal (also sourceFeature emergency) — must NOT show in money_rescue
+    await ledger.recordEventSafe({
+      profileKey: uid,
+      actor: "user",
+      sourceFeature: "emergency",
+      actionType: "branch_sealed",
+      status: "active",
+      messageKey: "changeLedger.event.branch_sealed.headline",
+      impactSet: [{ goalId: "emergency", metric: "monthlyContribution", before: 0, after: 250, unit: "sgd_per_month", direction: "up" }],
+    });
+    // a Protection Studio seal: insurance ledger + a written handoff plan
+    await ledger.recordEventSafe({
+      profileKey: uid,
+      actor: "user",
+      sourceFeature: "insurance",
+      actionType: "branch_sealed",
+      status: "active",
+      messageKey: "changeLedger.event.branch_sealed.headline",
+      impactSet: [{ goalId: "insurance", metric: "monthlyContribution", before: 0, after: 78, unit: "sgd_per_month", direction: "up" }],
+    });
+    await audit.recordAuditEvent(null, uid, { kind: "handoff_plan_described", detail: { kind: "general" } });
+
+    const rescue = await hist.buildFeatureHistory(uid, "money_rescue");
+    const protect = await hist.buildFeatureHistory(uid, "protect_handoff");
+
+    assert.equal(rescue.length, 1, "money_rescue: only the rescue_adopted row");
+    assert.match(rescue[0].what, /rescue adopted/i);
+
+    assert.ok(protect.some((e) => /branch sealed/i.test(e.what)), "protect_handoff has the insurance seal");
+    assert.ok(protect.some((e) => /handoff plan described/i.test(e.what)), "protect_handoff has the handoff plan");
+    assert.ok(!protect.some((e) => /rescue adopted/i.test(e.what)), "protect_handoff excludes rescue events");
+  } finally {
+    await cleanup(pool, uid);
+  }
+});

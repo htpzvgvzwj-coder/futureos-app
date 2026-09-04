@@ -586,5 +586,14 @@
   "Sample Data Loaded": "已加载示例数据",
   "Sample Data Cleared": "已清除示例数据",
   "Provider Connected": "已连接渠道",
-  "Provider Disconnected": "已断开渠道"
+  "Provider Disconnected": "已断开渠道",
+
+  "Recovery actions you've adopted": "你采用过的恢复措施",
+  "Protection & handoff you've set": "你设定过的保障与交接",
+  "Rescue Adopted": "已采用救援措施",
+  "Branch Sealed": "已确认方案",
+  "Branch Created": "已创建方案",
+  "Handoff Plan Described": "已写下交接计划",
+  "Nothing needs rescuing": "目前无需救援",
+  "No payment problems, cashflow shortfalls or unusual charges right now.": "目前没有付款问题、现金流缺口或异常扣款。"
 }
