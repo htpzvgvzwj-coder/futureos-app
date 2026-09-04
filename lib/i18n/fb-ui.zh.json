@@ -573,5 +573,18 @@
   "Life Memory — scroll back along the line": "人生记忆 — 沿着脉络回溯",
   "Your line has no past yet — changes you make will pile up here.": "你的人生脉络还没有过去 — 你所做的变更会在这里累积。",
   "Further back": "更早之前",
-  "partner": "伴侣"
+  "partner": "伴侣",
+
+  "Try it with real numbers": "用真实数字试一试",
+  "Your account is empty, so most features below have nothing to show. Load an example account and every zone fills with realistic figures — accounts, 90 days of spending, plans, CPF, insurance and the three links. It only touches your own data and you can clear it any time.": "你的账户是空的，所以下面大多数功能没有内容可显示。加载一个示例账户，每个板块都会填入贴近真实的数字 — 账户、90 天消费记录、计划、公积金、保险和三个连接。它只会改动你自己的数据，你随时可以清除。",
+  "Reload the example account to reset every feature to a known state, or clear it to start from an empty account.": "重新加载示例账户可把每个功能重置到已知状态，或清除它以从空账户开始。",
+  "Working…": "处理中…",
+  "Load an example account": "加载示例账户",
+  "Reload example data": "重新加载示例数据",
+  "Clear it": "清除",
+  "Your connection history": "你的连接记录",
+  "Sample Data Loaded": "已加载示例数据",
+  "Sample Data Cleared": "已清除示例数据",
+  "Provider Connected": "已连接渠道",
+  "Provider Disconnected": "已断开渠道"
 }
