@@ -1,0 +1,261 @@
+/* Guardian protection-layer — visual-first. One status leads; everything
+   else is quiet until asked for. Uses the fb palette tokens + one alert. */
+
+:root {
+  --g-alert: #c0362c;
+  --g-alert-soft: #fbe9e7;
+}
+:root:not([data-theme="light"]) {
+  --g-alert: #e5645a;
+  --g-alert-soft: #2c1a17;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --g-alert: #e5645a;
+    --g-alert-soft: #2c1a17;
+  }
+}
+:root[data-theme="dark"] {
+  --g-alert: #e5645a;
+  --g-alert-soft: #2c1a17;
+}
+
+/* ---- Guardian Now ---- */
+.now {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.now.calm { border-left-color: var(--sea); background: var(--sea-soft); }
+.now.watching { border-left-color: var(--amber); background: var(--amber-soft); }
+.now.decision { border-left-color: var(--ink); }
+.now.urgent { border-left-color: var(--g-alert); background: var(--g-alert-soft); }
+
+.nowLevel {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.now.calm .nowLevel { color: var(--sea); }
+.now.watching .nowLevel { color: var(--amber); }
+.now.urgent .nowLevel { color: var(--g-alert); }
+
+.nowHeadline {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.nowCause {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.nowAction {
+  margin-top: 6px;
+  align-self: flex-start;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ink);
+  cursor: pointer;
+}
+.now.calm .nowAction { background: var(--sea); }
+.now.watching .nowAction { background: var(--amber); }
+.now.urgent .nowAction { background: var(--g-alert); }
+.nowAction:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- Protected by Guardian ---- */
+.protectHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.protectCount { font-size: 15px; font-weight: 700; color: var(--ink); }
+.protectNext { font-size: 12px; color: var(--ink-faint); }
+.stageLine {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--sea);
+  padding: 2px 0 2px 12px;
+}
+.stageLine b { color: var(--ink); font-weight: 700; }
+
+.domain {
+  border-top: 1px solid var(--line);
+}
+.domain:first-of-type { border-top: 0; }
+.domainRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 2px;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-faint);
+}
+.dot.protected { background: var(--sea); }
+.dot.watching { background: var(--amber); }
+.dot.at_risk { background: var(--g-alert); }
+.dot.unknown { background: var(--line); border: 1px solid var(--ink-faint); }
+
+.domainName { font-size: 14px; font-weight: 600; flex: 1; }
+.domainChevron { font-size: 12px; color: var(--ink-faint); }
+.domainBody {
+  padding: 0 2px 14px 19px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.domainDetail { font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+.domainChecks { margin: 0; padding-left: 16px; }
+.domainChecks li { font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; }
+
+/* ---- Guardian Proof (causal replay) ---- */
+.proofCard {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  row-gap: 5px;
+  column-gap: 10px;
+}
+.proofCard + .proofCard { margin-top: 8px; }
+.proofWhen {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+.proofLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-top: 1px;
+}
+.proofValue { font-size: 13px; color: var(--ink); line-height: 1.4; }
+.proofValue.pending { color: var(--amber); }
+
+/* ---- Guardian Contract ---- */
+.capRow {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.capRow:first-of-type { border-top: 0; }
+.capLabel { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.capScope { font-size: 12px; color: var(--ink-faint); line-height: 1.4; }
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+.seg button {
+  border: 0;
+  background: var(--surface);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.seg button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---- Decision panel (Phase 2: show impact before committing) ---- */
+.decision {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+}
+.decisionEv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.decisionEv dt { font-size: 12px; color: var(--ink-faint); }
+.decisionEv dd { font-size: 12.5px; color: var(--ink); margin: 0; text-align: right; }
+.impactRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.impactRow:first-of-type { border-top: 0; }
+.impactName { font-size: 13px; color: var(--ink-soft); }
+.impactVal { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.impactVal .to { color: var(--ink-faint); font-weight: 400; margin: 0 5px; }
+.impactVal.warn { color: var(--g-alert); }
+.impactVal.same { color: var(--ink-faint); font-weight: 400; }
+.decisionActs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.decisionActs button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.decisionActs button.go { background: var(--ink); color: #fff; border-color: var(--ink); }
+.decisionActs button:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- collapsible below-the-fold operational area ---- */
+.foldToggle {
+  width: 100%;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 14px 2px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}

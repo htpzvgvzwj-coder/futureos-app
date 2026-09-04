@@ -12,9 +12,19 @@
 import { useState } from "react";
 import css from "./future-bank.module.css";
 import { useFutureBankData } from "./FutureBankDataProvider.jsx";
+import { useTx } from "./i18n.jsx";
 import { afterLabel, directionClass, relTime } from "./format.js";
 
+// tx a key whose string params may themselves be translatable phrases.
+function txp(tx, key, params) {
+  if (!params) return tx(key);
+  const m = {};
+  for (const [k, v] of Object.entries(params)) m[k] = typeof v === "string" ? tx(v) : v;
+  return tx(key, m);
+}
+
 function MomentCard({ moment, onRoute }) {
+  const { tx } = useTx();
   const { act } = useFutureBankData();
   const [busy, setBusy] = useState(null);
 
@@ -30,24 +40,24 @@ function MomentCard({ moment, onRoute }) {
   return (
     <article className={`${css.moment} ${css[moment.severity] || ""}`}>
       <div className={css.momentTop}>
-        <span className={`${css.sev} ${css[moment.severity] || ""}`}>{String(moment.severity).replace("_", " ")}</span>
-        {moment.reopened ? <span className={css.reopened}>Reopened</span> : null}
+        <span className={`${css.sev} ${css[moment.severity] || ""}`}>{tx(String(moment.severity).replace("_", " "))}</span>
+        {moment.reopened ? <span className={css.reopened}>{tx("Reopened")}</span> : null}
         <span className={css.evMeta} style={{ marginLeft: "auto" }}>{relTime(moment.occurredAt)}</span>
       </div>
-      <div className={css.momentTitle}>{moment.title}</div>
-      <div className={css.momentSummary}>{moment.summary}</div>
-      {moment.whyNow ? <div className={css.evMeta}>Why now: {moment.whyNow}</div> : null}
+      <div className={css.momentTitle}>{txp(tx, moment.titleKey ?? moment.title, moment.titleParams)}</div>
+      <div className={css.momentSummary}>{txp(tx, moment.summaryKey ?? moment.summary, moment.summaryParams)}</div>
+      {moment.whyNow ? <div className={css.evMeta}>{tx("Why now")}: {txp(tx, moment.whyNowKey ?? moment.whyNow, moment.whyNowParams)}</div> : null}
 
       {(moment.evidence ?? []).length > 0 && (
         <div className={css.evidence}>
           {moment.evidence.map((e, i) => (
             <div key={i} className={css.evRow}>
-              <span>{e.label}</span>
-              <span>{e.value ?? "Needs more information"}</span>
+              <span>{tx(e.label)}</span>
+              <span>{e.value ?? tx("Needs more information")}</span>
             </div>
           ))}
           <div className={css.evMeta}>
-            source: {moment.evidence[0]?.source} · confidence: {moment.evidence[0]?.confidence} · {moment.evidence[0]?.provenance}
+            {tx("source")}: {moment.evidence[0]?.source} · {tx("confidence")}: {moment.evidence[0]?.confidence} · {moment.evidence[0]?.provenance}
           </div>
         </div>
       )}
@@ -84,17 +94,17 @@ function MomentCard({ moment, onRoute }) {
                   : run("reviewed")
             }
           >
-            {busy === "acknowledged" ? "Saving…" : primary.label}
+            {busy === "acknowledged" ? tx("Saving…") : txp(tx, primary.labelKey ?? primary.label, primary.labelParams)}
           </button>
         ) : null}
         {primary && !primary.available && primary.unavailableReason ? (
-          <span className={css.evMeta}>{primary.unavailableReason}</span>
+          <span className={css.evMeta}>{tx(primary.unavailableReason)}</span>
         ) : null}
         <button type="button" className={css.act} disabled={busy != null} onClick={() => run("reviewed")}>
-          Mark reviewed
+          {tx("Mark reviewed")}
         </button>
         <button type="button" className={css.act} disabled={busy != null} onClick={() => run("snoozed", { snoozeDays: 7 })}>
-          Snooze 7d
+          {tx("Snooze 7d")}
         </button>
       </div>
     </article>
@@ -103,24 +113,25 @@ function MomentCard({ moment, onRoute }) {
 
 // Today: at most one. Explore: up to `limit`.
 export function DetectedMoments({ limit = 1, onRoute, showWatchingWhenCalm = true, exclude = [] }) {
+  const { tx } = useTx();
   const { moments, watching, status } = useFutureBankData();
-  if (status === "loading" && !moments.length) return <p className={css.empty}>Checking your money…</p>;
+  if (status === "loading" && !moments.length) return <p className={css.empty}>{tx("Checking your money…")}</p>;
 
   const shown = (moments ?? []).filter((m) => !exclude.includes(m.sourceType)).slice(0, limit);
   if (shown.length === 0) {
     return (
       <div className={css.calm}>
-        <span className={css.calmTitle}>Nothing needs your attention right now.</span>
+        <span className={css.calmTitle}>{tx("Nothing needs your attention right now.")}</span>
         {showWatchingWhenCalm && (
           <>
-            <span className={css.empty}>Future Bank is watching, based on the data it has:</span>
+            <span className={css.empty}>{tx("Future Bank is watching, based on the data it has:")}</span>
             <div className={css.watchList}>
               {(watching ?? []).map((w, i) => (
                 <div key={i} className={`${css.watchItem} ${w.active ? "" : css.off}`}>
                   <span className={css.watchDot} />
                   <span>
-                    {w.label}
-                    {!w.active ? ` — ${w.reason}` : ""}
+                    {tx(w.label)}
+                    {!w.active ? ` — ${tx(w.reason)}` : ""}
                   </span>
                 </div>
               ))}

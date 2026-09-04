@@ -15,6 +15,7 @@ import { computeLivingEnvelope } from "../../../lib/insurance/living-envelope-fi
 import { projectLivingEnvelopeImpact } from "../../../lib/insurance/living-envelope-projector.js";
 import { LivingSceneProvider, useLivingScene } from "../../components/living-scene/LivingSceneProvider.jsx";
 import { SceneShell } from "../../components/living-scene/SceneShell.jsx";
+import { FeatureHistory } from "../../components/future-bank/FeatureHistory.jsx";
 
 function sgd(n) {
   return `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
@@ -178,6 +179,7 @@ function LivingEnvelopeInner({ t, setActiveScreen }) {
         <button type="button" className="linkButton" onClick={() => setActiveScreen("mirror")}>← {t("changeLedger.back")}</button>
         <header className="wlpHeader"><h1>{t("livingEnvelope.title")}</h1></header>
         <p className="wlpEmpty">{t("livingEnvelope.noPlan")}</p>
+        <FeatureHistory feature="protect_handoff" label="Protection & handoff you've set" />
       </section>
     );
   }
@@ -227,6 +229,8 @@ function LivingEnvelopeInner({ t, setActiveScreen }) {
           </div>
         </div>
       </SceneShell>
+
+      <FeatureHistory feature="protect_handoff" label="Protection & handoff you've set" />
     </section>
   );
 }

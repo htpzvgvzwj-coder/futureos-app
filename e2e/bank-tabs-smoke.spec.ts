@@ -34,11 +34,20 @@ test("Guardian and Spending Intelligence tabs render for a new user", async ({ p
 
   await page.goto(BASE + "/");
 
-  // Guardian tab
+  // Life tab — the Living Thread: a direction sentence, the Life Position
+  // sentence, a weather chip, and Life Memory (starting point at minimum)
+  await page.getByTestId("bottom-nav-lifeGraph").click();
+  await expect(page.getByRole("heading", { name: /^Life$/ })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/promised to (your )?future plans/i).first()).toBeVisible();
+  await expect(page.getByText(/safety (covers|buffer)/i).first()).toBeVisible();
+  await expect(page.getByText(/\b(Calm|Tight|Exposed|Recovering|Opportunity)\b/).first()).toBeVisible();
+  await expect(page.getByText(/Latest movement|Your starting point/i).first()).toBeVisible();
+
+  // Guardian tab — the protection layer: one status + what it protects
   await page.getByTestId("bottom-nav-guardian").click();
   await expect(page.getByRole("heading", { name: /^Guardian$/ })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/What Guardian can never do/i)).toBeVisible();
-  await expect(page.getByText(/move money or make a payment/i)).toBeVisible();
+  await expect(page.getByText(/^(Calm|Watching|Decision|Urgent)$/).first()).toBeVisible();
+  await expect(page.getByText(/of \d+ promises protected/i)).toBeVisible();
 
   // Explore -> Spending Intelligence
   await page.getByTestId("bottom-nav-mirror").click();

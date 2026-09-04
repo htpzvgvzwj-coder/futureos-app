@@ -8,13 +8,19 @@
 import { useState } from "react";
 import styles from "./bank.module.css";
 import { EmptyState } from "./AsyncState.jsx";
+import { FeatureHistory } from "../future-bank/FeatureHistory.jsx";
 
 export function MoneyRescuePanel({ cases = [], onOpen }) {
   const [handled, setHandled] = useState({});
   const live = cases.filter((c) => !handled[c.id]);
 
   if (!live.length) {
-    return <EmptyState title="Nothing needs rescuing" hint="No payment problems, cashflow shortfalls or unusual charges right now." />;
+    return (
+      <div className={styles.bank} aria-label="Money Rescue">
+        <EmptyState title="Nothing needs rescuing" hint="No payment problems, cashflow shortfalls or unusual charges right now." />
+        <FeatureHistory feature="money_rescue" label="Recovery actions you've adopted" />
+      </div>
+    );
   }
 
   return (
@@ -57,6 +63,7 @@ export function MoneyRescuePanel({ cases = [], onOpen }) {
           </div>
         </section>
       ))}
+      <FeatureHistory feature="money_rescue" label="Recovery actions you've adopted" />
     </div>
   );
 }

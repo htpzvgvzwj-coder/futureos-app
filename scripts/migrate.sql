@@ -869,6 +869,10 @@ create index if not exists goal_commitments_profile_domain_idx
 -- a plain number, for quick audit reads.
 alter table goal_commitments add column if not exists superseded_savings_plan jsonb;
 alter table goal_commitments add column if not exists prior_monthly_contribution numeric(12,2);
+-- Guardian Phase 3: a collision path or recovery step can pause a commitment
+-- (status 'paused'); it drops out of the active/committed total until resumed.
+alter table goal_commitments add column if not exists paused_at timestamptz;
+alter table goal_commitments add column if not exists pause_reason text;
 
 -- One active commitment per (profile, domain). A rapid double-submit, or a
 -- second "adopt" before the first is revoked, must not leave two active
@@ -1580,3 +1584,62 @@ create table if not exists care_transitions (
 create index if not exists care_transitions_profile_idx on care_transitions (profile_key, status);
 -- an optional birth year to drive the milestone proposals (year only - not a full DOB)
 alter table user_onboarding add column if not exists birth_year integer;
+
+-- ============================================================
+-- Guardian round 2 (protection layer) - the Guardian Contract.
+-- One row per capability the user has moved off its default level.
+-- level: watch | ask | act. A fixed set can never reach 'act'
+-- (enforced in lib/guardian/contract.js, not here).
+-- ============================================================
+create table if not exists guardian_contracts (
+  profile_key  text not null,
+  capability   text not null,
+  level        text not null default 'ask',   -- watch | ask | act
+  updated_at   timestamptz not null default now(),
+  primary key (profile_key, capability)
+);
+
+-- ============================================================
+-- Outside-data connections. One row per provider the account has linked;
+-- `data` holds the pulled, viewable detail (linked sources, policies,
+-- payees). Nothing here is a bank fact - a linked figure is tagged with
+-- its source_type in the Financial Twin.
+-- ============================================================
+create table if not exists provider_connections (
+  profile_key   text not null,
+  provider      text not null,                          -- payment_provider | sgfindex | insurer
+  status        text not null default 'not_connected',  -- connected | sandbox | not_connected
+  linked_ref    text,                                   -- masked identifier shown to the user
+  data          jsonb not null default '{}',
+  connected_at  timestamptz,
+  updated_at    timestamptz not null default now(),
+  primary key (profile_key, provider)
+);
+
+-- ============================================================
+-- Life Thread snapshots (Life vision Phase 2). One compact frozen copy
+-- of the Life Thread state, linked to the Change Ledger event it follows
+-- (kind='after_event') or the account's first picture (kind='baseline').
+-- Life Memory reads these to replay "your life on <date>". Forward-only:
+-- a snapshot is captured when a direction-changing event is first
+-- reconciled, so events older than this table have no frozen line (Life
+-- Memory falls back to the per-event Before/After record for those).
+-- ============================================================
+create table if not exists life_thread_snapshots (
+  id               uuid primary key default gen_random_uuid(),
+  profile_key      text not null,
+  ledger_event_id  uuid,                         -- null for the baseline
+  kind             text not null default 'after_event',  -- baseline | after_event
+  captured_at      timestamptz not null default now(),
+  event_at         timestamptz,                  -- the ledger event's occurred_at (for ordering)
+  thread           jsonb not null default '{}',  -- { direction*, numbers:[{id,value}], weather:{id,label}, nodes:[{id,label,state,valueText,note}] }
+  free_monthly     numeric,
+  committed_monthly numeric,
+  safety_months    numeric
+);
+create unique index if not exists life_thread_snapshots_event_uq
+  on life_thread_snapshots (profile_key, ledger_event_id) where ledger_event_id is not null;
+create unique index if not exists life_thread_snapshots_baseline_uq
+  on life_thread_snapshots (profile_key) where kind = 'baseline';
+create index if not exists life_thread_snapshots_profile_idx
+  on life_thread_snapshots (profile_key, event_at desc);

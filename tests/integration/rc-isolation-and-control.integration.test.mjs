@@ -34,7 +34,7 @@ async function cleanupUser(pool, uid) {
   await pool.query(`delete from care_invites where profile_key = $1 or accepted_by = $1`, [uid]).catch(() => {});
   await pool.query(`delete from care_nudges where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
   await pool.query(`delete from lifecycle_roles where profile_key = $1 or subject_key = $1`, [uid]).catch(() => {});
-  for (const t of ["care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
+  for (const t of ["provider_connections", "guardian_contracts", "care_shared_ranges", "care_transitions", "authorization_requests", "authorization_policies", "bank_transactions", "bank_accounts", "financial_assets", "liabilities", "income_streams", "recurring_obligations", "ripple_events", "change_ledger_events", "consent_records", "care_handoff_plans", "lifecycle_roles", "import_batches", "audit_events", "user_onboarding", "account_deletions", "user_sessions"]) {
     await pool.query(`delete from ${t} where profile_key = $1 or ${t === "user_sessions" ? "user_id" : "profile_key"} = $1`, [uid]).catch(() => {});
   }
   await pool.query(`delete from users where id = $1`, [uid]).catch(() => {});
@@ -483,4 +483,148 @@ test("Phase 6 Round 5 Care extras: nudges, shared ranges, and age-transition pro
   assert.equal((await control.getOnboarding(owner)).accountType, "individual");
   // it is no longer a live proposal
   assert.equal((await transitions.listTransitions(owner)).some((p) => p.milestone === "turns_18"), false);
+});
+
+test("Guardian Contract: defaults, raising a capability, the never-act guard, reset", opts, async (t) => {
+  const [{ getContracts, setContract, resetContracts }, { pool }] = await Promise.all([
+    import("../../lib/guardian/contract.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gcontract");
+  t.after(() => cleanupUser(pool, u));
+
+  const start = await getContracts(u);
+  assert.equal(start.find((c) => c.capability === "notify_a_guardian").level, "watch");
+  assert.equal(start.find((c) => c.capability === "pause_plan_contribution").level, "ask");
+
+  const raised = await setContract(u, "pause_plan_contribution", "act");
+  assert.equal(raised.find((c) => c.capability === "pause_plan_contribution").level, "act");
+
+  await assert.rejects(() => setContract(u, "move_emergency_funds", "act"), /never be set to "act"/i);
+  await assert.rejects(() => setContract(u, "not_a_capability", "ask"), /unknown capability/i);
+  await assert.rejects(() => setContract(u, "pause_plan_contribution", "sideways"), /invalid level/i);
+
+  const afterReset = await resetContracts(u);
+  assert.equal(afterReset.find((c) => c.capability === "pause_plan_contribution").level, "ask", "reset returns to the default");
+});
+
+test("Guardian Phase 2 decision loop: impact preview, adjust re-parks, approve writes a numeric impact_set", opts, async (t) => {
+  const [{ buildGuardianDecision }, { accounts, ledger, authz, pool }] = await Promise.all([
+    import("../../lib/guardian/decision.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gdec");
+  t.after(() => cleanupUser(pool, u));
+
+  const cur = await accounts.createBankAccount(u, { kind: "current", displayName: "Everyday" });
+  const card = await accounts.createBankAccount(u, { kind: "credit_card", displayName: "Card" });
+  await ledger.appendTransaction(u, { accountId: cur.id, direction: "credit", amount: 5000, channel: "salary" });
+  await ledger.appendTransaction(u, { accountId: card.id, direction: "debit", amount: 800, channel: "purchase" });
+  await authz.setAuthPolicy(u, { approvalOverAmount: 50 });
+
+  const req = await authz.createAuthRequest(u, {
+    kind: "card_repayment",
+    summary: "Repay SGD 300 to a card",
+    amount: 300,
+    payload: { fromAccountId: cur.id, cardAccountId: card.id, amount: 300, currency: "SGD", idempotencyKey: "gdec-" + Date.now() },
+    reason: "over the rule",
+  });
+
+  // the decision view shows a real before/after
+  const d = await buildGuardianDecision(u, req.id);
+  assert.ok(d, "decision built");
+  assert.equal(d.impact.movesOutOfSpendable, true);
+  assert.equal(d.impact.spendableNow.after, d.impact.spendableNow.before - 300);
+  assert.ok(d.evidence.some((e) => /Amount/.test(e.label)));
+
+  // adjust: cancels the old, re-parks a fresh request at the new amount
+  const adjusted = await authz.adjustAuthRequest(u, req.id, 120);
+  assert.equal(adjusted.amount, 120);
+  assert.notEqual(adjusted.id, req.id);
+  const pend = await authz.listAuthRequests(u, { status: "pending" });
+  assert.equal(pend.length, 1);
+  assert.equal(pend[0].id, adjusted.id);
+
+  // approve -> executes AND the ledger event carries a numeric impact_set
+  await authz.decideAuthRequest(u, adjusted.id, { decision: "approved", decidedBy: "owner" });
+  const led = await pool.query(
+    `select impact_set from change_ledger_events where profile_key = $1 and action_type = 'guardian_action' order by occurred_at desc limit 1`,
+    [u],
+  );
+  const impact = led.rows[0].impact_set;
+  assert.ok(Array.isArray(impact) && impact.length > 0, "impact_set populated");
+  const spend = impact.find((x) => x.metric === "spendableNow");
+  assert.ok(spend && spend.before != null && spend.after != null, "spendableNow before/after recorded");
+  assert.equal(spend.before - spend.after, 120);
+});
+
+test("Guardian Phase 3: pause / reduce a commitment drops it from the active total", opts, async (t) => {
+  const [{ createCommitment, getActiveCommitment, pauseCommitment, resumeCommitment, reduceCommitment }, { pool }] = await Promise.all([
+    import("../../lib/goal-commitment-store.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "gp3");
+  t.after(() => cleanupUser(pool, u));
+
+  const mk = (domain, m) => createCommitment(u, { domain, monthlyContribution: m, effectiveMonth: "2026-10", pauseIfEmergencyMonthsBelow: 3 });
+  await mk("wedding", 1500);
+  await mk("home", 1200);
+
+  // pause the smaller one -> no longer 'active'
+  const home = await getActiveCommitment(u, "home");
+  const paused = await pauseCommitment(home.id, u, { reason: "guardian_collision_path" });
+  assert.equal(paused.status, "paused");
+  assert.equal(await getActiveCommitment(u, "home"), null, "a paused commitment is not active");
+
+  // resume brings it back
+  const resumed = await resumeCommitment(home.id, u);
+  assert.equal(resumed.status, "active");
+  assert.ok(await getActiveCommitment(u, "home"));
+
+  // reduce = revoke + recreate at the lower amount, audit chain intact
+  const wed = await getActiveCommitment(u, "wedding");
+  const red = await reduceCommitment(wed.id, u, 900);
+  assert.equal(red.to, 900);
+  assert.equal(red.from, 1500);
+  const wedNow = await getActiveCommitment(u, "wedding");
+  assert.equal(Number(wedNow.monthly_contribution), 900);
+  assert.notEqual(wedNow.id, wed.id);
+
+  // reduce to 0 -> just revoked, no active row
+  const red0 = await reduceCommitment(wedNow.id, u, 0);
+  assert.equal(red0.revoked, true);
+  assert.equal(await getActiveCommitment(u, "wedding"), null);
+});
+
+test("Connections: connect / view / disconnect; a sandbox rail is flagged", opts, async (t) => {
+  const [{ getConnections, connectProvider, disconnectProvider, connectedProviderStatuses }, { pool }] = await Promise.all([
+    import("../../lib/connections/store.js"),
+    mods(),
+  ]);
+  const u = await makeUser(pool, "conns");
+  t.after(() => cleanupUser(pool, u));
+
+  const start = await getConnections(u);
+  assert.equal(start.length, 3);
+  assert.ok(start.every((c) => !c.connected));
+
+  const afterSg = await connectProvider(u, "sgfindex");
+  const sg = afterSg.find((c) => c.id === "sgfindex");
+  assert.equal(sg.connected, true);
+  assert.equal(sg.status, "connected");
+  assert.ok(sg.data.sources.some((s) => s.id === "cpf" && s.balances.ordinary_account > 0), "CPF balances pulled");
+  assert.match(sg.summary, /CPF/);
+
+  const afterPay = await connectProvider(u, "payment_provider");
+  const pay = afterPay.find((c) => c.id === "payment_provider");
+  assert.equal(pay.status, "sandbox", "the payment rail is honest sandbox, not 'connected'");
+  assert.equal(pay.sandbox, true);
+  assert.ok(pay.data.payees.length >= 1);
+
+  await connectProvider(u, "insurer");
+  const statuses = await connectedProviderStatuses(u);
+  assert.deepEqual(statuses, { sgfindex: "connected", payment_provider: "sandbox", insurer: "connected" });
+
+  const afterOff = await disconnectProvider(u, "sgfindex");
+  assert.equal(afterOff.find((c) => c.id === "sgfindex").connected, false);
 });

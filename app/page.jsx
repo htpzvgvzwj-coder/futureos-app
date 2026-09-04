@@ -19,6 +19,7 @@ import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
 import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
 import { GuardianView } from "./components/future-bank/GuardianView.jsx";
 import { FutureBankDataProvider } from "./components/future-bank/FutureBankDataProvider.jsx";
+import { FutureBankI18n } from "./components/future-bank/i18n.jsx";
 import {
   OnboardingGate,
   RealityEntryConnected, CsvImportConnected, AccountControlConnected,
@@ -3213,14 +3214,6 @@ function PhoneShell({ children, activeScreen, setActiveScreen, language, setLang
   return (
     <main className={`stage theme-${theme}${simpleMode ? " simple-mode" : ""}`}>
       <section className={`phone screen-${navScreen}${hideNav ? " nav-hidden" : ""}`} aria-label="Future Bank">
-        <div className="statusBar">
-          <span>9:41</span>
-          <div>
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
         <div className="brandBar">
           <div className="brandMark">OCBC</div>
           <div className="brandActions">
@@ -17916,9 +17909,11 @@ export default function App() {
         hideNav={onboardingActive}
         t={t}
       >
-        <FutureBankDataProvider enabled>
-          <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
-        </FutureBankDataProvider>
+        <FutureBankI18n language={language}>
+          <FutureBankDataProvider enabled>
+            <AnimatePresence mode="wait">{currentScreen}</AnimatePresence>
+          </FutureBankDataProvider>
+        </FutureBankI18n>
       </PhoneShell>
      </BankDataProvider>
     </LifeThreadProvider>

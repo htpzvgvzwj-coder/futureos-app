@@ -7,7 +7,9 @@
 
 import { useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
+import { useTx } from "./i18n.jsx";
 
 // Real outside-data connections. None are configured yet, so every one is
 // honestly "Not connected" with what it would unlock — never a fake toggle.
@@ -54,9 +56,11 @@ export function ExploreView(props) {
 }
 
 function Inner({ onRoute, onStudio }) {
+  const { tx } = useTx();
   const fb = useFutureBankData();
   const needs = fb.momentsRaw?.counts?.actionRequired ?? 0;
   const [caps, setCaps] = useState(null);
+  const [sampleBusy, setSampleBusy] = useState(false);
   useEffect(() => {
     fetch("/api/capabilities", { headers: { "cache-control": "no-cache" } })
       .then((r) => (r.ok ? r.json() : null))
@@ -67,72 +71,107 @@ function Inner({ onRoute, onStudio }) {
   const accountType = caps?.accountType ?? "individual";
   const isConnected = (v) => v === "connected" || v === "sandbox";
 
+  // The account has nothing to work with yet (or is still loading) — offer
+  // to fill it with the example dataset so every zone below has real
+  // numbers. Erring toward "empty" is right: a new user is exactly who
+  // this is for.
+  const looksEmpty = !Number(fb.twin?.twin?.netWorth) && (fb.lifeThread?.commitments?.length ?? 0) === 0;
+  const sample = async (action) => {
+    setSampleBusy(true);
+    await fetch("/api/account/sample-data", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action }),
+    }).catch(() => {});
+    setSampleBusy(false);
+    await fb.refetchAll?.();
+  };
+
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
         <div>
-          <h1 className={css.title}>Explore</h1>
-          <p className={css.micro}>What OCBC Future Bank can do — your everyday banking, your real money, and your whole life ahead.</p>
+          <h1 className={css.title}>{tx("Explore")}</h1>
+          <p className={css.micro}>{tx("What OCBC Future Bank can do — your everyday banking, your real money, and your whole life ahead.")}</p>
         </div>
 
-        {ACCOUNT_TYPE_NOTE[accountType] ? <p className={css.micro}>{ACCOUNT_TYPE_NOTE[accountType]}</p> : null}
+        <section className={css.section}>
+          <p className={css.kicker}>{tx("Try it with real numbers")}</p>
+          <p className={css.micro}>
+            {looksEmpty
+              ? tx("Your account is empty, so most features below have nothing to show. Load an example account and every zone fills with realistic figures — accounts, 90 days of spending, plans, CPF, insurance and the three links. It only touches your own data and you can clear it any time.")
+              : tx("Reload the example account to reset every feature to a known state, or clear it to start from an empty account.")}
+          </p>
+          <div className={css.choiceGrid}>
+            <button type="button" className={css.cta} disabled={sampleBusy} onClick={() => sample("load")}>
+              {sampleBusy ? tx("Working…") : looksEmpty ? tx("Load an example account") : tx("Reload example data")}
+            </button>
+            {!looksEmpty ? (
+              <button type="button" className={css.choice} disabled={sampleBusy} onClick={() => sample("clear")}>{tx("Clear it")}</button>
+            ) : null}
+          </div>
+        </section>
+
+        {ACCOUNT_TYPE_NOTE[accountType] ? <p className={css.micro}>{tx(ACCOUNT_TYPE_NOTE[accountType])}</p> : null}
 
         {needs > 0 ? (
           <button type="button" className={`${css.partial}`} onClick={() => onRoute("today")}>
-            <b>{needs} thing{needs > 1 ? "s" : ""} need{needs > 1 ? "" : "s"} you</b>
-            <span>Open Today to see what and why →</span>
+            <b>{needs} {needs > 1 ? tx("things need you") : tx("thing needs you")}</b>
+            <span>{tx("Open Today to see what and why →")}</span>
           </button>
         ) : null}
 
         {/* 7 bank capability zones */}
         <section className={css.section}>
-          <p className={css.kicker}>Bank capabilities</p>
+          <p className={css.kicker}>{tx("Bank capabilities")}</p>
           {ZONES.map((z) => (
             <button key={z.id} type="button" className={css.zoneRow} onClick={() => onRoute(z.route)}>
               <span className={css.zoneMain}>
-                <span className={css.zoneName}>{z.name}</span>
-                <span className={css.zoneSolves}>{z.solves}</span>
-                <span className={css.zoneOut}>Life Thread: {z.output}</span>
+                <span className={css.zoneName}>{tx(z.name)}</span>
+                <span className={css.zoneSolves}>{tx(z.solves)}</span>
+                <span className={css.zoneOut}>{tx("Life Thread")}: {tx(z.output)}</span>
               </span>
-              <span className={`${css.zoneStatus} ${z.status === "live" ? css.live : css.soon}`}>{z.status === "live" ? "Available" : "Coming"}</span>
+              <span className={`${css.zoneStatus} ${z.status === "live" ? css.live : css.soon}`}>{z.status === "live" ? tx("Available") : tx("Coming")}</span>
             </button>
           ))}
         </section>
 
         {/* real outside-data connections — honest status */}
         <section className={css.section}>
-          <p className={css.kicker}>Connections</p>
+          <p className={css.kicker}>{tx("Connections")}</p>
           <div className={css.activity}>
             {CONNECTIONS.map((c) => {
               const connected = isConnected(providers[c.id]);
               return (
                 <div key={c.id} className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>{c.name}</span>
-                    <span className={css.actMeta}>{c.unlocks}</span>
+                    <span className={css.actName}>{tx(c.name)}</span>
+                    <span className={css.actMeta}>{tx(c.unlocks)}</span>
                   </span>
-                  <span className={`${css.zoneStatus} ${connected ? css.live : css.soon}`}>{connected ? "Connected" : "Not connected"}</span>
+                  <span className={`${css.zoneStatus} ${connected ? css.live : css.soon}`}>{connected ? tx("Connected") : tx("Not connected")}</span>
                 </div>
               );
             })}
           </div>
-          <p className={css.micro}>Until a provider is configured, these stay off and nothing is estimated in their place.</p>
-          <button type="button" className={css.link} onClick={() => onRoute("connections")}>See everything that&apos;s limited and why →</button>
+          <p className={css.micro}>{tx("Until a provider is configured, these stay off and nothing is estimated in their place.")}</p>
+          <button type="button" className={css.link} onClick={() => onRoute("connections")}>{tx("See everything that's limited and why →")}</button>
         </section>
 
         {/* 9 life Studios */}
         <section className={css.section}>
-          <p className={css.kicker}>Plan a future</p>
-          <p className={css.micro}>Each Studio shows a real path and what it does to your other goals — never a fixed template.</p>
+          <p className={css.kicker}>{tx("Plan a future")}</p>
+          <p className={css.micro}>{tx("Each Studio shows a real path and what it does to your other goals — never a fixed template.")}</p>
           <div className={css.choiceGrid}>
             {STUDIOS.map((s) => (
               <button key={s.domain} type="button" className={css.choice} onClick={() => onStudio(s.domain)}>
-                <b>{s.name}</b>
-                <span>{s.line}</span>
+                <b>{tx(s.name)}</b>
+                <span>{tx(s.line)}</span>
               </button>
             ))}
           </div>
         </section>
+
+        <FeatureHistory feature="explore" label="What you've explored" />
       </div>
     </div>
   );

@@ -1,0 +1,498 @@
+/* The Living Thread — one vertical line, nodes strung along it. Node
+   meaning is carried by the dot's FORM, not a sentence:
+     solid  = confirmed, affecting money
+     hollow = not enough information
+     ghost  = simulating, not committed
+     pulse  = changed recently                                          */
+
+.direction {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.numbers {
+  display: flex;
+  gap: 8px;
+}
+.numCell {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 11px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.numLabel { font-size: 11px; color: var(--ink-faint); display: block; }
+.numValue { font-size: 15px; font-weight: 700; color: var(--ink); display: block; margin-top: 3px; }
+.numValue.unset { color: var(--ink-faint); font-weight: 500; }
+.numSource { font-size: 11.5px; color: var(--ink-soft); line-height: 1.4; margin: 4px 2px 0; }
+
+.weather {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.weatherDot { width: 7px; height: 7px; border-radius: 50%; background: var(--sea); }
+.weather.tight .weatherDot, .weather.recovering .weatherDot { background: var(--amber); }
+.weather.exposed .weatherDot { background: var(--g-alert, #c0362c); }
+.weather.opportunity .weatherDot { background: var(--sea); }
+
+/* ---- the line ---- */
+.thread {
+  position: relative;
+  padding-left: 26px;
+}
+.thread::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 18px;
+  width: 2px;
+  background: linear-gradient(var(--line), var(--line));
+}
+.node {
+  position: relative;
+  padding: 12px 0;
+}
+.node + .node { border-top: 1px solid transparent; }
+.nodeDot {
+  position: absolute;
+  left: -26px;
+  top: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.nodeDot.solid { background: var(--ink); border: 2px solid var(--ink); }
+.nodeDot.hollow { background: var(--surface); border: 2px solid var(--ink-faint); }
+.nodeDot.ghost { background: var(--surface); border: 2px dashed var(--ink-faint); opacity: 0.8; }
+.nodeDot.pulse { background: var(--sea); border: 2px solid var(--sea); box-shadow: 0 0 0 0 rgba(15, 125, 107, 0.5); animation: nodePulse 1.8s ease-out infinite; }
+@keyframes nodePulse {
+  70% { box-shadow: 0 0 0 8px rgba(15, 125, 107, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(15, 125, 107, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .nodeDot.pulse { animation: none; } }
+
+/* a protection ring: Guardian is holding this node */
+.nodeDot.ring::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sea);
+  opacity: 0.55;
+}
+.nodeRowTop { display: flex; align-items: baseline; gap: 8px; }
+.nodeName { font-size: 14.5px; font-weight: 650; color: var(--ink); }
+.nodeVal { font-size: 12.5px; color: var(--ink-soft); }
+.nodeState { font-size: 11px; color: var(--ink-faint); }
+.nodeCollision { font-size: 11px; font-weight: 700; color: var(--amber); }
+.nodeBtn {
+  margin-top: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--sea);
+  cursor: pointer;
+}
+
+.futureSlot {
+  position: relative;
+  padding: 12px 0 4px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+}
+.futureSlot .nodeDot { background: transparent; border: 2px dotted var(--ink-faint); opacity: 0.6; }
+.futureSlot span { font-size: 13px; color: var(--ink-faint); }
+
+/* ---- What Moved ---- */
+.moved {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.movedHead { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.movedImpact { font-size: 12.5px; color: var(--ink-soft); }
+.movedWhen { font-size: 11px; color: var(--ink-faint); }
+
+/* ---- Future Echo — where today's plans land if nothing changes ---- */
+.echo {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.echoHead { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.echoRow { display: flex; flex-direction: column; gap: 3px; }
+.echoRow + .echoRow { border-top: 1px solid var(--line); padding-top: 8px; }
+.echoLabel { font-size: 13px; font-weight: 650; color: var(--ink); }
+.echoCells { display: flex; gap: 10px; flex-wrap: wrap; }
+.echoCell { font-size: 12px; color: var(--ink-soft); }
+.echoCell b { color: var(--ink); font-weight: 700; }
+.echoBasis { font-size: 10.5px; color: var(--ink-faint); font-style: italic; }
+
+/* ---- Ask the Line ---- */
+.ask { display: flex; flex-direction: column; gap: 8px; }
+.askRow { display: flex; gap: 8px; }
+.askInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.askInput:focus { outline: 2px solid var(--sea-soft); border-color: var(--sea); }
+.askBtn {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: #fff;
+  background: var(--sea);
+  cursor: pointer;
+}
+.askBtn:disabled { opacity: 0.5; cursor: default; }
+.askAnswer {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+  border-left: 3px solid var(--sea);
+  padding: 4px 0 4px 12px;
+}
+.askExamples { display: flex; flex-direction: column; gap: 4px; }
+.askExample {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--sea);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ---- Pull the Future + Fork and Fold ---- */
+.nodeActs { display: flex; gap: 14px; align-items: center; margin-top: 4px; }
+.nodePull {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.nodePull[aria-expanded="true"] { color: var(--sea); }
+
+.pullSheet {
+  margin: 8px 0 4px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+}
+.pullHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.pullRange { width: 100%; accent-color: var(--sea); }
+.pullCaption { font-size: 13px; font-weight: 650; color: var(--ink); margin: 0; }
+.pullImpact { display: flex; flex-direction: column; gap: 4px; }
+.pullImpactRow { font-size: 12.5px; color: var(--ink-soft); }
+.pullBlock { font-size: 12px; color: var(--g-alert, #c0362c); font-weight: 600; }
+.pullActs { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+
+.forkList {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.forkHead { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
+.forkRow { display: flex; flex-direction: column; gap: 3px; }
+.forkLabel { font-size: 13px; font-weight: 600; color: var(--ink); }
+.forkTag { color: var(--sea); font-weight: 700; }
+.forkActs { display: flex; gap: 12px; }
+
+/* ---- Life Memory ---- */
+.memoryToggle {
+  width: 100%;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 13px 2px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.memory {
+  position: relative;
+  padding-left: 22px;
+  margin-top: 6px;
+}
+.memory::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--line);
+}
+.memoryNode { position: relative; padding: 8px 0; }
+.memoryDot {
+  position: absolute;
+  left: -22px;
+  top: 12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--ink-faint);
+}
+.memoryBody { display: flex; flex-direction: column; gap: 2px; }
+.memoryWhen { font-size: 11px; color: var(--ink-faint); }
+.memoryWhat { font-size: 13px; font-weight: 600; color: var(--ink); }
+.memoryMoved { font-size: 12px; color: var(--ink-soft); }
+
+/* ---- Life Position (the three numbers as one sentence) ---- */
+.position {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+}
+.posFrag {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+}
+.posFrag:hover { border-bottom-color: var(--line); }
+.posFragOpen { border-bottom-color: var(--sea); color: var(--sea); }
+
+/* ---- Life Memory (merged: latest movement + full timeline) ---- */
+.memLatest {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.memLatestKicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
+.memLatestHead { font-size: 14px; font-weight: 700; color: var(--ink); }
+.memLatestLine { font-size: 13px; color: var(--ink-soft); }
+.memOpen {
+  align-self: flex-start;
+  margin-top: 6px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--sea);
+  cursor: pointer;
+}
+.memOpenWrap { display: flex; flex-direction: column; gap: 10px; }
+.memTimeline { position: relative; padding-left: 24px; }
+.memTimeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--line);
+}
+.memBucket { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.memBucketLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-left: -24px;
+}
+.memRec { position: relative; }
+.memDot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sea);
+  border: 2px solid var(--sea);
+}
+.memDotStart { background: var(--surface); border-color: var(--ink-faint); }
+.memBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.memWhen { font-size: 11px; color: var(--ink-faint); }
+.memWhat { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.memWhy { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+.memMoney { font-size: 12.5px; color: var(--ink); margin-top: 2px; }
+.memPlan { font-size: 12.5px; color: var(--ink-soft); }
+.memGuardian { font-size: 12px; color: var(--sea); }
+.memSource { font-size: 11px; color: var(--ink-faint); font-style: italic; }
+.memMore {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sea);
+  cursor: pointer;
+}
+.memEvidence {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+/* ---- Life Memory playback ---- */
+.replayBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--amber-soft, #fdf3e3);
+  border: 1px solid var(--amber, #c98a2b);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.memReplay {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--sea);
+  cursor: pointer;
+}
+
+/* ---- Pressure Weather forecast ---- */
+.forecast {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: left;
+  cursor: pointer;
+}
+.forecast.fc_tight { border-color: var(--amber, #c98a2b); color: var(--ink); }
+.forecast.fc_exposed { border-color: var(--g-alert, #c0362c); color: var(--g-alert, #c0362c); }
+.forecastBody {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.forecastRow { display: grid; grid-template-columns: 10px 1fr auto; gap: 6px 8px; align-items: baseline; }
+.forecastDot { width: 8px; height: 8px; border-radius: 50%; background: var(--sea); align-self: center; }
+.forecastDot.fc_tight { background: var(--amber, #c98a2b); }
+.forecastDot.fc_exposed { background: var(--g-alert, #c0362c); }
+.forecastMonth { font-size: 12.5px; font-weight: 650; color: var(--ink); }
+.forecastNums { font-size: 11.5px; color: var(--ink-soft); text-align: right; }
+.forecastDrivers { grid-column: 2 / -1; font-size: 11.5px; color: var(--ink-faint); }
+
+/* ---- Ask the Line: what-if branch preview ---- */
+.askSim {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sea);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.askSimHead { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.askSimRow { font-size: 12.5px; color: var(--ink-soft); }
+
+/* ---- Node Moment Sheet ---- */
+.momentRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0;
+}

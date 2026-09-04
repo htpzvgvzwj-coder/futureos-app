@@ -1,112 +1,149 @@
 "use client";
 
-// Connections — the one honest place that shows what Future Bank cannot do
-// on its own yet, and exactly why. Every row is resolved from the live
-// capability registry (/api/capabilities): account type, connected
-// providers, permissions. Nothing here fakes a connection or fills the gap
-// with an estimate.
+// Connections — the three outside-data links. Each shows its real status
+// (from /api/connections), a Connect / Disconnect control, and — when
+// connected — the pulled detail so the user can open it and check it holds
+// up. A payment rail runs in `sandbox`: it says so, and an external
+// transfer still returns a sandbox receipt.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import css from "../../showcase/fb.module.css";
+import { useTx } from "./i18n.jsx";
+import { FeatureHistory } from "./FeatureHistory.jsx";
 
-const PROVIDERS = [
-  {
-    id: "payment_provider",
-    name: "Payment rail",
-    pulls: "The ability to actually send money to people and businesses outside your own accounts.",
-    lands: "Pay, Scan & Pay, PayNow-to-someone.",
-  },
-  {
-    id: "sgfindex",
-    name: "SGFinDex (government)",
-    pulls: "CPF, HDB, IRAS and other-bank balances, with your consent, straight from the source.",
-    lands: "Financial Twin — real figures instead of what you typed.",
-  },
-  {
-    id: "insurer",
-    name: "Insurer link",
-    pulls: "Your real policy cover, premiums and renewal dates.",
-    lands: "Protection — a real gap instead of an estimate.",
-  },
-];
+const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
-const STATUS_LABEL = {
-  live: "Working",
-  limited: "Partly working",
-  connection_required: "Needs a connection",
-  unavailable: "Off",
-  restricted_by_age: "Not for this account type",
-  restricted_by_permission: "You lack the permission",
-};
+function LinkedDetail({ id, data }) {
+  const { tx } = useTx();
+  if (!data) return null;
+  if (id === "sgfindex") {
+    return (
+      <div className={css.activity}>
+        {(data.sources ?? []).map((s) => (
+          <div key={s.id} className={css.actItem}>
+            <span className={css.actBody}>
+              <span className={css.actName}>{s.name} · {s.ref}</span>
+              <span className={css.actMeta}>
+                {s.balances
+                  ? Object.entries(s.balances).map(([k, v]) => `${k.replace(/_/g, " ")}: ${money(v)}`).join(" · ")
+                  : s.lastAssessedAnnualIncome != null
+                    ? `Assessed income ${money(s.lastAssessedAnnualIncome)} (${s.lastAssessedIncomeYear}) · tax ${money(s.taxPayable)}`
+                    : s.balance != null
+                      ? `${s.accountType}: ${money(s.balance)}`
+                      : s.records}
+              </span>
+              <span className={css.actMeta}>as of {s.asOf}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (id === "insurer") {
+    return (
+      <div className={css.activity}>
+        {(data.policies ?? []).map((p) => (
+          <div key={p.id} className={css.actItem}>
+            <span className={css.actBody}>
+              <span className={css.actName}>{p.insurer} · {p.type}</span>
+              <span className={css.actMeta}>
+                {p.coverage ? `Cover ${money(p.coverage)}${p.criticalIllnessCoverage ? ` · CI ${money(p.criticalIllnessCoverage)}` : ""} · ` : ""}
+                {p.premiumMonthly ? `${money(p.premiumMonthly)}/mo` : p.premiumAnnual ? `${money(p.premiumAnnual)}/yr` : ""}
+                {p.ward ? ` · ${p.ward}` : ""} · renews {p.renews}
+              </span>
+              <span className={css.actMeta}>Policy {p.policyNo}</span>
+            </span>
+          </div>
+        ))}
+        {data.incomeProtection?.note ? <p className={css.micro}>{data.incomeProtection.note}</p> : null}
+      </div>
+    );
+  }
+  // payment_provider
+  return (
+    <div className={css.activity}>
+      <p className={css.micro}>{tx("Running in sandbox — a real external transfer still returns a sandbox receipt, never money actually sent.")}</p>
+      {(data.payees ?? []).map((p) => (
+        <div key={p.id} className={css.actItem}>
+          <span className={css.actBody}>
+            <span className={css.actName}>{p.name}</span>
+            <span className={css.actMeta}>{p.handle}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function ConnectionsView({ onBack }) {
-  const [data, setData] = useState(null);
-  useEffect(() => {
-    fetch("/api/capabilities", { headers: { "cache-control": "no-cache" } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setData)
-      .catch(() => setData(null));
-  }, []);
+  const { tx } = useTx();
+  const [conns, setConns] = useState(null);
+  const [open, setOpen] = useState(null);
+  const [busy, setBusy] = useState(null);
 
-  const providers = data?.providers ?? {};
-  const caps = data?.capabilities ?? {};
-  const isConnected = (v) => v === "connected" || v === "sandbox";
-  const limited = Object.values(caps).filter(
-    (c) => c.status === "connection_required" || c.status === "restricted_by_age" || c.status === "limited",
-  );
+  const load = useCallback(() => {
+    fetch("/api/connections", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setConns(d?.connections ?? []))
+      .catch(() => setConns([]));
+  }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const act = async (provider, action) => {
+    setBusy(provider);
+    await fetch("/api/connections", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, provider }) }).catch(() => {});
+    setBusy(null);
+    load();
+  };
 
   return (
     <div className={`${css.app} ${css.embedded}`}>
       <div className={css.shell}>
-        <button type="button" className={css.backLink} onClick={onBack}>← Explore</button>
+        <button type="button" className={css.backLink} onClick={onBack}>← {tx("Explore")}</button>
         <div>
-          <h1 className={css.title}>Connections</h1>
-          <p className={css.micro}>What Future Bank can&apos;t do on its own yet, and exactly why. No fake switches; nothing is estimated in place of a real connection.</p>
+          <h1 className={css.title}>{tx("Connections")}</h1>
+          <p className={css.micro}>{tx("Link your real outside data. A linked figure is tagged with its source in your Financial Twin — never presented as something we made up.")}</p>
         </div>
 
         <section className={css.section}>
-          <p className={css.kicker}>Outside data &amp; rails</p>
-          <div className={css.activity}>
-            {PROVIDERS.map((p) => {
-              const connected = isConnected(providers[p.id]);
-              return (
-                <div key={p.id} className={css.actItem}>
+          <p className={css.kicker}>{tx("Outside data & rails")}</p>
+          {conns == null ? (
+            <p className={css.micro}>{tx("Loading…")}</p>
+          ) : (
+            conns.map((c) => (
+              <div key={c.id} data-testid={`conn-${c.id}`} style={{ borderTop: "1px solid var(--line)", padding: "12px 0" }}>
+                <div className={css.actItem}>
                   <span className={css.actBody}>
-                    <span className={css.actName}>{p.name}</span>
-                    <span className={css.actMeta}>{p.pulls}</span>
-                    <span className={css.actMeta}>Lands in: {p.lands}</span>
+                    <span className={css.actName}>{tx(c.name)}</span>
+                    <span className={css.actMeta}>{tx(c.pulls)}</span>
+                    <span className={css.actMeta}>{tx("Lands in")}: {tx(c.lands)}</span>
+                    {c.connected ? <span className={css.actMeta}>{tx(c.summary)}</span> : null}
                   </span>
-                  <span className={`${css.zoneStatus} ${connected ? css.live : css.soon}`}>{connected ? "Connected" : "Not connected"}</span>
+                  <span className={`${css.zoneStatus} ${c.connected ? css.live : css.soon}`}>
+                    {c.status === "sandbox" ? tx("Connected (sandbox)") : c.connected ? tx("Connected") : tx("Not connected")}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-          <p className={css.micro}>These turn on when the provider is connected for OCBC — you don&apos;t need to do anything, and you&apos;ll see the change here.</p>
+                <div className={css.choiceGrid}>
+                  {c.connected ? (
+                    <>
+                      <button type="button" className={css.link} onClick={() => setOpen(open === c.id ? null : c.id)}>
+                        {open === c.id ? tx("Hide what's linked") : tx("See what's linked")}
+                      </button>
+                      <button type="button" className={css.link} disabled={busy === c.id} onClick={() => act(c.id, "disconnect")}>{tx("Disconnect")}</button>
+                    </>
+                  ) : (
+                    <button type="button" className={css.cta} disabled={busy === c.id} onClick={() => act(c.id, "connect")}>{tx("Connect")}</button>
+                  )}
+                </div>
+                {open === c.id && c.data ? <LinkedDetail id={c.id} data={c.data} /> : null}
+              </div>
+            ))
+          )}
         </section>
 
-        <section className={css.section}>
-          <p className={css.kicker}>What&apos;s limited right now</p>
-          {!data ? (
-            <p className={css.micro}>Reading your capabilities…</p>
-          ) : limited.length === 0 ? (
-            <p className={css.micro}>Nothing is held back — everything available to your account is working on your real data.</p>
-          ) : (
-            <div className={css.activity}>
-              {limited.map((c) => (
-                <div key={c.id} className={css.actItem}>
-                  <span className={css.actBody}>
-                    <span className={css.actName}>{c.name}</span>
-                    <span className={css.actMeta}>{c.whatIsRequired || c.note || STATUS_LABEL[c.status]}</span>
-                  </span>
-                  <span className={`${css.zoneStatus} ${css.soon}`}>{STATUS_LABEL[c.status] ?? c.status}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {data?.accountType && data.accountType !== "individual" ? (
-            <p className={css.micro}>Some of these are limited because this is a <b>{String(data.accountType).replace(/_/g, " ")}</b> account, not because of a missing connection.</p>
-          ) : null}
-        </section>
+        <FeatureHistory feature="connections" label="Your connection history" />
       </div>
     </div>
   );
