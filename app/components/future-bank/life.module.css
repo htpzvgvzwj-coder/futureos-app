@@ -191,6 +191,43 @@
   cursor: pointer;
 }
 
+/* ---- Fragment: placed on the line + impact receipt ---- */
+.fragmentPlaced { border-left-width: 4px; background: color-mix(in srgb, var(--sea) 5%, transparent); }
+.fragmentPlaceBtn {
+  align-self: flex-start;
+  background: var(--ink);
+  color: var(--surface);
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.fragmentConfirmed { font-size: 12px; font-weight: 600; color: var(--sea); line-height: 1.45; }
+.fragmentDescribeBox { margin-top: 2px; }
+.describeRow { display: flex; gap: 8px; }
+
+.fragReceipt {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-top: 1px dashed var(--line);
+  padding-top: 9px;
+  margin-top: 2px;
+}
+.fragReceiptHead { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); }
+.fragReceiptLines { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.fragReceiptLines li { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+.fragReceiptWarn { color: #b91c1c; font-size: 12px; }
+.fragGuardian { font-size: 12px; font-weight: 600; line-height: 1.4; }
+.fragGuardianOk { color: var(--sea); }
+.fragGuardianWarn { color: #b45309; }
+.fragAdjust { display: flex; align-items: center; gap: 10px; }
+.fragAdjustVal { font-size: 12.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.fragActs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 2px; }
+
 /* ---- What Moved ---- */
 .moved {
   border: 1px solid var(--line);
