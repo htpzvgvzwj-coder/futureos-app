@@ -176,5 +176,11 @@
   "travel": "perjalanan",
   "loan": "pinjaman",
   "family": "keluarga",
-  "other": "lain-lain"
+  "other": "lain-lain",
+  "Wedding": "Perkahwinan",
+  "Emergency": "Kecemasan",
+  "Investment": "Pelaburan",
+  "Travel": "Perjalanan",
+  "Loan": "Pinjaman",
+  "Protection": "Perlindungan"
 }
