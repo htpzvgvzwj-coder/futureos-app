@@ -17,6 +17,9 @@ import x from "./explore.module.css";
 import { FeatureHistory } from "./FeatureHistory.jsx";
 import { FutureBankDataProvider, useFutureBankData } from "./FutureBankDataProvider.jsx";
 import { useTx } from "./i18n.jsx";
+import {
+  costOfDelay, negativeRecommendations, stressTest, receiptFromLedgerEvent, traceSecondOrder, nextBestQuestion,
+} from "../../../lib/explore/differentiation.js";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const yearOf = (s) => {
@@ -83,6 +86,17 @@ export function ExploreView(props) {
   );
 }
 
+function ExploreDelayRow({ r, tx, money }) {
+  return (
+    <>
+      <span className={r.delta === 0 ? x.delayNow : undefined}>{tx(r.label)}</span>
+      <span>{r.readyYear}</span>
+      <span>{r.bufferMonthsAfter != null ? `${r.bufferMonthsAfter} mo` : "—"}</span>
+      <span>{r.monthlyRoomAfter != null ? money(r.monthlyRoomAfter) : "—"}</span>
+    </>
+  );
+}
+
 function Inner({ onRoute, onStudio }) {
   const { tx } = useTx();
   const fb = useFutureBankData();
@@ -93,12 +107,18 @@ function Inner({ onRoute, onStudio }) {
   const [q, setQ] = useState("");
   const [openStudio, setOpenStudio] = useState("home");
   const [spendPreview, setSpendPreview] = useState(false);
+  const [delayOpen, setDelayOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [guardian, setGuardian] = useState(null);
+  const [latestEvent, setLatestEvent] = useState(null);
   const [sampleBusy, setSampleBusy] = useState(false);
 
   useEffect(() => {
     fetch("/api/guardian", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setGuardian).catch(() => {});
+    fetch("/api/change-ledger", { headers: { "cache-control": "no-cache" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setLatestEvent((d?.events ?? []).find((e) => Array.isArray(e.impact_set) && e.impact_set.length) ?? null))
+      .catch(() => {});
   }, [fb.version]);
 
   const looksEmpty = !Number(twin?.twin?.netWorth) && (lt.commitments?.length ?? 0) === 0;
@@ -125,6 +145,25 @@ function Inner({ onRoute, onStudio }) {
     return Math.max(200, Math.round((base * 0.16) / 100) * 100); // ~a sixth of what's safe
   }, [s2s.safeToSpend]);
   const spendAfter = (Number(s2s.safeToSpend) || 0) - spendAmt;
+
+  // ---- deeper differentiation: computed from real data --------------
+  const twinCtx = {
+    essentialMonthly: lt.monthlyExpenses,
+    monthlyExpenses: lt.monthlyExpenses,
+    bufferMonths: (lt.lifeNodes ?? []).find((n) => n.id === "safety")?.value,
+    monthlyRoom: lt.availableMonthlyCashflow,
+    liquidBuffer: s2s.breakdown?.postedLiquidCash,
+    safeToSpend: s2s,
+  };
+  const homeContribution = (lt.commitments ?? []).find((c) => c.domain === "home")?.monthlyContribution ?? 0;
+  const delay = useMemo(
+    () => (homeContribution > 0 && homeYear ? costOfDelay({ domain: "home", monthlyContribution: homeContribution, readyYear: homeYear, twin: twinCtx }) : null),
+    [homeContribution, homeYear, lt.monthlyExpenses, lt.availableMonthlyCashflow],
+  );
+  const secondOrder = useMemo(() => traceSecondOrder({ primaryDomain: "home", direction: "earlier", lt }), [lt.crossGoalEdges]);
+  const negatives = useMemo(() => negativeRecommendations({ lt, s2s }), [lt.availableMonthlyCashflow, lt.promiseWeight, s2s.safeToSpend, s2s.belowProtectedFloor]);
+  const stress = useMemo(() => stressTest({ lt, twin: twinCtx, shock: "income_1mo" }), [lt.monthlyCommittedTotal, lt.monthlyExpenses, s2s.breakdown]);
+  const receipt = useMemo(() => (latestEvent ? receiptFromLedgerEvent(latestEvent, tx) : null), [latestEvent]);
 
   const submitQuestion = () => {
     if (!q.trim()) return onRoute("future_field");
@@ -154,12 +193,38 @@ function Inner({ onRoute, onStudio }) {
             <button type="submit" className={x.heroGo} aria-label={tx("Test it")}>→</button>
           </form>
           <div className={x.quickRow}>
-            <button type="button" className={x.quick} onClick={() => onRoute("studio:home")}>{tx("Buy home sooner")}</button>
+            <button type="button" className={x.quick} onClick={() => (delay ? setDelayOpen((v) => !v) : onRoute("studio:home"))}>{tx("Buy home sooner")}</button>
             <button type="button" className={x.quick} onClick={() => onRoute("studio:loan")}>{tx("Pay debt faster")}</button>
             {spendAmt > 0 ? (
               <button type="button" className={x.quick} onClick={() => setSpendPreview((v) => !v)}>{tx("Spend {amt} safely", { amt: money(spendAmt) })}</button>
             ) : null}
           </div>
+
+          {delayOpen && delay ? (
+            <div className={x.preview}>
+              <span className={x.previewHead}>{tx("The cost of waiting — or not")}</span>
+              <div className={x.delayGrid}>
+                <span />
+                <span className={x.delayCol}>{tx("Ready")}</span>
+                <span className={x.delayCol}>{tx("Buffer")}</span>
+                <span className={x.delayCol}>{tx("Room")}</span>
+                {delay.rows.map((r) => (
+                  <ExploreDelayRow key={r.delta} r={r} tx={tx} money={money} />
+                ))}
+              </div>
+              {secondOrder ? (
+                <span className={x.chain}>
+                  {secondOrder.chain.map((c, i) => (
+                    <span key={i}>{i > 0 ? " → " : ""}<b>{tx(c.node)}</b> {tx(c.effect)}</span>
+                  ))}
+                </span>
+              ) : null}
+              <span className={css.micro}>{tx("Estimate. Open the Home Studio to test it against your real numbers.")}</span>
+              <div className={x.previewActs}>
+                <button type="button" className={css.cta} onClick={() => onStudio("home")}>{tx("Open Home Studio")}</button>
+              </div>
+            </div>
+          ) : null}
 
           {spendPreview && spendAmt > 0 ? (
             <div className={x.preview}>
@@ -239,6 +304,37 @@ function Inner({ onRoute, onStudio }) {
           </div>
         </section>
 
+        {/* ---- Before you commit: what NOT to do + a stress test ---- */}
+        {(negatives.items.length || stress) ? (
+          <section className={css.section}>
+            <p className={css.kicker}>{tx("Before you commit")}</p>
+
+            {negatives.items.map((n, i) => (
+              <div key={i} className={x.dont}>
+                <b>{tx(n.dont)}</b>
+                <span className={css.micro}>{tx(n.because)}</span>
+              </div>
+            ))}
+
+            {stress ? (
+              <div className={x.stress}>
+                <b>{tx(stress.shock)}</b>
+                {stress.survivesShock ? (
+                  <span className={css.micro}>
+                    {tx("Your line holds — about {n} months of runway before anything breaks.", { n: stress.monthsOfRunway })}
+                    {stress.weakestPlan ? ` ${tx("Pausing {d} would stretch it further.", { d: tx(stress.weakestPlan.label) })}` : ""}
+                  </span>
+                ) : (
+                  <span className={css.micro}>
+                    {tx("It breaks around {m} — short by {v}.", { m: stress.breaksAt, v: money(stress.shortBy) })}
+                    {stress.weakestPlan ? ` ${tx("Pausing {d} buys about {n} months.", { d: tx(stress.weakestPlan.label), n: stress.weakestPlan.pausingBuysMonths })}` : ""}
+                  </span>
+                )}
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         {/* ---- Life Studios ---- */}
         <section className={css.section}>
           <p className={css.kicker}>{tx("Life Studios")}</p>
@@ -259,6 +355,10 @@ function Inner({ onRoute, onStudio }) {
             <ul className={x.studioShows}>
               {studio.shows.map((s) => <li key={s}>{tx(s)}</li>)}
             </ul>
+            {(() => {
+              const oq = nextBestQuestion({ domain: studio.domain, known: [] });
+              return oq ? <span className={x.oneQ}>{tx("Answer one thing to sharpen this:")} {tx(oq.q)}</span> : null;
+            })()}
             <button type="button" className={css.cta} onClick={() => onStudio(studio.domain)}>{tx("Explore {name}", { name: tx(studio.name) })}</button>
           </div>
         </section>
@@ -266,6 +366,19 @@ function Inner({ onRoute, onStudio }) {
         {/* ---- Recent Futures ---- */}
         <section className={css.section}>
           <p className={css.kicker}>{tx("Recent futures")}</p>
+          {receipt && receipt.lines.length ? (
+            <div className={x.receipt}>
+              <span className={x.previewHead}>{tx("Future receipt")}</span>
+              <b>{tx("You tested:")} {receipt.title}</b>
+              {receipt.lines.map((l, i) => (
+                <div key={i} className={x.receiptRow}>
+                  <span>{tx(l.label)}</span>
+                  <span>{l.before} <b>→</b> {l.after}{l.delta ? ` (${l.delta})` : ""}</span>
+                </div>
+              ))}
+              <span className={css.micro}>{tx("Estimate, recomputed from your Change Ledger.")}</span>
+            </div>
+          ) : null}
           <FeatureHistory feature="explore" label="Recent futures" />
         </section>
 
