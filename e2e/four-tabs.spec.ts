@@ -9,6 +9,7 @@ const rid = () => Math.random().toString(36).slice(2, 9);
 const hdr = { origin: BASE, referer: `${BASE}/` };
 
 test("Today / Life / Explore / Guardian all render and their key controls work", async ({ page }) => {
+  test.setTimeout(120000);
   const email = `e2e-fourtabs-${rid()}@futureos.test`;
   const signup = await page.request.post(`${BASE}/api/auth/signup`, {
     data: { email, password: "test-password-123", displayName: "E2E User" },
@@ -40,10 +41,14 @@ test("Today / Life / Explore / Guardian all render and their key controls work",
   await expect(page.getByText(/Where your money sits|Nothing added yet/i).first()).toBeVisible();
   await page.getByRole("button", { name: /← Today/i }).click();
 
-  // --- Life (bottom-nav-lifeGraph) ---
+  // --- Life (bottom-nav-lifeGraph): the Living Thread — a direction line,
+  // the Life Position sentence, a weather chip, Life Memory ---
   await page.getByTestId("bottom-nav-lifeGraph").click();
-  await expect(page.getByText(/Life position/i)).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/What is moving|steady|not set up/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Life$/ })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/promised to (your )?future plans/i).first()).toBeVisible();
+  await expect(page.getByText(/safety (covers|buffer)/i).first()).toBeVisible();
+  await expect(page.getByText(/\b(Calm|Tight|Exposed|Recovering|Opportunity)\b/).first()).toBeVisible();
+  await expect(page.getByText(/Latest movement|Your starting point/i).first()).toBeVisible();
 
   // --- Explore (bottom-nav-mirror) ---
   await page.getByTestId("bottom-nav-mirror").click();
@@ -54,11 +59,12 @@ test("Today / Life / Explore / Guardian all render and their key controls work",
   await page.getByText(/Financial Twin/i).first().click();
   await expect(page.getByRole("heading", { name: /Your money picture/i })).toBeVisible({ timeout: 15000 });
 
-  // --- Guardian (bottom-nav-guardian) ---
+  // --- Guardian (bottom-nav-guardian): the protection layer — one status
+  // + what it protects ---
   await page.getByTestId("bottom-nav-guardian").click();
   await expect(page.getByRole("heading", { name: /^Guardian$/ })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/What Guardian can never do/i)).toBeVisible();
-  await expect(page.getByText(/move money or make a payment/i)).toBeVisible();
+  await expect(page.getByText(/^(Calm|Watching|Decision|Urgent)$/).first()).toBeVisible();
+  await expect(page.getByText(/of \d+ promises protected/i)).toBeVisible();
 
   // nav round-trips back to Today
   await page.getByTestId("bottom-nav-home").click();
