@@ -225,6 +225,24 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   };
   const clearPlaced = () => { setPlacedFrag(null); setFragMonthly(null); setFragAdjustOpen(false); setFragDone(null); };
   const placedReceipt = placedFrag ? simulateFragment(placedFrag, lt, { overrideMonthly: fragMonthly }) : null;
+
+  // Which node visibly reacts while a fragment sits on the line (ghost),
+  // and how far it shifts. build/described add a ghost node; accelerate
+  // pulls an existing node earlier; protect shields Safety.
+  const activeFrag = placedFrag ?? null;
+  const NODE_FOR_DOMAIN = { home: "home", wedding: "relationships", family: "relationships", investment: "freedom", retirement: "future", emergency: "safety" };
+  const placedEffect = (() => {
+    const f = activeFrag;
+    if (!f) return null;
+    if (f.described) return { kind: "ghost", nodeId: null, label: f.goalLabel, year: String(f.horizonYear ?? "") };
+    if (f.kind === "build") return { kind: "ghost", nodeId: "freedom", label: tx("One year of freedom"), year: String(f.projected?.readyYear ?? "") };
+    if (f.kind === "accelerate") {
+      const dom = f.projected?.planShift?.domain;
+      return { kind: "pull", nodeId: NODE_FOR_DOMAIN[dom] ?? "home", months: f.projected?.planShift?.monthsEarlier ?? 0 };
+    }
+    return { kind: "shield", nodeId: "safety" };
+  })();
+  const placing = Boolean(activeFrag);
   const confirmFragment = async () => {
     if (!placedFrag || fragBusy) return;
     // A described (free-text) fragment routes to its Studio to nail down
@@ -324,14 +342,25 @@ function Inner({ onStudio, onAddReality, onRoute }) {
         ) : null}
 
         <section className={css.section}>
-          <div className={life.thread}>
-            {shownNodes.map((n) => (
-              <div key={n.id} className={life.node}>
-                <span className={`${life.nodeDot} ${life[n.state] || ""} ${n.ring ? life.ring : ""}`} />
+          <div className={`${life.thread} ${placing ? life.threadPlacing : ""}`}>
+            {shownNodes.map((n) => {
+              const hit = placedEffect && placedEffect.nodeId === n.id;
+              const cls = hit
+                ? placedEffect.kind === "pull" ? life.nodePulled
+                : placedEffect.kind === "shield" ? life.nodeShielded
+                : life.nodeNudged
+                : "";
+              return (
+              <div key={n.id} className={`${life.node} ${cls}`}>
+                <span className={`${life.nodeDot} ${life[n.state] || ""} ${n.ring ? life.ring : ""} ${hit ? life.nodeDotBreathe : ""}`} />
                 <div className={life.nodeRowTop}>
                   <span className={life.nodeName}>{tx(n.label)}</span>
                   {n.valueText ? <span className={life.nodeVal}>{n.valueText}</span> : null}
-                  {n.collision ? (
+                  {hit && placedEffect.kind === "pull" && placedEffect.months ? (
+                    <span className={life.nodeShiftBadge}>↑ ~{placedEffect.months} {tx("months earlier")}</span>
+                  ) : hit && placedEffect.kind === "shield" ? (
+                    <span className={life.nodeShiftBadge}>🛡 {tx("protected")}</span>
+                  ) : n.collision ? (
                     <span className={life.nodeCollision}>{tx(n.note)}</span>
                   ) : n.note ? (
                     <span className={life.nodeState}>{tx(n.note)}</span>
@@ -367,7 +396,18 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                   />
                 ) : null}
               </div>
-            ))}
+              );
+            })}
+            {!replay && placedEffect && placedEffect.kind === "ghost" ? (
+              <div className={`${life.node} ${life.nodeGhostNew}`}>
+                <span className={`${life.nodeDot} ${life.ghost} ${life.nodeDotBreathe}`} />
+                <div className={life.nodeRowTop}>
+                  <span className={life.nodeName}>{placedEffect.label}</span>
+                  {placedEffect.year ? <span className={life.nodeVal}>{placedEffect.year}</span> : null}
+                  <span className={life.nodeShiftBadge}>{tx("New — not sealed")}</span>
+                </div>
+              </div>
+            ) : null}
             {!replay && (fragments.length > 0 || thread.futureSlot) ? (
               <div className={life.fragmentSlot}>
                 <button
