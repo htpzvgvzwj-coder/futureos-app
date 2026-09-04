@@ -213,7 +213,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
           </div>
         ) : null}
 
-        <p className={life.direction}>{tx(shownDirectionKey, shownDirectionParams)}</p>
+        <p className={life.direction}>{txWithParams(tx, shownDirectionKey, shownDirectionParams)}</p>
 
         {shownWeather ? (
           <span

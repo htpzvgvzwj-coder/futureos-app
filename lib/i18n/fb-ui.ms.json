@@ -315,5 +315,20 @@
   "Approval rules saved. Money moves that match will wait for a decision in Guardian.": "Peraturan kelulusan disimpan. Gerakan wang yang sepadan akan menunggu keputusan dalam Penjaga.",
   "Could not save the approval rules. Try again.": "Tidak dapat simpan peraturan kelulusan. Cuba lagi.",
   "Handoff plan saved as a written note. Future Bank never carries it out on its own.": "Pelan penyerahan disimpan sebagai nota bertulis. Future Bank tidak sekali-kali melaksanakannya sendiri.",
-  "Could not save the handoff plan. Try again.": "Tidak dapat simpan pelan penyerahan. Cuba lagi."
+  "Could not save the handoff plan. Try again.": "Tidak dapat simpan pelan penyerahan. Cuba lagi.",
+  "Your future is funded, but {a} and {b} are competing for the same monthly space.": "Masa depan anda berdana, tetapi {a} dan {b} bersaing untuk ruang bulanan yang sama.",
+  "Salary arrived": "Gaji telah masuk",
+  "Reality caught up with your plan": "Realiti telah menyusul pelan anda",
+  "Guardian noticed": "Penjaga perasan",
+  "Wedding plan created": "Pelan perkahwinan dicipta",
+  "Home plan created": "Pelan rumah dicipta",
+  "Safety plan created": "Pelan keselamatan dicipta",
+  "Freedom plan created": "Pelan kebebasan dicipta",
+  "Retirement plan created": "Pelan persaraan dicipta",
+  "Family plan created": "Pelan keluarga dicipta",
+  "Wedding plan adjusted": "Pelan perkahwinan diselaraskan",
+  "Home plan adjusted": "Pelan rumah diselaraskan",
+  "Safety plan adjusted": "Pelan keselamatan diselaraskan",
+  "Retirement plan adjusted": "Pelan persaraan diselaraskan",
+  "Freedom plan adjusted": "Pelan kebebasan diselaraskan"
 }
