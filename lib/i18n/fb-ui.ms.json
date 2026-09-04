@@ -622,5 +622,17 @@
   "What's the trip budget?": "Apakah bajet perjalanan?",
   "How many years before you'd need this money back?": "Berapa tahun sebelum anda perlukan wang ini semula?",
   "How many people depend on your income?": "Berapa ramai bergantung pada pendapatan anda?",
-  "What amount do you want to share visibility of?": "Jumlah apa yang anda mahu kongsi keterlihatannya?"
+  "What amount do you want to share visibility of?": "Jumlah apa yang anda mahu kongsi keterlihatannya?",
+  "Don't move {amt} out of spending this week": "Jangan alih {amt} daripada perbelanjaan minggu ini",
+  "{v} of bills land before your income in {d} days. It's protecting them.": "{v} bil tiba sebelum pendapatan anda dalam {d} hari. Ia melindunginya.",
+  "{v} of bills land soon. It's protecting them.": "{v} bil tiba tidak lama lagi. Ia melindunginya.",
+  "Don't start a new monthly commitment yet": "Jangan mulakan komitmen bulanan baharu lagi",
+  "Your safety buffer is below its floor — rebuild it first, then add.": "Penampan keselamatan anda di bawah parasnya — bina semula dahulu, kemudian tambah.",
+  "Don't add another plan this month": "Jangan tambah pelan lain bulan ini",
+  "{a} and {b} already want {v}/month more than is free.": "{a} dan {b} sudah mahu {v}/bulan lebih daripada yang bebas.",
+  "Don't raise a plan's monthly amount right now": "Jangan naikkan jumlah bulanan pelan sekarang",
+  "Only {v}/month is still flexible — a small change would leave no room to absorb a surprise.": "Hanya {v}/bulan masih fleksibel — perubahan kecil tidak akan meninggalkan ruang untuk kejutan.",
+  "As planned": "Seperti dirancang",
+  "{n} months sooner": "{n} bulan lebih awal",
+  "{n} months later": "{n} bulan kemudian"
 }

@@ -1335,5 +1335,17 @@
   "What's the trip budget?": "这趟旅行的预算是多少？",
   "How many years before you'd need this money back?": "多少年后你会需要拿回这笔钱？",
   "How many people depend on your income?": "有多少人依赖你的收入？",
-  "What amount do you want to share visibility of?": "你想共享哪个金额的可见性？"
+  "What amount do you want to share visibility of?": "你想共享哪个金额的可见性？",
+  "Don't move {amt} out of spending this week": "本周别从消费里挪走 {amt}",
+  "{v} of bills land before your income in {d} days. It's protecting them.": "{d} 天后收入到账前有 {v} 的账单要付。它在保护这些账单。",
+  "{v} of bills land soon. It's protecting them.": "很快有 {v} 的账单要付。它在保护这些账单。",
+  "Don't start a new monthly commitment yet": "先别开始新的每月承诺",
+  "Your safety buffer is below its floor — rebuild it first, then add.": "你的安全缓冲已低于底线——先重建，再增加。",
+  "Don't add another plan this month": "这个月别再加计划",
+  "{a} and {b} already want {v}/month more than is free.": "{a}和{b}想要的已经比可自由支配的每月多 {v}。",
+  "Don't raise a plan's monthly amount right now": "现在别提高某个计划的每月金额",
+  "Only {v}/month is still flexible — a small change would leave no room to absorb a surprise.": "只剩 {v}/月 可灵活支配——小改动就没有余地应对意外了。",
+  "As planned": "按原计划",
+  "{n} months sooner": "提前 {n} 个月",
+  "{n} months later": "推迟 {n} 个月"
 }

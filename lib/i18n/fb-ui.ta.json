@@ -622,5 +622,17 @@
   "What's the trip budget?": "பயண பட்ஜெட் என்ன?",
   "How many years before you'd need this money back?": "இந்தப் பணம் திரும்பத் தேவைப்படுவதற்கு எத்தனை ஆண்டுகள்?",
   "How many people depend on your income?": "உங்கள் வருமானத்தை எத்தனை பேர் நம்பியுள்ளனர்?",
-  "What amount do you want to share visibility of?": "எந்தத் தொகையின் தெரிவுநிலையைப் பகிர விரும்புகிறீர்கள்?"
+  "What amount do you want to share visibility of?": "எந்தத் தொகையின் தெரிவுநிலையைப் பகிர விரும்புகிறீர்கள்?",
+  "Don't move {amt} out of spending this week": "இந்த வாரம் செலவிலிருந்து {amt} ஐ நகர்த்த வேண்டாம்",
+  "{v} of bills land before your income in {d} days. It's protecting them.": "{d} நாட்களில் உங்கள் வருமானத்திற்கு முன் {v} பில்கள் வரும். அது அவற்றைப் பாதுகாக்கிறது.",
+  "{v} of bills land soon. It's protecting them.": "விரைவில் {v} பில்கள் வரும். அது அவற்றைப் பாதுகாக்கிறது.",
+  "Don't start a new monthly commitment yet": "இன்னும் புதிய மாதாந்திர உறுதிப்பாட்டைத் தொடங்க வேண்டாம்",
+  "Your safety buffer is below its floor — rebuild it first, then add.": "உங்கள் பாதுகாப்பு காப்பு அதன் எல்லைக்குக் கீழே உள்ளது — முதலில் மீண்டும் கட்டி, பிறகு சேர்க்கவும்.",
+  "Don't add another plan this month": "இந்த மாதம் மற்றொரு திட்டத்தைச் சேர்க்க வேண்டாம்",
+  "{a} and {b} already want {v}/month more than is free.": "{a}-ம் {b}-ம் ஏற்கனவே இலவசமாக உள்ளதை விட மாதம் {v} அதிகம் விரும்புகின்றன.",
+  "Don't raise a plan's monthly amount right now": "இப்போது ஒரு திட்டத்தின் மாதத் தொகையை உயர்த்த வேண்டாம்",
+  "Only {v}/month is still flexible — a small change would leave no room to absorb a surprise.": "{v}/மாதம் மட்டுமே இன்னும் நெகிழ்வானது — ஒரு சிறிய மாற்றம் எதிர்பாராததை ஈடுசெய்ய இடமளிக்காது.",
+  "As planned": "திட்டமிட்டபடி",
+  "{n} months sooner": "{n} மாதங்கள் முன்னதாக",
+  "{n} months later": "{n} மாதங்கள் பின்னர்"
 }

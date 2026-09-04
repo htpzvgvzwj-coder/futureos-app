@@ -89,7 +89,7 @@ export function ExploreView(props) {
 function ExploreDelayRow({ r, tx, money }) {
   return (
     <>
-      <span className={r.delta === 0 ? x.delayNow : undefined}>{tx(r.label)}</span>
+      <span className={r.delta === 0 ? x.delayNow : undefined}>{tx(r.labelKey ?? r.label, r.labelParams)}</span>
       <span>{r.readyYear}</span>
       <span>{r.bufferMonthsAfter != null ? `${r.bufferMonthsAfter} mo` : "—"}</span>
       <span>{r.monthlyRoomAfter != null ? money(r.monthlyRoomAfter) : "—"}</span>
@@ -311,8 +311,8 @@ function Inner({ onRoute, onStudio }) {
 
             {negatives.items.map((n, i) => (
               <div key={i} className={x.dont}>
-                <b>{tx(n.dont)}</b>
-                <span className={css.micro}>{tx(n.because)}</span>
+                <b>{tx(n.dontKey ?? n.dont, n.dontParams)}</b>
+                <span className={css.micro}>{tx(n.becauseKey ?? n.because, n.becauseParams)}</span>
               </div>
             ))}
 
