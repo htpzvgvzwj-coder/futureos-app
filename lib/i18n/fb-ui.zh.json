@@ -1359,5 +1359,16 @@
   "Insurance cover gap": "保险保障缺口",
   "Home price & timeline": "购房价格和时间线",
   "Investment returns": "投资回报",
-  "Next income date": "下一笔收入日期"
+  "Next income date": "下一笔收入日期",
+  "You haven't put a monthly amount on {name} yet — start it and this fills in.": "你还没给「{name}」设定每月金额——开始之后这里就会填上。",
+  "Buying about a year sooner moves {name} to {y}, but your safety buffer drops from {b1} to {b2} months.": "早约一年入手会把「{name}」提前到 {y}，但你的安全缓冲会从 {b1} 个月降到 {b2} 个月。",
+  "{name} sits on your line for {y}, taking {m}/month. Change it and the rest of your line responds.": "「{name}」在你的人生线上定在 {y}，每月占用 {m}。改动它，人生线的其余部分会响应。",
+  "Drag the plan and watch your line move": "拖动计划，看你的人生线移动",
+  "What moves": "什么会动",
+  "From the same projection the Home Studio uses.": "用的是「购房工作室」相同的投影计算。",
+  "Estimate — sharpen it in Future Field.": "估算——在 Future Field 里让它更精确。",
+  "Answer one thing to sharpen this": "回答一个问题让它更精确",
+  "Answer it in Future Field →": "在 Future Field 里回答 →",
+  "See what it affects": "看它影响什么",
+  "See it on your line": "在你的人生线上看"
 }

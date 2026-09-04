@@ -646,5 +646,17 @@
   "Insurance cover gap": "Jurang perlindungan insurans",
   "Home price & timeline": "Harga rumah & garis masa",
   "Investment returns": "Pulangan pelaburan",
-  "Next income date": "Tarikh pendapatan seterusnya"
+  "Next income date": "Tarikh pendapatan seterusnya",
+  "You haven't put a monthly amount on {name} yet — start it and this fills in.": "Anda belum letak jumlah bulanan pada {name} — mulakannya dan ini akan terisi.",
+  "Buying about a year sooner moves {name} to {y}, but your safety buffer drops from {b1} to {b2} months.": "Membeli kira-kira setahun lebih awal mengalihkan {name} ke {y}, tetapi penampan keselamatan anda turun dari {b1} ke {b2} bulan.",
+  "{name} sits on your line for {y}, taking {m}/month. Change it and the rest of your line responds.": "{name} berada pada garis anda untuk {y}, mengambil {m}/bulan. Ubah ia dan seluruh garis anda bertindak balas.",
+  "Drag the plan and watch your line move": "Seret pelan dan lihat garis anda bergerak",
+  "Change": "Ubah",
+  "What moves": "Apa yang bergerak",
+  "From the same projection the Home Studio uses.": "Daripada unjuran yang sama digunakan oleh Studio Rumah.",
+  "Estimate — sharpen it in Future Field.": "Anggaran — tajamkannya dalam Future Field.",
+  "Answer one thing to sharpen this": "Jawab satu perkara untuk menajamkannya",
+  "Answer it in Future Field →": "Jawab dalam Future Field →",
+  "See what it affects": "Lihat apa yang ia jejaskan",
+  "See it on your line": "Lihat pada garis anda"
 }

@@ -646,5 +646,17 @@
   "Insurance cover gap": "காப்பீட்டு பாதுகாப்பு இடைவெளி",
   "Home price & timeline": "வீட்டு விலை & கால அட்டவணை",
   "Investment returns": "முதலீட்டு வருமானம்",
-  "Next income date": "அடுத்த வருமான தேதி"
+  "Next income date": "அடுத்த வருமான தேதி",
+  "You haven't put a monthly amount on {name} yet — start it and this fills in.": "நீங்கள் இன்னும் {name} க்கு மாதத் தொகையை அமைக்கவில்லை — தொடங்கினால் இது நிரப்பப்படும்.",
+  "Buying about a year sooner moves {name} to {y}, but your safety buffer drops from {b1} to {b2} months.": "சுமார் ஒரு வருடம் முன்னதாக வாங்குவது {name} ஐ {y} க்கு நகர்த்துகிறது, ஆனால் உங்கள் பாதுகாப்பு காப்பு {b1} இலிருந்து {b2} மாதங்களாகக் குறைகிறது.",
+  "{name} sits on your line for {y}, taking {m}/month. Change it and the rest of your line responds.": "{name} உங்கள் கோட்டில் {y} க்கு உள்ளது, மாதம் {m} எடுக்கிறது. அதை மாற்றினால் உங்கள் கோட்டின் மற்ற பகுதி பதிலளிக்கும்.",
+  "Drag the plan and watch your line move": "திட்டத்தை இழுத்து உங்கள் கோடு நகர்வதைப் பார்",
+  "Change": "மாற்று",
+  "What moves": "எது நகர்கிறது",
+  "From the same projection the Home Studio uses.": "வீட்டு Studio பயன்படுத்தும் அதே கணிப்பிலிருந்து.",
+  "Estimate — sharpen it in Future Field.": "மதிப்பீடு — Future Field இல் அதைக் கூர்மைப்படுத்துங்கள்.",
+  "Answer one thing to sharpen this": "இதைக் கூர்மைப்படுத்த ஒன்றுக்கு பதிலளிக்கவும்",
+  "Answer it in Future Field →": "Future Field இல் பதிலளி →",
+  "See what it affects": "அது எதைப் பாதிக்கிறது என்று பார்",
+  "See it on your line": "உங்கள் கோட்டில் பார்"
 }

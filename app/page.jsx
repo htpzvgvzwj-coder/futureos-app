@@ -15,6 +15,7 @@ import { LifeView } from "./components/future-bank/LifeView.jsx";
 import { FamilyCareView } from "./components/future-bank/FamilyCareView.jsx";
 import { ExploreView } from "./components/future-bank/ExploreView.jsx";
 import { ImpactMapView } from "./components/future-bank/ImpactMapView.jsx";
+import { StudioView } from "./components/future-bank/StudioView.jsx";
 import { SpendingView } from "./components/future-bank/SpendingView.jsx";
 import { ConnectionsView } from "./components/future-bank/ConnectionsView.jsx";
 import { SupervisedView } from "./components/future-bank/SupervisedView.jsx";
@@ -219,6 +220,7 @@ const screens = {
   CONNECTIONS: "connections",
   SUPERVISED: "supervised",
   IMPACT_MAP: "impactMap",
+  STUDIO: "studio",
 };
 
 const locales = { en, zh, ms, ta };
@@ -3283,6 +3285,7 @@ function getNavScreen(activeScreen) {
   if (activeScreen === screens.LOADING) return screens.MIRROR;
   if (activeScreen === screens.EXPLORE_CHAT) return screens.MIRROR;
   if (activeScreen === screens.IMPACT_MAP) return screens.MIRROR;
+  if (activeScreen === screens.STUDIO) return screens.MIRROR;
   if (activeScreen === screens.FUTURE_FIELD) return screens.MIRROR;
   if (activeScreen === screens.HOME_HORIZON) return screens.MIRROR;
   if (activeScreen === screens.EMERGENCY_RUNWAY) return screens.MIRROR;
@@ -17296,6 +17299,7 @@ export default function App() {
   const [jointDebateViewId, setJointDebateViewId] = useState(null);
   const [supervisedTarget, setSupervisedTarget] = useState(null); // { ownerKey, ownerLabel }
   const [futureFieldDomain, setFutureFieldDomain] = useState("home"); // which plan Future Field opens on
+  const [studioViewDomain, setStudioViewDomain] = useState("home"); // which Studio the unified StudioView shows
   const preferencesSyncTimer = useRef(null);
 
   const t = useMemo(() => makeTranslator(language), [language]);
@@ -17711,9 +17715,9 @@ export default function App() {
         onHistory={() => setActiveScreen(screens.CHANGE_LEDGER)}
         onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
         onStudio={(d) => {
-          if (d === "relationships") return setActiveScreen(screens.FAMILY_CARE);
-          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
-          setActiveScreen(target ?? screens.REALITY_ENTRY);
+          if (d === "relationships" || d === "family") return setActiveScreen(screens.FAMILY_CARE);
+          if (STUDIO_SCREEN_FOR_DOMAIN[d]) { setStudioViewDomain(d); return setActiveScreen(screens.STUDIO); }
+          setActiveScreen(screens.REALITY_ENTRY);
         }}
         onRoute={(r) => {
           const s = String(r || "");
@@ -17773,8 +17777,8 @@ export default function App() {
       <ExploreView
         onStudio={(d) => {
           if (d === "family") return setActiveScreen(screens.FAMILY_CARE);
-          const target = STUDIO_SCREEN_FOR_DOMAIN[d];
-          setActiveScreen(target ?? screens.HOME);
+          setStudioViewDomain(d);
+          setActiveScreen(screens.STUDIO);
         }}
         onRoute={(r) => {
           const s = String(r || "");
@@ -17792,7 +17796,12 @@ export default function App() {
           }
           if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
           if (s === "history") return setActiveScreen(screens.CHANGE_LEDGER);
-          if (s.startsWith("studio:")) { const t2 = STUDIO_SCREEN_FOR_DOMAIN[s.slice(7)]; return setActiveScreen(t2 ?? screens.HOME); }
+          if (s.startsWith("studio:")) {
+            const d = s.slice(7);
+            if (d === "family") return setActiveScreen(screens.FAMILY_CARE);
+            setStudioViewDomain(d);
+            return setActiveScreen(screens.STUDIO);
+          }
           setActiveScreen(screens.HOME);
         }}
       />
@@ -17800,7 +17809,24 @@ export default function App() {
     [screens.IMPACT_MAP]: (
       <ImpactMapView
         onBack={() => setActiveScreen(screens.MIRROR)}
-        onStudio={(d) => { const t = STUDIO_SCREEN_FOR_DOMAIN[d]; setActiveScreen(t ?? screens.MIRROR); }}
+        onStudio={(d) => { setStudioViewDomain(d); setActiveScreen(screens.STUDIO); }}
+      />
+    ),
+    [screens.STUDIO]: (
+      <StudioView
+        domain={studioViewDomain}
+        onBack={() => setActiveScreen(screens.MIRROR)}
+        onRoute={(r) => {
+          const s = String(r || "");
+          if (s === "life") return setActiveScreen(screens.LIFE_GRAPH);
+          if (s === "impact_map") return setActiveScreen(screens.IMPACT_MAP);
+          if (s === "future_field" || s.startsWith("future_field:")) {
+            const d = s.includes(":") ? s.slice(s.indexOf(":") + 1) : studioViewDomain;
+            setFutureFieldDomain(STUDIO_SCREEN_FOR_DOMAIN[d] ? d : "home");
+            return setActiveScreen(screens.FUTURE_FIELD);
+          }
+          setActiveScreen(screens.MIRROR);
+        }}
       />
     ),
     [screens.EXPLORE_CHAT]: exploreChatScreen,
