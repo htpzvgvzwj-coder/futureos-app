@@ -252,6 +252,7 @@ function Inner({ onRoute, onOpenSupervised }) {
               ))}
             </div>
             <p className={css.micro}>{tx("Guardian proposes this — nothing changes until you confirm a step.")}</p>
+            <FeatureHistory feature="guardian:recovery" label="Recovery steps you've confirmed" compact />
           </section>
         ) : null}
 
@@ -270,6 +271,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                 ))}
               </div>
             </div>
+            <FeatureHistory feature="guardian:collision" label="Collision choices you've made" compact />
           </section>
         ) : null}
 
@@ -285,6 +287,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                 </div>
               ))}
             </div>
+            <FeatureHistory feature="guardian:moves" label="Money moves Guardian made across your plans" compact />
           </section>
         ) : null}
 
@@ -348,8 +351,9 @@ function Inner({ onRoute, onOpenSupervised }) {
 
         {foldOpen ? (
           <>
-            {/* approval queue */}
-            {auth && (pending.length > 0 || auth.accountType === "youth" || auth.accountType === "guardian_managed_child") ? (
+            {/* approval queue — always shown inside the fold so its record
+                is reachable even when nothing is pending right now */}
+            {auth ? (
               <section className={css.section}>
                 <p className={css.kicker}>{tx("Waiting for approval")}</p>
                 {!auth.linkedApprover ? (
@@ -395,6 +399,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                     </article>
                   ))
                 )}
+                <FeatureHistory feature="guardian:approvals" label="Approvals you've decided" compact />
               </section>
             ) : null}
 
@@ -423,6 +428,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                     </div>
                   ))}
                 </div>
+                <FeatureHistory feature="guardian:supervised" label="Decisions on accounts you look after" compact />
               </section>
             ) : null}
             {supervisors.length > 0 ? (
@@ -454,6 +460,7 @@ function Inner({ onRoute, onOpenSupervised }) {
                   </div>
                 ))}
                 <button type="button" className={css.link} onClick={resetCaps} style={{ marginTop: 10 }}>{tx("Reset every capability to its default")}</button>
+                <FeatureHistory feature="guardian:contract" label="Contract changes" compact />
               </section>
             ) : null}
           </>
