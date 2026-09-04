@@ -18,6 +18,7 @@ import { buildLivingThread } from "../../../lib/life/thread.js";
 import { compactThread } from "../../../lib/life/snapshot-shape.js";
 import { buildFutureEcho, answerLineQuestion, lineSuggestions } from "../../../lib/life/ask.js";
 import { forecastHeadline } from "../../../lib/life/forecast.js";
+import { buildNodeMoment } from "../../../lib/life/moment.js";
 import { detectCollision } from "../../../lib/guardian/collision.js";
 import { isPullable } from "../../../lib/life/pull.js";
 import { buildLifeMemory } from "../../../lib/life/memory.js";
@@ -103,6 +104,7 @@ function Inner({ onStudio, onAddReality, onRoute }) {
   const [forecast, setForecast] = useState(null);
   const [forecastOpen, setForecastOpen] = useState(false);
   const [askSim, setAskSim] = useState(null); // preview of an Ask-the-Line "what if"
+  const [momentNode, setMomentNode] = useState(null); // node id -> Moment Sheet
   const reconciledFor = useRef(null);
 
   const collision = detectCollision({
@@ -279,8 +281,12 @@ function Inner({ onStudio, onAddReality, onRoute }) {
                 </div>
                 {replay ? null : (
                 <div className={life.nodeActs}>
-                  <button type="button" className={life.nodeBtn} onClick={() => openNode(n.id)}>
-                    {tx(n.cta)} →
+                  <button
+                    type="button"
+                    className={life.nodeBtn}
+                    onClick={() => (n.state === "hollow" ? openNode(n.id) : setMomentNode(n.id))}
+                  >
+                    {n.state === "hollow" ? `${tx(n.cta)} →` : `${tx("Look at this")} →`}
                   </button>
                   {isPullable(n.id) && n.state !== "hollow" ? (
                     <button
@@ -401,6 +407,45 @@ function Inner({ onStudio, onAddReality, onRoute }) {
             />
           </section>
         ) : null}
+      </div>
+
+      {momentNode ? (
+        <NodeMomentSheet
+          moment={buildNodeMoment({ nodeId: momentNode, lt, memory, planMovement })}
+          tx={tx}
+          onClose={() => setMomentNode(null)}
+          onOpenStudio={() => { const id = momentNode; setMomentNode(null); openNode(id); }}
+          onTry={() => { const id = momentNode; setMomentNode(null); if (isPullable(id)) setPullNode(id); else openNode(id); }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function NodeMomentSheet({ moment, tx, onClose, onOpenStudio, onTry }) {
+  return (
+    <div className={css.sheetScrim} onClick={onClose}>
+      <div className={css.sheet} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <span className={css.sheetGrip} />
+        <p className={css.sheetTitle}>{tx(moment.label)}</p>
+        <p className={css.lede}>{tx(moment.standing.key, moment.standing.params)}</p>
+
+        <div className={life.momentRows}>
+          {moment.monthlyUsed != null ? (
+            <div className={css.sheetKV}><span>{tx("Using each month")}</span><span>{money(moment.monthlyUsed)}</span></div>
+          ) : null}
+          {moment.whyMoved ? (
+            <div className={css.sheetKV}><span>{tx("Last moved")}</span><span>{tx(moment.whyMoved.what)} · {relTime(moment.whyMoved.when)}</span></div>
+          ) : null}
+          {moment.affecting.length ? (
+            <div className={css.sheetKV}><span>{tx("Affecting")}</span><span>{moment.affecting.map((a) => tx(a)).join(", ")}</span></div>
+          ) : null}
+        </div>
+
+        <div className={css.choiceGrid}>
+          <button type="button" className={css.cta} onClick={onOpenStudio}>{tx(moment.action.key, moment.action.params)} →</button>
+          <button type="button" className={css.choice} onClick={onTry}>{tx("Try a change")}</button>
+        </div>
       </div>
     </div>
   );
