@@ -21,6 +21,7 @@ import {
   costOfDelay, negativeRecommendations, stressTest, receiptFromLedgerEvent, traceSecondOrder, nextBestQuestion,
   realityConfidence, regretCheck,
 } from "../../../lib/explore/differentiation.js";
+import { routeForQuestion } from "../../../lib/explore/route-for-question.js";
 
 const money = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 const yearOf = (s) => {
@@ -40,29 +41,6 @@ const STUDIOS = [
   { domain: "emergency", name: "Emergency", q: "How many months can I survive?", shows: ["Months covered", "Rebuild path"] },
   { domain: "family", name: "Family", q: "What can we share without exposing everything?", shows: ["Shared band", "Permission boundary"] },
 ];
-
-// A free-text question -> the best place to test it.
-function domainForQuestion(q) {
-  const s = String(q || "").toLowerCase();
-  if (/wedding|marry|marriage/.test(s)) return "wedding";
-  if (/debt|loan|repay|pay.*(down|off)|mortgage/.test(s)) return "loan";
-  if (/home|house|flat|hdb|condo|property|down ?payment|buy a place/.test(s)) return "home";
-  if (/retire|pension|old age/.test(s)) return "retirement";
-  if (/travel|trip|holiday|vacation/.test(s)) return "travel";
-  if (/invest|portfolio|stocks|etf/.test(s)) return "investment";
-  if (/insur|cover|protect/.test(s)) return "insurance";
-  if (/emergency|buffer|runway|survive|job loss|income stop/.test(s)) return "emergency";
-  return null;
-}
-function routeForQuestion(q) {
-  const s = String(q || "").toLowerCase();
-  if (/spend|afford|can i|safe to/.test(s) && !domainForQuestion(q)) return "twin";
-  const d = domainForQuestion(q);
-  // a concrete ask ("buy home 6 months sooner") goes straight into Future
-  // Field with the text so it can pre-fill the peel form; a bare mention
-  // of a life area with no real ask opens the Studio's framed preview.
-  return `future_field:${d ?? "home"}:ask:${encodeURIComponent(q)}`;
-}
 
 const ALL_TOOLS = [
   { group: "Everyday banking", items: [
