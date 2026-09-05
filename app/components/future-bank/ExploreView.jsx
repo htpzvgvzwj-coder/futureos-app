@@ -164,9 +164,25 @@ function Inner({ onRoute, onStudio }) {
   // sealed reality path for), not a hardcoded "home" that dead-ends into
   // "you don't have a confirmed home plan yet" on any account without one.
   const fallbackDomain = lt.commitments?.[0]?.domain ?? "home";
+  const [aiAnswer, setAiAnswer] = useState(null); // { question, text, loading, error }
+  const askAi = async (question) => {
+    setAiAnswer({ question, text: null, loading: true, error: false });
+    try {
+      const r = await fetch("/api/explore/ask-ai", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d?.reply) { setAiAnswer({ question, text: null, loading: false, error: true }); return; }
+      setAiAnswer({ question, text: d.reply, loading: false, error: false });
+    } catch {
+      setAiAnswer({ question, text: null, loading: false, error: true });
+    }
+  };
   const submitQuestion = () => {
     if (!q.trim()) return onRoute("future_field");
-    onRoute(routeForQuestion(q, fallbackDomain));
+    askAi(q);
   };
 
   const studio = STUDIOS.find((st) => st.domain === openStudio) ?? STUDIOS[0];
@@ -198,6 +214,25 @@ function Inner({ onRoute, onStudio }) {
               <button type="button" className={x.quick} onClick={() => setSpendPreview((v) => !v)}>{tx("Spend {amt} safely", { amt: money(spendAmt) })}</button>
             ) : null}
           </div>
+
+          {aiAnswer ? (
+            <div className={x.preview}>
+              <span className={x.previewHead}>{tx("Claude, grounded in your real numbers")}</span>
+              {aiAnswer.loading ? (
+                <span className={x.previewRow}>{tx("Thinking…")}</span>
+              ) : aiAnswer.error ? (
+                <span className={x.previewRow}>{tx("Couldn't get an answer just now — try again in a moment.")}</span>
+              ) : (
+                <span className={x.previewRow}>{aiAnswer.text}</span>
+              )}
+              <div className={x.previewActs}>
+                <button type="button" className={css.cta} onClick={() => onRoute(routeForQuestion(aiAnswer.question, fallbackDomain))}>
+                  {tx("Open Future Field to test this")} →
+                </button>
+                <button type="button" className={css.link} onClick={() => setAiAnswer(null)}>{tx("Close")}</button>
+              </div>
+            </div>
+          ) : null}
 
           {delayOpen && delay ? (
             <div className={x.preview}>

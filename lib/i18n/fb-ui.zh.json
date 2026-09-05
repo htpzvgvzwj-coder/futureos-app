@@ -1438,5 +1438,9 @@
   "Or type it — \"6 months sooner\", \"invest SGD 500 a month\"…": "或直接输入 —— “提前6个月”、“每月投资 SGD 500”……",
   "Type a change": "输入一项变更",
   "Go": "前往",
-  "Couldn't read that as a change here — try a number, or drag the slider instead.": "这里无法理解为一项变更 —— 试试输入数字，或改用滑块拖动。"
+  "Couldn't read that as a change here — try a number, or drag the slider instead.": "这里无法理解为一项变更 —— 试试输入数字，或改用滑块拖动。",
+  "Claude, grounded in your real numbers": "Claude 回答 —— 基于你的真实数据",
+  "Thinking…": "思考中……",
+  "Couldn't get an answer just now — try again in a moment.": "现在无法获取答案 —— 请稍后再试。",
+  "Open Future Field to test this": "打开 Future Field 来测试这个"
 }

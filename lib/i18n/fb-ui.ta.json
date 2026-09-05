@@ -1440,5 +1440,9 @@
   "Or type it — \"6 months sooner\", \"invest SGD 500 a month\"…": "அல்லது தட்டச்சு செய்யவும் — \"6 மாதங்கள் முன்னதாக\", \"மாதம் SGD 500 முதலீடு செய்\"…",
   "Type a change": "ஒரு மாற்றத்தை தட்டச்சு செய்",
   "Go": "செல்",
-  "Couldn't read that as a change here — try a number, or drag the slider instead.": "இதை இங்கே ஒரு மாற்றமாகப் படிக்க முடியவில்லை — ஒரு எண்ணை முயற்சிக்கவும், அல்லது ஸ்லைடரை இழுக்கவும்."
+  "Couldn't read that as a change here — try a number, or drag the slider instead.": "இதை இங்கே ஒரு மாற்றமாகப் படிக்க முடியவில்லை — ஒரு எண்ணை முயற்சிக்கவும், அல்லது ஸ்லைடரை இழுக்கவும்.",
+  "Claude, grounded in your real numbers": "Claude, உங்கள் உண்மையான எண்களை அடிப்படையாகக் கொண்டது",
+  "Thinking…": "யோசிக்கிறது…",
+  "Couldn't get an answer just now — try again in a moment.": "இப்போது பதில் கிடைக்கவில்லை — சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+  "Open Future Field to test this": "இதை சோதிக்க Future Field ஐத் திற"
 }
