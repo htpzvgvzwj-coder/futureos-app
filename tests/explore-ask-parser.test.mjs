@@ -72,3 +72,15 @@ test("property_type doesn't hijack an unrelated numeric ask", () => {
   assert.equal(r.field, "monthly_contribution");
   assert.equal(r.value, 500);
 });
+
+// Regression: a real, serious incident. "can i Buy $150000 car" has no
+// wedding keyword anywhere, but the domain fallback silently set
+// guest_count to 150,000, and peel-always-auto-activates (by design) made
+// that the wedding plan's LIVE, real, active state -- no confirmation
+// step ever shown a value that could be sanity-checked. A number must
+// never target a field whose own keyword isn't actually in the text.
+test("regression: a bare unrelated number targets NO field at all, never a guessed one", () => {
+  assert.equal(parseAsk("can i Buy $150000 car", "wedding"), null);
+  assert.equal(parseAsk("can i Buy $150000 car", "home"), null);
+  assert.equal(parseAsk("random thing costing 5000 dollars", "retirement"), null);
+});

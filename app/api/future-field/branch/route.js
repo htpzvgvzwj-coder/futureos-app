@@ -48,6 +48,32 @@ const ALLOWED_OVERRIDES = {
   family: new Set(["shared_monthly_contribution", "partner_share_ratio", "minimum_current_breathing_room"]),
 };
 
+// A server-side floor under the client-side parser: whatever produced an
+// override (today's ask-box parser, a future one, a bug in either), a
+// count-like field never accepts a value outside what's physically
+// plausible. Regression: "can i Buy $150000 car" (no wedding keyword at
+// all) reached this route with { guest_count: 150000 } -- peel always
+// auto-activates the branch it creates (by design, see below), so that
+// number became the wedding plan's real, live guest count with no
+// confirmation step in between. Fixed at the source (the parser must
+// never guess a field), and backstopped here too.
+const SANITY_BOUNDS = {
+  guest_count: [0, 2000],
+  travellers: [0, 50],
+  nights: [0, 365],
+  target_months: [0, 120],
+  floor_months: [0, 120],
+  income_protection_months: [0, 120],
+  horizon_years: [0, 80],
+  loan_tenure: [0, 40],
+};
+function withinSanityBounds(field, value) {
+  const bounds = SANITY_BOUNDS[field];
+  if (!bounds) return true;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= bounds[0] && n <= bounds[1];
+}
+
 // Peel: create a possible future off the reality path. Also handles
 // ?action=compare and ?action=merge on the same resource.
 export async function POST(request) {
@@ -82,7 +108,7 @@ export async function POST(request) {
     const allowed = ALLOWED_OVERRIDES[domain] ?? ALLOWED_OVERRIDES.home;
     const overrides = {};
     for (const [k, v] of Object.entries(body.overrides ?? {})) {
-      if (allowed.has(k)) overrides[k] = v;
+      if (allowed.has(k) && withinSanityBounds(k, v)) overrides[k] = v;
     }
     if (Object.keys(overrides).length === 0) {
       return Response.json({ error: "no_valid_overrides", allowed: [...allowed] }, { status: 422 });
@@ -203,7 +229,7 @@ export async function POST(request) {
   const allowed = ALLOWED_OVERRIDES[domain] ?? ALLOWED_OVERRIDES.home;
   const overrides = {};
   for (const [k, v] of Object.entries(body.overrides ?? {})) {
-    if (allowed.has(k)) overrides[k] = v;
+    if (allowed.has(k) && withinSanityBounds(k, v)) overrides[k] = v;
   }
   if (Object.keys(overrides).length === 0) {
     return Response.json({ error: "no_valid_overrides", allowed: [...allowed] }, { status: 422 });
