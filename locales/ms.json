@@ -2456,5 +2456,15 @@
       "fragment_expiring": "Jika anda tunggu, pilihan itu kembali menjadi aliran tunai biasa tanpa apa-apa diputuskan.",
       "commitment_completing": "Jika anda tunggu, wang dibebaskan hanya kekal sebagai aliran tunai tanpa arah."
     }
+  },
+  "futureField": {
+    "opt": {
+      "property_type": {
+        "hdb_new": "HDB baharu (BTO)",
+        "hdb_resale": "HDB jual semula",
+        "ec_new": "Kondominium eksekutif (baharu)",
+        "private": "Hartanah persendirian"
+      }
+    }
   }
 }

@@ -3693,6 +3693,12 @@
         "domestic": "国内",
         "regional": "周边",
         "longhaul": "长途"
+      },
+      "property_type": {
+        "hdb_new": "新组屋（BTO）",
+        "hdb_resale": "转售组屋",
+        "ec_new": "执行共管公寓（新）",
+        "private": "私人物业"
       }
     },
     "possibleIfAllocated": "若你分配释放出的现金流，则可能"

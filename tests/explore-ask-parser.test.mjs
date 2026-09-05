@@ -46,3 +46,29 @@ test("unknown domain falls back to home's fields", () => {
   const r = parseAsk("buy it sooner", "not_a_real_domain");
   assert.equal(r.field, "target_complete_month");
 });
+
+// Reported live: "buy a condo in Bugis" did nothing at all -- no field,
+// no value, no acknowledgement of "condo" or "Bugis". property_type is
+// now a real "select" field so this resolves to a genuine plan value
+// (registry.js's real enum), with the area name preserved in the label
+// for display even though there's no schema field for it.
+test("'buy a condo in Bugis' resolves property_type to the real enum value 'private'", () => {
+  const r = parseAsk("buy a condo in Bugis", "home");
+  assert.equal(r.field, "property_type");
+  assert.equal(r.kind, "select");
+  assert.equal(r.value, "private");
+  assert.match(r.label, /Bugis/, "the area name is preserved for display even with no schema field for it");
+});
+
+test("property_type recognises HDB, BTO, EC and landed too", () => {
+  assert.equal(parseAsk("looking at an HDB resale flat", "home").value, "hdb_resale");
+  assert.equal(parseAsk("apply for a BTO", "home").value, "hdb_new");
+  assert.equal(parseAsk("thinking about an executive condo", "home").value, "ec_new");
+  assert.equal(parseAsk("maybe a landed house in Bukit Timah", "home").value, "private");
+});
+
+test("property_type doesn't hijack an unrelated numeric ask", () => {
+  const r = parseAsk("put aside 500 a month", "home");
+  assert.equal(r.field, "monthly_contribution");
+  assert.equal(r.value, 500);
+});

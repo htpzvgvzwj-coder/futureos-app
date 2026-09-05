@@ -67,6 +67,7 @@ const PEEL_FIELDS = {
     { field: "estimated_price", kind: "money" },
     { field: "target_complete_month", kind: "month" },
     { field: "monthly_contribution", kind: "money" },
+    { field: "property_type", kind: "select", options: ["hdb_new", "hdb_resale", "ec_new", "private"] },
   ],
   wedding: [
     { field: "wedding_date", kind: "month" },

@@ -3875,6 +3875,12 @@
         "domestic": "Domestic",
         "regional": "Regional",
         "longhaul": "Long-haul"
+      },
+      "property_type": {
+        "hdb_new": "New HDB (BTO)",
+        "hdb_resale": "HDB resale",
+        "ec_new": "Executive condo (new)",
+        "private": "Private property"
       }
     },
     "possibleIfAllocated": "possible if you allocate the freed cashflow"
