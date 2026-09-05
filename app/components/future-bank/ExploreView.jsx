@@ -159,9 +159,14 @@ function Inner({ onRoute, onStudio }) {
     [soonerRow?.bufferMonthsAfter, soonerRow?.monthlyRoomAfter],
   );
 
+  // Which domain to open when the typed question names none — the
+  // account's own first active commitment (a domain it actually has a
+  // sealed reality path for), not a hardcoded "home" that dead-ends into
+  // "you don't have a confirmed home plan yet" on any account without one.
+  const fallbackDomain = lt.commitments?.[0]?.domain ?? "home";
   const submitQuestion = () => {
     if (!q.trim()) return onRoute("future_field");
-    onRoute(routeForQuestion(q));
+    onRoute(routeForQuestion(q, fallbackDomain));
   };
 
   const studio = STUDIOS.find((st) => st.domain === openStudio) ?? STUDIOS[0];

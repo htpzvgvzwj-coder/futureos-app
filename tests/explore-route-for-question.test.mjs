@@ -38,6 +38,17 @@ test("every domain keyword routes to its own Future Field", () => {
   assertOpensFutureField("What can we share with family without exposing everything?", "family");
 });
 
+test("regression: an unrecognised question defaults to the account's own active domain, not a hardcoded Home dead-end", () => {
+  // Reported live: an account with no confirmed Home plan got dumped on
+  // "You do not have a confirmed home plan yet" no matter what was typed,
+  // because the fallback domain was hardcoded to "home".
+  assert.equal(routeForQuestion("asdkjfh random text", "wedding").split(":")[1], "wedding");
+  assert.equal(routeForQuestion("", "retirement").split(":")[1], "retirement");
+  // still defaults to home when the caller has no active domain to suggest
+  assert.equal(routeForQuestion("asdkjfh random text").split(":")[1], "home");
+  assert.equal(routeForQuestion("asdkjfh random text", null).split(":")[1], "home");
+});
+
 test("an empty or unrecognisable question still opens Future Field, defaulting to Home", () => {
   assertOpensFutureField("asdkjfh random text", "home");
   assert.match(routeForQuestion(""), /^future_field:home:/);
