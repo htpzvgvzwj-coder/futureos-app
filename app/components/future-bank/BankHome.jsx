@@ -262,12 +262,17 @@ export function BankHome(props) {
   );
 }
 
-function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, onAddReality, onTwin }) {
+function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, onAddReality, onTwin, onOpenSupervised }) {
   const { tx } = useTx();
   const fb = useFutureBankData();
   const { twin, status } = fb;
   const [sheet, setSheet] = useState(null);
   const surface = useTodaySurface();
+  const [care, setCare] = useState(null);
+  useEffect(() => {
+    fetch("/api/care", { headers: { "cache-control": "no-cache" } }).then((r) => (r.ok ? r.json() : null)).then(setCare).catch(() => setCare(null));
+  }, [fb.version]);
+  const supervised = care?.supervised ?? [];
 
   const route = (r) => {
     const s = String(r || "");
@@ -380,6 +385,32 @@ function BankHomeInner({ onExplore, onLife, onGuardian, onActivity, onStudio, on
               <p className={css.kicker}>{tx("Plans in motion")}</p>
               <ActivePlanRail limit={3} dense onRoute={route} />
             </section>
+
+            {/* 6b FAMILY — the children and elderly accounts you look after,
+                one tap away, without going through Guardian's fold */}
+            {supervised.length > 0 ? (
+              <section className={css.section}>
+                <p className={css.kicker}>{tx("Family")}</p>
+                <div className={css.activity}>
+                  {supervised.map((p) => (
+                    <button
+                      key={p.roleId}
+                      type="button"
+                      className={css.actItem}
+                      style={{ width: "100%", background: "none", border: 0, textAlign: "left", cursor: "pointer", font: "inherit" }}
+                      onClick={() => onOpenSupervised?.(p.ownerKey, p.ownerLabel)}
+                    >
+                      <span className={css.actGlyph}>{(p.ownerLabel || "?")[0].toUpperCase()}</span>
+                      <span className={css.actBody}>
+                        <span className={css.actName}>{p.ownerLabel}</span>
+                        <span className={css.actMeta}>{tx(p.role)} · {p.scope === "approve" ? tx("view + approve") : tx("view only")}</span>
+                      </span>
+                      <span className={css.link}>{tx("Open")} →</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             {/* 7 RECENT ACTIVITY */}
             <section className={css.section}>

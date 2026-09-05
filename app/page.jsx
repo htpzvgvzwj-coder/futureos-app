@@ -17706,6 +17706,10 @@ export default function App() {
           onAddReality={() => setActiveScreen(screens.REALITY_ENTRY)}
           onTwin={() => setActiveScreen(screens.FINANCIAL_TWIN)}
           onStudio={(d) => { const target = STUDIO_SCREEN_FOR_DOMAIN[d]; if (target) setActiveScreen(target); }}
+          onOpenSupervised={(ownerKey, ownerLabel) => {
+            setSupervisedTarget({ ownerKey, ownerLabel });
+            setActiveScreen(screens.SUPERVISED);
+          }}
         />
       </OnboardingGate>
     ),
