@@ -112,3 +112,33 @@ test("latestMovementLine summarises the most recent record", () => {
   assert.equal(line.lines[0].params.amt, "SGD 420");
   assert.match(line.lines[1].text, /Home: 2 months sooner/);
 });
+
+test("a machine-code uncertainty_note is translated to a real sentence, never shown raw", () => {
+  const m = buildLifeMemory({
+    events: [ev({ action_type: "branch_created", uncertainty_note: "branch_delta_not_numeric", cause: { trigger: "future_field_peel" } })],
+    twin,
+    lifeThread,
+  });
+  assert.equal(m.count, 1);
+  assert.doesNotMatch(m.records[0].why, /^branch_delta_not_numeric$/, "the raw code must not leak onto the screen");
+  assert.match(m.records[0].why, /doesn't reduce to a single number/);
+});
+
+test("a dynamic budget_impact_pending:<field> code is translated with the field named", () => {
+  const m = buildLifeMemory({
+    events: [ev({ action_type: "quote_imported", uncertainty_note: "budget_impact_pending:guest_count" })],
+    twin,
+    lifeThread,
+  });
+  assert.match(m.records[0].why, /Waiting on Guest Count/);
+});
+
+test("an uncertainty_note that is already a real sentence passes through unchanged", () => {
+  const sentence = "Recorded — no commitment was active to change yet.";
+  const m = buildLifeMemory({
+    events: [ev({ action_type: "guardian_action", uncertainty_note: sentence })],
+    twin,
+    lifeThread,
+  });
+  assert.equal(m.records[0].why, sentence);
+});

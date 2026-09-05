@@ -15,6 +15,7 @@ import css from "../../showcase/fb.module.css";
 import life from "./life.module.css";
 import { useTx } from "./i18n.jsx";
 import { PULLABLE, buildPullSpec, overrideFor, captionFor } from "../../../lib/life/pull.js";
+import { parsePullAsk } from "../../../lib/life/parse-pull-ask.js";
 
 const sgd = (n) => `SGD ${Math.round(Number(n) || 0).toLocaleString("en-SG")}`;
 
@@ -49,6 +50,8 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
   const [slider, setSlider] = useState(0);
   const [preview, setPreview] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [askText, setAskText] = useState("");
+  const [askUnrecognised, setAskUnrecognised] = useState(false);
   const timer = useRef(null);
 
   const loadField = useCallback(() => {
@@ -91,6 +94,18 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
     setSlider(v);
     if (Number(v) === Number(spec?.value)) setPreview(null);
     else runPreview(v);
+  };
+
+  // A typed request ("6 months sooner", "invest SGD 500 a month") moves
+  // the same slider a drag does — not a canned formula, a real parse of
+  // this node's own unit (months_shift / months_cushion / sgd_per_month /
+  // age), reusing every bit of machinery the slider already has (preview,
+  // fork, keep).
+  const runAsk = () => {
+    const v = parsePullAsk(askText, spec);
+    if (v == null) { setAskUnrecognised(true); return; }
+    setAskUnrecognised(false);
+    onSlide(v);
   };
 
   const post = async (action, body) => {
@@ -152,6 +167,24 @@ export function PullFold({ nodeId, onClose, onChanged, onStudio }) {
             onChange={(e) => onSlide(e.target.value)}
           />
           <p className={life.pullCaption}>{spec ? captionFor(spec, slider) : ""}</p>
+
+          <form
+            className={life.pullAskRow}
+            onSubmit={(e) => { e.preventDefault(); runAsk(); }}
+          >
+            <input
+              type="text"
+              className={life.pullAskInput}
+              value={askText}
+              onChange={(e) => { setAskText(e.target.value); setAskUnrecognised(false); }}
+              placeholder={tx("Or type it — \"6 months sooner\", \"invest SGD 500 a month\"…")}
+              aria-label={tx("Type a change")}
+            />
+            <button type="submit" className={life.pullAskGo} disabled={!askText.trim()}>{tx("Go")}</button>
+          </form>
+          {askUnrecognised ? (
+            <span className={life.pullBlock}>{tx("Couldn't read that as a change here — try a number, or drag the slider instead.")}</span>
+          ) : null}
 
           {preview ? (
             <div className={life.pullImpact}>
